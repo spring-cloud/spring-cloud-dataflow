@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.util.Assert;
 
 /**
@@ -53,6 +54,8 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 
 	private final Class<E> exceptionClass;
 
+	protected StreamDefinitionService streamDefinitionService;
+
 	/**
 	 * Construct a new StacktraceFingerprintingRecoveryStrategy given the parser, and the
 	 * expected exception class to be thrown for sample fragments of a stream definition
@@ -61,12 +64,15 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 	 * @param exceptionClass the expected exception that results from parsing the sample
 	 * fragment stream definitions. Stack frames from the thrown exception are used to
 	 * store the fingerprint of this exception thrown by the parser.
+	 * @param streamDefinitionService the service to handle stream definition
 	 * @param samples the sample fragments of stream definitions.
 	 */
-	public StacktraceFingerprintingRecoveryStrategy(Class<E> exceptionClass, String... samples) {
+	public StacktraceFingerprintingRecoveryStrategy(Class<E> exceptionClass, StreamDefinitionService streamDefinitionService, String... samples) {
 		Assert.notNull(exceptionClass, "exceptionClass should not be null");
+		Assert.notNull(streamDefinitionService, "streamDefinitionService should not be null");
 		Assert.notEmpty(samples, "samples should not be null or empty");
 		this.exceptionClass = exceptionClass;
+		this.streamDefinitionService = streamDefinitionService;
 		initFingerprints(samples);
 	}
 
@@ -74,7 +80,7 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 	private void initFingerprints(String... samples) {
 		for (String sample : samples) {
 			try {
-				new StreamDefinition("__dummy", sample);
+				this.streamDefinitionService.parse(new StreamDefinition("__dummy", sample));
 			}
 			catch (RuntimeException exception) {
 				if (this.exceptionClass.isAssignableFrom(exception.getClass())) {
@@ -110,6 +116,10 @@ public abstract class StacktraceFingerprintingRecoveryStrategy<E extends Excepti
 		int i = 0;
 		StackTraceElement[] stackTrace = exception.getStackTrace();
 		for (StackTraceElement frame : fingerPrint) {
+			if (frame.getClassName().contains("StreamParser")
+					&& (frame.getMethodName().equals("<init>") || frame.getMethodName().equals("parse"))) {
+				return true;
+			}
 			if (!stackTrace[i++].equals(frame)) {
 				return false;
 			}

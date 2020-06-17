@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -55,7 +56,8 @@ public class AppDeploymentRequestCreatorTests {
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
-				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)));
+				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
+				new DefaultStreamDefinitionService());
 	}
 
 	@Test

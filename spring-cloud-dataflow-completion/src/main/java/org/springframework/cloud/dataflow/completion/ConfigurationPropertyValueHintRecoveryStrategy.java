@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.Token;
 import org.springframework.cloud.dataflow.core.dsl.TokenKind;
@@ -45,8 +48,9 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 	private ValueHintProvider[] valueHintProviders = new ValueHintProvider[0];
 
 	ConfigurationPropertyValueHintRecoveryStrategy(AppRegistryService appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
-		super(CheckPointedParseException.class, "foo --bar=", "foo | wizz --bar=");
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			StreamDefinitionService streamDefinitionService) {
+		super(CheckPointedParseException.class, streamDefinitionService,"foo --bar=", "foo | wizz --bar=");
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
 
@@ -66,9 +70,10 @@ public class ConfigurationPropertyValueHintRecoveryStrategy
 	private AppRegistration lookupLastApp(CheckPointedParseException exception) {
 		String safe = exception.getExpressionStringUntilCheckpoint();
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 		return this.collectorSupport.findAppRegistration(lastApp.getName(),
-				CompletionUtils.determinePotentialTypes(lastApp, streamDefinition.getAppDefinitions().size() > 1));
+				CompletionUtils.determinePotentialTypes(lastApp, streamAppDefinitions.size() > 1));
 	}
 
 	private String recoverPropertyName(CheckPointedParseException exception) {

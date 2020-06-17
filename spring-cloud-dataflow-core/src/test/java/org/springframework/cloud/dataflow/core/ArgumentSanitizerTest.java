@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.support;
+package org.springframework.cloud.dataflow.core;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 
 /**
  * @author Christian Tzolov
@@ -53,64 +45,6 @@ public class ArgumentSanitizerTest {
 			Assert.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
 			Assert.assertEquals("******", sanitizer.sanitize(key, "bar"));
 		}
-	}
-
-	@Test
-	public void testSanitizeJobParameters() {
-		String[] JOB_PARAM_KEYS = {"username", "password", "name", "C", "D", "E"};
-		Date testDate = new Date();
-		JobParameter[] PARAMETERS = {new JobParameter("foo", true),
-				new JobParameter("bar", true),
-				new JobParameter("baz", true),
-				new JobParameter(1L, true),
-				new JobParameter(1D, true),
-				new JobParameter(testDate, false)};
-
-		Map<String, JobParameter> jobParamMap = new LinkedHashMap<>();
-		for (int paramCount = 0; paramCount < JOB_PARAM_KEYS.length; paramCount++) {
-			jobParamMap.put(JOB_PARAM_KEYS[paramCount], PARAMETERS[paramCount]);
-		}
-		JobParameters jobParameters = new JobParameters(jobParamMap);
-		JobParameters sanitizedJobParameters = this.sanitizer.sanitizeJobParameters(jobParameters);
-		for(Map.Entry<String, JobParameter> entry : sanitizedJobParameters.getParameters().entrySet()) {
-			if (entry.getKey().equals("username") || entry.getKey().equals("password")) {
-				Assert.assertEquals("******", entry.getValue().getValue());
-			}
-			else if (entry.getKey().equals("name")) {
-				Assert.assertEquals("baz", entry.getValue().getValue());
-			}
-			else if (entry.getKey().equals("C")) {
-				Assert.assertEquals(1L, entry.getValue().getValue());
-			}
-			else if (entry.getKey().equals("D")) {
-				Assert.assertEquals(1D, entry.getValue().getValue());
-			}
-			else if (entry.getKey().equals("E")) {
-				Assert.assertEquals(testDate, entry.getValue().getValue());
-			}
-		}
-	}
-
-	@Test
-	public void testSanitizeTaskDefinition() {
-		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar --another-secret=kenny");
-		Assert.assertEquals("task1 --some.password='******' --another-secret='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
-	}
-
-
-	@Test
-	public void testSanitizeComposedTaskDefinition() {
-		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar && task2 --some.password=woof");
-		Assert.assertEquals("task1 --some.password='******' && task2 --some.password='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
-	}
-
-	@Test
-	public void testSanitizeComposedTaskSplitDefinition() {
-		TaskDefinition taskDefinition = new TaskDefinition(
-				"mytask", "<task1 --some.password=foobar || task2 --some.password=woof> && task3  --some.password=foobar");
-		Assert.assertEquals(
-				"<task1 --some.password='******' || task2 --some.password='******'> && task3 --some.password='******'",
-				this.sanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	@Test
@@ -143,7 +77,7 @@ public class ArgumentSanitizerTest {
 //	@Test
 //	public void testHierarchicalPropertyNames() {
 //		Assert.assertEquals("time --password='******' | log",
-//				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --password=bar | log")));
+//				sanitizer.(new StreamDefinition("stream", "time --password=bar | log")));
 //	}
 //
 //	@Test

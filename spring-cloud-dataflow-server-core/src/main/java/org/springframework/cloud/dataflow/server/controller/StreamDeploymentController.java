@@ -24,11 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
-import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -72,6 +73,8 @@ public class StreamDeploymentController {
 
 	private final StreamService streamService;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	/**
 	 * The repository this controller will use for stream CRUD operations.
 	 */
@@ -85,13 +88,16 @@ public class StreamDeploymentController {
 	 * @param streamService the underlying UpdatableStreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
+			StreamService streamService,
+			StreamDefinitionService streamDefinitionService) {
 
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 
 		this.repository = repository;
 		this.streamService = streamService;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	/**
@@ -209,7 +215,7 @@ public class StreamDeploymentController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that
 	 * converts {@link StreamDeployment}s to {@link StreamDeploymentResource}s.
 	 */
 	class Assembler extends RepresentationModelAssemblerSupport<StreamDeployment, StreamDeploymentResource> {
@@ -244,9 +250,10 @@ public class StreamDeploymentController {
 			if (StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties()) {
 				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
+			StreamDefinition streamDefinition = new StreamDefinition(streamDeployment.getStreamName(), this.dslText);
 			return new StreamDeploymentResource(streamDeployment.getStreamName(),
-					new ArgumentSanitizer().sanitizeStream(
-							new StreamDefinition(streamDeployment.getStreamName(), this.dslText)),
+					StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
+							streamDefinitionService.getAppDefinitions(streamDefinition)),
 					this.description,
 					deploymentProperties, this.status);
 		}

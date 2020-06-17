@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.util;
+package org.springframework.cloud.dataflow.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.cloud.dataflow.core.DefinitionUtils;
-import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -112,49 +105,6 @@ public class ArgumentSanitizer {
 	}
 
 	/**
-	 * Replaces the sensitive String values in the JobParameter value.
-	 *
-	 * @param jobParameters the original job parameters
-	 * @return the sanitized job parameters
-	 */
-	public JobParameters sanitizeJobParameters(JobParameters jobParameters) {
-		Map<String,JobParameter> newJobParameters = new HashMap<>();
-		jobParameters.getParameters().forEach( (key, jobParameter) -> {
-			String updatedKey = !jobParameter.isIdentifying() ? "-" + key : key;
-			if (jobParameter.getType().equals(JobParameter.ParameterType.STRING)) {
-				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString())));
-			}
-			else {
-				newJobParameters.put(updatedKey, jobParameter);
-			}
-		});
-		return new JobParameters(newJobParameters);
-	}
-
-	/**
-	 * Redacts sensitive property values in a task.
-	 *
-	 * @param taskDefinition the task definition to sanitize
-	 * @return Task definition text that has sensitive data redacted.
-	 */
-	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
-		if(StringUtils.isEmpty(taskDefinition.getDslText())) {
-			return taskDefinition.getDslText();
-		}
-		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
-		Graph graph = taskParser.parse().toGraph();
-		graph.getNodes().stream().forEach(node -> {
-			if (node.properties != null) {
-				node.properties.keySet().stream().forEach(key -> {
-					node.properties.put(key,
-							DefinitionUtils.autoQuotes(sanitize(key, node.properties.get(key))));
-				});
-			}
-		});
-		return graph.toDSLText();
-	}
-
-	/**
 	 * For all sensitive properties (e.g. key names containing words like password, secret,
 	 * key, token) replace the value with '*****' string
 	 * @param properties to be sanitized
@@ -187,4 +137,5 @@ public class ArgumentSanitizer {
 		}
 		return arguments;
 	}
+
 }

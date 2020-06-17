@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,7 +34,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
@@ -47,6 +51,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -77,13 +82,16 @@ public class StreamDeploymentControllerTests {
 	private StreamService streamService;
 
 	@Mock
+	private StreamDefinitionService streamDefinitionService;
+
+	@Mock
 	private Deployer deployer;
 
 	@Before
 	public void setup() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-		this.controller = new StreamDeploymentController(streamDefinitionRepository, streamService);
+		this.controller = new StreamDeploymentController(streamDefinitionRepository, streamService, streamDefinitionService);
 	}
 
 	@Test
@@ -171,9 +179,16 @@ public class StreamDeploymentControllerTests {
 		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
 		streamDeploymentStates.put(streamDefinition, DeploymentState.deployed);
 
+		StreamAppDefinition streamAppDefinition1 = new StreamAppDefinition("time", "time", ApplicationType.source, streamDefinition.getName(), new HashMap<>());
+		StreamAppDefinition streamAppDefinition2 = new StreamAppDefinition("log", "log", ApplicationType.sink, streamDefinition.getName(), new HashMap<>());
+
 		when(this.streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 		when(this.streamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
 		when(this.streamService.state(anyList())).thenReturn(streamDeploymentStates);
+		LinkedList<StreamAppDefinition> streamAppDefinitions = new LinkedList<>();
+		streamAppDefinitions.add(streamAppDefinition1);
+		streamAppDefinitions.add(streamAppDefinition2);
+		when(this.streamDefinitionService.getAppDefinitions(any())).thenReturn(streamAppDefinitions);
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());

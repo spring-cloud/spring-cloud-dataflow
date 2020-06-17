@@ -32,6 +32,8 @@ import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -65,15 +67,20 @@ public class AppDeploymentRequestCreator {
 
 	private final WhitelistProperties whitelistProperties;
 
+	private final StreamDefinitionService streamDefinitionService;
+
 	public AppDeploymentRequestCreator(AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			StreamDefinitionService streamDefinitionService) {
 		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
+		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		this.appRegistry = appRegistry;
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.whitelistProperties = new WhitelistProperties(metadataResolver);
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	public List<AppDeploymentRequest> createUpdateRequests(StreamDefinition streamDefinition,
@@ -82,7 +89,7 @@ public class AppDeploymentRequestCreator {
 		if (updateProperties == null) {
 			updateProperties = Collections.emptyMap();
 		}
-		Iterator<StreamAppDefinition> iterator = streamDefinition.getDeploymentOrderIterator();
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = currentApp.getApplicationType();
@@ -139,7 +146,7 @@ public class AppDeploymentRequestCreator {
 		if (streamDeploymentProperties == null) {
 			streamDeploymentProperties = Collections.emptyMap();
 		}
-		Iterator<StreamAppDefinition> iterator = streamDefinition.getDeploymentOrderIterator();
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
 		int nextAppCount = 0;
 		boolean isDownStreamAppPartitioned = false;
 		while (iterator.hasNext()) {
@@ -250,15 +257,15 @@ public class AppDeploymentRequestCreator {
 	 * Return {@code true} if the upstream app (the app that appears before the provided app)
 	 * contains partition related properties.
 	 *
-	 * @param stream stream for the app
+	 * @param streamDefinition stream for the app
 	 * @param currentApp app for which to determine if the upstream app has partition
 	 * properties
 	 * @param streamDeploymentProperties deployment properties for the stream
 	 * @return true if the upstream app has partition properties
 	 */
-	/* default */ boolean upstreamAppHasPartitionInfo(StreamDefinition stream, StreamAppDefinition currentApp,
+	/* default */ boolean upstreamAppHasPartitionInfo(StreamDefinition streamDefinition, StreamAppDefinition currentApp,
 			Map<String, String> streamDeploymentProperties) {
-		Iterator<StreamAppDefinition> iterator = stream.getDeploymentOrderIterator();
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
 		while (iterator.hasNext()) {
 			StreamAppDefinition app = iterator.next();
 			if (app.equals(currentApp) && iterator.hasNext()) {

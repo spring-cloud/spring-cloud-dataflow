@@ -23,6 +23,7 @@ import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.dsl.DSLMessage;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -39,8 +40,12 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
-	public TapOnDestinationRecoveryStrategy(StreamDefinitionRepository streamDefinitionRepository) {
+	private final StreamDefinitionService streamDefinitionService;
+
+	public TapOnDestinationRecoveryStrategy(StreamDefinitionRepository streamDefinitionRepository,
+			StreamDefinitionService streamDefinitionService) {
 		this.streamDefinitionRepository = streamDefinitionRepository;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	@Override
@@ -71,7 +76,7 @@ public class TapOnDestinationRecoveryStrategy implements RecoveryStrategy<ParseE
 		// User has started to type an app name, or at least the stream name is valid
 		if (streamDefinition != null) {
 			CompletionProposal.Factory proposals = CompletionProposal.expanding(":" + streamName + ".");
-			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+			for (StreamAppDefinition streamAppDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 				ApplicationType applicationType = streamAppDefinition.getApplicationType();
 				if (streamAppDefinition.getName().startsWith(appName)
 						&& !applicationType.equals(ApplicationType.sink)) {

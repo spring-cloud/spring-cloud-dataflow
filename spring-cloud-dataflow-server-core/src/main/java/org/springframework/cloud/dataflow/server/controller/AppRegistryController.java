@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -97,18 +98,22 @@ public class AppRegistryController {
 
 	private ForkJoinPool forkJoinPool;
 
+	private StreamDefinitionService streamDefinitionService;
+
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public AppRegistryController(Optional<StreamDefinitionRepository> streamDefinitionRepository,
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			ForkJoinPool forkJoinPool) {
+			ForkJoinPool forkJoinPool,
+			StreamDefinitionService streamDefinitionService) {
 		this.streamDefinitionRepository = streamDefinitionRepository.isPresent() ? streamDefinitionRepository.get() : null;
 		this.streamService = streamService.isPresent() ? streamService.get() : null;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	/**
@@ -284,7 +289,7 @@ public class AppRegistryController {
 		Iterable<StreamDefinition> streamDefinitions = streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
-			for (StreamAppDefinition streamAppDefinition : streamDefinition.getAppDefinitions()) {
+			for (StreamAppDefinition streamAppDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
 				final String streamAppName = streamAppDefinition.getRegisteredAppName();
 				final ApplicationType streamAppType = streamAppDefinition.getApplicationType();
 				if (appType != streamAppType) {

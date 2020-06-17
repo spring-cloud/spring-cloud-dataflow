@@ -35,6 +35,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -52,7 +53,9 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -248,8 +251,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDeploymentController updatableStreamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService) {
-		return new StreamDeploymentController(repository, streamService);
+			StreamService streamService, StreamDefinitionService streamDefinitionService) {
+		return new StreamDeploymentController(repository, streamService, streamDefinitionService);
 	}
 
 	@Bean
@@ -265,10 +268,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public StreamValidationService streamValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties,
-			StreamDefinitionRepository streamDefinitionRepository) {
+			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDefinitionService streamDefinitionService) {
 		return new DefaultStreamValidationService(appRegistry,
 				dockerValidatorProperties,
-				streamDefinitionRepository);
+				streamDefinitionRepository,
+				streamDefinitionService);
 	}
 
 	@Bean
@@ -281,30 +286,40 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public StreamDefinitionService streamDefinitionService() {
+		return new DefaultStreamDefinitionService();
+	}
+
+	@Bean
 	public StreamService streamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			StreamValidationService streamValidationService,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			StreamDefinitionService streamDefinitionService) {
 		return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
-				appDeploymentRequestCreator, streamValidationService, auditRecordService);
+				appDeploymentRequestCreator, streamValidationService, auditRecordService, streamDefinitionService);
 	}
 
 	@Bean
 	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver) {
+			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
+			StreamDefinitionService streamDefinitionService) {
 		return new AppDeploymentRequestCreator(appRegistry,
 				commonApplicationProperties,
-				applicationConfigurationMetadataResolver);
+				applicationConfigurationMetadataResolver,
+				streamDefinitionService);
 	}
 
 	@Bean
 	public SkipperStreamDeployer skipperStreamDeployer(SkipperClient skipperClient,
 			AppRegistryService appRegistryService,
-			StreamDefinitionRepository streamDefinitionRepository) {
+			StreamDefinitionRepository streamDefinitionRepository,
+			StreamDefinitionService streamDefinitionService) {
 		return new SkipperStreamDeployer(skipperClient, streamDefinitionRepository, appRegistryService,
-				new ForkJoinPool(2));
+				new ForkJoinPool(2), streamDefinitionService);
 	}
 
 	@Bean
@@ -327,8 +342,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public StreamDefinitionController streamDefinitionController(StreamService streamService) {
-		return new StreamDefinitionController(streamService);
+	public StreamDefinitionController streamDefinitionController(StreamService streamService,
+			StreamDefinitionService streamDefinitionService) {
+		return new StreamDefinitionController(streamService, streamDefinitionService);
 	}
 
 	@Bean
@@ -368,9 +384,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			Optional<StreamDefinitionRepository> streamDefinitionRepository,
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			StreamDefinitionService streamDefinitionService) {
 		return new AppRegistryController(streamDefinitionRepository, streamService, appRegistry, metadataResolver,
-				new ForkJoinPool(2));
+				new ForkJoinPool(2), streamDefinitionService);
 	}
 
 	@Bean

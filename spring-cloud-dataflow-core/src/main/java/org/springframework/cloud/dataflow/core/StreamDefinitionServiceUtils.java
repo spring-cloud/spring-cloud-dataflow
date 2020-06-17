@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,23 @@
 package org.springframework.cloud.dataflow.core;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
 import org.springframework.util.StringUtils;
 
 /**
- * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
+ * Utility class serving operations related to the {@link StreamDefinition}s.
+ *
+ * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-public class StreamDefinitionToDslConverter {
+public class StreamDefinitionServiceUtils {
 
 	private final static List<String> dataFlowAddedProperties = Arrays.asList(
 			DataFlowPropertyKeys.STREAM_APP_TYPE,
@@ -42,14 +47,25 @@ public class StreamDefinitionToDslConverter {
 			BindingPropertyKeys.OUTPUT_DESTINATION,
 			BindingPropertyKeys.INPUT_DESTINATION);
 
+
 	/**
-	 * Reverse engineers a {@link StreamDefinition} into a semantically equivalent DSL text representation.
-	 * @param streamDefinition stream to be converted into DSL
-	 * @return the textual DSL representation of the stream
+	 * Redacts sensitive property values in a stream.
+	 *
+	 * @param streamName the name of the stream definition
+	 * @param streamAppDefinitions the {@link StreamAppDefinition}s of the given stream
+	 * @return Stream definition text that has sensitive data redacted.
 	 */
-	public String toDsl(StreamDefinition streamDefinition) {
-		return toDsl(streamDefinition.getAppDefinitions());
+	public static String sanitizeStreamDefinition(String streamName, LinkedList<StreamAppDefinition> streamAppDefinitions) {
+		List<StreamAppDefinition> sanitizedAppDefinitions = streamAppDefinitions.stream()
+				.map(app -> StreamAppDefinition.Builder
+						.from(app)
+						.setProperties(new ArgumentSanitizer().sanitizeProperties(app.getProperties()))
+						.build(streamName)
+				).collect(Collectors.toList());
+
+		return toDsl(sanitizedAppDefinitions);
 	}
+
 
 	/**
 	 * Reverse engineers a stream, represented by ordered {@link StreamAppDefinition} list, into a semantically
@@ -59,7 +75,7 @@ public class StreamDefinitionToDslConverter {
 	 * @return the textual DSL representation of the stream, that if parsed should produce exactly
 	 * the same {@link StreamAppDefinition} list.
 	 */
-	public String toDsl(List<StreamAppDefinition> appDefinitions) {
+	public static String toDsl(List<StreamAppDefinition> appDefinitions) {
 		StringBuilder dslBuilder = new StringBuilder();
 
 		int appDefinitionIndex = 0;
@@ -116,8 +132,47 @@ public class StreamDefinitionToDslConverter {
 		return dsl;
 	}
 
-
-	private String unescape(String text) {
+	private static String unescape(String text) {
 		return StringEscapeUtils.unescapeHtml(text);
 	}
+
+	/**
+	 * Return an iterator that indicates the order of application deployments for this
+	 * stream. The application definitions are returned in reverse order; i.e. the sink is
+	 * returned first followed by the processors in reverse order followed by the source.
+	 *
+	 * @return iterator that iterates over the application definitions in deployment order
+	 */
+	public static Iterator<StreamAppDefinition> getDeploymentOrderIterator(LinkedList<StreamAppDefinition> streamAppDefinitions) {
+		return new ReadOnlyIterator<>(streamAppDefinitions.descendingIterator());
+	}
+
+	/**
+	 * Iterator that prevents mutation of its backing data structure.
+	 *
+	 * @param <T> the type of elements returned by this iterator
+	 */
+	private static class ReadOnlyIterator<T> implements Iterator<T> {
+		private final Iterator<T> wrapped;
+
+		ReadOnlyIterator(Iterator<T> wrapped) {
+			this.wrapped = wrapped;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return wrapped.hasNext();
+		}
+
+		@Override
+		public T next() {
+			return wrapped.next();
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
 }

@@ -28,6 +28,7 @@ import org.springframework.batch.item.database.support.DataFieldMaxValueIncremen
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -40,7 +41,9 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
@@ -146,6 +149,12 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Autowired
 	DockerValidatorProperties dockerValidatorProperties;
+
+	@Bean
+	@ConditionalOnMissingBean
+	public StreamDefinitionService streamDefinitionService() {
+		return new DefaultStreamDefinitionService();
+	}
 
 	@Bean
 	public TaskValidationService taskValidationService(AppRegistryService appRegistry,

@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +25,6 @@ import org.springframework.boot.configurationmetadata.ConfigurationMetadataPrope
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.BindingPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
-import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.TaskPropertyKeys;
 
 /**
@@ -100,11 +100,11 @@ public class CompletionUtils {
 	 * case.
 	 * </p>
 	 */
-	static String maybeQualifyWithLabel(String appName, StreamDefinition streamDefinition) {
+	static String maybeQualifyWithLabel(String appName, LinkedList<StreamAppDefinition> streamAppDefinitions) {
 		String candidate = appName;
 
 		Set<String> alreadyUsed = new HashSet<>();
-		for (StreamAppDefinition appDefinition : streamDefinition.getAppDefinitions()) {
+		for (StreamAppDefinition appDefinition : streamAppDefinitions) {
 			alreadyUsed.add(appDefinition.getName());
 		}
 

@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Conta
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -106,11 +107,12 @@ public class DefaultStreamServiceTests {
 		this.auditRecordService = mock(AuditRecordService.class); // FIXME
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryService,
 				mock(CommonApplicationProperties.class),
-				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)));
+				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
+				new DefaultStreamDefinitionService());
 		this.streamValidationService = mock(DefaultStreamValidationService.class);
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
-				this.auditRecordService);
+				this.auditRecordService, new DefaultStreamDefinitionService());
 		when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 	}
 
@@ -289,7 +291,7 @@ public class DefaultStreamServiceTests {
 
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator,
-				this.streamValidationService, this.auditRecordService);
+				this.streamValidationService, this.auditRecordService, new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 

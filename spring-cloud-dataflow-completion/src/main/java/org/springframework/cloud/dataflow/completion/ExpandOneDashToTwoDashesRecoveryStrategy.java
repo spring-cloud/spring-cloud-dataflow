@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.util.Assert;
@@ -35,8 +36,8 @@ class ExpandOneDashToTwoDashesRecoveryStrategy extends StacktraceFingerprintingR
 	@Autowired
 	private ConfigurationPropertyNameAfterDashDashRecoveryStrategy recoveryAfterDashDash;
 
-	public ExpandOneDashToTwoDashesRecoveryStrategy() {
-		super(ParseException.class, "file -");
+	public ExpandOneDashToTwoDashesRecoveryStrategy(StreamDefinitionService streamDefinitionService) {
+		super(ParseException.class, streamDefinitionService, "file -");
 	}
 
 	@Override
@@ -46,11 +47,11 @@ class ExpandOneDashToTwoDashesRecoveryStrategy extends StacktraceFingerprintingR
 		// case
 		String withDashDash = dsl + "-";
 		try {
-			new StreamDefinition("__dummy", withDashDash);
+			this.streamDefinitionService.parse(new StreamDefinition("__dummy", withDashDash));
 		}
 		catch (CheckPointedParseException recoverable) {
 			Assert.isTrue(recoveryAfterDashDash.shouldTrigger(withDashDash, recoverable),
-					"did not tigger after dash-dash");
+					"did not trigger after dash-dash");
 			recoveryAfterDashDash.addProposals(withDashDash, recoverable, detailLevel, proposals);
 		}
 	}

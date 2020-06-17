@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
@@ -121,7 +122,7 @@ public class SkipperStreamDeployerTests {
 
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		when(streamDefinitionRepository.findById("test1")).thenReturn(Optional.of(new StreamDefinition("test1", "t1: time | log")));
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
@@ -156,7 +157,7 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 		skipperStreamDeployer.deployStream(streamDeploymentRequest);
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
 		ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
@@ -188,7 +189,7 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = MockUtils.createSkipperClientMock();
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
 			fail();
@@ -212,7 +213,7 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
 			fail();
@@ -284,7 +285,7 @@ public class SkipperStreamDeployerTests {
 
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		when(streamDefinitionRepository.findById("test1")).thenReturn(Optional.of(new StreamDefinition("test1", "t1: time | log")));
 
@@ -299,7 +300,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
@@ -335,7 +336,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
@@ -419,7 +420,7 @@ public class SkipperStreamDeployerTests {
 
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		when(streamDefinitionRepository.findById(streamName)).thenReturn(Optional.of(new StreamDefinition(streamName, streamDSL)));
 		try {
@@ -449,7 +450,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 
 		String platformStatus = StreamUtils.copyToString(
@@ -478,7 +479,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
@@ -504,7 +505,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
@@ -523,7 +524,7 @@ public class SkipperStreamDeployerTests {
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class));
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
 
@@ -538,7 +539,8 @@ public class SkipperStreamDeployerTests {
 	public void testManifestWithRelease() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class)
+				, new DefaultStreamDefinitionService());
 
 		skipperStreamDeployer.manifest("name", 666);
 		verify(skipperClient).manifest(eq("name"), eq(666));
@@ -551,7 +553,8 @@ public class SkipperStreamDeployerTests {
 	public void testManifest() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class)
+				, new DefaultStreamDefinitionService());
 
 		skipperStreamDeployer.manifest("name");
 		verify(skipperClient).manifest(eq("name"));
@@ -562,7 +565,8 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 		skipperStreamDeployer.platformList();
 		verify(skipperClient, times(1)).listDeployers();
 	}
@@ -572,7 +576,8 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.history(eq("release1"))).thenReturn(new ArrayList<>());
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 		skipperStreamDeployer.history("release1");
 		verify(skipperClient, times(1)).history(eq("release1"));
 	}
@@ -581,7 +586,8 @@ public class SkipperStreamDeployerTests {
 	public void testRollback() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 		skipperStreamDeployer.rollbackStream("release666", 666);
 		ArgumentCaptor<RollbackRequest> rollbackRequestCaptor = ArgumentCaptor.forClass(RollbackRequest.class);
 		verify(skipperClient).rollback(rollbackRequestCaptor.capture());
@@ -594,7 +600,8 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.getLog(eq("release1"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 		skipperStreamDeployer.getLog("release1");
 		verify(skipperClient, times(1)).getLog(eq("release1"));
 	}
@@ -604,7 +611,8 @@ public class SkipperStreamDeployerTests {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 		skipperStreamDeployer.getLog("release1", "myapp");
 		verify(skipperClient, times(1)).getLog(eq("release1"), eq("myapp"));
 	}
@@ -619,7 +627,8 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(new Deployer("d1", "t1", null)));
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
-				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class));
+				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
+				new DefaultStreamDefinitionService());
 
 		RuntimeEnvironmentInfo info = skipperStreamDeployer.environmentInfo();
 

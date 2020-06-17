@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.completion;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +25,8 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.dsl.CheckPointedParseException;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
@@ -41,8 +44,9 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 	private final ProposalsCollectorSupportUtils collectorSupport;
 
 	UnfinishedConfigurationPropertyNameRecoveryStrategy(AppRegistryService appRegistry,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
-		super(CheckPointedParseException.class, "file --foo", "file | bar --quick", "file --foo.",
+			ApplicationConfigurationMetadataResolver metadataResolver,
+			StreamDefinitionService streamDefinitionService) {
+		super(CheckPointedParseException.class, streamDefinitionService, "file --foo", "file | bar --quick", "file --foo.",
 				"file | bar " + "--quick.");
 		this.collectorSupport = new ProposalsCollectorSupportUtils(appRegistry, metadataResolver);
 	}
@@ -52,10 +56,11 @@ public class UnfinishedConfigurationPropertyNameRecoveryStrategy
 		String safe = exception.getExpressionStringUntilCheckpoint();
 
 		StreamDefinition streamDefinition = new StreamDefinition("__dummy", safe);
-		StreamAppDefinition lastApp = streamDefinition.getDeploymentOrderIterator().next();
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 
 		AppRegistration appRegistration = this.collectorSupport.findAppRegistration(lastApp.getName(),
-				CompletionUtils.determinePotentialTypes(lastApp, streamDefinition.getAppDefinitions().size() > 1));
+				CompletionUtils.determinePotentialTypes(lastApp, streamAppDefinitions.size() > 1));
 		if (appRegistration != null) {
 			String startsWith = ProposalsCollectorSupportUtils.computeStartsWith(exception);
 			Set<String> alreadyPresentOptions = new HashSet<>(lastApp.getProperties().keySet());

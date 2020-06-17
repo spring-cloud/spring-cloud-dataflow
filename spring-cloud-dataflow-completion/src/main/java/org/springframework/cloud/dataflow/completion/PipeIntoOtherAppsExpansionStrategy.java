@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 
 /**
@@ -35,17 +38,21 @@ public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 
 	private final AppRegistryService appRegistry;
 
-	public PipeIntoOtherAppsExpansionStrategy(AppRegistryService appRegistry) {
+	private final StreamDefinitionService streamDefinitionService;
+
+	public PipeIntoOtherAppsExpansionStrategy(AppRegistryService appRegistry, StreamDefinitionService streamDefinitionService) {
 		this.appRegistry = appRegistry;
+		this.streamDefinitionService = streamDefinitionService;
 	}
 
 	@Override
-	public boolean addProposals(String text, StreamDefinition parseResult, int detailLevel,
+	public boolean addProposals(String text, StreamDefinition streamDefinition, int detailLevel,
 			List<CompletionProposal> collector) {
 		if (text.isEmpty() || !text.endsWith(" ")) {
 			return false;
 		}
-		StreamAppDefinition lastApp = parseResult.getDeploymentOrderIterator().next();
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		StreamAppDefinition lastApp = StreamDefinitionServiceUtils.getDeploymentOrderIterator(streamAppDefinitions).next();
 		// Consider "bar | foo". If there is indeed a sink named foo in the registry,
 		// "foo" may also be a processor, in which case we can continue
 		boolean couldBeASink = appRegistry.find(lastApp.getName(), ApplicationType.sink) != null;
@@ -59,7 +66,7 @@ public class PipeIntoOtherAppsExpansionStrategy implements ExpansionStrategy {
 		CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 		for (AppRegistration appRegistration : appRegistry.findAll()) {
 			if (appRegistration.getType() == ApplicationType.processor || appRegistration.getType() == ApplicationType.sink) {
-				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), parseResult);
+				String expansion = CompletionUtils.maybeQualifyWithLabel(appRegistration.getName(), streamAppDefinitions);
 				collector.add(proposals.withSeparateTokens("| " + expansion,
 						"Continue stream definition with a " + appRegistration.getType()));
 			}

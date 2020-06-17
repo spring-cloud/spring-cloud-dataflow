@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.completion.RecoveryStrategy;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
+import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.server.completion.TapOnDestinationRecoveryStrategy;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.context.annotation.Bean;
@@ -33,9 +34,10 @@ public class StreamConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(TapOnDestinationRecoveryStrategy.class)
 	public RecoveryStrategy<?> tapOnDestinationExpansionStrategy(StreamCompletionProvider streamCompletionProvider,
-			StreamDefinitionRepository streamDefinitionRepository) {
-		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository);
+			StreamDefinitionRepository streamDefinitionRepository, StreamDefinitionService streamDefinitionService) {
+		RecoveryStrategy<?> recoveryStrategy = new TapOnDestinationRecoveryStrategy(streamDefinitionRepository, streamDefinitionService);
 		streamCompletionProvider.addCompletionRecoveryStrategy(recoveryStrategy);
 		return recoveryStrategy;
 	}
+
 }
