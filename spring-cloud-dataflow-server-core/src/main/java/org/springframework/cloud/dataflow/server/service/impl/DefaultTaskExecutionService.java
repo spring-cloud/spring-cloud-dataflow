@@ -59,7 +59,6 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoServic
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.diff.PropertiesDiff;
-import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.dataflow.server.service.impl.diff.PropertiesDiff.PropertyChange;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
