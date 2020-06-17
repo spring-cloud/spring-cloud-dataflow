@@ -543,4 +543,24 @@ public class TaskControllerTests {
 						"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\",\"links\":[]}"));
 
 	}
+
+	@Test
+	public void testTaskLaunchNoManifest() throws Exception{
+		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3");
+		taskExecutionComplete.setTaskName("myTask3");
+		taskExecutionComplete.setStartTime(new Date());
+		taskExecutionComplete.setEndTime(new Date());
+		taskExecutionComplete.setExitCode(0);
+		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask3")).thenReturn(taskExecutionComplete);
+		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
+		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
+				.thenReturn(Arrays.asList(taskExecutionComplete, taskExecutionComplete));
+		repository.save(new TaskDefinition("myTask3", "foo"));
+		this.registry.save("foo", ApplicationType.task,
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
+		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isOk());
+
+	}
 }
