@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,8 @@ public class DeleteStep {
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 
-		Map<String, String> appNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
+		Map<String, String> appNamesAndDeploymentIds = (existingAppDeployerData!= null) ?
+				existingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
 
 		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
 			if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {

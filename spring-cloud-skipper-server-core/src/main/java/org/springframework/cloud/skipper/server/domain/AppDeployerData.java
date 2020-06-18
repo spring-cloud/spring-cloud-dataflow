@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.domain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -86,7 +87,8 @@ public class AppDeployerData extends AbstractEntity {
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {
 			};
-			return mapper.readValue(this.deploymentData, typeRef);
+			return (this.deploymentData != null) ? mapper.readValue(this.deploymentData, typeRef) :
+					Collections.EMPTY_MAP;
 		}
 		catch (Exception e) {
 			throw new SkipperException("Could not parse appNameDeploymentIdMap JSON:" + this.deploymentData, e);

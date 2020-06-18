@@ -193,7 +193,8 @@ public class DefaultReleaseManager implements ReleaseManager {
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(
 						existingRelease.getName(), existingRelease.getVersion());
-		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
+		Map<String, String> existingAppNamesAndDeploymentIds = (existingAppDeployerData != null) ?
+				existingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
 		List<AppStatus> appStatuses = status(existingRelease).getInfo().getStatus().getAppStatusList();
 
 		Map<String, Object> model = calculateAppCountsForRelease(replacingRelease, existingAppNamesAndDeploymentIds,
@@ -272,14 +273,16 @@ public class DefaultReleaseManager implements ReleaseManager {
 							logger.warn(String.format("Could not get status for release %s-v%s.  No app deployer data found.",
 									release.getName(), release.getVersion()));
 						}
-						deploymentIds = appDeployerData.getDeploymentIds();
-						if (appDeployerDeploymentIds.containsKey(appDeployer)) {
-							appDeployerDeploymentIds.get(appDeployer).addAll(deploymentIds);
-						}
 						else {
-							appDeployerDeploymentIds.put(appDeployer, new ArrayList<>(deploymentIds));
+							deploymentIds = appDeployerData.getDeploymentIds();
+							if (appDeployerDeploymentIds.containsKey(appDeployer)) {
+								appDeployerDeploymentIds.get(appDeployer).addAll(deploymentIds);
+							}
+							else {
+								appDeployerDeploymentIds.put(appDeployer, new ArrayList<>(deploymentIds));
+							}
+							releaseDeploymentIds.put(release.getName(), new ArrayList<>(deploymentIds));
 						}
-						releaseDeploymentIds.put(release.getName(), new ArrayList<>(deploymentIds));
 					}
 				}
 				return Mono.zip(Mono.just(appDeployerDeploymentIds), Mono.just(releaseDeploymentIds));
@@ -481,6 +484,9 @@ public class DefaultReleaseManager implements ReleaseManager {
 		}
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
+		if (appDeployerData == null) {
+			return new LogInfo(Collections.EMPTY_MAP);
+		}
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 		Map<String, String> logMap = new HashMap<>();
@@ -508,6 +514,9 @@ public class DefaultReleaseManager implements ReleaseManager {
 		}
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersion(release.getName(), release.getVersion());
+		if (appDeployerData == null) {
+			return release;
+		}
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 		Map<String, String> appNameDeploymentIdMap = appDeployerData.getDeploymentDataAsMap();
@@ -538,7 +547,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 				.getAppDeployer();
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(release.getName(), release.getVersion());
-		List<String> deploymentIds = appDeployerData.getDeploymentIds();
+		List<String> deploymentIds = (appDeployerData != null) ? appDeployerData.getDeploymentIds() : Collections.EMPTY_LIST;
 		if (!deploymentIds.isEmpty()) {
 			for (String deploymentId : deploymentIds) {
 				try {

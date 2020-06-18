@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,8 @@ public class DeployAppStep {
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(
 						existingRelease.getName(), existingRelease.getVersion());
-		Map<String, String> existingAppNamesAndDeploymentIds = existingAppDeployerData.getDeploymentDataAsMap();
+		Map<String, String> existingAppNamesAndDeploymentIds = (existingAppDeployerData != null) ?
+				existingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
 
 		for (Map.Entry<String, String> existingEntry : existingAppNamesAndDeploymentIds.entrySet()) {
 			String existingName = existingEntry.getKey();

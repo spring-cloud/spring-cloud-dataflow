@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.deployer.strategies;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -53,7 +54,8 @@ public class HealthCheckStep {
 		AppDeployerData replacingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(
 						replacingRelease.getName(), replacingRelease.getVersion());
-		Map<String, String> appNamesAndDeploymentIds = replacingAppDeployerData.getDeploymentDataAsMap();
+		Map<String, String> appNamesAndDeploymentIds = (replacingAppDeployerData!= null) ?
+				replacingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
 		AppDeployer appDeployer = this.deployerRepository
 				.findByNameRequired(replacingRelease.getPlatformName())
 				.getAppDeployer();
