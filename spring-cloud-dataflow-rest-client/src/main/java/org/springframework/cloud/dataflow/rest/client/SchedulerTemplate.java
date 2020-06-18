@@ -66,7 +66,18 @@ public class SchedulerTemplate implements SchedulerOperations {
 		values.add("scheduleName", scheduleName);
 		values.add("properties", DeploymentPropertiesUtils.format(taskProperties));
 		values.add("taskDefinitionName", taskDefinitionName);
-		values.add("arguments", commandLineArgs);
+		String commandLineArgValue = new String();
+		boolean isFirst = true;
+		for(String command : commandLineArgs) {
+			if(isFirst) {
+				isFirst = false;
+			}
+			else {
+				commandLineArgValue += " ";
+			}
+			commandLineArgValue += command;
+		}
+		values.add("arguments", commandLineArgValue);
 		restTemplate.postForObject(schedulesLink.getHref(), values, Long.class);
 	}
 
