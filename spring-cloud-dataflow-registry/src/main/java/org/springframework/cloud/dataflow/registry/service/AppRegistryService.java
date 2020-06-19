@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 /**
  * @author Christian Tzolov
  * @author Chris Schaefer
+ * @author Ilayaperumal Gopinathan
  */
 public interface AppRegistryService {
 
@@ -111,6 +112,16 @@ public interface AppRegistryService {
 	 * pagination.
 	 */
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
+
+
+	/**
+	 * @param type appliation type
+	 * @param name application name
+	 * @param pageable Pagination information
+	 * @return returns the {@link AppRegistration}s that have the default version set to `true` and matches the given name and type. Uses the
+	 * pagination.
+	 */
+	Page<AppRegistration> findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(ApplicationType type, String name, Pageable pageable);
 
 	/**
 	 * Checks if an application with such name and type exists and is set as default.

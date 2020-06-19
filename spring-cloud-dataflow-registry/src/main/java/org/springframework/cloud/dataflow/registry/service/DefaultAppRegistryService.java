@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -167,7 +168,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	public Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable) {
 		Page<AppRegistration> result = null;
 		if (!StringUtils.hasText(name) && type == null) {
-			result = findAll(pageable);
+			result = this.appRegistrationRepository.findAll(pageable);
 		}
 		else if (StringUtils.hasText(name) && type == null) {
 			result = this.appRegistrationRepository.findAllByNameContainingIgnoreCase(name, pageable);
@@ -177,6 +178,39 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		}
 		else {
 			result = this.appRegistrationRepository.findAllByType(type, pageable);
+		}
+		return result;
+	}
+
+	@Override
+	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(ApplicationType type, String name, Pageable pageable) {
+		Page<AppRegistration> result = null;
+		if (!StringUtils.hasText(name) && type == null) {
+			result = this.appRegistrationRepository.findAllByDefaultVersionIsTrue(pageable);
+		}
+		else if (StringUtils.hasText(name) && type == null) {
+			result = this.appRegistrationRepository.findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(name, pageable);
+		}
+		else if (StringUtils.hasText(name)) {
+			result = this.appRegistrationRepository.findAllByTypeAndNameContainingIgnoreCaseAndDefaultVersionIsTrue(type, name, pageable);
+		}
+		else {
+			result = this.appRegistrationRepository.findAllByTypeAndDefaultVersionIsTrue(type, pageable);
+		}
+		for (AppRegistration pagedAppRegistration: result.getContent()) {
+			for (AppRegistration appRegistration: this.findAll()) {
+				if (pagedAppRegistration.getName().equals(appRegistration.getName()) &&
+						pagedAppRegistration.getType().equals(appRegistration.getType())) {
+					if (pagedAppRegistration.getVersions() == null) {
+						HashSet<String> versions = new HashSet<>();
+						versions.add(appRegistration.getVersion());
+						pagedAppRegistration.setVersions(versions);
+					}
+					else {
+						pagedAppRegistration.getVersions().add(appRegistration.getVersion());
+					}
+				}
+			}
 		}
 		return result;
 	}

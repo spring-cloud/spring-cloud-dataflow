@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,9 +132,12 @@ public class AppRegistryController {
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type,
-			@RequestParam(required = false) String search) {
+			@RequestParam(required = false) String search,
+			@RequestParam(required = false) boolean defaultVersion) {
 
-		Page<AppRegistration> pagedRegistrations = this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
+		Page<AppRegistration> pagedRegistrations = (defaultVersion) ?
+				this.appRegistryService.findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(type, search, pageable)
+				: this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
 				pageable);
 
 		return pagedResourcesAssembler.toModel(pagedRegistrations, this.assembler);
@@ -432,8 +435,11 @@ public class AppRegistryController {
 
 		@Override
 		protected AppRegistrationResource instantiateModel(AppRegistration registration) {
-			return new AppRegistrationResource(registration.getName(), registration.getType().name(),
-					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion());
+			return (registration.getVersions() == null) ? new AppRegistrationResource(registration.getName(), registration.getType().name(),
+					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion()) :
+					new AppRegistrationResource(registration.getName(), registration.getType().name(),
+					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion(),
+					registration.getVersions());
 		}
 	}
 }

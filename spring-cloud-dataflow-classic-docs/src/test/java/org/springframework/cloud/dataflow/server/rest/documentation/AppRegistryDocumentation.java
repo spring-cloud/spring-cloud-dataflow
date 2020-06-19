@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Eric Bottard
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class AppRegistryDocumentation extends BaseDocumentation {
 
@@ -120,6 +121,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
             get("/apps")
                 .param("search", "")
                 .param("type", "source").accept(MediaType.APPLICATION_JSON)
+				.param("defaultVersion", "true")
 				.param("page", "0")
 				.param("size", "10")
 				.param("sort", "name,ASC")
@@ -130,6 +132,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
                     parameterWithName("search").description("The search string performed on the name (optional)"),
                     parameterWithName("type")
                         .description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())),
+					parameterWithName("defaultVersion").description("The boolean flag to set to retrieve only the apps of the default versions (optional)"),
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("sort").description("The sort on the list (optional)"),
 					parameterWithName("size").description("The requested page size (optional)")
@@ -168,6 +171,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 						fieldWithPath("type").description("The type of the application. One of " + Arrays.asList(ApplicationType.values())),
 						fieldWithPath("uri").description("The uri of the application"),
 						fieldWithPath("version").description("The version of the application"),
+						fieldWithPath("versions").description("All the registered versions of the application"),
 						fieldWithPath("defaultVersion").description("If true, the application is the default version"),
 						subsectionWithPath("options").description("The options of the application (Array)"),
 						fieldWithPath("shortDescription").description("The description of the application")

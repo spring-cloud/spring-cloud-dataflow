@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.util.HashSet;
+
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -25,6 +27,7 @@ import org.springframework.hateoas.RepresentationModel;
  * @author Glenn Renfro
  * @author Mark Fisher
  * @author Patrick Peralta
+ * @author Ilayaperumal Gopinathan
  */
 public class AppRegistrationResource extends RepresentationModel<AppRegistrationResource> {
 
@@ -53,6 +56,10 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 */
 	private Boolean defaultVersion;
 
+	/**
+	 * All the registered versions for this app.
+	 */
+	private HashSet<String> versions;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -80,6 +87,26 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 		this.uri = uri;
 		this.defaultVersion = defaultVersion;
 	}
+
+	/**
+	 * Construct a {@code AppRegistrationResource}.
+	 *
+	 * @param name app name
+	 * @param type app type
+	 * @param version app version
+	 * @param uri uri for app resource
+	 * @param defaultVersion is this application selected to the be default version in DSL
+	 * @param versions all the registered versions of this application
+	 */
+	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, HashSet<String> versions) {
+		this.name = name;
+		this.type = type;
+		this.version = version;
+		this.uri = uri;
+		this.defaultVersion = defaultVersion;
+		this.versions = versions;
+	}
+
 
 	/**
 	 * @return the name of the app
@@ -114,6 +141,13 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 */
 	public Boolean getDefaultVersion() {
 		return defaultVersion;
+	}
+
+	/**
+	 * @return all the available versions of the app
+	 */
+	public HashSet<String> getVersions() {
+		return this.versions;
 	}
 
 	/**
