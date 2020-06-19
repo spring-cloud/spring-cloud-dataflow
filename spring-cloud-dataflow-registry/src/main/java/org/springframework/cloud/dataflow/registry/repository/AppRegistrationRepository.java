@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,14 @@ public interface AppRegistrationRepository extends KeyValueRepository<AppRegistr
 	Page<AppRegistration> findAllByType(ApplicationType type, Pageable pageable);
 
 	Page<AppRegistration> findAllByNameContainingIgnoreCase(String name, Pageable pageable);
+
+	Page<AppRegistration> findAllByDefaultVersionIsTrue(Pageable pageable);
+
+	Page<AppRegistration> findAllByTypeAndNameContainingIgnoreCaseAndDefaultVersionIsTrue(ApplicationType type, String name, Pageable pageable);
+
+	Page<AppRegistration> findAllByTypeAndDefaultVersionIsTrue(ApplicationType type, Pageable pageable);
+
+	Page<AppRegistration> findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(String name, Pageable pageable);
 
 	@Override
 	<S extends AppRegistration> S save(S s);
