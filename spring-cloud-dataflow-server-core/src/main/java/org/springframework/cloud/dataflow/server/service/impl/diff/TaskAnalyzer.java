@@ -59,4 +59,20 @@ public class TaskAnalyzer {
 		TaskManifestDifference taskManifestDifference = new TaskManifestDifference(deploymentPropertiesDifference);
 		return new TaskAnalysisReport(taskManifestDifference);
 	}
+
+	/**
+	 * Compares current and newly created deployment properties for their differences.
+	 * @param existingDeploymentProperties the current deployment properties
+	 * @param replacingDeploymentProperties the new replacing properties
+	 * @return the task analysis report
+	 */
+	public TaskAnalysisReport analyze(Map<String, String> existingDeploymentProperties,
+			Map<String, String> replacingDeploymentProperties) {
+
+		PropertiesDiff deploymentPropertiesDifference = PropertiesDiff.builder().left(existingDeploymentProperties)
+				.right(replacingDeploymentProperties).build();
+
+		TaskManifestDifference taskManifestDifference = new TaskManifestDifference(deploymentPropertiesDifference);
+		return new TaskAnalysisReport(taskManifestDifference);
+	}
 }
