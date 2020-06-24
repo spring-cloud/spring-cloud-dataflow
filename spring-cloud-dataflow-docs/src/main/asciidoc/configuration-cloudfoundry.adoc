@@ -89,7 +89,7 @@ These properties are also used when configuring the <<configuration-cloudfoundry
 |5000
 
 |useSpringApplicationJson
-|Flag to indicate whether application properties are fed into SPRING_APPLICATION_JSON or as environment variables.
+|Flag to indicate whether application properties are fed into `SPRING_APPLICATION_JSON` or as separate environment variables.
 |true
 
 |stagingTimeout
@@ -119,6 +119,11 @@ These properties are also used when configuring the <<configuration-cloudfoundry
 |autoDeleteMavenArtifacts
 |Whether to automatically delete Maven artifacts from the local repository when deployed.
 |true
+
+|env.<key>
+|Defines a top level environment variable. This is useful for customizing https://github.com/cloudfoundry/java-buildpack#configuration-and-extension[Java build pack configuration] which must be included as top level environment variables in the application manifest, as the Java build pack does not recognize `SPRING_APPLICATION_JSON`.
+
+|The deployer determines if the app has https://github.com/pivotal-cf/java-cfenv[Java CfEnv] in its classpath. If so, it applies the required https://github.com/pivotal-cf/java-cfenv#pushing-your-application-to-cloud-foundry[configuration].
 
 |===
 
