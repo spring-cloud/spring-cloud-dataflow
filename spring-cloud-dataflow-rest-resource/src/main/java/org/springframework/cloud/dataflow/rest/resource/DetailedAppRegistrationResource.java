@@ -17,7 +17,9 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.hateoas.PagedModel;
@@ -42,6 +44,16 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * Optional short description of the application.
 	 */
 	private String shortDescription;
+
+	/**
+	 * Inbound port names configured for the app.
+	 */
+	private final Set<String> inboundPortNames = new HashSet<>();
+
+	/**
+	 * Outbound port names configured for the app.
+	 */
+	private final Set<String> outboundPortNames = new HashSet<>();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -90,6 +102,44 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	public List<ConfigurationMetadataProperty> getOptions() {
 		return options;
 	}
+
+	/**
+	 * Add application's inbound port name.
+	 *
+	 * @param inboundPortName application's inbound port name to add
+	 */
+	public void addInboundPortName(String inboundPortName) {
+		this.inboundPortNames.add(inboundPortName);
+	}
+
+	/**
+	 * Add application's outbound port name.
+	 *
+	 * @param outboundPortName application's outbound port name to add
+	 */
+	public void addOutboundPortName(String outboundPortName) {
+		this.outboundPortNames.add(outboundPortName);
+	}
+
+	/**
+	 * Return a set of application's inbound port names.
+	 *
+	 * @return set of application's inbound port names.
+	 */
+	public Set<String> getInboundPortNames() {
+		return this.inboundPortNames;
+	}
+
+
+	/**
+	 * Return a set of application's outbound port names.
+	 *
+	 * @return set of application's outbound port names.
+	 */
+	public Set<String> getOutboundPortNames() {
+		return this.outboundPortNames;
+	}
+
 
 	/**
 	 * Return a description for this application.

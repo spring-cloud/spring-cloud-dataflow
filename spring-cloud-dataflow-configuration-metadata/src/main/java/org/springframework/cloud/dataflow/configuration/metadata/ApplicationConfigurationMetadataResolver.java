@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.configuration.metadata;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.core.io.Resource;
@@ -59,4 +61,6 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	 * @return the list of configuration metdata properties
 	 */
 	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
+
+	public abstract Map<String, Set<String>> listPortNames(Resource metadataResource);
 }

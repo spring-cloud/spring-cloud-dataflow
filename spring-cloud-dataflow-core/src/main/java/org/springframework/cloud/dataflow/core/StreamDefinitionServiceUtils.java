@@ -16,16 +16,9 @@
 
 package org.springframework.cloud.dataflow.core;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
-import org.springframework.util.StringUtils;
 
 /**
  * Utility class serving operations related to the {@link StreamDefinition}s.
@@ -35,105 +28,20 @@ import org.springframework.util.StringUtils;
  */
 public class StreamDefinitionServiceUtils {
 
-	private final static List<String> dataFlowAddedProperties = Arrays.asList(
-			DataFlowPropertyKeys.STREAM_APP_TYPE,
-			DataFlowPropertyKeys.STREAM_APP_LABEL,
-			DataFlowPropertyKeys.STREAM_NAME,
-			StreamPropertyKeys.METRICS_TRIGGER_INCLUDES,
-			StreamPropertyKeys.METRICS_KEY,
-			StreamPropertyKeys.METRICS_PROPERTIES,
-			BindingPropertyKeys.INPUT_GROUP,
-			BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
-			BindingPropertyKeys.OUTPUT_DESTINATION,
-			BindingPropertyKeys.INPUT_DESTINATION);
-
 
 	/**
 	 * Redacts sensitive property values in a stream.
 	 *
-	 * @param streamName the name of the stream definition
 	 * @param streamAppDefinitions the {@link StreamAppDefinition}s of the given stream
-	 * @return Stream definition text that has sensitive data redacted.
+	 * @return the list of {@link StreamAppDefinition}s with the sensitive data redacted.
 	 */
-	public static String sanitizeStreamDefinition(String streamName, LinkedList<StreamAppDefinition> streamAppDefinitions) {
-		List<StreamAppDefinition> sanitizedAppDefinitions = streamAppDefinitions.stream()
+	public static LinkedList<StreamAppDefinition>  sanitizeStreamAppDefinitions(LinkedList<StreamAppDefinition> streamAppDefinitions) {
+		return streamAppDefinitions.stream()
 				.map(app -> StreamAppDefinition.Builder
 						.from(app)
 						.setProperties(new ArgumentSanitizer().sanitizeProperties(app.getProperties()))
-						.build(streamName)
-				).collect(Collectors.toList());
-
-		return toDsl(sanitizedAppDefinitions);
-	}
-
-
-	/**
-	 * Reverse engineers a stream, represented by ordered {@link StreamAppDefinition} list, into a semantically
-	 * equivalent DSL text representation.
-	 *
-	 * @param appDefinitions ordered list of {@link StreamAppDefinition}'s that represent a single stream definition.
-	 * @return the textual DSL representation of the stream, that if parsed should produce exactly
-	 * the same {@link StreamAppDefinition} list.
-	 */
-	public static String toDsl(List<StreamAppDefinition> appDefinitions) {
-		StringBuilder dslBuilder = new StringBuilder();
-
-		int appDefinitionIndex = 0;
-		for (StreamAppDefinition appDefinition : appDefinitions) {
-			Map<String, String> props = appDefinition.getProperties();
-			String inputDestination = props.get(BindingPropertyKeys.INPUT_DESTINATION);
-			String outputDestination = props.get(BindingPropertyKeys.OUTPUT_DESTINATION);
-			String inputGroup = props.get(BindingPropertyKeys.INPUT_GROUP);
-
-			// Check for Input Named Destination
-			if (appDefinitionIndex == 0 && StringUtils.hasText(inputDestination)) {
-				dslBuilder.append(":").append(inputDestination);
-				if (inputGroup != null && !inputGroup.equals(appDefinition.getStreamName())) {
-					dslBuilder.append(" --group=").append(inputGroup);
-				}
-				dslBuilder.append(" > ");
-			}
-
-			// Add App Definition
-			dslBuilder.append(appDefinition.getName());
-
-			if (!appDefinition.getName().equals(appDefinition.getRegisteredAppName())) {
-				dslBuilder.append(": ").append(appDefinition.getRegisteredAppName());
-			}
-
-			for (String propertyName : props.keySet()) {
-				if (!dataFlowAddedProperties.contains(propertyName)) {
-					String propertyValue = unescape(props.get(propertyName));
-					dslBuilder.append(" --").append(propertyName).append("=").append(
-							DefinitionUtils.escapeNewlines(DefinitionUtils.autoQuotes(propertyValue)));
-				}
-			}
-
-			// Check for Output Named Destination
-			if (appDefinitionIndex == (appDefinitions.size() - 1)) {
-				if (StringUtils.hasText(outputDestination)) {
-					dslBuilder.append(" > ").append(":").append(outputDestination);
-				}
-			}
-			else {
-				if (appDefinition.getApplicationType() != ApplicationType.app) {
-					dslBuilder.append(" | ");
-				} else {
-					dslBuilder.append(" || ");
-				}
-			}
-
-			appDefinitionIndex++;
-		}
-
-		// Bridge dsl shortcut optimization
-		String dsl = dslBuilder.toString().replace("> bridge >", ">");
-
-		return dsl;
-	}
-
-	private static String unescape(String text) {
-		return StringEscapeUtils.unescapeHtml(text);
+						.build(app.getStreamName())
+				).collect(Collectors.toCollection(LinkedList::new));
 	}
 
 	/**

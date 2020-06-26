@@ -39,11 +39,9 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
-import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -188,9 +186,7 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UNDEPLOY,
-				streamDefinition.getName(), StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-						streamDefinitionService.getAppDefinitions(streamDefinition)),
-				null);
+				streamDefinition.getName(), this.streamDefinitionService.redactDsl(streamDefinition), null);
 	}
 
 	private void updateStreamDefinitionFromReleaseManifest(String streamName, String releaseManifest) {
@@ -217,9 +213,8 @@ public class DefaultStreamService implements StreamService {
 			updatedStreamAppDefinitions.addLast(appDefinitionBuilder.build(streamDefinition.getName()));
 		}
 
-		String updatedDslText =  StreamDefinitionServiceUtils.toDsl(updatedStreamAppDefinitions);
-
-		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName, updatedDslText,
+		StreamDefinition updatedStreamDefinition = new StreamDefinition(streamName,
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), updatedStreamAppDefinitions),
 				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
@@ -229,8 +224,7 @@ public class DefaultStreamService implements StreamService {
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
-				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-						this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
+				updatedStreamDefinition.getDslText(), null);
 	}
 
 	@Override
@@ -419,8 +413,7 @@ public class DefaultStreamService implements StreamService {
 
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.CREATE, streamDefinition.getName(),
-				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-						streamDefinitionService.getAppDefinitions(streamDefinition)), null);
+				this.streamDefinitionService.redactDsl(streamDefinition), null);
 
 		return streamDefinition;
 
@@ -465,8 +458,7 @@ public class DefaultStreamService implements StreamService {
 				AuditOperationType.STREAM, AuditActionType.DEPLOY,
 				streamDefinition.getName(),
 				this.auditServiceUtils.convertStreamDefinitionToAuditData(
-						StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-								this.streamDefinitionService.getAppDefinitions(streamDefinition)), deploymentProperties),
+						this.streamDefinitionService.redactDsl(streamDefinition), deploymentProperties),
 				platformName);
 	}
 
@@ -483,8 +475,7 @@ public class DefaultStreamService implements StreamService {
 		auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.DELETE,
 				streamDefinition.getName(),
-				StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-						this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
+				this.streamDefinitionService.redactDsl(streamDefinition), null);
 	}
 
 	/**
@@ -501,8 +492,7 @@ public class DefaultStreamService implements StreamService {
 			auditRecordService.populateAndSaveAuditRecord(
 					AuditOperationType.STREAM, AuditActionType.DELETE,
 					streamDefinition.getName(),
-					StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-							this.streamDefinitionService.getAppDefinitions(streamDefinition)), null);
+					this.streamDefinitionService.redactDsl(streamDefinition), null);
 		}
 	}
 
@@ -531,7 +521,7 @@ public class DefaultStreamService implements StreamService {
 		String currentStreamName = currentStreamDefinition.getName();
 		String indexedStreamName = currentStreamName + ".";
 		for (StreamDefinition definition : definitions) {
-			StreamNode sn = new StreamParser(definition.getName(), definition.getDslText()).parse();
+			StreamNode sn = this.streamDefinitionService.parse(definition);
 			if (sn.getSourceDestinationNode() != null) {
 				String nameComponent = sn.getSourceDestinationNode().getDestinationName();
 				if (nameComponent.equals(currentStreamName) || nameComponent.startsWith(indexedStreamName)) {

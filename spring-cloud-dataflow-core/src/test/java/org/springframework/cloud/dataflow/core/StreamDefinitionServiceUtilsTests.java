@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.core;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.junit.Ignore;
@@ -122,7 +123,7 @@ public class StreamDefinitionServiceUtilsTests {
 		assertEquals(expectedAppSize, this.streamDefinitionService.getAppDefinitions(streamDefinition).size());
 
 		assertEquals(streamDefinition.getDslText(),
-				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -146,7 +147,7 @@ public class StreamDefinitionServiceUtilsTests {
 			StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 			assertEquals("foo | bar",
-							StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+					this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 		}
 	}
 
@@ -159,7 +160,7 @@ public class StreamDefinitionServiceUtilsTests {
 		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
 
 		assertEquals(":boza > foo | bar",
-				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 	@Test
@@ -185,7 +186,7 @@ public class StreamDefinitionServiceUtilsTests {
 				.build("stream2");
 
 		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
-				StreamDefinitionServiceUtils.toDsl(Arrays.asList(foo2, bar2)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), new LinkedList(Arrays.asList(foo2, bar2))));
 	}
 
 	@Test
@@ -197,7 +198,7 @@ public class StreamDefinitionServiceUtilsTests {
 
 		assertEquals("http-source-kafka --server.port=9900 | couchbase-sink-kafka " +
 						"--spring.cloud.stream.bindings.input.contentType='application/x-java-object;type=com.example.dto.InputDto'",
-				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 
 
 		streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
@@ -211,7 +212,7 @@ public class StreamDefinitionServiceUtilsTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 
 	}
 
@@ -229,7 +230,7 @@ public class StreamDefinitionServiceUtilsTests {
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
-				StreamDefinitionServiceUtils.toDsl(this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 
 }

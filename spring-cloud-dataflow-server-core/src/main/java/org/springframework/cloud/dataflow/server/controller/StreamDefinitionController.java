@@ -16,16 +16,21 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.core.AppRegistration;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
@@ -77,17 +82,22 @@ public class StreamDefinitionController {
 
 	private final StreamDefinitionService streamDefinitionService;
 
+	private final AppRegistryService appRegistryService;
+
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates to {@link StreamService}.
 	 *
 	 * @param streamService the stream service to use
 	 * @param streamDefinitionService the stream definition service to use
 	 */
-	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService) {
+	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService,
+			AppRegistryService appRegistryService) {
 		Assert.notNull(streamService, "StreamService must not be null");
 		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
+		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		this.streamService = streamService;
 		this.streamDefinitionService = streamDefinitionService;
+		this.appRegistryService = appRegistryService;
 	}
 
 	/**
@@ -175,6 +185,43 @@ public class StreamDefinitionController {
 		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toModel(definition);
 	}
 
+
+	@RequestMapping(value = "/{name}/applications", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public List<AppRegistrationResource> listApplications(@PathVariable("name") String name) {
+		StreamDefinition definition = this.streamService.findOne(name);
+		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(definition);
+		List<AppRegistrationResource> appRegistrations = new ArrayList<>();
+		AppRegistryAssembler appRegistryAssembler = new AppRegistryAssembler();
+		for (StreamAppDefinition streamAppDefinition: streamAppDefinitions) {
+			appRegistrations.add(appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
+					streamAppDefinition.getApplicationType())));
+		}
+		return appRegistrations;
+	}
+
+	class AppRegistryAssembler extends RepresentationModelAssemblerSupport<AppRegistration, AppRegistrationResource> {
+
+		public AppRegistryAssembler() {
+			super(AppRegistryController.class, AppRegistrationResource.class);
+		}
+
+		@Override
+		public AppRegistrationResource toModel(AppRegistration registration) {
+			return createModelWithId(String.format("%s/%s/%s", registration.getType(), registration.getName(),
+					registration.getVersion()), registration);
+		}
+
+		@Override
+		protected AppRegistrationResource instantiateModel(AppRegistration registration) {
+			return (registration.getVersions() == null) ? new AppRegistrationResource(registration.getName(), registration.getType().name(),
+					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion()) :
+					new AppRegistrationResource(registration.getName(), registration.getType().name(),
+							registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion(),
+							registration.getVersions());
+		}
+	}
+
 	/**
 	 * Request removal of all stream definitions.
 	 */
@@ -212,12 +259,10 @@ public class StreamDefinitionController {
 
 		@Override
 		public StreamDefinitionResource instantiateModel(StreamDefinition streamDefinition) {
-			final StreamDefinition originalStreamDefinition = new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText());
 			final StreamDefinitionResource resource = new StreamDefinitionResource(streamDefinition.getName(),
-					StreamDefinitionServiceUtils.sanitizeStreamDefinition(streamDefinition.getName(),
-							streamDefinitionService.getAppDefinitions(streamDefinition)),
-					StreamDefinitionServiceUtils.sanitizeStreamDefinition(originalStreamDefinition.getName(),
-							streamDefinitionService.getAppDefinitions(originalStreamDefinition)), originalStreamDefinition.getDescription());
+					streamDefinitionService.redactDsl(streamDefinition),
+					streamDefinitionService.redactDsl(new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText())),
+					streamDefinition.getDescription());
 			DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
 			if (deploymentState != null) {
 				final DeploymentStateResource deploymentStateResource = ControllerUtils

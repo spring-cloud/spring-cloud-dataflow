@@ -174,7 +174,9 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 						fieldWithPath("versions").description("All the registered versions of the application"),
 						fieldWithPath("defaultVersion").description("If true, the application is the default version"),
 						subsectionWithPath("options").description("The options of the application (Array)"),
-						fieldWithPath("shortDescription").description("The description of the application")
+						fieldWithPath("shortDescription").description("The description of the application"),
+						fieldWithPath("inboundPortNames").description("Inbound port names of the application"),
+						fieldWithPath("outboundPortNames").description("Outbound port names of the application")
 					)
 				)
 			);
