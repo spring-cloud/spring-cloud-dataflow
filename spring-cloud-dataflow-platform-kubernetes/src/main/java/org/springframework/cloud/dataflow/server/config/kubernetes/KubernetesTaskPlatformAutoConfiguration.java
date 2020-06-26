@@ -15,14 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -40,9 +37,8 @@ public class KubernetesTaskPlatformAutoConfiguration {
 	@Bean
 	public KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory(
 			KubernetesPlatformProperties platformProperties,
-			Optional<KubernetesSchedulerProperties> schedulerProperties,
 			@Value("${spring.cloud.dataflow.features.schedules-enabled:false}") boolean schedulesEnabled) {
-		return new KubernetesTaskPlatformFactory(platformProperties, schedulerProperties, schedulesEnabled);
+		return new KubernetesTaskPlatformFactory(platformProperties, schedulesEnabled);
 	}
 
 	@Bean
