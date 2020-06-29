@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -286,4 +287,10 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andExpect(status().isUnauthorized());
 	}
 
+	@Test
+	public void testXMLHttpRequestReturnsNoWwwAuthenticateHeader() throws Exception {
+		localDataflowResource.getMockMvc().perform(get("/").header("X-Requested-With", "XMLHttpRequest")).andDo(print())
+				.andExpect(status().isUnauthorized())
+				.andExpect(header().doesNotExist("WWW-Authenticate"));
+	}
 }
