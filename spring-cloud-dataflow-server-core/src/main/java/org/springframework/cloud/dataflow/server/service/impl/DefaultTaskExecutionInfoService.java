@@ -119,7 +119,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 	@Override
 	public TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties) {
+			Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
@@ -138,15 +138,13 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		TaskDefinition taskDefinitionToUse;
 		AppRegistration appRegistration;
 		if (taskNode.isComposed()) {
-
-
 			taskDefinitionToUse = new TaskDefinition(originalTaskDefinition.getName(),
 					TaskServiceUtils.createComposedTaskDefinition(taskNode.toExecutableDSL()));
 			taskExecutionInformation.setTaskDeploymentProperties(
 					TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
 							taskNode));
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(taskDefinitionToUse,
-					dataSourceProperties);
+					dataSourceProperties, addDatabaseCredentials);
 			try {
 				appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
 						ApplicationType.task,
@@ -159,7 +157,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		}
 		else {
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(originalTaskDefinition,
-					dataSourceProperties);
+					dataSourceProperties, addDatabaseCredentials);
 			appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
 					ApplicationType.task);
 		}

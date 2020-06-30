@@ -38,10 +38,11 @@ public interface TaskExecutionInfoService {
 	 * Create a the {@link TaskExecutionInformation} instance for the information provided.
 	 * @param taskName the name of the task definition
 	 * @param taskDeploymentProperties the deployment properties to use for the {@link TaskExecutionInformation}
+	 * @param addDatabaseCredentials  true if database credentials should be added to the {@link TaskExecutionInformation}
 	 * @return instance of {@link TaskExecutionInformation}
 	 */
 	TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties);
+			Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials);
 
 	AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation();
 

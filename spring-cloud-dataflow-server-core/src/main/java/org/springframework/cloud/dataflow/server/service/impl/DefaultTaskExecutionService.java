@@ -222,7 +222,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						"Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
 			}
 		}
-
+		Launcher launcher = this.launcherRepository.findByName(platformName);
 		// Remove since the key for task platform name will not pass validation for app,
 		// deployer, or scheduler prefix.
 		// Then validate
@@ -244,7 +244,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 
 		TaskExecutionInformation taskExecutionInformation =
-				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties);
+				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, launcher.getType());
 
 		if (taskExecutionInformation.isComposed()) {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
@@ -285,7 +285,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		String taskDeploymentId = null;
 		try {
-			Launcher launcher = this.launcherRepository.findByName(platformName);
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				verifyTaskIsNotRunning(taskName, taskExecution, taskLauncher);
 				validateAndLockUpgrade(taskName, platformName);
@@ -324,12 +323,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecution.getExecutionId();
 	}
 
-	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties) {
+	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties, String platform) {
 
 		TaskExecutionInformation taskExecutionInformation;
 		try {
 			 taskExecutionInformation = taskExecutionInfoService
-					.findTaskExecutionInformation(taskName, taskDeploymentProperties);
+					.findTaskExecutionInformation(taskName, taskDeploymentProperties, addDatabaseCredentials(platform));
 
 		} catch (NoSuchTaskDefinitionException e) {
 			if (autoCreateTaskDefinitions) {
@@ -337,7 +336,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
 				taskSaveService.saveTaskDefinition(taskDefinition);
 				taskExecutionInformation = taskExecutionInfoService
-						.findTaskExecutionInformation(taskName, taskDeploymentProperties);
+						.findTaskExecutionInformation(taskName, taskDeploymentProperties, addDatabaseCredentials(platform));
 			}
 			else {
 				throw e;
@@ -346,6 +345,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecutionInformation;
 	}
 
+	private boolean addDatabaseCredentials(String platform) {
+		boolean addDatabaseCredentials = false;
+		if(!this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials() ||
+				!StringUtils.hasText(platform) || !platform.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			addDatabaseCredentials = true;
+		}
+		return addDatabaseCredentials;
+	}
 	/**
 	 * Determines if an OAuth token is available and if so, sets it as a deployment property.
 	 *

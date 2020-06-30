@@ -105,6 +105,25 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
+	public void testDatabasePropUpdateWithPlatform() {
+		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
+		DataSourceProperties dataSourceProperties = new DataSourceProperties();
+		dataSourceProperties.setUsername("myUser");
+		dataSourceProperties.setDriverClassName("myDriver");
+		dataSourceProperties.setPassword("myPassword");
+		dataSourceProperties.setUrl("myUrl");
+		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties, false);
+
+		assertThat(definition.getProperties().size()).isEqualTo(3);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties().get("spring.datasource.username")).isNull();
+		assertThat(definition.getProperties().get("spring.datasource.password")).isNull();
+	}
+
+	@Test
 	public void testExtractAppProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		taskDeploymentProperties.put("app.test.foo", "bar");
