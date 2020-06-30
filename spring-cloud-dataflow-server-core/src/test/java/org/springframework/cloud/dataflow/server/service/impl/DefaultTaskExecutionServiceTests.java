@@ -131,6 +131,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
+	private final static String K8_PLATFORM = "k8platform";
+
+	private final static String FAKE_PLATFORM = "fakeplatformname";
+
 	@Autowired
 	TaskRepository taskRepository;
 
@@ -193,28 +197,86 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Before
 		public void setup() {
-			// not adding platform name as default as we want to check that this only one
-			// gets replaced
-			this.launcherRepository.save(new Launcher("fakeplatformname", "local", taskLauncher));
-			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			taskDefinitionRepository.findAll();
-			JdbcTemplate template = new JdbcTemplate(this.dataSource);
-			template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
-			template.execute("DELETE FROM TASK_EXECUTION;");
+			setupTest(dataSource);
 		}
 
 		@Test
 		@DirtiesContext
 		public void executeSingleTaskDefaultsToExistingSinglePlatformTest() {
 			initializeSuccessfulRegistry(appRegistry);
-			when(taskLauncher.launch(any())).thenReturn("0");
-			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			when(taskLauncher.launch(argument.capture())).thenReturn("0");
+			validateBasicProperties(Collections.emptyMap(), argument, FAKE_PLATFORM);
+		}
 
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskDefaultsToExistingSinglePlatformTestForKubernetes() {
+			this.launcherRepository.save(new Launcher(K8_PLATFORM, "Kubernetes", taskLauncher));
+			initializeSuccessfulRegistry(appRegistry);
+			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			when(taskLauncher.launch(argument.capture())).thenReturn("0");
+			Map<String, String> taskDeploymentProperties = new HashMap<>();
+			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", K8_PLATFORM);
+			validateBasicProperties(taskDeploymentProperties, argument, K8_PLATFORM);
+		}
+
+		private void validateBasicProperties(Map<String, String> taskDeploymentProperties,
+				ArgumentCaptor<AppDeploymentRequest> argument,
+				String platform) {
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG,
+					taskDeploymentProperties, new LinkedList<>()));
+			AppDeploymentRequest appDeploymentRequest = argument.getValue();
+			assertTrue(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
 			assertNotNull("TaskDeployment should not be null", taskDeployment);
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
-			assertEquals("fakeplatformname", taskDeployment.getPlatformName());
+			assertEquals(platform, taskDeployment.getPlatformName());
+			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+		}
+	}
+
+	public void setupTest(DataSource dataSource) {
+		this.launcherRepository.save(new Launcher(FAKE_PLATFORM, "local", taskLauncher));
+		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+		taskDefinitionRepository.findAll();
+		JdbcTemplate template = new JdbcTemplate(dataSource);
+		template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
+		template.execute("DELETE FROM TASK_EXECUTION;");
+	}
+
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	@TestPropertySource(properties = { "spring.cloud.dataflow.task.use-kubernetes-secrets-for-db-credentials=true" })
+	public static class SimpleDefaultPlatformForKubernetesTests extends DefaultTaskExecutionServiceTests {
+
+		@Autowired
+		DataSource dataSource;
+
+		@Before
+		public void setup() {
+			setupTest(dataSource);
+			this.launcherRepository.save(new Launcher(K8_PLATFORM, "Kubernetes", taskLauncher));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskDefaultsToExistingSinglePlatformTestForKubernetes() {
+			final String K8_PLATFORM = "k8platform";
+			initializeSuccessfulRegistry(appRegistry);
+			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			when(taskLauncher.launch(argument.capture())).thenReturn("0");
+			Map<String, String> taskDeploymentProperties = new HashMap<>();
+			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", K8_PLATFORM);
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG,
+					taskDeploymentProperties, new LinkedList<>()));
+			AppDeploymentRequest appDeploymentRequest = argument.getValue();
+			assertFalse(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
+			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
+			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertEquals("0", taskDeployment.getTaskDeploymentId());
+			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
+			assertEquals(K8_PLATFORM, taskDeployment.getPlatformName());
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
 		}
 	}

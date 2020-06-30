@@ -61,6 +61,12 @@ public class TaskConfigurationProperties {
 	 */
 	private boolean useUserAccessToken = false;
 
+	/**
+	 * When using the kubernetes platform obtain database username and password
+	 * from secrets vs having dataflow pass them via properties.
+	 */
+	private boolean useKubernetesSecretsForDbCredentials;
+
 	public String getComposedTaskRunnerUri() {
 		return composedTaskRunnerUri;
 	}
@@ -131,5 +137,13 @@ public class TaskConfigurationProperties {
 		public void setGroupExcludes(String[] groupExcludes) {
 			this.groupExcludes = groupExcludes;
 		}
+	}
+
+	public boolean isUseKubernetesSecretsForDbCredentials() {
+		return useKubernetesSecretsForDbCredentials;
+	}
+
+	public void setUseKubernetesSecretsForDbCredentials(boolean useKubernetesSecretsForDbCredentials) {
+		this.useKubernetesSecretsForDbCredentials = useKubernetesSecretsForDbCredentials;
 	}
 }

@@ -106,15 +106,29 @@ public class TaskServiceUtils {
 	 */
 	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
 			DataSourceProperties dataSourceProperties) {
+		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
+	}
+	/**
+	 * Updates the task definition with the datasource properties.
+	 * @param taskDefinition the {@link TaskDefinition} to be updated.
+	 * @param dataSourceProperties the dataSource properties used by SCDF.
+	 * @param setDatabaseCredentials if true database username and password that should be set in the {@link TaskDefinition} .
+	 * @return the updated {@link TaskDefinition}
+	 */
+	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
+			DataSourceProperties dataSourceProperties,
+			boolean setDatabaseCredentials) {
 		Assert.notNull(taskDefinition, "taskDefinition must not be null");
 		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
 		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
-		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
-		builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
-		// password may be empty
-		if (StringUtils.hasText(dataSourceProperties.getPassword())) {
-			builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+		if(setDatabaseCredentials) {
+			// password may be empty
+			if (StringUtils.hasText(dataSourceProperties.getPassword())) {
+				builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
+			}
+			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
+		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
 		builder.setTaskName(taskDefinition.getTaskName());
 		builder.setDslText(taskDefinition.getDslText());
