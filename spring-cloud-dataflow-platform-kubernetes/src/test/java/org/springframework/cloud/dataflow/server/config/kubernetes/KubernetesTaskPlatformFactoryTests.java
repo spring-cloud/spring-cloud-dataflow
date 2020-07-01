@@ -17,14 +17,15 @@
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,7 +41,7 @@ public class KubernetesTaskPlatformFactoryTests {
 		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
 
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
-				platformProperties, Optional.empty(), false);
+				platformProperties, false);
 
 		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
@@ -58,20 +59,25 @@ public class KubernetesTaskPlatformFactoryTests {
 	public void kubernetesTaskPlatformWithScheduler() {
 		KubernetesPlatformProperties platformProperties = new KubernetesPlatformProperties();
 		KubernetesDeployerProperties deployerProperties = new KubernetesDeployerProperties();
+		deployerProperties.getLimits().setMemory("5555Mi");
 		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
 
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
-				platformProperties,
-				Optional.of(new KubernetesSchedulerProperties()), true);
+				platformProperties, true);
 
 		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
-		assertThat(taskPlatform.getLaunchers().get(0).getScheduler()).isNotNull();
-		assertThat(taskPlatform.getLaunchers().get(0).getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
-		assertThat(taskPlatform.getLaunchers().get(0).getName()).isEqualTo("k8s");
-		assertThat(taskPlatform.getLaunchers().get(0).getType()).isEqualTo("Kubernetes");
-		assertThat(taskPlatform.getLaunchers().get(0).getDescription()).matches("^master url = \\[.+\\], namespace = "
+		Launcher taskLauncher = taskPlatform.getLaunchers().get(0);
+		KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
+		assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
+
+		assertThat(taskLauncher.getScheduler()).isNotNull();
+		assertThat(taskLauncher.getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
+		assertThat(taskLauncher.getName()).isEqualTo("k8s");
+		assertThat(taskLauncher.getType()).isEqualTo("Kubernetes");
+		assertThat(taskLauncher.getDescription()).matches("^master url = \\[.+\\], namespace = "
+
 			+ "\\[.+\\], api version = \\[.+\\]$");
 
 	}
