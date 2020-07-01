@@ -115,6 +115,7 @@
 		<module>spring-cloud-starter-dataflow-ui</module>
 		<module>spring-cloud-dataflow-audit</module>
 		<module>spring-cloud-dataflow-composed-task-runner</module>
+		<module>spring-cloud-dataflow-test</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

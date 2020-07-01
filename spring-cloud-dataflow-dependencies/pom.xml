@@ -115,6 +115,11 @@
 				<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
 				<version>2.6.0-SNAPSHOT</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-test</artifactId>
+				<version>2.6.0-SNAPSHOT</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<distributionManagement>
