@@ -37,13 +37,6 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    secretKeyRefs:
-                      - envVarName: "spring.datasource.password"
-                        secretName: mysql
-                        dataKey: mysql-root-password
-                      - envVarName: "spring.datasource.username"
-                        secretName: mysql
-                        dataKey: mysql-root-username
                     limits:
                       memory: 1024Mi
       datasource:

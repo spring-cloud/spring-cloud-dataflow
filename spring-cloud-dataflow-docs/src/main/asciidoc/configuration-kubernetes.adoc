@@ -643,7 +643,8 @@ Request to clean up resources for task execution 1 has been submitted
 ----
 
 ===== Database Credentials for Tasks
-By default Spring Cloud Data Flow passes Database credentials as properties to the pod at task launch time.   If using the `exec` entry point style the DB credentials will be viewable if the user does a `kubectl describe` on the task's pod.
+By default Spring Cloud Data Flow passes database credentials as properties to the pod at task launch time.
+If using the `exec`  or `shell` entry point styles the DB credentials will be viewable if the user does a `kubectl describe` on the task's pod.
 To configure Spring Cloud Data Flow to use Kubernetes Secrets:  Set `spring.cloud.dataflow.task.use.kubernetes.secrets.for.db.credentials` property to `true`. If using the yaml files provided by Spring Cloud Data Flow update the `src/kubernetes/server/server-deployment.yaml to add the following environment variable:
 [source,yaml]
 ----
@@ -662,13 +663,19 @@ If upgrading from a previous version of SCDF be sure to verify that the `spring.
         accounts:
           default:
             secretKeyRefs:
+              - envVarName: "spring.datasource.password"
+                secretName: mysql
+                dataKey: mysql-root-password
               - envVarName: "spring.datasource.username"
                   secretName: mysql
                   dataKey: mysql-root-username
 ...
 ----
 
-Also verify that the associated secret(dataKey) is also available in secrets.
+Also verify that the associated secret(dataKey) is also available in secrets.  SCDF provides an example of this for MySql here: `src/kubernetes/mysql/mysql-svc.yaml`.
+
+
+NOTE: Passing of DB credentials via properties by default is to preserve to backwards compatibility.  This will be feature will be removed in future release.
 
 === Scheduling
 
