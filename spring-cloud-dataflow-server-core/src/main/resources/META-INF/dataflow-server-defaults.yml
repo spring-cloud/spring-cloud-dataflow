@@ -1,4 +1,12 @@
 management:
+  metrics:
+    export:
+      influx:
+        enabled: false
+      prometheus:
+        enabled: false
+      wavefront:
+        enabled: false
   endpoints:
     web:
       base-path: /management

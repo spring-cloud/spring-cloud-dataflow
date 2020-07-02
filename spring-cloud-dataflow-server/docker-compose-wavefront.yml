@@ -10,6 +10,13 @@ version: '3'
 services:
   dataflow-server:
     environment:
+      - management.metrics.web.server.request.autotime.enabled=true
+      - management.metrics.web.server.request.metric-name=spring.cloud.dataflow.http.server.requests
+      - management.metrics.export.wavefront.enabled=true
+      - management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
