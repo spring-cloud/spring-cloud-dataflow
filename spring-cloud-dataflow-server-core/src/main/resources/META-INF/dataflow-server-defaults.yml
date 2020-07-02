@@ -1,5 +1,11 @@
 management:
   metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+          metric-name: 'spring.cloud.dataflow.http.server.requests'
     export:
       influx:
         enabled: false
