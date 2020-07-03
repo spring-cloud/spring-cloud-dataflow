@@ -16,13 +16,14 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner.configuration;
 
+import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.InfluxMetricsExportAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.wavefront.WavefrontMetricsExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.TestPropertySource;
 
 import static org.mockito.Mockito.mock;
 
@@ -30,7 +31,9 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  */
 @Configuration
-@EnableAutoConfiguration(exclude = { DataFlowClientAutoConfiguration.class, WavefrontMetricsExportAutoConfiguration.class })
+@EnableAutoConfiguration(exclude = { DataFlowClientAutoConfiguration.class,
+		WavefrontMetricsExportAutoConfiguration.class, PrometheusMetricsExportAutoConfiguration.class,
+		InfluxMetricsExportAutoConfiguration.class })
 public class DataFlowTestConfiguration {
 
 	@Bean
