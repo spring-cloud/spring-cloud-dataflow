@@ -11,6 +11,8 @@ management:
         enabled: false
       prometheus:
         enabled: false
+        rsocket:
+          enabled: false
       wavefront:
         enabled: false
   endpoints:
