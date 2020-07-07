@@ -73,5 +73,30 @@ public class TaskAnalyzerTests {
 		assertThat(report.getMergedDeploymentProperties()).hasSize(1);
 		assertThat(report.getMergedDeploymentProperties()).contains(entry("key1", "value2"));
 	}
+	
+	
+	@Test
+	public void testAnalyze() {
+
+		Map<String, String> leftDeploymentProperties = new HashMap<>();
+		leftDeploymentProperties.put("key1", "value1");
+
+		Map<String, String> rightDeploymentProperties = new HashMap<>();
+		rightDeploymentProperties.put("key1", "value1");
+
+		TaskAnalysisReport report = analyzer.analyze(leftDeploymentProperties, rightDeploymentProperties);
+		TaskManifestDifference taskManifestDifference = report.getTaskManifestDifference();
+		PropertiesDiff deploymentPropertiesDifference = taskManifestDifference.getDeploymentPropertiesDifference();
+		assertThat(deploymentPropertiesDifference.areEqual()).isTrue();
+
+		rightDeploymentProperties.put("key1", "value2");
+
+		report = analyzer.analyze(leftDeploymentProperties, rightDeploymentProperties);
+		taskManifestDifference = report.getTaskManifestDifference();
+		deploymentPropertiesDifference = taskManifestDifference.getDeploymentPropertiesDifference();
+		assertThat(deploymentPropertiesDifference.areEqual()).isFalse();
+		assertThat(report.getMergedDeploymentProperties()).hasSize(1);
+		assertThat(report.getMergedDeploymentProperties()).contains(entry("key1", "value2"));
+	}
 
 }
