@@ -158,12 +158,8 @@
 			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.pivotal.cfenv</groupId>
-			<artifactId>java-cfenv-boot</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.pivotal.cfenv</groupId>
-			<artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+			<groupId>io.pivotal.spring.cloud</groupId>
+			<artifactId>spring-cloud-services-starter-config-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.pivotal.cfenv</groupId>

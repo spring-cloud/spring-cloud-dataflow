@@ -34,7 +34,8 @@
 		<spring-statemachine.version>2.2.0.RELEASE</spring-statemachine.version>
 
 		<spring-cloud-dataflow-common.version>2.6.0-M1</spring-cloud-dataflow-common.version>
-		<java-cfenv-boot.version>1.1.3.RELEASE</java-cfenv-boot.version>
+		<java-cfenv-boot.version>2.2.0.RELEASE</java-cfenv-boot.version>
+		<spring-cloud-services-starter-config-client.version>3.1.3.RELEASE</spring-cloud-services-starter-config-client.version>
 		<spring-cloud-deployer.version>2.4.0-M1</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.4.0-M1</spring-cloud-deployer-local.version>
 		<spring-cloud-deployer-cloudfoundry.version>2.4.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
@@ -164,18 +165,18 @@
 			</dependency>
 			<dependency>
 				<groupId>io.pivotal.cfenv</groupId>
-				<artifactId>java-cfenv-boot</artifactId>
-				<version>${java-cfenv-boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.cfenv</groupId>
-				<artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+				<artifactId>java-cfenv</artifactId>
 				<version>${java-cfenv-boot.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.pivotal.cfenv</groupId>
 				<artifactId>java-cfenv-boot-pivotal-sso</artifactId>
 				<version>${java-cfenv-boot.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.pivotal.spring.cloud</groupId>
+				<artifactId>spring-cloud-services-starter-config-client</artifactId>
+				<version>${spring-cloud-services-starter-config-client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
