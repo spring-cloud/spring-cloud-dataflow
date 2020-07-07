@@ -10,6 +10,11 @@
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
+			<groupId>io.pivotal.cfenv</groupId>
+			<artifactId>java-cfenv</artifactId>
+			<version>2.0.0.RELEASE</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-server-core</artifactId>
 		</dependency>
@@ -32,11 +37,12 @@
 		</dependency>
 		<dependency>
 			<groupId>io.pivotal.cfenv</groupId>
-			<artifactId>java-cfenv-boot-pivotal-scs</artifactId>
+			<artifactId>java-cfenv-boot-pivotal-sso</artifactId>
+			<version>${java-cfenv-boot.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.pivotal.cfenv</groupId>
-			<artifactId>java-cfenv-boot-pivotal-sso</artifactId>
+			<groupId>io.pivotal.spring.cloud</groupId>
+			<artifactId>spring-cloud-services-starter-config-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

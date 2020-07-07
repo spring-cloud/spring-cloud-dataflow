@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.util.Assert;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -64,8 +63,8 @@ public class CloudFoundrySecurityService {
 	}
 
 	/**
-	 * Returns {@code true} if the user (using the access-token from
-	 * {@link OAuth2RestTemplate}) has full {@link AccessLevel#FULL} for the provided
+	 * Returns {@code true} if the user (using the access-token from the authenticated user)
+	 * has full {@link AccessLevel#FULL} for the provided
 	 * {@code applicationId}
 	 *
 	 * @return true of the user is a space developer in Cloud Foundry
