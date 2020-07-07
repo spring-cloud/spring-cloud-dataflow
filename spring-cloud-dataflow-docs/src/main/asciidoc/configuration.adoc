@@ -216,7 +216,7 @@ will fail. Therefore, make sure that you configure your Shell accordingly.
 ===== Using Self-Signed Certificates
 
 For testing purposes or during development, it might be convenient to create self-signed certificates.
-To get started, execute the following command to create a certificate:
+To get started, run the following command to create a certificate:
 
 [source,bash]
 ----
@@ -440,7 +440,7 @@ that Spring Cloud Data Flow exposes:
 * *ROLE_DESTROY* for anything that involves deleting streams, tasks etc.
 * *ROLE_MANAGE* for boot management endpoints
 * *ROLE_MODIFY* for anything that involves mutating the state of the system
-* *ROLE_SCHEDULE* for scheduling related operation (e.g. schedule a task execution)
+* *ROLE_SCHEDULE* for scheduling related operation (for example, schedule a task)
 * *ROLE_VIEW* for anything that relates to retrieving state
 
 As mentioned earlier, all authorization-related default settings are specified

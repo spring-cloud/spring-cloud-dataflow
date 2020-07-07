@@ -29,7 +29,7 @@ The REST `/about` endpoint provides information on the features that have been e
 [[configuration-local-rdbms]]
 === Database
 
-A relational database is used to store stream and task definitions as well as the state of executed tasks.
+A relational database is used to store stream and task definitions as well as the state of tasks that have been run.
 Spring Cloud Data Flow provides schemas for *H2*, *MySQL*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
 
 By default, Spring Cloud Data Flow offers an embedded instance of the *H2* database. The *H2* database is good

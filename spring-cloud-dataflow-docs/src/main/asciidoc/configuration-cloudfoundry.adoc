@@ -915,12 +915,12 @@ services:
 
 [[configuration-cloudfoundry-scheduling]]
 === Configure Scheduling
-This section discusses how to configure Spring Cloud Data Flow to connect to the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF-Scheduler] as its agent to execute tasks.
+This section discusses how to configure Spring Cloud Data Flow to connect to the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF-Scheduler] as its agent to run tasks.
 
 [NOTE]
 ====
 Before following these instructions, be sure to have an instance of the PCF-Scheduler service running in your Cloud Foundry space.
-To create a PCF-Scheduler in your space (assuming it is in your Market Place) execute the following from the CF CLI: `cf create-service scheduler-for-pcf standard <name of service>`.
+To create a PCF-Scheduler in your space (assuming it is in your Market Place), run the following from the CF CLI: `cf create-service scheduler-for-pcf standard <name of service>`.
 Name of a service is later used to bound running application in _PCF_.
 ====
 

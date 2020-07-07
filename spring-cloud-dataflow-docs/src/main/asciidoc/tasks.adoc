@@ -199,7 +199,7 @@ One may also specify the longhand version as well, as shown in the following exa
 
 `dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
 
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-allowlisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
 The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.  The supported Task `<appType>` is task.
@@ -368,9 +368,9 @@ In this case Spring Cloud Data Flow states that the task is invalid because task
 [[spring-cloud-dataflow-stopping-task-execution]]
 === Stopping a Task Execution
 
-In some cases a task that is executing on a platform may not stop because of a problem on the platform or the application business logic itself.
-For such cases Spring Cloud Data Flow offers the user the ability to send a request to the platform to terminate the task execution.
-To do this a user can submit a `task execution stop` for a given set of task executions.  For example:
+In some cases, a task that is running on a platform may not stop because of a problem on the platform or the application business logic itself.
+For such cases, Spring Cloud Data Flow offers the ability to send a request to the platform to stop the task.
+To do this, a user can submit a `task execution stop` for a given set of task executions, as follows:
 
 [source,bash]
 ----
@@ -1210,5 +1210,3 @@ The last main flow is when a launch request comes to Spring Cloud Data Flow to d
 3. Data Flow prevents the launch from happening because other instances of the task definition are running.
 
 NOTE: Any launch that requires an upgrade of a task definition that is running at the time of the request is blocked from executing due to the need to delete any currently running tasks.
-
-

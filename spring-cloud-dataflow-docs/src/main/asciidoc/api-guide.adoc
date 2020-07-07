@@ -180,7 +180,7 @@ include::{snippets}/api-documentation/index/http-response.adoc[]
 ===== Links
 
 The main element of the index are the links, as they let you traverse the API
-and execute the desired functionality:
+and invoke the desired functionality:
 
 include::{snippets}/api-documentation/index/links.adoc[]
 
@@ -2832,4 +2832,3 @@ include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.ado
 ===== Response Structure
 
 include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
-

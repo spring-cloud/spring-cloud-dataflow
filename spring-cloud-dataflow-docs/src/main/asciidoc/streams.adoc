@@ -149,7 +149,7 @@ One may also specify the longhand version as well, as shown in the following exa
 
 `dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream`
 
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-allowlisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
 The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
@@ -442,20 +442,20 @@ In some cases, the Resource is resolved on the server side. In others, the
 URI is passed to a runtime container instance where it is resolved. Consult
 the specific documentation of each Data Flow Server for more detail.
 
-[[spring-cloud-dataflow-stream-app-whitelisting]]
-==== Whitelisting application properties
+[[spring-cloud-dataflow-stream-app-allowlisting]]
+==== Allowlisting Application Properties
 
-Stream and Task applications are Spring Boot applications that are aware of many <<spring-cloud-dataflow-global-properties>>, such as `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application, you should whitelist properties so that the shell and the UI can display them first as primary properties when presenting options through TAB completion or in drop-down boxes.
+Stream and Task applications are Spring Boot applications that are aware of many <<spring-cloud-dataflow-global-properties>>, such as `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application, you should allowlist properties so that the shell and the UI can display them first as primary properties when presenting options through TAB completion or in drop-down boxes.
 
-To whitelist application properties, create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory. There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`. The value is a comma separated list of fully qualified `@ConfigurationProperty` class names. The second key is `configuration-properties.names`, whose value is a comma-separated list of property names. This can contain the full name of the property, such as `server.port`, or a partial name to whitelist a category of property names, such as `spring.jmx`.
+To allowlist application properties, create a file named `spring-configuration-metadata-allowlist.properties` in the `META-INF` resource directory. There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`. The value is a comma separated list of fully qualified `@ConfigurationProperty` class names. The second key is `configuration-properties.names`, whose value is a comma-separated list of property names. This can contain the full name of the property, such as `server.port`, or a partial name to allowlist a category of property names, such as `spring.jmx`.
 
-The link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage. The following example comes from the file sink's `spring-configuration-metadata-whitelist.properties` file:
+The link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage. The following example comes from the file sink's `spring-configuration-metadata-allowlist.properties` file:
 
 ```
 configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 ```
 
-If we also want to add `server.port` to be white listed, it would become the following line:
+If we also want to add `server.port` to be allowlisted, it would become the following line:
 
 ```
 configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
@@ -475,9 +475,9 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
 </dependency>
 ----
 
-The whitelisting support works only for uber-jar application artifacts! At the moment, the metadata properties are not retrievable from the dockerized application images directly — a dedicated companion metadata JAR is required.
+The allowlisting support works only for uber-jar application artifacts! At the moment, the metadata properties are not retrievable from the dockerized application images directly — a dedicated companion metadata JAR is required.
 
-The `configuration-properties.names` can whitelist properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be whitelisted.
+The `configuration-properties.names` can allowlist properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be allowlisted.
 ====
 
 
@@ -485,7 +485,7 @@ The `configuration-properties.names` can whitelist properties that are defined i
 ==== Creating and Using a Dedicated Metadata Artifact
 You can go a step further in the process of describing the main properties that your stream or task app supports by
 creating a metadata companion artifact. This jar file contains only the Spring boot JSON file about
-configuration properties metadata and the whitelisting file described in the previous section.
+configuration properties metadata and the allowlisting file described in the previous section.
 
 The following example shows the contents of such an artifact, for the canonical `log` sink:
 
@@ -493,7 +493,7 @@ The following example shows the contents of such an artifact, for the canonical 
 ----
 $ jar tvf log-sink-rabbit-1.2.1.BUILD-SNAPSHOT-metadata.jar
 373848 META-INF/spring-configuration-metadata.json
-   174 META-INF/spring-configuration-metadata-whitelist.properties
+   174 META-INF/spring-configuration-metadata-allowlist.properties
 ----
 
 Note that the `spring-configuration-metadata.json` file is quite large. This is because it contains the concatenation of _all_ the properties that
@@ -572,7 +572,7 @@ The process of creating Spring Cloud Stream applications with https://start.spri
 It is possible to include multiple binders to an application.
 If doing so, see the instructions in <<passing_producer_consumer_properties>> for how to configure them.
 
-For supporting property whitelisting, Spring Cloud Stream applications running in Spring Cloud Data Flow may include the Spring Boot `configuration-processor` as an optional dependency, as shown in the following example:
+For supporting property allowlisting, Spring Cloud Stream applications running in Spring Cloud Data Flow may include the Spring Boot `configuration-processor` as an optional dependency, as shown in the following example:
 
 [source,xml]
 ----
@@ -602,7 +602,7 @@ Once a custom application has been created, it can be registered as described in
 
 The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is through the Spring Cloud Data Flow shell. Start the shell as described in the xref:getting-started#getting-started[Getting Started] section.
 
-New streams are created with the help of stream definitions. The definitions are built from a simple DSL. For example, consider what happens if we execute the following shell command:
+New streams are created with the help of stream definitions. The definitions are built from a simple DSL. For example, consider what happens if we run the following shell command:
 
 [source,bash]
 ----
@@ -635,10 +635,10 @@ The following stream can have application properties defined at the time of stre
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
 
-The shell command `app info --name <appName> --type <appType>` displays the white-listed application properties for the application.
-For more info on the property white listing, refer to <<spring-cloud-dataflow-stream-app-whitelisting>>
+The shell command `app info --name <appName> --type <appType>` displays the allowlisted application properties for the application.
+For more info on the property allowlisting, refer to <<spring-cloud-dataflow-stream-app-allowlisting>>
 
-The following listing shows the white_listed properties for the `time` app:
+The following listing shows the allowlisted properties for the `time` app:
 
 [source,bash,options="nowrap"]
 ----
@@ -660,7 +660,7 @@ dataflow:> app info --name time --type source
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
 
-The following listing shows the white-listed properties for the `log` app:
+The following listing shows the allowlisted properties for the `log` app:
 
 [source,bash,options="nowrap"]
 ----
@@ -685,7 +685,7 @@ dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" 
 ----
 
 Note that, in the preceding example, the `fixed-delay` and `level` properties defined for the apps `time` and `log` are the "'short-form'" property names provided by the shell completion.
-These "'short-form'" property names are applicable only for the white-listed properties. In all other cases, only fully qualified property names should be used.
+These "'short-form'" property names are applicable only for the allowlisted properties. In all other cases, only fully qualified property names should be used.
 
 
 [[spring-cloud-dataflow-global-properties]]

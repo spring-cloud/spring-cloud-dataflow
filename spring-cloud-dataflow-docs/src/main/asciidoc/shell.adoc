@@ -3,7 +3,7 @@
 
 [partintro]
 --
-This section covers the options for starting the shell and more advanced functionality relating to how the shell handles white spaces, quotes, and interpretation of SpEL expressions.
+This section covers the options for starting the shell and more advanced functionality relating to how the shell handles white space, quotes, and interpretation of SpEL expressions.
 The introductory chapters to the
 <<spring-cloud-dataflow-stream-intro, Stream DSL>> and <<spring-cloud-dataflow-composed-tasks, Composed Task DSL>> are good places to start for the most common usage of shell commands.
 --
@@ -35,7 +35,7 @@ Data Flow Options:
 
 The `spring.shell.commandFile` option can be used to point to an existing file that contains
 all the shell commands to deploy one or many related streams and tasks. +
-Multiple files execution is also supported, they should be passed as comma delimited string : +
+Running multiple files is also supported. They should be passed as comma delimited string: +
 
 `--spring.shell.commandFile=file1.txt,file2.txt`
 
@@ -144,7 +144,7 @@ Arguably, the most complex component when it comes to quotes is the shell. The r
 * Other escapes are available, such as `\t`, `\n`, `\r`, `\f` and unicode escapes of the form `\uxxxx`.
 * The keyless mapping is handled in a special way such that it does not need quoting to contain spaces.
 
-For example, the shell supports the `!` command to execute native shell commands. The `!` accepts a single keyless argument. This is why the following works:
+For example, the shell supports the `!` command to run native shell commands. The `!` accepts a single keyless argument. This is why the following works:
 ----
 dataflow:>! rm something
 ----
@@ -248,4 +248,3 @@ dataflow:>stream create something --definition "http | transform --expression=\"
 ----
 <1> In the first line, there are single quotes around the string (at the Data Flow parser level), but they need to be doubled because they are inside a string literal (started by the first single quote after the equals sign).
 <2> The second and third lines, use single and double quotes respectively to encompass the whole string at the Data Flow parser level. Consequently, the other kind of quote can be used inside the string. The whole thing is inside the `--definition` argument to the shell, though, which uses double quotes. Consequently, double quotes are escaped (at the shell level)
-
