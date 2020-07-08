@@ -220,7 +220,7 @@ You can find more information on the deployment properties that you can configur
 [[skipper-database-configuration]]
 == Database configuration
 
-A relational database is used to store stream and task definitions as well as the state of executed tasks.
+A relational database is used to store stream and task definitions as well as the state of tasks that have been run.
 Spring Cloud Skipper provides schemas for *H2*, *MySQL*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
 
 By default, Spring Cloud Skipper offers an embedded instance of the *H2* database.

@@ -114,7 +114,7 @@ include::{snippets}/api-documentation/index/http-response.adoc[]
 [[api-guide-resources-index-links]]
 ===== Links
 
-The links are the main element of the index, as they allow you to traverse the API and execute the desired functionality.
+The links are the main element of the index, as they let you traverse the API and invoke the desired functionality.
 The following table dsecribes the links:
 
 include::{snippets}/api-documentation/index/links.adoc[]
@@ -689,4 +689,3 @@ include::{snippets}/cancel-documentation/cancel-release/http-response.adoc[]
 ====== Response fields
 
 include::{snippets}/cancel-documentation/cancel-release/response-fields.adoc[]
-

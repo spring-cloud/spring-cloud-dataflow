@@ -23,11 +23,11 @@ Skipper Options:
   --spring.cloud.skipper.client.serverUri=<uri>                        Address of the Skipper Server [default: http://localhost:7577].
   --spring.cloud.skipper.client.username=<USER>                        Username of the Skipper Server [no default].
   --spring.cloud.skipper.client.password=<PASSWORD>                    Password of the Skipper Server [no default].
-  --spring.cloud.skipper.client.credentials-provider-command=<COMMAND> Executes an external command which must return an OAuth Access Token [no default].
+  --spring.cloud.skipper.client.credentials-provider-command=<COMMAND> Runs an external command, which must return an OAuth Access Token [no default].
   --spring.cloud.skipper.client.skip-ssl-validation=<true|false>       Accept any SSL certificate (even self-signed) [default: no].
 
   --spring.shell.historySize=<SIZE>                 Default size of the shell log file [default: 3000].
-  --spring.shell.commandFile=<FILE>                 Skipper Shell executes commands read from the file(s) and then exits.
+  --spring.shell.commandFile=<FILE>                 Skipper Shell read commands read from the file(s) and then exits.
 
   --help                                            This message.
 ----
@@ -35,8 +35,8 @@ Skipper Options:
 === Shell Modes
 
 The shell can be started in either interactive or non-interactive mode.
-In the case of the non-interactive mode, command line arguments are executed as Skipper commands, and then the shell exits.
-If there are any arguments that do not have the prefix `spring.cloud.skipper.client`, they are considered as skipper commands to execute.
+In the case of the non-interactive mode, command line arguments are run as Skipper commands, and then the shell exits.
+If there are any arguments that do not have the prefix `spring.cloud.skipper.client`, they are considered as skipper commands to run.
 
 
 Consider the following example:
@@ -53,7 +53,7 @@ Now consider the following command:
 $ java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=http://localhost:9123/api search
 ----
 
-The preceding command connects to `http://localhost:9123/api`, executes the `search` command, and then exits.
+The preceding command connects to `http://localhost:9123/api`, runs the `search` command, and then exits.
 
 A more common use case would be to update a package from within a CI job -- for example, in a Jenkins Stage, as shown in the following example:
 
