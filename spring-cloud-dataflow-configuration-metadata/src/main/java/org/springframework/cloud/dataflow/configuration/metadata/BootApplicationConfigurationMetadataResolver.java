@@ -282,7 +282,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 	}
 
-	public Map<String, Set<String>> listPortNames(Archive archive) {
+	private Map<String, Set<String>> listPortNames(Archive archive) {
 		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
 			Set<String> inboundPorts = new HashSet<>();
@@ -305,7 +305,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			return portsMap;
 		}
 		catch (Exception e) {
-			throw new RuntimeException("Exception trying to list configuration properties for application " + archive,
+			throw new AppMetadataResolutionException("Exception trying to list configuration properties for application " + archive,
 					e);
 		}
 	}

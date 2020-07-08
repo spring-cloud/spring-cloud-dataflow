@@ -121,7 +121,7 @@ public class DefaultStreamDefinitionService implements StreamDefinitionService {
 		return this.constructDsl(streamDefinition.getDslText(), StreamDefinitionServiceUtils.sanitizeStreamAppDefinitions(this.getAppDefinitions(streamDefinition)));
 	}
 
-	public static String unescape(String text) {
+	private String unescape(String text) {
 		return StringEscapeUtils.unescapeHtml(text);
 	}
 

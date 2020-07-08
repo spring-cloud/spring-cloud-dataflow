@@ -192,18 +192,18 @@ public class AppRegistryController {
 		}
 		Map<String, Set<String>> portsMap = this.metadataResolver.listPortNames(appRegistryService.getAppMetadataResource(registration));
 		if (portsMap != null && !portsMap.isEmpty()) {
-		for (Map.Entry<String, Set<String>> entry: portsMap.entrySet()) {
-			if (entry.getKey().equals("inbound")) {
-				for (String portName: entry.getValue()) {
-					result.addInboundPortName(portName);
+			for (Map.Entry<String, Set<String>> entry: portsMap.entrySet()) {
+				if (entry.getKey().equals("inbound")) {
+					for (String portName: entry.getValue()) {
+						result.addInboundPortName(portName);
+					}
+				}
+				else if (entry.getKey().equals("outbound")) {
+					for (String portName: entry.getValue()) {
+						result.addOutboundPortName(portName);
+					}
 				}
 			}
-			else if (entry.getKey().equals("outbound")) {
-				for (String portName: entry.getValue()) {
-					result.addOutboundPortName(portName);
-				}
-			}
-		}
 		}
 		return result;
 	}
