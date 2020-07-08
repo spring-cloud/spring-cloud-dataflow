@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -486,6 +486,10 @@ public class Graph {
 			graphText.append(node.getLabel()).append(": ");
 		}
 		graphText.append(nameInDSL);
+		printNodeProperties(graphText, node);
+	}
+
+	private void printNodeProperties(StringBuilder graphText, Node node) {
 		if (node.properties != null) {
 			for (Map.Entry<String, String> entry : node.properties.entrySet()) {
 				graphText.append(" ");
@@ -589,6 +593,7 @@ public class Graph {
 					transitionTargetName = transitionTarget.getLabel() + ": " + transitionTargetName;
 				}
 				graphText.append(" ").append(transitionName).append("->").append(transitionTargetName);
+				printNodeProperties(graphText, transitionTarget);
 				unfollowedLinks.remove(l);
 				// We only want to consider it 'visited' if this node doesn't go anywhere
 				// after this

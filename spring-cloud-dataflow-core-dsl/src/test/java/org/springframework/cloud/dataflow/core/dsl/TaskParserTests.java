@@ -941,6 +941,32 @@ public class TaskParserTests {
 	}
 	
 	@Test
+	public void graphToText_3667() {
+		assertGraph("[0:START][1:sql-executor-task:password=password:url=jdbc:postgresql://127.0.0.1:5432/postgres:script-location=/dataflow/scripts/test.sql:username=postgres]"+
+					"[2:END][0-1][1-2]","sql-executor-task --script-location=/dataflow/scripts/test.sql --username=postgres --password=password --url=jdbc:postgresql://127.0.0.1:5432/postgres");
+		
+		assertGraph("[0:START][1:t1:timestamp][2:t2:timestamp][3:t3:timestamp][4:END][0-1][FAILED:1-2][1-3][3-4][2-4]",
+					"t1: timestamp 'FAILED'->t2: timestamp && t3: timestamp");
+
+		TaskNode ctn = parse("t1: timestamp 'FAILED'->t2: timestamp && t3: timestamp");
+		Graph graph = ctn.toGraph();
+		assertEquals("t1: timestamp 'FAILED'->t2: timestamp && t3: timestamp", graph.toDSLText());
+		
+		ctn = parse("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp && t3: timestamp --format=gghhii");
+		graph = ctn.toGraph();
+		assertEquals("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp && t3: timestamp --format=gghhii", graph.toDSLText());
+
+		ctn = parse("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp --format=ddeeff && t3: timestamp --format=gghhii");
+		graph = ctn.toGraph();
+		Node node = graph.nodes.get(2);
+		assertEquals("ddeeff",node.properties.get("format"));
+		assertEquals("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp --format=ddeeff && t3: timestamp --format=gghhii", graph.toDSLText());
+		
+		assertGraph("[0:START][1:eee:timestamp:format=ttt][2:QQQQQ:timestamp:format=NOT-IN-TEXT][3:ooo:timestamp:format=yyyy][4:END][0-1][FAILED:1-2][1-3][3-4][2-4]",
+				    "eee: timestamp --format=ttt 'FAILED'->QQQQQ: timestamp --format=NOT-IN-TEXT && ooo: timestamp --format=yyyy");
+	}
+	
+	@Test
 	public void graphToTextSingleAppInSplit() {
 		// Note the graph here does not include anything special
 		// to preserve the split because the split is unnecessary
