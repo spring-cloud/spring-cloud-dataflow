@@ -63,11 +63,11 @@
 
 
 		<spring-cloud-deployer-cloudfoundry.version>2.4.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.4.0-M1</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.4.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
-		<kubernetes-client.version>4.1.0</kubernetes-client.version>
+		<kubernetes-client.version>4.10.2</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.5.0-M1</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.5.0-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.2.3.RELEASE</spring-cloud-task.version>
 
