@@ -333,9 +333,9 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public StreamDefinitionController streamDefinitionController(StreamDefinitionRepository repository,
-				StreamService streamService, StreamDefinitionService streamDefinitionService) {
-			return new StreamDefinitionController(streamService, streamDefinitionService);
+		public StreamDefinitionController streamDefinitionController(StreamService streamService,
+				StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService) {
+			return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService);
 		}
 
 		@Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -37,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the /streams/definitions endpoint.
  *
  * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StreamDefinitionsDocumentation extends BaseDocumentation {
@@ -116,23 +121,47 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	@Test
 	public void getStreamDefinition() throws Exception {
 		this.mockMvc.perform(
-			get("/streams/definitions/{name}", "timelog"))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document(
-				pathParameters(
-					parameterWithName("name").description("The name of the stream definition to query (required)")
-				),
-				responseFields(
-					fieldWithPath("name").description("The name of the stream definition"),
-					fieldWithPath("dslText").description("The DSL of the stream definition"),
-					fieldWithPath("originalDslText").description("The original DSL of the stream definition"),
-					fieldWithPath("status").description("The status of the stream definition"),
-					fieldWithPath("description").description("The description of the stream definition"),
-					fieldWithPath("statusDescription")
-							.description("The status description of the stream definition"),
-					subsectionWithPath("_links.self").description("Link to the stream definition resource")
-				)));
+				get("/streams/definitions/{name}", "timelog"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("name").description("The name of the stream definition to query (required)")
+						),
+						responseFields(
+								fieldWithPath("name").description("The name of the stream definition"),
+								fieldWithPath("dslText").description("The DSL of the stream definition"),
+								fieldWithPath("originalDslText").description("The original DSL of the stream definition"),
+								fieldWithPath("status").description("The status of the stream definition"),
+								fieldWithPath("description").description("The description of the stream definition"),
+								fieldWithPath("statusDescription")
+										.description("The status description of the stream definition"),
+								subsectionWithPath("_links.self").description("Link to the stream definition resource")
+						)));
+	}
+
+	@Test
+	public void getStreamApplications() throws Exception {
+		createStream("mysamplestream", "time | log", false);
+		this.mockMvc.perform(
+				get("/streams/definitions/{name}/applications", "mysamplestream"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("name").description("The name of the stream definition to query (required)")
+						),
+						responseFields(
+								fieldWithPath("[]").description("An array of applications"),
+								fieldWithPath("[].name").description("The name of the application"),
+								fieldWithPath("[].type").description("The type of the application. One of " + Arrays
+										.asList(ApplicationType.values())),
+								fieldWithPath("[].uri").description("The uri of the application"),
+								fieldWithPath("[].version").description("The version of the application"),
+								fieldWithPath("[].defaultVersion").description("If true, the application is the default version"),
+								fieldWithPath("[].versions").description("All the registered versions of the application"),
+								fieldWithPath("[]._links.self.href").description("Link to the application resource")
+						)));
 	}
 
 	@Test

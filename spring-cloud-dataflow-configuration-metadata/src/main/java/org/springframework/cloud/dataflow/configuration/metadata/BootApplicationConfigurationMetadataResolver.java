@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,10 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
 
+	private static final String CONFIGURATION_PROPERTIES_INBOUND_PORTS = "configuration-properties.inbound-ports";
+
+	private static final String CONFIGURATION_PROPERTIES_OUTBOUND_PORTS = "configuration-properties.outbound-ports";
+
 	private static final String CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME = "org.springframework.cloud.dataflow.spring-configuration-metadata.json";
 
 	private final Set<String> globalWhiteListedProperties = new HashSet<>();
@@ -106,8 +111,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Resource[] globalResources = new PathMatchingResourcePatternResolver(
 					ApplicationConfigurationMetadataResolver.class.getClassLoader())
 					.getResources(WHITELIST_PROPERTIES);
-			loadWhiteLists(concatArrays(globalLegacyResources, globalResources), globalWhiteListedClasses,
-					globalWhiteListedProperties);
+			loadWhiteLists(concatArrays(globalLegacyResources, globalResources), this.globalWhiteListedClasses,
+					this.globalWhiteListedProperties);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Error reading global white list of configuration properties", e);
@@ -147,6 +152,27 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		return Collections.emptyList();
 	}
 
+	@Override
+	public Map<String, Set<String>> listPortNames(Resource app) {
+		try {
+			if (app != null) {
+				if (isDockerSchema(app.getURI())) {
+					return resolvePortNamesFromContainerImage(app.getURI());
+				}
+				else {
+					Archive archive = resolveAsArchive(app);
+					return listPortNames(archive);
+				}
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Failed to retrieve properties for resource:" + app, e);
+			return Collections.emptyMap();
+		}
+
+		return Collections.emptyMap();
+	}
+
 	private boolean isDockerSchema(URI uri) {
 		return uri != null && uri.getScheme() != null && uri.getScheme().contains("docker");
 	}
@@ -180,12 +206,34 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 	}
 
+	private Map<String, Set<String>> resolvePortNamesFromContainerImage(URI imageUri) {
+		String imageName = imageUri.getSchemeSpecificPart();
+		Map<String, Set<String>> portsMap = new HashMap<>();
+		Map<String, String> labels = this.containerImageMetadataResolver.getImageLabels(imageName);
+		if (CollectionUtils.isEmpty(labels)) {
+			return Collections.emptyMap();
+		}
+
+		String encodedMetadata = labels.get(CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME);
+		if (!StringUtils.hasText(encodedMetadata)) {
+			return Collections.emptyMap();
+		}
+
+		try {
+			//todo: add port mappings from container image config
+			return portsMap;
+		}
+		catch (Exception e) {
+			throw new AppMetadataResolutionException("Invalid Metadata for " + imageName);
+		}
+	}
+
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
 		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
 			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
-			Collection<String> whiteListedClasses = new HashSet<>(globalWhiteListedClasses);
-			Collection<String> whiteListedProperties = new HashSet<>(globalWhiteListedProperties);
+			Collection<String> whiteListedClasses = new HashSet<>(this.globalWhiteListedClasses);
+			Collection<String> whiteListedProperties = new HashSet<>(this.globalWhiteListedProperties);
 
 			// read both formats and concat
 			Resource[] whitelistLegacyDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
@@ -230,6 +278,34 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 		catch (Exception e) {
 			throw new RuntimeException("Exception trying to list configuration properties for application " + archive,
+					e);
+		}
+	}
+
+	private Map<String, Set<String>> listPortNames(Archive archive) {
+		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
+			ResourcePatternResolver moduleResourceLoader = new PathMatchingResourcePatternResolver(moduleClassLoader);
+			Set<String> inboundPorts = new HashSet<>();
+			Set<String> outboundPorts = new HashSet<>();
+			Map<String, Set<String>> portsMap = new HashMap<>();
+			// read both formats and concat
+			Resource[] whitelistLegacyDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
+			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
+
+			for (Resource resource : concatArrays(whitelistLegacyDescriptors, whitelistDescriptors)) {
+				Properties properties = new Properties();
+				properties.load(resource.getInputStream());
+				inboundPorts.addAll(Arrays.asList(StringUtils
+						.delimitedListToStringArray(properties.getProperty(CONFIGURATION_PROPERTIES_INBOUND_PORTS), ",", " ")));
+				portsMap.put("inbound", inboundPorts);
+				outboundPorts.addAll(Arrays.asList(StringUtils
+						.delimitedListToStringArray(properties.getProperty(CONFIGURATION_PROPERTIES_OUTBOUND_PORTS), ",", " ")));
+				portsMap.put("outbound", outboundPorts);
+			}
+			return portsMap;
+		}
+		catch (Exception e) {
+			throw new AppMetadataResolutionException("Exception trying to list configuration properties for application " + archive,
 					e);
 		}
 	}

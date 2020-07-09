@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -188,6 +189,21 @@ public class AppRegistryController {
 				.listProperties(appRegistryService.getAppMetadataResource(registration), allProperties);
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
+		}
+		Map<String, Set<String>> portsMap = this.metadataResolver.listPortNames(appRegistryService.getAppMetadataResource(registration));
+		if (portsMap != null && !portsMap.isEmpty()) {
+			for (Map.Entry<String, Set<String>> entry: portsMap.entrySet()) {
+				if (entry.getKey().equals("inbound")) {
+					for (String portName: entry.getValue()) {
+						result.addInboundPortName(portName);
+					}
+				}
+				else if (entry.getKey().equals("outbound")) {
+					for (String portName: entry.getValue()) {
+						result.addOutboundPortName(portName);
+					}
+				}
+			}
 		}
 		return result;
 	}

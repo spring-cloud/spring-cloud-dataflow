@@ -130,6 +130,7 @@ public class TaskAppDeploymentRequestCreator {
 				+ request.getDefinition().toString());
 		return request;
 	}
+
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName) {
 		List<String> results = new ArrayList();
 		commandLineArgs.stream()

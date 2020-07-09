@@ -163,7 +163,7 @@ public class StreamControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(null, null);
+		new StreamDefinitionController(null, null, null);
 	}
 
 	@Test

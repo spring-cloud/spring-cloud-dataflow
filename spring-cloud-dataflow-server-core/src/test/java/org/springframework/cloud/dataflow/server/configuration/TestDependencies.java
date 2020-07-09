@@ -345,8 +345,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamService streamService,
-			StreamDefinitionService streamDefinitionService) {
-		return new StreamDefinitionController(streamService, streamDefinitionService);
+			StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService) {
+		return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService);
 	}
 
 	@Bean

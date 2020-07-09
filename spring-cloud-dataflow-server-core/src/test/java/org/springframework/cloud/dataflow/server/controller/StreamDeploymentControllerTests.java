@@ -188,7 +188,7 @@ public class StreamDeploymentControllerTests {
 		LinkedList<StreamAppDefinition> streamAppDefinitions = new LinkedList<>();
 		streamAppDefinitions.add(streamAppDefinition1);
 		streamAppDefinitions.add(streamAppDefinition2);
-		when(this.streamDefinitionService.getAppDefinitions(any())).thenReturn(streamAppDefinitions);
+		when(this.streamDefinitionService.redactDsl(any())).thenReturn("time | log");
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
 		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());

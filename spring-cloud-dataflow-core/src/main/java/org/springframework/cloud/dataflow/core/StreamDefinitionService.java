@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 
@@ -26,6 +28,18 @@ import org.springframework.cloud.dataflow.core.dsl.StreamNode;
  * @author Ilayaperumal Gopinathan
  */
 public interface StreamDefinitionService {
+
+	public final static List<String> dataFlowAddedProperties = Arrays.asList(
+			DataFlowPropertyKeys.STREAM_APP_TYPE,
+			DataFlowPropertyKeys.STREAM_APP_LABEL,
+			DataFlowPropertyKeys.STREAM_NAME,
+			StreamPropertyKeys.METRICS_TRIGGER_INCLUDES,
+			StreamPropertyKeys.METRICS_KEY,
+			StreamPropertyKeys.METRICS_PROPERTIES,
+			BindingPropertyKeys.INPUT_GROUP,
+			BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
+			BindingPropertyKeys.OUTPUT_DESTINATION,
+			BindingPropertyKeys.INPUT_DESTINATION);
 
 	/**
 	 * Parse the given stream definition and return the AST representation of the stream DSL in {@link StreamNode}.
@@ -42,4 +56,14 @@ public interface StreamDefinitionService {
 	 * @return the linked list of stream app definitions
 	 */
 	LinkedList<StreamAppDefinition> getAppDefinitions(StreamDefinition streamDefinition);
+
+	/**
+	 * Return the updated stream DSL for the given stream definition with the associated properties.
+	 *
+	 * @param streamAppDefinitions the linked list of {@link StreamAppDefinition}s associated with the stream with some of app properties modified
+	 * @return the updated stream DSL
+	 */
+	String constructDsl(String originalDslText, LinkedList<StreamAppDefinition> streamAppDefinitions);
+
+	String redactDsl(StreamDefinition streamDefinition);
 }
