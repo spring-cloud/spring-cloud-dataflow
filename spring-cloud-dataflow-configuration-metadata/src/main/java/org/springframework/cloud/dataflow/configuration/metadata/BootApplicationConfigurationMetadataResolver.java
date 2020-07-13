@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Eric Bottard
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class BootApplicationConfigurationMetadataResolver extends ApplicationConfigurationMetadataResolver {
 
@@ -213,19 +214,21 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		if (CollectionUtils.isEmpty(labels)) {
 			return Collections.emptyMap();
 		}
-
-		String encodedMetadata = labels.get(CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME);
-		if (!StringUtils.hasText(encodedMetadata)) {
-			return Collections.emptyMap();
+		String inboundPortMapping = labels.get(CONFIGURATION_PROPERTIES_INBOUND_PORTS);
+		if (StringUtils.hasText(inboundPortMapping)) {
+			Set<String> inboundPorts = new HashSet<>();
+			inboundPorts.addAll(Arrays.asList(StringUtils
+					.delimitedListToStringArray(inboundPortMapping, ",", " ")));
+			portsMap.put("inbound", inboundPorts);
 		}
-
-		try {
-			//todo: add port mappings from container image config
-			return portsMap;
+		String outboundPortMapping = labels.get(CONFIGURATION_PROPERTIES_OUTBOUND_PORTS);
+		if (StringUtils.hasText(outboundPortMapping)) {
+			Set<String> outboundPorts = new HashSet<>();
+			outboundPorts.addAll(Arrays.asList(StringUtils
+					.delimitedListToStringArray(outboundPortMapping, ",", " ")));
+			portsMap.put("outbound", outboundPorts);
 		}
-		catch (Exception e) {
-			throw new AppMetadataResolutionException("Invalid Metadata for " + imageName);
-		}
+		return portsMap;
 	}
 
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {

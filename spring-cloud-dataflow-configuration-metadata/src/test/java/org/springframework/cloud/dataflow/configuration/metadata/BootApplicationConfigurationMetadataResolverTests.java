@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.hamcrest.Matcher;
@@ -35,6 +36,7 @@ import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -47,6 +49,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Eric Bottard
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class BootApplicationConfigurationMetadataResolverTests {
 
@@ -143,6 +146,20 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()), true);
 		assertThat(properties.size(), is(0));
 		assertThat(full.size(), is(2));
+	}
+
+	@Test
+	public void appDockerResourceWithInboundOutboundPortMapping() {
+		Map<String, String> result = new HashMap<>();
+		result.put("configuration-properties.inbound-ports", "input1,input2, input3");
+		result.put("configuration-properties.outbound-ports", "output1, output2");
+		when(this.containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
+		Map<String, Set<String>> portNames = this.resolver.listPortNames(new DockerResource("test/test:latest"));
+		assertThat(portNames.size(), is(2));
+		assertThat(portNames.get("inbound").size(), is(3));
+		assertThat(portNames.get("inbound"), containsInAnyOrder("input1", "input2", "input3"));
+		assertThat(portNames.get("outbound").size(), is(2));
+		assertThat(portNames.get("outbound"), containsInAnyOrder("output1", "output2"));
 	}
 
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
