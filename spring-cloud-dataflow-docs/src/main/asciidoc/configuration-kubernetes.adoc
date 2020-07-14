@@ -325,6 +325,8 @@ NOTE: When deploying a task to multiple platforms, the configuration of the task
 
 You can configure the Data Flow server that is on Kubernetes to deploy tasks to Cloud Foundry and Kubernetes.  See the section on <<configuration-cloudfoundry-tasks,Cloud Foundry Task Platform Configuration>> for more information.
 
+Detailed examples for launching and scheduling tasks across multiple platforms, are available in this section https://dataflow.spring.io/docs/recipes/multi-platform-deployment/[Multiple Platform Support for Tasks] on http://dataflow.spring.io.
+
 [[configuration-kubernetes-general]]
 === General Configuration
 
