@@ -928,7 +928,7 @@ For scheduling, you must add (or update) the following environment variables in 
 
 * Enable scheduling for Spring Cloud Data Flow by setting `spring.cloud.dataflow.features.schedules-enabled` to `true`.
 * Bind the task deployer to your instance of PCF-Scheduler by adding the PCF-Scheduler service name to the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES` environment variable.
-* Establish the URL to the PCF-Scheduler by setting the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_PROPERTIES_SCHEDULER_URL` environment variable.
+* Establish the URL to the PCF-Scheduler by setting the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_SCHEDULER_URL` environment variable.
 
 [NOTE]
 ====
@@ -960,12 +960,12 @@ applications:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, myscheduler
     SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED: true
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_PROPERTIES_SCHEDULER_URL: https://scheduler.local.pcfdev.io
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_SCHEDULER_URL: https://scheduler.local.pcfdev.io
 services:
 - mysql
 ----
 
-Where the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_PROPERTIES_SCHEDULER_URL` has the following format: `scheduler.<Domain-Name>` (for
+Where the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_SCHEDULER_URL` has the following format: `scheduler.<Domain-Name>` (for
 example, `https://scheduler.local.pcfdev.io`). Check the actual address from your _PCF_ environment.
 
 NOTE: Detailed examples for launching and scheduling tasks across multiple platforms, are available in this section https://dataflow.spring.io/docs/recipes/multi-platform-deployment/[Multiple Platform Support for Tasks] on http://dataflow.spring.io.
