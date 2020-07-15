@@ -128,7 +128,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties.getAccounts().get("default");
 		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
 		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
-		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
 
 		TaskPlatform taskPlatform = getSchedulePlatform("default");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
@@ -190,7 +190,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 				.cloudFoundryClientProvider(this.cloudFoundryClientProvider)
 				.cloudFoundrySchedulerClientProvider(Optional.of(this.cloudFoundrySchedulerClientProvider))
 				.schedulesEnabled(true)
-				.schedulerProperties(Optional.of(cloudFoundryProperties.getSchedulerProperties()))
+				.schedulerProperties(Optional.of(cloudFoundryProperties.getScheduler()))
 				.build();
 
 		TaskPlatform taskPlatform =  taskPlatformFactory.createTaskPlatform();
@@ -208,7 +208,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();
 		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
 		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
-		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
 		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
 		cloudFoundryProperties.setConnection(this.defaultConnectionProperties);
 		Map<String, CloudFoundryProperties> platformMap = new HashMap<>();
@@ -216,7 +216,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		cloudFoundryProperties = new CloudFoundryProperties();
 		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
 		cloudFoundryProperties.setConnection(this.anotherOrgSpaceConnectionProperties);
-		cloudFoundryProperties.setSchedulerProperties(cloudFoundrySchedulerProperties);
+		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
 
 
 		platformMap.put("anotherOrgSpace", cloudFoundryProperties);

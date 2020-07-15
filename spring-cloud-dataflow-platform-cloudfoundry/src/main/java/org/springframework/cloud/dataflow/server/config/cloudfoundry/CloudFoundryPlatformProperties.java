@@ -40,7 +40,7 @@ public class CloudFoundryPlatformProperties extends AbstractPlatformProperties<C
 
 		private CloudFoundryDeploymentProperties deployment;
 
-		private CloudFoundrySchedulerProperties schedulerProperties;
+		private CloudFoundrySchedulerProperties scheduler;
 
 		public CloudFoundryConnectionProperties getConnection() {
 			return connection;
@@ -58,12 +58,12 @@ public class CloudFoundryPlatformProperties extends AbstractPlatformProperties<C
 			this.deployment = deployment;
 		}
 
-		public CloudFoundrySchedulerProperties getSchedulerProperties() {
-			return schedulerProperties;
+		public CloudFoundrySchedulerProperties getScheduler() {
+			return scheduler;
 		}
 
-		public void setSchedulerProperties(CloudFoundrySchedulerProperties schedulerProperties) {
-			this.schedulerProperties = schedulerProperties;
+		public void setScheduler(CloudFoundrySchedulerProperties scheduler) {
+			this.scheduler = scheduler;
 		}
 	}
 }
