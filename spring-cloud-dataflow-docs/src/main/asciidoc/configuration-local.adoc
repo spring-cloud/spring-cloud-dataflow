@@ -201,6 +201,39 @@ spring:
 . Alternatively, you can build a custom Spring Cloud Data Flow server with your build files.
 There are examples of a custom server builds in our https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/custom-dataflow-builds[samples repo] if there is a need to add a driver jars.
 
+[[configuration-local-rdbms-schema]]
+==== Schema Handling
+On default database schema is managed with _Flyway_ which is convenient if it's
+possible to give enough permissions to a database user.
+
+Here's a description what happens when _Skipper_ server is started:
+
+* Flyway checks if `flyway_schema_history` table exists.
+* Does a baseline(to version 1) if schema is not empty as _Dataflow_ tables
+  may be in place if a shared DB is used.
+* If schema is empty, flyway assumes to start from a scratch.
+* Goes through all needed schema migrations.
+
+Here's a description what happens when _Dataflow_ server is started:
+
+* Flyway checks if `flyway_schema_history_dataflow` table exists.
+* Does a baseline(to version 1) if schema is not empty as _Skipper_ tables
+  may be in place if a shared DB is used.
+* If schema is empty, flyway assumes to start from a scratch.
+* Goes through all needed schema migrations.
+* Due to historical reasons, if we detect that schema is from _1.7.x_ line
+  we convert these to structures needed from _2.0.x_ onwards and fully
+  continue with flyway.
+
+[NOTE]
+====
+We have schema ddl's in our source code
+https://github.com/spring-cloud/spring-cloud-dataflow/tree/master/spring-cloud-dataflow-server-core/src/main/resources/schemas[schemas]
+which can be used manually if _Flyway_ is disabled by using configuration
+`spring.flyway.enabled=false`. This is a good option if company's databases
+are restricted and i.e. applications itself cannot create schemas.
+====
+
 [[configuration-local-deployer]]
 === Deployer Properties
 You can use the following configuration properties of the https://github.com/spring-cloud/spring-cloud-deployer-local[Local deployer] to customize how Streams and Tasks are deployed.
