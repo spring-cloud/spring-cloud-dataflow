@@ -42,7 +42,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -74,7 +74,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private AppRegistryService registry;
 	private final TaskConfigurationProperties taskConfigurationProperties;
 	private final String dataflowServerUri;
-	private final WhitelistProperties whitelistProperties;
+	private final VisibleProperties visibleProperties;
 	private final SchedulerServiceProperties schedulerServiceProperties;
 	private final AuditRecordService auditRecordService;
 	private final AuditServiceUtils auditServiceUtils;
@@ -119,7 +119,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.registry = registry;
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.dataflowServerUri = dataflowServerUri;
-		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
+		this.visibleProperties = new VisibleProperties(metaDataResolver);
 		this.schedulerServiceProperties = schedulerServiceProperties;
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
@@ -167,7 +167,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
-				appDeploymentProperties, whitelistProperties);
+				appDeploymentProperties, visibleProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 

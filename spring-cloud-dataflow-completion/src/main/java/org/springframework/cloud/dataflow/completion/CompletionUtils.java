@@ -119,17 +119,17 @@ public class CompletionUtils {
 
 	/**
 	 * Return whether the given property name should be considered matching the candidate
-	 * configuration property, also taking into account the list of whitelist properties
+	 * configuration property, also taking into account the list of included properties
 	 * (which are tested on their short name).
 	 */
 	static boolean isMatchingProperty(String propertyName, ConfigurationMetadataProperty property,
-			List<ConfigurationMetadataProperty> whiteListedProps) {
+			List<ConfigurationMetadataProperty> includedProps) {
 		if (property.getId().equals(propertyName)) {
 			return true; // For any prop
-		} // Handle special case of short form for whitelist
+		} // Handle special case of short form for included properties
 		else {
-			for (ConfigurationMetadataProperty white : whiteListedProps) {
-				if (property.getId().equals(white.getId())) { // prop#equals() not implemented
+			for (ConfigurationMetadataProperty included : includedProps) {
+				if (property.getId().equals(included.getId())) { // prop#equals() not implemented
 					return property.getName().equals(propertyName);
 				}
 			}

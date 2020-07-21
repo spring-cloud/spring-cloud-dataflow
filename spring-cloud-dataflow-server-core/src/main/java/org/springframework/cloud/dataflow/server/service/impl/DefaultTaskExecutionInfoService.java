@@ -189,7 +189,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 				Assert.notNull(appRegistration, "Unknown task app: " + subTask.getName());
 				Resource appResource = appRegistryService.getAppResource(appRegistration);
 
-				// TODO whitelist args
+				// TODO filter args
 				// TODO incorporate the label somehow, ea. 1:timestamp --format=YYYY
 				AppDefinition appDefinition = new AppDefinition(subTask.getName(), subTaskNode.getTaskApp().getArgumentsAsMap());
 

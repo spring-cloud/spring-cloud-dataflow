@@ -38,7 +38,7 @@ import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -65,7 +65,7 @@ public class AppDeploymentRequestCreator {
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
-	private final WhitelistProperties whitelistProperties;
+	private final VisibleProperties visibleProperties;
 
 	private final StreamDefinitionService streamDefinitionService;
 
@@ -79,7 +79,7 @@ public class AppDeploymentRequestCreator {
 		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		this.appRegistry = appRegistry;
 		this.commonApplicationProperties = commonApplicationProperties;
-		this.whitelistProperties = new WhitelistProperties(metadataResolver);
+		this.visibleProperties = new VisibleProperties(metadataResolver);
 		this.streamDefinitionService = streamDefinitionService;
 	}
 
@@ -110,7 +110,7 @@ public class AppDeploymentRequestCreator {
 			Resource appResource = appRegistry.getAppResource(appRegistration);
 			Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
 			Map<String, String> expandedAppUpdateTimeProperties = (appUpdateTimeProperties.isEmpty()) ? new HashMap<>():
-				this.whitelistProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
+				this.visibleProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
 
 			expandedAppUpdateTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, type.toString());
 			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
@@ -304,13 +304,13 @@ public class AppDeploymentRequestCreator {
 	/**
 	 * Return a new app definition where definition-time and deploy-time properties have been
 	 * merged and short form parameters have been expanded to their long form (amongst the
-	 * whitelisted supported properties of the app) if applicable.
+	 * included supported properties of the app) if applicable.
 	 */
 	/* default */ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource metadataResource,
 			Map<String, String> appDeployTimeProperties) {
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeployTimeProperties);
-		merged = this.whitelistProperties.qualifyProperties(merged, metadataResource);
+		merged = this.visibleProperties.qualifyProperties(merged, metadataResource);
 
 		merged.putIfAbsent(StreamPropertyKeys.METRICS_PROPERTIES, "spring.application.name,spring.application.index,"
 				+ "spring.cloud.application.*,spring.cloud.dataflow.*");

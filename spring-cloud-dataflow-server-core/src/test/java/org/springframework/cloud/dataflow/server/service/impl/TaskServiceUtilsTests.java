@@ -29,7 +29,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
 
@@ -144,15 +144,15 @@ public class TaskServiceUtilsTests {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		appDeploymentProperties.put("propA", "valA");
 		appDeploymentProperties.put("propB", "valB");
-		WhitelistProperties whitelistProperties = mock(WhitelistProperties.class);
-		org.mockito.BDDMockito.given(whitelistProperties
+		VisibleProperties visibleProperties = mock(VisibleProperties.class);
+		org.mockito.BDDMockito.given(visibleProperties
 				.qualifyProperties(any(), any()))
 				.willReturn(appDeploymentProperties);
 		AppDefinition appDefinition = TaskServiceUtils.mergeAndExpandAppProperties(
 				taskDefinition,
 				mock(Resource.class),
 				appDeploymentProperties,
-				whitelistProperties);
+				visibleProperties);
 		assertThat(appDefinition.getProperties().size()).isEqualTo(2);
 		assertThat(appDefinition.getProperties().get("propA")).isEqualTo("valA");
 		assertThat(appDefinition.getProperties().get("propB")).isEqualTo("valB");

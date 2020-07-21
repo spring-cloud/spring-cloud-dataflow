@@ -61,12 +61,12 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testRequalifyShortWhiteListedProperty() {
+	public void testRequalifyShortVisibleProperty() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("timezone", "GMT+2").build("streamname");
 
-		Resource app = new ClassPathResource("/apps/whitelist-source");
+		Resource app = new ClassPathResource("/apps/included-source");
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
@@ -80,7 +80,7 @@ public class AppDeploymentRequestCreatorTests {
 				.setApplicationType(ApplicationType.app)
 				.setProperty("time.format", "hh").setProperty("date.format", "yy").build("streamname");
 
-		Resource app = new ClassPathResource("/apps/whitelist-source");
+		Resource app = new ClassPathResource("/apps/included-source");
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
@@ -94,7 +94,7 @@ public class AppDeploymentRequestCreatorTests {
 				.setApplicationType(ApplicationType.app)
 				.setProperty("format", "hh").build("streamname");
 
-		Resource app = new ClassPathResource("/apps/whitelist-source");
+		Resource app = new ClassPathResource("/apps/included-source");
 
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Ambiguous short form property 'format'");
@@ -111,7 +111,7 @@ public class AppDeploymentRequestCreatorTests {
 				.setProperty("someLongProperty", "yy") // Use camelCase here
 				.build("streamname");
 
-		Resource app = new ClassPathResource("/apps/whitelist-source");
+		Resource app = new ClassPathResource("/apps/included-source");
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
