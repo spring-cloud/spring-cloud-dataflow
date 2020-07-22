@@ -493,7 +493,7 @@ The following example shows the contents of such an artifact, for the canonical 
 ----
 $ jar tvf log-sink-rabbit-1.2.1.BUILD-SNAPSHOT-metadata.jar
 373848 META-INF/spring-configuration-metadata.json
-   174 META-INF/spring-configuration-metadata-allowlist.properties
+   174 META-INF/spring-configuration-metadata-whitelist.properties
 ----
 
 Note that the `spring-configuration-metadata.json` file is quite large. This is because it contains the concatenation of _all_ the properties that
