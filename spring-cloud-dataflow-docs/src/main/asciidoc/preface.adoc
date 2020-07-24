@@ -14,7 +14,7 @@ print or electronically.
 
 [[dataflow-documentation-getting-help]]
 == Getting help
-Having trouble with Spring Cloud Data Flow, We would like to help!
+Having trouble with Spring Cloud Data Flow? We would like to help!
 
 * Ask a question. We monitor https://stackoverflow.com[stackoverflow.com] for questions
 tagged with https://stackoverflow.com/tags/spring-cloud-dataflow[`spring-cloud-dataflow`].

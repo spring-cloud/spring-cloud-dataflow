@@ -3,16 +3,20 @@
 
 [[configuration-maven]]
 == Maven
-If you want to override specific maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
-you need to specify those properties as command line arguments when starting the Data Flow Server, as shown in the following example:
 
+If you want to override specific Maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
+you need to specify those properties as command-line arguments when you start the Data Flow Server, as shown in the following example:
+
+====
 [source,bash,subs=attributes]
 ----
 $ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.config.additional-location=/home/joe/maven.yml
 ----
+====
 
-where `maven.yaml` is
+The preceding command assumes a `maven.yaml` similar to the following:
 
+====
 [source,yml]
 ----
 maven:
@@ -41,20 +45,20 @@ maven:
       username: proxyuser1
       password: proxypass1
 ----
+====
 
+By default, the protocol is set to `http`. You can omit the auth properties if the proxy does not need a username and password. Also, by default, the maven `localRepository` is set to `${user.home}/.m2/repository/`.
+As shown in the preceding example, you can specify the remote repositories along with their authentication (if needed). If the remote repositories are behind a proxy, you can specify the proxy properties, as shown in the preceding example.
 
+You can specify the repository policies for each remote repository configuration, as shown in the preceding example.
+The key `policy` is applicable to both the `snapshot` and the `release` repository policies.
 
-By default, the protocol is set to `http`. You can omit the auth properties if the proxy does not need a username and password. Also, the maven `localRepository` is set to `${user.home}/.m2/repository/` by default.
-As shown in the preceding example, the remote repositories can be specified along with their authentication (if needed). If the remote repositories are behind a proxy, then the proxy properties can be specified as shown in the preceding example.
-
-The repository policies can be specified for each remote repository configuration as shown in the preceding example.
-The key `policy` is applicable to both `snapshot` and the `release` repository policies.
-
-You can refer to https://github.com/apache/maven-resolver/blob/master/maven-resolver-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java[Repository Policies] for the list of
+See the https://github.com/apache/maven-resolver/blob/master/maven-resolver-api/src/main/java/org/eclipse/aether/repository/RepositoryPolicy.java[Repository Policies] topic for the list of
 supported repository policies.
 
-As these are Spring Boot `@ConfigurationProperties`, that you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
+As these are Spring Boot `@ConfigurationProperties` you need to specify by adding them to the `SPRING_APPLICATION_JSON` environment variable. The following example shows how the JSON is structured:
 
+====
 [source,bash,subs=attributes]
 ----
 $ SPRING_APPLICATION_JSON='
@@ -85,26 +89,29 @@ $ SPRING_APPLICATION_JSON='
 }
 '
 ----
+====
 
 === Wagon
-There is a limited support for using `Wagon` transport with maven. Currently this
-exists to support _preemptive_ authentication with `http` based repositories
+
+There is a limited support for using `Wagon` transport with Maven. Currently, this
+exists to support _preemptive_ authentication with `http`-based repositories
 and needs to be enabled manually.
 
-Wagon based http transport is enabled by setting `maven.use-wagon` property
-to `true` and then _preemptive_ authentication can be enabled per remote
-repository. Configuration loosely follows similar patterns found in
+Wagon-based `http` transport is enabled by setting the `maven.use-wagon` property
+to `true`. Then you can enable _preemptive_ authentication for each remote
+repository. Configuration loosely follows the similar patterns found in
 https://maven.apache.org/guides/mini/guide-http-settings.html[HttpClient HTTP Wagon].
-At a time of writing this, documentation in Maven's own site is slightly misleading
-and missing most of the possible config options.
+At the time of this writing, documentation in Maven's own site is slightly misleading
+and missing most of the possible configuration options.
 
-Namespace `maven.remote-repositories.<repo>.wagon.http` contains all Wagon
-http related settings and keys directly under it maps to supported http methods,
-namely `all`, `put`, `get` and `head` just like in Maven's own configuration.
-Under these method configurations you can then set various options like
-`use-preemptive`. Most simplest _preemptive_ configuration sending auth
-header with all requests to a specified remote repository would look like:
+The `maven.remote-repositories.<repo>.wagon.http` namespace contains all Wagon
+`http` related settings, and the keys directly under it map to supported `http` methods --
+namely, `all`, `put`, `get` and `head`, as in Maven's own configuration.
+Under these method configurations, you can then set various options, such as
+`use-preemptive`. A simpl _preemptive_ configuration to send an auth
+header with all requests to a specified remote repository would look like the following example:
 
+====
 [source,yml]
 ----
 maven:
@@ -120,10 +127,12 @@ maven:
         username: user
         password: password
 ----
+====
 
-Instead of configuring `all` methods it's possible to tune settings for `get`
-and `head` requests only:
+Instead of configuring `all` methods, you can tune settings for `get`
+and `head` requests only, as follows:
 
+====
 [source,yml]
 ----
 maven:
@@ -141,7 +150,7 @@ maven:
             connection-timeout: 1000
             read-timeout: 1000
             headers:
-              Foo: Bar
+              sample1: sample2
             params:
               http.socket.timeout: 1000
               http.connection.stalecheck: true
@@ -149,17 +158,18 @@ maven:
         username: user
         password: password
 ----
+====
 
 There are settings for `use-default-headers`, `connection-timeout`,
-`read-timeout`, request `headers` and HttpClient `params`. More about params
-check https://github.com/apache/maven-wagon/blob/master/wagon-providers/wagon-http-shared/src/main/java/org/apache/maven/wagon/shared/http/ConfigurationUtils.java[Wagon ConfigurationUtils].
+`read-timeout`, request `headers`, and HttpClient `params`. For more about parameters,
+see https://github.com/apache/maven-wagon/blob/master/wagon-providers/wagon-http-shared/src/main/java/org/apache/maven/wagon/shared/http/ConfigurationUtils.java[Wagon ConfigurationUtils].
 
 [[configuration-security]]
 == Security
 
 By default, the Data Flow server is unsecured and runs on an unencrypted HTTP connection.
 You can secure your REST endpoints as well as the Data Flow Dashboard by enabling HTTPS
-and requiring clients to authenticate using https://oauth.net/2/[OAuth 2.0].
+and requiring clients to authenticate with https://oauth.net/2/[OAuth 2.0].
 
 [NOTE]
 ====
@@ -176,9 +186,9 @@ While you can theoretically choose any OAuth provider in conjunction with
 Spring Cloud Data Flow, we recommend using the
 https://github.com/cloudfoundry/uaa[CloudFoundry User Account and Authentication (UAA) Server].
 
-Not only is the UAA OpenID certified and is used by Cloud Foundry but it can
-also be used in local stand-alone deployment scenarios. Furthermore, the UAA not
-only provides its own user store, but also provides comprehensive LDAP integration.
+Not only is the UAA OpenID certified and is used by Cloud Foundry, but you can
+also use it in local stand-alone deployment scenarios. Furthermore, the UAA not
+only provides its own user store, but it also provides comprehensive LDAP integration.
 
 [[configuration-local-security-enabling-https]]
 ==== Enabling HTTPS
@@ -187,6 +197,7 @@ By default, the dashboard, management, and health endpoints use HTTP as a transp
 You can switch to HTTPS by adding a certificate to your configuration in
 `application.yml`, as shown in the following example:
 
+====
 [source,yaml]
 ----
 server:
@@ -202,15 +213,16 @@ server:
 
 <1> As the default port is `9393`, you may choose to change the port to a more common HTTPs-typical port.
 <2> The alias (or name) under which the key is stored in the keystore.
-<3> The path to the keystore file. Classpath resources may also be specified, by using the classpath prefix - for example: `classpath:path/to/keystore`.
+<3> The path to the keystore file. You can also specify classpath resources, by using the classpath prefix - for example: `classpath:path/to/keystore`.
 <4> The password of the keystore.
 <5> The password of the key.
-<6> The path to the truststore file. Classpath resources may also be specified, by using the classpath prefix - for example: `classpath:path/to/trust-store`
+<6> The path to the truststore file. You can also specify classpath resources, by using the classpath prefix - for example: `classpath:path/to/trust-store`
 <7> The password of the trust store.
+====
 
 NOTE: If HTTPS is enabled, it completely replaces HTTP as the protocol over
 which the REST endpoints and the Data Flow Dashboard interact. Plain HTTP requests
-will fail. Therefore, make sure that you configure your Shell accordingly.
+fail. Therefore, make sure that you configure your Shell accordingly.
 
 [[configuration-security-self-signed-certificates]]
 ===== Using Self-Signed Certificates
@@ -218,6 +230,7 @@ will fail. Therefore, make sure that you configure your Shell accordingly.
 For testing purposes or during development, it might be convenient to create self-signed certificates.
 To get started, execute the following command to create a certificate:
 
+====
 [source,bash]
 ----
 $ keytool -genkey -alias dataflow -keyalg RSA -keystore dataflow.keystore \
@@ -225,11 +238,12 @@ $ keytool -genkey -alias dataflow -keyalg RSA -keystore dataflow.keystore \
           -dname "CN=localhost, OU=Spring, O=Pivotal, L=Kailua-Kona, ST=HI, C=US"  # <1>
           -keypass dataflow -storepass dataflow
 ----
-
 <1> `CN` is the important parameter here. It should match the domain you are trying to access - for example, `localhost`.
+====
 
 Then add the following lines to your `application.yml` file:
 
+====
 [source,yaml]
 ----
 server:
@@ -242,11 +256,14 @@ server:
     key-store-password: dataflow
     key-password: dataflow
 ----
+====
 
-This is all that is needed for the Data Flow Server. Once you start the server,
+This is all you need to do for the Data Flow Server. Once you start the server,
 you should be able to access it at `https://localhost:8443/`.
 As this is a self-signed certificate, you should hit a warning in your browser, which
 you need to ignore.
+
+WARNING: _Never_ use self-signed certificates in production.
 
 [[configuration-security-self-signed-certificates-shell]]
 ===== Self-Signed Certificates and the Shell
@@ -260,23 +277,28 @@ are available:
 
 ====== Adding the Self-signed Certificate to the JVM Truststore
 
-In order to use the JVM truststore option, we need to
+In order to use the JVM truststore option, you need to
 export the previously created certificate from the keystore, as follows:
 
+====
 [source,bash]
 ----
 $ keytool -export -alias dataflow -keystore dataflow.keystore -file dataflow_cert -storepass dataflow
 ----
+====
 
-Next, we need to create a truststore which the shell can use, as follows:
+Next, you need to create a truststore that the shell can use, as follows:
 
+====
 [source,bash]
 ----
 $ keytool -importcert -keystore dataflow.truststore -alias dataflow -storepass dataflow -file dataflow_cert -noprompt
 ----
+====
 
-Now, you are ready to launch the Data Flow Shell by using the following JVM arguments:
+Now you are ready to launch the Data Flow Shell with the following JVM arguments:
 
+====
 [source,bash,subs=attributes]
 ----
 $ java -Djavax.net.ssl.trustStorePassword=dataflow \
@@ -284,24 +306,27 @@ $ java -Djavax.net.ssl.trustStorePassword=dataflow \
        -Djavax.net.ssl.trustStoreType=jks \
        -jar spring-cloud-dataflow-shell-{project-version}.jar
 ----
+====
 
 [TIP]
 ====
-In case you run into trouble establishing a connection over SSL, you can enable additional
+If you run into trouble establishing a connection over SSL, you can enable additional
 logging by using and setting the `javax.net.debug` JVM argument to `ssl`.
 ====
 
-Do not forget to target the Data Flow Server with the following:
+Do not forget to target the Data Flow Server with the following command:
 
+====
 [source,bash]
 ----
 dataflow:> dataflow config server https://localhost:8443/
 ----
+====
 
 ====== Skipping Certificate Validation
 
 Alternatively, you can also bypass the certification validation by providing the
-optional command-line parameter `--dataflow.skip-ssl-validation=true`.
+optional `--dataflow.skip-ssl-validation=true` command-line parameter.
 
 If you set this command-line parameter, the shell accepts any (self-signed) SSL
 certificate.
@@ -309,14 +334,14 @@ certificate.
 [WARNING]
 ====
 If possible, you should avoid using this option. Disabling the trust manager
-defeats the purpose of SSL and makes you vulnerable to man-in-the-middle attacks.
+defeats the purpose of SSL and makes your application vulnerable to man-in-the-middle attacks.
 ====
 
 [[configuration-security-oauth2]]
-==== Authentication using OAuth 2.0
+==== Authentication by using OAuth 2.0
 
-In order to support authentication and authorization, Spring Cloud Data
-Flow is using https://oauth.net/2/[OAuth 2.0] and https://openid.net/connect/[OpenID Connect].
+To support authentication and authorization, Spring Cloud Data
+Flow uses https://oauth.net/2/[OAuth 2.0].
 It lets you integrate Spring Cloud Data Flow into Single Sign On (SSO)
 environments.
 
@@ -327,23 +352,24 @@ The following OAuth2 Grant Types are used:
 
 * *Authorization Code*: Used for the GUI (browser) integration. Visitors are redirected to your OAuth Service for authentication
 * *Password*: Used by the shell (and the REST integration), so visitors can log in with username and password
-* *Client Credentials*: Retrieve an access token directly from your OAuth provider and pass it to the Data Flow server by using the Authorization HTTP header
+* *Client Credentials*: Retrieves an access token directly from your OAuth provider and passes it to the Data Flow server by using the Authorization HTTP header
 
 NOTE: Currently, Spring Cloud Data Flow uses opaque tokens and not transparent
 tokens (JWT).
 
-The REST endpoints can be accessed in two ways:
+You can access the REST endpoints in two ways:
 
-* *Basic authentication*, which uses the _Password Grant Type_ under the covers to authenticate with your OAuth2 service
-* *Access token*, which uses the Client _Credentials Grant Type_ under the covers
+* *Basic authentication*, which uses the _Password Grant Type_ to authenticate with your OAuth2 service
+* *Access token*, which uses the Client _Credentials Grant Type_
 
-NOTE: When authentication is set up, it is strongly recommended to enable HTTPS
+NOTE: When you set up authentication, you really should enable HTTPS
 as well, especially in production environments.
 
 You can turn on OAuth2 authentication by adding the following to `application.yml` or by setting
 environment variables. The following example shows the minimal setup needed for
 https://github.com/cloudfoundry/uaa[CloudFoundry User Account and Authentication (UAA) Server]:
 
+====
 [source,yaml]
 ----
 spring:
@@ -372,35 +398,38 @@ spring:
           client-secret: dataflow
 ----
 
-<1> Providing this property activates OAuth2 security
-<2> The provider id. It is possible to specify more than 1 provider
+<1> Providing this property activates OAuth2 security.
+<2> The provider ID. You can specify more than one provider.
 <3> As the UAA is an OpenID provider, you must at least specify the `openid` scope.
     If your provider also provides additional scopes to control the role assignments,
-    you must specify those scopes here as well
+    you must specify those scopes here as well.
 <4> OpenID endpoint. Used to retrieve user information such as the username. Mandatory.
-<5> The JSON property of the response that contains the username
+<5> The JSON property of the response that contains the username.
 <6> Used to introspect and validate a directly passed-in token. Mandatory.
+====
 
 You can verify that basic authentication is working properly by using curl, as follows:
 
+====
 [source,bash]
 ----
 curl -u myusername:mypassword http://localhost:9393/ -H 'Accept: application/json'
 ----
+====
 
 As a result, you should see a list of available REST endpoints.
 
-IMPORTANT: Please be aware that when accessing the Root URL with a web browser and
-enabled security, you are redirected to the Dashboard UI. In order to see the
-list of REST endpoints, specify the `application/json` Accept header. Also be sure
-to add the `Accept` header using tools such as
+IMPORTANT: When you access the Root URL with a web browser and
+security enabled, you are redirected to the Dashboard UI. To see the
+list of REST endpoints, specify the `application/json` `Accept` header. Also be sure
+to add the `Accept` header by using tools such as
 https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en[Postman] (Chrome)
 or https://addons.mozilla.org/en-GB/firefox/addon/restclient/[RESTClient] (Firefox).
 
-Besides Basic Authentication, you can also provide an Access Token in order to
-access the REST Api. In order to make that happen, you would retrieve an
-OAuth2 Access Token from your OAuth2 provider first and then pass that Access Token to
-the REST Api using the *Authorization* Http header:
+Besides Basic Authentication, you can also provide an access token, to
+access the REST API. To do so, retrieve an
+OAuth2 Access Token from your OAuth2 provider and pass that access token to
+the REST Api by using the *Authorization* HTTP header, as follows:
 
 ```
 $ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Accept: application/json'
@@ -409,25 +438,25 @@ $ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Acce
 [[configuration-security-customizing-authorization]]
 ==== Customizing Authorization
 
-The preceding content deals with mostly with authentication - that is, how to assess
-the identity of the user. In this section we want to discuss the available
-*authorization* options - that is, who can do what.
+The preceding content mostly deals with authentication -- that is, how to assess
+the identity of the user. In this section, we discuss the available
+*authorization* options -- that is, who can do what.
 
 The authorization rules are defined in `dataflow-server-defaults.yml` (part of
 the Spring Cloud Data Flow Core module).
 
 Because the determination of security roles is environment-specific,
-Spring Cloud Data Flow, assigns all roles to authenticated OAuth2
-users by default. The `DefaultDataflowAuthoritiesExtractor` class is used for that purpose.
+Spring Cloud Data Flow, by default, assigns all roles to authenticated OAuth2
+users. The `DefaultDataflowAuthoritiesExtractor` class is used for that purpose.
 
-Alternatively, Spring Cloud Data Flow can map OAuth2 scopes to Data Flow roles by
-setting the boolean property `map-oauth-scopes` for your provider to `true` (False is the default).
-For example, if your provider's id is `uaa`, the property would be
+Alternatively, you can have Spring Cloud Data Flow map OAuth2 scopes to Data Flow roles by
+setting the boolean property `map-oauth-scopes` for your provider to `true` (the default is `false`).
+For example, if your provider's ID is `uaa`, the property would be
 `spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes`.
 
-For more details, please see the chapter on <<configuration-security-role-mapping>>.
+For more details, see the chapter on <<configuration-security-role-mapping>>.
 
-Lastly, you can customize the role mapping behavior by providing your own Spring bean definition that
+You can also customize the role-mapping behavior by providing your own Spring bean definition that
 extends Spring Cloud Data Flow's `AuthorityMapper` interface. In that case,
 the custom bean definition takes precedence over the default one provided by
 Spring Cloud Data Flow.
@@ -435,17 +464,17 @@ Spring Cloud Data Flow.
 The default scheme uses seven roles to protect the xref:api-guide[REST endpoints]
 that Spring Cloud Data Flow exposes:
 
-* *ROLE_CREATE* for anything that involves creating, e.g. creating streams or tasks
-* *ROLE_DEPLOY* for deploying streams or launching tasks
-* *ROLE_DESTROY* for anything that involves deleting streams, tasks etc.
-* *ROLE_MANAGE* for boot management endpoints
-* *ROLE_MODIFY* for anything that involves mutating the state of the system
-* *ROLE_SCHEDULE* for scheduling related operation (e.g. schedule a task execution)
-* *ROLE_VIEW* for anything that relates to retrieving state
+* *ROLE_CREATE*: For anything that involves creating, such as creating streams or tasks
+* *ROLE_DEPLOY*: For deploying streams or launching tasks
+* *ROLE_DESTROY*: For anything that involves deleting streams, tasks, and so on.
+* *ROLE_MANAGE*: For Boot management endpoints
+* *ROLE_MODIFY*: For anything that involves mutating the state of the system
+* *ROLE_SCHEDULE*: For scheduling related operation (such as scheduling a task)
+* *ROLE_VIEW*: For anything that relates to retrieving state
 
-As mentioned earlier, all authorization-related default settings are specified
+As mentioned earlier in this section, all authorization-related default settings are specified
 in `dataflow-server-defaults.yml`, which is part of the Spring Cloud Data Flow Core
-Module. Nonetheless, you can override those settings, if desired - for example,
+Module. Nonetheless, you can override those settings, if desired -- for example,
 in `application.yml`. The configuration takes the form of a YAML list (as some
 rules may have precedence over others). Consequently, you need to copy and paste
 the whole list and tailor it to your needs (as there is no way to merge lists).
@@ -454,6 +483,7 @@ NOTE: Always refer to your version of the `application.yml` file, as the followi
 
 The default rules are as follows:
 
+====
 [source,yaml]
 ----
 spring:
@@ -575,24 +605,28 @@ spring:
             - POST   /tools/**                       => hasRole('ROLE_VIEW')
 
 ----
+====
 
 The format of each line is the following:
+
+====
 ----
 HTTP_METHOD URL_PATTERN '=>' SECURITY_ATTRIBUTE
 ----
 
-where
+where:
 
-* HTTP_METHOD is one http method, capital case
-* URL_PATTERN is an Ant style URL pattern
-* SECURITY_ATTRIBUTE is a SpEL expression.  See https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
-* Each of those separated by one or several blank characters (spaces, tabs, and so on)
+* HTTP_METHOD is one HTTP method (such as PUT or GET), capital case.
+* URL_PATTERN is an Ant-style URL pattern.
+* SECURITY_ATTRIBUTE is a SpEL expression. See https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#el-access[Expression-Based Access Control].
+* Each of those is separated by one or whitespace characters (spaces, tabs, and so on).
+====
 
-Be mindful that the above is indeed a YAML list, not a map (thus the use of '-' dashes
+Be mindful that the above is a YAML list, not a map (thus the use of '-' dashes
 at the start of each line) that lives under the `spring.cloud.dataflow.security.authorization.rules` key.
 
 [[configuration-security-authorization-local-shell-and-dashboard]]
-===== Authorization - Shell and Dashboard Behavior
+===== Authorization -- Shell and Dashboard Behavior
 
 When security is enabled, the dashboard and the shell are role-aware,
 meaning that, depending on the assigned roles, not all functionality may be visible.
@@ -606,7 +640,7 @@ Currently, the shell's `help` command lists commands that are unavailable.
 Please track the following issue: https://github.com/spring-projects/spring-shell/issues/115
 ====
 
-Similarly, for the Dashboard, the UI does not show pages or page elements for
+Conversely, for the Dashboard, the UI does not show pages or page elements for
 which the user is not authorized.
 
 [[configuration-security-securing-management-endpoints]]
@@ -614,11 +648,12 @@ which the user is not authorized.
 
 When security is enabled, the
 {spring-boot-docs-reference}/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
-are secured the same way as the other REST endpoints. The management REST endpoints
+are secured in the same way as the other REST endpoints. The management REST endpoints
 are available under `/management` and require the `MANAGEMENT` role.
 
-The default configuration in `dataflow-server-defaults.yml` has the following configuration:
+The default configuration in `dataflow-server-defaults.yml` is as follows:
 
+====
 [source,yaml]
 ----
 management:
@@ -628,8 +663,9 @@ management:
   security:
     roles: MANAGE
 ----
+====
 
-IMPORTANT: Currently, please refrain from customizing the default management path.
+IMPORTANT: Currently, you should not customize the default management path.
 
 [[configuration-security-uaa-authentication]]
 ==== Setting up UAA Authentication
@@ -637,33 +673,36 @@ IMPORTANT: Currently, please refrain from customizing the default management pat
 For local deployment scenarios, we recommend using the https://github.com/cloudfoundry/uaa[CloudFoundry User
 Account and Authentication (UAA) Server], which is https://openid.net/certification/[OpenID certified].
 While the UAA is used by https://www.cloudfoundry.org/[Cloud Foundry],
-it is also a fully featured stand alone OAuth2 server with enterprise features such as
+it is also a fully featured stand alone OAuth2 server with enterprise features, such as
 https://github.com/cloudfoundry/uaa/blob/develop/docs/UAA-LDAP.md[LDAP integration].
 
 ===== Requirements
 
-Checkout, Build and Run UAA:
+You need to check out, build and run UAA. To do so, make sure that you:
 
-- Make sure you use Java 8
-- https://git-scm.com/[Git] installed
-- You need the https://github.com/cloudfoundry/cf-uaac[CloudFoundry UAA Command Line Client] installed
-- Use a different host name for UAA when running on the same machine, e.g. `http://uaa/`
+- Use Java 8.
+- Have https://git-scm.com/[Git] installed.
+- Have the https://github.com/cloudfoundry/cf-uaac[CloudFoundry UAA Command Line Client] installed.
+- Use a different host name for UAA when running on the same machine -- for example, `http://uaa/`.
 
-In case you run into issues installing _uaac_, you may have to set the `GEM_HOME` environment
+If you run into issues installing _uaac_, you may have to set the `GEM_HOME` environment
 variable:
 
+====
 [source,bash]
 ----
 export GEM_HOME="$HOME/.gem"
 ----
+====
 
-and add `~/.gem/gems/cf-uaac-4.2.0/bin` to your path.
+You should also ensure that `~/.gem/gems/cf-uaac-4.2.0/bin` has been added to your path.
 
 ===== Prepare UAA for JWT
 
-As the UAA is an OpenID provider it uses JSON Web Tokens (JWT) it needs to have
+As the UAA is an OpenID provider and uses JSON Web Tokens (JWT), it needs to have
 a private key for signing those JWTs:
 
+====
 [source,bash]
 ----
 openssl genrsa -out signingkey.pem 2048
@@ -671,13 +710,17 @@ openssl rsa -in signingkey.pem -pubout -out verificationkey.pem
 export JWT_TOKEN_SIGNING_KEY=$(cat signingkey.pem)
 export JWT_TOKEN_VERIFICATION_KEY=$(cat verificationkey.pem)
 ----
+====
 
-Later, once the UAA is started you can see the keys when accessing `http://uaa:8080/uaa/token_keys`
+Later, once the UAA is started, you can see the keys when you access `http://uaa:8080/uaa/token_keys`.
 
-NOTE: Here, the name `uaa` in the URL `http://uaa:8080/uaa/token_keys` is the hostname.
+NOTE: Here, the `uaa` in the URL `http://uaa:8080/uaa/token_keys` is the hostname.
 
-===== Download + Start UAA
+===== Download and Start UAA
 
+To download and install UAA, run the following commands:
+
+====
 [source,bash]
 ----
 git clone https://github.com/pivotal/uaa-bundled.git
@@ -685,10 +728,12 @@ cd uaa-bundled
 ./mvnw clean install
 java -jar target/uaa-bundled-1.0.0.BUILD-SNAPSHOT.jar
 ----
+====
 
-The configuration of the UAA is driven by either a Yaml file `uaa.yml` or you can script the configuration
+The configuration of the UAA is driven by a YAML file `uaa.yml`, or you can script the configuration
 using the UAA Command Line Client:
 
+====
 [source,bash]
 ----
 uaac target http://uaa:8080/uaa
@@ -696,40 +741,45 @@ uaac token client get admin -s adminsecret
 uaac client add dataflow \
   --name dataflow \
   --secret dataflow \
-  --scope cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,foo.create,foo.view,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view \
+  --scope cloud_controller.read,cloud_controller.write,openid,password.write,scim.userids,sample.create,sample.view,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view \
   --authorized_grant_types password,authorization_code,client_credentials,refresh_token \
-  --authorities uaa.resource,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view,foo.view,foo.create\
+  --authorities uaa.resource,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view,sample.view,sample.create\
   --redirect_uri http://localhost:9393/login \
   --autoapprove openid
 
-uaac group add "foo.view"
-uaac group add "foo.create"
+uaac group add "sample.view"
+uaac group add "sample.create"
 uaac group add "dataflow.view"
 uaac group add "dataflow.create"
 
 uaac user add springrocks -p mysecret --emails springrocks@someplace.com
 uaac user add vieweronly -p mysecret --emails mrviewer@someplace.com
 
-uaac member add "foo.view" springrocks
-uaac member add "foo.create" springrocks
+uaac member add "sample.view" springrocks
+uaac member add "sample.create" springrocks
 uaac member add "dataflow.view" springrocks
 uaac member add "dataflow.create" springrocks
-uaac member add "foo.view" vieweronly
+uaac member add "sample.view" vieweronly
 ----
+====
 
-This script will set up the dataflow client as well as 2 users:
+The preceding script sets up the dataflow client as well as two users:
 
-- User _springrocks_ will have both scopes `foo.view` and `foo.create`
-- User _vieweronly_ will only have one scope `foo.view`
+- User _springrocks_ has have both scopes: `sample.view` and `sample.create`.
+- User _vieweronly_ has only one scope: `sample.view`.
 
 Once added, you can quickly double-check that the UAA has the users created:
+
+====
 [source,bash]
 ----
 curl -v -d"username=springrocks&password=mysecret&client_id=dataflow&grant_type=password" -u "dataflow:dataflow" http://uaa:8080/uaa/oauth/token -d 'token_format=opaque'
 ----
+====
 
-This should produce output similar to the following:
+The preceding command should produce output similar to the following:
 
+====
 [source,bash]
 ----
 *   Trying 127.0.0.1...
@@ -756,10 +806,11 @@ This should produce output similar to the following:
 < Date: Thu, 31 Oct 2019 21:22:59 GMT
 <
 * Connection #0 to host uaa left intact
-{"access_token":"0329c8ecdf594ee78c271e022138be9d","token_type":"bearer","id_token":"eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vbG9jYWxob3N0OjgwODAvdWFhL3Rva2VuX2tleXMiLCJraWQiOiJsZWdhY3ktdG9rZW4ta2V5IiwidHlwIjoiSldUIn0.eyJzdWIiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdWQiOlsiZGF0YWZsb3ciXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkwL3VhYS9vYXV0aC90b2tlbiIsImV4cCI6MTU3MjYwMDE3OSwiaWF0IjoxNTcyNTU2OTc5LCJhbXIiOlsicHdkIl0sImF6cCI6ImRhdGFmbG93Iiwic2NvcGUiOlsib3BlbmlkIl0sImVtYWlsIjoic3ByaW5ncm9ja3NAc29tZXBsYWNlLmNvbSIsInppZCI6InVhYSIsIm9yaWdpbiI6InVhYSIsImp0aSI6IjAzMjljOGVjZGY1OTRlZTc4YzI3MWUwMjIxMzhiZTlkIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImNsaWVudF9pZCI6ImRhdGFmbG93IiwiY2lkIjoiZGF0YWZsb3ciLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX25hbWUiOiJzcHJpbmdyb2NrcyIsInJldl9zaWciOiJlOTkyMDQxNSIsInVzZXJfaWQiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdXRoX3RpbWUiOjE1NzI1NTY5Nzl9.bqYvicyCPB5cIIu_2HEe5_c7nSGXKw7B8-reTvyYjOQ2qXSMq7gzS4LCCQ-CMcb4IirlDaFlQtZJSDE-_UsM33-ThmtFdx--TujvTR1u2nzot4Pq5A_ThmhhcCB21x6-RNNAJl9X9uUcT3gKfKVs3gjE0tm2K1vZfOkiGhjseIbwht2vBx0MnHteJpVW6U0pyCWG_tpBjrNBSj9yLoQZcqrtxYrWvPHaa9ljxfvaIsOnCZBGT7I552O1VRHWMj1lwNmRNZy5koJFPF7SbhiTM8eLkZVNdR3GEiofpzLCfoQXrr52YbiqjkYT94t3wz5C6u1JtBtgc2vq60HmR45bvg","refresh_token":"6ee95d017ada408697f2d19b04f7aa6c-r","expires_in":43199,"scope":"scim.userids openid foo.create cloud_controller.read password.write cloud_controller.write foo.view","jti":"0329c8ecdf594ee78c271e022138be9d"}
+{"access_token":"0329c8ecdf594ee78c271e022138be9d","token_type":"bearer","id_token":"eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHBzOi8vbG9jYWxob3N0OjgwODAvdWFhL3Rva2VuX2tleXMiLCJraWQiOiJsZWdhY3ktdG9rZW4ta2V5IiwidHlwIjoiSldUIn0.eyJzdWIiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdWQiOlsiZGF0YWZsb3ciXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDkwL3VhYS9vYXV0aC90b2tlbiIsImV4cCI6MTU3MjYwMDE3OSwiaWF0IjoxNTcyNTU2OTc5LCJhbXIiOlsicHdkIl0sImF6cCI6ImRhdGFmbG93Iiwic2NvcGUiOlsib3BlbmlkIl0sImVtYWlsIjoic3ByaW5ncm9ja3NAc29tZXBsYWNlLmNvbSIsInppZCI6InVhYSIsIm9yaWdpbiI6InVhYSIsImp0aSI6IjAzMjljOGVjZGY1OTRlZTc4YzI3MWUwMjIxMzhiZTlkIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImNsaWVudF9pZCI6ImRhdGFmbG93IiwiY2lkIjoiZGF0YWZsb3ciLCJncmFudF90eXBlIjoicGFzc3dvcmQiLCJ1c2VyX25hbWUiOiJzcHJpbmdyb2NrcyIsInJldl9zaWciOiJlOTkyMDQxNSIsInVzZXJfaWQiOiJlZTg4MDg4Ny00MWM2LTRkMWQtYjcyZC1hOTQ4MmFmNGViYTQiLCJhdXRoX3RpbWUiOjE1NzI1NTY5Nzl9.bqYvicyCPB5cIIu_2HEe5_c7nSGXKw7B8-reTvyYjOQ2qXSMq7gzS4LCCQ-CMcb4IirlDaFlQtZJSDE-_UsM33-ThmtFdx--TujvTR1u2nzot4Pq5A_ThmhhcCB21x6-RNNAJl9X9uUcT3gKfKVs3gjE0tm2K1vZfOkiGhjseIbwht2vBx0MnHteJpVW6U0pyCWG_tpBjrNBSj9yLoQZcqrtxYrWvPHaa9ljxfvaIsOnCZBGT7I552O1VRHWMj1lwNmRNZy5koJFPF7SbhiTM8eLkZVNdR3GEiofpzLCfoQXrr52YbiqjkYT94t3wz5C6u1JtBtgc2vq60HmR45bvg","refresh_token":"6ee95d017ada408697f2d19b04f7aa6c-r","expires_in":43199,"scope":"scim.userids openid sample.create cloud_controller.read password.write cloud_controller.write sample.view","jti":"0329c8ecdf594ee78c271e022138be9d"}
 ----
+====
 
-Using `token_format` parameter you can requested token to be either:
+By using the `token_format` parameter, you can request the token to be either:
 
 - opaque
 - jwt

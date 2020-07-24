@@ -2,7 +2,7 @@
 [[dataflow-template]]
 == Data Flow Template
 
-As described in the previous chapter, Spring Cloud Data Flow's functionality is completely exposed through REST endpoints.
+As described in API Guide chapter, Spring Cloud Data Flow's functionality is completely exposed through REST endpoints.
 While you can use those endpoints directly, Spring Cloud Data Flow also provides a Java-based API, which makes using those REST endpoints even easier.
 
 The central entry point is the `DataFlowTemplate` class in the `org.springframework.cloud.dataflow.rest.client` package.
@@ -40,17 +40,18 @@ This class implements the `DataFlowOperations` interface and delegates to the fo
 | REST Client for runtime operations
 |===
 
-When the `DataFlowTemplate` is being initialized, the sub-templates can be discovered through the REST relations, which are provided by HATEOAS.footnote:[HATEOAS stands for Hypermedia as the Engine of Application State]
+When the `DataFlowTemplate` is being initialized, the sub-templates can be discovered through the REST relations, which are provided by HATEOAS (Hypermedia as the Engine of Application State).
 
 IMPORTANT: If a resource cannot be resolved, the respective sub-template results
-in NULL. A common cause is that Spring Cloud Data Flow offers for specific
-sets of features to be enabled/disabled when launching. For more information, see `<<configuration-local-enable-disable-specific-features, local>>`, `<<configuration-cloudfoundry-enable-disable-specific-features, Cloud Foundry>>`, `<<configuration-kubernetes-enable-disable-specific-features, Kubernetes>>`.
+in NULL. A common cause is that Spring Cloud Data Flow allows for specific
+sets of features to be enabled or disabled when launching. For more information, see one of the <<configuration-local-enable-disable-specific-features, local>>, <<configuration-cloudfoundry-enable-disable-specific-features, Cloud Foundry>>, or <<configuration-kubernetes-enable-disable-specific-features, Kubernetes>> configuration chapters, depending on where you deploy your application.
 
 === Using the Data Flow Template
 
 When you use the Data Flow Template, the only needed Data Flow dependency is the
 Spring Cloud Data Flow Rest Client, as shown in the following Maven snippet:
 
+====
 [source,xml,subs=attributes]
 ----
 &lt;dependency&gt;
@@ -59,13 +60,15 @@ Spring Cloud Data Flow Rest Client, as shown in the following Maven snippet:
   &lt;version&gt;{project-version}&lt;/version&gt;
 &lt;/dependency&gt;
 ----
+====
 
 With that dependency, you get the `DataFlowTemplate` class as well as all the dependencies needed to make calls to a Spring Cloud Data Flow server.
 
 When instantiating the `DataFlowTemplate`, you also pass in a `RestTemplate`.
-Please be aware that the needed `RestTemplate` requires some additional configuration to be valid in the context of the `DataFlowTemplate`.
+Note that the needed `RestTemplate` requires some additional configuration to be valid in the context of the `DataFlowTemplate`.
 When declaring a `RestTemplate` as a bean, the following configuration suffices:
 
+====
 [source,java]
 ----
   @Bean
@@ -91,23 +94,26 @@ When declaring a `RestTemplate` as a bean, the following configuration suffices:
     return restTemplate;
   }
 ----
+====
 
-TIP: You can also get a pre-configured `RestTemplate` using
+TIP: You can also get a pre-configured `RestTemplate` by using
 `DataFlowTemplate.getDefaultDataflowRestTemplate();`
 
 Now you can instantiate the `DataFlowTemplate` with the following code:
 
+====
 [source,java]
 ----
 DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(
     new URI("http://localhost:9393/"), restTemplate);         # <1>
 ----
-
 <1> The `URI` points to the ROOT of your Spring Cloud Data Flow Server.
+====
 
 Depending on your requirements, you can now make calls to the server. For instance,
-if you want to get a list of currently available applications you can run the following code:
+if you want to get a list of the currently available applications, you can run the following code:
 
+====
 [source,java]
 ----
 PagedResources<AppRegistrationResource> apps = dataFlowTemplate.appRegistryOperations().list();
@@ -122,16 +128,18 @@ for (AppRegistrationResource app : apps.getContent()) {
     app.getUri()));
 }
 ----
+====
 
 === Data Flow Template and Security
 
 When using the `DataFlowTemplate`, you can also provide all the security-related
-options similar to as if you were using the _Data Flow Shell_. In fact the _Data Flow Shell_
+options as if you were using the _Data Flow Shell_. In fact, the _Data Flow Shell_
 uses the `DataFlowTemplate` for all its operations.
 
-In order to get started, we provide a `HttpClientConfigurer` that uses the builder
+To let you get started, we provide a `HttpClientConfigurer` that uses the builder
 pattern to set the various security-related options:
 
+====
 [source,java]
 ----
 	HttpClientConfigurer
@@ -150,14 +158,16 @@ pattern to set the various security-related options:
 <5> Add a custom interceptor e.g. to set the OAuth2 Authorization header. This allows
 you to pass an OAuth2 Access Token instead of username/password credentials.
 <6> Builds the `ClientHttpRequestFactory` that can be set on the `RestTemplate`.
+====
 
-Once the `HttpClientConfigurer` is configured, its `buildClientHttpRequestFactory`
-can be used to build the `ClientHttpRequestFactory` and you would set the corresponding
+Once the `HttpClientConfigurer` is configured, you can use its `buildClientHttpRequestFactory`
+to build the `ClientHttpRequestFactory` and then set the corresponding
 property on the `RestTemplate`. You can then instantiate the actual `DataFlowTemplate`
 using that `RestTemplate`.
 
-In order to configure _Basic Authentication_, the following setup is required:
+To configure _Basic Authentication_, the following setup is required:
 
+====
 [source,java]
 ----
 	RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
@@ -168,7 +178,8 @@ In order to configure _Basic Authentication_, the following setup is required:
 
 	DataFlowTemplate dataFlowTemplate = new DataFlowTemplate("http://localhost:9393", restTemplate);
 ----
+====
 
 You can find a sample application as part of the
-https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/dataflow-template-example[spring-cloud-dataflow-samples]
+https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/dataflow-template-example[spring-cloud-dataflow-samples] repository
 on GitHub.

@@ -26,14 +26,14 @@ Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP a
 | Verb | Usage
 
 | `GET`
-| Used to retrieve a resource
+| Used to retrieve a resource.
 
 | `POST`
-| Used to create a new resource
+| Used to create a new resource.
 
 | `PUT`
 | Used to update an existing resource, including partial updates. Also used for
-resources that imply the concept of `restarts`, such as Tasks.
+resources that imply the concept of `restarts`, such as tasks.
 
 | `DELETE`
 | Used to delete an existing resource.
@@ -68,7 +68,7 @@ Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP a
 | The requested resource already exists. For example, the task already exists or the stream was already being deployed
 
 | `422 Unprocessable Entity`
-| Returned in cases where the Job Execution cannot be stopped or restarted.
+| Returned in cases where the job execution cannot be stopped or restarted.
 
 |===
 
@@ -77,7 +77,7 @@ Spring Cloud Data Flow tries to adhere as closely as possible to standard HTTP a
 [[api-guide-overview-headers]]
 === Headers
 
-Every response has the following header(s):
+Every response has the following headers:
 
 include::{snippets}/api-documentation/headers/response-headers.adoc[]
 
@@ -95,10 +95,10 @@ include::{snippets}/api-documentation/errors/response-fields.adoc[]
 
 Spring Cloud Data Flow uses hypermedia, and resources include links to other resources
 in their responses.
-Responses are in the http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format.
+Responses are in the http://stateless.co/hal_specification.html[Hypertext Application from resource-to-resource Language (HAL)] format.
 Links can be found beneath the `_links` key.
 Users of the API should not create URIs themselves.
-Instead. they should use the above-described links to navigate.
+Instead, they should use the above-described links to navigate.
 
 
 
@@ -201,6 +201,7 @@ The following topics provide more details:
 
 [[api-guide-resources-server-meta-retrieving]]
 ==== Retrieving information about the server
+
 A `GET` request returns meta information for Spring Cloud Data Flow, including:
 
 * Runtime environment information
@@ -249,7 +250,8 @@ The following topics provide more details:
 
 [[resources-app-registry-list]]
 ==== Listing Applications
-A `GET` request will list all applications known to Spring Cloud Data Flow.
+
+A `GET` request lists all of the applications known to Spring Cloud Data Flow.
 The following topics provide more details:
 
 * <<api-guide-resources-app-registry-request-structure>>
@@ -337,6 +339,7 @@ include::{snippets}/app-registry-documentation/get-single-application/http-respo
 
 [[resources-app-registry-post]]
 ==== Registering a New Application
+
 A `POST` request on `/apps/<type>/<name>` allows registration of a new application.
 The following topics provide more details:
 
@@ -384,7 +387,7 @@ include::{snippets}/app-registry-documentation/registering-an-application/http-r
 [[resources-app-registry-post-versioned]]
 ==== Registering a New Application with version
 
-A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application
+A `POST` request on `/apps/<type>/<name>/<version>` allows registration of a new application.
 The following topics provide more details:
 
 * <<api-guide-resources-app-registry-post-versioned-request-structure>>
@@ -431,6 +434,7 @@ include::{snippets}/app-registry-documentation/registering-an-application-versio
 
 [[resources-app-registry-bulk]]
 ==== Registering Applications in Bulk
+
 A `POST` request on `/apps` allows registering multiple applications at once.
 The following topics provide more details:
 
@@ -470,10 +474,10 @@ include::{snippets}/app-registry-documentation/bulk-registering-apps/http-respon
 
 
 [[resources-app-registry-default]]
-==== Set the default application version
+==== Set the Default Application Version
 
-For an application with the `name` and `type`, multiple versions can be registered.
-In this case, one of the versions can be chosen as the default application.
+For an application with the same `name` and `type`, you can register multiple versions.
+In this case, you can choose one of the versions as the default application.
 
 The following topics provide more details:
 
@@ -513,6 +517,7 @@ include::{snippets}/app-registry-documentation/app-default/http-response.adoc[]
 
 [[resources-app-registry-delete]]
 ==== Unregistering an Application
+
 A `DELETE` request on `/apps/<type>/<name>` unregisters a previously registered application.
 The following topics provide more details:
 
@@ -553,6 +558,7 @@ include::{snippets}/app-registry-documentation/unregistering-an-application/http
 
 [[resources-app-registry-delete-all]]
 ==== Unregistering all Applications
+
 A `DELETE` request on `/apps` unregisters all the applications.
 The following topics provide more details:
 
@@ -730,10 +736,12 @@ The following topics provide more details:
 Creating a stream definition is achieved by creating a POST request to the stream definitions endpoint.
 A curl request for a `ticktock` stream might resemble the following:
 
+====
 [source,bash]
 ----
 curl -X POST -d "name=ticktock&definition=time | log" localhost:9393/streams/definitions?deploy=false
 ----
+====
 
 A stream definition can also contain additional parameters.
 For instance, in the example shown under "`<<api-guide-resources-stream-definitions-create-request-structure>>`", we also provide the date-time format.
@@ -1969,7 +1977,7 @@ include::{snippets}/task-executions-documentation/launch-task-display-detail/htt
 [[api-guide-resources-task-executions-delete]]
 ==== Delete Task Execution
 
-The task executions endpoint lets you:
+The task execution endpoint lets you:
 
 - Clean up resources used to deploy the task
 - Remove relevant task data as well as possibly associated Spring Batch job data from the persistence store
@@ -1995,16 +2003,16 @@ include::{snippets}/task-executions-documentation/task-execution-remove-and-task
 
 [IMPORTANT]
 ====
-You must ensure to only provide task execution ids that actually exist. Otherwise a `404` (Not Found) HTTP status is returned.
-In case of submitting multiple task execution ids, the invalidity of a single task execution id will cause the entire request to fail,
+You must provide task execution IDs that actually exist. Otherwise, a `404` (Not Found) HTTP status is returned.
+In the case of submitting multiple task execution IDs, the invalidity of a single task execution ID causes the entire request to fail,
 without performing any operation.
 ====
 
 [[api-guide-resources-task-executions-delete-request-parameters]]
 ===== Request Parameters
 
-This endpoint supports 1 optional request parameter named **action**. It is an enumeration and supports the following
-2 values:
+This endpoint supports one optional request parameter named **action**. It is an enumeration and supports the following
+values:
 
 - CLEANUP
 - REMOVE_DATA
@@ -2026,9 +2034,9 @@ include::{snippets}/task-executions-documentation/task-execution-remove-and-task
 
 Not only can you clean up resources that were used to deploy tasks but you can also delete the data associated with
 task executions from the underlying persistence store. Also, if a task execution is associated with one or
-more batch job executions, these will be removed as well.
+more batch job executions, these are removed as well.
 
-The following example illustrates how a request can be made using multiple task execution ids and multiple actions:
+The following example illustrates how a request can be made using multiple task execution IDs and multiple actions:
 
 include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/curl-request.adoc[]
 
@@ -2036,12 +2044,9 @@ include::{snippets}/task-executions-documentation/task-execution-remove-and-task
 
 include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/request-parameters.adoc[]
 
-[IMPORTANT]
-====
-When deleting data from the persistence store using the `REMOVE_DATA` action parameter, you must ensure to provide
-only task execution ids that represent parent task executions. When providing child task executions (Executed as part of a composed task),
-then a `400` (Bad Request) HTTP status is returned.
-====
+IMPORTANT: When deleting data from the persistence store by using the `REMOVE_DATA` action parameter, you must provide
+task execution IDs that represent parent task executions. When you provide child task executions (executed as part of a composed task),
+a `400` (Bad Request) HTTP status is returned.
 
 [[api-guide-resources-task-executions-current-count]]
 ==== Task Execution Current Count
@@ -2612,7 +2617,7 @@ include::{snippets}/job-step-executions-documentation/step-progress/http-respons
 [[api-guide-resources-runtime-information-applications]]
 === Runtime Information about Applications
 
-It is possible to get information about running apps known to the system, either globally or individually.
+You can get information about running apps known to the system, either globally or individually.
 The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-listing-all>>
@@ -2690,7 +2695,7 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[
 [[api-guide-resources-runtime-information-applications-querying-single-instance-single-app]]
 ==== Querying a Single Instance of a Single App
 
-Finally, to retrieve information about a particular instance of a particular app, query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint by using `GET`.
+To retrieve information about a particular instance of a particular application, query the `/runtime/apps/<appId>/instances/<instanceId>` endpoint by using `GET`.
 The following topics provide more details:
 
 * <<api-guide-resources-runtime-information-applications-querying-single-instance-single-app-request-structure>>
@@ -2722,7 +2727,7 @@ include::{snippets}/runtime-apps-documentation/list-all-apps/http-response.adoc[
 [[api-guide-resources-stream-logs]]
 === Stream Logs
 
-It is possible to get the application logs of the stream for the entire stream or a specific application inside the stream.
+You can get the application logs of the stream for the entire stream or a specific application inside the stream.
 The following topics provide more details:
 
 * <<api-guide-resources-stream-logs-by-stream-name>>
@@ -2792,7 +2797,7 @@ include::{snippets}/stream-logs-documentation/get-logs-by-app-name/http-response
 [[api-guide-resources-task-logs]]
 === Task Logs
 
-It is possible to get the task execution log for a specific task execution.
+You can get the task execution log for a specific task execution.
 
 The following topic provides more details:
 
@@ -2802,7 +2807,7 @@ The following topic provides more details:
 [[api-guide-resources-stream-logs-by-task-id]]
 ==== Get the task execution log
 
-To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint using the HTTP `GET` method..
+To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint by using the HTTP `GET` method..
 The following topics provide more details:
 
 * <<api-guide-resources-task-logs-by-task-id-request-structure>>
@@ -2832,4 +2837,3 @@ include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.ado
 ===== Response Structure
 
 include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
-

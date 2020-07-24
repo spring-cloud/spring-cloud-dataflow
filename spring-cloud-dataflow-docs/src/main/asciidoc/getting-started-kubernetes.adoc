@@ -3,14 +3,14 @@
 
 https://cloud.spring.io/spring-cloud-dataflow/[Spring Cloud Data Flow] is a toolkit for building data integration and real-time data-processing pipelines.
 
-Pipelines consist of Spring Boot apps, built with the Spring Cloud Stream or Spring Cloud Task microservice frameworks.
-This makes Spring Cloud Data Flow suitable for a range of data-processing use cases, from import-export to event-streaming and predictive analytics.
+Pipelines consist of Spring Boot applications built with the Spring Cloud Stream or Spring Cloud Task microservice frameworks.
+This makes Spring Cloud Data Flow suitable for a range of data-processing use cases, from import-export to event streaming and predictive analytics.
 
 This project provides support for using Spring Cloud Data Flow with Kubernetes as the runtime for these pipelines, with applications packaged as Docker images.
 
-Please see the link:https://dataflow.spring.io/docs/installation/kubernetes/[Kubernetes] section of the microsite for more information on installing Spring Cloud Data Flow on Kubernetes.
+See the link:https://dataflow.spring.io/docs/installation/kubernetes/[Kubernetes] section of the microsite for more information on installing Spring Cloud Data Flow on Kubernetes.
 
-Once you have the Data Flow server installed on Kubernetes, you will want to get started with orchestrating the deployment of readily available pre-built applications into a coherent streaming or batch data pipelines. Below we have guides on how to get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.
+Once you have the Data Flow server installed on Kubernetes, you probably want to get started with orchestrating the deployment of readily available pre-built applications into a coherent streaming or batch data pipelines. We have guides to help you get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.
 
 === Application and Server Properties
 
@@ -18,19 +18,19 @@ This section covers how you can customize the deployment of your applications. Y
 
 NOTE: Properties set on a per-application basis always take precedence over properties set as the server configuration. This arrangement lets you override global server level properties on a per-application basis.
 
-Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-(binder).yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-(binder).yaml`. Replace `(binder)` with the messaging middleware you are using -- for example, `rabbit` or `kafka`.
+Properties to be applied for all deployed Tasks are defined in the `src/kubernetes/server/server-config-[binder].yaml` file and for Streams in `src/kubernetes/skipper/skipper-config-[binder].yaml`. Replace `[binder]` with the messaging middleware you are using -- for example, `rabbit` or `kafka`.
 
 ==== Memory and CPU Settings
 
-Applications are deployed with default memory and CPU settings. If needed, these values can be adjusted. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
+Applications are deployed with default memory and CPU settings. If you need to, you can adjust these values. The following example shows how to set `Limits` to `1000m` for `CPU` and `1024Mi` for memory and `Requests` to `800m` for CPU and `640Mi` for memory:
 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.limits.cpu=1000m
-deployer.<app>.kubernetes.limits.memory=1024Mi
-deployer.<app>.kubernetes.requests.cpu=800m
-deployer.<app>.kubernetes.requests.memory=640Mi
+deployer.<application>.kubernetes.limits.cpu=1000m
+deployer.<application>.kubernetes.limits.memory=1024Mi
+deployer.<application>.kubernetes.requests.cpu=800m
+deployer.<application>.kubernetes.requests.memory=640Mi
 ----
 ====
 
@@ -92,7 +92,7 @@ data:
 ----
 ====
 
-The settings we have used so far only affect the settings for the container. They do not affect the memory setting for the JVM process in the container. If you would like to set JVM memory settings, you can provide an environment variable to do so. See the next section for details.
+The settings we have used so far affect only the settings for the container. They do not affect the memory setting for the JVM process in the container. If you would like to set JVM memory settings, you can set an environment variable to do so. See the next section for details.
 
 ==== Environment Variables
 
@@ -103,30 +103,30 @@ You can do so by using the `JAVA_TOOL_OPTIONS` environment variable, as the foll
 ====
 [source]
 ----
-deployer.<app>.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
+deployer.<application>.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
 ----
 ====
 
 NOTE: The `environmentVariables` property accepts a comma-delimited string. If an environment variable contains a value
-which is also a comma-delimited string, it must be enclosed in single quotation marks -- for example,
+that is also a comma-delimited string, it must be enclosed in single quotation marks -- for example,
 `spring.cloud.deployer.kubernetes.environmentVariables=spring.cloud.stream.kafka.binder.brokers='somehost:9092,
 anotherhost:9093'`
 
-This overrides the JVM memory setting for the desired `<app>` (replace `<app>` with the name of your application).
+This overrides the JVM memory setting for the desired `<application>` (replace `<application>` with the name of your application).
 
 [[getting-started-kubernetes-probes]]
 ==== Liveness and Readiness Probes
 
-The `liveness` and `readiness` probes use paths called `/health` and `/info`, respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. Liveness and readiness probes are only applied to streams.
+The `liveness` and `readiness` probes use paths called `/health` and `/info`, respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. The liveness and readiness probes are applied only to streams.
 
-The following example changes the `liveness` probe (replace `<app>` with the name of your application) by setting deployer properties:
+The following example changes the `liveness` probe (replace `<application>` with the name of your application) by setting deployer properties:
 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.livenessProbePath=/health
-deployer.<app>.kubernetes.livenessProbeDelay=120
-deployer.<app>.kubernetes.livenessProbePeriod=20
+deployer.<application>.kubernetes.livenessProbePath=/health
+deployer.<application>.kubernetes.livenessProbeDelay=120
+deployer.<application>.kubernetes.livenessProbePeriod=20
 ----
 ====
 
@@ -158,8 +158,8 @@ By default, port 8080 is used as the probe port. You can change the defaults for
 ====
 [source]
 ----
-deployer.<app>.kubernetes.readinessProbePort=7000
-deployer.<app>.kubernetes.livenessProbePort=7000
+deployer.<application>.kubernetes.readinessProbePort=7000
+deployer.<application>.kubernetes.livenessProbePort=7000
 ----
 ====
 
@@ -185,13 +185,13 @@ data:
 
 [NOTE]
 =====
-By default, the `liveness` and `readiness` probe paths use Spring Boot 2.x+ actuator endpoints. To use Spring Boot 1.x actuator endpoint paths, you must adjust the `liveness` and `readiness` values, as the following example shows (replace `<app>` with the name of your application):
+By default, the `liveness` and `readiness` probe paths use Spring Boot 2.x+ actuator endpoints. To use Spring Boot 1.x actuator endpoint paths, you must adjust the `liveness` and `readiness` values, as the following example shows (replace `<application>` with the name of your application):
 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.livenessProbePath=/health
-deployer.<app>.kubernetes.readinessProbePath=/info
+deployer.<application>.kubernetes.livenessProbePath=/health
+deployer.<application>.kubernetes.readinessProbePath=/info
 ----
 ====
 
@@ -200,7 +200,7 @@ To automatically set both `liveness` and `readiness` endpoints on a per-applicat
 ====
 [source]
 ----
-deployer.<app>.kubernetes.bootMajorVersion=1
+deployer.<application>.kubernetes.bootMajorVersion=1
 ----
 ====
 
@@ -212,7 +212,7 @@ To create a new secret:
 
 . Generate the base64 string with the credentials used to access the secured probe endpoints.
 +
-Basic authentication encodes a username and password as a base64 string in the format of `username:password`.
+Basic authentication encodes a username and a password as a base64 string in the format of `username:password`.
 +
 The following example (which includes output and in which you should replace `user` and `pass` with your values) shows how to generate a base64 string:
 +
@@ -256,15 +256,15 @@ secret "myprobesecret" created
 ====
 [source]
 ----
-deployer.<app>.kubernetes.probeCredentialsSecret=myprobesecret
+deployer.<application>.kubernetes.probeCredentialsSecret=myprobesecret
 ----
 ====
 +
-Replace `<app>` with the name of the application to which to apply authentication.
+Replace `<application>` with the name of the application to which to apply authentication.
 
 ==== Using `SPRING_APPLICATION_JSON`
 
-You can use a `SPRING_APPLICATION_JSON` environment variable to set Data Flow server properties (including the configuration of maven repository settings) that are common across all of the Data Flow server implementations. These settings go at the server level in the container `env` section of a deployment YAML. The following example shows how to do so:
+You can use a `SPRING_APPLICATION_JSON` environment variable to set Data Flow server properties (including the configuration of Maven repository settings) that are common across all of the Data Flow server implementations. These settings go at the server level in the container `env` section of a deployment YAML. The following example shows how to do so:
 
 ====
 [source,options=nowrap]
@@ -284,11 +284,11 @@ Once you have created the secret, you can use the `imagePullSecret` property to 
 ====
 [source]
 ----
-deployer.<app>.kubernetes.imagePullSecret=mysecret
+deployer.<application>.kubernetes.imagePullSecret=mysecret
 ----
 ====
 
-Replace `<app>` with the name of your application and `mysecret` with the name of the secret you created earlier.
+Replace `<application>` with the name of your application and `mysecret` with the name of the secret you created earlier.
 
 You can also configure the image pull secret at the global server level.
 
@@ -341,34 +341,34 @@ The following example shows how you can configure applications to use annotation
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.podAnnotations=annotationName:annotationValue
-deployer.<app>.kubernetes.serviceAnnotations=annotationName:annotationValue,annotationName2:annotationValue2
-deployer.<app>.kubernetes.jobAnnotations=annotationName:annotationValue
+deployer.<application>.kubernetes.podAnnotations=annotationName:annotationValue
+deployer.<application>.kubernetes.serviceAnnotations=annotationName:annotationValue,annotationName2:annotationValue2
+deployer.<application>.kubernetes.jobAnnotations=annotationName:annotationValue
 ----
 ====
 
-Replace `<app>` with the name of your application and the value of your annotations.
+Replace `<application>` with the name of your application and the value of your annotations.
 
 ==== Entry Point Style
 
 An entry point style affects how application properties are passed to the container to be deployed. Currently, three styles are supported:
 
 * `exec` (default): Passes all application properties and command line arguments in the deployment request as container arguments. Application properties are transformed into the format of `--key=value`.
-* `shell`: Passes all application properties and command line arguments as environment variables. Each of the application/commandline argument properties is transformed into an uppercase string and `.` characters are replaced with `_`.
+* `shell`: Passes all application properties and command line arguments as environment variables. Each of the applicationor command-line argument properties is transformed into an uppercase string and `.` characters are replaced with `_`.
 * `boot`: Creates an environment variable called `SPRING_APPLICATION_JSON` that contains a JSON representation of all application properties. Command line arguments from the deployment request are set as container args.
 
-NOTE: In all cases, environment variables defined at the server-level configuration and on a per-application basis are set onto the container as is.
+NOTE: In all cases, environment variables defined at the server-level configuration and on a per-application basis are sent on to the container as is.
 
-You can configure applications as follows:
+You can configure an application as follows:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.entryPointStyle=<Entry Point Style>
+deployer.<application>.kubernetes.entryPointStyle=<Entry Point Style>
 ----
 ====
 
-Replace `<app>` with the name of your application and `<Entry Point Style>` with your desired entry point style.
+Replace `<application>` with the name of your application and `<Entry Point Style>` with your desired entry point style.
 
 You can also configure the entry point style at the global server level.
 
@@ -416,7 +416,7 @@ You should choose an Entry Point Style of either `exec` or `shell`, to correspon
 
 Using the `boot` entry point style corresponds to using the `exec` style `ENTRYPOINT`. Command line arguments from the deployment request are passed to the container, with the addition of application properties being mapped into the `SPRING_APPLICATION_JSON` environment variable rather than command line arguments.
 
-NOTE: When you use the `boot` Entry Point Style, the `deployer.<app>.kubernetes.environmentVariables` property must not contain `SPRING_APPLICATION_JSON`.
+NOTE: When you use the `boot` Entry Point Style, the `deployer.<application>.kubernetes.environmentVariables` property must not contain `SPRING_APPLICATION_JSON`.
 
 ==== Deployment Service Account
 
@@ -435,11 +435,11 @@ Then you can configure individual applications as follows:
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.deploymentServiceAccountName=myserviceaccountname
+deployer.<application>.kubernetes.deploymentServiceAccountName=myserviceaccountname
 ----
 ====
 
-Replace `<app>` with the name of your application and `myserviceaccountname` with your service account name.
+Replace `<application>` with the name of your application and `myserviceaccountname` with your service account name.
 
 You can also configure the service account name at the global server level.
 
@@ -496,11 +496,11 @@ The following example shows how you can individually configure applications:
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.imagePullPolicy=Always
+deployer.<application>.kubernetes.imagePullPolicy=Always
 ----
 ====
 
-Replace `<app>` with the name of your application and `Always` with your desired image pull policy.
+Replace `<application>` with the name of your application and `Always` with your desired image pull policy.
 
 You can configure an image pull policy at the global server level.
 
@@ -553,18 +553,18 @@ The following example shows how you can individually configure applications:
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.deploymentLabels=myLabelName:myLabelValue
+deployer.<application>.kubernetes.deploymentLabels=myLabelName:myLabelValue
 ----
 ====
 
-Replace `<app>` with the name of your application, `myLabelName` with your label name, and `myLabelValue` with the value of your label.
+Replace `<application>` with the name of your application, `myLabelName` with your label name, and `myLabelValue` with the value of your label.
 
 Additionally, you can apply multiple labels, as the following example shows:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.deploymentLabels=myLabelName:myLabelValue,myLabelName2:myLabelValue2
+deployer.<application>.kubernetes.deploymentLabels=myLabelName:myLabelValue,myLabelName2:myLabelValue2
 ----
 ====
 
@@ -572,18 +572,18 @@ deployer.<app>.kubernetes.deploymentLabels=myLabelName:myLabelValue,myLabelName2
 
 Tolerations work with taints to ensure pods are not scheduled onto particular nodes.
 Tolerations are set into the pod configuration while taints are set onto nodes.
-Refer to the https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/[Taints and Tolerations] section of the Kubernetes reference for more information.
+See the https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/[Taints and Tolerations] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure applications:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.tolerations=[{key: 'mykey' operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
+deployer.<application>.kubernetes.tolerations=[{key: 'mykey' operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
 ----
 ====
 
-Replace `<app>` with the name of your application and the key / value pairs according to your desired toleration configuration.
+Replace `<application>` with the name of your application and the key-value pairs according to your desired toleration configuration.
 
 You can configure tolerations at the global server level as well.
 
@@ -633,32 +633,32 @@ data:
 ----
 ====
 
-Replacing the `tolerations` key / value pairs according to your desired toleration configuration.
+Replace the `tolerations` key-value pairs according to your desired toleration configuration.
 
 ==== Secret References
 
-Secrets can be referenced and their entire data contents decoded and inserted into the pod(s) environment as individual variables.
-Refer to the https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#configure-all-key-value-pairs-in-a-secret-as-container-environment-variables[Configure all key-value pairs in a Secret as container environment variables] section of the Kubernetes reference for more information.
+Secrets can be referenced and their entire data contents can be decoded and inserted into the pod environment as individual variables.
+See the https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#configure-all-key-value-pairs-in-a-secret-as-container-environment-variables[Configure all key-value pairs in a Secret as container environment variables] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure applications:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.secretRefs=testsecret
+deployer.<application>.kubernetes.secretRefs=testsecret
 ----
 ====
 
-Multiple secrets can also be specified, for example:
+You can also specify multiple secrets, as follows:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.secretRefs=[testsecret,anothersecret]
+deployer.<application>.kubernetes.secretRefs=[testsecret,anothersecret]
 ----
 ====
 
-Replace `<app>` with the name of your application and the `secretRefs` attribute with the appropriate values for your application environment and secret.
+Replace `<application>` with the name of your application and the `secretRefs` attribute with the appropriate values for your application environment and secret.
 
 You can configure secret references at the global server level as well.
 
@@ -704,23 +704,23 @@ data:
 ----
 ====
 
-Replacing the items of `secretRefs` with one or more secret names.
+Replace the items of `secretRefs` with one or more secret names.
 
 ==== Secret Key References
 
-Secrets can be referenced and their decoded value inserted into the pod(s) environment.
-Refer to the https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables[Using Secrets as Environment Variables] section of the Kubernetes reference for more information.
+Secrets can be referenced and their decoded value can be inserted into the pod environment.
+See the https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables[Using Secrets as Environment Variables] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure applications:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.secretKeyRefs=[{envVarName: 'MY_SECRET', secretName: 'testsecret', dataKey: 'password'}]
+deployer.<application>.kubernetes.secretKeyRefs=[{envVarName: 'MY_SECRET', secretName: 'testsecret', dataKey: 'password'}]
 ----
 ====
 
-Replace `<app>` with the name of your application and the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your application environment and secret.
+Replace `<application>` with the name of your application and the `envVarName`, `secretName`, and `dataKey` attributes with the appropriate values for your application environment and secret.
 
 You can configure secret key references at the global server level as well.
 
@@ -768,32 +768,32 @@ data:
 ----
 ====
 
-Replacing the `envVarName`, `secretName` and `dataKey` attributes with the appropriate values for your secret.
+Replace the `envVarName`, `secretName`, and `dataKey` attributes with the appropriate values for your secret.
 
-==== Config Map References
+==== ConfigMap References
 
-ConfigMap's can be referenced and their entire data contents decoded and inserted into the pod(s) environment as individual variables.
-Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables[Configure all key-value pairs in a ConfigMap as container environment variables] section of the Kubernetes reference for more information.
+A ConfigMap can be referenced and its entire data contents can be decoded and inserted into the pod environment as individual variables.
+See the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables[Configure all key-value pairs in a ConfigMap as container environment variables] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure applications:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.configMapRefs=testcm
+deployer.<application>.kubernetes.configMapRefs=testcm
 ----
 ====
 
-Multiple ConfigMap's can also be specified, for example:
+You can also specify multiple ConfigMap instances, as follows:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.configMapRefs=[testcm,anothercm]
+deployer.<application>.kubernetes.configMapRefs=[testcm,anothercm]
 ----
 ====
 
-Replace `<app>` with the name of your application and the `configMapRefs` attribute with the appropriate values for your application environment and ConfigMap.
+Replace `<application>` with the name of your application and the `configMapRefs` attribute with the appropriate values for your application environment and ConfigMap.
 
 You can configure ConfigMap references at the global server level as well.
 
@@ -839,23 +839,23 @@ data:
 ----
 ====
 
-Replacing the items of `configMapRefs` with one or more secret names.
+Replace the items of `configMapRefs` with one or more secret names.
 
-==== Config Map Key References
+==== ConfigMap Key References
 
-ConfigMap's can be referenced and their associated key value inserted into the pod(s) environment.
-Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data[Define container environment variables using ConfigMap data] section of the Kubernetes reference for more information.
+A ConfigMap can be referenced and its associated key value inserted into the pod environment.
+See the https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data[Define container environment variables using ConfigMap data] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure applications:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.configMapKeyRefs=[{envVarName: 'MY_CM', configMapName: 'testcm', dataKey: 'platform'}]
+deployer.<application>.kubernetes.configMapKeyRefs=[{envVarName: 'MY_CM', configMapName: 'testcm', dataKey: 'platform'}]
 ----
 ====
 
-Replace `<app>` with the name of your application and the `envVarName`, `configMapName` and `dataKey` attributes with the appropriate values for your application environment and ConfigMap.
+Replace `<application>` with the name of your application and the `envVarName`, `configMapName`, and `dataKey` attributes with the appropriate values for your application environment and ConfigMap.
 
 You can configure ConfigMap references at the global server level as well.
 
@@ -903,25 +903,25 @@ data:
 ----
 ====
 
-Replacing the `envVarName`, `configMapName` and `dataKey` attributes with the appropriate values for your ConfigMap.
+Replace the `envVarName`, `configMapName`, and `dataKey` attributes with the appropriate values for your ConfigMap.
 
 ==== Pod Security Context
 
-The pod security context can be configured to run processes under the specified UID (user ID) or GID (group ID).
-This is useful when its preferred not to run processes under the default `root` UID and GID.
-Either the `runAsUser` (UID) or `fsGroup` (GID) can be defined, as well as configured together.
-Refer to the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information.
+You can confiure the pod security context to run processes under the specified UID (user ID) or GID (group ID).
+This is useful when you want to not run processes under the default `root` UID and GID.
+You can define either the `runAsUser` (UID) or `fsGroup` (GID), and you can configure them to work together.
+See the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information.
 
 The following example shows how you can individually configure application pods:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup: 65534}
+deployer.<application>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup: 65534}
 ----
 ====
 
-Replace `<app>` with the name of your application and the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+Replace `<application>` with the name of your application and the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
 
 You can configure the pod security context at the global server level as well.
 
@@ -967,39 +967,39 @@ data:
 ----
 ====
 
-Replacing the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+Replace the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
 
 ==== Service Ports
 
-When deploying applications a kubernetes Service object is created with a default port of `8080` or, if set the application property value of `server.port`. Additional ports can be added to the Service object on a per-application basis. Multiple ports can be added when specified with a comma delimiter.
+When you deploy applications, a kubernetes Service object is created with a default port of `8080`. If the `server.port` property is set, it overrides the default port value. You can add additional ports to the Service object on a per-application basis. You can add multiple ports with a comma delimiter.
 
 The following example shows how you can configure additional ports on a Service object for an application:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.servicePorts=5000
-deployer.<app>.kubernetes.servicePorts=5000,9000
+deployer.<application>.kubernetes.servicePorts=5000
+deployer.<application>.kubernetes.servicePorts=5000,9000
 ----
 ====
 
-Replace `<app>` with the name of your application and the value of your port(s).
+Replace `<application>` with the name of your application and the value of your ports.
 
 ==== StatefulSet Init Container
 
-When deploying an application using a StatefulSet, an Init Container is used to set the instance index into the pod.
-By default the image used is `busybox`, which can be customized if needed.
+When deploying an application by using a StatefulSet, an Init Container is used to set the instance index in the pod.
+By default, the image used is `busybox`, which you can be customize.
 
 The following example shows how you can individually configure application pods:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.statefulSetInitContainerImageName=myimage:mylabel
+deployer.<application>.kubernetes.statefulSetInitContainerImageName=myimage:mylabel
 ----
 ====
 
-Replace `<app>` with the name of your application and the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+Replace `<application>` with the name of your application and the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
 
 You can configure the StatefulSet Init Container at the global server level as well.
 
@@ -1041,11 +1041,11 @@ data:
 ----
 ====
 
-Replacing the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
+Replace the `statefulSetInitContainerImageName` attribute with the appropriate value for your environment.
 
 ==== Init Containers
 
-When applications are deployed, a custom Init Container can be set on a per application basis.
+When you deploy applications, you can set a custom Init Container on a per-application basis.
 Refer to the https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init Containers] section of the Kubernetes reference for more information.
 
 The following example shows how you can configure an Init Container for an application:
@@ -1053,8 +1053,8 @@ The following example shows how you can configure an Init Container for an appli
 ====
 [source,options=nowrap]
 ----
-deployer.<app>.kubernetes.initContainer={containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}
+deployer.<application>.kubernetes.initContainer={containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}
 ----
 ====
 
-Replace `<app>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.
+Replace `<application>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.

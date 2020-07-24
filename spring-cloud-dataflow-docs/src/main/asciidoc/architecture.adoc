@@ -4,6 +4,6 @@
 [[arch-intro]]
 == Introduction
 
-Spring Cloud Data Flow simplifies the development and deployment of applications focused on data processing use cases.
+Spring Cloud Data Flow simplifies the development and deployment of applications that are focused on data-processing use cases.
 
-The https://dataflow.spring.io/docs/concepts/architecture/[Architecture] section of the microsite contains the description of Data Flow's architecture.
+The https://dataflow.spring.io/docs/concepts/architecture/[Architecture] section of the microsite describes Data Flow's architecture.

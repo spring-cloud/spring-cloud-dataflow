@@ -5,7 +5,7 @@
 --
 Having trouble with Spring Cloud Data Flow, We'd like to help!
 
-* Ask a question - we monitor https://stackoverflow.com[stackoverflow.com] for questions
+* Ask a question. We monitor https://stackoverflow.com[stackoverflow.com] for questions
   tagged with https://stackoverflow.com/tags/spring-cloud-dataflow[`spring-cloud-dataflow`].
 * Report bugs with Spring Cloud Data Flow at https://github.com/spring-cloud/spring-cloud-dataflow/issues.
 --

@@ -1,7 +1,6 @@
 [[getting-started-cloudfoundry]]
 == Getting Started - Cloud Foundry
 
-This section covers how to get started with Spring Cloud Data Flow on Cloud Foundry. Please see the https://dataflow.spring.io/docs/installation/cloudfoundry/[Cloud Foundry] section of the microsite for more information on installing Spring Cloud Data Flow on Cloud Foundry.
+This section covers how to get started with Spring Cloud Data Flow on Cloud Foundry. See the https://dataflow.spring.io/docs/installation/cloudfoundry/[Cloud Foundry] section of the microsite for more information on installing Spring Cloud Data Flow on Cloud Foundry.
 
-Once you have the Data Flow server installed on Cloud Foundry, you will want to get started with orchestrating the deployment of readily available pre-built applications into a coherent streaming or batch data pipelines. Below we have guides on how to get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.
-
+Once you have the Data Flow server installed on Cloud Foundry, you probably want to get started with orchestrating the deployment of readily available pre-built applications into coherent streaming or batch data pipelines. We have guides to help you get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.

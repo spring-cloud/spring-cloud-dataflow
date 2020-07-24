@@ -5,30 +5,31 @@
 --
 This section goes into more detail about how you can orchestrate https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] applications on Spring Cloud Data Flow.
 
-If you are just starting out with Spring Cloud Data Flow, you should probably read the Getting Started guide for  "`<<getting-started-local.adoc#getting-started-local, Local>>`" , "`<<getting-started-cloudfoundry.adoc#getting-started-cloudfoundry, Cloud Foundry>>`", "`<<getting-started-kubernetes.adoc#getting-started-kubernetes, Kubernetes>>`" before diving into this section.
+If you are just starting out with Spring Cloud Data Flow, you should probably read the Getting Started guide for  "`<<getting-started-local.adoc#getting-started-local, Local>>`" , "`<<getting-started-cloudfoundry.adoc#getting-started-cloudfoundry, Cloud Foundry>>`", or "`<<getting-started-kubernetes.adoc#getting-started-kubernetes, Kubernetes>>`" before diving into this section.
 --
 
 [[spring-cloud-dataflow-task-intro]]
 == Introduction
 
-A task application is short lived, meaning it stops running on purpose, and can be executed on demand or scheduled for execution.
-A use case might be to scrape a web page and write to the database.
-The https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the capability for Boot applications to record the lifecycle events of a short lived application such as when it starts, when it ends and the exit status.
-The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#features-task-execution-details[TaskExecution] documentation shows which information is stored in the database.
+A task application is short-lived, meaning that it stops running on purpose and can be run on demand or scheduled for later.
+One use case might be to scrape a web page and write to the database.
+
+The https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the ability for Boot applications to record the lifecycle events of a short-lived application, such as when it starts, when it ends, and the exit status.
+The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#features-task-execution-details[`TaskExecution`] documentation shows which information is stored in the database.
 The entry point for code execution in a Spring Cloud Task application is most often an implementation of Boot's `CommandLineRunner` interface, as shown in this https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#getting-started-writing-the-code[example].
 
-The Spring Batch project is probably what comes to mind for Spring developers writing short lived applications.
+The Spring Batch project is probably what comes to mind for Spring developers writing short-lived applications.
 Spring Batch provides a much richer set of functionality than Spring Cloud Task and is recommended when processing large volumes of data.
-A use case might be to read many CSV files, transform each row of data, and write each transformed row to a database.
+One use case might be to read many CSV files, transform each row of data, and write each transformed row to a database.
 Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/{spring-batch-doc-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
-Spring Cloud Task is integrated with Spring Batch so that if a Spring Cloud Task application defined a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
+Spring Cloud Task is integrated with Spring Batch so that, if a Spring Cloud Task application defines a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
 
 When running Data Flow on your local machine, Tasks are launched in a separate JVM.
-When running on Cloud Foundry, tasks are launched using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functionality and when running on Kubernetes, tasks are launched using either a `Pod` or a `Job` resource.
+When running on Cloud Foundry, tasks are launched by using https://docs.cloudfoundry.org/devguide/using-tasks.html[Cloud Foundry's Task] functionality. When running on Kubernetes, tasks are launched by using either a `Pod` or a `Job` resource.
 
 == The Lifecycle of a Task
 
-Before we dive deeper into the details of creating Tasks, we need to understand the typical lifecycle for tasks in the context of Spring Cloud Data Flow:
+Before you dive deeper into the details of creating Tasks, you should understand the typical lifecycle for tasks in the context of Spring Cloud Data Flow:
 
 . <<spring-cloud-dataflow-create-task-apps>>
 . <<spring-cloud-dataflow-register-task-apps>>
@@ -42,12 +43,12 @@ Before we dive deeper into the details of creating Tasks, we need to understand 
 === Creating a Task Application
 
 While Spring Cloud Task does provide a number of out-of-the-box applications (at https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]), most task applications require custom development.
-  To create a custom task application:
+To create a custom task application:
 
 .  Use the https://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
 .. `Cloud Task`: This dependency is the `spring-cloud-starter-task`.
 .. `JDBC`: This dependency is the `spring-jdbc` starter.
-.. Select your database dependency: Enter the database dependency that Data Flow is currently using.  For example: `H2`.
+.. Select your database dependency: Enter the database dependency that Data Flow is currently using. For example: `H2`.
 . Within your new project, create a new class to serve as your main class, as follows:
 +
 [source,java]
@@ -71,16 +72,17 @@ The packaged application can be registered and deployed as noted below.
 CAUTION: When launching a task application, be sure that the database driver that is being used by Spring Cloud Data Flow is also a dependency on the task application.
 For example, if your Spring Cloud Data Flow is set to use Postgresql, be sure that the task application also has Postgresql as a dependency.
 
-TIP: When you run tasks externally (that is, from the command line) and you want Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that common datasource settings are shared among the both.
+TIP: When you run tasks externally (that is, from the command line) and you want Spring Cloud Data Flow to show the TaskExecutions in its UI, be sure that common datasource settings are shared among them both.
 By default, Spring Cloud Task uses a local H2 instance, and the execution is recorded to the database used by Spring Cloud Data Flow.
 
 [[spring-cloud-dataflow-register-task-apps]]
 === Registering a Task Application
 
-You can register a Task App with the App Registry by using the Spring Cloud Data Flow Shell `app register` command.
-You must provide a unique name and a URI that can be resolved to the app artifact. For the type, specify "task".
+You can register a Task application with the App Registry by using the Spring Cloud Data Flow Shell `app register` command.
+You must provide a unique name and a URI that can be resolved to the application artifact. For the type, specify `task`.
 The following listing shows three examples:
 
+====
 [source,bash]
 ----
 dataflow:>app register --name task1 --type task --uri maven://com.example:mytask:1.0.2
@@ -89,167 +91,207 @@ dataflow:>app register --name task2 --type task --uri file:///Users/example/myta
 
 dataflow:>app register --name task3 --type task --uri https://example.com/mytask-1.0.2.jar
 ----
+====
 
 When providing a URI with the `maven` scheme, the format should conform to the following:
 
-`maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>`
-
-If you would like to register multiple apps at one time, you can store them in a properties file where the keys are formatted as `<type>.<name>` and the values are the URIs.
-For example, the followinng listing would be a valid properties file:
-
-[source]
+====
+[source,bash]
 ----
-task.foo=file:///tmp/foo-1.2.1.BUILD-SNAPSHOT.jar
-task.bar=file:///tmp/bar-1.2.1.BUILD-SNAPSHOT.jar
+maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
 ----
+====
+
+If you would like to register multiple applications at one time, you can store them in a properties file where the keys are formatted as `<type>.<name>` and the values are the URIs.
+For example, the following listing would be a valid properties file:
+
+====
+[source,properties]
+----
+task.cat=file:///tmp/cat-1.2.1.BUILD-SNAPSHOT.jar
+task.hat=file:///tmp/hat-1.2.1.BUILD-SNAPSHOT.jar
+----
+====
 
 Then you can use the `app import` command and provide the location of the properties file by using the  `--uri` option, as follows:
 
-```
+====
+[source,bash]
+----
 app import --uri file:///tmp/task-apps.properties
-```
+----
+====
 
-For example, if you would like to register all out-of-the-box task applications in bulk, you can do so with the following command:
+For example, if you would like to register all the task applications that ship with Data Flow in a single operation, you can do so with the following command:
 
-```
+====
+[source,bash]
+----
 dataflow:>app import --uri https://dataflow.spring.io/task-maven-latest
-```
+----
+====
 
 You can also pass the `--local` option (which is `TRUE` by default) to indicate whether the properties file location should be resolved within the shell process itself.
 If the location should be resolved from the Data Flow Server process, specify `--local false`.
 
-When using either `app register` or `app import`, if a task app is already registered with
+When using either `app register` or `app import`, if a task application is already registered with
 the provided name and version, it is not overridden by default. If you would like to override the
-pre-existing task app with a different uri or uri-metadata location, then include the `--force` option.
+pre-existing task application with a different `uri` or `uri-metadata` location, include the `--force` option.
 
 [NOTE]
-In some cases, the Resource is resolved on the server side.
-In other cases, the URI is passed to a runtime container instance where it is resolved.
+In some cases, the resource is resolved on the server side.
+In other cases, the URI is passed to a runtime container instance, where it is resolved.
 Consult the specific documentation of each Data Flow Server for more detail.
 
 [[spring-cloud-dataflow-create-task-definition]]
 === Creating a Task Definition
 
-You can create a task Definition from a task app by providing a definition name as well as
-properties that apply to the task execution.  Creating a task definition can be done through
+You can create a task definition from a task application by providing a definition name as well as
+properties that apply to the task execution. You can create a task definition through
 the RESTful API or the shell.  To create a task definition by using the shell, use the
 `task create` command to create the task definition, as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task create mytask --definition "timestamp --format=\"yyyy\""
 Created new task 'mytask'
 ----
+====
 
-A listing of the current task definitions can be obtained through the RESTful API or the shell.
+You can obtain a listing of the current task definitions through the RESTful API or the shell.
 To get the task definition list by using the shell, use the `task list` command.
 
 ==== Automating the Creation of Task Definitions
-As of version 2.3.0, the Data Flow server can be configured to auto create task definitions by setting `spring.cloud.dataflow.task.autocreate-task-definitions` to `true`.
-This is not the default behavior but provided as a convenience.
-When this property is enabled, a task launch request can specify the registered task application name as the task name.
-If the task application is registered, the server will create a basic task definition that specifies only the app name, as required. This eliminates a manual step equivalent to something like:
 
+As of version 2.3.0, you can configure the Data Flow server to automatically create task definitions by setting `spring.cloud.dataflow.task.autocreate-task-definitions` to `true`.
+This is not the default behavior but is provided as a convenience.
+When this property is enabled, a task launch request can specify the registered task application name as the task name.
+If the task application is registered, the server creates a basic task definition that specifies only the application name, as required. This eliminates a manual step similar to:
+
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task create mytask --definition "mytask"
 ----
+====
 
-Command line arguments and deployment properties can still be specified for each task launch request.
-
+You can still specify command-line arguments and deployment properties for each task launch request.
 
 [[spring-cloud-dataflow-task-launch]]
 === Launching a Task
-An adhoc task can be launched through the RESTful API or the shell.
-To launch an ad-hoc task through the shell, use the `task launch` command, as shown in the following example:
 
+An ad hoc task can be launched through the RESTful API or the shell.
+To launch an ad hoc task through the shell, use the `task launch` command, as shown in the following example:
+
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task launch mytask
 Launched task 'mytask'
 ----
+====
 
-When a task is launched, any properties that need to be passed as command line arguments to the task application can be set when launching the task, as follows:
+When a task is launched, you can set any properties that need to be passed as command-line arguments to the task application when you launch the task, as follows:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task launch mytask --arguments "--server.port=8080 --custom=value"
 ----
+====
 
-[NOTE]
-The arguments need to be passed as `space` delimited values.
+NOTE: The arguments need to be passed as space-delimited values.
 
-Additional properties meant for a `TaskLauncher` itself can be passed in by using a `--properties` option.
+You can pass in additional properties meant for a `TaskLauncher` itself by using the `--properties` option.
 The format of this option is a comma-separated string of properties prefixed with `app.<task definition name>.<property>`.
 Properties are passed to `TaskLauncher` as application properties.
 It is up to an implementation to choose how those are passed into an actual task application.
-If the property is prefixed with `deployer` instead of `app`, it is passed to `TaskLauncher` as a deployment property and its meaning may be `TaskLauncher` implementation specific.
+If the property is prefixed with `deployer` instead of `app`, it is passed to `TaskLauncher` as a deployment property, and its meaning may be `TaskLauncher` implementation specific.
 
-`dataflow:>task launch mytask --properties "deployer.timestamp.custom1=value1,app.timestamp.custom2=value2"`
+====
+[source,bash]
+----
+dataflow:>task launch mytask --properties "deployer.timestamp.custom1=value1,app.timestamp.custom2=value2"
+----
+====
 
 ==== Application properties
 
-Each application takes properties to customize its behavior.  As an example, the `timestamp` task `format` setting establishes a output format that is different from the default value.
+Each application takes properties to customize its behavior. For example, the `timestamp` task `format` setting establishes an output format that is different from the default value.
 
-`dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp`
+====
+[source,bash]
+----
+dataflow:> task create --definition "timestamp --format=\"yyyy\"" --name printTimeStamp
+----
+====
 
 This `timestamp` property is actually the same as the `timestamp.format` property specified by the timestamp application.
 Data Flow adds the ability to use the shorthand form `format` instead of `timestamp.format`.
-One may also specify the longhand version as well, as shown in the following example:
+You can also specify the longhand version as well, as shown in the following example:
 
-`dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp`
+====
+[source,bash]
+----
+dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --name printTimeStamp
+----
+====
 
 This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
 If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
-The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.  The supported Task `<appType>` is task.
+The shell provides tab completion for application properties. The `app info --name <appName> --type <appType>` shell command provides additional documentation for all the supported properties. The supported task `<appType>` is `task`.
 
 NOTE: When restarting Spring Batch Jobs on Kubernetes, you must use the entry point of `shell` or `boot`.
 
 ===== Application Properties With Sensitive Information on Kubernetes
 
-When launching task applications where some of the properties may contain sensitive information, use the `shell` or `boot` as the `entryPointStyle`. This is because the `exec` (default) converts all properties to command line arguments and thus may not be secure in some environments.
+When launching task applications where some of the properties may contain sensitive information, use the `shell` or `boot` as the `entryPointStyle`. This is because the `exec` (default) converts all properties to command-line arguments and, as a result, may not be secure in some environments.
 
 ==== Common application properties
 
-In addition to configuration through DSL, Spring Cloud Data Flow provides a mechanism for setting common properties to all the task applications that are launched by it.
-This can be done by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.task` when starting the server.
-When doing so, the server passes all the properties, without the prefix, to the instances it launches.
+In addition to configuration through DSL, Spring Cloud Data Flow provides a mechanism for setting properties that are common to all the task applications that are launched by it.
+You can do so by adding properties prefixed with `spring.cloud.dataflow.applicationProperties.task` when starting the server.
+The server then passes all the properties, without the prefix, to the instances it launches.
 
-For example, all the launched applications can be configured to use the properties `prop1` and `prop2` by launching the Data Flow server with the following options:
+For example, you can configure all the launched applications to use the `prop1` and `prop2` properties by launching the Data Flow server with the following options:
 
+====
 [source,bash,subs=attributes]
 ----
 --spring.cloud.dataflow.applicationProperties.task.prop1=value1
 --spring.cloud.dataflow.applicationProperties.task.prop2=value2
 ----
+====
 
-This causes the properties, `prop1=value1` and `prop2=value2`, to be passed to all the launched applications.
+This causes the `prop1=value1` and `prop2=value2` properties to be passed to all the launched applications.
 
-[NOTE]
-Properties configured by using this mechanism have lower precedence than task deployment properties.
+NOTE: Properties configured by using this mechanism have lower precedence than task deployment properties.
 They are overridden if a property with the same key is specified at task launch time (for example, `app.trigger.prop2`
 overrides the common property).
 
 [[spring-cloud-dataflow-task-limit-concurrent-executions]]
 === Limit the number concurrent task launches
-Spring Cloud Data Flow allows a user to limit the maximum number of concurrently running tasks for each configured platform to prevent the saturation of IaaS/hardware resources.
-The limit is set to `20` for all supported platforms by default. If the number of concurrently running tasks on a platform instance is greater or equal to the limit, the next task launch request will fail and an error message will be returned via the RESTful API, Shell or UI.
-This limit can be configured for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].deployment.maximumConcurrentTasks` property, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
+
+Spring Cloud Data Flow lets a user limit the maximum number of concurrently running tasks for each configured platform to prevent the saturation of IaaS or hardware resources.
+By default, the limit is set to `20` for all supported platforms. If the number of concurrently running tasks on a platform instance is greater than or equal to the limit, the next task launch request fails, and an error message is returned through the RESTful API, the Shell, or the UI.
+You can configure this limit for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].deployment.maximumConcurrentTasks`, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
 The `<platform-type>` refers to one of the currently supported deployers: `local`, `cloudfoundry`, or `kubernetes`.
 
-The TaskLauncher implementation for each supported platform determines the number of currently executing tasks by querying the underlying platform's runtime state if possible. The method for identifying a `task` varies by platform.
-For example, launching a task on the local host uses the `LocalTaskLauncher`. The LocalTaskLauncher executes a process for each launch request and keeps track of these processes in memory. In this case, we don't query the underlying OS, as it is impractical to identify tasks this way.
-For Cloud Foundry, tasks are a core concept supported by its deployment model. The state of all tasks, running, completed, or failed, is available directly via the API.
-This means that every running task container in the account's org and space is included in the running execution count, whether or not it was launched using Spring Cloud Data Flow, or invoking the `CloudFoundryTaskLauncher` directly.
-For Kubernetes, launching a task via the `KubernetesTaskLauncher`, if successful, results in a running pod which we expect to eventually complete or fail.
-In this environment there is generally no easy way to identify pods that correspond to a task.
-For this reason, we only count pods that were launched by the `KubernetesTaskLauncher`.
+The `TaskLauncher` implementation for each supported platform determines the number of currently running tasks by querying the underlying platform's runtime state, if possible. The method for identifying a `task` varies by platform.
+For example, launching a task on the local host uses the `LocalTaskLauncher`. `LocalTaskLauncher` runs a process for each launch request and keeps track of these processes in memory. In this case, we do not query the underlying OS, as it is impractical to identify tasks this way.
+For Cloud Foundry, tasks are a core concept supported by its deployment model. The state of all tasks ) is available directly through the API.
+This means that every running task container in the account's organization and space is included in the running execution count, whether or not it was launched by using Spring Cloud Data Flow or by invoking the `CloudFoundryTaskLauncher` directly.
+For Kubernetes, launching a task through the `KubernetesTaskLauncher`, if successful, results in a running pod, which we expect to eventually complete or fail.
+In this environment, there is generally no easy way to identify pods that correspond to a task.
+For this reason, we count only pods that were launched by the `KubernetesTaskLauncher`.
 Since the task launcher provides `task-name` label in the pod's metadata, we filter all running pods by the presence of this label.
 
 [[spring-cloud-dataflow-task-review-executions]]
 === Reviewing Task Executions
-Once the task is launched, the state of the task is stored in a relational DB.  The state
+
+Once the task is launched, the state of the task is stored in a relational database. The state
 includes:
 
 * Task Name
@@ -260,70 +302,84 @@ includes:
 * Last Updated Time
 * Parameters
 
-A user can check the status of their task executions through the RESTful API or the shell.
+You can check the status of your task executions through the RESTful API or the shell.
 To display the latest task executions through the shell, use the `task execution list` command.
 
 To get a list of task executions for just one task definition, add `--name` and
-the task definition name, for example `task execution list --name foo`.  To retrieve full
-details for a task execution use the `task execution status` command with the id of the task execution,
+the task definition name -- for example, `task execution list --name foo`. To retrieve full
+details for a task execution, use the `task execution status` command with the ID of the task execution,
 for example `task execution status --id 549`.
 
 [[spring-cloud-dataflow-task-definition-destroying]]
 === Destroying a Task Definition
-Destroying a Task Definition removes the definition from the definition repository.
+
+Destroying a task definition removes the definition from the definition repository.
 This can be done through the RESTful API or the shell.
 To destroy a task through the shell, use the `task destroy` command, as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task destroy mytask
 Destroyed task 'mytask'
 ----
+====
 
 The `task destroy` command also has an option to `cleanup` the task executions of the task being destroyed, as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task destroy mytask --cleanup
 Destroyed task 'mytask'
 ----
+====
 
-By default, the `cleanup` option is set to `false` (ie., by default, the task executions are not cleaned up when destroying the task).
+By default, the `cleanup` option is set to `false` (that is, by default, the task executions are not cleaned up when the task is destroyed).
 
 To destroy all tasks through the shell, use the `task all destroy` command as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task all destroy
 Really destroy all tasks? [y, n]: y
 All tasks destroyed
 ----
+====
 
-Or use the force command:
+If need be, you can use the force switch:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task all destroy --force
 All tasks destroyed
 ----
+====
 
 The task execution information for previously launched tasks for the definition remains in the task repository.
 
-NOTE: This does not stop any currently executing tasks for this definition. Instead, it removes the task definition from the database.
+NOTE: This does not stop any currently running tasks for this definition. Instead, it removes the task definition from the database.
 
-NOTE: The `task destroy <task-name>` deletes only the definition and not the task deployed on Cloud Foundry.
-The only way to do this now is through the CLI in two steps. First, obtain a list of the apps by using the `cf apps` command.
+[NOTE]
+====
+`task destroy <task-name>` deletes only the definition and not the task deployed on Cloud Foundry.
+The only way to do delete the task is through the CLI in two steps:
++
+. Obtain a list of the apps by using the `cf apps` command.
 . Identify the task application to be deleted and run the `cf delete <task-name>` command.
-
+====
 
 
 [[spring-cloud-dataflow-validate-task]]
 === Validating a Task
 
-Sometimes the one or more of the apps contained within a task definition contain an invalid URI in its registration.
-This can be caused by an invalid URI entered at app registration time or the app was removed from the repository from which it was to be drawn.
-To verify that all the apps contained in a task are resolve-able, a user can use the `validate` command.
-For example:
+Sometimes, an application contained within a task definition has an invalid URI in its registration.
+This can be caused by an invalid URI being entered at application-registration time or the by the application being removed from the repository from which it was to be drawn.
+To verify that all the applications contained in a task are resolve-able, use the `validate` command, as follows:
+
+====
 [source,bash]
 ----
 dataflow:>task validate time-stamp
@@ -341,10 +397,12 @@ time-stamp is a valid task.
 ║task:timestamp │valid            ║
 ╚═══════════════╧═════════════════╝
 ----
+====
 
-In the example above the user validated their time-stamp task.   As we see `task:timestamp` app is valid.
-Now let's see what happens if we have a stream definition with a registered app with an invalid URI.
+In the preceding example, the user validated their time-stamp task. The `task:timestamp` application is valid.
+Now we can see what happens if we have a stream definition with a registered application that has an invalid URI:
 
+====
 [source,bash]
 ----
 dataflow:>task validate bad-timestamp
@@ -362,24 +420,29 @@ bad-timestamp is an invalid task.
 ║task:badtimestamp │invalid          ║
 ╚══════════════════╧═════════════════╝
 ----
+====
 
-In this case Spring Cloud Data Flow states that the task is invalid because task:badtimestamp has an invalid URI.
+In this case, Spring Cloud Data Flow states that the task is invalid because `task:badtimestamp` has an invalid URI.
 
 [[spring-cloud-dataflow-stopping-task-execution]]
 === Stopping a Task Execution
 
-In some cases a task that is executing on a platform may not stop because of a problem on the platform or the application business logic itself.
-For such cases Spring Cloud Data Flow offers the user the ability to send a request to the platform to terminate the task execution.
-To do this a user can submit a `task execution stop` for a given set of task executions.  For example:
+In some cases, a task that is running on a platform may not stop because of a problem on the platform or the application business logic itself.
+For such cases, Spring Cloud Data Flow offers the ability to send a request to the platform to end the task.
+To do this, submit a `task execution stop` for a given set of task executions, as follows:
 
+====
 [source,bash]
 ----
 task execution stop --ids 5
 
 Request to stop the task execution with id(s): 5 has been submitted
 ----
-With the above command, the trigger to stop the execution of id=5 will be submitted to the underlying deployer implementation, and as a result, the operation will stop the execution of that task. When we view the result for the task execution, we will see that the task execution completed with a 0 exit code.
+====
 
+With the preceding command, the trigger to stop the execution of `id=5` is submitted to the underlying deployer implementation. As a result, the operation stops that task. When we view the result for the task execution, we see that the task execution completed with a 0 exit code:
+
+====
 [source,bash]
 ----
 dataflow:>task execution list
@@ -390,47 +453,52 @@ dataflow:>task execution list
 ║timestamp │1 │Mon Jul 15 09:26:41 EDT 2019│Mon Jul 15 09:26:41 EDT 2019│0        ║
 ╚══════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
-
-If a user submits a stop for a task execution that has child task executions associated with it, like a composed task, a stop request will be sent for each of the child task executions.
-[WARNING]
-====
-When stopping a task execution that has a running Spring Batch job, the job will be left with the batch status of `STARTED`.
-Each of the supported platforms send a SIG-INT to the task application  when a stop is requested that allows Spring Cloud Task to capture the state of the app, however Spring Batch does not handle a SIG-INT and thus the job stops in the STARTED status.
 ====
 
-==== Stopping a Task Execution that was started outside of Spring Cloud Data Flow
+If you submit a stop for a task execution that has child task executions associated with it, such as a composed task, a stop request is sent for each of the child task executions.
 
-You may wish to stop a task that has been launched outside of Spring Cloud Data Flow.  An example of this is the worker applications launched by a Remote Batch Partitioned application.
-In such cases the Remote Batch Partitioned Application stores the external-execution-id for each of the worker applications, however no platform information is stored.
-So when Spring Cloud Data Flow has to stop a Remote Batch Partitioned application and its worker applications, you will need to specify the platform name as shown below:
+WARNING: When stopping a task execution that has a running Spring Batch job, the job is left with a batch status of `STARTED`.
+Each of the supported platforms sends a SIG-INT to the task application when a stop is requested. That allows Spring Cloud Task to capture the state of the app. However, Spring Batch does not handle a SIG-INT and, as a result, the job stops but remains in the STARTED status.
 
+==== Stopping a Task Execution that was Started Outside of Spring Cloud Data Flow
+
+You may wish to stop a task that has been launched outside of Spring Cloud Data Flow. An example of this is the worker applications launched by a remote batch partitioned application.
+In such cases, the remote batch partitioned application stores the `external-execution-id` for each of the worker applications. However, no platform information is stored.
+So when Spring Cloud Data Flow has to stop a remote batch partitioned application and its worker applications, you need to specify the platform name, as follows:
+
+====
 [source,bash]
 ----
 dataflow:>task execution stop --ids 1 --platform myplatform
 Request to stop the task execution with id(s): 1 for platform myplatform has been submitted
 ----
+====
 
 [[spring-cloud-dataflow-task-events]]
-== Subscribing to Task/Batch Events
+== Subscribing to Task and Batch Events
 
 You can also tap into various task and batch events when the task is launched.
-If the task is enabled to generate task or batch events (with the additional dependencies `spring-cloud-task-stream` and, in the case of Kafka as the binder, `spring-cloud-stream-binder-kafka`), those events are published during the task lifecycle.
+If the task is enabled to generate task or batch events (with the additional dependencies of `spring-cloud-task-stream` and, in the case of Kafka as the binder, `spring-cloud-stream-binder-kafka`), those events are published during the task lifecycle.
 By default, the destination names for those published events on the broker (Rabbit, Kafka, and others) are the event names themselves (for instance: `task-events`, `job-execution-events`, and so on).
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>task create myTask --definition "myBatchJob"
 dataflow:>stream create task-event-subscriber1 --definition ":task-events > log" --deploy
 dataflow:>task launch myTask
 ----
+====
 
 You can control the destination name for those events by specifying explicit names when launching the task, as follows:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>stream create task-event-subscriber2 --definition ":myTaskEvents > log" --deploy
 dataflow:>task launch myTask --properties "app.myBatchJob.spring.cloud.stream.bindings.task-events.destination=myTaskEvents"
 ----
+====
 
 The following table lists the default task and batch event and destination names on the broker:
 
@@ -441,118 +509,117 @@ The following table lists the default task and batch event and destination names
 
 |*Event*|*Destination*
 
-|Task events
-|`task-events`
-|Job Execution events  |`job-execution-events`
-|Step Execution events|`step-execution-events`
-|Item Read events|`item-read-events`
-|Item Process events|`item-process-events`
-|Item Write events|`item-write-events`
-|Skip events|`skip-events`
+|Task events |`task-events`
+|Job Execution events |`job-execution-events`
+|Step Execution events |`step-execution-events`
+|Item Read events |`item-read-events`
+|Item Process events |`item-process-events`
+|Item Write events |`item-write-events`
+|Skip events |`skip-events`
 |===
 
 [[spring-cloud-dataflow-composed-tasks]]
 == Composed Tasks
 
-Spring Cloud Data Flow lets a user create a directed graph where each node of the graph is a task application.
+Spring Cloud Data Flow lets you create a directed graph, where each node of the graph is a task application.
 This is done by using the DSL for composed tasks.
-A composed task can be created through the RESTful API, the Spring Cloud Data Flow Shell, or the Spring Cloud Data Flow UI.
+You can create a composed task through the RESTful API, the Spring Cloud Data Flow Shell, or the Spring Cloud Data Flow UI.
 
 === Configuring the Composed Task Runner
 
-Composed tasks are executed through a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
+Composed tasks are run through a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
 
 ==== Registering the Composed Task Runner
 
-By default, Spring Cloud Data Flow retrieves the Composed Task Runner application from
+By default, Spring Cloud Data Flow retrieves the composed task runner application from
 Maven Central for Cloud Foundry and local deployments and DockerHub for Kubernetes.  It
-retrieves the Composed Task Runner upon the first use of composed tasks.
+retrieves the composed task runner upon the first use of composed tasks.
 
 If Maven Central or DockerHub cannot be reached for a given Spring Cloud Data Flow
-deployment a new URI can be specified to retrieve the Composed Task Runner using the
+deployment, you can specify a new URI from which to retrieve the composed task runner by setting the
 `spring.cloud.dataflow.task.composed.task.runner.uri` property.
 
 ==== Configuring the Composed Task Runner
 
-The Composed Task Runner application has a `dataflow.server.uri` property that is used for validation and for launching child tasks.
+The composed task runner application has a `dataflow.server.uri` property that is used for validation and for launching child tasks.
 This defaults to `http://localhost:9393`. If you run a distributed Spring Cloud Data Flow server, as you would if you deploy the server on Cloud Foundry or Kubernetes, you need to provide the URI that can be used to access the server.
-You can either provide this `dataflow.server.uri` property for the Composed Task Runner application when launching a composed task or you can provide a `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
-For the latter case, the `dataflow.server.uri` Composed Task Runner application property is automatically set when a composed task is launched.
+You can either provide this by setting the `dataflow.server.uri` property for the composed task runner application when launching a composed task or by setting the `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
+For the latter case, the `dataflow.server.uri` composed task runner application property is automatically set when a composed task is launched.
 
 ===== Configuration Options
 
-The ComposedTaskRunner task has the following options:
+The `ComposedTaskRunner` task has the following options:
 
-* *composed-task-arguments*
-The command line arguments to be used for each of the tasks.  (String, default: <none>).
+* `composed-task-arguments`
+The command line arguments to be used for each of the tasks. (String, default: <none>).
 
-* *increment-instance-enabled*
-Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed. (Boolean, default: false).
-ComposedTaskRunner is built using https://github.com/spring-projects/spring-batch[Spring Batch] and thus upon a successful execution the batch job is considered complete.
-To launch the same ComposedTaskRunner definition multiple times you must set the `increment-instance-enabled` property to true or change the parameters for the definition for each launch.
-When using this option it must be applied for all task launches for the desired application including the first launch.
+* `increment-instance-enabled`
+Allows a single `ComposedTaskRunner` instance to be run again without changing the parameters. The default is `false`, which means a `ComposedTaskRunner` instance can be started only once with a given set of parameters. If `true` it can be re-started. (Boolean, default: `false`).
+ComposedTaskRunner is built by using https://github.com/spring-projects/spring-batch[Spring Batch]. As a result, upon a successful execution, the batch job is considered to be complete.
+To launch the same `ComposedTaskRunner` definition multiple times, you must set the `increment-instance-enabled` property to `true` or change the parameters for the definition for each launch.
+When using this option, it must be applied for all task launches for the desired application, including the first launch.
 
-* *interval-time-between-checks*
-The amount of time in millis that the ComposedTaskRunner will wait between checks of the database to see if a task has completed. (Integer, default: 10000).
-ComposedTaskRunner uses the datastore to determine the status of each child tasks.  This interval indicates to ComposedTaskRunner how often it should check the status its child tasks.
+* `interval-time-between-checks`
+The amount of time, in milliseconds, that the `ComposedTaskRunner` waits between checks of the database to see if a task has completed. (Integer, default: `10000`).
+`ComposedTaskRunner` uses the datastore to determine the status of each child tasks. This interval indicates to `ComposedTaskRunner` how often it should check the status its child tasks.
 
-* *max-wait-time*
-The maximum amount of time in millis that a individual step can run before the execution of the Composed task is failed (Integer, default: 0).
-Determines the maximum time each child task is allowed to run before the CTR will terminate with a failure.  The default of `0` indicates no timeout.
+* `max-wait-time`
+The maximum amount of time, in milliseconds, that an individual step can run before the execution of the Composed task is failed (Integer, default: 0).
+Determines the maximum time each child task is allowed to run before the CTR ends with a failure. The default of `0` indicates no timeout.
 
-* *split-thread-allow-core-thread-timeout*
-Specifies whether to allow split core threads to timeout. Default is false; (Boolean, default: false)
+* `split-thread-allow-core-thread-timeout`
+Specifies whether to allow split core threads to timeout. (Boolean, default: `false`)
 Sets the policy governing whether core threads may timeout and terminate if no tasks arrive within the keep-alive time, being replaced if needed when new tasks arrive.
 
-* *split-thread-core-pool-size*
-Split's core pool size. Default is 1; (Integer, default: 1)
-Each child task contained in a split requires a thread in order to execute.   So for example a definition like: `<AAA || BBB || CCC> && <DDD || EEE>` would require a split-thread-core-pool-size of 3.
-This is because the largest split contains 3 child tasks.   A count of 2 would mean that `AAA` and `BBB` would run in parallel but CCC would wait until either `AAA` or `BBB` to finish in order to run.
+* `split-thread-core-pool-size`
+Split's core pool size. (Integer, default: `1`)
+Each child task contained in a split requires a thread in order to execute. So, for example, a definition such as `<AAA || BBB || CCC> && <DDD || EEE>` would require a `split-thread-core-pool-size` of `3`.
+This is because the largest split contains three child tasks. A count of `2` would mean that `AAA` and `BBB` would run in parallel, but CCC would wait until either `AAA` or `BBB` finish in order to run.
 Then `DDD` and `EEE` would run in parallel.
 
-* *split-thread-keep-alive-seconds*
-Split's thread keep alive seconds. Default is 60. (Integer, default: 60)
-If the pool currently has more than corePoolSize threads, excess threads will be terminated if they have been idle for more than the keepAliveTime.
+* `split-thread-keep-alive-seconds`
+Split's thread keep alive seconds. (Integer, default: `60`)
+If the pool currently has more than `corePoolSize` threads, excess threads are stopped if they have been idle for more than the `keepAliveTime`.
 
-* *split-thread-max-pool-size*
-Split's maximum pool size. Default is {@code Integer.MAX_VALUE} (Integer, default: <none>).
+* `split-thread-max-pool-size`
+Split's maximum pool size. (Integer, default: `Integer.MAX_VALUE`).
 Establish the maximum number of threads allowed for the thread pool.
 
 * *split-thread-queue-capacity*
-Capacity for Split's BlockingQueue. Default is {@code Integer.MAX_VALUE}. (Integer, default: <none>)
-** If fewer than corePoolSize threads are running, the Executor always prefers adding a new thread rather than queuing.
-** If corePoolSize or more threads are running, the Executor always prefers queuing a request rather than adding a new thread.
-** If a request cannot be queued, a new thread is created unless this would exceed maximumPoolSize, in which case, the task will be rejected.
+Capacity for Split's `BlockingQueue`. (Integer, default: `Integer.MAX_VALUE`)
 
-* *split-thread-wait-for-tasks-to-complete-on-shutdown*
-Whether to wait for scheduled tasks to complete on shutdown, not interrupting running tasks and executing all tasks in the queue. Default is false; (Boolean, default: false)
+** If fewer than `corePoolSize` threads are running, the `Executor` always prefers adding a new thread rather than queuing.
+** If `corePoolSize` or more threads are running, the `Executor` always prefers queuing a request rather than adding a new thread.
+** If a request cannot be queued, a new thread is created unless this would exceed `maximumPoolSize`. In that case, the task is rejected.
 
-* *dataflow-server-uri*
-The URI for the dataflow server that will receive task launch requests. (String, default: http://localhost:9393)
+* `split-thread-wait-for-tasks-to-complete-on-shutdown`
+Whether to wait for scheduled tasks to complete on shutdown, not interrupting running tasks and running all tasks in the queue. (Boolean, default: `false`)
 
-* *dataflow-server-username*
-The optional username for the dataflow server that will receive task launch requests.
-Used to access the the dataflow server using Basic Authentication. Not used if 	`dataflow-server-access-token` is set.
+* `dataflow-server-uri`
+The URI for the Data Flow server that receives task launch requests. (String, default: `http://localhost:9393`)
 
-* *dataflow-server-password*
-The optional password for the dataflow server that will receive task launch requests.
-Used to access the the dataflow server using Basic Authentication. Not used if 	`dataflow-server-access-token` is set.
+* `dataflow-server-username`
+The optional username for the Data Flow server that receives task launch requests.
+Used to access the the Data Flow server by using Basic Authentication. Not used if 	`dataflow-server-access-token` is set.
 
-* *dataflow-server-access-token*
-This property sets optional OAuth2 Access Token.
-Typically the value is automatically set using the token from the currently logged in user, if available.
-However, for special use-cases this value can also be set explicitly.
+* `dataflow-server-password`
+The optional password for the Data Flow server that receives task launch requests.
+Used to access the the Data Flow server by using Basic Authentication. Not used if 	`dataflow-server-access-token` is set.
+
+* `dataflow-server-access-token`
+This property sets an optional OAuth2 Access Token.
+Typically, the value is automatically set by using the token from the currently logged-in user, if available.
+However, for special use-cases, this value can also be set explicitly.
 
 [INFO]
 ====
-A special boolean property `dataflow-server-use-user-access-token` exists for the case
-where you want to use the access token of the currently logged user and propagate it to the Composed Task Runner. This property is used
-by Spring Cloud Data Flow and if set to `true` will auto-populate the property `dataflow-server-access-token`.  When using `dataflow-server-use-user-access-token` it must be passed for each task execution.
-In some cases it maybe preferred that the user's `dataflow-server-access-token` must be passed for each composed task launch by default.
-In this case set the Spring Cloud Data Flow property `spring.cloud.dataflow.task.useUserAccessToken` to true.
+A special boolean property, `dataflow-server-use-user-access-token`, exists for when you want to use the access token of the currently logged-in user and propagate it to the Composed Task Runner. This property is used
+by Spring Cloud Data Flow and, if set to `true`, auto-populates the `dataflow-server-access-token` property. When using `dataflow-server-use-user-access-token`, it must be passed for each task execution.
+In some cases, it may be preferred that the user's `dataflow-server-access-token` must be passed for each composed task launch by default.
+In this case, set the Spring Cloud Data Flow `spring.cloud.dataflow.task.useUserAccessToken` property to `true`.
 ====
 
-Note when using the options above as environment variables, convert to uppercase, remove the dash character and replace with the underscore character. For example: increment-instance-enabled would be INCREMENT_INSTANCE_ENABLED.
+Note that, when using these options as environment variables, convert to uppercase, and replace the hyphens with underscores -- for example: `increment-instance-enabled` becomes `INCREMENT_INSTANCE_ENABLED`.
 
 === The Lifecycle of a Composed Task
 
@@ -567,6 +634,7 @@ The lifecycle of a composed task has three parts:
 
 The DSL for the composed tasks is used when creating a task definition through the task create command, as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:> app register --name timestamp --type task --uri maven://org.springframework.cloud.task.app:timestamp-task:<DESIRED_VERSION>
@@ -574,15 +642,17 @@ dataflow:> app register --name mytaskapp --type task --uri file:///home/tasks/my
 dataflow:> task create my-composed-task --definition "mytaskapp && timestamp"
 dataflow:> task launch my-composed-task
 ----
+====
 
-In the preceding example, we assume that the applications to be used by our composed task have not been registered yet.
+In the preceding example, we assume that the applications to be used by our composed task have not yet been registered.
 Consequently, in the first two steps, we register two task applications.
 We then create our composed task definition by using the `task create` command.
-The composed task DSL in the preceding example, when launched, runs mytaskapp and then runs the timestamp application.
+The composed task DSL in the preceding example, when launched, runs `mytaskapp` and then runs the timestamp application.
 
 But before we launch the `my-composed-task` definition, we can view what Spring Cloud Data Flow generated for us.
-This can be done by executing the task list command, as shown (including its output) in the following example:
+This can be done by using the task list command, as shown (including its output) in the following example:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>task list
@@ -594,23 +664,36 @@ dataflow:>task list
 ║my-composed-task-timestamp│timestamp             │unknown    ║
 ╚══════════════════════════╧══════════════════════╧═══════════╝
 ----
+====
 
 In the example, Spring Cloud Data Flow created three task definitions, one for each of the applications that makes up our composed task (`my-composed-task-mytaskapp` and `my-composed-task-timestamp`) as well as the composed task (`my-composed-task`) definition.
-We also see that each of the generated names for the child tasks is made up of the name of the composed task and the name of the application, separated by a dash `-` (as in _my-composed-task_ `-` _mytaskapp_).
+We also see that each of the generated names for the child tasks is made up of the name of the composed task and the name of the application, separated by a hyphen `-` (as in _my-composed-task_ `-` _mytaskapp_).
 
 ===== Task Application Parameters
 
 The task applications that make up the composed task definition can also contain parameters, as shown in the following example:
 
-`dataflow:> task create my-composed-task --definition "mytaskapp --displayMessage=hello && timestamp --format=YYYY"`
+====
+[source,bash]
+----
+dataflow:> task create my-composed-task --definition "mytaskapp --displayMessage=hello && timestamp --format=YYYY"
+----
+====
 
 ==== Launching a Composed Task
-Launching a composed task is done the same way as launching a stand-alone task, as follows:
 
-`task launch my-composed-task`
+Launching a composed task is done in the same way as launching a stand-alone task, as follows:
 
-Once the task is launched, and assuming all the tasks complete successfully, you can see three task executions when executing a `task execution list`, as shown in the following example:
+====
+[source,bash]
+----
+task launch my-composed-task
+----
+====
 
+Once the task is launched, and assuming all the tasks complete successfully, you can see three task executions when you run a `task execution list`, as shown in the following example:
+
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>task execution list
@@ -622,40 +705,48 @@ dataflow:>task execution list
 ║my-composed-task          │711│Wed Apr 12 16:42:55 EDT 2017│Wed Apr 12 16:43:15 EDT 2017│0        ║
 ╚══════════════════════════╧═══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
+====
 
-In the preceding example, we see that `my-compose-task` launched and that it also launched the other tasks in sequential order.
-All of them executed successfully with `Exit Code` as `0`.
+In the preceding example, we see that `my-compose-task` launched and that the other tasks were also launched in sequential order.
+Each of them ran successfully with an `Exit Code` as `0`.
 
-===== Passing properties to the child tasks
+===== Passing Properties to the Child Tasks
 
 To set the properties for child tasks in a composed task graph at task launch time,
-you would use the following format of `app.<composed task definition name>.<child task app name>.<property>`.
-Using the following Composed Task definition as an example:
+use the following format: `app.<composed task definition name>.<child task app name>.<property>`.
+The following listing shows a composed task definition as an example:
 
+====
 [source,bash]
 ----
 dataflow:> task create my-composed-task --definition "mytaskapp  && mytimestamp"
 ----
-To have mytaskapp display 'HELLO' and set the mytimestamp timestamp format to 'YYYY' for the Composed Task definition, you would use the following task launch format:
+====
+
+To have `mytaskapp` display 'HELLO' and set the `mytimestamp` timestamp format to `YYYY` for the composed task definition, use the following task launch format:
+
+====
 [source,bash]
 ----
 task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
 ----
+====
 
-Similar to application properties, the `deployer` properties can also be set for child tasks using the format format of `deployer.<composed task definition name>.<child task app name>.<deployer-property>`.
+Similar to application properties, you can also set the `deployer` properties for child tasks by using the following format: `deployer.<composed task definition name>.<child task app name>.<deployer-property>`:
 
+====
 [source,bash]
 ----
 task launch my-composed-task --properties "deployer.my-composed-task.mytaskapp.memory=2048m,app.my-composed-task.mytimestamp.timestamp.format=HH:mm:ss"
 Launched task 'a1'
 ----
+====
 
-===== Passing arguments to the composed task runner
+===== Passing Arguments to the Composed Task Runner
 
-Command line arguments for the composed task runner can be passed using `--arguments` option.
+You can pass command-line arguments for the composed task runner by using the `--arguments` option:
 
-For example:
-
+====
 [source,bash]
 ----
 dataflow:>task create my-composed-task --definition "<aaa: timestamp || bbb: timestamp>"
@@ -664,11 +755,14 @@ Created new task 'my-composed-task'
 dataflow:>task launch my-composed-task --arguments "--increment-instance-enabled=true --max-wait-time=50000 --split-thread-core-pool-size=4" --properties "app.my-composed-task.bbb.timestamp.format=dd/MM/yyyy HH:mm:ss"
 Launched task 'my-composed-task'
 ----
+====
 
-===== Launching a Composed Task using Custom Composed Task Runner
+===== Launching a Composed Task by using a Custom Composed Task Runner
 
-In some cases a user will need to launch a composed task using a custom version of a Composed Task Runner other than default application that is shipped out-of-the-box.
-To do this, a user will need to register the custom version of the Composed Task Runner and then specify the --composedTaskRunnerName property pointing to the custom application at task launch as shown below:
+In some cases, you need to launch a composed task by using a custom version of a composed task runner other than the default application that is shipped out-of-the-box.
+To do this, you need to register the custom version of the composed task runner and then specify the `composedTaskRunnerName` property to point to the custom application at task launch, as follows:
+
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>app register --name best-ctr --type task --uri maven://the.best.ctr.composed-task-runner:1.0.0.RELEASE
@@ -678,15 +772,16 @@ Created new task 'mycomposedtask'
 
 dataflow:>task launch --name mycomposedtask --composedTaskRunnerName best-ctr
 ----
+====
 
-NOTE: The app specified by the  `composedTaskRunnerName` needs to be a task registered in the Application Registry.
+NOTE: The application specified by the  `composedTaskRunnerName` needs to be a task registered in the Application Registry.
 
 ===== Exit Statuses
 
-The following list shows how the Exit Status is set for each step (task) contained in the composed task following each step execution:
+The following list shows how the exit status is set for each step (task) contained in the composed task following each step execution:
 
 * If the `TaskExecution` has an `ExitMessage`, that is used as the `ExitStatus`.
-* If no `ExitMessage` is present and the `ExitCode` is set to zero, then the `ExitStatus` for the step is `COMPLETED`.
+* If no `ExitMessage` is present and the `ExitCode` is set to zero, the `ExitStatus` for the step is `COMPLETED`.
 * If no `ExitMessage` is present and the `ExitCode` is set to any non-zero number, the `ExitStatus` for the step is `FAILED`.
 
 ==== Destroying a Composed Task
@@ -695,6 +790,7 @@ The command used to destroy a stand-alone task is the same as the command used t
 The only difference is that destroying a composed task also destroys the child tasks associated with it.
 The following example shows the task list before and after using the `destroy` command:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>task list
@@ -712,15 +808,17 @@ dataflow:>task list
 ║Task Name│Task Definition│Task Status║
 ╚═════════╧═══════════════╧═══════════╝
 ----
+====
 
 [[spring-cloud-data-flow-composed-task-stopping]]
 ==== Stopping a Composed Task
+
 In cases where a composed task execution needs to be stopped, you can do so through the:
 
 * RESTful API
 * Spring Cloud Data Flow Dashboard
 
-To stop a composed task through the dashboard, select the Jobs tab and click the Stop button next to the job execution that you want to stop.
+To stop a composed task through the dashboard, select the *Jobs* tab and click the *Stop() button next to the job execution that you want to stop.
 
 The composed task run is stopped when the currently running child task completes.
 The step associated with the child task that was running at the time that the composed task was stopped is marked as `STOPPED` as well as the composed task job execution.
@@ -735,9 +833,9 @@ You can do so through the:
 * Spring Cloud Data Flow Dashboard
 
 To restart a composed task through the shell, launch the task with the same parameters.
-To restart a composed task through the dashboard, select the Jobs tab and click the Restart button next to the job execution that you want to restart.
+To restart a composed task through the dashboard, select the *Jobs* tab and click the *Restart* button next to the job execution that you want to restart.
 
-NOTE: Restarting a Composed Task job that has been stopped (through the Spring Cloud Data Flow Dashboard or RESTful API) relaunches the `STOPPED` child task and then launches the remaining (unlaunched) child tasks in the specified order.
+NOTE: Restarting a composed task job that has been stopped (through the Spring Cloud Data Flow Dashboard or RESTful API) relaunches the `STOPPED` child task and then launches the remaining (unlaunched) child tasks in the specified order.
 
 == Composed Tasks DSL
 
@@ -754,10 +852,15 @@ Conditional execution is expressed by using a double ampersand symbol (`&&`).
 This lets each task in the sequence be launched only if the previous task
 successfully completed, as shown in the following example:
 
-`task create my-composed-task --definition "task1 && task2"`
+====
+[source,bash]
+----
+task create my-composed-task --definition "task1 && task2"
+----
+====
 
-When the composed task called `my-composed-task` is launched, it launches the task called `task1` and, if it completes successfully, then the task called `task2` is launched.
-If `task1` fails, then `task2` does not launch.
+When the composed task called `my-composed-task` is launched, it launches the task called `task1` and, if `task1` completes successfully, the task called `task2` is launched.
+If `task1` fails, `task2` does not launch.
 
 You can also use the Spring Cloud Data Flow Dashboard to create your conditional execution, by using the designer to drag and drop applications that are required and connecting them together to create your directed graph, as shown in the following image:
 
@@ -765,40 +868,42 @@ You can also use the Spring Cloud Data Flow Dashboard to create your conditional
 image::{dataflow-asciidoc}/images/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
 
 The preceding diagram is a screen capture of the directed graph as it being created by using the Spring Cloud Data Flow Dashboard.
-You can see that are four components in the diagram that comprise a conditional execution:
+You can see that four components in the diagram comprise a conditional execution:
 
-* Start icon: All directed graphs start from this symbol.
-There is only one.
-* Task icon: Represents each task in the directed graph.
-* End icon: Represents the termination of a directed graph.
+* *Start* icon: All directed graphs start from this symbol. There is only one.
+* *Task* icon: Represents each task in the directed graph.
+* *End* icon: Represents the end of a directed graph.
 * Solid line arrow: Represents the flow conditional execution flow between:
 ** Two applications.
 ** The start control node and an application.
 ** An application and the end control node.
-* End icon: All directed graphs end at this symbol.
+* *End* icon: All directed graphs end at this symbol.
 
-TIP: You can view a diagram of your directed graph by clicking the Detail button next to the composed task definition on the Definitions tab.
+TIP: You can view a diagram of your directed graph by clicking the *Detail* button next to the composed task definition on the Definitions tab.
 
 [[spring-cloud-data-flow-transitional-execution]]
 === Transitional Execution
 
 The DSL supports fine-grained control over the transitions taken during the execution of the directed graph.
-Transitions are specified by providing a condition for equality based on the exit status of the previous task.
+Transitions are specified by providing a condition for equality that is based on the exit status of the previous task.
 A task transition is represented by the following symbol `-&gt;`.
 
 ==== Basic Transition
 
 A basic transition would look like the following:
 
-```
+====
+[source,bash]
+----
 task create my-transition-composed-task --definition "foo 'FAILED' -> bar 'COMPLETED' -> baz"
-```
+----
+====
 
 In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
 If the exit status of `foo` was `COMPLETED`, `baz` would launch.
-All other statuses returned by `foo` have no effect, and the task would terminate normally.
+All other statuses returned by `cat` have no effect, and the task would end normally.
 
-Using the Spring Cloud Data Flow Dashboard to create the same " `basic transition` " would resemble the following image:
+Using the Spring Cloud Data Flow Dashboard to create the same "`basic transition`" would resemble the following image:
 
 .Basic Transition
 image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
@@ -820,14 +925,17 @@ To create a transitional connector:
 
 ==== Transition With a Wildcard
 
-Wildcards are supported for transitions by the DSL, as shown in the following:
+Wildcards are supported for transitions by the DSL, as shown in the following example:
 
-```
+====
+[source,bash]
+----
 task create my-transition-composed-task --definition "foo 'FAILED' -> bar '*' -> baz"
-```
+----
+====
 
-In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
-For any exit status of `foo` other than `FAILED`, `baz` would launch.
+In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, `bar` task would launch.
+For any exit status of `cat` other than `FAILED`, `baz` would launch.
 
 Using the Spring Cloud Data Flow Dashboard to create the same "`transition with wildcard`" would resemble the following image:
 
@@ -836,12 +944,15 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Com
 
 ==== Transition With a Following Conditional Execution
 
-A transition can be followed by a conditional execution so long as the wildcard
+A transition can be followed by a conditional execution, so long as the wildcard
 is not used, as shown in the following example:
 
-```
+====
+[source,bash]
+----
 task create my-transition-conditional-execution-task --definition "foo 'FAILED' -> bar 'UNKNOWN' -> baz && qux && quux"
-```
+----
+====
 
 In the preceding example, `foo` would launch, and, if it had an exit status of `FAILED`, the `bar` task would launch.
 If `foo` had an exit status of `UNKNOWN`, `baz` would launch.
@@ -852,32 +963,42 @@ Using the Spring Cloud Data Flow Dashboard to create the same "`transition with 
 .Transition With Conditional Execution
 image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
 
-NOTE: In this diagram we see the dashed line (transition) connecting the `foo` application to the target applications, but a solid line connecting the conditional executions between `foo`, `qux`, and  `quux`.
+NOTE: In this diagram, the dashed line (transition) connects the `foo` application to the target applications, but a solid line connects the conditional executions between `foo`, `qux`, and  `quux`.
 
 
 
 [[spring-cloud-data-flow-split-execution]]
 === Split Execution
 
-Splits allow multiple tasks within a composed task to be run in parallel.
+Splits let multiple tasks within a composed task be run in parallel.
 It is denoted by using angle brackets (`<>`) to group tasks and flows that are to be run in parallel.
 These tasks and flows are separated by the double pipe `||` symbol, as shown in the following example:
 
-`task create my-split-task --definition "<foo || bar || baz>"`
+====
+[source,bash]
+----
+task create my-split-task --definition "<foo || bar || baz>"
+----
+====
 
-The preceding example above launches tasks `foo`, `bar` and `baz` in parallel.
+The preceding example launches tasks `foo`, `bar` and `baz` in parallel.
 
 Using the Spring Cloud Data Flow Dashboard to create the same "`split execution`" would resemble the following image:
 
 .Split
 image::{dataflow-asciidoc}/images/dataflow-ctr-split.png[Composed Task Split, scaledwidth="50%"]
 
-With the task DSL, a user may also execute multiple split groups in succession, as shown in the following example:
+With the task DSL, you can also run multiple split groups in succession, as shown in the following example:
 
-`task create my-split-task --definition "<foo || bar || baz> && <qux || quux>"'
+====
+[source,bash]
+----
+task create my-split-task --definition "<foo || bar || baz> && <qux || quux>"
+----
+====
 
-In the preceding example, tasks `foo`, `bar`, and `baz` are launched in parallel.
-Once they all complete, then tasks `qux` and `quux` are launched in parallel.
+In the preceding example, the `foo`, `bar`, and `baz` tasks are launched in parallel.
+Once they all complete, then the `qux` and `quux` tasks are launched in parallel.
 Once they complete, the composed task ends.
 However, if `foo`, `bar`, or `baz` fails, the split containing `qux` and `quux` does not launch.
 
@@ -889,14 +1010,19 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task
 Notice that there is a `SYNC` control node that is inserted by the designer when
 connecting two consecutive splits.
 
-NOTE: Tasks that are used in a split should not set the their `ExitMessage`.   Setting the `ExitMessage` is only to be used
+NOTE: Tasks that are used in a split should not set the their `ExitMessage`. Setting the `ExitMessage` is only to be used
 with  <<spring-cloud-data-flow-transitional-execution, transitions>>.
 
 ==== Split Containing Conditional Execution
 
 A split can also have a conditional execution within the angle brackets, as shown in the following example:
 
-`task create my-split-task --definition "<foo && bar || baz>"`
+====
+[source,bash]
+----
+task create my-split-task --definition "<foo && bar || baz>"
+----
+====
 
 In the preceding example, we see that `foo` and `baz` are launched in parallel.
 However, `bar` does not launch until `foo` completes successfully.
@@ -906,26 +1032,27 @@ Using the Spring Cloud Data Flow Dashboard to create the same " `split containin
 .Split with conditional execution
 image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
 
-==== Establishing the proper thread count for splits
+==== Establishing the Proper Thread Count for Splits
 
-Each child task contained in a split requires a thread in order to execute.  To set this properly you want to look at your graph and count the split that has the largest number of child tasks, this will be the number of threads you will need to utilize.
-To set the thread count use the split-thread-core-pool-size property (defaults to 1).   So for example a definition like: `<AAA || BBB || CCC> && <DDD || EEE>` would require a split-thread-core-pool-size of 3.
-This is because the largest split contains 3 child tasks.   A count of 2 would mean that `AAA` and `BBB` would run in parallel but CCC would wait until either `AAA` or `BBB` to finish in order to run.
+Each child task contained in a split requires a thread in order to run. To set this properly, you want to look at your graph and find the split that has the largest number of child tasks. The number of child tasks in that split is the number of threads you need.
+To set the thread count, use the `split-thread-core-pool-size property` (defaults to `1`). So, for example, a definition such as `<AAA || BBB || CCC> && <DDD || EEE>` requires a `split-thread-core-pool-size` of `3`.
+This is because the largest split contains three child tasks. A count of two would mean that `AAA` and `BBB` would run in parallel but CCC would wait for either `AAA` or `BBB` to finish in order to run.
 Then `DDD` and `EEE` would run in parallel.
 
 [[spring-cloud-dataflow-launch-tasks-from-stream]]
 == Launching Tasks from a Stream
 
-You can launch a task from a stream by using the https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc[tasklauncher-dataflow] sink.
+You can launch a task from a stream by using the https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc[`tasklauncher-dataflow`] sink.
 The sink connects to a Data Flow server and uses its REST API to launch any defined task.
-The sink accepts a https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc#payload[JSON payload] representing a `task launch request` which provides the name of the task to launch, and may include command line arguments and deployment properties.
+The sink accepts a https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc#payload[JSON payload] representing a `task launch request`, which provides the name of the task to launch and may include command line arguments and deployment properties.
 
-The https://github.com/spring-cloud-stream-app-starters/core/blob/master/common/app-starters-task-launch-request-common/README.adoc[app-starters-task-launch-request-common] component , in conjunction with Spring Cloud Stream https://docs.spring.io/spring-cloud-stream/docs/current-snapshot/reference/htmlsingle/#_functional_composition[functional composition], can transform the output of any source or processor to a task launch request.
+The https://github.com/spring-cloud-stream-app-starters/core/blob/master/common/app-starters-task-launch-request-common/README.adoc[`app-starters-task-launch-request-common`] component, in conjunction with Spring Cloud Stream https://docs.spring.io/spring-cloud-stream/docs/current-snapshot/reference/htmlsingle/#_functional_composition[functional composition], can transform the output of any source or processor to a task launch request.
 
-Adding a dependency to `app-starters-task-launch-request-common`, auto-configures a `java.util.function.Function` implementation, registered via https://cloud.spring.io/spring-cloud-function/[Spring Cloud Function] as `taskLaunchRequest`.
+Adding a dependency to `app-starters-task-launch-request-common` auto-configures a `java.util.function.Function` implementation, registered through https://cloud.spring.io/spring-cloud-function/[Spring Cloud Function] as a `taskLaunchRequest`.
 
-For example, you can start with the https://github.com/spring-cloud-stream-app-starters/time/tree/master/spring-cloud-starter-stream-source-time[time] source, add the following dependency, build it, and register it as a custom source. We'll call it `time-tlr` in this example.
+For example, you can start with the https://github.com/spring-cloud-stream-app-starters/time/tree/master/spring-cloud-starter-stream-source-time[time] source, add the following dependency, build it, and register it as a custom source. We call it `time-tlr` in this example:
 
+====
 [source,xml]
 ----
 <dependency>
@@ -933,28 +1060,35 @@ For example, you can start with the https://github.com/spring-cloud-stream-app-s
     <artifactId>app-starters-task-launch-request-common</artifactId>
 </dependency>
 ----
+====
 
 TIP: https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] provides a great starting point for creating stream applications.
 
-Next, <<applications.adoc#applications, register>> the `tasklauncher-dataflow` sink, and create a task (we will use the provided timestamp task).
+Next, <<applications.adoc#applications, register>> the `tasklauncher-dataflow` sink and create a task (we use the provided timestamp task):
 
-```
+====
+[source,bash]
+----
 stream create --name task-every-minute --definition "time-tlr --trigger.fixed-delay=60 --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task | tasklauncher-dataflow" --deploy
-```
+----
+====
 
-The preceding stream will produce a task launch request every minute. The request provides the name of the task to launch : `{"name":"timestamp-task"}`.
+The preceding stream produces a task launch request every minute. The request provides the name of the task to launch: `{"name":"timestamp-task"}`.
 
+The following stream definition illustrates the use of command line arguments. It produces messages such as `{"args":["foo=bar","time=12/03/18 17:44:12"],"deploymentProps":{},"name":"timestamp-task"}` to provide command-line arguments to the task:
 
-The following stream definition illustrates the use of command line arguments. It will produce messages like `{"args":["foo=bar","time=12/03/18 17:44:12"],"deploymentProps":{},"name":"timestamp-task"}` to provide command line arguments to the task:
-
-```
+====
+[source,bash]
+----
 stream create --name task-every-second --definition "time-tlr --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task --task.launch.request.args=foo=bar --task.launch.request.arg-expressions=time=payload | tasklauncher-dataflow" --deploy
-```
+----
+====
 
-Note the use of SpEL expressions to map each message payload to the `time` command line argument, along with a static argument `foo=bar`.
+Note the use of SpEL expressions to map each message payload to the `time` command-line argument, along with a static argument (`foo=bar`).
 
 You can then see the list of task executions by using the shell command `task execution list`, as shown (with its output) in the following example:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>task execution list
@@ -967,6 +1101,7 @@ dataflow:>task execution list
 ║timestamp-task_13467│1 │Tue May 02 12:10:50 EDT 2017│Tue May 02 12:10:50 EDT 2017│0        ║
 ╚════════════════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
 ----
+====
 
 In this example, we have shown how to use the `time` source to launch a task at a fixed rate.
 This pattern may be applied to any source to launch a task in response to any event.
@@ -978,115 +1113,125 @@ Since we use the `ComposedTaskRunner` directly, we need to set up the task defin
 Suppose we wanted to create the following composed task definition: `AAA && BBB`.
 The first step would be to create the task definitions, as shown in the following example:
 
+====
 [source]
 ----
 task create composed-task-runner --definition "composed-task-runner"
 task create AAA --definition "timestamp"
 task create BBB --definition "timestamp"
 ----
+====
 
 NOTE: Releases of `ComposedTaskRunner` can be found
 https://github.com/spring-cloud-task-app-starters/composed-task-runner/releases[here].
 
 Now that the task definitions we need for composed task definition are ready, we need to create a stream that launches `ComposedTaskRunner`.
-So, in this case, we create a stream with
+So, in this case, we create a stream with:
 
-* The `time` source customized to emit task launch requests, as shown <<spring-cloud-dataflow-launch-tasks-from-stream, above>>.
+* The `time` source customized to emit task launch requests, as shown <<spring-cloud-dataflow-launch-tasks-from-stream, earlier>>.
 * The `tasklauncher-dataflow` sink that launches the `ComposedTaskRunner`
 
 The stream should resemble the following:
 
+====
 [source]
 ----
 stream create ctr-stream --definition "time --fixed-delay=30 --task.launch.request.task-name=composed-task-launcher --task.launch.request.args=--graph=AAA&&BBB,--increment-instance-enabled=true | tasklauncher-dataflow"
 ----
+====
 
 For now, we focus on the configuration that is required to launch the `ComposedTaskRunner`:
 
-* *graph*: this is the graph that is to be executed by the `ComposedTaskRunner`.
+* `graph`: This is the graph that is to be executed by the `ComposedTaskRunner`.
 In this case it is `AAA&&BBB`.
-* *increment-instance-enabled*: This lets each execution of `ComposedTaskRunner` be unique.
+* `increment-instance-enabled`: This lets each execution of `ComposedTaskRunner` be unique.
 `ComposedTaskRunner` is built by using https://projects.spring.io/spring-batch/[Spring Batch].
 Thus, we want a new Job Instance for each launch of the `ComposedTaskRunner`.
 To do this, we set `increment-instance-enabled` to be `true`.
 
 [[sharing-spring-cloud-dataflows-datastore-with-tasks]]
 == Sharing Spring Cloud Data Flow's Datastore with Tasks
-As discussed in the <<spring-cloud-dataflow-task, Tasks>> documentation Spring
-Cloud Data Flow allows a user to view Spring Cloud Task App executions. So in
-this section we will discuss what is required by a Task Application and Spring
+
+As discussed in the <<spring-cloud-dataflow-task, Tasks>> documentation, Spring
+Cloud Data Flow lets you view Spring Cloud Task application executions. So, in
+this section, we discuss what is required for a task application and Spring
 Cloud Data Flow to share the task execution information.
 
 [[a-common-datastore-dependency]]
 === A Common DataStore Dependency
+
 Spring Cloud Data Flow supports many databases out-of-the-box,
-so all the user typically has to do is declare the `spring_datasource_*` environment variables
-to establish what data store Spring Cloud Data Flow will need.
-So whatever database you decide to use for Spring Cloud Data Flow make sure that the your task also
-includes that database dependency in its `pom.xml` or `gradle.build` file.  If the database dependency
-that is used by Spring Cloud Data Flow is not present in the Task Application, the task will fail
-and the task execution will not be recorded.
+so all you typically need to do is declare the `spring_datasource_*` environment variables
+to establish what data store Spring Cloud Data Flow needs.
+Regardless of which database you decide to use for Spring Cloud Data Flow, make sure that your task also
+includes that database dependency in its `pom.xml` or `gradle.build` file. If the database dependency
+that is used by Spring Cloud Data Flow is not present in the Task Application, the task fails
+and the task execution is not recorded.
 
 [[a-common-datastore]]
 === A Common Data Store
+
 Spring Cloud Data Flow and your task application must access the same datastore instance.
 This is so that the task executions recorded by the task application can be read by Spring Cloud Data Flow to list them in the Shell and Dashboard views.
-Also the task app must have read  & write privileges to the task data tables that are used by Spring Cloud Data Flow.
+Also, the task application must have read and write privileges to the task data tables that are used by Spring Cloud Data Flow.
 
-Given the understanding of Datasource dependency between Task apps and Spring Cloud Data Flow, let's review how to apply them in various Task orchestration scenarios.
+Given this understanding of the datasource dependency between Task applications and Spring Cloud Data Flow, you can now review how to apply them in various Task orchestration scenarios.
 
 [[datasource-simple-task-launch]]
 ==== Simple Task Launch
+
 When launching a task from Spring Cloud Data Flow, Data Flow adds its datasource
 properties (`spring.datasource.url`, `spring.datasource.driverClassName`, `spring.datasource.username`, `spring.datasource.password`)
-to the app properties of the task being launched.  Thus a task application
-will record its task execution information to the Spring Cloud Data Flow repository.
+to the application properties of the task being launched. Thus, a task application
+records its task execution information to the Spring Cloud Data Flow repository.
 
 ==== Composed Task Runner
-Spring Cloud Data Flow allows a user to create a directed graph where each node
-of the graph is a task application and this is done via the
-https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc[Composed Task Runner].
-In this case the rules that applied to a <<datasource-simple-task-launch, Simple Task Launch>>
-or Task Launcher Sink apply to the composed task runner as well.
-All child apps must also have access to the datastore that is being used by the composed task runner
-Also, All child apps must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
 
-==== Launching a task externally from Spring Cloud Data Flow
-Users may wish to launch Spring Cloud Task applications via another method (scheduler for example) but still track the task execution via Spring Cloud Data Flow.
-This can be done so long as the task applications observe the rules specified <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
+Spring Cloud Data Flow lets you create a directed graph where each node
+of the graph is a task application. This is done through the
+https://github.com/spring-cloud-task-app-starters/composed-task-runner/blob/master/spring-cloud-starter-task-composedtaskrunner/README.adoc[composed task runner].
+In this case, the rules that applied to a <<datasource-simple-task-launch,simple task launch>>
+or task launcher sink apply to the composed task runner as well.
+All child applications must also have access to the datastore that is being used by the composed task runner.
+Also, all child applications must have the same database dependency as the composed task runner enumerated in their `pom.xml` or `gradle.build` file.
 
-NOTE: If a user wishes to use Spring Cloud Data Flow to view their
-https://projects.spring.io/spring-batch/[Spring Batch] jobs, the user must make sure that
-their batch application use the `@EnableTask` annotation and follow the rules enumerated <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
+==== Launching a Task Externally from Spring Cloud Data Flow
+
+You can launch Spring Cloud Task applications by using another method (scheduler, for example) but still track the task execution in Spring Cloud Data Flow.
+You can do so, provided the task applications observe the rules specified <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
+
+NOTE: If you want to use Spring Cloud Data Flow to view your
+https://projects.spring.io/spring-batch/[Spring Batch] jobs, make sure that
+your batch application uses the `@EnableTask` annotation and follow the rules enumerated <<a-common-datastore-dependency, here>> and <<a-common-datastore, here>>.
 More information is available https://github.com/spring-projects/spring-batch-admin/blob/master/MIGRATION.md[here].
 
 [[spring-cloud-dataflow-schedule-launch-tasks]]
 == Scheduling Tasks
 
-Spring Cloud Data Flow lets a user schedule the execution of tasks via a cron expression.
-A schedule can be created through the RESTful API or the Spring Cloud Data Flow UI.
+Spring Cloud Data Flow lets you schedule the execution of tasks with a `cron` expression.
+You can create a schedule through the RESTful API or the Spring Cloud Data Flow UI.
 
 === The Scheduler
 
-Spring Cloud Data Flow will schedule the execution of its tasks via a scheduling agent that is available on the cloud platform.
-When using the Cloud Foundry platform Spring Cloud Data Flow will use the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF Scheduler].
+Spring Cloud Data Flow schedules the execution of its tasks through a scheduling agent that is available on the cloud platform.
+When using the Cloud Foundry platform, Spring Cloud Data Flow uses the https://www.cloudfoundry.org/the-foundry/scheduler/[PCF Scheduler].
 When using Kubernetes, a https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/[CronJob] will be used.
 
-NOTE: Scheduled tasks do not implement the continuous deployment feature.  Any changes to application version or properties for a task definition via Spring Cloud Data Flow will not affect scheduled tasks.
+NOTE: Scheduled tasks do not implement the continuous deployment feature. Any changes to application version or properties for a task definition in Spring Cloud Data Flow will not affect scheduled tasks.
 
 .Architectural Overview
 image::{dataflow-asciidoc}/images/dataflow-scheduling-architecture.png[Scheduler Architecture Overview, scaledwidth="50%"]
 
 === Enabling Scheduling
 
-By default the Spring Cloud Data Flow leaves the scheduling feature disabled.  To enable the scheduling feature the following feature properties must be set to `true`:
+By default, Spring Cloud Data Flow leaves the scheduling feature disabled. To enable the scheduling feature, set the following feature properties to `true`:
 
 * `spring.cloud.dataflow.features.schedules-enabled`
 * `spring.cloud.dataflow.features.tasks-enabled`
 
 === The Lifecycle of a Schedule
 
-The lifecycle of a schedule has 2 parts:
+The lifecycle of a schedule has three parts:
 
 * <<spring-cloud-data-flow-schedule-scheduling>>
 * <<spring-cloud-data-flow-schedule-unscheduling>>
@@ -1102,40 +1247,51 @@ You can schedule a task execution via the:
 * Spring Cloud Data Flow RESTful API
 
 ==== Scheduling a Task
-To schedule a task using the shell, use the `task schedule create` command to create the schedule as shown in the following example:
-```
+To schedule a task using the shell, use the `task schedule create` command to create the schedule, as shown in the following example:
+
+====
+[source,bash]
+----
 dataflow:>task schedule create --definitionName mytask --name mytaskschedule --expression '*/1 * * * *'
 Created schedule 'mytaskschedule'
-```
-In the example above we created a schedule `mytaskschedule` for the task definition `mytask`.  This schedule will launch `mytask` once a minute.
+----
+====
 
-NOTE: If using Cloud Foundry the cron expression above would be: `*/1 * ? * *`.  This is because Cloud Foundry uses the Quartz cron expression format.
+In the earlier example, we created a schedule called `mytaskschedule` for the task definition called `mytask`.  This schedule launches `mytask` once a minute.
+
+NOTE: If using Cloud Foundry, the `cron` expression above would be: `*/1 * ? * *`. This is because Cloud Foundry uses the Quartz `cron` expression format.
 
 [[spring-cloud-data-flow-schedule-unscheduling]]
 ==== Deleting a Schedule
 
-You can delete a schedule via the:
+You can delete a schedule by using the:
 
 * Spring Cloud Data Flow Shell
 * Spring Cloud Data Flow Dashboard
 * Spring Cloud Data Flow RESTful API
 
-To delete a task schedule using the shell, use the `task schedule destroy` command  as shown in the following example:
-```
+To delete a task schedule by using the shell, use the `task schedule destroy` command, as shown in the following example:
+
+====
+[source,bash]
+----
 dataflow:>task schedule destroy --name mytaskschedule
 Deleted task schedule 'mytaskschedule'
-```
+----
+====
 
 [[spring-cloud-data-flow-schedule-list]]
 ==== Listing Schedules
-You can view the available schedules via the:
+
+You can view the available schedules by using the:
 
 * Spring Cloud Data Flow Shell
 * Spring Cloud Data Flow Dashboard
 * Spring Cloud Data Flow RESTful API
 
-To view your schedules via the shell use the `task schedule list` command as shown in the following example:
+To view your schedules from the shell, use the `task schedule list` command, as shown in the following example:
 
+====
 [source,bas,options="nowrap"h]
 ----
 dataflow:>task schedule list
@@ -1145,18 +1301,19 @@ dataflow:>task schedule list
 ║mytaskschedule            │mytask              │spring.cloud.scheduler.cron.expression = */1 * * * *║
 ╚══════════════════════════╧════════════════════╧════════════════════════════════════════════════════╝
 ----
+====
 
-NOTE: Instructions to create, delete and list schedules via the Spring Cloud Data Flow UI can be found https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[here].
+NOTE: Instructions to create, delete, and list schedules by using the Spring Cloud Data Flow UI can be found https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[here].
 
 [[spring-cloud-dataflow-task-cd]]
 == Continuous Deployment
-As task applications evolve, you want to get your updates to production.  This section walks through the capabilities that Spring Cloud Data Flow provides around being able to update task applications.
+As task applications evolve, you want to get your updates to production. This section walks through the capabilities that Spring Cloud Data Flow provides around being able to update task applications.
 
-When a task application is registered (<<spring-cloud-dataflow-register-task-apps>>), a version is associated with it.  A task application can have multiple versions associated with it, with one selected as the default.  The following image illustrates an application with multiple versions associated with it (see the timestamp entry).
+When a task application is registered (see <<spring-cloud-dataflow-register-task-apps>>), a version is associated with it.  A task application can have multiple versions associated with it, with one selected as the default. The following image illustrates an application with multiple versions associated with it (see the timestamp entry).
 
 image::{dataflow-asciidoc}/images/dataflow-task-application-versions.png[Task Application Versions, scaledwidth="50%"]
 
-Versions of an application are managed by registering multiple applications with the same name and coordinates, _except_ the version.  For example, if you were to register an application with the following values, you would get one application registered with two versions (2.0.0.RELEASE and 2.1.0.RELEASE):
+Versions of an application are managed by registering multiple applications with the same name and coordinates, _except_ the version. For example, if you were to register an application with the following values, you would get one application registered with two versions (2.0.0.RELEASE and 2.1.0.RELEASE):
 
 * Application 1
 ** Name: `timestamp`
@@ -1167,48 +1324,50 @@ Versions of an application are managed by registering multiple applications with
 ** Type: `task`
 ** URI: `maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE`
 
-Besides having multiple versions, Spring Cloud Data Flow needs to know which version to run on the next launch.  This is indicated by setting a version to be the default version.  Whatever version of a task application is configured as the default version is the one to be run on the next launch request.  You can see which version is the default in the UI as this image shows:
+Besides having multiple versions, Spring Cloud Data Flow needs to know which version to run on the next launch. This is indicated by setting a version to be the default version. Whatever version of a task application is configured as the default version is the one to be run on the next launch request. You can see which version is the default in the UI, as this image shows:
 
 image::{dataflow-asciidoc}/images/dataflow-task-default-version.png[Task Application Default Version, scaledwidth="50%"]
 
 === Task Launch Lifecycle
-In previous versions of Spring Cloud Data Flow, when the request to launch a task was received, Spring Cloud Data Flow would deploy the application (if needed) and run it.  If the application was being run on a platform that did not need to have the application deployed every time (CloudFoundry for example), the previously deployed application was used.  This flow has changed in 2.3.  The following image shows what happens when a task launch request comes in now:
+
+In previous versions of Spring Cloud Data Flow, when the request to launch a task was received, Spring Cloud Data Flow would deploy the application (if needed) and run it. If the application was being run on a platform that did not need to have the application deployed every time (CloudFoundry, for example), the previously deployed application was used. This flow has changed in 2.3. The following image shows what happens when a task launch request comes in now:
 
 image::{dataflow-asciidoc}/images/dataflow-task-launch-flow.png[Flow For Launching A Task, scaledwidth="50%"]
 
-There are three main flows to consider in the preceding diagram.  Launching the first time or launching with no changes is one. The other is launching when there are changes.  We look at the flow with no changes first.
+There are three main flows to consider in the preceding diagram. Launching the first time or launching with no changes is one. The other two are launching when there are changes but the appliction is not currently and launching when there are changes and the application is running. We look at the flow with no changes first.
 
-==== Launch a Task With No Changes
-1. A launch request comes into to Data Flow.  Data Flow determines that an upgrade is not required, since nothing has changed (no properties, deployment properites, or versions have changed since the last execution).
+==== Launching a Task With No Changes
+
+1. A launch request comes into Data Flow. Data Flow determines that an upgrade is not required, since nothing has changed (no properties, deployment properties, or versions have changed since the last execution).
 
 [start=5]
-5. On platforms that cache a deployed artifact (CloudFoundry at the writing of this documentation), Data Flow checks whether the application was previously deployed.
-6. If the application needs to be deployed, Data Flow does the deployment of the task application.
+5. On platforms that cache a deployed artifact (CloudFoundry, at this writing), Data Flow checks whether the application was previously deployed.
+6. If the application needs to be deployed, Data Flow deploys the task application.
 7. Data Flow launches the application.
 
-That flow is the default behavior and occurs every time a request comes in if nothing has changed.  It is important to note that this is the same flow that Data Flow has always executed for launching of tasks.
+This flow is the default behavior and, if nothing has changed, occurs every time a request comes in. Note that this is the same flow that Data Flow has always use for launching tasks.
 
-==== Launch a Task With Changes That Is Not Currently Running
-The second flow to consider when launching a task is whether there was a change in any of the task application version, application properties, or deployment properties.  In this case, the following flow is executed:
+==== Launching a Task With Changes That Is Not Currently Running
 
-1. A launch request comes into Data Flow.  Data Flow determines that an upgrade is required since there was a change in either task application version, application properties, or deployment properties.
+The second flow to consider when launching a task is when a task is not running but there is a change in any of the task application version, application properties, or deployment properties. In this case, the following flow is executed:
+
+1. A launch request comes into Data Flow. Data Flow determines that an upgrade is required, since there was a change in the task application version, the application properties, or the deployment properties.
 2. Data Flow checks to see whether another instance of the task definition is currently running.
 
 [start=4]
-4. If there is not another instance of the task definition currently running, the old deployment is deleted.
-5. On platforms that cache a deployed artifact (CloudFoundry at the writing of this documentation), Data Flow checks whether the application was previously deployed (this check will evaluate to `false` in this flow since the old deployment was deleted).
+4. If there is no other instance of the task definition currently running, the old deployment is deleted.
+5. On platforms that cache a deployed artifact (CloudFoundry, at this writing), Data Flow checks whether the application was previously deployed (this check evaluates to `false` in this flow, since the old deployment was deleted).
 6. Data Flow does the deployment of the task application with the updated values (new application version, new merged properties, and new merged deployment properties).
 7. Data Flow launches the application.
 
 This flow is what fundamentally enables continuous deployment for Spring Cloud Data Flow.
 
 ==== Launch a Task With Changes While Another Instance Is Running
-The last main flow is when a launch request comes to Spring Cloud Data Flow to do an upgrade but the task definition is currently running.  In this case, the launch is blocked due to the requirement to delete the current application.  On some platforms (CloudFoundry at the writing of this document), deleting the application causes all currently running applications to be shut down.  This feature prevents that from happening.  The following process describes what happens when a task changes while another instance is running:
 
-1. A launch request comes into to Data Flow.  Data Flow determines that an upgrade is required, since there was a change in either task application version, application properties, or deployment properties.
+The last main flow is when a launch request comes to Spring Cloud Data Flow to do an upgrade but the task definition is currently running. In this case, the launch is blocked due to the requirement to delete the current application. On some platforms (CloudFoundry, at this writing), deleting the application causes all currently running applications to be shut down. This feature prevents that from happening. The following process describes what happens when a task changes while another instance is running:
+
+1. A launch request comes into Data Flow. Data Flow determines that an upgrade is required, since there was a change in the task application version, the application properties, or the deployment properties.
 2. Data Flow checks to see whether another instance of the task definition is currently running.
-3. Data Flow prevents the launch from happening because other instances of the task definition are running.
+3. Data Flow prevents the launch from happening, because other instances of the task definition are running.
 
-NOTE: Any launch that requires an upgrade of a task definition that is running at the time of the request is blocked from executing due to the need to delete any currently running tasks.
-
-
+NOTE: Any launch that requires an upgrade of a task definition that is running at the time of the request is blocked from running due to the need to delete any currently running tasks.

@@ -1,7 +1,10 @@
 [appendix]
 [[identity-providers]]
 == Identity Providers
-This appendix contains information how a spesific providers can be setup to work
-with dataflow security.
+
+This appendix contains information how specific providers can be set up to work
+with Data Flow security.
+
+At this writing, Azure is the only identity provider.
 
 include::appendix-identity-provider-azure.adoc[]
