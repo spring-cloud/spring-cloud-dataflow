@@ -14,20 +14,21 @@ this section.
 
 [[spring-cloud-dataflow-stream-intro]]
 == Introduction
-A Stream is are a collection of long-lived https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
-A text-based DSL defines the configuration and data flow between the applications.  While many applications are provided for you to implement common use-cases, you typically create a custom Spring Cloud Stream application to implement custom business logic.
+
+A Stream is a collection of long-lived https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] applications that communicate with each other over messaging middleware.
+A text-based DSL defines the configuration and data flow between the applications. While many applications are provided for you to implement common use-cases, you typically create a custom Spring Cloud Stream application to implement custom business logic.
 
 The general lifecycle of a Stream is:
 
 . Register applications.
 . Create a Stream Definition.
 . Deploy the Stream.
-. Undeploy or Destroy the Stream.
-. Upgrade or Rollback applications in the Stream.
+. Undeploy or destroy the Stream.
+. Upgrade or roll back applications in the Stream.
 
-For deploying streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named https://cloud.spring.io/spring-cloud-skipper/[Skipper].
+For deploying Streams, the Data Flow Server has to be configured to delegate the deployment to a new server in the Spring Cloud ecosystem named https://cloud.spring.io/spring-cloud-skipper/[Skipper].
 
-Furthermore you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
+Furthermore, you can configure Skipper to deploy applications to one or more Cloud Foundry orgs and spaces, one or more namespaces on a Kubernetes cluster, or to the local machine.
 When deploying a stream in Data Flow, you can specify which platform to use at deployment time.
 Skipper also provides Data Flow with the ability to perform updates to deployed streams.
 There are many ways the applications in a stream can be updated, but one of the most common examples is to upgrade a processor application with new custom business logic while leaving the existing source and sink applications alone.
@@ -36,20 +37,20 @@ There are many ways the applications in a stream can be updated, but one of the 
 [[spring-cloud-dataflow-stream-intro-dsl]]
 === Stream Pipeline DSL
 
-A stream is defined by using a unix-inspired link:https://en.wikipedia.org/wiki/Pipeline_(Unix)[Pipeline syntax].
-The syntax uses vertical bars, also known as "`pipes`" to connect multiple commands.
+A stream is defined by using a Unix-inspired link:https://en.wikipedia.org/wiki/Pipeline_(Unix)[Pipeline syntax].
+The syntax uses vertical bars, known as "`pipes`", to connect multiple commands.
 The command `ls -l | grep key | less` in Unix takes the output of the `ls -l` process and pipes it to the input of the `grep key` process.
-The output of `grep` in turn is sent to the input of the `less` process.
+The output of `grep` is, in turn, sent to the input of the `less` process.
 Each `|` symbol connects the standard output of the command on the left to the standard input of the command on the right.
 Data flows through the pipeline from left to right.
 
 In Data Flow, the Unix command is replaced by a https://cloud.spring.io/spring-cloud-stream/[Spring Cloud Stream] application and each pipe symbol represents connecting the input and output of applications over messaging middleware, such as RabbitMQ or Apache Kafka.
 
 Each Spring Cloud Stream application is registered under a simple name.
-The registration process specifies where the application can be obtained (for example, in a Maven Repository or a Docker registry).  You can find out more information on how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
+The registration process specifies where the application can be obtained (for example, in a Maven Repository or a Docker registry). You can find out more about how to register Spring Cloud Stream applications in this <<spring-cloud-dataflow-register-stream-apps,section>>.
 In Data Flow, we classify the Spring Cloud Stream applications as Sources, Processors, or Sinks.
 
-As a simple example, consider the collection of data from an HTTP Source writing to a File Sink.
+As a simple example, consider the collection of data from an HTTP Source and writing to a File Sink.
 Using the DSL, the stream description is:
 
 `http | file`
@@ -64,20 +65,23 @@ Stream definitions can be created by using the shell's `stream create` command, 
 
 The Stream DSL is passed in to the `--definition` command option.
 
-The deployment of stream definitions is done through the shell's `stream deploy` command.
+The deployment of stream definitions is done through the Shell's `stream deploy` command, as follows:
 
 `dataflow:> stream deploy --name ticktock`
 
 The xref:getting-started#getting-started[Getting Started] section shows you how to start the server and how to start and use the Spring Cloud Data Flow shell.
 
-Note that the shell calls the Data Flow Servers' REST API. For more information on making HTTP requests directly to the server, consult the <<api-guide, REST API Guide>>.
+Note that the shell calls the Data Flow Server's REST API. For more information on making HTTP requests directly to the server, see the <<api-guide, REST API Guide>>.
 
 [[spring-cloud-dataflow-stream-app-dsl]]
 === Stream Application DSL
 
-The Stream Application DSL can be used to define custom binding properties for each of the Spring Cloud Stream applications.
-Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/stream-application-dsl/[Stream Application DSL] section of the microsite for more information.
+You can use the Stream Application DSL to define custom binding properties for each of the Spring Cloud Stream applications.
+See the link:https://dataflow.spring.io/docs/feature-guides/streams/stream-application-dsl/[Stream Application DSL] section of the microsite for more information.
 
+Consider the following Java interface, which defines an input method and two output methods:
+
+====
 [source,java]
 ----
 public interface Barista {
@@ -92,9 +96,11 @@ public interface Barista {
     MessageChannel coldDrinks();
 }
 ----
+====
 
-or as is common when creating a Kafka Streams application,
+Further consider the following Java interface, which is typical for creating a Kafka Streams application:
 
+====
 [source,java]
 ----
 interface KStreamKTableBinding {
@@ -106,21 +112,28 @@ interface KStreamKTableBinding {
     KTable<?, ?> inputTable();
 }
 ----
+====
 
 In these cases with multiple input and output bindings, Data Flow cannot make any assumptions about the flow of data from one application to another.
-Therefore the developer needs to set the binding properties to 'wire up' the application.
-The *Stream Application DSL* uses a `double pipe`, instead of the `pipe symbol`, to indicate that Data Flow should not configure the binding properties of the application.  Think of `||` as meaning 'in parallel'.
-For example:
+Therefore, you need to set the binding properties to "`wire up`" the application.
+The *Stream Application DSL* uses a "`double pipe`", instead of the "`pipe symbol`", to indicate that Data Flow should not configure the binding properties of the application. Think of `||` as meaning "`in parallel`".
+The following example shows such a "`parallel`" definition:
 
-`dataflow:> stream create --definition "orderGeneratorApp || baristaApp || hotDrinkDeliveryApp || coldDrinkDeliveryApp" --name myCafeStream`
+====
+[source,bash]
+----
+dataflow:> stream create --definition "orderGeneratorApp || baristaApp || hotDrinkDeliveryApp || coldDrinkDeliveryApp" --name myCafeStream
+----
+====
 
-NOTE: Breaking Change!  Versions of SCDF Local, Cloud Foundry 1.7.0 to 1.7.2 and SCDF Kubernetes 1.7.0 to 1.7.1 used the `comma` character as the separator between applications.  This caused breaking changes in the traditional Stream DSL.  While not ideal, changing the separator character was felt to be the best solution with the least impact on existing users.
+NOTE: Breaking Change! Versions of SCDF Local, Cloud Foundry 1.7.0 to 1.7.2 and SCDF Kubernetes 1.7.0 to 1.7.1 used the `comma` character as the separator between applications. This caused breaking changes in the traditional Stream DSL. While not ideal, changing the separator character was felt to be the best solution with the least impact on existing users.
 
-There are four applications in this stream.
- The baristaApp has two output destinations, `hotDrinks` and `coldDrinks` intended to be consumed by the `hotDrinkDeliveryApp` and `coldDrinkDeliveryApp` respectively.
+This stream has four applications.
+`baristaApp` has two output destinations, `hotDrinks` and `coldDrinks`, intended to be consumed by the `hotDrinkDeliveryApp` and `coldDrinkDeliveryApp`, respectively.
 When deploying this stream, you need to set the binding properties so that the `baristaApp` sends hot drink messages to the `hotDrinkDeliveryApp` destination and cold drink messages to the `coldDrinkDeliveryApp` destination.
-For example
+The following listing does so:
 
+====
 [source,bash,subs=attributes]
 ----
 app.baristaApp.spring.cloud.stream.bindings.hotDrinks.destination=hotDrinksDest
@@ -128,62 +141,71 @@ app.baristaApp.spring.cloud.stream.bindings.coldDrinks.destination=coldDrinksDes
 app.hotDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=hotDrinksDest
 app.coldDrinkDeliveryApp.spring.cloud.stream.bindings.input.destination=coldDrinksDest
 ----
+====
 
-If you want to use consumer groups, you will need to set the Spring Cloud Stream application property `spring.cloud.stream.bindings.<channelName>.producer.requiredGroups` and `spring.cloud.stream.bindings.<channelName>.group` on the producer and consumer applications respectively.
+If you want to use consumer groups, you need to set the Spring Cloud Stream application properties, `spring.cloud.stream.bindings.<channelName>.producer.requiredGroups` and `spring.cloud.stream.bindings.<channelName>.group`, on the producer and consumer applications respectively.
 
-Another common use case for the Stream Application DSL is to deploy a http gateway application that sends a synchronous request/reply message to a Kafka or RabbitMQ application.
-In this case both the http gateway application and the Kafka or RabbitMQ application can be a Spring Integration application that does not make use of the Spring Cloud Stream library.
+Another common use case for the Stream Application DSL is to deploy a HTTP gateway application that sends a synchronous request or reply message to a Kafka or RabbitMQ application.
+In this case, both the HTTP gateway application and the Kafka or RabbitMQ application can be a Spring Integration application that does not make use of the Spring Cloud Stream library.
 
-It is also possible to deploy just a single application using the Stream application DSL.
+It is also possible to deploy only a single application using the Stream application DSL.
 
+=== Application Properties
 
-=== Application properties
+Each application takes properties to customize its behavior.  As an example, the `http` source module exposes a `port` setting that lets the data ingestion port be changed from the default value:
 
-Each application takes properties to customize its behavior.  As an example, the `http` source module exposes a `port` setting that allows the data ingestion port to be changed from the default value.
-
-`dataflow:> stream create --definition "http --port=8090 | log" --name myhttpstream`
+====
+[source,bash]
+----
+dataflow:> stream create --definition "http --port=8090 | log" --name myhttpstream
+----
+====
 
 This `port` property is actually the same as the standard Spring Boot `server.port` property.
 Data Flow adds the ability to use the shorthand form `port` instead of `server.port`.
-One may also specify the longhand version as well, as shown in the following example:
+You can also specify the longhand version:
 
-`dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream`
+====
+[source,bash]
+----
+dataflow:> stream create --definition "http --server.port=8000 | log" --name myhttpstream
+----
+====
 
 This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
-If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
+If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>>, you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
-The shell provides tab completion for application properties. The shell command `app info --name <appName> --type <appType>` provides additional documentation for all the supported properties.
+The shell provides tab completion for application properties. The `app info --name <appName> --type <appType>` shell command provides additional documentation for all the supported properties.
 
-NOTE: Supported Stream `<appType>` possibilities are: source, processor, and sink.
-
-
-
+NOTE: Supported Stream `<appType>` possibilities are: `source`, `processor`, and `sink`.
 
 [[spring-cloud-dataflow-stream-lifecycle]]
 == Stream Lifecycle
 
-The lifecycle of a stream, goes through the following stages:
+The lifecycle of a stream goes through the following stages:
 
 . <<spring-cloud-dataflow-register-stream-apps>>
 . <<spring-cloud-dataflow-create-stream>>
 . <<spring-cloud-dataflow-deploy-stream>>
 . <<spring-cloud-dataflow-destroy-stream>> or <<spring-cloud-dataflow-undeploy-stream>>
-. <<spring-cloud-dataflow-streams-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-rollback,Rollback>> applications in the Stream.
+. <<spring-cloud-dataflow-streams-upgrading,Upgrade>> or <<spring-cloud-dataflow-streams-rollback,roll back>> applications in the Stream.
 
-https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
+https://cloud.spring.io/spring-cloud-skipper/[Skipper] is a server that lets you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
 
-Applications in Skipper are bundled as packages that contain the application's resource location, application properties and deployment properties.
-You can think Skipper packages as analogous to packages found in tools such as `apt-get` or `brew`.
+Applications in Skipper are bundled as packages that contain the application's resource location, application properties, and deployment properties.
+You can think of Skipper packages as being analogous to packages found in tools such as `apt-get` or `brew`.
 
-When Data Flow deploys a Stream, it will generate and upload a package to Skipper that represents the applications in the Stream.
-Subsequent commands to upgrade or rollback the applications within the Stream are passed through to Skipper.
-In addition, the Stream definition is reverse engineered from the package and the status of the Stream is also delegated to Skipper.
+When Data Flow deploys a Stream, it generates and upload a package to Skipper that represents the applications in the Stream.
+Subsequent commands to upgrade or roll back the applications within the Stream are passed through to Skipper.
+In addition, the Stream definition is reverse-engineered from the package, and the status of the Stream is also delegated to Skipper.
 
 [[spring-cloud-dataflow-register-stream-apps]]
-=== Register a Stream App
+=== Register a Stream Application
 
-Register a versioned stream application using the `app register` command. You must provide a unique name, application type, and a URI that can be resolved to the app artifact.
-For the type, specify "source", "processor", or "sink". The version is resolved from the URI. Here are a few examples:
+You can register a versioned stream application by using the `app register` command. You must provide a unique name, an application type, and a URI that can be resolved to the application artifact.
+For the type, specify `source`, `processor`, or `sink`. The version is resolved from the URI. Here are a few examples:
+
+====
 [source,bash]
 ----
 dataflow:>app register --name mysource --type source --uri maven://com.example:mysource:0.0.1
@@ -202,73 +224,96 @@ dataflow:>app list --id source:mysource
 dataflow:>app register --name myprocessor --type processor --uri file:///Users/example/myprocessor-1.2.3.jar
 
 dataflow:>app register --name mysink --type sink --uri https://example.com/mysink-2.0.1.jar
-
 ----
+====
 
 The application URI should conform to one the following schema formats:
 
-* maven schema
+* Maven schema:
++
+====
 [source,bash]
 ----
 maven://<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>
 ----
-* http schema
+====
+
+* HTTP schema:
++
+====
 [source,bash]
 ----
 http://<web-path>/<artifactName>-<version>.jar
 ----
-* file schema
+====
+
+* File schema:
++
+====
 [source,bash]
 ----
 file:///<local-path>/<artifactName>-<version>.jar
 ----
-* docker schema
+====
+
+* Docker schema:
++
+====
 [source,bash]
 ----
 docker:<docker-image-path>/<imageName>:<version>
 ----
+====
 
 [NOTE]
-The URI `<version>` part is compulsory for the versioned stream applications.
-Skipper leverages the multi-versioned stream applications to allow upgrade or rollback of those applications at runtime using the deployment properties.
+The URI `<version>` part is compulsory for versioned stream applications.
+Skipper uses the multi-versioned stream applications to allow upgrading or rolling back those applications at runtime by using the deployment properties.
 
 If you would like to register the snapshot versions of the `http` and `log`
 applications built with the RabbitMQ binder, you could do the following:
 
+====
 [source,bash]
 ----
 dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.1.BUILD-SNAPSHOT
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.1.BUILD-SNAPSHOT
 ----
+====
 
-If you would like to register multiple apps at one time, you can store them in a properties file
+If you would like to register multiple applications at one time, you can store them in a properties file,
 where the keys are formatted as `<type>.<name>` and the values are the URIs.
 
-For example, if you would like to register the snapshot versions of the `http` and `log`
+For example, to register the snapshot versions of the `http` and `log`
 applications built with the RabbitMQ binder, you could have the following in a properties file (for example, `stream-apps.properties`):
 
+====
 [source,bash]
 ----
 source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.2.1.BUILD-SNAPSHOT
 sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.1.BUILD-SNAPSHOT
 ----
+====
 
-Then to import the apps in bulk, use the `app import` command and provide the location of the properties file with the `--uri` switch, as follows:
+Then, to import the applications in bulk, use the `app import` command and provide the location of the properties file with the `--uri` switch, as follows:
 
+====
 [source,bash]
 ----
 dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ----
+====
 
-Registering an application using `--type app` is the same as registering a `source`, `processor` or `sink`.
-Applications of the type `app` are only allowed to be used in the Stream Application DSL, which uses a comma instead of the pipe symbol in the DSL, and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
-The application that is registered using `--type app` does not have to be a Spring Cloud Stream app, it can be any Spring Boot application.
-See the <<spring-cloud-dataflow-stream-app-dsl,Stream Application DSL introduction>> for more information on using this application type.
+Registering an application by using `--type app` is the same as registering a `source`, `processor` or `sink`.
+Applications of the type `app` can be used only in the Stream Application DSL (which uses a comma instead of the pipe symbol in the DSL) and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
+The application that is registered using `--type app` does not have to be a Spring Cloud Stream application. It can be any Spring Boot application.
+See the <<spring-cloud-dataflow-stream-app-dsl,Stream Application DSL introduction>> for more about using this application type.
 
-Multiple versions can be registered for the same applications (e.g. same name and type) but only one can be set as default.
+You can register multiple versions of the same applications (for example, the same name and type), but you can set only one as the default.
 The default version is used for deploying Streams.
 
-The first time an application is registered it will be marked as default. The default application version can be altered with the `app default` command:
+The first time an application is registered, it is marked as default. The default application version can be altered with the `app default` command:
+
+====
 [source,bash]
 ----
 dataflow:>app default --id source:mysource --version 0.0.2
@@ -281,10 +326,13 @@ dataflow:>app list --id source:mysource
 ║   │mysource-0.0.3    │         │    │    ║
 ╚═══╧══════════════════╧═════════╧════╧════╝
 ----
+====
 
 The `app list --id <type:name>` command lists all versions for a given stream application.
 
-The `app unregister` command has an optional `--version` parameter to specify the app version to unregister.
+The `app unregister` command has an optional `--version` parameter to specify the application version to unregister:
+
+====
 [source,bash]
 ----
 dataflow:>app unregister --name mysource --type source --version 0.0.1
@@ -296,15 +344,18 @@ dataflow:>app list --id source:mysource
 ║   │mysource-0.0.3    │         │    │    ║
 ╚═══╧══════════════════╧═════════╧════╧════╝
 ----
-If a `--version` is not specified, the default version is unregistered.
+====
+
+If `--version` is not specified, the default version is unregistered.
 
 [NOTE]
 ====
 All applications in a stream should have a default version set for the stream to be deployed.
-Otherwise they will be treated as unregistered application during the deployment.
-Use the `app default` to set the defaults.
+Otherwise, they are treated as unregistered application during the deployment.
+Use the `app default` command to set the defaults.
 ====
 
+====
 [source,bash]
 ----
 app default --id source:mysource --version 0.0.3
@@ -316,38 +367,45 @@ dataflow:>app list --id source:mysource
 ║   │> mysource-0.0.3 <│         │    │    ║
 ╚═══╧══════════════════╧═════════╧════╧════╝
 ----
+====
 
-The `stream deploy` necessitates default app versions to be set.
-The `stream update` and `stream rollback` commands though can use all (default and non-default) registered app versions.
+The `stream deploy` necessitates default application versions being set.
+The `stream update` and `stream rollback` commands, though, can use all (default and non-default) registered application versions.
 
+The following command creates a stream that uses the default mysource version (0.0.3):
+
+====
 [source,bash]
 ----
 dataflow:>stream create foo --definition "mysource | log"
 ----
-This will create stream using the default mysource version (0.0.3). Then we can update the version to 0.0.2 like this:
+====
+
+Then we can update the version to 0.0.2:
+
+====
 [source,bash]
 ----
 dataflow:>stream update foo --properties version.mysource=0.0.2
 ----
-
-[IMPORTANT]
-====
-Only pre-registered applications can be used to `deploy`, `update` or `rollback` a Stream.
 ====
 
-An attempt to update the `mysource` to version `0.0.1` (not registered) will fail!
+IMPORTANT: Only pre-registered applications can be used to `deploy`, `update`, or `rollback` a Stream.
+
+An attempt to update the `mysource` to version `0.0.1` (not registered) fails.
 
 [[supported-apps-and-tasks]]
 ==== Register Supported Applications and Tasks
-For convenience, we have the static files with application-URIs (for both maven and docker) available
-for all the out-of-the-box stream and task/batch app-starters. You can point to this file and import
+
+For convenience, we have the static files with application-URIs (for both Maven and Docker) available
+for all the out-of-the-box stream and task or batch app-starters. You can point to this file and import
 all the application-URIs in bulk. Otherwise, as explained previously, you can register them individually or have your own
-custom property file with only the required application-URIs in it. It is recommended, however, to have a "`focused`"
+custom property file with only the required application-URIs in it. We recommend, however, having a "`focused`"
 list of desired application-URIs in a custom property file.
 
 ===== Spring Cloud Stream App Starters
 
-The following table includes the dataflow.spring.io links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
+The following table includes the `dataflow.spring.io` links to the available Stream Application Starters based on Spring Cloud Stream 2.1.x
 and Spring Boot 2.1.x:
 
 [width="100%",frame="topbot",options="header"]
@@ -372,14 +430,14 @@ and Spring Boot 2.1.x:
 |======================
 
 
-NOTE: App Starter actuator endpoints are secured by default. You can disable security by deploying streams with the
-property `app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration`.
-On Kubernetes refer to the section <<getting-started-kubernetes-probes, Liveness and readiness probes>> to configure
+NOTE: By default, App Starter actuator endpoints are secured. You can disable security by deploying streams with the
+`app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration` property.
+On Kubernetes, see the <<getting-started-kubernetes-probes, Liveness and readiness probes>> section for how to configure
 security for actuator endpoints.
 
-NOTE: Starting with Spring Cloud Stream 2.1 GA release, we now have robust interoperability with Spring Cloud Function
-programming model. Building on that, with Einstein release-train, it is now possible to pick a few Stream App
-Starters, and compose them into a single application using the functional-style programming model. Check out the
+NOTE: Starting with the Spring Cloud Stream 2.1 GA release, we now have robust interoperability with the Spring Cloud Function
+programming model. Building on that, with the Einstein release-train, it is now possible to pick a few Stream App
+Starters and compose them into a single application by using the functional-style programming model. Check out the
 https://spring.io/blog/2019/01/09/composed-function-support-in-spring-cloud-data-flow["Composed Function Support in
 Spring Cloud Data Flow"] blog to learn more about the developer and orchestration-experience with an example.
 
@@ -401,22 +459,26 @@ The following table includes the available Task Application Starters based on Sp
 |======================
 
 You can find more information about the available task starters in the https://cloud.spring.io/spring-cloud-task-app-starters/[Task App Starters Project Page] and
-related reference documentation.  For more information about the available stream starters, look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
+related reference documentation. For more information about the available stream starters, look at the https://cloud.spring.io/spring-cloud-stream-app-starters/[Stream App Starters Project Page]
 and related reference documentation.
 
 As an example, if you would like to register all out-of-the-box stream applications built with the Kafka binder in bulk, you can use the following command:
 
+====
 [source,bash,subs=attributes]
 ----
 $ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-latest
 ----
+====
 
-Alternatively you can register all the stream applications with the Rabbit binder, as follows:
+Alternatively, you can register all the stream applications with the Rabbit binder, as follows:
 
+====
 [source,bash,subs=attributes]
 ----
 $ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-latest
 ----
+====
 
 You can also pass the `--local` option (which is `true` by default) to indicate whether the
 properties file location should be resolved within the shell process itself. If the location should
@@ -424,48 +486,54 @@ be resolved from the Data Flow Server process, specify `--local false`.
 
 [WARNING]
 ====
-When using either `app register` or `app import`, if an app is already registered with
-the provided name and type and version, it is not overridden by default. If you would like to override the
-pre-existing app uri or metadata-uri coordinates, then include the `--force` option.
+When you use either `app register` or `app import`, if an application is already registered with
+the provided name and type and version, it is, by default, not overridden. If you would like to override the
+pre-existing application `uri` or `metadata-uri` coordinates, include the `--force` option.
 
 Note, however, that, once downloaded, applications may be cached locally on the Data Flow server, based on the resource
-location. If the resource location does not change (even though the actual resource _bytes_ may be different), then it
-is not re-downloaded. When using `maven://` resources on the other hand, using a constant location may still circumvent
+location. If the resource location does not change (even though the actual resource _bytes_ may be different), it
+is not re-downloaded. When using `maven://` resources, on the other hand, using a constant location may still circumvent
 caching (if using `-SNAPSHOT` versions).
 
-Moreover, if a stream is already deployed and using some version of a registered app, then (forcibly) re-registering a
-different app has no effect until the stream is deployed again.
+Moreover, if a stream is already deployed and uses some version of a registered app, then (forcibly) re-registering a
+different application has no effect until the stream is deployed again.
 ====
 
-[NOTE]
-In some cases, the Resource is resolved on the server side. In others, the
-URI is passed to a runtime container instance where it is resolved. Consult
+NOTE: In some cases, the resource is resolved on the server side. In others, the
+URI is passed to a runtime container instance, where it is resolved. See
 the specific documentation of each Data Flow Server for more detail.
 
 [[spring-cloud-dataflow-stream-app-whitelisting]]
-==== Whitelisting application properties
+==== Whitelisting Application Properties
 
-Stream and Task applications are Spring Boot applications that are aware of many <<spring-cloud-dataflow-global-properties>>, such as `server.port` but also families of properties such as those with the prefix `spring.jmx` and `logging`.  When creating your own application, you should whitelist properties so that the shell and the UI can display them first as primary properties when presenting options through TAB completion or in drop-down boxes.
+Stream and Task applications are Spring Boot applications that are aware of many <<spring-cloud-dataflow-global-properties>>, such as `server.port`, but also families of properties, such as those with the prefix `spring.jmx` and `logging`. When creating your own application, you should create a list of allowed properties so that the shell and the UI can display them first as primary properties when presenting options through tab completion or in drop-down boxes.
 
-To whitelist application properties, create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory. There are two property keys that can be used inside this file. The first key is named `configuration-properties.classes`. The value is a comma separated list of fully qualified `@ConfigurationProperty` class names. The second key is `configuration-properties.names`, whose value is a comma-separated list of property names. This can contain the full name of the property, such as `server.port`, or a partial name to whitelist a category of property names, such as `spring.jmx`.
+To create a list of allowed application properties, create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory. There are two property keys that you can use inside this file. The first key is named `configuration-properties.classes`. The value is a comma-separated list of fully qualified `@ConfigurationProperty` class names. The second key is `configuration-properties.names`, whose value is a comma-separated list of property names. This can contain the full name of the property, such as `server.port`, or a partial name to allow a category of property names, such as `spring.jmx`.
 
 The link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage. The following example comes from the file sink's `spring-configuration-metadata-whitelist.properties` file:
 
-```
+====
+[source,bash]
+----
 configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
-```
+----
+====
 
-If we also want to add `server.port` to be white listed, it would become the following line:
+If we also want to add `server.port` to be allowed, it would become the following line:
 
-```
+====
+[source,bash]
+----
 configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
 configuration-properties.names=server.port
-```
+----
+====
 
 [IMPORTANT]
-====
-Make sure to add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
+=====
+Add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
 
+====
 [source,xml]
 ----
 <dependency>
@@ -474,27 +542,30 @@ Make sure to add 'spring-boot-configuration-processor' as an optional dependency
     <optional>true</optional>
 </dependency>
 ----
-
-The whitelisting support works only for uber-jar application artifacts! At the moment, the metadata properties are not retrievable from the dockerized application images directly — a dedicated companion metadata JAR is required.
-
-The `configuration-properties.names` can whitelist properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be whitelisted.
 ====
 
+The allow support works only for uber-jar application artifacts. At the moment, the metadata properties are not retrievable from the Dockerized application images directly —- a dedicated companion metadata JAR is required.
+
+The `configuration-properties.names` can allow properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be allowed.
+=====
 
 [[spring-cloud-dataflow-stream-app-metadata-artifact]]
 ==== Creating and Using a Dedicated Metadata Artifact
-You can go a step further in the process of describing the main properties that your stream or task app supports by
+
+You can go a step further in the process of describing the main properties that your stream or task application supports by
 creating a metadata companion artifact. This jar file contains only the Spring boot JSON file about
-configuration properties metadata and the whitelisting file described in the previous section.
+configuration properties metadata and the allow file described in the previous section.
 
 The following example shows the contents of such an artifact, for the canonical `log` sink:
 
+====
 [source, bash]
 ----
 $ jar tvf log-sink-rabbit-1.2.1.BUILD-SNAPSHOT-metadata.jar
 373848 META-INF/spring-configuration-metadata.json
    174 META-INF/spring-configuration-metadata-whitelist.properties
 ----
+====
 
 Note that the `spring-configuration-metadata.json` file is quite large. This is because it contains the concatenation of _all_ the properties that
 are available at runtime to the `log` sink (some of them come from `spring-boot-actuator.jar`, some of them come from
@@ -505,6 +576,7 @@ into a single file.
 To help with that (you do not want to try to craft this giant JSON file by hand), you can use the
 following plugin in your build:
 
+====
 [source, xml]
 ----
 <plugin>
@@ -521,40 +593,45 @@ following plugin in your build:
  	</executions>
  </plugin>
 ----
+====
 
 NOTE: This plugin comes in addition to the `spring-boot-configuration-processor` that creates the individual JSON files.
 Be sure to configure both.
 
 The benefits of a companion artifact include:
 
-* Being much lighter. (The companion artifact is usually a few kilobytes, as opposed to megabytes for the actual app.) Consequently, they are quicker to download,
+* Being much lighter. (The companion artifact is usually a few kilobytes, as opposed to megabytes for the actual application.) Consequently, they are quicker to download,
 allowing quicker feedback when using, for example, `app info` or the Dashboard UI.
-* As a consequence of being lighter, they can be used in resource constrained environments (such as PaaS) when metadata is
+* As a consequence of being lighter, they can be used in resource-constrained environments (such as PaaS), where metadata is
 the only piece of information needed.
-* For environments that do not deal with Spring Boot uber jars directly (for example, Docker-based runtimes such as
-Kubernetes or Cloud Foundry), this is the only way to provide metadata about the properties supported by the app.
+* For environments that do not deal with Spring Boot uber jars directly (for example, Docker-based runtimes, such as
+Kubernetes or Cloud Foundry), this is the only way to provide metadata about the properties supported by the application.
 
 Remember, though, that this is entirely optional when dealing with uber jars. The uber jar itself also includes the
-metadata in it already.
+metadata.
 
 ==== Using the Companion Artifact
-Once you have a companion artifact at hand, you need to make the system aware of it so that it can be used.
 
-When registering a single app with `app register`, you can use the optional `--metadata-uri` option in the shell, as follows:
+Once you have a companion artifact, you need to make the system aware of it so that it can be used.
 
+When registering a single application with `app register`, you can use the optional `--metadata-uri` option in the shell:
+
+====
 [source,bash,subs=attributes]
 ----
 dataflow:>app register --name log --type sink
     --uri maven://org.springframework.cloud.stream.app:log-sink:2.1.0.RELEASE
     --metadata-uri maven://org.springframework.cloud.stream.app:log-sink:jar:metadata:2.1.0.RELEASE
 ----
+====
 
 When registering several files by using the `app import` command, the file should contain a `<type>.<name>.metadata` line
 in addition to each `<type>.<name>` line. Strictly speaking, doing so is optional (if some apps have it but some others do not, it works), but it is best practice.
 
-The following example shows a Dockerized app, where the metadata artifact is being hosted in a Maven repository (retrieving
-it through `http://` or `file://` would be equally possible).
+The following example shows a Dockerized application, where the metadata artifact is being hosted in a Maven repository (retrieving
+it through `http://` or `file://` would also work).
 
+====
 [source, properties]
 ----
 ...
@@ -562,18 +639,20 @@ source.http=docker:springcloudstream/http-source-rabbit:latest
 source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:2.1.0.RELEASE
 ...
 ----
+====
 
 [[custom-applications]]
 ==== Creating Custom Applications
 
-While there are out-of-the-box source, processor, sink applications available, you can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
+While Data Flow includes source, processor, sink applications, you can extend these applications or write a custom link:https://github.com/spring-cloud/spring-cloud-stream[Spring Cloud Stream] application.
 
 The process of creating Spring Cloud Stream applications with https://start.spring.io/[Spring Initializr] is detailed in the Spring Cloud Stream {spring-cloud-stream-docs}#_getting_started[documentation].
-It is possible to include multiple binders to an application.
-If doing so, see the instructions in <<passing_producer_consumer_properties>> for how to configure them.
+You can include multiple binders to an application.
+If you do so, see the instructions in <<passing_producer_consumer_properties>> for how to configure them.
 
-For supporting property whitelisting, Spring Cloud Stream applications running in Spring Cloud Data Flow may include the Spring Boot `configuration-processor` as an optional dependency, as shown in the following example:
+To support allowing properties, Spring Cloud Stream applications running in Spring Cloud Data Flow can include the Spring Boot `configuration-processor` as an optional dependency, as shown in the following example:
 
+====
 [source,xml]
 ----
 <dependencies>
@@ -586,33 +665,33 @@ For supporting property whitelisting, Spring Cloud Stream applications running i
 </dependencies>
 
 ----
-
-[NOTE]
 ====
-Make sure that the `spring-boot-maven-plugin` is included in the POM.
+
+NOTE:Make sure that the `spring-boot-maven-plugin` is included in the POM.
 The plugin is necessary for creating the executable jar that is registered with Spring Cloud Data Flow.
 Spring Initialzr includes the plugin in the generated POM.
-====
 
-Once a custom application has been created, it can be registered as described in <<spring-cloud-dataflow-register-stream-apps>>.
-
+Once you have created a custom application, you can register it, as described in <<spring-cloud-dataflow-register-stream-apps>>.
 
 [[spring-cloud-dataflow-create-stream]]
 === Creating a Stream
 
-The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is through the Spring Cloud Data Flow shell. Start the shell as described in the xref:getting-started#getting-started[Getting Started] section.
+The Spring Cloud Data Flow Server exposes a full RESTful API for managing the lifecycle of stream definitions, but the easiest way to use is it is through the Spring Cloud Data Flow shell. The xref:getting-started#getting-started[Getting Started] section describes how to start the shell.
 
-New streams are created with the help of stream definitions. The definitions are built from a simple DSL. For example, consider what happens if we execute the following shell command:
+New streams are created with the help of stream definitions. The definitions are built from a simple DSL. For example, consider what happens if we run the following shell command:
 
+====
 [source,bash]
 ----
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
+====
 
-This defines a stream named `ticktock` that is based off the DSL expression `time | log`. The DSL uses the "pipe" symbol (`|`), to connect a source to a sink.
+This defines a stream named `ticktock` that is based off of the DSL expression `time | log`. The DSL uses the "`pipe`" symbol (`|`), to connect a source to a sink.
 
 The `stream info` command shows useful information about the stream, as shown (with its output) in the following example:
 
+====
 [source,bash]
 ----
 dataflow:>stream info ticktock
@@ -622,24 +701,28 @@ dataflow:>stream info ticktock
 ║ticktock   │time | log       │undeployed║
 ╚═══════════╧═════════════════╧══════════╝
 ----
+====
 
 ==== Application Properties
 
 Application properties are the properties associated with each application in the stream. When the application is deployed, the application properties are applied to the application through
-command line arguments or environment variables, depending on the underlying deployment implementation.
+command-line arguments or environment variables, depending on the underlying deployment implementation.
 
 The following stream can have application properties defined at the time of stream creation:
 
+====
 [source,bash]
 ----
 dataflow:> stream create --definition "time | log" --name ticktock
 ----
+====
 
-The shell command `app info --name <appName> --type <appType>` displays the white-listed application properties for the application.
-For more info on the property white listing, refer to <<spring-cloud-dataflow-stream-app-whitelisting>>
+The `app info --name <appName> --type <appType>` shell command displays the allowed application properties for the application.
+For more about property allowing, see <<spring-cloud-dataflow-stream-app-whitelisting>>.
 
-The following listing shows the white_listed properties for the `time` app:
+The following listing shows the allowed properties for the `time` application:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:> app info --name time --type source
@@ -659,9 +742,11 @@ dataflow:> app info --name time --type source
 ║trigger.date-format           │Format for the date value.    │<none>                        │java.lang.String              ║
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
+====
 
-The following listing shows the white-listed properties for the `log` app:
+The following listing shows the allowed properties for the `log` application:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:> app info --name log --type sink
@@ -676,17 +761,19 @@ dataflow:> app info --name log --type sink
 ║                              │as the logged message.        │                              │                              ║
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
+====
 
-The application properties for the `time` and `log` apps can be specified at the time of `stream` creation as follows:
+You can specify the application properties for the `time` and `log` apps at the time of `stream` creation, as follows:
 
+====
 [source,bash]
 ----
 dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" --name ticktock
 ----
+====
 
-Note that, in the preceding example, the `fixed-delay` and `level` properties defined for the apps `time` and `log` are the "'short-form'" property names provided by the shell completion.
-These "'short-form'" property names are applicable only for the white-listed properties. In all other cases, only fully qualified property names should be used.
-
+Note that, in the preceding example, the `fixed-delay` and `level` properties defined for the `time` and `log` applications are the "`short-form`" property names provided by the shell completion.
+These "`short-form`" property names are applicable only for the allowed properties. In all other cases, you should use only fully qualified property names.
 
 [[spring-cloud-dataflow-global-properties]]
 ==== Common Application Properties
@@ -700,16 +787,18 @@ When doing so, the server passes all the properties, without the prefix, to the 
 For example, all the launched applications can be configured to use a specific Kafka broker by launching the
 Data Flow server with the following options:
 
-```
+====
+[source,bash]
+----
 --spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.brokers=192.168.1.100:9092
 --spring.cloud.dataflow.applicationProperties.stream.spring.cloud.stream.kafka.binder.zkNodes=192.168.1.100:2181
-```
+----
+====
 
-Doing so causes the properties `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes`
+Doing so causes the `spring.cloud.stream.kafka.binder.brokers` and `spring.cloud.stream.kafka.binder.zkNodes` properties
 to be passed to all the launched applications.
 
-[NOTE]
-Properties configured with this mechanism have lower precedence than stream deployment properties.
+NOTE: Properties configured with this mechanism have lower precedence than stream deployment properties.
 They are overridden if a property with the same key is specified at stream deployment time (for example,
 `app.http.spring.cloud.stream.kafka.binder.brokers` overrides the common property).
 
@@ -717,20 +806,31 @@ They are overridden if a property with the same key is specified at stream deplo
 [[spring-cloud-dataflow-deploy-stream]]
 === Deploying a Stream
 
-This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream. It covers the deployment and upgrade of Streams leveraging the Skipper service.  The description of how deployment properties applies to both approaches of Stream deployment.
+This section describes how to deploy a Stream when the Spring Cloud Data Flow server is responsible for deploying the stream. It covers the deployment and upgrade of Streams by using the Skipper service. The description of how to set deployment properties applies to both approaches of Stream deployment.
 
-Give the `ticktock` stream definition:
+Consider the `ticktock` stream definition:
 
-`dataflow:> stream create --definition "time | log" --name ticktock`
+====
+[source,bash]
+----
+dataflow:> stream create --definition "time | log" --name ticktock
+----
+====
 
 To deploy the stream, use the following shell command:
 
-
-`dataflow:> stream deploy --name ticktock`
+====
+[source,bash]
+----
+dataflow:> stream deploy --name ticktock
+----
+====
 
 The Data Flow Server delegates to Skipper the resolution and deployment of the `time` and `log` applications.
 
 The `stream info` command shows useful information about the stream, including the deployment properties:
+
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>stream info --name ticktock
@@ -753,70 +853,90 @@ Stream Deployment properties: {
   }
 }
 ----
+====
 
 There is an important optional command argument (called `--platformName`) to the `stream deploy` command.
 Skipper can be configured to deploy to multiple platforms.
 Skipper is pre-configured with a platform named `default`, which deploys applications to the local machine where Skipper is running.
-The default value of the command line argument `--platformName` is `default`.
+The default value of the `--platformName` command line argument is `default`.
 If you commonly deploy to one platform, when installing Skipper, you can override the configuration of the `default` platform.
-Otherwise, specify the `platformName` to one of the values returned by the `stream platform-list` command.
+Otherwise, specify the `platformName` to be one of the values returned by the `stream platform-list` command.
 
 In the preceding example, the time source sends the current time as a message each second, and the log sink outputs it by using the logging framework.
 You can tail the `stdout` log (which has an `<instance>` suffix). The log files are located within the directory displayed in the Data Flow Server's log output, as shown in the following listing:
 
-[source]
+====
+[source,bash]
+----
 $ tail -f /var/folders/wn/8jxm_tbd1vj28c8vj37n900m0000gn/T/spring-cloud-dataflow-912434582726479179/ticktock-1464788481708/ticktock.log/stdout_0.log
 2016-06-01 09:45:11.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:11
 2016-06-01 09:45:12.250  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:12
 2016-06-01 09:45:13.251  INFO 79194 --- [  kafka-binder-] log.sink    : 06/01/16 09:45:13
-
+----
+====
 
 You can also create and deploy the stream in one step by passing the `--deploy` flag when creating the stream, as follows:
 
+====
 [source,bash]
 ----
 dataflow:> stream create --definition "time | log" --name ticktock --deploy
 ----
+====
 
-However, it is not very common in real-world use cases to create and deploy the stream in one step.
+However, it is not common in real-world use cases to create and deploy the stream in one step.
 The reason is that when you use the `stream deploy` command, you can pass in properties that define how to map the applications onto the platform (for example, what is the memory size of the container to use, the number of each application to run, and whether to enable data partitioning features).
 Properties can also override application properties that were set when creating the stream.
 The next sections cover this feature in detail.
 
 ==== Deployment Properties
 
-When deploying a stream, you can specify properties that can control how apps are deployed and configured. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/deployment-properties/[Deployment Properties] section of the microsite for more information.
-
+When deploying a stream, you can specify properties that can control how applications are deployed and configured. See the link:https://dataflow.spring.io/docs/feature-guides/streams/deployment-properties/[Deployment Properties] section of the microsite for more information.
 
 [[spring-cloud-dataflow-destroy-stream]]
 === Destroying a Stream
 
 You can delete a stream by issuing the `stream destroy` command from the shell, as follows:
 
-`dataflow:> stream destroy --name ticktock`
+====
+[source,bash]
+----
+dataflow:> stream destroy --name ticktock
+----
+====
 
 If the stream was deployed, it is undeployed before the stream definition is deleted.
 
 [[spring-cloud-dataflow-undeploy-stream]]
 === Undeploying a Stream
 
-Often you want to stop a stream but retain the name and definition for future use. In that case, you can `undeploy` the stream by name.
+Often, you want to stop a stream but retain the name and definition for future use. In that case, you can `undeploy` the stream by name:
 
-[source]
+====
+[source,bash]
+----
 dataflow:> stream undeploy --name ticktock
 dataflow:> stream deploy --name ticktock
+----
+====
 
-You can issue the `deploy` command at a later time to restart it.
+You can issue the `deploy` command at a later time to restart it:
 
-`dataflow:> stream deploy --name ticktock`
+====
+[source,bash]
+----
+dataflow:> stream deploy --name ticktock
+----
+====
 
 [[spring-cloud-dataflow-validate-stream]]
 === Validating a Stream
 
-Sometimes the one or more of the apps contained within a stream definition contain an invalid URI in its registration.
-This can caused by an invalid URI entered at app registration time or the app was removed from the repository from which it was to be drawn.
-To verify that all the apps contained in a stream are resolve-able, a user can use the `validate` command.
-For example:
+Sometimes, an application contained within a stream definition contains an invalid URI in its registration.
+This can caused by an invalid URI being entered at application registration time or by the application being removed from the repository from which it was to be drawn.
+To verify that all the applications contained in a stream are resolve-able, a user can use the `validate` command:
+
+====
 [source,bash]
 ----
 dataflow:>stream validate ticktock
@@ -835,8 +955,12 @@ ticktock is a valid stream.
 ║sink:log   │valid            ║
 ╚═══════════╧═════════════════╝
 ----
-In the example above the user validated their ticktock stream.   As we see that both the `source:time` and `sink:log` are valid.
-Now let's see what happens if we have a stream definition with a registered app with an invalid URI.
+====
+
+In the preceding example, the user validated their ticktock stream. Both the `source:time` and `sink:log` are valid.
+Now we can see what happens if we have a stream definition with a registered application with an invalid URI:
+
+====
 [source,bash]
 ----
 dataflow:>stream validate bad-ticktock
@@ -855,14 +979,18 @@ bad-ticktock is an invalid stream.
 ║sink:log       │valid            ║
 ╚═══════════════╧═════════════════╝
 ----
-In this case Spring Cloud Data Flow states that the stream is invalid because source:bad-time has an invalid URI.
+====
+
+In this case, Spring Cloud Data Flow states that the stream is invalid because `source:bad-time` has an invalid URI.
 
 [[spring-cloud-dataflow-stream-lifecycle-update]]
 === Updating a Stream
-To update the stream, use the command `stream update` which takes as a command argument either `--properties` or `--propertiesFile`.
-There is an important new top level prefix available when using Skipper, which is `version`.
-If the Stream `http | log` was deployed, and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`:
 
+To update the stream, use the `stream update` command, which takes either `--properties` or `--propertiesFile` as a command argument.
+Skipper has an important new top-level prefix: `version`.
+The following commands deploy `http | log` stream (and the version of `log` which registered at the time of deployment was `1.1.0.RELEASE`):
+
+====
 [source,bash]
 ----
 dataflow:> stream create --name httptest --definition "http --server.port=9000 | log"
@@ -886,26 +1014,33 @@ Stream Deployment properties: {
   }
 }
 ----
+====
 
-Then the following command will update the Stream to use the `1.2.0.RELEASE` of the log application.
-Before updating the stream with the specific version of the app, we need to make sure that the app is registered with that version.
+Then the following command updates the stream to use the `1.2.0.RELEASE` version of the log application.
+Before updating the stream with the specific version of the application, we need to make sure that the application is registered with that version:
+
+====
 [source,bash]
 ----
 dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
 Successfully registered application 'sink:log'
 ----
+====
 
+Then we can update the application:
+
+====
 [source,bash]
 ----
 dataflow:>stream update --name httptest --properties version.log=1.2.0.RELEASE
 ----
-[IMPORTANT]
 ====
-Only pre-registered application versions can be used to `deploy`, `update`, or `rollback` a stream.
-====
+
+IMPORTANT: You can use only pre-registered application versions to `deploy`, `update`, or `rollback` a stream.
 
 To verify the deployment properties and the updated version, we can use `stream info`, as shown (with its output) in the following example:
 
+====
 [source,bash]
 ----
 dataflow:>stream info httptest
@@ -927,21 +1062,25 @@ Stream Deployment properties: {
     "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "1.1.0.RELEASE"
   }
 }
-
 ----
+====
+
 [[spring-cloud-dataflow-stream-lifecycle-force-update]]
-=== Force update of a Stream
-When upgrading a stream, the `--force` option can be used to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
-This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from Spring Cloud Config Server.
-You can specify which applications to force upgrade by using the option `--app-names`.
-If you do not specify any application names, all the applications will be force upgraded.
-You can specify `--force` and `--app-names` options together with `--properties` or `--propertiesFile` options.
+=== Forcing an Update of a Stream
 
-=== Stream versions
+When upgrading a stream, you can use the `--force` option to deploy new instances of currently deployed applications even if no application or deployment properties have changed.
+This behavior is needed for when configuration information is obtained by the application itself at startup time -- for example, from Spring Cloud Config Server.
+You can specify the applications for which to force an upgrade by using the `--app-names` option.
+If you do not specify any application names, all the applications are forced to upgrade.
+You can specify the `--force` and `--app-names` options together with the `--properties` or `--propertiesFile` options.
+
+=== Stream Versions
+
 Skipper keeps a history of the streams that were deployed.
-After updating a Stream, there will be a second version of the stream.
-You can query for the history of the versions using the command `stream history --name <name-of-stream>`.
+After updating a Stream, there is a second version of the stream.
+You can query for the history of the versions by using the `stream history --name <name-of-stream>` command:
 
+====
 [source,bash]
 ----
 dataflow:>stream history --name httptest
@@ -952,25 +1091,34 @@ dataflow:>stream history --name httptest
 ║1      │Mon Nov 27 22:40:41 EST 2017│DELETED │httptest    │1.0.0          │Delete complete ║
 ╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
 ----
-
+====
 === Stream Manifests
-Skipper keeps a "`manifest`" of the all the applications, their application properties, and their deployment properties after all values have been substituted.
+
+Skipper keeps a "`manifest`" of the all of the applications, their application properties, and their deployment properties after all values have been substituted.
 This represents the final state of what was deployed to the platform.
 You can view the manifest for any of the versions of a Stream by using the following command:
 
-`stream manifest --name <name-of-stream> --releaseVersion <optional-version>`
+====
+[source,bash]
+----
+stream manifest --name <name-of-stream> --releaseVersion <optional-version>
+----
+====
 
 If the `--releaseVersion` is not specified, the manifest for the last version is returned.
 
 The following example shows the use of the manifest:
 
+====
 [source,bash]
 ----
 dataflow:>stream manifest --name httptest
 ----
+====
 
 Using the command results in the following output:
 
+====
 [source,yaml]
 ----
 # Source: log.yml
@@ -1017,34 +1165,36 @@ spec:
   deploymentProperties:
     spring.cloud.deployer.group: httptest
 ----
+====
 
 The majority of the deployment and application properties were set by Data Flow to enable the applications to talk to each other and to send application metrics with identifying labels.
-
-
 
 [[spring-cloud-dataflow-stream-lifecycle-rollback]]
 === Rollback a Stream
 
-You can rollback to a previous version of the stream using the command `stream rollback`.
+You can roll back to a previous version of the stream by using the `stream rollback` command:
+
+====
 [source,bash]
 ----
 dataflow:>stream rollback --name httptest
 ----
+====
 
 The optional `--releaseVersion` command argument adds the version of the stream.
-If not specified, the rollback goes to the previous stream version.
+If not specified, the rollback operation goes to the previous stream version.
 
 === Application Count
 
-The application count is a dynamic property of the system used to specify the number of instances of applications. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/application-count/[Application Count] section of the microsite for more information.
+The application count is a dynamic property of the system used to specify the number of instances of applications. See the link:https://dataflow.spring.io/docs/feature-guides/streams/application-count/[Application Count] section of the microsite for more information.
 
 === Skipper's Upgrade Strategy
 
-Skipper has a simple 'red/black' upgrade strategy.  It deploys the new version of the applications, using as many instances as the currently running version, and checks the `/health` endpoint of the application.
-If the health of the new application is good, then the previous application is undeployed.
-If the health of the new application is bad, then all new applications are undeployed and the upgrade is considered to be not successful.
+Skipper has a simple "`red/black`" upgrade strategy. It deploys the new version of the applications, using as many instances as the currently running version, and checks the `/health` endpoint of the application.
+If the health of the new application is good, the previous application is undeployed.
+If the health of the new application is bad, all new applications are undeployed, and the upgrade is considered to be not successful.
 
-The upgrade strategy is not a rolling upgrade, so if five applications of the application are running, then in a sunny-day scenario, five of the new applications are also running before the older version is undeployed.
+The upgrade strategy is not a rolling upgrade, so, if five instances of the application are running, then, in a sunny-day scenario, five of the new applications are also running before the older version is undeployed.
 
 == Stream DSL
 
@@ -1053,48 +1203,47 @@ This section covers additional features of the Stream DSL not covered in the  <<
 [[spring-cloud-dataflow-stream-dsl-tap]]
 === Tap a Stream
 
-Taps can be created at various producer endpoints in a stream. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/taps/[Tapping a Stream] section of the microsite for more information.
+Taps can be created at various producer endpoints in a stream. See the link:https://dataflow.spring.io/docs/feature-guides/streams/taps/[Tapping a Stream] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-labels]]
 === Using Labels in a Stream
-When a stream is made up of multiple apps with the same name, they must be qualified with labels.
-Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/labels/[Labeling Applications] section of the microsite for more information.
 
-
-
+When a stream is made up of multiple applications with the same name, they must be qualified with labels.
+See the link:https://dataflow.spring.io/docs/feature-guides/streams/labels/[Labeling Applications] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-named-destinations]]
 === Named Destinations
 
 Instead of referencing a source or sink application, you can use a named destination.
-Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/named-destinations/[Named Destinations] section of the microsite for more information.
+See the link:https://dataflow.spring.io/docs/feature-guides/streams/named-destinations/[Named Destinations] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-dsl-fanin-fanout]]
 === Fan-in and Fan-out
 
 By using named destinations, you can support fan-in and fan-out use cases.
-Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/fanin-fanout/[Fan-in and Fan-out] section of the microsite for more information.
-
+See the link:https://dataflow.spring.io/docs/feature-guides/streams/fanin-fanout/[Fan-in and Fan-out] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-java-dsl]]
 == Stream Java DSL
 
 Instead of using the shell to create and deploy streams, you can use the Java-based DSL provided by the `spring-cloud-dataflow-rest-client` module.
-Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/[Java DSL] section of the microsite for more information.
+See the link:https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/[Java DSL] section of the microsite for more information.
 
 [[spring-cloud-dataflow-stream-multi-binder]]
 == Stream Applications with Multiple Binder Configurations
 
 In some cases, a stream can have its applications bound to multiple spring cloud stream binders when they are required to connect to different messaging
-middleware configurations. In those cases, it is important to make sure the applications are configured appropriately with their binder
+middleware configurations. In those cases, you should make sure the applications are configured appropriately with their binder
 configurations. For example, a multi-binder transformer that supports both Kafka and Rabbit binders is the processor in the following stream:
 
+====
 [source,bash,subs=attributes]
 ----
 http | multibindertransform --expression=payload.toUpperCase() | log
 ----
+====
 
-NOTE: In the example above you would write your own multibindertransform application.
+NOTE: In the preceding example, you would write your own `multibindertransform` application.
 
 In this stream, each application connects to messaging middleware in the following way:
 
@@ -1102,16 +1251,17 @@ In this stream, each application connects to messaging middleware in the followi
 . The Multi-Binder Transform processor receives events from RabbitMQ (`rabbit1`) and sends the processed events into Kafka (`kafka1`).
 . The log sink receives events from Kafka (`kafka1`).
 
-Here, `rabbit1` and `kafka1` are the binder names given in the spring cloud stream application properties.
-Based on this setup, the applications have the following binder(s) in their classpath with the appropriate configuration:
+Here, `rabbit1` and `kafka1` are the binder names given in the Spring Cloud Stream application properties.
+Based on this setup, the applications have the following binders in their classpaths with the appropriate configuration:
 
 * HTTP: Rabbit binder
 * Transform: Both Kafka and Rabbit binders
 * Log: Kafka binder
 
-The spring-cloud-stream `binder` configuration properties can be set within the applications themselves.
-If not, they can be passed through `deployment` properties when the stream is deployed as shown in the following example:
+The `spring-cloud-stream` `binder` configuration properties can be set within the applications themselves.
+If not, they can be passed through `deployment` properties when the stream is deployed:
 
+====
 [source,bash]
 ----
 dataflow:>stream create --definition "http | multibindertransform --expression=payload.toUpperCase() | log" --name mystream
@@ -1119,18 +1269,19 @@ dataflow:>stream create --definition "http | multibindertransform --expression=p
 dataflow:>stream deploy mystream --properties "app.http.spring.cloud.stream.bindings.output.binder=rabbit1,app.multibindertransform.spring.cloud.stream.bindings.input.binder=rabbit1,
 app.multibindertransform.spring.cloud.stream.bindings.output.binder=kafka1,app.log.spring.cloud.stream.bindings.input.binder=kafka1"
 ----
+====
 
-One can override any of the binder configuration properties by specifying them through deployment properties.
+You can override any of the binder configuration properties by specifying them through deployment properties.
 
 [[spring-cloud-dataflow-stream-function-composition]]
 == Function Composition
 
-Function composition allows you can attach a functional logic dynamically to an existing event streaming application. Please see the link:https://dataflow.spring.io/docs/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
+Function composition lets you attach a functional logic dynamically to an existing event streaming application. See the link:https://dataflow.spring.io/docs/feature-guides/streams/function-composition/[Function Composition] section of the microsite for more details.
 
 == Functional Applications
 
-With Spring Cloud Stream 3.x adding link:https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#spring-cloud-stream-overview-producing-consuming-messages[functional support], users can build `Source`, `Sink` and `Processor` applications by merely implementing the Java Util's `Supplier`, `Consumer` and `Function` interfaces respectively.
-You can refer to the link:https://dataflow.spring.io/docs/recipes/functional-apps/[Functional Application Recipe] of the SCDF site for more information on this.
+With Spring Cloud Stream 3.x adding link:https://cloud.spring.io/spring-cloud-static/spring-cloud-stream/current/reference/html/spring-cloud-stream.html#spring-cloud-stream-overview-producing-consuming-messages[functional support], you can build `Source`, `Sink` and `Processor` applications merely by implementing the Java Util's `Supplier`, `Consumer`, and `Function` interfaces respectively.
+See the link:https://dataflow.spring.io/docs/recipes/functional-apps/[Functional Application Recipe] of the SCDF site for more about this feature.
 
 [[spring-cloud-dataflow-stream-examples]]
 == Examples
@@ -1146,30 +1297,49 @@ You can find links to more samples in the "`<<dataflow-samples>>`" chapter.
 [[spring-cloud-dataflow-simple-stream]]
 === Simple Stream Processing
 
-As an example of a simple processing step, we can transform the payload of the HTTP posted data to upper case by using the following stream definition:
-`http | transform --expression=payload.toUpperCase() | log`
+As an example of a simple processing step, we can transform the payload of the HTTP-posted data to upper case by using the following stream definition:
 
-To create this stream enter the following command in the shell
-```
+====
+[source,bash]
+----
+http | transform --expression=payload.toUpperCase() | log
+----
+====
+
+To create this stream, enter the following command in the shell:
+====
+[source,bash]
+----
 dataflow:> stream create --definition "http --server.port=9000 | transform --expression=payload.toUpperCase() | log" --name mystream --deploy
-```
+----
+====
 
 The following example uses a shell command to post some data:
 
-```
+====
+[source,bash]
+----
 dataflow:> http post --target http://localhost:9000 --data "hello"
-```
+----
+====
 
-The preceding example results in an upper-case 'HELLO' in the log, as follows:
+The preceding example results in an upper-case `HELLO` in the log, as follows:
 
-`2016-06-01 09:54:37.749  INFO 80083 --- [  kafka-binder-] log.sink    : HELLO`
+====
+[source,bash]
+----
+2016-06-01 09:54:37.749  INFO 80083 --- [  kafka-binder-] log.sink    : HELLO
+----
+====
 
 [[spring-cloud-dataflow-stream-partitions]]
 === Stateful Stream Processing
 
 To demonstrate the data partitioning functionality, the following listing deploys a stream with Kafka as the binder:
 
-```
+====
+[source,bash]
+----
 dataflow:>stream create --name words --definition "http --server.port=9900 | splitter --expression=payload.split(' ') | log"
 Created new stream 'words'
 
@@ -1223,20 +1393,25 @@ dataflow:>runtime apps
 ║                    │           │        url = https://192.168.0.102:33963                                                                                                                   ║
 ║                    │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/words-1542803437542/words.splitter-v1             ║
 ╚════════════════════╧═══════════╧═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-
-```
+----
+====
 
 When you review the `words.log-v1-0` logs, you should see the following:
 
-```
+====
+[source,bash]
+----
 2016-06-05 18:35:47.047  INFO 58638 --- [  kafka-binder-] log.sink                                 : How
 2016-06-05 18:35:47.066  INFO 58638 --- [  kafka-binder-] log.sink                                 : chuck
 2016-06-05 18:35:47.066  INFO 58638 --- [  kafka-binder-] log.sink                                 : chuck
-```
+----
+====
 
 When you review the `words.log-v1-1` logs, you should see the following:
 
-```
+====
+[source,bash]
+----
 2016-06-05 18:35:47.047  INFO 58639 --- [  kafka-binder-] log.sink                                 : much
 2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : wood
 2016-06-05 18:35:47.066  INFO 58639 --- [  kafka-binder-] log.sink                                 : would
@@ -1247,24 +1422,28 @@ When you review the `words.log-v1-1` logs, you should see the following:
 2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : woodchuck
 2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : could
 2016-06-05 18:35:47.067  INFO 58639 --- [  kafka-binder-] log.sink                                 : wood
-```
+----
+====
 
 This example has shown that payload splits that contain the same word are routed to the same application instance.
 
 [[spring-cloud-dataflow-stream-app-types]]
 === Other Source and Sink Application Types
 
-This example shows something a bit more complicated: swapping out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POSTs. Note that the `http` source accepts data on a different port from the Data Flow Server (default 8080). By default, the port is randomly assigned.
+This example shows something a bit more complicated: swapping out the `time` source for something else. Another supported source type is `http`, which accepts data for ingestion over HTTP POST requests. Note that the `http` source accepts data on a different port from the Data Flow Server (default 8080). By default, the port is randomly assigned.
 
-To create a stream using an `http` source but still using the same `log` sink, we would change the original command in the <<spring-cloud-dataflow-simple-stream>> example to the following:
+To create a stream that uses an `http` source but still uses the same `log` sink, we would change the original command in the <<spring-cloud-dataflow-simple-stream>> example to the following:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:> stream create --definition "http | log" --name myhttpstream --deploy
 ----
+====
 
-Note that we do not see any other output this time until we actually post some data (by using a shell command). In order to see the randomly assigned port on which the http source is listening, run the following command:
+Note that, this time, we do not see any other output until we actually post some data (by using a shell command). To see the randomly assigned port on which the `http` source is listening, run the following command:
 
+====
 [source,bash,options="nowrap"]
 ----
 dataflow:>runtime apps
@@ -1293,20 +1472,26 @@ dataflow:>runtime apps
 ║                      │           │working.dir = /var/folders/js/7b_pn0t575l790x7j61slyxc0000gn/T/spring-cloud-deployer-6467595568759190742/myhttpstream-1542803866800/myhttpstream.http-v1             ║
 ╚══════════════════════╧═══════════╧═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 ----
+====
 
-You should see that the corresponding `http` source has a `url` property containing the host and port information on which it is listening. You are now ready to post to that url, as shown in the following example:
+You should see that the corresponding `http` source has a `url` property that contains the host and port information on which it is listening. You are now ready to post to that url, as shown in the following example:
 
+====
 [source,bash,subs=attributes]
 ----
 dataflow:> http post --target http://localhost:1234 --data "hello"
 dataflow:> http post --target http://localhost:1234 --data "goodbye"
 ----
+====
 
-The stream then funnels the data from the http source to the output log implemented by the log sink, yielding output similar to the following:
+The stream then funnels the data from the `http` source to the output log implemented by the `log` sink, yielding output similar to the following:
 
-```
+====
+[source,bash]
+----
 2016-06-01 09:50:22.121  INFO 79654 --- [  kafka-binder-] log.sink    : hello
 2016-06-01 09:50:26.810  INFO 79654 --- [  kafka-binder-] log.sink    : goodbye
-```
+----
+====
 
 We could also change the sink implementation. You could pipe the output to a file (`file`), to hadoop (`hdfs`), or to any of the other sink applications that are available. You can also define your own applications.

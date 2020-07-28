@@ -11,7 +11,9 @@ This section shows the available samples.
 Several samples have been created to help you get started on implementing higher-level use cases than the basic Streams and Tasks shown in the reference guide.
 The samples are part of a separate https://github.com/spring-cloud/spring-cloud-dataflow-samples[repository] and have their own https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/[reference documentation].
 
+The following samples are available:
 
+.General
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#_java_dsl[Java DSL]
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#spring-cloud-data-flow-samples-http-cassandra-overview[HTTP to Cassandra]
 * https://docs.spring.io/spring-cloud-dataflow-samples/docs/current/reference/htmlsingle/#_http_to_mysql_demo[HTTP to MySQL]

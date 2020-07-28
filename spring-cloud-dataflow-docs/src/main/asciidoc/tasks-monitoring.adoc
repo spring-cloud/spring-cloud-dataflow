@@ -1,5 +1,4 @@
 [[tasks-monitoring]]
 = Task Monitoring
 
-Please see the link:https://dataflow.spring.io/docs/feature-guides/batch/monitoring/[Task Monitoring] Guide of the microsite for more information on how to monitor the applications that were deployed as part of a Task.
-
+See the link:https://dataflow.spring.io/docs/feature-guides/batch/monitoring/[Task Monitoring] Guide of the microsite for more about how to monitor the applications that were deployed as part of a task.

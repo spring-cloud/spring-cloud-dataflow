@@ -1,15 +1,16 @@
 [appendix]
 [[contributing]]
 == Contributing
-Spring Cloud is released under the non-restrictive Apache 2.0 license and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master.
-If you want to contribute even something trivial, please do not hesitate, but follow the guidelines below.
+
+Spring Cloud is released under the non-restrictive Apache 2.0 license and follows a very standard Github development process, using Github tracker for issues and merging pull requests into the master branch.
+If you want to contribute even something trivial, please do not hesitate, but do please follow the guidelines in this appendix.
 
 
 
 === Sign the Contributor License Agreement
 
-Before we accept a non-trivial patch or pull request, we need you to sign the https://cla.pivotal.io[contributor's agreement].
-Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do.
+Before we accept a non-trivial (anything more than correcting a typographical error) patch or pull request, we need you to sign the https://cla.pivotal.io[contributor's agreement].
+Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you get an author credit if we do.
 Active contributors might be asked to join the core team and be given the ability to merge pull requests.
 
 
@@ -20,13 +21,12 @@ None of the following guidelines is essential for a pull request, but they all h
 They can also be added after the original pull request but before a merge.
 
 * Use the Spring Framework code format conventions. If you use Eclipse, you can import formatter settings by using the `eclipse-code-formatter.xml` file from the https://github.com/spring-cloud/spring-cloud-build/blob/master/spring-cloud-dependencies-parent/eclipse-code-formatter.xml[Spring Cloud Build] project.
-If using IntelliJ, you can use the https://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter Plugin] to import the same file.
+If you use IntelliJ, you can use the https://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter Plugin] to import the same file.
 * Make sure all new `.java` files have a simple Javadoc class comment with at least an  `@author` tag identifying you, and preferably at least a paragraph describing the class's purpose.
-* Add the ASF license header comment to all new `.java` files (to do so, copy from existing files in the project).
+* Add the ASF license header comment to all new `.java` files (to do so, copy it from existing files in the project).
 * Add yourself as an `@author` to the .java files that you modify substantially (more than cosmetic changes).
 * Add some Javadocs and, if you change the namespace, some XSD doc elements.
 * A few unit tests would help a lot as well. Someone has to do it, and your fellow developers appreciate the effort.
 * If no one else uses your branch, rebase it against the current master (or other target branch in the main project).
 * When writing a commit message, follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions].
 If you fix an existing issue, add `Fixes gh-XXXX` (where XXXX is the issue number) at the end of the commit message.
-

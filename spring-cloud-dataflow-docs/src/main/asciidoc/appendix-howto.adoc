@@ -2,10 +2,10 @@
 [[howto]]
 == "`How-to`" guides
 
-This section provides answers to some common '`how do I do that...`' type of questions that often arise when using Spring Cloud Data Flow.
+This section provides answers to some common '`how do I do that...`' questions that often arise when people use Spring Cloud Data Flow.
 
-If you are having a specific problem that we do not cover here, you might want to check out https://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has already provided an answer.
-That is also a great place to ask new questions (please use the `spring-cloud-dataflow` tag).
+If you have a specific problem that we do not cover here, you might want to check out https://stackoverflow.com/tags/spring-cloud-dataflow[stackoverflow.com] to see if someone has already provided an answer.
+That is also a great place to ask new questions (use the `spring-cloud-dataflow` tag).
 
 We are also more than happy to extend this section. If you want to add a "`how-to`", you can send us a {github-code}[pull request].
 
@@ -13,15 +13,16 @@ We are also more than happy to extend this section. If you want to add a "`how-t
 
 === Configure Maven Properties
 
-You can set the maven properties such as local maven repository location, remote maven repositories, authentication credentials, and proxy server properties through command line properties when starting the Data Flow server.
-Alternatively, you can set the properites using `SPRING_APPLICATION_JSON` environment property for the Data Flow server.
+You can set the Maven properties, such as the local Maven repository location, remote Maven repositories, authentication credentials, and proxy server properties through command-line properties when you start the Data Flow server.
+Alternatively, you can set the properties by setting the `SPRING_APPLICATION_JSON` environment property for the Data Flow server.
 
-The remote maven repositories need to be configured explicitly if the apps are resolved using maven repository, except for a `local` Data Flow server.
-The other Data Flow server implementations (that use maven resources for app artifacts resolution) have no default value for remote repositories.
+The remote Maven repositories need to be configured explicitly if the applications are resolved by using the Maven repository, except for a `local` Data Flow server.
+The other Data Flow server implementations (which use Maven resources for application artifacts resolution) have no default value for remote repositories.
 The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
 
-To pass the properties as commandline options, run the server with a command similar to the following:
+To pass the properties as command-line options, run the server with a command similar to the following:
 
+====
 [source,bash]
 ----
 $ java -jar <dataflow-server>.jar --maven.localRepository=mylocal
@@ -32,17 +33,21 @@ $ java -jar <dataflow-server>.jar --maven.localRepository=mylocal
 --maven.proxy.port=9018 --maven.proxy.auth.username=proxyuser
 --maven.proxy.auth.password=proxypass
 ----
+====
 
 You can also use the `SPRING_APPLICATION_JSON` environment property:
 
+====
 [source,json]
 ----
 export SPRING_APPLICATION_JSON='{ "maven": { "local-repository": "local","remote-repositories": { "repo1": { "url": "https://repo1", "auth": { "username": "repo1user", "password": "repo1pass" } },
 "repo2": { "url": "https://repo2" } }, "proxy": { "host": "proxyhost", "port": 9018, "auth": { "username": "proxyuser", "password": "proxypass" } } } }'
 ----
+====
 
 Here is the same content in nicely formatted JSON:
 
+====
 [source,json]
 ----
 SPRING_APPLICATION_JSON='{
@@ -71,16 +76,18 @@ SPRING_APPLICATION_JSON='{
   }
 }'
 ----
+====
 
 NOTE: Depending on the Spring Cloud Data Flow server implementation, you may have to pass the environment properties by using the platform specific environment-setting capabilities. For instance, in Cloud Foundry, you would pass them as `cf set-env SPRING_APPLICATION_JSON`.
 
 
 === Troubleshooting
 
-This section covers how to troubleshoot Spring Cloud Data Flow on your platform of choice. Please visit the Troubleshooting sections of the microsite for link:https://dataflow.spring.io/docs/stream-developer-guides/troubleshooting/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/troubleshooting/[Batch] processing.
+This section covers how to troubleshoot Spring Cloud Data Flow on your platform of choice. See the Troubleshooting sections of the microsite for link:https://dataflow.spring.io/docs/stream-developer-guides/troubleshooting/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/troubleshooting/[Batch] processing.
 
 
 [[faqs]]
 === Frequently Asked Questions
-In this section, we review the frequently asked questions in Spring Cloud Data Flow.
-Please see the https://dataflow.spring.io/docs/resources/faq/[Frequently Asked Questions] section of the microsite for more information.
+
+In this section, we review the frequently asked questions for Spring Cloud Data Flow.
+See the https://dataflow.spring.io/docs/resources/faq/[Frequently Asked Questions] section of the microsite for more information.

@@ -9,7 +9,6 @@ You can find a gentle introduction to Spring Cloud Data Flow along with installa
 We then build an introductory Spring Cloud Data Flow application, discussing some core principles as we go.
 --
 
-Please see the link:https://dataflow.spring.io/docs/installation/local/[Local Machine] section of the microsite for more information on setting up docker compose and manual installation.
+See the link:https://dataflow.spring.io/docs/installation/local/[Local Machine] section of the microsite for more information on setting up docker compose and manual installation.
 
-Once you have the Data Flow server installed locally, you will want to get started with orchestrating the deployment of readily available pre-built applications into a coherent streaming or batch data pipelines. Below we have guides on how to get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.
-
+Once you have the Data Flow server installed locally, you probably want to get started with orchestrating the deployment of readily available pre-built applications into coherent streaming or batch data pipelines. We have guides to help you get started with both link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/[Batch] processing.

@@ -9,24 +9,24 @@ This section describes how to use the dashboard of Spring Cloud Data Flow.
 [[dashboard-introduction]]
 == Introduction
 
-Spring Cloud Data Flow provides a browser-based GUI called the dashboard to manage the following information:
+Spring Cloud Data Flow provides a browser-based GUI called the Dashboard to manage the following information:
 
-* *Apps*: The Apps tab lists all available applications and provides the controls to register/unregister them.
-* *Runtime*: The Runtime tab provides the list of all running applications.
-* *Streams*: The Streams tab lets you list, design, create, deploy, and destroy Stream Definitions.
+* *Apps*: The *Apps* tab lists all available applications and provides the controls to register and unregister them.
+* *Runtime*: The *Runtime* tab provides the list of all running applications.
+* *Streams*: The *Streams* tab lets you list, design, create, deploy, and destroy Stream Definitions.
 ifndef::omit-tasks-docs[]
-* *Tasks*: The Tasks tab lets you list, create, launch, schedule and, destroy Task Definitions.
+* *Tasks*: The *Tasks* tab lets you list, create, launch, schedule, and destroy Task Definitions.
 endif::omit-tasks-docs[]
-* *Jobs*: The Jobs tab lets you perform batch job related functions.
+* *Jobs*: The *Jobs* tab lets you perform batch job related functions.
 
 Upon starting Spring Cloud Data Flow, the dashboard is available at:
 
 `http://<host>:<port>/dashboard`
 
-For example, if Spring Cloud Data Flow is running locally, the dashboard is available at `\http://localhost:9393/dashboard`.
+For example, if Spring Cloud Data Flow is running locally, the dashboard is available at `http://localhost:9393/dashboard`.
 
-If you have enabled https, then the dashboard will be located at `\https://localhost:9393/dashboard`.
-If you have enabled security, a login form is available at `\http://localhost:9393/dashboard/#/login`.
+If you have enabled HTTPS, the dashboard is available at `https://localhost:9393/dashboard`.
+If you have enabled security, a login form is available at `http://localhost:9393/dashboard/#/login`.
 
 NOTE: The default Dashboard server port is `9393`.
 
@@ -40,10 +40,10 @@ image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud 
 [[dashboard-apps]]
 == Apps
 
-The Apps section of the dashboard lists all the available applications and provides the controls to register and unregister them (if applicable).
-It is possible to import a number of applications at once by using the Bulk Import Applications action.
+The *Apps* tab of the dashboard lists all the available applications and provides the controls to register and unregister them (if applicable).
+You can import a number of applications at once by using the Bulk Import Applications action.
 
-The following image shows a typical list of available apps within the dashboard:
+The following image shows a typical list of available applications within the dashboard:
 
 .List of Available Applications
 image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of available applications, scaledwidth="100%"]
@@ -55,19 +55,26 @@ image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of avail
 The Bulk Import Applications page provides numerous options for defining and importing a set of applications all at once.
 For bulk import, the application definitions are expected to be expressed in a properties style, as follows:
 
-`<type>.<name> = <coordinates>`
+====
+[source,properties]
+----
+<type>.<name> = <coordinates>
+----
+====
 
-The following examples show a typical application definitions:
+The following examples show typical application definitions:
 
+====
 [source,subs=properties]
 ----
 task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
 processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.0.RELEASE
 ----
+====
 
-At the top of the bulk import page, a URI can be specified that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
-Alternatively, by using the textbox labeled "`Apps as Properties`", you can directly list each property string. Finally, if the properties are stored in a local file, the "`Select Properties File`" option opens a local file browser to select the file.
-After setting your definitions through one of these routes, click Import.
+At the top of the bulk import page, you can specify a URI that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
+Alternatively, by using the *Apps as Properties* textbox , you can directly list each property string. Finally, if the properties are stored in a local file, the *Select Properties File* option opens a local file browser to select the file.
+After setting your definitions through one of these routes, click *Import*.
 
 The following image shows the Bulk Import Applications page:
 
@@ -79,11 +86,11 @@ image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications.png[Bulk Imp
 [[dashboard-runtime]]
 == Runtime
 
-The Runtime section of the Dashboard application shows the list of all running applications.
-For each runtime app, the state of the deployment and the number of deployed instances is shown.
-A list of the used deployment properties is available by clicking on the App Id.
+The *Runtime* tab of the Dashboard application shows the list of all running applications.
+For each runtime applicaiton, the state of the deployment and the number of deployed instances is shown.
+A list of the used deployment properties is available by clicking on the application ID.
 
-The following image shows an example of the Runtime tab in use:
+The following image shows an example of the *Runtime* tab in use:
 
 .List of Running Applications
 image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applications, scaledwidth="100%"]
@@ -93,7 +100,7 @@ image::{dataflow-asciidoc}/images/dataflow-runtime.png[List of running applicati
 [[dashboard-streams]]
 == Streams
 
-The Streams tab has two child tabs: Definitions and Create Stream. The following topics describe how to work with each one:
+The *Streams* tab has two child tabs: *Definitions* and *Create Stream*. The following topics describe how to work with each one:
 
 * <<dashboard-stream-definitions>>
 * <<dashboard-flo-streams-designer>>
@@ -105,11 +112,11 @@ The Streams tab has two child tabs: Definitions and Create Stream. The following
 [[dashboard-stream-definitions]]
 === Working with Stream Definitions
 
-The Streams section of the Dashboard includes the Definitions tab that provides a listing of Stream definitions.
+The *Streams* section of the Dashboard includes the *Definitions* tab that provides a listing of stream definitions.
 There you have the option to deploy or undeploy those stream definitions.
-Additionally, you can remove the definition by clicking on Destroy.
+Additionally, you can remove the definition by clicking on *Destroy*.
 Each row includes an arrow on the left, which you can click to see a visual representation of the definition.
-Hovering over the boxes in the visual representation shows more details about the apps, including any options passed to them.
+Hovering over the boxes in the visual representation shows more details about the applications, including any options passed to them.
 
 In the following screenshot, the `timer` stream has been expanded to show the visual representation:
 
@@ -127,12 +134,12 @@ image::{dataflow-asciidoc}/images/dataflow-stream-details.png[Stream Details Pag
 [[dashboard-flo-streams-designer]]
 === Creating a Stream
 
-The Streams section of the Dashboard includes the Create Stream tab, which makes available the https://github.com/spring-projects/spring-flo[Spring Flo] designer: a canvas application that offers an interactive graphical interface for creating data pipelines.
+The *Streams* section of the Dashboard includes the *Create Stream* tab, which makes the https://github.com/spring-projects/spring-flo[Spring Flo] designer available. The designer is a canvas application that offers an interactive graphical interface for creating data pipelines.
 
 In this tab, you can:
 
-* Create, manage, and visualize stream pipelines using DSL, a graphical canvas, or both
-* Write pipelines via DSL with content-assist and auto-complete
+* Create, manage, and visualize stream pipelines by using DSL, a graphical canvas, or both
+* Write pipelines by using DSL with content-assist and auto-complete
 * Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of pipelines
 
 You should watch this https://www.youtube.com/watch?v=78CgV46OstI[screencast] that highlights some of the "Flo for Spring Cloud Data Flow" capabilities.
@@ -148,15 +155,17 @@ image::{dataflow-asciidoc}/images/dataflow-flo-create-stream.png[Flo for Spring 
 [[dashboard-stream-deploy]]
 === Deploying a Stream
 
-The stream deploy page includes tabs that provide different ways to setup the deployment properties and deploy the stream.
+The stream deploy page includes tabs that provide different ways to set up the deployment properties and deploy the stream.
 The following screenshots show the stream deploy page for `foobar` (`time | log`).
 
-You can define deployments properties using:
+You can define deployments properties by using:
 
-* Form builder tab: a builder which help you to define deployment properties (deployer, application properties...)
-* Free text tab: a free text area (key/value pairs)
+* Form builder tab: a builder that helps you to define deployment properties (deployer, application properties, and so on)
+* Free text tab: a free text area (for key-value pairs)
 
-You can switch between the both views, the form builder provides a more stronger validation of the inputs.
+You can switch between both views.
+
+TIP: The form builder offers stronger validation of the inputs.
 
 .The following image shows the form builder
 image::{dataflow-asciidoc}/images/dataflow-stream-deploy-builder.png[Form builder, scaledwidth="100%"]
@@ -167,71 +176,71 @@ image::{dataflow-asciidoc}/images/dataflow-stream-deploy-freetext.png[Free text,
 [[dashboard-stream-logs]]
 === Accessing Stream Logs
 
-Once the stream applications are deployed, their logs can be accessed from the Stream `summary` page as below:
+Once the stream applications are deployed, their logs can be accessed from the Stream `summary` page, as the following image shows:
 
 image::{dataflow-asciidoc}/images/dataflow-stream-logs.png[Stream Logs, scaledwidth="100%"]
 
 [[dashboard-flo-streams-designer-fanin-fanout]]
-=== Creating Fan-In/Fan-Out Streams
+=== Creating Fan-In and Fan-Out Streams
 
-In chapter <<spring-cloud-dataflow-stream-dsl-fanin-fanout>> you learned how we can support fan-in and fan-out use cases using <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>.
+In the <<spring-cloud-dataflow-stream-dsl-fanin-fanout>> chapter, you can learn how to support fan-in and fan-out use cases by  using <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>.
 The UI provides dedicated support for named destinations as well:
 
 .Flo for Spring Cloud Data Flow
 image::{dataflow-asciidoc}/images/dataflow-flo-create-stream-fanin-fanout.png[Fan-in and Fan-out example, scaledwidth="100%"]
 
-In this example we have data from an _HTTP Source_ and a _JDBC Source_ that is being sent to the
-_sharedData_ channel which represents a *Fan-in* use case.
-On the other end we have a _Cassandra Sink_ and a _File Sink_ subscribed to the _sharedData_ channel which represents a *Fan-out* use case.
+In this example, we have data from an _HTTP Source_ and a _JDBC Source_ that is being sent to the
+_sharedData_ channel, which represents a fan-in use case.
+On the other end we have a _Cassandra Sink_ and a _File Sink_ subscribed to the _sharedData_ channel, which represents a fan-out use case.
 
 === Creating a Tap Stream
 
-Creating Taps using the Dashboard is straightforward.
-Let's say you have stream consisting of an _HTTP Source_ and a _File Sink_ and you would like to tap into the stream
+Creating taps by using the Dashboard is straightforward.
+Suppose you have a stream consisting of an _HTTP Source_ and a _File Sink_ and you would like to tap into the stream
 to also send data to a _JDBC Sink_.
-In order to create the tap stream simply connect the output connector of the _HTTP Source_ to the _JDBC Sink_.
-The connection will be displayed as a dotted line, indicating that you created a tap stream.
+To create the tap stream, connect the output connector of the _HTTP Source_ to the _JDBC Sink_.
+The connection is displayed as a dotted line, indicating that you created a tap stream.
 
 .Creating a Tap Stream
 image::{dataflow-asciidoc}/images/dataflow-flo-create-tap-stream.png[Tap stream example, scaledwidth="100%"]
 
 The primary stream (_HTTP Source_ to _File Sink_) will be automatically named, in case you did not provide a name for the stream, yet.
 When creating tap streams, the primary stream must always be explicitly named.
-In the picture above, the primary stream was named _HTTP_INGEST_.
+In the preceding image, the primary stream was named _HTTP_INGEST_.
 
-Using the Dashboard, you can also switch the primary stream to become the secondary tap stream.
+By using the Dashboard, you can also switch the primary stream so that it becomes the secondary tap stream.
 
 .Change Primary Stream to Secondary Tap Stream
 image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stream.png[Switch tap stream to primary stream, scaledwidth="100%"]
 
-Simply hover over the existing primary stream, the line between _HTTP Source_ and _File Sink_.
-Several control icons will appear, and by clicking on the icon labeled _Switch to/from tap_,
+Hover over the existing primary stream, the line between _HTTP Source_ and _File Sink_.
+Several control icons appear, and, by clicking on the icon labeled _Switch to/from tap_,
 you change the primary stream into a tap stream.
 Do the same for the tap stream and switch it to a primary stream.
 
 .End Result of Switching the Primary Stream
 image::{dataflow-asciidoc}/images/dataflow-flo-tap-stream-switch-to-primary-stream-result.png[End result of switching the tap stream to a primary stream, scaledwidth="100%"]
-=======
+
+
 TIP: When interacting directly with <<spring-cloud-dataflow-stream-dsl-named-destinations,named destinations>>,
 there can be "n" combinations (Inputs/Outputs). This allows you to create complex topologies involving a
 wide variety of data sources and destinations.
-=======
 
-=== Import/Export Streams
+=== Import and Export Streams
 
-The Streams section of the Dashboard includes a new Utils page that provides the option to import and export streams.
+The *Streams* tab of the Dashboard includes a new *Streams Utils* page that provides the option to import and export streams.
 
 The following image shows the streams export page:
 
 .Stream Utils Export page
 image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Stream Utils Export, scaledwidth="100%"]
 
-On the Streams import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Streams export page.
+On the streams import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the streams export page.
 
 .Stream Utils Import page
 image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Stream Utils Import, scaledwidth="100%"]
 
-After importing the file, you will get confirmation on whether the operation completed successfully.
+After importing the file, you get confirmation of whether the operation completed successfully.
 
 .Stream Utils Import Result page
 image::{dataflow-asciidoc}/images/dataflow-streams-utils-import-result.png[Stream Utils Import Result, scaledwidth="100%"]
@@ -241,7 +250,7 @@ ifndef::omit-tasks-docs[]
 [[dashboard-tasks]]
 == Tasks
 
-The Tasks section of the Dashboard currently has three tabs:
+The *Tasks* tab of the Dashboard currently has three tabs:
 
 * <<dashboard-tasks-apps>>
 * <<dashboard-task-definition>>
@@ -251,32 +260,34 @@ The Tasks section of the Dashboard currently has three tabs:
 [[dashboard-tasks-apps]]
 === Apps
 
-Each app encapsulates a unit of work into a reusable component.
-Within the Data Flow runtime environment, apps let users create definitions for streams as well as tasks.
-Consequently, the Apps tab within the Tasks section lets users create task definitions.
+Each application encapsulates a unit of work into a reusable component.
+Within the Data Flow runtime environment, applications let you create definitions for streams as well as tasks.
+Consequently, the *Apps* tab within the *Tasks* tab lets you create task definitions.
 
 TIP: You can also use this tab to create Batch Jobs.
 
-The following image shows a typical list of task apps:
+The following image shows a typical list of task applications:
 
 .List of Task Apps
 image::{dataflow-asciidoc}/images/dataflow-task-apps-list.png[List of Task Apps, scaledwidth="100%"]
 
 On this screen, you can perform the following actions:
 
-* View details, such as the task app options.
-* Create a task definition from the respective app.
+* View details, such as the task application options.
+* Create a task definition from the respective application.
 
-==== View Task App Details
+==== View Task Application Details
 
-On this page you can view the details of a selected task app, including the list of available options (properties) for that app.
+On this page, you can view the details of a selected task application, including the list of available options (properties) for that application.
 
 ==== Create a Task Definition
 
-image::{dataflow-asciidoc}/images/dataflow-task-definition-create.png[List of Task Apps, scaledwidth="100%"]
+The following image shows the list of task applications:
+
+image::{dataflow-asciidoc}/images/dataflow-task-definition-create.png[List of Task Applications, scaledwidth="100%"]
 
 At a minimum, you must provide a name for the new definition.
-You also have the option to specify various properties that are used during the deployment of the app.
+You can also specify various properties that are used during the deployment of the application.
 
 NOTE: Each parameter is included only if the Include checkbox is selected.
 
@@ -285,7 +296,7 @@ NOTE: Each parameter is included only if the Include checkbox is selected.
 
 This page lists the Data Flow task definitions and provides actions to launch or destroy those tasks.
 It also provides a shortcut operation to define one or more tasks with simple textual input, indicated by
-the Bulk Define Tasks button.
+the *Bulk Define Tasks* button.
 
 The following image shows the Definitions page:
 
@@ -294,14 +305,14 @@ image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Tas
 
 ==== Creating Composed Task Definitions
 
-The dashboard includes the Create Composed Task tab, which provides an interactive graphical interface for creating composed tasks.
+The dashboard includes the *Create Composed Task* tab, which provides an interactive graphical interface for creating composed tasks.
 
 In this tab, you can:
 
-* Create and visualize composed tasks using DSL, a graphical canvas, or both.
+* Create and visualize composed tasks by using DSL, a graphical canvas, or both.
 * Use auto-adjustment and grid-layout capabilities in the GUI for simpler and interactive organization of the composed task.
 
-On the Create Composed Task screen, you can define one or more task parameters by entering both the parameter key and the parameter value.
+On the *Create Composed Task* screen, you can define one or more task parameters by entering both the parameter key and the parameter value.
 
 NOTE: Task parameters are not typed.
 
@@ -314,8 +325,9 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designe
 
 ==== Launching Tasks
 
-Once the task definition has been created, the tasks can be launched through the dashboard.
-To do so, click the Definitions tab and select the task you want to launch by pressing `Launch`.
+Once the task definition has been created, you can launch the tasks through the dashboard.
+To do so, click the *Definitions* tab and select the task you want to launch by pressing `Launch`.
+The following image shows the Task Launch page:
 
 .Task Launch Page
 image::{dataflow-asciidoc}/images/dataflow-task-launch.png[Task Launch, scaledwidth="100%"]
@@ -323,19 +335,19 @@ image::{dataflow-asciidoc}/images/dataflow-task-launch.png[Task Launch, scaledwi
 
 ==== Import/Export Tasks
 
-The Tasks section of the Dashboard includes a new Utils page that provides the option to import and export tasks.
+The *Tasks* tab of the Dashboard includes a new *Utils* page that provides the option to import and export tasks.
 
 The following image shows the tasks export page:
 
 .Tasks Utils Export page
 image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Tasks Utils Export, scaledwidth="100%"]
 
-On the Tasks import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Tasks export page.
+On the Tasks Import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Tasks Export page.
 
 .Tasks Utils Import page
 image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Tasks Utils Import, scaledwidth="100%"]
 
-After importing the file, you will get confirmation on whether the operation completed successfully.
+After importing the file, you get confirmation on whether the operation completed successfully.
 
 .Tasks Utils Import Result page
 image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Tasks Utils Import Result, scaledwidth="100%"]
@@ -345,57 +357,57 @@ image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Tasks U
 [[dashboard-tasks-executions]]
 === Executions
 
-The Executions tab shows the current running and completed task executions. From this page you can drill down into the Task Execution details page. Furthermore, you can relaunch a Task Execution or stop a running execution.
+The *Executions* tab shows the current running and completed task executions. From this page, you can drill down into the *Task Execution* details page. Furthermore, you can relaunch a *Task Execution* or stop a running execution.
 
-Lastly, you can clean up 1 or more Task Executions. This operation will remove any associated Task and/or Batch Job from the underlying persistence store. This operation can only be triggered for _parent_ Task Executions and will cascade down to the child Task Executions (if there are any).
+Lastly, you can clean up one or more task executions. This operation removes any associated task or batch job from the underlying persistence store. This operation can only be triggered for _parent_ task executions and cascades down to the child task executions (if there are any).
 
-The following image shows the Executions tab:
+The following image shows the *Executions* tab:
 
 .List of Task Executions
 image::{dataflow-asciidoc}/images/dataflow-task-executions-list.png[List of Task Executions, scaledwidth="100%"]
 
 [[dashboard-tasks-execution-detail]]
 === Execution Detail
-For each task execution on the Executions page, a user can retrieve detailed information about a specific execution by clicking the information icon located to the right of the task execution.
+
+For each task execution on the *Executions* tab, you can retrieve detailed information about a specific execution by clicking the information icon located to the right of the task execution.
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-detail.png[List of Task Executions, scaledwidth="100%"]
 
-On this screen the user can view not only the information from the Task Executions page but also:
+On this screen, you can view not only the information from the task executions page but also:
 
 * Task Arguments
-* External Execution Id
+* External Execution ID
 * Batch Job Indicator (indicates if the task execution contained Spring Batch jobs.)
-* Job Execution Ids links (Clicking the Job Execution Id will take you to the <<dashboard-job-executions-details>> for that Job Execution Id.)
+* Job Execution IDs links (Clicking the Job Execution Id will take you to the <<dashboard-job-executions-details>> for that Job Execution ID.)
 * Task Execution Duration
 * Task Execution Exit Message
 * Logging output from the Task Execution
 
-Additionally, users can trigger the following operations:
+Additionally, you can trigger the following operations:
 
-* Relaunch the Task
-* Stop a running Task
-* Task Execution cleanup (For parent Task Executions only)
+* Relaunch a task
+* Stop a running task
+* Task execution cleanup (for parent task executions only)
 
 ==== Stop Executing Tasks
 
 To submit a stop task execution request to the platform, click the drop down button next to the task execution that needs to be stopped.
-Now click the `Stop task` option.  The dashboard will the present a dialog box asking if you are sure that you want to stop the task execution, click `Stop Task Execution(s)`.
+Now click the *Stop task* option. The dashboard presents a dialog box asking if you are sure that you want to stop the task execution. If so, click `Stop Task Execution(s)`.
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-stop.png[Stop Executing Tasks, scaledwidth="100%"]
 
-
-NOTE: Child Spring Cloud Task applications launched via Spring Batch applications that utilize remote partitioning will not be stopped.
+NOTE: Child Spring Cloud Task applications launched via Spring Batch applications that use remote partitioning are not stopped.
 
 [[dashboard-jobs]]
 == Jobs
 
-The Jobs section of the Dashboard lets you inspect batch jobs.
+The *Jobs* tab of the Dashboard lets you inspect batch jobs.
 The main section of the screen provides a list of job executions.
 Batch jobs are tasks that each execute one or more batch jobs.
-Each job execution has a reference to the task execution ID (in the Task Id column).
+Each job execution has a reference to the task execution ID (in the Task ID column).
 
-The list of Job Executions also shows the state of the underlying Job Definition.
-Thus, if the underlying definition has been deleted, "`No definition found`" appears in the Status column.
+The list of job executions also shows the state of the underlying Job Definition.
+Thus, if the underlying definition has been deleted, "`No definition found`" appears in the *Status* column.
 
 You can take the following actions for each job:
 
@@ -403,9 +415,9 @@ You can take the following actions for each job:
 * Stop (for running jobs).
 * View execution details.
 
-Note: Clicking the stop button actually sends a stop request to the running job, which may not immediately stop.
+NOTE: Clicking the stop button actually sends a stop request to the running job, which may not immediately stop.
 
-The following image shows the Jobs page:
+The following image shows the *Jobs* tab:
 
 .List of Job Executions
 image::{dataflow-asciidoc}/images/dataflow-job-executions-list.png[List of Job Executions, scaledwidth="100%"]
@@ -415,7 +427,7 @@ image::{dataflow-asciidoc}/images/dataflow-job-executions-list.png[List of Job E
 [[dashboard-job-executions-details]]
 === Job Execution Details
 
-After having launched a batch job, the Job Execution Details page will show information about the job.
+After you have launched a batch job, the Job Execution Details page shows information about the job.
 
 The following image shows the Job Execution Details page:
 
@@ -437,15 +449,15 @@ The following image shows the Step Execution Details page:
 .Step Execution Details
 image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
 
-On the top of the page, you can see a progress indicator the respective step, with the option to refresh the indicator.
+On the top of the page, you can see a progress indicator that shows the respective step, with the option to refresh the indicator.
 A link is provided to view the step execution history.
 
-The Step Execution Details screen provides a complete list of all Step Execution Context key/value pairs.
+The Step Execution Details screen provides a complete list of all Step Execution Context key-value pairs.
 
-IMPORTANT: For exceptions, the Exit Description field contains additional error information.
+IMPORTANT: For exceptions, the *Exit Description* field contains additional error information.
 However, this field can have a maximum of 2500 characters.
 Therefore, in the case of long exception stack traces, trimming of error messages may occur.
-When that happens, refer to the server log files for further details.
+When that happens, check the server log files for further details.
 
 
 
@@ -462,12 +474,12 @@ endif::omit-tasks-docs[]
 [[dashboard-task-scheduling]]
 == Scheduling
 
-You can create schedules from the SCDF Dashboard for the Task Definitions. Please see the https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[Scheduling Batch Jobs] section of the microsite for more information.
+You can create schedules from the SCDF Dashboard for the Task Definitions. See the https://dataflow.spring.io/docs/feature-guides/batch/scheduling/[Scheduling Batch Jobs] section of the microsite for more information.
 
 [[dashboard-auditing]]
 == Auditing
 
-The Auditing page of the Dashboard gives you access to recorded audit events. Currently audit event
+The Auditing page of the Dashboard gives you access to recorded audit events. Audit events
 are recorded for:
 
 * Streams
@@ -483,31 +495,33 @@ are recorded for:
   - Create Schedule
   - Delete Schedule
 
-.List Overview of Audit Records
-image::{dataflow-asciidoc}/images/dataflow-audit-records-list.png[List Available Audit Records, scaledwidth="100%"]
+The following image shows the Audit Records page:
 
-By clicking on the _Show Details_ icon, you can obtain further details regarding
+.List Overview of Audit Records
+image::{dataflow-asciidoc}/images/dataflow-audit-records-list.png[List of available audit records, scaledwidth="100%"]
+
+By clicking the _show details_ icon (the "`i`" in a circle on the right), you can obtain further details regarding
 the auditing details:
 
 .List Details of an Audit Record
-image::{dataflow-asciidoc}/images/dataflow-audit-records-details.png[Details of a single Audit Record, scaledwidth="100%"]
+image::{dataflow-asciidoc}/images/dataflow-audit-records-details.png[Details of a single audit record, scaledwidth="100%"]
 
 Generally, auditing provides the following information:
 
 * When was the record created?
-* Username that triggered the audit event (if security is enabled)
-* Audit operation (Schedule, Stresm, Task)
-* Performed action (Create, Delete, Deploy, Rollback, Undeploy, Update)
-* Correlation Id, e.g. Stream/Task name
+* The name of the user who triggered the audit event (if security is enabled)
+* Audit operation (Schedule, Stream, or Task)
+* The performed action (Create, Delete, Deploy, Rollback, Undeploy, or Update)
+* Correlation ID, such as the Stream or Task name
 * Audit Data
 
-The written value of the property _Audit Data_ depends on the performed _Audit Operation_ and the _ActionType_.
-For example, when a Schedule is being created, the name of the task definition,
-task definition properties, deployment properties, as well as command line arguments are written
+The written value of the _audit data_ property depends on the performed _audit operation_ and the _action type_.
+For example, when a schedule is being created, the name of the task definition,
+task definition properties, deployment properties, and command line arguments are written
 to the persistence store.
 
-Sensitive information is sanitized prior to saving the Audit Record, in an _best-effort-manner_.
-Any of the following keys are being detected and its sensitive values are
+Sensitive information is sanitized prior to saving the Audit Record, in a best-effort manner.
+Any of the following keys are being detected and their sensitive values are
 masked:
 
 - password
@@ -516,4 +530,3 @@ masked:
 - token
 - .\*credentials.*
 - vcap_services
-

@@ -3,17 +3,19 @@
 
 [partintro]
 --
-This section covers the options for starting the shell and more advanced functionality relating to how the shell handles white spaces, quotes, and interpretation of SpEL expressions.
+This section covers the options for starting the shell and more advanced functionality relating to how the shell handles whitespace, quotes, and interpretation of SpEL expressions.
 The introductory chapters to the
 <<spring-cloud-dataflow-stream-intro, Stream DSL>> and <<spring-cloud-dataflow-composed-tasks, Composed Task DSL>> are good places to start for the most common usage of shell commands.
 --
 
 [[shell-options]]
 == Shell Options
-The shell is built upon the link:https://projects.spring.io/spring-shell/[Spring Shell] project.
-There are command line options generic to Spring Shell and some specific to Data Flow.
-The shell takes the following command line options
 
+The shell is built upon the link:https://projects.spring.io/spring-shell/[Spring Shell] project.
+Some command-line options come from Spring Shell, and some are specific to Data Flow.
+The shell takes the following command line options:
+
+====
 [source,bash,options="nowrap",subs=attributes]
 ----
 unix:>java -jar spring-cloud-dataflow-shell-{project-version}.jar --help
@@ -32,14 +34,15 @@ Data Flow Options:
   --spring.shell.commandFile=<FILE>                 Data Flow Shell executes commands read from the file(s) and then exits.
   --help                                            This message.
 ----
+====
 
-The `spring.shell.commandFile` option can be used to point to an existing file that contains
-all the shell commands to deploy one or many related streams and tasks. +
-Multiple files execution is also supported, they should be passed as comma delimited string : +
+You can use the `spring.shell.commandFile` option to point to an existing file that contains
+all the shell commands to deploy one or many related streams and tasks.
+Running multiple files is also supported. They should be passed as a comma-delimited string:
 
 `--spring.shell.commandFile=file1.txt,file2.txt`
 
-This is useful when creating some scripts to help automate deployment.
+This option is useful when creating some scripts to help automate deployment.
 
 Also, the following shell command helps to modularize a complex script into multiple independent files:
 
@@ -50,6 +53,9 @@ Also, the following shell command helps to modularize a complex script into mult
 
 Typing `help` at the command prompt gives a listing of all available commands.
 Most of the commands are for Data Flow functionality, but a few are general purpose.
+The following listing shows the output of the `help` command:
+
+====
 [source,bash]
 ----
 ! - Allows execution of operating system (OS) commands
@@ -60,11 +66,14 @@ exit - Exits the shell
 http get - Make GET request to http endpoint
 http post - POST data to http endpoint
 quit - Exits the shell
-system properties - Shows the shell's properties
+system properties - Shows the shells properties {JB - restore the apostrophe}
 version - Displays shell version
 ----
+====
 
-Adding the name of the command to `help` shows additional information on how to invoke the command.
+Adding the name of the command to `help` shows additional information on how to invoke the command:
+
+====
 [source,bash]
 ----
 dataflow:>help stream create
@@ -89,108 +98,148 @@ Description:               Create a new stream definition
    Default if specified:   'true'
    Default if unspecified: 'false'
 ----
+====
 
 [[shell-tab-completion]]
 == Tab Completion
 
-The shell command options can be completed in the shell by pressing the `TAB` key after the leading `--`. For example, pressing `TAB` after `stream create --` results in
-```
+You can complete the shell command options in the shell by pressing the `TAB` key after the leading `--`. For example, pressing `TAB` after `stream create --` results in the following pair of suggestions:
+
+====
+[source,bash]
+----
 dataflow:>stream create --
 stream create --definition    stream create --name
-```
+----
+====
 
-If you type `--de` and then hit tab, `--definition` will be expanded.
+If you type `--de` and then press tab, `--definition` expands.
 
-Tab completion is also available inside the stream or composed task DSL expression for application or task properties.  You can also use `TAB` to get hints in a stream DSL expression for what available sources, processors, or sinks can be used.
+Tab completion is also available inside the stream or composed task DSL expression for application or task properties. You can also use `TAB` to get hints in a stream DSL expression for the available sources, processors, or sinks that you can use.
 
 [[shell-white-space]]
-== White Space and Quoting Rules
+== Whitespace and Quoting Rules
 
-It is only necessary to quote parameter values if they contain spaces or the `|` character. The following example passes a SpEL expression (which is applied to any data it encounters) to a transform processor:
+You need to quote parameter values only if they contain spaces or the `|` character. The following example passes a SpEL expression (which is applied to any data it encounters) to a transform processor:
 
-`transform --expression='new StringBuilder(payload).reverse()'`
+====
+[source,bash]
+----
+transform --expression='new StringBuilder(payload).reverse()'
+----
+====
 
 If the parameter value needs to embed a single quote, use two single quotes, as follows:
 
-[source]
+====
+[source,bash]
+----
 // Query is: Select * from /Customers where name='Smith'
 scan --query='Select * from /Customers where name=''Smith'''
-
+----
+====
 
 [[dsl-quotes-escaping]]
 === Quotes and Escaping
 
 There is a Spring Shell-based client that talks to the Data Flow Server and is responsible for *parsing* the DSL.
-In turn, applications may have applications properties that rely on embedded languages, such as the *Spring Expression Language*.
+In turn, applications may have application properties that rely on embedded languages, such as the *Spring Expression Language*.
 
-The shell, Data Flow DSL parser, and SpEL have rules about how they handle quotes and how syntax escaping works.
+The Shell, Data Flow DSL parser, and SpEL have rules about how they handle quotes and how syntax escaping works.
 When combined together, confusion may arise.
 This section explains the rules that apply and provides examples of the most complicated situations you may encounter when all three components are involved.
 
 [NOTE]
-.It's not always that complicated
+.It is not always that complicated
 ====
-If you do not use the Data Flow shell (for example, you use the REST API directly) or if application properties are not SpEL expressions, then the escaping rules are simpler.
+If you do not use the Data Flow Shell (for example, if you use the REST API directly) or if application properties are not SpEL expressions, the escaping rules are simpler.
 ====
 
-==== Shell rules
-Arguably, the most complex component when it comes to quotes is the shell. The rules can be laid out quite simply, though:
+==== Shell Rules
+
+Arguably, the most complex component when it comes to quotes is the Shell. The rules can be laid out quite simply, though:
 
 * A shell command is made of keys (`--something`) and corresponding values. There is a special, keyless mapping, though, which is described later.
 * A value cannot normally contain spaces, as space is the default delimiter for commands.
 * Spaces can be added though, by surrounding the value with quotes (either single (`'`) or double (`"`) quotes).
-* Values passed inside deployment properties (e.g. `deployment <stream-name> --properties " ..."`) should not be quoted again.
+* Values passed inside deployment properties (for example, `deployment <stream-name> --properties " ..."`) should not be quoted again.
 * If surrounded with quotes, a value can embed a literal quote of the same kind by prefixing it with a backslash (`\`).
 * Other escapes are available, such as `\t`, `\n`, `\r`, `\f` and unicode escapes of the form `\uxxxx`.
 * The keyless mapping is handled in a special way such that it does not need quoting to contain spaces.
 
-For example, the shell supports the `!` command to execute native shell commands. The `!` accepts a single keyless argument. This is why the following works:
+For example, the shell supports the `!` command to execute native shell commands. The `!` accepts a single keyless argument. This is why the following example works:
+
+====
+[source,bash]
 ----
 dataflow:>! rm something
 ----
+====
+
 The argument here is the whole `rm something` string, which is passed as is to the underlying shell.
 
 As another example, the following commands are strictly equivalent, and the argument value is `something` (without the quotes):
+
+====
+[source,bash]
 ----
 dataflow:>stream destroy something
 dataflow:>stream destroy --name something
 dataflow:>stream destroy "something"
 dataflow:>stream destroy --name "something"
 ----
+====
 
-==== Property files rules
-Rules are relaxed when loading the properties from files.
-* The special characters used in property files (both Java and YAML) needs to be escaped. For example `\` should be replaced  by `\\`, '\t` by `\\t` and so forth.
-* For Java property files (`--propertiesFile` <FILE_PATH>.properties) the property values should not be surrounded by quotes! It is not needed even if they contain spaces.
+==== Property Files Rules
+
+The rules are relaxed when loading the properties from files.
+
+* The special characters used in property files (both Java and YAML) need to be escaped. For example `\` should be replaced  by `\\`, `\t` by `\\t` and so forth.
+* For Java property files (`--propertiesFile <FILE_PATH>.properties`), the property values should not be surrounded by quotes. It is not needed even if they contain spaces.
++
+====
+[source,bash]
 ----
 filter.expression=payload > 5
 ----
-* For YAML property files (`--propertiesFile` <FILE_PATH>.yaml), though, the values need to be surrounded by double quotes.
+====
+* For YAML property files (`--propertiesFile <FILE_PATH>.yaml`), though, the values need to be surrounded by double quotes.
++
+====
+[source,bash]
 ----
 app:
     filter:
         filter:
             expression: "payload > 5"
 ----
+====
 
 ==== DSL Parsing Rules
-At the parser level (that is, inside the body of a stream or task definition) the rules are as follows:
+At the parser level (that is, inside the body of a stream or task definition), the rules are as follows:
 
 * Option values are normally parsed until the first space character.
 * They can be made of literal strings, though, surrounded by single or double quotes.
 * To embed such a quote, use two consecutive quotes of the desired kind.
 
 As such, the values of the `--expression` option to the filter application are semantically equivalent in the following examples:
+
+====
+[source,bash]
 ----
 filter --expression=payload>5
 filter --expression="payload>5"
 filter --expression='payload>5'
 filter --expression='payload > 5'
 ----
+====
 
-Arguably, the last one is more readable. It is made possible thanks to the surrounding quotes. The actual expression is `payload > 5` (without quotes).
+Arguably, the last one is more readable. It is made possible thanks to the surrounding quotes. The actual expression is `payload > 5`.
 
 Now, imagine that we want to test against string messages. If we want to compare the payload to the SpEL literal string, `"something"`, we could use the following:
+
+====
+[source,bash]
 ----
 filter --expression=payload=='something'           <1>
 filter --expression='payload == ''something'''     <2>
@@ -199,9 +248,13 @@ filter --expression='payload == "something"'       <3>
 <1> This works because there are no spaces. It is not very legible, though.
 <2> This uses single quotes to protect the whole argument. Hence, the actual single quotes need to be doubled.
 <3> SpEL recognizes String literals with either single or double quotes, so this last method is arguably the most readable.
+====
 
-Please note that the preceding examples are to be considered outside of the shell (for example, when calling the REST API directly).
+Note that the preceding examples are to be considered outside of the shell (for example, when calling the REST API directly).
 When entered inside the shell, chances are that the whole stream definition is itself inside double quotes, which would need to be escaped. The whole example then becomes the following:
+
+====
+[source,bash]
 ----
 dataflow:>stream create something --definition "http | filter --expression=payload='something' | log"
 
@@ -209,12 +262,12 @@ dataflow:>stream create something --definition "http | filter --expression='payl
 
 dataflow:>stream create something --definition "http | filter --expression='payload == \"something\"' | log"
 ----
-
-
+====
 
 ==== SpEL Syntax and SpEL Literals
+
 The last piece of the puzzle is about SpEL expressions.
-Many applications accept options that are to be interpreted as SpEL expressions, and, as seen above, String literals are handled in a special way there, too. The rules are as follows:
+Many applications accept options that are to be interpreted as SpEL expressions, and, as seen earlier, String literals are handled in a special way there, too. The rules are as follows:
 
 * Literals can be enclosed in either single or double quotes.
 * Quotes need to be doubled to embed a literal quote. Single quotes inside double quotes need no special treatment, and the reverse is also true.
@@ -223,22 +276,32 @@ As a last example, assume you want to use the link:${scs-app-starters-docs}/spri
 This processor accepts an `expression` option which is a SpEL expression. It is to be evaluated against the incoming message, with a default of `payload` (which forwards the message payload untouched).
 
 It is important to understand that the following statements are equivalent:
+
+====
+[source,bash]
 ----
 transform --expression=payload
 transform --expression='payload'
 ----
+====
 
 However, they are different from the following (and variations upon them):
+
+====
+[source,bash]
 ----
 transform --expression="'payload'"
 transform --expression='''payload'''
 ----
+====
 
-The first series evaluates to the message payload, while the latter examples evaluate to the literal string, `payload`, (again, without quotes).
+The first series evaluates to the message payload, while the latter examples evaluate to the literal string, `payload`.
 
 ==== Putting It All Together
-As a last, complete example, consider how one could force the transformation of all messages to the string literal, `hello world`, by creating a stream in the context of the Data Flow shell:
+As a last, complete example, consider how you could force the transformation of all messages to the string literal, `hello world`, by creating a stream in the context of the Data Flow shell:
+
 // asciidoctor note: callouts don't work here, they mess up the TOC for some reason
+====
 ----
 dataflow:>stream create something --definition "http | transform --expression='''hello world''' | log" <1>
 
@@ -246,6 +309,6 @@ dataflow:>stream create something --definition "http | transform --expression='\
 
 dataflow:>stream create something --definition "http | transform --expression=\"'hello world'\" | log" <2>
 ----
-<1> In the first line, there are single quotes around the string (at the Data Flow parser level), but they need to be doubled because they are inside a string literal (started by the first single quote after the equals sign).
-<2> The second and third lines, use single and double quotes respectively to encompass the whole string at the Data Flow parser level. Consequently, the other kind of quote can be used inside the string. The whole thing is inside the `--definition` argument to the shell, though, which uses double quotes. Consequently, double quotes are escaped (at the shell level)
-
+<1> In the first line, single quotes surround the string (at the Data Flow parser level), but they need to be doubled because they are inside a string literal (started by the first single quote after the equals sign).
+<2> The second and third lines use single and double quotes, respectively, to encompass the whole string at the Data Flow parser level. Consequently, the other kind of quote can be used inside the string. The whole thing is inside the `--definition` argument to the shell, though, which uses double quotes. Consequently, double quotes are escaped (at the shell level).
+====

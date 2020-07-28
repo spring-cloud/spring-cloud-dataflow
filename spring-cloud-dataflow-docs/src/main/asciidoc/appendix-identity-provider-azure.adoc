@@ -1,87 +1,98 @@
 [[appendix-identity-provider-azure]]
 === Azure
-Azure AD is a fully fledged identity provider providing wide range of features
-around authentication and authorization. Just like any other provider it has its
-own nuances meaning care must be taken to set it up.
 
-In this section we go through how _oauth2_ setup is done for _AD_ and
-_Spring Cloud Data Flow_.
+Azure AD (Active Directory) is a fully fledged identity provider that provide a wide range of features
+around authentication and authorization. As with any other provider, it has its
+own nuances, meaning care must be taken to set it up.
 
-[NOTE]
-====
-You'll need a full organization access rights to setup everything correctly.
-====
+In this section, we go through how OAuth2 setup is done for AD and
+Spring Cloud Data Flow.
+
+NOTE: You need full organization access rights to set up everything correctly.
 
 [[appendix-identity-provider-azure-adenv]]
-==== Creating new AD Environment
-To get started you can simply create a new _Active Directory_ environment. Choose a
-type as _Azure Active Directory_ (not the b2c type) and then pick your _org_ name and
-_initial domain_.
+==== Creating a new AD Environment
+
+To get started, create a new Active Directory environment. Choose a
+type as Azure Active Directory (not the b2c type) and then pick your organization name and
+initial domain. The following image shows the settings:
 
 image::./images/azure-create-ad-env.png[Create AD Environment, width="60%"]
 
 [[appendix-identity-provider-azure-appreg]]
-==== Creating new App Registration
-_App registration_ is where _oauth_ clients are created to get used from _oauth_
-applications. At minimum it's recommended to create two clients, one for
-dataflow and skipper servers and one for dataflow shell as these two will have
-a slightly different configuration. _Server applications_ can be considered to be
-trusted applications while _shell_ not so as use would be able to see its full
-configuration.
+==== Creating a New App Registration
 
-[NOTE]
-====
-We recommend to use same _oauth client_ for both dataflow and skipper servers. While
-it's possible to use different clients it currently would not provide any value as
-configs needs to be same.
-====
+App registration is where OAuth clients are created to get used by OAuth
+applications. At minimum, you need to create two clients, one for the
+Data Flow and Skipper servers and one for the Data Flow shell, as these two have
+slightly different configurations. Server applications can be considered to be
+trusted applications while shell is not trusted (because users can see its full
+configuration).
+
+NOTE:
+We recommend using the same OAuth client for both the Data Flow and the Skipper servers. While
+you can use different clients, it currently would not provide any value, as the
+configurations needs to be the same.
+
+The following image shows the settings for creating a a new app registration:
 
 image::./images/azure-create-app-registration.png[Create App Registration, width="60%"]
 
-[IMPORTANT]
-====
-_Client secret_ when needed is created under `Certificates & secrets` in AD.
-====
+IMPORTANT: A client secret, when needed, is created under `Certificates & secrets` in AD.
 
 [[appendix-identity-provider-azure-exposeapi]]
-==== Expose Dataflow Api’s
-To prepare _oauth_ scopes create one for each dataflow security roles. In this example those would be `api://dataflow-server/dataflow.create`,
-`api://dataflow-server/dataflow.deploy`, `api://dataflow-server/dataflow.destroy`,
-`api://dataflow-server/dataflow.manage`, `api://dataflow-server/dataflow.schedule`,
-`api://dataflow-server/dataflow.modify` and `api://dataflow-server/dataflow.view`.
+==== Expose Dataflow APIs
+
+To prepare OAuth scopes, create one for each Data Flow security role. In this example, those would be
+
+* `api://dataflow-server/dataflow.create`
+* `api://dataflow-server/dataflow.deploy`
+* `api://dataflow-server/dataflow.destroy`
+* `api://dataflow-server/dataflow.manage`
+* `api://dataflow-server/dataflow.schedule`
+* `api://dataflow-server/dataflow.modify`
+* `api://dataflow-server/dataflow.view`
+
+The following image shows the APIs to expose:
 
 image::./images/azure-expose-apis.png[Expose APIs, width="60%"]
 
-Previously created scopes needs to be added as _API Permissions_.
+Previously created scopes needs to be added as API Permissions, as the following image shows:
 
 image::./images/azure-api-permissions.png[Api Permissions, width="60%"]
 
 [[appendix-identity-provider-azure-privclient]]
 ==== Creating a Privileged Client
-For _oauth_ client which is about to use _password_ grants, same _Api permissions_ needs
-to be created than with _oauth_ client used for server. Additional step required is that
-all these permissions needs to be granted with admin consent as otherwise it doesn't work.
+
+For the OAuth client, which is about to use password grants, the same API permissions need
+to be created for the OAuth client as were used for the server (described in the previous section).
+
+NOTE: All these permissions need to be granted with admin privileges.
+
+The following image shows the privileged settings:
 
 image::./images/azure-privileged-client.png[Privileged Client, width="60%"]
 
-[IMPORTANT]
-====
-Privileged client needs a _Client secret_ which needs to be exposed to a client
-configuration when used in a shell. If you don't want to expose that secret, use
-public client <<appendix-identity-provider-azure-pubclient>>.
-====
+IMPORTANT: Privileged client needs a client secret, which needs to be exposed to a client
+configuration when used in a shell. If you do not want to expose that secret, use the
+<<appendix-identity-provider-azure-pubclient>> public client.
 
 [[appendix-identity-provider-azure-pubclient]]
 ==== Creating a Public Client
-Public client is basically a client without client secret and type set to public.
+
+A public client is basically a client without a client secret and with its type set to public.
+
+The following image shows the configuration of a public client:
 
 image::./images/azure-public-client.png[Public Client, width="60%"]
 
-==== Config examples
-Here is a list of config examples for servers and shell.
+==== Configuration Examples
 
-Starting a dataflow server:
+This section contains configuration examples for the Data Flow and Skipper servers and the shell.
 
+To starting a Data Flow server:
+
+====
 [source,bash]
 ----
 $ java -jar spring-cloud-dataflow-server.jar \
@@ -136,9 +147,11 @@ spring:
         jwt:
           jwk-set-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/discovery/v2.0/keys
 ----
+====
 
-Starting a skipper server:
+To start a Skipper server:
 
+====
 [source,bash]
 ----
 $ java -jar spring-cloud-skipper-server.jar \
@@ -193,9 +206,11 @@ spring:
         jwt:
           jwk-set-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/discovery/v2.0/keys
 ----
+====
 
-Starting a shell and optionally passing credentials as options:
+To start a shell and (optionally) pass credentials as options:
 
+====
 [source,bash]
 ----
 $ java -jar spring-cloud-dataflow-shell.jar \
@@ -230,9 +245,11 @@ $ java -jar spring-cloud-dataflow-shell.jar \
             issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
 
 ----
+====
 
-Starting a shell and optionally passing credentials as options:
+Starting a public shell and (optionally) pass credentials as options:
 
+====
 [source,bash]
 ----
 $ java -jar spring-cloud-dataflow-shell.jar \
@@ -267,3 +284,4 @@ spring:
           azure:
             issuer-uri: https://login.microsoftonline.com/799dcfde-b9e3-4dfc-ac25-659b326e0bcd/v2.0
 ----
+====

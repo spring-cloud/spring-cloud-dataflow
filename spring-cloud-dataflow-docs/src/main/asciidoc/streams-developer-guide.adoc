@@ -1,5 +1,4 @@
 [[streams-dev-guide]]
 = Stream Developer Guide
 
-Please see the link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream Developer Guides] of the microsite for more information on how to create, test, and run Spring Cloud Stream applications on your local machine.
-
+See the link:https://dataflow.spring.io/docs/stream-developer-guides/[Stream Developer Guides] on the microsite for more about how to create, test, and run Spring Cloud Stream applications on your local machine.
