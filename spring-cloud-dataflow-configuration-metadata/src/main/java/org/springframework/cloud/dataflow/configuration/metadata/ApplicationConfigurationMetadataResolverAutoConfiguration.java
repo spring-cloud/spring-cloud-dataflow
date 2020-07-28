@@ -30,7 +30,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +50,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.autho
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.BasicAuthRegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerConfigJsonSecretToRegistryConfigurationConverter;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerOAuth2RegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -186,7 +187,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(name = "containerRestTemplate")
 	public RestTemplate containerRestTemplate(RestTemplateBuilder builder) {
-		return this.initRestTemplateBuilder(builder).build();
+		// Create a RestTemplate that uses custom request factory
+		return this.initRestTemplate(builder, HttpClients.custom());
 	}
 
 	@Bean
@@ -211,21 +213,27 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		// Install trust manager to SSL Context.
 		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-		// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
-		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
-				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
-		customRequestFactory.setHttpClient(httpClient);
+
 		// Create a RestTemplate that uses custom request factory
-		return this.initRestTemplateBuilder(builder).requestFactory(() -> customRequestFactory).build();
+		return initRestTemplate(builder,
+				HttpClients.custom()
+						.setSSLContext(sslContext)
+						.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE));
 	}
 
-	private RestTemplateBuilder initRestTemplateBuilder(RestTemplateBuilder builder) {
+	private RestTemplate initRestTemplate(RestTemplateBuilder restTemplateBuilder, HttpClientBuilder clientBuilder) {
 		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
 		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
 
-		return builder.additionalMessageConverters(octetToStringMessageConverter);
+		HttpComponentsClientHttpRequestFactory customRequestFactory =
+				new HttpComponentsClientHttpRequestFactory(
+						clientBuilder.setRedirectStrategy(new DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy()).build());
+
+		return restTemplateBuilder
+				.additionalMessageConverters(octetToStringMessageConverter)
+				.requestFactory(() -> customRequestFactory)
+				.build();
 	}
 }

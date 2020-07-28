@@ -127,6 +127,10 @@ public class RegistryConfiguration {
 		return extra;
 	}
 
+	public void setExtra(Map<String, String> extra) {
+		this.extra = extra;
+	}
+
 	public String getUser() {
 		return user;
 	}
