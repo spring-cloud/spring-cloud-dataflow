@@ -51,6 +51,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.autho
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerConfigJsonSecretToRegistryConfigurationConverter;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerOAuth2RegistryAuthorizer;
 import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.RegistryAuthorizer;
+import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.SignedS3RequestRedirectInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -186,7 +187,12 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean(name = "containerRestTemplate")
 	public RestTemplate containerRestTemplate(RestTemplateBuilder builder) {
-		return this.initRestTemplateBuilder(builder).build();
+		CloseableHttpClient httpClient = HttpClients.custom()
+				.setRedirectStrategy(new SignedS3RequestRedirectInterceptor()).build();
+		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
+		customRequestFactory.setHttpClient(httpClient);
+		// Create a RestTemplate that uses custom request factory
+		return this.initRestTemplateBuilder(builder).requestFactory(() -> customRequestFactory).build();
 	}
 
 	@Bean
@@ -213,7 +219,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 		// Create an HttpClient that uses the custom SSLContext and do not verify cert hostname.
 		CloseableHttpClient httpClient = HttpClients.custom().setSSLContext(sslContext)
-				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+				.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+				.setRedirectStrategy(new SignedS3RequestRedirectInterceptor()).build();
 		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory();
 		customRequestFactory.setHttpClient(httpClient);
 		// Create a RestTemplate that uses custom request factory
