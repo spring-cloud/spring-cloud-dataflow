@@ -149,12 +149,12 @@ public class TaskServiceUtils {
 
 	/**
 	 * Return a copy of a given task definition where short form parameters have been expanded
-	 * to their long form (amongst the included supported properties of the app) if
+	 * to their long form (amongst the visible properties of the app) if
 	 * applicable.
 	 * @param original the task definition with the original set of properties.
 	 * @param resource the resource to be used for identifying included properties.
 	 * @param appDeploymentProperties the app deployment properties to be added to the {@link AppDefinition}.
-	 * @param visibleProperties util for formatting included properties properly.
+	 * @param visibleProperties util for formatting visible properties properly.
 	 * @return fully qualified {@link AppDefinition}.
 	 */
 	public static AppDefinition mergeAndExpandAppProperties(TaskDefinition original,
@@ -163,7 +163,7 @@ public class TaskServiceUtils {
 			VisibleProperties visibleProperties) {
 		Assert.notNull(original, "original must not be null");
 		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
-		Assert.notNull(visibleProperties, "includedProperties must not be null");
+		Assert.notNull(visibleProperties, "visibleProperties must not be null");
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeploymentProperties);
 		merged = visibleProperties.qualifyProperties(merged, resource);

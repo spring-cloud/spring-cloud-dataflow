@@ -75,7 +75,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	@Test
 	public void appDockerResource() throws IOException {
 		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
-				"apps/no-included-properties/META-INF/spring-configuration-metadata.json", getClass())
+				"apps/no-visible-properties/META-INF/spring-configuration-metadata.json", getClass())
 						.getInputStream());
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest"))
 				.thenReturn(Collections.singletonMap(
@@ -99,7 +99,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appSpecificincludedPropsShouldBeVisible() {
+	public void appSpecificVisiblePropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
@@ -107,7 +107,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appSpecificincludedLegacyPropsShouldBeVisible() {
+	public void appSpecificVisibleLegacyPropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor-legacy", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
@@ -115,7 +115,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appSpecificincludedLegacyPropsShouldBeVisibleIfBothInPlace() {
+	public void appSpecificVisibleLegacyPropsShouldBeVisibleIfBothInPlace() {
 		// test resource files has both expresso2 and expresso3 in spring-configuration-metadata
 		// and as we prefer new format(expresso3 included) and it exists
 		// expresso2 from old format doesn't get read.
@@ -138,9 +138,9 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	@Test
 	public void shouldReturnEverythingWhenNoDescriptors() {
 		List<ConfigurationMetadataProperty> properties = resolver
-				.listProperties(new ClassPathResource("apps/no-included-properties", getClass()));
+				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
-				.listProperties(new ClassPathResource("apps/no-included-properties", getClass()), true);
+				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()), true);
 		assertThat(properties.size(), is(0));
 		assertThat(full.size(), is(3));
 	}

@@ -52,7 +52,7 @@ class ProposalsCollectorSupportUtils {
 
 	void addPropertiesProposals(String text, String startsWith, AppRegistration appRegistration, Set<String> alreadyPresentOptions, List<CompletionProposal> collector, int detailLevel){
 		Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
-		// For included properties, use their simple name
+		// For visible properties, use their simple name
 		if (metadataResource != null) {
 			CompletionProposal.Factory proposals = CompletionProposal.expanding(text);
 			for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource)) {
@@ -62,7 +62,7 @@ class ProposalsCollectorSupportUtils {
 							.withSeparateTokens("--" + property.getName() + "=", property.getShortDescription()));
 				}
 			}
-			// For other properties (including WL'ed in full form), use their id
+			// For other properties (including visible in full form), use their id
 			if (detailLevel > 1) {
 				for (ConfigurationMetadataProperty property : metadataResolver.listProperties(metadataResource, true)) {
 					String id = property.getId();
