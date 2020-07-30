@@ -527,7 +527,7 @@ You can create a composed task through the RESTful API, the Spring Cloud Data Fl
 
 === Configuring the Composed Task Runner
 
-Composed tasks are run through a task application called the https://github.com/spring-cloud-task-app-starters/composed-task-runner[Composed Task Runner].
+Composed tasks are run through a task application called the Composed Task Runner.
 
 ==== Registering the Composed Task Runner
 
