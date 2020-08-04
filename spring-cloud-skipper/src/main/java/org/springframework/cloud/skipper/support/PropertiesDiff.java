@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +191,8 @@ public final class PropertiesDiff {
 		 * @return the properties diff
 		 */
 		public PropertiesDiff build() {
-			DiffBuilder leftBuilder = new DiffBuilder(leftMap, rightMap, ToStringStyle.DEFAULT_STYLE);
-			DiffBuilder rightBuilder = new DiffBuilder(leftMap, rightMap, ToStringStyle.DEFAULT_STYLE);
+			DiffBuilder<?> leftBuilder = new DiffBuilder<>(leftMap, rightMap, ToStringStyle.DEFAULT_STYLE);
+			DiffBuilder<?> rightBuilder = new DiffBuilder<>(leftMap, rightMap, ToStringStyle.DEFAULT_STYLE);
 
 			for (Entry<String, String> entry : leftMap.entrySet()) {
 				leftBuilder.append(entry.getKey(), entry.getValue(), rightMap.get(entry.getKey()));
@@ -201,7 +201,7 @@ public final class PropertiesDiff {
 				rightBuilder.append(entry.getKey(), entry.getValue(), leftMap.get(entry.getKey()));
 			}
 
-			DiffResult leftResult = leftBuilder.build();
+			DiffResult<?> leftResult = leftBuilder.build();
 			for (Diff<?> diff : leftResult) {
 				leftMap.remove(diff.getFieldName());
 				if (diff.getRight() == null) {
@@ -215,7 +215,7 @@ public final class PropertiesDiff {
 
 			common.putAll(leftMap);
 
-			DiffResult rightResult = rightBuilder.build();
+			DiffResult<?> rightResult = rightBuilder.build();
 			for (Diff<?> diff : rightResult) {
 				if (diff.getRight() == null) {
 					added.put(diff.getFieldName(), diff.getLeft().toString());
