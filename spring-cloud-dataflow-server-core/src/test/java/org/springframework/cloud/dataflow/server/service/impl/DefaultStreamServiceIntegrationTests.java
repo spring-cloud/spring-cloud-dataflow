@@ -314,6 +314,7 @@ public class DefaultStreamServiceIntegrationTests {
 		when(skipperClient.manifest(streamDefinition.getName())).thenReturn(releaseManifest);
 		StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 		assertThat(streamDeployment.getStreamName()).isEqualTo(streamDefinition.getName());
+		// TODO: this is unreliable to test json like this as field order may change
 		assertThat(streamDeployment.getDeploymentProperties()).contains(deploymentProps);
 	}
 

@@ -43,6 +43,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionE
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.cloud.deployer.spi.scheduler.CreateScheduleException;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -82,7 +83,8 @@ public class RestControllerAdvice {
 		logger.error("Caught exception while handling a request", e);
 		String logref = e.getClass().getSimpleName();
 		String msg = getExceptionMessage(e);
-		return new VndErrors(logref, msg);
+		// TODO: currently need to add these dummy links as deserialization is broken in hateoas
+		return new VndErrors(logref, msg, Link.of("/"));
 	}
 
 	/**
@@ -107,7 +109,7 @@ public class RestControllerAdvice {
 			logTraceLevelStrackTrace(e);
 		}
 		String msg = getExceptionMessage(e);
-		return new VndErrors(logref, msg);
+		return new VndErrors(logref, msg, Link.of("/"));
 	}
 
 	/**
@@ -128,7 +130,7 @@ public class RestControllerAdvice {
 			logTraceLevelStrackTrace(e);
 		}
 		String msg = getExceptionMessage(e);
-		return new VndErrors(logref, msg);
+		return new VndErrors(logref, msg, Link.of("/"));
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class RestControllerAdvice {
 			logTraceLevelStrackTrace(e);
 		}
 		String msg = getExceptionMessage(e);
-		return new VndErrors(logref, msg);
+		return new VndErrors(logref, msg, Link.of("/"));
 	}
 
 	/**
@@ -215,7 +217,7 @@ public class RestControllerAdvice {
 			message = getExceptionMessage(e);
 		}
 
-		return new VndErrors(logref, message);
+		return new VndErrors(logref, message, Link.of("/"));
 	}
 
 	/**
@@ -248,7 +250,7 @@ public class RestControllerAdvice {
 			first = false;
 		}
 
-		return new VndErrors(logref, errorMessage.toString());
+		return new VndErrors(logref, errorMessage.toString(), Link.of("/"));
 	}
 
 	private String logWarnLevelExceptionMessage(Exception e) {

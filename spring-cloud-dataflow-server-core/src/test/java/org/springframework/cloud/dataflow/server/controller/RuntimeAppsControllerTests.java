@@ -160,7 +160,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -176,7 +176,7 @@ public class RuntimeAppsControllerTests {
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound())
-				.andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -197,7 +197,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("$[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
 
 		info.getStatus().setPlatformStatusAsAppStatusList(
 				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
@@ -205,7 +205,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("$[0].logref", is("NoSuchAppInstanceException")));
+				.andExpect(jsonPath("content[0].logref", is("NoSuchAppInstanceException")));
 	}
 
 	@Test

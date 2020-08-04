@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,7 +306,7 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
 		.andDo(print())
 		.andExpect(status().is(400))
-		.andExpect(jsonPath("$[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
+		.andExpect(jsonPath("content[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
 	}
 
 	@Test
@@ -354,8 +354,8 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(delete("/tasks/executions/2"))
 			.andDo(print())
 			.andExpect(status().is(400))
-			.andExpect(jsonPath("$[0].logref", is("CannotDeleteNonParentTaskExecutionException")))
-			.andExpect(jsonPath("$[0].message", is("Cannot delete non-parent TaskExecution with id 1")));
+			.andExpect(jsonPath("content[0].logref", is("CannotDeleteNonParentTaskExecutionException")))
+			.andExpect(jsonPath("content[0].message", is("Cannot delete non-parent TaskExecution with id 1")));
 	}
 
 	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {

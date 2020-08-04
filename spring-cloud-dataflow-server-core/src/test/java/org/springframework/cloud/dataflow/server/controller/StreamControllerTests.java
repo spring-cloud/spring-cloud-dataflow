@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -484,8 +484,8 @@ public class StreamControllerTests {
 				.param("name", "myStream")
 				.param("definition", "foo | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException")))
-				.andExpect(jsonPath("$[0].message",
+				.andExpect(jsonPath("content[0].logref", is("InvalidStreamDefinitionException")))
+				.andExpect(jsonPath("content[0].message",
 						is("Application name 'foo' with type 'source' does not exist in the " + "app "
 								+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app "
 								+ "registry.")));
@@ -496,8 +496,8 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream")
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
-						jsonPath("$[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
+				.andExpect(jsonPath("content[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
+						jsonPath("content[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
 	}
 
 	@Test
