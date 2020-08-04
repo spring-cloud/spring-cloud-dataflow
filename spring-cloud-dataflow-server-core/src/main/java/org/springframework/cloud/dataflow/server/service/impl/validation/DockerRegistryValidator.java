@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 package org.springframework.cloud.dataflow.server.service.impl.validation;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,19 +132,20 @@ public class DockerRegistryValidator {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 			HttpEntity<String> httpEntity;
-			JSONObject request = new JSONObject();
 			try {
-				request.put(USER_NAME_KEY, userName);
-				request.put(PASSWORD_KEY, password);
+				Map<String, String> jsonMap = new HashMap<>();
+				jsonMap.put(USER_NAME_KEY, userName);
+				jsonMap.put(PASSWORD_KEY, password);
+				ObjectMapper objectMapper = new ObjectMapper();
+				String json = objectMapper.writeValueAsString(jsonMap);
+				httpEntity = new HttpEntity<>(json, headers);
+				ResponseEntity<DockerAuth> dockerAuth = restTemplate.exchange(
+						dockerValidatiorProperties.getDockerAuthUrl(),
+						HttpMethod.POST, httpEntity, DockerAuth.class);
+				result = dockerAuth.getBody();
+			} catch (Exception e) {
+				throw new IllegalStateException("Unable to serialize jsonMap", e);
 			}
-			catch (JSONException ie) {
-				throw new IllegalStateException(ie);
-			}
-			httpEntity = new HttpEntity<>(request.toString(), headers);
-			ResponseEntity dockerAuth = restTemplate.exchange(
-					dockerValidatiorProperties.getDockerAuthUrl(),
-					HttpMethod.POST, httpEntity, DockerAuth.class);
-			result = (DockerAuth) dockerAuth.getBody();
 		}
 		return result;
 	}

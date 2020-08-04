@@ -398,7 +398,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().is5xxServerError())
-				.andExpect(content().json("[{message: \"Unknown task app: no-such-task-app\"}]"));
+				.andExpect(content().json("{content:[{message: \"Unknown task app: no-such-task-app\"}]}"));
 	}
 
 	@Test
@@ -406,7 +406,7 @@ public class TaskControllerTests {
 		mockMvc.perform(post("/tasks/executions")
 				.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().json("[{message: \"Could not find task definition named myFoo\"}]"));
+				.andExpect(content().json("{content:[{message: \"Could not find task definition named myFoo\"}]}"));
 	}
 
 	@Test

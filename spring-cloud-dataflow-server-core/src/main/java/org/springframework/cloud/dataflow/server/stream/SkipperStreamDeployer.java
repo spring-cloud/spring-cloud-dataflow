@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
@@ -584,7 +583,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_VERSION, spec.getVersion());
 				streamPropertiesMap.put(applicationName, versionAndDeploymentProperties);
 			}
-			return new StreamDeployment(streamName, new JSONObject(streamPropertiesMap).toString());
+			try {
+				ObjectMapper objectMapper = new ObjectMapper();
+				String json = objectMapper.writeValueAsString(streamPropertiesMap);
+				return new StreamDeployment(streamName,json);
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Unable to serializer streamPropertiesMap", e);
+			}
 		}
 		catch (ReleaseNotFoundException e) {
 			return new StreamDeployment(streamName);
