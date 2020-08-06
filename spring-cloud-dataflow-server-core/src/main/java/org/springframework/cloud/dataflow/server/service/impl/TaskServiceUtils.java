@@ -27,7 +27,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
-import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.dataflow.server.support.RelaxedNames;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
@@ -149,24 +149,24 @@ public class TaskServiceUtils {
 
 	/**
 	 * Return a copy of a given task definition where short form parameters have been expanded
-	 * to their long form (amongst the whitelisted supported properties of the app) if
+	 * to their long form (amongst the visible properties of the app) if
 	 * applicable.
 	 * @param original the task definition with the original set of properties.
-	 * @param resource the resource to be used for identifying white listed properties.
+	 * @param resource the resource to be used for identifying included properties.
 	 * @param appDeploymentProperties the app deployment properties to be added to the {@link AppDefinition}.
-	 * @param whitelistProperties util for formatting white listed properties properly.
+	 * @param visibleProperties util for formatting visible properties properly.
 	 * @return fully qualified {@link AppDefinition}.
 	 */
 	public static AppDefinition mergeAndExpandAppProperties(TaskDefinition original,
 			Resource resource,
 			Map<String, String> appDeploymentProperties,
-			WhitelistProperties whitelistProperties) {
+			VisibleProperties visibleProperties) {
 		Assert.notNull(original, "original must not be null");
 		Assert.notNull(appDeploymentProperties, "appDeploymentProperties must not be null");
-		Assert.notNull(whitelistProperties, "whitelistProperties must not be null");
+		Assert.notNull(visibleProperties, "visibleProperties must not be null");
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeploymentProperties);
-		merged = whitelistProperties.qualifyProperties(merged, resource);
+		merged = visibleProperties.qualifyProperties(merged, resource);
 		return new AppDefinition(original.getName(), merged);
 	}
 

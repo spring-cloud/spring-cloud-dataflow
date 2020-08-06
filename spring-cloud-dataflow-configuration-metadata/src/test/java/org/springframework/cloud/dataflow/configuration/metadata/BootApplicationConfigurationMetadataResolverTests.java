@@ -75,48 +75,55 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	@Test
 	public void appDockerResource() throws IOException {
 		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
-				"apps/no-whitelist/META-INF/spring-configuration-metadata.json", getClass()).getInputStream());
+				"apps/no-visible-properties/META-INF/spring-configuration-metadata.json", getClass())
+						.getInputStream());
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest"))
-				.thenReturn(Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes))));
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new DockerResource("test/test:latest"));
+				.thenReturn(Collections.singletonMap(
+						"org.springframework.cloud.dataflow.spring-configuration-metadata.json",
+						StringEscapeUtils.escapeJson(new String(bytes))));
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new DockerResource("test/test:latest"));
 		assertThat(properties.size(), is(3));
 	}
 
 	@Test
 	public void appDockerResourceBrokenFormat() {
 		byte[] bytes = "Invalid metadata json content1".getBytes();
-		Map<String, String> result = Collections.singletonMap("org.springframework.cloud.dataflow.spring-configuration-metadata.json", StringEscapeUtils.escapeJson(new String(bytes)));
+		Map<String, String> result = Collections.singletonMap(
+				"org.springframework.cloud.dataflow.spring-configuration-metadata.json",
+				StringEscapeUtils.escapeJson(new String(bytes)));
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
-		List<ConfigurationMetadataProperty> properties = resolver.listProperties(new DockerResource("test/test:latest"));
+		List<ConfigurationMetadataProperty> properties = resolver
+				.listProperties(new DockerResource("test/test:latest"));
 		assertThat(properties.size(), is(0));
 	}
 
 	@Test
-	public void appSpecificWhitelistedPropsShouldBeVisible() {
+	public void appSpecificVisiblePropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
-	public void appSpecificWhitelistedLegacyPropsShouldBeVisible() {
+	public void appSpecificVisibleLegacyPropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor-legacy", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
-	public void appSpecificWhitelistedLegacyPropsShouldBeVisibleIfBothInPlace() {
+	public void appSpecificVisibleLegacyPropsShouldBeVisibleIfBothInPlace() {
 		// test resource files has both expresso2 and expresso3 in spring-configuration-metadata
-		// and as we prefer new format(expresso3 whitelisted) and it exists
+		// and as we prefer new format(expresso3 included) and it exists
 		// expresso2 from old format doesn't get read.
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor-both", getClass()));
 		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso3")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.whitelisted.prefix.expresso2")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso3")));
+		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
@@ -131,9 +138,9 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	@Test
 	public void shouldReturnEverythingWhenNoDescriptors() {
 		List<ConfigurationMetadataProperty> properties = resolver
-				.listProperties(new ClassPathResource("apps/no-whitelist", getClass()));
+				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
-				.listProperties(new ClassPathResource("apps/no-whitelist", getClass()), true);
+				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()), true);
 		assertThat(properties.size(), is(0));
 		assertThat(full.size(), is(3));
 	}

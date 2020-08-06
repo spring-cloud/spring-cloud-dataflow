@@ -30,25 +30,25 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Knows how to expand app properties into their full form if whitelist properties (short
+ * Knows how to expand app properties into their full form if visible properties (short
  * hand form) have been used.
  *
  * @author Eric Bottard
  */
-public class WhitelistProperties {
+public class VisibleProperties {
 
 	/**
-	 * Used to expand short form of whitelisted properties to their long form.
+	 * Used to expand short form of included properties to their long form.
 	 */
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 
-	public WhitelistProperties(ApplicationConfigurationMetadataResolver metadataResolver) {
+	public VisibleProperties(ApplicationConfigurationMetadataResolver metadataResolver) {
 		this.metadataResolver = metadataResolver;
 	}
 
 	/**
 	 * Return a copy of app properties where shorthand form have been expanded to their
-	 * long form (amongst the whitelisted supported properties of the app) if applicable.
+	 * long form (amongst the visible supported properties of the app) if applicable.
 	 *
 	 * @param properties the application properties in shorthand form
 	 * @param metadataResource the metadata that can be used to expand shorthand property
@@ -56,11 +56,11 @@ public class WhitelistProperties {
 	 * @return the application properties with expanded long form property names
 	 */
 	public Map<String, String> qualifyProperties(Map<String, String> properties, Resource metadataResource) {
-		MultiValueMap<String, ConfigurationMetadataProperty> whiteList = new LinkedMultiValueMap<>();
+		MultiValueMap<String, ConfigurationMetadataProperty> visible = new LinkedMultiValueMap<>();
 		Set<String> allProps = new HashSet<>();
 
 		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(metadataResource, false)) {
-			whiteList.add(property.getName(), property);// Use names here
+			visible.add(property.getName(), property);// Use names here
 		}
 		for (ConfigurationMetadataProperty property : this.metadataResolver.listProperties(metadataResource, true)) {
 			allProps.add(property.getId()); // But full ids here
@@ -72,7 +72,7 @@ public class WhitelistProperties {
 			if (!allProps.contains(provided)) {
 				List<ConfigurationMetadataProperty> longForms = null;
 				for (String relaxed : new RelaxedNames(provided)) {
-					longForms = whiteList.get(relaxed);
+					longForms = visible.get(relaxed);
 					if (longForms != null) {
 						break;
 					}

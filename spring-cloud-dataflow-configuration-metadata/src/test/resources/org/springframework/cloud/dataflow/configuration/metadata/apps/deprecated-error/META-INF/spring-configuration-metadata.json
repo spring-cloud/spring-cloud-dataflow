@@ -15,7 +15,7 @@
       "defaultValue": "true"
     },
     {
-      "name": "some.other.property.whitelisted.prefix.expresso2",
+      "name": "some.other.property.included.prefix.expresso2",
       "type": "org.springframework.cloud.dataflow.completion.Expresso",
       "description": "A property of type enum and whose name starts like 'expression'",
       "sourceType": "com.acme.SomeDifferentProperties"

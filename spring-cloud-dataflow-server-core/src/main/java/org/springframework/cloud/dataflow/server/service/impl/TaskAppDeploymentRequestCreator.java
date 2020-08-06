@@ -28,7 +28,7 @@ import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConf
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
-import org.springframework.cloud.dataflow.server.controller.WhitelistProperties;
+import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -54,7 +54,7 @@ public class TaskAppDeploymentRequestCreator {
 
 	private final CommonApplicationProperties commonApplicationProperties;
 
-	private final WhitelistProperties whitelistProperties;
+	private final VisibleProperties visibleProperties;
 
 	private final String dataflowServerUri;
 
@@ -72,7 +72,7 @@ public class TaskAppDeploymentRequestCreator {
 		Assert.notNull(metaDataResolver, "metaDataResolver must not be null");
 
 		this.commonApplicationProperties = commonApplicationProperties;
-		this.whitelistProperties = new WhitelistProperties(metaDataResolver);
+		this.visibleProperties = new VisibleProperties(metaDataResolver);
 		this.dataflowServerUri = dataflowServerUri;
 	}
 
@@ -117,7 +117,7 @@ public class TaskAppDeploymentRequestCreator {
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition,
 				taskExecutionInformation.getMetadataResource(),
-				appDeploymentProperties, this.whitelistProperties);
+				appDeploymentProperties, this.visibleProperties);
 
 		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed())?this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName, registeredAppName):this.updateCommandLineArgs(commandLineArgs,
