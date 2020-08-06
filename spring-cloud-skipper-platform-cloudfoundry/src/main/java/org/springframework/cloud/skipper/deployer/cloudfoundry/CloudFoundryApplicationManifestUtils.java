@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,8 +73,9 @@ public class CloudFoundryApplicationManifestUtils {
 		if (applicationManifest.getName() != null) {
 			applicationManifestMap.put("spec.manifest.name", applicationManifest.getName());
 		}
-		if (applicationManifest.getBuildpack() != null) {
-			applicationManifestMap.put("spec.manifest.buildpack", applicationManifest.getBuildpack());
+		if (applicationManifest.getBuildpacks() != null) {
+			applicationManifestMap.put("spec.manifest.buildpacks",
+					StringUtils.collectionToCommaDelimitedString(applicationManifest.getBuildpacks()));
 		}
 		if (applicationManifest.getCommand() != null) {
 			applicationManifestMap.put("spec.manifest.command", applicationManifest.getCommand());
