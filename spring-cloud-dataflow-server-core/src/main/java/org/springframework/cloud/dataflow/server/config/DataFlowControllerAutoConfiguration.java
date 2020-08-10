@@ -144,7 +144,7 @@ import org.springframework.web.client.RestTemplate;
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({ EnableDataFlowServerConfiguration.Marker.class })
 @EnableConfigurationProperties({ FeaturesProperties.class, VersionInfoProperties.class,
-		DockerValidatorProperties.class, GrafanaInfoProperties.class })
+		DockerValidatorProperties.class, GrafanaInfoProperties.class, MonitoringDashboardInfoProperties.class })
 @ConditionalOnProperty(prefix = "dataflow.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 @EntityScan({
 		"org.springframework.cloud.dataflow.core"
@@ -182,9 +182,11 @@ public class DataFlowControllerAutoConfiguration {
 			FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties,
 			SecurityStateBean securityStateBean,
-			GrafanaInfoProperties grafanaInfoProperties) {
+			GrafanaInfoProperties grafanaInfoProperties,
+			MonitoringDashboardInfoProperties monitoringDashboardInfoProperties) {
 		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
-				featuresProperties, versionInfoProperties, securityStateBean, grafanaInfoProperties);
+				featuresProperties, versionInfoProperties, securityStateBean, grafanaInfoProperties,
+				monitoringDashboardInfoProperties);
 	}
 
 	@Bean

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardType;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
  */
-@ConfigurationProperties(prefix = GrafanaInfoProperties.VERSION_INFO_PREFIX)
-@Deprecated
-public class GrafanaInfoProperties {
+@ConfigurationProperties(prefix = MonitoringDashboardInfoProperties.VERSION_INFO_PREFIX)
+public class MonitoringDashboardInfoProperties {
 
-	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "grafana-info";
+	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "monitoring-info";
 
 	/**
-	 * Root URL to access the grafana dashboards
+	 * Root URL to access the monitoring dashboards
 	 */
 	private String url = "";
 
@@ -46,6 +47,17 @@ public class GrafanaInfoProperties {
 	 * Dashboard refresh interval in Seconds
 	 */
 	private int refreshInterval = 15;
+
+	/**
+	 *
+	 */
+	private MonitoringDashboardType dashboardType = MonitoringDashboardType.grafana;
+
+	/**
+	 *
+	 */
+	@Value("${management.metrics.export.wavefront.source:default-scdf-source}")
+	private String source = "";
 
 	public String getUrl() {
 		return url;
@@ -71,7 +83,27 @@ public class GrafanaInfoProperties {
 		this.refreshInterval = refreshInterval;
 	}
 
-	public boolean isGrafanaEnabled() {
+	public static String getVersionInfoPrefix() {
+		return VERSION_INFO_PREFIX;
+	}
+
+	public MonitoringDashboardType getDashboardType() {
+		return dashboardType;
+	}
+
+	public void setDashboardType(MonitoringDashboardType dashboardType) {
+		this.dashboardType = dashboardType;
+	}
+
+	public String getSource() {
+		return source;
+	}
+
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	public boolean isEnabled() {
 		return StringUtils.hasText(this.url);
 	}
 }

@@ -23,3 +23,6 @@ services:
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+
+      - spring.cloud.dataflow.monitoring-info.url=http://vmware.wavefront.com/integrations/scdf
+      - spring.cloud.dataflow.monitoring-info.dashboard-type=wavefront

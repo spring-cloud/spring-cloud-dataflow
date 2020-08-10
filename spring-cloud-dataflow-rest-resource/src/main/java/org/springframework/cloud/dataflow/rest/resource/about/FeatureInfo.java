@@ -32,7 +32,17 @@ public class FeatureInfo {
 
 	private boolean schedulesEnabled = false;
 
+	/**
+	 * @deprecated consider using the monitoringDashboardType instead
+	 */
 	private boolean grafanaEnabled = false;
+
+	/**
+	 * @deprecated consider using the monitoringDashboardType instead
+	 */
+	private boolean wavefrontEnabled = false;
+
+	private MonitoringDashboardType monitoringDashboardType = MonitoringDashboardType.none;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -77,6 +87,28 @@ public class FeatureInfo {
 	}
 
 	public void setGrafanaEnabled(boolean grafanaEnabled) {
+		if (grafanaEnabled) {
+			this.monitoringDashboardType = MonitoringDashboardType.grafana;
+		}
 		this.grafanaEnabled = grafanaEnabled;
+	}
+
+	public boolean isWavefrontEnabled() {
+		return wavefrontEnabled;
+	}
+
+	public void setWavefrontEnabled(boolean wavefrontEnabled) {
+		if (wavefrontEnabled) {
+			this.monitoringDashboardType = MonitoringDashboardType.wavefront;
+		}
+		this.wavefrontEnabled = wavefrontEnabled;
+	}
+
+	public MonitoringDashboardType getMonitoringDashboardType() {
+		return monitoringDashboardType;
+	}
+
+	public void setMonitoringDashboardType(MonitoringDashboardType monitoringDashboardType) {
+		this.monitoringDashboardType = monitoringDashboardType;
 	}
 }
