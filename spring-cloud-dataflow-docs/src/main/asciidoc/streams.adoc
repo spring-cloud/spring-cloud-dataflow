@@ -304,7 +304,7 @@ dataflow:>app import --uri file:///<YOUR_FILE_LOCATION>/stream-apps.properties
 ====
 
 Registering an application by using `--type app` is the same as registering a `source`, `processor` or `sink`.
-Applications of the type `app` can be used only in the Stream Application DSL (which uses a comma instead of the pipe symbol in the DSL) and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
+Applications of the type `app` can be used only in the Stream Application DSL (which uses double pipes `||` instead of single pipes `|` in the DSL) and instructs Data Flow not to configure the Spring Cloud Stream binding properties of the application.
 The application that is registered using `--type app` does not have to be a Spring Cloud Stream application. It can be any Spring Boot application.
 See the <<spring-cloud-dataflow-stream-app-dsl,Stream Application DSL introduction>> for more about using this application type.
 
