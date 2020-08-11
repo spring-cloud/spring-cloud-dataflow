@@ -98,7 +98,7 @@ A selection of pre-built link:https://cloud.spring.io/spring-cloud-stream-app-st
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-tcp-client-source[tcp-client]
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-aggregator-processor[aggregator]
-|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-task-launcher-dataflow-sink[tasklauncher-dataflow]
+|link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-task-launcher-dataflow-sink[task-launcher-dataflow]
 |
 
 |link:{scs-app-starters-docs-htmlsingle}/#spring-cloud-stream-modules-mail-source[mail]
