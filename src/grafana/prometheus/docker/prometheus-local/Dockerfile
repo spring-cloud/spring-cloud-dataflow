@@ -1,4 +1,4 @@
-FROM prom/prometheus:v2.12.0
+FROM prom/prometheus:v2.20.1
 COPY prometheus-local-file.yml /etc/prometheus-local-file.yml
 CMD  [ "--config.file=/etc/prometheus-local-file.yml", \
        "--storage.tsdb.path=/prometheus", \

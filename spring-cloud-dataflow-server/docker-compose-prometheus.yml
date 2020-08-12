@@ -9,6 +9,12 @@ services:
       - |
         SPRING_APPLICATION_JSON=
         {
+          "management.metrics.export.prometheus":{
+             "enabled":true,
+             "rsocket.enabled":true,
+             "rsocket.host":"prometheus-rsocket-proxy",
+             "rsocket.port":7001
+          },
           "spring.cloud.dataflow.applicationProperties":{
              "task.management.metrics.export.prometheus":{
                 "enabled":true,
@@ -23,8 +29,17 @@ services:
                 "rsocket.port":7001
              }
           },
-          "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
+          "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000",
+          "spring.jpa.properties.hibernate.generate_statistics":true
         }
+
+  skipper-server:
+    environment:
+      - management.metrics.export.prometheus.enabled=true
+      - management.metrics.export.prometheus.rsocket.enabled=true
+      - management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy
+      - management.metrics.export.prometheus.rsocket.port=7001
+      - spring.jpa.properties.hibernate.generate_statistics=true
 
   prometheus-rsocket-proxy:
     image: micrometermetrics/prometheus-rsocket-proxy:1.0.0

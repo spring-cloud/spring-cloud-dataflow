@@ -1,11 +1,14 @@
 management:
   metrics:
+    tags:
+      application: ${info.app.name}
+      application.version: ${info.app.version}
     web:
       server:
         request:
           autotime:
-            enabled: true
-          metric-name: 'spring.cloud.dataflow.http.server.requests'
+            enabled: true # true is default to Boot 2.3.2 at least.
+            percentiles-histogram: true
     export:
       influx:
         enabled: false
@@ -41,7 +44,10 @@ spring:
     initialize-schema: never
   jpa:
     properties:
-      hibernate.id.new_generator_mappings: true
+      hibernate:
+        id.new_generator_mappings: true
+        # Statistics generation is required for publishing JPA micrometer metrics.
+        # generate_statistics: true
     hibernate:
         naming:
           physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy

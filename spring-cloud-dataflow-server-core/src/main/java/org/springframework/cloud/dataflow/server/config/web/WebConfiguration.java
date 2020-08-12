@@ -25,6 +25,9 @@ import javax.servlet.ServletContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.micrometer.core.instrument.LongTaskTimer;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Tags;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +78,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	private String dataSourceUrl;
 
 	private Server server = null;
+	private LongTaskTimer.Sample longTaskSample;
 
 	public Server initH2TCPServer() {
 		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
@@ -97,6 +101,11 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 
 	@Override
 	public void onStartup(ServletContext servletContext) {
+		LongTaskTimer longTaskTimer = LongTaskTimer
+				.builder("spring.cloud.dataflow.server").description("Spring Cloud Data Flow duration timer")
+				.tags(Tags.empty()).register(Metrics.globalRegistry);
+		this.longTaskSample = longTaskTimer.start();
+
 		if (StringUtils.hasText(dataSourceUrl) && dataSourceUrl.startsWith("jdbc:h2:tcp://localhost:")) {
 			logger.info("Start Embedded H2");
 			initH2TCPServer();
@@ -161,6 +170,10 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 
 	@Override
 	public void onApplicationEvent(ContextClosedEvent event) {
+		if (this.longTaskSample != null) {
+			this.longTaskSample.stop();
+			this.longTaskSample = null;
+		}
 		if (this.server != null) {
 			this.server.stop();
 			logger.info("Embedded H2 server stopped!");

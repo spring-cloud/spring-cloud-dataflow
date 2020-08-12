@@ -14,6 +14,7 @@ services:
       - management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
       - management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
       - management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - spring.jpa.properties.hibernate.generate_statistics=true
 
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.enabled=true
       - spring.cloud.dataflow.applicationProperties.stream.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
@@ -23,3 +24,11 @@ services:
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
       - spring.cloud.dataflow.applicationProperties.task.management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+
+  skipper-server:
+    environment:
+      - management.metrics.export.wavefront.enabled=true
+      - management.metrics.export.wavefront.api-token=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - management.metrics.export.wavefront.uri=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - management.metrics.export.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - spring.jpa.properties.hibernate.generate_statistics=true
