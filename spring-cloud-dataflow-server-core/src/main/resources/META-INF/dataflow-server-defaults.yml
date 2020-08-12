@@ -1,11 +1,18 @@
 management:
   metrics:
+    distribution:
+      # Enable percentile-based histogram for HTTP requests
+      percentiles-histogram.http.server.requests: true
+      # Additional HTTP SLO histogram buckets
+      slo.http.server.requests: 100ms, 150ms, 250ms, 500ms, 1s
+    tags:
+      application: ${info.app.name}
+      application.version: ${info.app.version}
     web:
       server:
         request:
           autotime:
             enabled: true
-          metric-name: 'spring.cloud.dataflow.http.server.requests'
     export:
       influx:
         enabled: false
@@ -41,7 +48,9 @@ spring:
     initialize-schema: never
   jpa:
     properties:
-      hibernate.id.new_generator_mappings: true
+      hibernate:
+        id.new_generator_mappings: true
+        generate_statistics: true
     hibernate:
         naming:
           physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
