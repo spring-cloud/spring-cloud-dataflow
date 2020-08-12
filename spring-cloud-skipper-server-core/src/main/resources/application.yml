@@ -7,6 +7,25 @@ management:
   security:
     roles: MANAGE
   context-path: /actuator
+  metrics:
+    tags:
+      application: "@project.artifactId@"
+      application.version: "@project.version@"
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true # true is default to Boot 2.3.2 at least.
+            percentiles-histogram: true
+    export:
+      influx:
+        enabled: false
+      prometheus:
+        enabled: false
+        rsocket:
+          enabled: false
+      wavefront:
+        enabled: false
 server:
   port: 7577
 spring:
@@ -18,7 +37,10 @@ spring:
   jpa:
     generate-ddl: false
     properties:
-      hibernate.id.new_generator_mappings: true
+      hibernate:
+        id.new_generator_mappings: true
+        # Statistics generation is required for publishing JPA micrometer metrics.
+        # generate_statistics: true
   cloud:
     skipper:
       server:
