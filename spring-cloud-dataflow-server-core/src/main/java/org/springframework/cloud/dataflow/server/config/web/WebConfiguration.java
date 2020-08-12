@@ -102,7 +102,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	@Override
 	public void onStartup(ServletContext servletContext) {
 		LongTaskTimer longTaskTimer = LongTaskTimer
-				.builder("spring.cloud.dataflow.server").description("DataFlow duration timer")
+				.builder("spring.cloud.dataflow.server").description("Spring Cloud Data Flow duration timer")
 				.tags(Tags.empty()).register(Metrics.globalRegistry);
 		this.longTaskSample = longTaskTimer.start();
 
