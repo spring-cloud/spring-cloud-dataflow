@@ -1,10 +1,5 @@
 management:
   metrics:
-    distribution:
-      # Enable percentile-based histogram for HTTP requests
-      percentiles-histogram.http.server.requests: true
-      # Additional HTTP SLO histogram buckets
-      slo.http.server.requests: 100ms, 150ms, 250ms, 500ms, 1s
     tags:
       application: ${info.app.name}
       application.version: ${info.app.version}
@@ -12,7 +7,8 @@ management:
       server:
         request:
           autotime:
-            enabled: true
+            enabled: true # true is default to Boot 2.3.2 at least.
+            percentiles-histogram: true
     export:
       influx:
         enabled: false
