@@ -42,7 +42,11 @@ public class FeatureInfo {
 	 */
 	private boolean wavefrontEnabled = false;
 
-	private MonitoringDashboardType monitoringDashboardType = MonitoringDashboardType.none;
+	/**
+	 * This enum shows what SCDF monitoring dashboard configuration is exposed.
+	 * It supports wavefront and grafana dashboards and none stands for no configuration provided.
+	 */
+	private MonitoringDashboardType monitoringDashboardType = MonitoringDashboardType.NONE;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -88,7 +92,7 @@ public class FeatureInfo {
 
 	public void setGrafanaEnabled(boolean grafanaEnabled) {
 		if (grafanaEnabled) {
-			this.monitoringDashboardType = MonitoringDashboardType.grafana;
+			this.monitoringDashboardType = MonitoringDashboardType.GRAFANA;
 		}
 		this.grafanaEnabled = grafanaEnabled;
 	}
@@ -99,7 +103,7 @@ public class FeatureInfo {
 
 	public void setWavefrontEnabled(boolean wavefrontEnabled) {
 		if (wavefrontEnabled) {
-			this.monitoringDashboardType = MonitoringDashboardType.wavefront;
+			this.monitoringDashboardType = MonitoringDashboardType.WAVEFRONT;
 		}
 		this.wavefrontEnabled = wavefrontEnabled;
 	}

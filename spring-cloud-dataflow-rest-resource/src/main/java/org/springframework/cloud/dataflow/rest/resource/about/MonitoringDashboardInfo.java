@@ -17,6 +17,8 @@
 package org.springframework.cloud.dataflow.rest.resource.about;
 
 /**
+ * This entity will contains the dashboard configuration information exposed by the SCDF server.
+ *
  * @author Christian Tzolov
  */
 public class MonitoringDashboardInfo {
@@ -34,7 +36,7 @@ public class MonitoringDashboardInfo {
 	/**
 	 * Type of the monitoring dashboard system.
 	 */
-	private MonitoringDashboardType dashboardType = MonitoringDashboardType.none;
+	private MonitoringDashboardType dashboardType = MonitoringDashboardType.NONE;
 
 	/**
 	 * Unique identifier of the SCDF installation within the monitoring system.

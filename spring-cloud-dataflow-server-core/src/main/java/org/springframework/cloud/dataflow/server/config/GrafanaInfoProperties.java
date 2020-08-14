@@ -22,6 +22,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
+ *
+ * @deprecated use the {@link MonitoringDashboardInfoProperties} instead.
  */
 @ConfigurationProperties(prefix = GrafanaInfoProperties.VERSION_INFO_PREFIX)
 @Deprecated

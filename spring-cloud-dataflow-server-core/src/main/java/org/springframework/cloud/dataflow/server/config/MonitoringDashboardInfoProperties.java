@@ -23,6 +23,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboar
 import org.springframework.util.StringUtils;
 
 /**
+ * A common property bag for all supported Dashboard monitoring systems (wavefront and grafana at the moment).
  * @author Christian Tzolov
  */
 @ConfigurationProperties(prefix = MonitoringDashboardInfoProperties.VERSION_INFO_PREFIX)
@@ -49,12 +50,12 @@ public class MonitoringDashboardInfoProperties {
 	private int refreshInterval = 15;
 
 	/**
-	 *
+	 * The type of the Monitoring dashboard those properties are provided for.
 	 */
-	private MonitoringDashboardType dashboardType = MonitoringDashboardType.grafana;
+	private MonitoringDashboardType dashboardType = MonitoringDashboardType.NONE;
 
 	/**
-	 *
+	 * Unique identifier for Wavefront to know the metrics are coming from this Data Flow installation.
 	 */
 	@Value("${management.metrics.export.wavefront.source:default-scdf-source}")
 	private String source = "";

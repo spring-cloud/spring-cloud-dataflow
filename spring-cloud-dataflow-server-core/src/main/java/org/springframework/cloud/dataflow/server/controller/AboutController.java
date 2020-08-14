@@ -132,9 +132,9 @@ public class AboutController {
 		featureInfo.setSchedulesEnabled(this.featuresProperties.isSchedulesEnabled());
 		featureInfo.setGrafanaEnabled(this.grafanaProperties.isGrafanaEnabled() ||
 				(this.monitoringDashboardInfoProperties.isEnabled()
-						&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.grafana)));
+						&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.GRAFANA)));
 		featureInfo.setWavefrontEnabled(this.monitoringDashboardInfoProperties.isEnabled()
-				&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.wavefront));
+				&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.WAVEFRONT));
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -224,7 +224,7 @@ public class AboutController {
 			aboutResource.setGrafanaInfo(grafanaInfo);
 
 			final MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
-			monitoringDashboardInfo.setDashboardType(MonitoringDashboardType.grafana);
+			monitoringDashboardInfo.setDashboardType(MonitoringDashboardType.GRAFANA);
 			monitoringDashboardInfo.setUrl(this.grafanaProperties.getUrl());
 			monitoringDashboardInfo.setRefreshInterval(this.grafanaProperties.getRefreshInterval());
 

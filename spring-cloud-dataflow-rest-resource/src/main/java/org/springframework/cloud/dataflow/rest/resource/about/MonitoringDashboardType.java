@@ -16,8 +16,12 @@
 package org.springframework.cloud.dataflow.rest.resource.about;
 
 /**
+ * Used to indicate what SCDF monitoring dashboard configuration is exposed.
+ *
  * @author Christian Tzolov
  */
 public enum MonitoringDashboardType {
-	none, grafana, wavefront;
+	NONE,
+	GRAFANA,
+	WAVEFRONT;
 }
