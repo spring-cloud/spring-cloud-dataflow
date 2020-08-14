@@ -236,8 +236,15 @@ public class AboutController {
 			final MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
 			monitoringDashboardInfo.setDashboardType(this.monitoringDashboardInfoProperties.getDashboardType());
 			monitoringDashboardInfo.setUrl(this.monitoringDashboardInfoProperties.getUrl());
-			monitoringDashboardInfo.setRefreshInterval(this.monitoringDashboardInfoProperties.getRefreshInterval());
-			monitoringDashboardInfo.setSource(this.monitoringDashboardInfoProperties.getSource());
+			if (this.monitoringDashboardInfoProperties.getDashboardType() == MonitoringDashboardType.GRAFANA) {
+				monitoringDashboardInfo.setRefreshInterval(this.monitoringDashboardInfoProperties.getGrafana().getRefreshInterval());
+			}
+			else if (this.monitoringDashboardInfoProperties.getDashboardType() == MonitoringDashboardType.WAVEFRONT) {
+				monitoringDashboardInfo.setSource(this.monitoringDashboardInfoProperties.getWavefront().getSource());
+			}
+			else {
+				throw new IllegalStateException();
+			}
 
 			aboutResource.setMonitoringDashboardInfo(monitoringDashboardInfo);
 		}

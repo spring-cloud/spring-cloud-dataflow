@@ -37,28 +37,60 @@ public class MonitoringDashboardInfoProperties {
 	private String url = "";
 
 	/**
-	 * If provided, can be used to authenticate with Grafana.
-	 * https://docs.grafana.org/http_api/auth/#create-api-token
-	 *
-	 * The 'Authorization' header value should be: 'Bearer (your api key)'.
-	 */
-	private String token = "";
-
-	/**
-	 * Dashboard refresh interval in Seconds
-	 */
-	private int refreshInterval = 15;
-
-	/**
 	 * The type of the Monitoring dashboard those properties are provided for.
 	 */
 	private MonitoringDashboardType dashboardType = MonitoringDashboardType.NONE;
 
-	/**
-	 * Unique identifier for Wavefront to know the metrics are coming from this Data Flow installation.
-	 */
-	@Value("${management.metrics.export.wavefront.source:default-scdf-source}")
-	private String source = "";
+	private Wavefront wavefront = new Wavefront();
+
+	private Grafana grafana = new Grafana();
+
+	public static class Grafana {
+		/**
+		 * If provided, can be used to authenticate with Grafana.
+		 * https://docs.grafana.org/http_api/auth/#create-api-token
+		 *
+		 * The 'Authorization' header value should be: 'Bearer (your api key)'.
+		 */
+		private String token = "";
+
+		/**
+		 * Dashboard refresh interval in Seconds
+		 */
+		private int refreshInterval = 15;
+
+		public String getToken() {
+			return token;
+		}
+
+		public void setToken(String token) {
+			this.token = token;
+		}
+
+		public int getRefreshInterval() {
+			return refreshInterval;
+		}
+
+		public void setRefreshInterval(int refreshInterval) {
+			this.refreshInterval = refreshInterval;
+		}
+	}
+
+	public static class Wavefront {
+		/**
+		 * Unique identifier for Wavefront to know the metrics are coming from this Data Flow installation.
+		 */
+		@Value("${management.metrics.export.wavefront.source:default-scdf-source}")
+		private String source = "";
+
+		public String getSource() {
+			return source;
+		}
+
+		public void setSource(String source) {
+			this.source = source;
+		}
+	}
 
 	public String getUrl() {
 		return url;
@@ -66,22 +98,6 @@ public class MonitoringDashboardInfoProperties {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
-	}
-
-	public int getRefreshInterval() {
-		return refreshInterval;
-	}
-
-	public void setRefreshInterval(int refreshInterval) {
-		this.refreshInterval = refreshInterval;
 	}
 
 	public static String getVersionInfoPrefix() {
@@ -96,15 +112,15 @@ public class MonitoringDashboardInfoProperties {
 		this.dashboardType = dashboardType;
 	}
 
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
 	public boolean isEnabled() {
-		return StringUtils.hasText(this.url);
+		return StringUtils.hasText(this.url) && this.getDashboardType() != MonitoringDashboardType.NONE;
+	}
+
+	public Wavefront getWavefront() {
+		return this.wavefront;
+	}
+
+	public Grafana getGrafana() {
+		return grafana;
 	}
 }

@@ -26,3 +26,4 @@ services:
 
       - spring.cloud.dataflow.monitoring-info.url=http://vmware.wavefront.com
       - spring.cloud.dataflow.monitoring-info.dashboard-type=WAVEFRONT
+      - spring.cloud.dataflow.monitoring-info.wavefront.source=${WAVEFRONT_SOURCE:-scdf-docker-compose}

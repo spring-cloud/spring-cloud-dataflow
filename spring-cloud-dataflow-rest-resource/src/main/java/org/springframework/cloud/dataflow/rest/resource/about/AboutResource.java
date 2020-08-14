@@ -89,5 +89,11 @@ public class AboutResource extends RepresentationModel {
 
 	public void setMonitoringDashboardInfo(MonitoringDashboardInfo monitoringDashboardInfo) {
 		this.monitoringDashboardInfo = monitoringDashboardInfo;
+		/**
+		 * @deprecated
+		 */
+		this.grafanaInfo = new GrafanaInfo();
+		this.grafanaInfo.setUrl(this.monitoringDashboardInfo.getUrl());
+		this.grafanaInfo.setRefreshInterval(this.monitoringDashboardInfo.getRefreshInterval());
 	}
 }
