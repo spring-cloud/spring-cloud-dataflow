@@ -71,6 +71,13 @@ spring:
       rdbms:
         initialize:
           enable: false
+      container:
+        registry-configurations:
+          default:
+            registry-host: registry-1.docker.io
+            authorization-type: dockeroauth2
+            extra:
+              "registryAuthUri": 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell'
       version-info:
         dependency-fetch:
           enabled: false
@@ -223,10 +230,3 @@ spring:
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_VIEW')
-      container:
-        registry-configurations:
-          default:
-            registry-host: registry-1.docker.io
-            authorization-type: dockeroauth2
-            extra:
-              "registryAuthUri": 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell'

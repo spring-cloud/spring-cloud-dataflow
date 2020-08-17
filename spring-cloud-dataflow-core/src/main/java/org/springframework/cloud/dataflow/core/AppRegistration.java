@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.Lob;
@@ -33,6 +34,7 @@ import org.springframework.util.Assert;
  * @author Mark Fisher
  * @author Christian Tzolov
  * @author Vinicius Carvalho
+ * @author Ilayaperumal Gopinathan
  */
 @Entity
 @Table(name = "AppRegistration")
@@ -207,5 +209,28 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 			i = this.getVersion().compareTo(that.getVersion());
 		}
 		return i;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		// self check
+		if (this == o)
+			return true;
+		// null check
+		if (o == null)
+			return false;
+		// type check and cast
+		if (getClass() != o.getClass())
+			return false;
+		AppRegistration appRegistration = (AppRegistration) o;
+		// field comparison
+		return this.getName().equals(appRegistration.getName())
+				&& this.getType().equals(appRegistration.getType());
+	}
+
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getName(), this.getType());
 	}
 }

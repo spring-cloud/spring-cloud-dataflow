@@ -112,6 +112,27 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 		this.versions = versions;
 	}
 
+	/**
+	 * Construct a {@code AppRegistrationResource}.
+	 *
+	 * @param name app name
+	 * @param type app type
+	 * @param version app version
+	 * @param uri uri for app resource
+	 * @param defaultVersion is this application selected to the be default version in DSL
+	 * @param versions all the registered versions of this application
+	 * @param label the label name of the application
+	 */
+	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, HashSet<String> versions, String label) {
+		this.name = name;
+		this.type = type;
+		this.version = version;
+		this.uri = uri;
+		this.defaultVersion = defaultVersion;
+		this.versions = versions;
+		this.label = label;
+	}
+
 
 	/**
 	 * @return the name of the app

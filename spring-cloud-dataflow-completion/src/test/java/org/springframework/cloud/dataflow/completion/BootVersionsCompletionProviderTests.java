@@ -31,7 +31,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
@@ -173,6 +175,14 @@ public class BootVersionsCompletionProviderTests {
 					return false;
 				}
 			};
+		}
+
+		@MockBean
+		ContainerRegistryService containerRegistryService;
+
+		@Bean
+		public ContainerImageMetadataResolver containerImageMetadataResolver(ContainerRegistryService containerRegistryService) {
+			return new DefaultContainerImageMetadataResolver(containerRegistryService);
 		}
 
 		@Bean

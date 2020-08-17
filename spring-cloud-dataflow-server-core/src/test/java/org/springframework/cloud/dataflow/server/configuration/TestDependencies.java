@@ -53,6 +53,7 @@ import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
@@ -93,6 +94,12 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
+import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultAppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultStreamDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.StreamDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
@@ -305,6 +312,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public ContainerRegistryService containerRegistryService() {
+		return mock(ContainerRegistryService.class);
+	}
+
+	@Bean
 	public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
@@ -344,9 +356,18 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public DefaultStreamDefinitionAssemblerProvider streamDefinitionAssemblerProvider(
+			StreamDefinitionService streamDefinitionService, StreamService streamService) {
+		return new DefaultStreamDefinitionAssemblerProvider(streamDefinitionService, streamService);
+	}
+
+	@Bean
 	public StreamDefinitionController streamDefinitionController(StreamService streamService,
-			StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService) {
-		return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService);
+			StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService,
+			StreamDefinitionAssemblerProvider streamDefinitionAssemblerProvider,
+			AppRegistrationAssemblerProvider appRegistrationAssemblerProvider) {
+		return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService,
+				streamDefinitionAssemblerProvider, appRegistrationAssemblerProvider);
 	}
 
 	@Bean
@@ -387,9 +408,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			Optional<StreamService> streamService,
 			AppRegistryService appRegistry,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			StreamDefinitionService streamDefinitionService) {
+			StreamDefinitionService streamDefinitionService,
+			AppRegistrationAssemblerProvider appRegistrationAssemblerProvider) {
 		return new AppRegistryController(streamDefinitionRepository, streamService, appRegistry, metadataResolver,
-				new ForkJoinPool(2), streamDefinitionService);
+				new ForkJoinPool(2), streamDefinitionService, appRegistrationAssemblerProvider);
+	}
+
+	@Bean
+	public AppRegistrationAssemblerProvider appRegistryAssemblerProvider() {
+		return new DefaultAppRegistrationAssemblerProvider();
 	}
 
 	@Bean
@@ -408,9 +435,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService) {
+		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService);
+	}
+
+	@Bean
 	public TaskDefinitionController taskDefinitionController(TaskExplorer explorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService, TaskExecutionService taskExecutionService) {
-		return new TaskDefinitionController(explorer, repository, taskSaveService, taskDeleteService, taskExecutionService);
+			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+			TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider) {
+		return new TaskDefinitionController(explorer, repository, taskSaveService, taskDeleteService,
+				taskDefinitionAssemblerProvider);
 	}
 
 	@Bean

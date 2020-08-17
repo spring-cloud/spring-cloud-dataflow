@@ -29,8 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
-import org.springframework.cloud.dataflow.configuration.metadata.container.RegistryConfiguration;
-import org.springframework.cloud.dataflow.configuration.metadata.container.authorization.DockerOAuth2RegistryAuthorizer;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryAutoConfiguration;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
+import org.springframework.cloud.dataflow.container.registry.authorization.DockerOAuth2RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -66,7 +67,7 @@ import static org.mockito.Mockito.when;
 public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 	@Autowired
-	Map<String, RegistryConfiguration> registryConfigurationMap;
+	Map<String, ContainerRegistryConfiguration> registryConfigurationMap;
 
 	@Autowired
 	ContainerImageMetadataResolver containerImageMetadataResolver;
@@ -83,10 +84,10 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 	public void registryConfigurationBeanCreationTest() {
 		assertThat(registryConfigurationMap).hasSize(2);
 
-		RegistryConfiguration secretConf = registryConfigurationMap.get("demo.repository.io");
+		ContainerRegistryConfiguration secretConf = registryConfigurationMap.get("demo.repository.io");
 		assertThat(secretConf).isNotNull();
 		assertThat(secretConf.getRegistryHost()).isEqualTo("demo.repository.io");
-		assertThat(secretConf.getAuthorizationType()).isEqualTo(RegistryConfiguration.AuthorizationType.dockeroauth2);
+		assertThat(secretConf.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
 		assertThat(secretConf.getUser()).isEqualTo("testuser");
 		assertThat(secretConf.getSecret()).isEqualTo("testpassword");
 		assertThat(secretConf.isDisableSslVerification())
@@ -96,10 +97,10 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 		assertThat(secretConf.getExtra().get(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
 				.isEqualTo("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
 
-		RegistryConfiguration goharborConf = registryConfigurationMap.get("demo.goharbor.io");
+		ContainerRegistryConfiguration goharborConf = registryConfigurationMap.get("demo.goharbor.io");
 		assertThat(goharborConf).isNotNull();
 		assertThat(goharborConf.getRegistryHost()).isEqualTo("demo.goharbor.io");
-		assertThat(goharborConf.getAuthorizationType()).isEqualTo(RegistryConfiguration.AuthorizationType.dockeroauth2);
+		assertThat(goharborConf.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
 		assertThat(goharborConf.getUser()).isEqualTo("admin");
 		assertThat(goharborConf.getSecret()).isEqualTo("Harbor12345");
 		assertThat(goharborConf.isDisableSslVerification()).isFalse();
@@ -152,7 +153,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 				eq(HttpMethod.GET), any(), eq(String.class));
 	}
 
-	@ImportAutoConfiguration(ApplicationConfigurationMetadataResolverAutoConfiguration.class)
+	@ImportAutoConfiguration({ContainerRegistryAutoConfiguration.class, ApplicationConfigurationMetadataResolverAutoConfiguration.class})
 	static class TestConfig {
 
 		@Bean(name = "noSslVerificationContainerRestTemplate")

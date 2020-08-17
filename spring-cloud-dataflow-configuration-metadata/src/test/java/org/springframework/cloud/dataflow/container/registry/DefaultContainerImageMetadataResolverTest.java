@@ -1,0 +1,235 @@
+/*
+ * Copyright 2020-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.dataflow.container.registry;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.container.registry.authorization.RegistryAuthorizer;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+/**
+ * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
+ */
+public class DefaultContainerImageMetadataResolverTest {
+
+	@Mock
+	private RestTemplate mockRestTemplate;
+
+	private Map<String, ContainerRegistryConfiguration> registryConfigurationMap = new HashMap<>();
+
+	private ContainerRegistryService containerRegistryService;
+
+	@Before
+	public void init() {
+		MockitoAnnotations.initMocks(this);
+
+		// DockerHub registry configuration by default.
+		ContainerRegistryConfiguration dockerHubAuthConfig = new ContainerRegistryConfiguration();
+		dockerHubAuthConfig.setRegistryHost(ContainerRegistryProperties.DOCKER_HUB_HOST);
+		dockerHubAuthConfig.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
+
+		ContainerRegistryConfiguration privateRegistryConfig = new ContainerRegistryConfiguration();
+		privateRegistryConfig.setRegistryHost("my-private-repository.com:5000");
+		privateRegistryConfig.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
+
+		registryConfigurationMap.put(dockerHubAuthConfig.getRegistryHost(), dockerHubAuthConfig);
+		registryConfigurationMap.put(privateRegistryConfig.getRegistryHost(), privateRegistryConfig);
+
+		RegistryAuthorizer registryAuthorizer = mock(RegistryAuthorizer.class);
+
+		when(registryAuthorizer.getType()).thenReturn(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
+		when(registryAuthorizer.getAuthorizationHeaders(any(ContainerImage.class), any())).thenReturn(new HttpHeaders());
+
+		this.containerRegistryService = new ContainerRegistryService(mockRestTemplate,
+				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer));
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsInvalidImageName() {
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+		resolver.getImageLabels(null);
+	}
+
+	@Test
+	public void getImageLabels() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null, "test/image", "latest");
+
+		mockBlogRestTemplateCall("{\"config\": { \"Labels\": { \"boza\": \"koza\"} } }",
+				"registry-1.docker.io", null, "test/image", "123");
+
+		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
+		assertThat(labels.size(), is(1));
+		assertThat(labels.get("boza"), is("koza"));
+	}
+
+	@Test
+	public void getImageLabelsFromPrivateRepository() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
+		mockManifestRestTemplateCall(manifestResponse, "my-private-repository.com", "5000", "test/image", "latest");
+
+		mockBlogRestTemplateCall("{\"config\": { \"Labels\": { \"boza\": \"koza\"} } }",
+				"my-private-repository.com", "5000", "test/image", "123");
+
+		Map<String, String> labels = resolver.getImageLabels("my-private-repository.com:5000/test/image:latest");
+		assertThat(labels.size(), is(1));
+		assertThat(labels.get("boza"), is("koza"));
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsMissingRegistryConfiguration() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		resolver.getImageLabels("test/image:latest");
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsMissingRegistryAuthorizer() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(new ContainerRegistryService(mockRestTemplate,
+				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Collections.emptyList()));
+
+		resolver.getImageLabels("test/image:latest");
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsMissingAuthorizationHeader() {
+		RegistryAuthorizer registryAuthorizer = mock(RegistryAuthorizer.class);
+
+		when(registryAuthorizer.getType()).thenReturn(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
+		when(registryAuthorizer.getAuthorizationHeaders(any(ContainerImage.class), any())).thenReturn(null);
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(new ContainerRegistryService(mockRestTemplate,
+				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer)));
+
+		resolver.getImageLabels("test/image:latest");
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsInvalidManifestResponse() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		Map<String, Object> manifestResponseWithoutConfig = Collections.emptyMap();
+		mockManifestRestTemplateCall(manifestResponseWithoutConfig, "registry-1.docker.io",
+				null, "test/image", "latest");
+
+		resolver.getImageLabels("test/image:latest");
+	}
+
+	@Test(expected = ContainerRegistryException.class)
+	public void getImageLabelsInvalidDigest() {
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		String emptyDigest = "";
+		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", emptyDigest));
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null,
+				"test/image", "latest");
+
+		resolver.getImageLabels("test/image:latest");
+	}
+
+	@Test
+	public void getImageLabelsWithInvalidLabels() {
+
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
+
+		Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", "123"));
+		mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null,
+				"test/image", "latest");
+
+		mockBlogRestTemplateCall("{\"config\": { } }",
+				"registry-1.docker.io", null, "test/image", "123");
+
+		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
+		assertThat(labels.size(), is(0));
+	}
+
+	private void mockManifestRestTemplateCall(Map<String, Object> mapToReturn, String registryHost,
+			String registryPort, String repository, String tagOrDigest) {
+
+		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(registryHost)
+				.port(StringUtils.hasText(registryPort) ? registryPort : null)
+				.path("v2/{repository}/manifests/{reference}")
+				.build().expand(repository, tagOrDigest);
+
+
+		when(mockRestTemplate.exchange(
+				eq(manifestUriComponents.toUri()),
+				eq(HttpMethod.GET),
+				any(HttpEntity.class),
+				eq(Map.class))).thenReturn(new ResponseEntity<>(mapToReturn, HttpStatus.OK));
+	}
+
+	private void mockBlogRestTemplateCall(String jsonResponse, String registryHost, String registryPort,
+			String repository, String digest) {
+
+		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
+				.scheme("https")
+				.host(registryHost)
+				.port(StringUtils.hasText(registryPort) ? registryPort : null)
+				.path("v2/{repository}/blobs/{digest}")
+				.build().expand(repository, digest);
+
+		when(mockRestTemplate.exchange(
+				eq(blobUriComponents.toUri()),
+				eq(HttpMethod.GET),
+				any(HttpEntity.class),
+				eq(String.class)))
+				.thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.OK));
+	}
+
+	private class MockedDefaultContainerImageMetadataResolver extends DefaultContainerImageMetadataResolver {
+		public MockedDefaultContainerImageMetadataResolver(ContainerRegistryService containerRegistryService) {
+			super(containerRegistryService);
+		}
+	}
+}

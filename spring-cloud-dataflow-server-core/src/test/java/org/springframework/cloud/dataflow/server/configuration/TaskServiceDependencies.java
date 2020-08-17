@@ -41,6 +41,7 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
@@ -228,6 +229,11 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	ApplicationConfigurationMetadataResolver metadataResolver() {
 		return mock(ApplicationConfigurationMetadataResolver.class);
+	}
+
+	@Bean
+	public ContainerRegistryService containerRegistryService() {
+		return mock(ContainerRegistryService.class);
 	}
 
 	@Bean

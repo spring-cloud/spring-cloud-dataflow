@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,20 +30,19 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
-import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
-import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
+import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.StreamDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -84,20 +82,33 @@ public class StreamDefinitionController {
 
 	private final AppRegistryService appRegistryService;
 
+	private final StreamDefinitionAssemblerProvider<? extends StreamDefinitionResource> streamDefinitionAssemblerProvider;
+
+	private final RepresentationModelAssembler<AppRegistration, ? extends AppRegistrationResource> appRegistryAssembler;
+
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates to {@link StreamService}.
 	 *
 	 * @param streamService the stream service to use
 	 * @param streamDefinitionService the stream definition service to use
-	 */
+	 * @param appRegistryService the app registry service to use
+	 * @param streamDefinitionAssemblerProvider the stream definition assembler provider to use
+	 * @param appRegistrationAssemblerProvider the app registry assembler provider to use
+	 * */
 	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService,
-			AppRegistryService appRegistryService) {
+			AppRegistryService appRegistryService,
+			StreamDefinitionAssemblerProvider<? extends StreamDefinitionResource> streamDefinitionAssemblerProvider,
+			AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
 		Assert.notNull(streamService, "StreamService must not be null");
 		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
+		Assert.notNull(streamDefinitionAssemblerProvider, "StreamDefinitionAssemblerProvider must not be null");
+		Assert.notNull(appRegistrationAssemblerProvider, "AppRegistrationAssemblerProvider must not be null");
 		this.streamService = streamService;
 		this.streamDefinitionService = streamDefinitionService;
 		this.appRegistryService = appRegistryService;
+		this.streamDefinitionAssemblerProvider = streamDefinitionAssemblerProvider;
+		this.appRegistryAssembler = appRegistrationAssemblerProvider.getAppRegistrationAssembler();
 	}
 
 	/**
@@ -110,10 +121,11 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<StreamDefinitionResource> list(Pageable pageable,
+	public PagedModel<? extends StreamDefinitionResource> list(Pageable pageable,
 			@RequestParam(required = false) String search, PagedResourcesAssembler<StreamDefinition> assembler) {
 		Page<StreamDefinition> streamDefinitions = this.streamService.findDefinitionByNameContains(pageable, search);
-		return assembler.toModel(streamDefinitions, new Assembler(streamDefinitions));
+		return assembler.toModel(streamDefinitions,
+				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(streamDefinitions.getContent()));
 	}
 
 	/**
@@ -136,7 +148,8 @@ public class StreamDefinitionController {
 											@RequestParam(value = "description", defaultValue = "") String description,
 											@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy);
-		return new Assembler(new PageImpl<>(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
+		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
+				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
 	}
 
 	/**
@@ -162,13 +175,14 @@ public class StreamDefinitionController {
 	 */
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<StreamDefinitionResource> listRelated(Pageable pageable,
+	public PagedModel<? extends StreamDefinitionResource> listRelated(Pageable pageable,
 			@PathVariable("name") String name,
 			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
 			PagedResourcesAssembler<StreamDefinition> assembler) {
 		List<StreamDefinition> result = this.streamService.findRelatedStreams(name, nested);
 		Page<StreamDefinition> page = new PageImpl<>(result, pageable, result.size());
-		return assembler.toModel(page, new Assembler(page));
+		return assembler.toModel(page,
+				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(page.getContent()));
 	}
 
 
@@ -181,47 +195,24 @@ public class StreamDefinitionController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDefinitionResource display(@PathVariable("name") String name) {
-		StreamDefinition definition = this.streamService.findOne(name);
-		return new Assembler(new PageImpl<>(Collections.singletonList(definition))).toModel(definition);
+		StreamDefinition streamDefinition = this.streamService.findOne(name);
+		return this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition)).toModel(streamDefinition);
 	}
 
 
 	@RequestMapping(value = "/{name}/applications", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public List<AppRegistrationResource> listApplications(@PathVariable("name") String name) {
+	public List<? extends AppRegistrationResource> listApplications(@PathVariable("name") String name) {
 		StreamDefinition definition = this.streamService.findOne(name);
 		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(definition);
 		List<AppRegistrationResource> appRegistrations = new ArrayList<>();
-		AppRegistryAssembler appRegistryAssembler = new AppRegistryAssembler();
 		for (StreamAppDefinition streamAppDefinition: streamAppDefinitions) {
-			AppRegistrationResource appRegistrationResource = appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
+			AppRegistrationResource appRegistrationResource = this.appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
 					streamAppDefinition.getApplicationType()));
 			appRegistrationResource.setLabel(streamAppDefinition.getName());
 			appRegistrations.add(appRegistrationResource);
 		}
 		return appRegistrations;
-	}
-
-	class AppRegistryAssembler extends RepresentationModelAssemblerSupport<AppRegistration, AppRegistrationResource> {
-
-		public AppRegistryAssembler() {
-			super(AppRegistryController.class, AppRegistrationResource.class);
-		}
-
-		@Override
-		public AppRegistrationResource toModel(AppRegistration registration) {
-			return createModelWithId(String.format("%s/%s/%s", registration.getType(), registration.getName(),
-					registration.getVersion()), registration);
-		}
-
-		@Override
-		protected AppRegistrationResource instantiateModel(AppRegistration registration) {
-			return (registration.getVersions() == null) ? new AppRegistrationResource(registration.getName(), registration.getType().name(),
-					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion()) :
-					new AppRegistrationResource(registration.getName(), registration.getType().name(),
-							registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion(),
-							registration.getVersions());
-		}
 	}
 
 	/**
@@ -231,49 +222,5 @@ public class StreamDefinitionController {
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteAll() {
 		this.streamService.deleteAll();
-	}
-
-	/**
-	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
-	 * {@link StreamDefinition}s to {@link StreamDefinitionResource}s.
-	 */
-	class Assembler extends RepresentationModelAssemblerSupport<StreamDefinition, StreamDefinitionResource> {
-
-		private final Map<StreamDefinition, DeploymentState> streamDeploymentStates;
-
-		public Assembler(Page<StreamDefinition> streamDefinitions) {
-			super(StreamDefinitionController.class, StreamDefinitionResource.class);
-			streamDeploymentStates = StreamDefinitionController.this.streamService
-					.state(streamDefinitions.getContent());
-
-		}
-
-		@Override
-		public StreamDefinitionResource toModel(StreamDefinition stream) {
-			try {
-				return createModelWithId(stream.getName(), stream);
-			}
-			catch (IllegalStateException e) {
-				logger.warn("Failed to create StreamDefinitionResource. " + e.getMessage());
-			}
-			return null;
-		}
-
-		@Override
-		public StreamDefinitionResource instantiateModel(StreamDefinition streamDefinition) {
-			final StreamDefinitionResource resource = new StreamDefinitionResource(streamDefinition.getName(),
-					streamDefinitionService.redactDsl(streamDefinition),
-					streamDefinitionService.redactDsl(new StreamDefinition(streamDefinition.getName(), streamDefinition.getOriginalDslText())),
-					streamDefinition.getDescription());
-			DeploymentState deploymentState = streamDeploymentStates.get(streamDefinition);
-			if (deploymentState != null) {
-				final DeploymentStateResource deploymentStateResource = ControllerUtils
-						.mapState(deploymentState);
-				resource.setStatus(deploymentStateResource.getKey());
-				resource.setStatusDescription(deploymentStateResource.getDescription());
-			}
-			return resource;
-		}
-
 	}
 }

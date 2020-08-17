@@ -90,12 +90,13 @@
 		<json-unit.version>2.11.1</json-unit.version>
 		<docker-compose-rule.version>1.4.2</docker-compose-rule.version>
 		<findbugs.version>3.0.2</findbugs.version>
-		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
-		<commons-text.version>1.8</commons-text.version>
 		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 		<joda-time.version>2.10.6</joda-time.version>
+		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
+		<commons-text.version>1.8</commons-text.version>
 	</properties>
 	<modules>
+		<module>spring-cloud-dataflow-container-registry</module>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-core-dsl</module>
 		<module>spring-cloud-dataflow-core</module>
@@ -273,6 +274,16 @@
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
 				<version>${joda-time.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${commons-text.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-ecr</artifactId>
+				<version>${aws-java-sdk-ecr.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

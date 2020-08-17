@@ -47,6 +47,7 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.core.io.ByteArrayResource;
@@ -58,7 +59,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -87,8 +88,6 @@ public class AppRegistryController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppRegistryController.class);
 
-	private final Assembler assembler = new Assembler();
-
 	private final StreamDefinitionRepository streamDefinitionRepository;
 
 	private final AppRegistryService appRegistryService;
@@ -101,6 +100,8 @@ public class AppRegistryController {
 
 	private StreamDefinitionService streamDefinitionService;
 
+	private final RepresentationModelAssembler<AppRegistration, ? extends AppRegistrationResource> appRegistryAssembler;
+
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	public AppRegistryController(Optional<StreamDefinitionRepository> streamDefinitionRepository,
@@ -108,13 +109,15 @@ public class AppRegistryController {
 			AppRegistryService appRegistryService,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			ForkJoinPool forkJoinPool,
-			StreamDefinitionService streamDefinitionService) {
+			StreamDefinitionService streamDefinitionService,
+			AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
 		this.streamDefinitionRepository = streamDefinitionRepository.isPresent() ? streamDefinitionRepository.get() : null;
 		this.streamService = streamService.isPresent() ? streamService.get() : null;
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
 		this.streamDefinitionService = streamDefinitionService;
+		this.appRegistryAssembler = appRegistrationAssemblerProvider.getAppRegistrationAssembler();
 	}
 
 	/**
@@ -141,7 +144,7 @@ public class AppRegistryController {
 				: this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
 				pageable);
 
-		return pagedResourcesAssembler.toModel(pagedRegistrations, this.assembler);
+		return pagedResourcesAssembler.toModel(pagedRegistrations, this.appRegistryAssembler);
 	}
 
 	/**
@@ -183,14 +186,13 @@ public class AppRegistryController {
 		if (registration == null) {
 			throw new NoSuchAppRegistrationException(name, type, version);
 		}
-		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(
-				assembler.toModel(registration));
-		List<ConfigurationMetadataProperty> properties = metadataResolver
-				.listProperties(appRegistryService.getAppMetadataResource(registration), allProperties);
+		DetailedAppRegistrationResource result = new DetailedAppRegistrationResource(this.appRegistryAssembler.toModel(registration));
+		List<ConfigurationMetadataProperty> properties = this.metadataResolver
+				.listProperties(this.appRegistryService.getAppMetadataResource(registration), allProperties);
 		for (ConfigurationMetadataProperty property : properties) {
 			result.addOption(property);
 		}
-		Map<String, Set<String>> portsMap = this.metadataResolver.listPortNames(appRegistryService.getAppMetadataResource(registration));
+		Map<String, Set<String>> portsMap = this.metadataResolver.listPortNames(this.appRegistryService.getAppMetadataResource(registration));
 		if (portsMap != null && !portsMap.isEmpty()) {
 			for (Map.Entry<String, Set<String>> entry: portsMap.entrySet()) {
 				if (entry.getKey().equals("inbound")) {
@@ -416,7 +418,8 @@ public class AppRegistryController {
 
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
-		return pagedResourcesAssembler.toModel(new PageImpl<>(registrations, pageable, registrations.size()), this.assembler);
+		return pagedResourcesAssembler.toModel(new PageImpl<>(registrations, pageable, registrations.size()),
+				this.appRegistryAssembler);
 	}
 
 	/**
@@ -456,28 +459,6 @@ public class AppRegistryController {
 
 		if (!invalidChars.toString().equals("")) {
 			throw new IllegalArgumentException("Application name: '" + name + "' cannot contain: " + invalidChars);
-		}
-	}
-
-	class Assembler extends RepresentationModelAssemblerSupport<AppRegistration, AppRegistrationResource> {
-
-		public Assembler() {
-			super(AppRegistryController.class, AppRegistrationResource.class);
-		}
-
-		@Override
-		public AppRegistrationResource toModel(AppRegistration registration) {
-			return createModelWithId(String.format("%s/%s/%s", registration.getType(), registration.getName(),
-					registration.getVersion()), registration);
-		}
-
-		@Override
-		protected AppRegistrationResource instantiateModel(AppRegistration registration) {
-			return (registration.getVersions() == null) ? new AppRegistrationResource(registration.getName(), registration.getType().name(),
-					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion()) :
-					new AppRegistrationResource(registration.getName(), registration.getType().name(),
-					registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion(),
-					registration.getVersions());
 		}
 	}
 }
