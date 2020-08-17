@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
@@ -203,6 +204,11 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public StreamDefinitionService streamDefinitionService() {
 			return mock(StreamDefinitionService.class);
+		}
+
+		@Bean
+		public ContainerRegistryService containerRegistryService() {
+			return mock(ContainerRegistryService.class);
 		}
 	}
 }

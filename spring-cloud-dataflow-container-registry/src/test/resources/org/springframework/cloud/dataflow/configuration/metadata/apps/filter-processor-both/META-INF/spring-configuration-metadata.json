@@ -1,0 +1,37 @@
+{
+  "groups": [
+    {
+      "name": "filter",
+      "type": "foo.bar.FilterProperties",
+      "sourceType": "foo.bar.FilterProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "filter.expression",
+      "type": "org.springframework.expression.Expression",
+      "description": "A predicate to evaluate",
+      "sourceType": "foo.bar.FilterProperties",
+      "defaultValue": "true"
+    },
+    {
+      "name": "some.other.property.included.prefix.expresso2",
+      "type": "org.springframework.cloud.dataflow.completion.Expresso",
+      "description": "A property of type enum and whose name starts like 'expression'",
+      "sourceType": "com.acme.SomeDifferentProperties"
+    },
+    {
+      "name": "some.other.property.included.prefix.expresso3",
+      "type": "org.springframework.cloud.dataflow.completion.Expresso",
+      "description": "A property of type enum and whose name starts like 'expression'",
+      "sourceType": "com.acme.SomeDifferentProperties"
+    },
+    {
+      "name": "some.prefix.hidden.by.default.secret",
+      "type": "java.lang.String",
+      "description": "Some hidden option",
+      "sourceType": "com.acme.OtherProperties"
+    }
+  ],
+  "hints": []
+}

@@ -49,6 +49,9 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
+import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -81,6 +84,12 @@ import org.springframework.cloud.dataflow.server.controller.TaskPlatformControll
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
+import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultAppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultStreamDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.StreamDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.controller.security.SecurityController;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -221,15 +230,23 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
 		public AppRegistryController appRegistryController(
 				Optional<StreamDefinitionRepository> streamDefinitionRepository,
 				Optional<StreamService> streamService,
 				AppRegistryService appRegistry, ApplicationConfigurationMetadataResolver metadataResolver,
-				ForkJoinPool appRegistryFJPFB, StreamDefinitionService streamDefinitionService) {
+				ForkJoinPool appRegistryFJPFB, StreamDefinitionService streamDefinitionService,
+				AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
 			return new AppRegistryController(streamDefinitionRepository,
 					streamService,
 					appRegistry,
-					metadataResolver, appRegistryFJPFB, streamDefinitionService);
+					metadataResolver, appRegistryFJPFB, streamDefinitionService, appRegistrationAssemblerProvider);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public AppRegistrationAssemblerProvider appRegistryAssemblerProvider() {
+			return new DefaultAppRegistrationAssemblerProvider();
 		}
 	}
 
@@ -253,11 +270,18 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
+		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService) {
+			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService);
+		}
+
+		@Bean
 		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
 				TaskDefinitionRepository repository, TaskSaveService taskSaveService,
-				TaskDeleteService taskDeleteService, TaskExecutionService taskExecutionService) {
+				TaskDeleteService taskDeleteService,
+				TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
 			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService,
-					taskExecutionService);
+					taskDefinitionAssemblerProvider);
 		}
 
 		@Bean
@@ -333,9 +357,21 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingBean
+		public StreamDefinitionAssemblerProvider streamDefinitionAssemblerProvider(
+				StreamDefinitionService streamDefinitionService,
+				StreamService streamService) {
+			return new DefaultStreamDefinitionAssemblerProvider(streamDefinitionService, streamService);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
 		public StreamDefinitionController streamDefinitionController(StreamService streamService,
-				StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService) {
-			return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService);
+				StreamDefinitionService streamDefinitionService, AppRegistryService appRegistryService,
+				StreamDefinitionAssemblerProvider<? extends StreamDefinitionResource> streamDefinitionAssemblerProvider,
+				AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
+			return new StreamDefinitionController(streamService, streamDefinitionService, appRegistryService,
+					streamDefinitionAssemblerProvider, appRegistrationAssemblerProvider);
 		}
 
 		@Bean
