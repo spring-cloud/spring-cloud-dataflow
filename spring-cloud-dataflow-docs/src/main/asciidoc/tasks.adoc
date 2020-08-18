@@ -1042,7 +1042,7 @@ Then `DDD` and `EEE` would run in parallel.
 [[spring-cloud-dataflow-launch-tasks-from-stream]]
 == Launching Tasks from a Stream
 
-You can launch a task from a stream by using the https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc[`tasklauncher-dataflow`] sink.
+You can launch a task from a stream by using the https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc[`task-launcher-dataflow`] sink.
 The sink connects to a Data Flow server and uses its REST API to launch any defined task.
 The sink accepts a https://github.com/spring-cloud-stream-app-starters/tasklauncher-dataflow/blob/master/spring-cloud-starter-stream-sink-task-launcher-dataflow/README.adoc#payload[JSON payload] representing a `task launch request`, which provides the name of the task to launch and may include command line arguments and deployment properties.
 
@@ -1064,12 +1064,12 @@ For example, you can start with the https://github.com/spring-cloud-stream-app-s
 
 TIP: https://start-scs.cfapps.io/[Spring Cloud Stream Initializr] provides a great starting point for creating stream applications.
 
-Next, <<applications.adoc#applications, register>> the `tasklauncher-dataflow` sink and create a task (we use the provided timestamp task):
+Next, <<applications.adoc#applications, register>> the `task-launcher-dataflow` sink and create a task (we use the provided timestamp task):
 
 ====
 [source,bash]
 ----
-stream create --name task-every-minute --definition "time-tlr --trigger.fixed-delay=60 --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task | tasklauncher-dataflow" --deploy
+stream create --name task-every-minute --definition "time-tlr --trigger.fixed-delay=60 --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task | task-launcher-dataflow" --deploy
 ----
 ====
 
@@ -1080,7 +1080,7 @@ The following stream definition illustrates the use of command line arguments. I
 ====
 [source,bash]
 ----
-stream create --name task-every-second --definition "time-tlr --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task --task.launch.request.args=foo=bar --task.launch.request.arg-expressions=time=payload | tasklauncher-dataflow" --deploy
+stream create --name task-every-second --definition "time-tlr --spring.cloud.stream.function.definition=taskLaunchRequest --task.launch.request.task-name=timestamp-task --task.launch.request.args=foo=bar --task.launch.request.arg-expressions=time=payload | task-launcher-dataflow" --deploy
 ----
 ====
 
@@ -1108,7 +1108,7 @@ This pattern may be applied to any source to launch a task in response to any ev
 
 === Launching a Composed Task From a Stream
 
-A composed task can be launched with the `tasklauncher-dataflow` sink, as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
+A composed task can be launched with the `task-launcher-dataflow` sink, as discussed <<spring-cloud-dataflow-launch-tasks-from-stream, here>>.
 Since we use the `ComposedTaskRunner` directly, we need to set up the task definitions for the composed task runner itself, along with the composed tasks, prior to the creation of the composed task launching stream.
 Suppose we wanted to create the following composed task definition: `AAA && BBB`.
 The first step would be to create the task definitions, as shown in the following example:
@@ -1129,14 +1129,14 @@ Now that the task definitions we need for composed task definition are ready, we
 So, in this case, we create a stream with:
 
 * The `time` source customized to emit task launch requests, as shown <<spring-cloud-dataflow-launch-tasks-from-stream, earlier>>.
-* The `tasklauncher-dataflow` sink that launches the `ComposedTaskRunner`
+* The `task-launcher-dataflow` sink that launches the `ComposedTaskRunner`
 
 The stream should resemble the following:
 
 ====
 [source]
 ----
-stream create ctr-stream --definition "time --fixed-delay=30 --task.launch.request.task-name=composed-task-launcher --task.launch.request.args=--graph=AAA&&BBB,--increment-instance-enabled=true | tasklauncher-dataflow"
+stream create ctr-stream --definition "time --fixed-delay=30 --task.launch.request.task-name=composed-task-launcher --task.launch.request.args=--graph=AAA&&BBB,--increment-instance-enabled=true | task-launcher-dataflow"
 ----
 ====
 
