@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -261,9 +261,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	private void createJobExecution(String name, BatchStatus status) {
-		TaskExecution taskExecution = this.dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
+		TaskExecution taskExecution = this.dao.createTaskExecution(name, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
-		jobParameterMap.put("-spring.cloud.data.flow.platformname", new JobParameter("default"));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution = this.jobRepository.createJobExecution(this.jobRepository.createJobInstance(name, new JobParameters()), jobParameters, null);
 		this.taskBatchDao.saveRelationship(taskExecution, jobExecution);
