@@ -183,8 +183,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-
-		String platformName = taskJobExecution.getJobExecution().getJobParameters().getString("-spring.cloud.data.flow.platformname");
+		String platformName = getPlatformFromTaskExecution(taskExecution.getArguments());
 		if (platformName != null) {
 			Map<String, String> deploymentProperties = new HashMap<>();
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
@@ -196,6 +195,18 @@ public class DefaultTaskJobService implements TaskJobService {
 					taskExecution.getTaskName(),taskJobExecution.getTaskId()));
 		}
 
+	}
+
+	private String getPlatformFromTaskExecution(List<String> taskExecutionArgs) {
+		final String platformPrefix = "--spring.cloud.data.flow.platformname=";
+		String result = null;
+		for(String arg : taskExecutionArgs) {
+			if(arg.startsWith(platformPrefix)) {
+				result = arg.substring(platformPrefix.length());
+				break;
+			}
+		}
+		return result;
 	}
 
 	/**

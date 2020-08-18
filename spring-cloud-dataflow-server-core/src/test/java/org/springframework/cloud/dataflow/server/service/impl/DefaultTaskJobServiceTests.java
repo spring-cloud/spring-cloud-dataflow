@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -115,8 +115,8 @@ public class DefaultTaskJobServiceTests {
 			// not adding platform name as default as we want to check that this only one
 			// gets replaced
 			this.launcherRepository.save(new Launcher("fakeplatformname", "local", this.taskLauncher));
+			this.launcherRepository.save(new Launcher("demo", "local", this.taskLauncher));
 			Map<String, JobParameter> jobParameterMap = new HashMap<>();
-			jobParameterMap.put("-spring.cloud.data.flow.platformname", new JobParameter("demo"));
 			jobParameterMap.put("identifying.param", new JobParameter("testparam"));
 			this.jobParameters = new JobParameters(jobParameterMap);
 
@@ -135,6 +135,7 @@ public class DefaultTaskJobServiceTests {
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
+		appDeploymentRequest.getCommandlineArguments().contains("--spring.cloud.data.flow.platformname=demo");
 		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
 	}
 
@@ -149,7 +150,7 @@ public class DefaultTaskJobServiceTests {
 			TaskExecutionDao taskExecutionDao, String jobName,
 			int jobExecutionCount, BatchStatus status) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), new ArrayList<>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=demo"), null);
 		JobExecution jobExecution;
 
 		for (int i = 0; i < jobExecutionCount; i++) {
