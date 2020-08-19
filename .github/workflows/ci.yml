@@ -1,12 +1,6 @@
-name: Java CI - master
+name: CI 
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   build:
@@ -17,7 +11,7 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Cache maven repository
       uses: actions/cache@v1
       with:
@@ -29,5 +23,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.6.2
     - name: Build with Maven
       run: mvn "-Dmaven.repo.local=.m2" -U -B package
