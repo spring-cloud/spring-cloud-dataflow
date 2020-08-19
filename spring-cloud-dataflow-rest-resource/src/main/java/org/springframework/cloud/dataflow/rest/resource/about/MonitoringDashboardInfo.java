@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
+import org.springframework.util.StringUtils;
+
 /**
  * This entity will contains the dashboard configuration information exposed by the SCDF server.
  *
@@ -68,7 +70,7 @@ public class MonitoringDashboardInfo {
 	}
 
 	public String getSource() {
-		return source;
+		return StringUtils.isEmpty(source) ? source : source.toLowerCase();
 	}
 
 	public void setSource(String source) {

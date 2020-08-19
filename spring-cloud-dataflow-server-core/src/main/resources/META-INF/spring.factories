@@ -1,5 +1,6 @@
 org.springframework.boot.env.EnvironmentPostProcessor=\
-  org.springframework.cloud.dataflow.server.config.DefaultEnvironmentPostProcessor
+  org.springframework.cloud.dataflow.server.config.DefaultEnvironmentPostProcessor,\
+  org.springframework.cloud.dataflow.server.config.MetricsReplicationEnvironmentPostProcessor
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   org.springframework.cloud.dataflow.server.config.DataFlowServerAutoConfiguration,\
   org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration

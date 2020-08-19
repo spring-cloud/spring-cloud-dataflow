@@ -23,9 +23,9 @@ services:
                 "rsocket.port":7001
              }
           },
-          "spring.cloud.dataflow.monitoring-info": {
+          "spring.cloud.dataflow.metrics.dashboard": {
              "url":"http://localhost:3000",
-             "dashboard-type=GRAFANA"
+             "type=GRAFANA"
           }
         }
 

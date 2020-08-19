@@ -30,9 +30,9 @@ data:
                         enabled: true
                         host: prometheus-proxy
                         port: 7001
-          monitoring-info:
+          metrics.dashboard:
             url: 'https://grafana:3000'
-            dashboardType: 'GRAFANA'
+            type: 'GRAFANA'
           task:
             platform:
               kubernetes:

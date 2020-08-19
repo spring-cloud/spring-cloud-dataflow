@@ -53,7 +53,7 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("featureInfo.wavefrontEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if an URL to an external Wavefront dashboards is provided."),
 						fieldWithPath("featureInfo.monitoringDashboardType").type(JsonFieldType.STRING)
-								.description("Name of the external monitoring dashboards if provided or none otherwise."),
+								.description("Name of the external metrics dashboards if provided or none otherwise."),
 
 						fieldWithPath("versionInfo").type(JsonFieldType.OBJECT).description(
 								"Provides details of the Spring Cloud Data Flow Server " + "dependencies."),

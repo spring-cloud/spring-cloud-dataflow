@@ -341,10 +341,10 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1",
-			"spring.cloud.dataflow.monitoring-info.url=http://localhost:3001",
-			"spring.cloud.dataflow.monitoring-info.dashboard-type=GRAFANA",
-			"spring.cloud.dataflow.monitoring-info.grafana.token=boza",
-			"spring.cloud.dataflow.monitoring-info.grafana.refresh-interval=30"
+			"spring.cloud.dataflow.metrics.dashboard.url=http://localhost:3001",
+			"spring.cloud.dataflow.metrics.dashboard.type=GRAFANA",
+			"spring.cloud.dataflow.metrics.dashboard.grafana.token=boza",
+			"spring.cloud.dataflow.metrics.dashboard.grafana.refresh-interval=30"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class AboutTests {

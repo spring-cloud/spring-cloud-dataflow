@@ -38,8 +38,8 @@ import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
+import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
 import org.springframework.cloud.dataflow.server.config.GrafanaInfoProperties;
-import org.springframework.cloud.dataflow.server.config.MonitoringDashboardInfoProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -76,7 +76,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @RequestMapping("/about")
 @ExposesResourceFor(AboutResource.class)
-@EnableConfigurationProperties({ GrafanaInfoProperties.class, MonitoringDashboardInfoProperties.class })
+@EnableConfigurationProperties({ GrafanaInfoProperties.class, DataflowMetricsProperties.class })
 public class AboutController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutController.class);
@@ -102,18 +102,18 @@ public class AboutController {
 
 	private GrafanaInfoProperties grafanaProperties;
 
-	private MonitoringDashboardInfoProperties monitoringDashboardInfoProperties;
+	private DataflowMetricsProperties dataflowMetricsProperties;
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, GrafanaInfoProperties grafanaInfoProperties,
-			MonitoringDashboardInfoProperties monitoringDashboardInfoProperties) {
+			DataflowMetricsProperties monitoringProperties) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
 		this.grafanaProperties = grafanaInfoProperties;
-		this.monitoringDashboardInfoProperties = monitoringDashboardInfoProperties;
+		this.dataflowMetricsProperties = monitoringProperties;
 	}
 
 	/**
@@ -131,10 +131,10 @@ public class AboutController {
 		featureInfo.setTasksEnabled(this.featuresProperties.isTasksEnabled());
 		featureInfo.setSchedulesEnabled(this.featuresProperties.isSchedulesEnabled());
 		featureInfo.setGrafanaEnabled(this.grafanaProperties.isGrafanaEnabled() ||
-				(this.monitoringDashboardInfoProperties.isEnabled()
-						&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.GRAFANA)));
-		featureInfo.setWavefrontEnabled(this.monitoringDashboardInfoProperties.isEnabled()
-				&& this.monitoringDashboardInfoProperties.getDashboardType().equals(MonitoringDashboardType.WAVEFRONT));
+				(this.dataflowMetricsProperties.getDashboard().isEnabled()
+						&& this.dataflowMetricsProperties.getDashboard().getType().equals(MonitoringDashboardType.GRAFANA)));
+		featureInfo.setWavefrontEnabled(this.dataflowMetricsProperties.getDashboard().isEnabled()
+				&& this.dataflowMetricsProperties.getDashboard().getType().equals(MonitoringDashboardType.WAVEFRONT));
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -231,16 +231,16 @@ public class AboutController {
 			aboutResource.setMonitoringDashboardInfo(monitoringDashboardInfo);
 		}
 
-		if (this.monitoringDashboardInfoProperties.isEnabled()) {
-
+		DataflowMetricsProperties.Dashboard dashboard = this.dataflowMetricsProperties.getDashboard();
+		if (dashboard.isEnabled()) {
 			final MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
-			monitoringDashboardInfo.setDashboardType(this.monitoringDashboardInfoProperties.getDashboardType());
-			monitoringDashboardInfo.setUrl(this.monitoringDashboardInfoProperties.getUrl());
-			if (this.monitoringDashboardInfoProperties.getDashboardType() == MonitoringDashboardType.GRAFANA) {
-				monitoringDashboardInfo.setRefreshInterval(this.monitoringDashboardInfoProperties.getGrafana().getRefreshInterval());
+			monitoringDashboardInfo.setDashboardType(dashboard.getType());
+			monitoringDashboardInfo.setUrl(dashboard.getUrl());
+			if (dashboard.getType() == MonitoringDashboardType.GRAFANA) {
+				monitoringDashboardInfo.setRefreshInterval(dashboard.getGrafana().getRefreshInterval());
 			}
-			else if (this.monitoringDashboardInfoProperties.getDashboardType() == MonitoringDashboardType.WAVEFRONT) {
-				monitoringDashboardInfo.setSource(this.monitoringDashboardInfoProperties.getWavefront().getSource());
+			else if (dashboard.getType() == MonitoringDashboardType.WAVEFRONT) {
+				monitoringDashboardInfo.setSource(dashboard.getWavefront().getSource());
 			}
 			else {
 				throw new IllegalStateException();

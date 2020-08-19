@@ -66,8 +66,8 @@ import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormat
 import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
+import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
 import org.springframework.cloud.dataflow.server.config.GrafanaInfoProperties;
-import org.springframework.cloud.dataflow.server.config.MonitoringDashboardInfoProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -194,7 +194,7 @@ import static org.mockito.Mockito.when;
 		TaskProperties.class,
 		DockerValidatorProperties.class,
 		GrafanaInfoProperties.class,
-		MonitoringDashboardInfoProperties.class})
+		DataflowMetricsProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -608,7 +608,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public AboutController aboutController(VersionInfoProperties versionInfoProperties,
 			FeaturesProperties featuresProperties, StreamDeployer streamDeployer,
-			GrafanaInfoProperties grafanaInfoProperties, MonitoringDashboardInfoProperties monitoringDashboardInfoProperties) {
+			GrafanaInfoProperties grafanaInfoProperties, DataflowMetricsProperties monitoringDashboardInfoProperties) {
 
 		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
