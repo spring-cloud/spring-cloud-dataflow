@@ -22,7 +22,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
-		<spring-cloud-dataflow-build.version>2.6.0-SNAPSHOT</spring-cloud-dataflow-build.version>
+		<spring-cloud-dataflow-build.version>2.7.0-SNAPSHOT</spring-cloud-dataflow-build.version>
 		<spring-boot.version>2.3.2.RELEASE</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
