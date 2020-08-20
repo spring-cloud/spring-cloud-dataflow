@@ -33,7 +33,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,10 +214,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		}
 
 		try {
-			String metadataJson = StringEscapeUtils.unescapeJson(encodedMetadata);
 			ConfigurationMetadataRepository configurationMetadataRepository = ConfigurationMetadataRepositoryJsonBuilder
-					.create().withJsonResource(
-							new ByteArrayInputStream(metadataJson.getBytes()))
+					.create().withJsonResource(new ByteArrayInputStream(encodedMetadata.getBytes()))
 					.build();
 
 			List<ConfigurationMetadataProperty> result = configurationMetadataRepository.getAllProperties().entrySet()
@@ -279,7 +276,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 					}
 
 				} // Props in the root group have an id that looks prefixed itself. Handle
-					// here
+				// here
 				else if ("_ROOT_GROUP_".equals(group.getId())) {
 					for (ConfigurationMetadataProperty property : group.getProperties().values()) {
 						if (isVisible(property, visibleProperties)) {
