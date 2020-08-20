@@ -77,6 +77,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String WHITELIST_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata-whitelist.properties";
 
+	private static final String PORT_MAPPING_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-port-mapping.properties";
+
 	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
@@ -292,10 +294,9 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Set<String> outboundPorts = new HashSet<>();
 			Map<String, Set<String>> portsMap = new HashMap<>();
 			// read both formats and concat
-			Resource[] whitelistLegacyDescriptors = moduleResourceLoader.getResources(WHITELIST_LEGACY_PROPERTIES);
-			Resource[] whitelistDescriptors = moduleResourceLoader.getResources(WHITELIST_PROPERTIES);
+			Resource[] portMappingDescriptors = moduleResourceLoader.getResources(PORT_MAPPING_PROPERTIES);
 
-			for (Resource resource : concatArrays(whitelistLegacyDescriptors, whitelistDescriptors)) {
+			for (Resource resource : concatArrays(portMappingDescriptors)) {
 				Properties properties = new Properties();
 				properties.load(resource.getInputStream());
 				inboundPorts.addAll(Arrays.asList(StringUtils
