@@ -35,6 +35,8 @@ public class AboutResource extends RepresentationModel {
 
 	private GrafanaInfo grafanaInfo = new GrafanaInfo();
 
+	private MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
@@ -79,5 +81,19 @@ public class AboutResource extends RepresentationModel {
 
 	public void setGrafanaInfo(GrafanaInfo grafanaInfo) {
 		this.grafanaInfo = grafanaInfo;
+	}
+
+	public MonitoringDashboardInfo getMonitoringDashboardInfo() {
+		return monitoringDashboardInfo;
+	}
+
+	public void setMonitoringDashboardInfo(MonitoringDashboardInfo monitoringDashboardInfo) {
+		this.monitoringDashboardInfo = monitoringDashboardInfo;
+		/**
+		 * @deprecated
+		 */
+		this.grafanaInfo = new GrafanaInfo();
+		this.grafanaInfo.setUrl(this.monitoringDashboardInfo.getUrl());
+		this.grafanaInfo.setRefreshInterval(this.monitoringDashboardInfo.getRefreshInterval());
 	}
 }

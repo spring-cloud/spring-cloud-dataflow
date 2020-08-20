@@ -22,8 +22,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
+ *
+ * @deprecated use the {@link DataflowMetricsProperties} instead.
  */
 @ConfigurationProperties(prefix = GrafanaInfoProperties.VERSION_INFO_PREFIX)
+@Deprecated
 public class GrafanaInfoProperties {
 
 	public static final String VERSION_INFO_PREFIX = DataFlowPropertyKeys.PREFIX + "grafana-info";

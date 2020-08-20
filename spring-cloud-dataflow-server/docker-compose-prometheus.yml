@@ -23,7 +23,10 @@ services:
                 "rsocket.port":7001
              }
           },
-          "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
+          "spring.cloud.dataflow.metrics.dashboard": {
+             "url":"http://localhost:3000",
+             "type=GRAFANA"
+          }
         }
 
   prometheus-rsocket-proxy:

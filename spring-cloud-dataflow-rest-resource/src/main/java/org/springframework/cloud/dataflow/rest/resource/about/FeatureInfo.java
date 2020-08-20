@@ -32,7 +32,21 @@ public class FeatureInfo {
 
 	private boolean schedulesEnabled = false;
 
+	/**
+	 * @deprecated consider using the monitoringDashboardType instead
+	 */
 	private boolean grafanaEnabled = false;
+
+	/**
+	 * @deprecated consider using the monitoringDashboardType instead
+	 */
+	private boolean wavefrontEnabled = false;
+
+	/**
+	 * This enum shows what SCDF monitoring dashboard configuration is exposed.
+	 * It supports wavefront and grafana dashboards and none stands for no configuration provided.
+	 */
+	private MonitoringDashboardType monitoringDashboardType = MonitoringDashboardType.NONE;
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -77,6 +91,28 @@ public class FeatureInfo {
 	}
 
 	public void setGrafanaEnabled(boolean grafanaEnabled) {
+		if (grafanaEnabled) {
+			this.monitoringDashboardType = MonitoringDashboardType.GRAFANA;
+		}
 		this.grafanaEnabled = grafanaEnabled;
+	}
+
+	public boolean isWavefrontEnabled() {
+		return wavefrontEnabled;
+	}
+
+	public void setWavefrontEnabled(boolean wavefrontEnabled) {
+		if (wavefrontEnabled) {
+			this.monitoringDashboardType = MonitoringDashboardType.WAVEFRONT;
+		}
+		this.wavefrontEnabled = wavefrontEnabled;
+	}
+
+	public MonitoringDashboardType getMonitoringDashboardType() {
+		return monitoringDashboardType;
+	}
+
+	public void setMonitoringDashboardType(MonitoringDashboardType monitoringDashboardType) {
+		this.monitoringDashboardType = monitoringDashboardType;
 	}
 }

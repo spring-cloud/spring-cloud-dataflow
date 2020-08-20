@@ -1,11 +1,13 @@
 ╔═════════════════╤═════════════════════════════════════╗
 ║     Target      │        http://localhost:9393        ║
 ╟─────────────────┼─────────────────────────────────────╢
-║                 │Analytics Enabled: true              ║
-║                 │  Grafana Enabled: false             ║
-║    Features     │Schedules Enabled: false             ║
-║                 │  Streams Enabled: true              ║
-║                 │    Tasks Enabled: false             ║
+║                 │        Analytics Enabled: true      ║
+║                 │          Grafana Enabled: false     ║
+║                 │Monitoring Dashboard Type: NONE      ║
+║    Features     │        Schedules Enabled: false     ║
+║                 │          Streams Enabled: true      ║
+║                 │            Tasks Enabled: false     ║
+║                 │        Wavefront Enabled: false     ║
 ╟─────────────────┼─────────────────────────────────────╢
 ║    Versions     │Foo Core: 1.2.3.BUILD-SNAPSHOT       ║
 ╟─────────────────┼─────────────────────────────────────╢
