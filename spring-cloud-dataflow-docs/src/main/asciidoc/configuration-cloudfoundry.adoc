@@ -49,8 +49,12 @@ These properties are also used when configuring the <<configuration-cloudfoundry
 |<none>
 
 |buildpack
-|The buildpack to use for deploying the application.
-|https://github.com/cloudfoundry/java-buildpack.git#v4.16.1
+|The buildpack to use for deploying the application. Deprecated use buildpacks.
+|https://github.com/cloudfoundry/java-buildpack.git#v4.29.1
+
+|buildpacks
+|The list of buildpacks to use for deploying the application.
+|https://github.com/cloudfoundry/java-buildpack.git#v4.29.1
 
 |memory
 |The amount of memory to allocate. Default unit is mebibytes, 'M' and 'G" suffixes supported
@@ -135,9 +139,10 @@ set the following environment variable:
 
 [source,bash,subs=attributes]
 ----
-cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_BUILDPACK java_buildpack_offline
+cf set-env dataflow-server SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_BUILDPACKS java_buildpack_offline
 ----
 
+* Setting `buildpack` is now deprecated in favour of `buildpacks` which allows you to pass on more than one if needed. More about this can be found from https://docs.cloudfoundry.org/buildpacks/understand-buildpacks.html[How Buildpacks Work].
 
 * You can customize the health check mechanism used by Cloud Foundry to assert whether apps are running by using the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK` environment variable. The current supported options
 are `http` (the default), `port`, and `none`.
@@ -689,7 +694,7 @@ SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_ST
 
 
 Note that you can set `spring.cloud.deployer.cloudfoundry.services`,
-`spring.cloud.deployer.cloudfoundry.buildpack`, or the Spring Cloud Deployer-standard
+`spring.cloud.deployer.cloudfoundry.buildpacks`, or the Spring Cloud Deployer-standard
 `spring.cloud.deployer.memory` and `spring.cloud.deployer.disk`
 as part of an individual deployment request by using the `deployer.<app-name>` shortcut, as the following example shows:
 
