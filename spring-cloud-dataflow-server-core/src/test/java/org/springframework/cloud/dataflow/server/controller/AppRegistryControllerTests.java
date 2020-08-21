@@ -23,7 +23,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -130,6 +129,13 @@ public class AppRegistryControllerTests {
 	public void testRegisterInvalidAppUri() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "\\boza").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().is5xxServerError());
+	}
+
+	@Test
+	public void testRegisterAppWithInvalidName() throws Exception {
+		mockMvc.perform(post("/apps/sink/log:1")
+				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is5xxServerError());
 	}
 
 	@Test
