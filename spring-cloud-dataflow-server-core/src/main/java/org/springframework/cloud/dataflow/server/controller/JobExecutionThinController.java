@@ -86,9 +86,9 @@ public class JobExecutionThinController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobExecutionThinResource> listJobsOnly(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
+	public PagedModel<JobExecutionThinResource> listJobsOnly(@RequestParam(required = false) String q,
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(q, pageable);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
 		return assembler.toModel(page, jobAssembler);
 	}

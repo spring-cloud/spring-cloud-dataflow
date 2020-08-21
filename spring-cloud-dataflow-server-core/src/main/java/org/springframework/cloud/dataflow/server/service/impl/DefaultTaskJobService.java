@@ -52,6 +52,7 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Repository that retrieves Tasks and JobExecutions/Instances and the associations
@@ -106,10 +107,18 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) {
+	public List<TaskJobExecution> listJobExecutionsWithStepCount(String q, Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
-				jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
+		List<JobExecutionWithStepCount> jobExecutions;
+		if (StringUtils.isEmpty(q)) {
+			jobExecutions = new ArrayList<>(
+					jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
+		}
+		else {
+			jobExecutions = new ArrayList<>(
+					jobService.listFilteredJobExecutionsWithStepCount(q, getPageOffset(pageable),
+							pageable.getPageSize()));
+		}
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
 	}
 
