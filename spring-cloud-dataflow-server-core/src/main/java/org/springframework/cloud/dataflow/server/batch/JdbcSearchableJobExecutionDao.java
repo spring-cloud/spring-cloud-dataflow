@@ -211,13 +211,13 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	public List<JobExecutionWithStepCount> getFilteredJobExecutionsWithStepCount(String q, int start, int count) {
 		if (start <= 0) {
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
-					new JobExecutionStepCountRowMapper(), "%" + q + "q");
+					new JobExecutionStepCountRowMapper(), "%" + q + "%");
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
 					executionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
-					new JobExecutionStepCountRowMapper(), "%" + q + "q", startAfterValue);
+					new JobExecutionStepCountRowMapper(), "%" + q + "%", startAfterValue);
 		}
 		catch (IncorrectResultSizeDataAccessException e) {
 			return Collections.emptyList();
