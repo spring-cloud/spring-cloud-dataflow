@@ -225,8 +225,7 @@ public class AppRegistryController {
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 
-		if (!isAppNameValid(name))
-			throw new IllegalArgumentException("Application name: " + name + " cannot contain ':'");
+		validateApplicationName(name);
 		appRegistryService.validate(appRegistryService.getDefaultApp(name, type), uri, version);
 		AppRegistration previous = appRegistryService.find(name, type, version);
 		if (!force && previous != null) {
@@ -439,8 +438,14 @@ public class AppRegistryController {
 		});
 	}
 
-	private boolean isAppNameValid(String name) {
-		return !name.contains(":");
+	private void validateApplicationName(String name) {
+		char[] invalidWildCards = new char[]{':'};
+		for (char invalidWildCard : invalidWildCards) {
+			if (name.contains(Character.toString(invalidWildCard))) {
+				throw new IllegalArgumentException(
+						"Application name: " + name + " cannot contain '" + invalidWildCard + "'");
+			}
+		}
 	}
 
 	class Assembler extends RepresentationModelAssemblerSupport<AppRegistration, AppRegistrationResource> {
