@@ -439,7 +439,7 @@ public class AppRegistryController {
 	}
 
 	private void validateApplicationName(String name) {
-		char[] invalidWildCards = new char[]{':','?'};
+		char[] invalidWildCards = new char[]{':'};
 		StringBuilder invalidChars = new StringBuilder();
 		for (char invalidWildCard : invalidWildCards) {
 			if (name.contains(Character.toString(invalidWildCard))) {
