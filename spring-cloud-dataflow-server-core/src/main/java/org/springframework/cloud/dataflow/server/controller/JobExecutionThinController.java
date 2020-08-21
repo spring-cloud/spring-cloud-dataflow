@@ -78,6 +78,7 @@ public class JobExecutionThinController {
 	 * Return a page-able list of {@link JobExecutionThinResource} defined jobs that
 	 * do not contain step execution detail.
 	 *
+	 * @param queryString search query string to filter job names
 	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions(job executions do not contain step executions.
@@ -86,9 +87,10 @@ public class JobExecutionThinController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobExecutionThinResource> listJobsOnly(@RequestParam(required = false) String q,
+	public PagedModel<JobExecutionThinResource> listJobsOnly(
+			@RequestParam(value = "q", required = false) String queryString,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(q, pageable);
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(queryString, pageable);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
 		return assembler.toModel(page, jobAssembler);
 	}

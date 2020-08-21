@@ -156,14 +156,14 @@ public interface TaskJobService {
 	 * and matches the data with a task id but excludes the step executions.
 	 *
 	 *
-	 * @param q
+	 * @param queryString search query string to filter job names
 	 * @param pageable enumerates the data to be returned.
 	 * @return List containing {@link TaskJobExecution}s.
 	 *
 	 * @throws NoSuchJobExecutionException thrown if the job execution specified does not
 	 *     exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsWithStepCount(String q, Pageable pageable) throws NoSuchJobExecutionException;
+	List<TaskJobExecution> listJobExecutionsWithStepCount(String queryString, Pageable pageable) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a specific

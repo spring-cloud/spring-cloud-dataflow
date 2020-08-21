@@ -208,16 +208,16 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	@Override
-	public List<JobExecutionWithStepCount> getFilteredJobExecutionsWithStepCount(String q, int start, int count) {
+	public List<JobExecutionWithStepCount> getFilteredJobExecutionsWithStepCount(String queryString, int start, int count) {
 		if (start <= 0) {
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
-					new JobExecutionStepCountRowMapper(), "%" + q + "%");
+					new JobExecutionStepCountRowMapper(), "%" + queryString + "%");
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
 					executionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
-					new JobExecutionStepCountRowMapper(), "%" + q + "%", startAfterValue);
+					new JobExecutionStepCountRowMapper(), "%" + queryString + "%", startAfterValue);
 		}
 		catch (IncorrectResultSizeDataAccessException e) {
 			return Collections.emptyList();

@@ -138,10 +138,10 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 * Get the {@link JobExecutionWithStepCount JobExecutions} in reverse order of creation
 	 * (so normally of execution) without StepExecution filtered by job name.
 	 *
-	 * @param q search query string to filter job names
+	 * @param queryString search query string to filter job names
 	 * @param start the start index of the instances
 	 * @param count the maximum number of instances to return
 	 * @return the {@link JobExecutionWithStepCount} instances requested
 	 */
-	List<JobExecutionWithStepCount> getFilteredJobExecutionsWithStepCount(String q, int start, int count);
+	List<JobExecutionWithStepCount> getFilteredJobExecutionsWithStepCount(String queryString, int start, int count);
 }

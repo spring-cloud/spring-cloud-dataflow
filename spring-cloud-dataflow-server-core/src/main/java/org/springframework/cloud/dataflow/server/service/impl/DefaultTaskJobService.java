@@ -107,16 +107,16 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public List<TaskJobExecution> listJobExecutionsWithStepCount(String q, Pageable pageable) {
+	public List<TaskJobExecution> listJobExecutionsWithStepCount(String queryString, Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<JobExecutionWithStepCount> jobExecutions;
-		if (StringUtils.isEmpty(q)) {
+		if (StringUtils.isEmpty(queryString)) {
 			jobExecutions = new ArrayList<>(
 					jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
 		}
 		else {
 			jobExecutions = new ArrayList<>(
-					jobService.listFilteredJobExecutionsWithStepCount(q, getPageOffset(pageable),
+					jobService.listFilteredJobExecutionsWithStepCount(queryString, getPageOffset(pageable),
 							pageable.getPageSize()));
 		}
 		return getTaskJobExecutionsWithStepCountForList(jobExecutions);
