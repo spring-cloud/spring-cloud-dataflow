@@ -349,4 +349,16 @@ public interface JobService {
 	 */
 	Collection<JobExecution> listJobExecutionsForJob(String jobName, BatchStatus status, int pageOffset, int pageSize)
 			throws NoSuchJobException;
+
+	/**
+	 * List the {@link JobExecutionWithStepCount JobExecutions} in descending order of
+	 * creation (usually close to execution order) without step execution data filtered by job
+	 * names matching query string.
+	 *
+	 * @param queryString search query string to filter job names
+	 * @param start the index of the first execution to return
+	 * @param count the maximum number of executions
+	 * @return a collection of {@link JobExecutionWithStepCount}
+	 */
+	Collection<JobExecutionWithStepCount> listFilteredJobExecutionsWithStepCount(String queryString, int start, int count);
 }
