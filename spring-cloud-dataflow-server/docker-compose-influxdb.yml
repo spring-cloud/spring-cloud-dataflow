@@ -20,7 +20,9 @@ services:
                 "uri":"http://influxdb:8086"
              }
           },
-          "spring.cloud.dataflow.grafana-info.url":"http://localhost:3000"
+          "spring.cloud.dataflow.metrics.dashboard": {
+             "url":"http://localhost:3000",
+          }
         }
 
   influxdb:

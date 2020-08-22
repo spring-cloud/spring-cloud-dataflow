@@ -33,7 +33,7 @@ public class AboutResource extends RepresentationModel {
 
 	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
-	private GrafanaInfo grafanaInfo = new GrafanaInfo();
+	private MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -73,11 +73,11 @@ public class AboutResource extends RepresentationModel {
 		this.runtimeEnvironment = runtimeEnvironment;
 	}
 
-	public GrafanaInfo getGrafanaInfo() {
-		return grafanaInfo;
+	public MonitoringDashboardInfo getMonitoringDashboardInfo() {
+		return monitoringDashboardInfo;
 	}
 
-	public void setGrafanaInfo(GrafanaInfo grafanaInfo) {
-		this.grafanaInfo = grafanaInfo;
+	public void setMonitoringDashboardInfo(MonitoringDashboardInfo monitoringDashboardInfo) {
+		this.monitoringDashboardInfo = monitoringDashboardInfo;
 	}
 }
