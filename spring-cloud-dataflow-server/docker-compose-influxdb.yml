@@ -8,17 +8,10 @@ services:
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.cloud.dataflow.applicationProperties":{
-             "task.management.metrics.export.influx":{
-                "enabled":true,
-                "db":"myinfluxdb",
-                "uri":"http://influxdb:8086"
-             },
-             "stream.management.metrics.export.influx":{
-                "enabled":true,
-                "db":"myinfluxdb",
-                "uri":"http://influxdb:8086"
-             }
+          "management.metrics.export.influx":{
+              "enabled":true,
+              "db":"myinfluxdb",
+              "uri":"http://influxdb:8086"
           },
           "spring.cloud.dataflow.metrics.dashboard": {
              "url":"http://localhost:3000",
