@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.PagedModel;
 
 /**
@@ -113,6 +114,15 @@ public interface TaskOperations {
 	 * @return the paged list of task executions for the given task name
 	 */
 	PagedModel<TaskExecutionResource> executionListByTaskName(String taskName);
+
+	/**
+	 * List task executions known to the system filtered by task name.
+	 *
+	 * @param taskName of the executions.
+	 * @param pageable page request.
+	 * @return the paged list of task executions for the given task name
+	 */
+	PagedModel<TaskExecutionResource> executionListByTaskName(String taskName, Pageable pageable);
 
 	/**
 	 * Return the {@link TaskExecutionResource} for the id specified.

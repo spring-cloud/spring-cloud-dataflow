@@ -130,7 +130,10 @@ public class RootController {
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
 					+ "{?name}";
-			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
+			root.add(Link.of(taskTemplated).withRel("tasks/executions/name"));
+			String taskTemplatedPageable = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
+					+ "{?name}{?page}{?size}";
+			root.add(Link.of(taskTemplatedPageable).withRel("tasks/executions/name&page&size"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(TaskExecutionController.class)
 					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskExecutionResource.class, "{id}")
