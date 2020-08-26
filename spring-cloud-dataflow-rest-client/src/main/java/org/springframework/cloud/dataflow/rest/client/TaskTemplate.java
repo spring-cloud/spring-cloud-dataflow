@@ -33,7 +33,6 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -218,7 +217,7 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public PagedModel<TaskExecutionResource> executionListByTaskName(String taskName,
+	public TaskExecutionResource.Page executionListByTaskName(String taskName,
 			Pageable pageable) {
 		return restTemplate.getForObject(
 				executionByNameAndPageLink.expand(taskName, pageable.getOffset(), pageable.getPageSize()).getHref(),
