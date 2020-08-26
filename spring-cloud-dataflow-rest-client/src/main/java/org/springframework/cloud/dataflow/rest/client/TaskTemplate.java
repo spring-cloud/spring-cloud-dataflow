@@ -31,7 +31,9 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -67,6 +69,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
 
+	private static final String EXECUTION_RELATION_BY_NAME_AND_PAGE = "tasks/executions/name&page&size";
+
 	private static final String VALIDATION_REL = "tasks/validation";
 
 	private static final String PLATFORM_LIST_RELATION = "tasks/platforms";
@@ -84,6 +88,8 @@ public class TaskTemplate implements TaskOperations {
 	private final Link executionLink;
 
 	private final Link executionByNameLink;
+
+	private final Link executionByNameAndPageLink;
 
 	private final Link executionsCurrentLink;
 
@@ -104,6 +110,8 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME_AND_PAGE),
+				"Execution by name and page relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
 
@@ -127,6 +135,7 @@ public class TaskTemplate implements TaskOperations {
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
+		this.executionByNameAndPageLink = resources.getLink(EXECUTION_RELATION_BY_NAME_AND_PAGE).get();
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
@@ -205,6 +214,14 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
 		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(),
+				TaskExecutionResource.Page.class);
+	}
+
+	@Override
+	public PagedModel<TaskExecutionResource> executionListByTaskName(String taskName,
+			Pageable pageable) {
+		return restTemplate.getForObject(
+				executionByNameAndPageLink.expand(taskName, pageable.getOffset(), pageable.getPageSize()).getHref(),
 				TaskExecutionResource.Page.class);
 	}
 
