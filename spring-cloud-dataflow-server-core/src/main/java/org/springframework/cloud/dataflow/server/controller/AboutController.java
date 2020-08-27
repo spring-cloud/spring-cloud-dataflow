@@ -201,12 +201,13 @@ public class AboutController {
 			}
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
-		
+
 		DataflowMetricsProperties.Dashboard dashboard = this.dataflowMetricsProperties.getDashboard();
 		if (dashboard.isEnabled()) {
 			final MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
 			monitoringDashboardInfo.setDashboardType(dashboard.getType());
 			monitoringDashboardInfo.setUrl(dashboard.getUrl());
+			featureInfo.setMonitoringDashboardType(dashboard.getType());
 			if (dashboard.getType() == MonitoringDashboardType.GRAFANA) {
 				monitoringDashboardInfo.setRefreshInterval(dashboard.getGrafana().getRefreshInterval());
 			}

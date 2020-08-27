@@ -229,3 +229,13 @@ spring:
             authorization-type: dockeroauth2
             extra:
               "registryAuthUri": 'https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull&offline_token=1&client_id=shell'
+      applicationProperties:
+        stream:
+          management:
+            metrics:
+              tags:
+                stream.name: ${spring.cloud.dataflow.stream.name:unknown}
+                application.name: ${spring.cloud.dataflow.stream.app.label:unknown}
+                application.type: ${spring.cloud.dataflow.stream.app.type:unknown}
+                instance.index: ${spring.cloud.stream.instanceIndex:0}
+                application.guid: ${spring.cloud.application.guid:unknown}

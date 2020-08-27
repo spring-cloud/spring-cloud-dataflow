@@ -45,6 +45,12 @@ public class MonitoringDashboardInfo {
 	 */
 	private String source = "default-scdf-source";
 
+	/**
+	 * Default constructor for serialization frameworks.
+	 */
+	public MonitoringDashboardInfo() {
+	}
+
 	public String getUrl() {
 		return url;
 	}
