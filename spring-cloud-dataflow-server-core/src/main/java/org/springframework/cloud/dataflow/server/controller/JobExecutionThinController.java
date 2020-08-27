@@ -38,6 +38,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -90,10 +91,16 @@ public class JobExecutionThinController {
 	public PagedModel<JobExecutionThinResource> listJobsOnly(
 			@RequestParam(value = "q", required = false) String queryString,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(queryString, pageable);
+		List<TaskJobExecution> jobExecutions;
+		if (StringUtils.isEmpty(queryString)) {
+			jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
+		} else {
+			jobExecutions = taskJobService.listJobExecutionsWithStepCount(queryString, pageable);
+		}
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
 		return assembler.toModel(page, jobAssembler);
 	}
+
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *

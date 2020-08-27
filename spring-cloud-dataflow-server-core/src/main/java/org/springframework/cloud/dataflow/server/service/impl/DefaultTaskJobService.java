@@ -107,6 +107,11 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
+	public List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) {
+		return listJobExecutionsWithStepCount(null, pageable);
+	}
+
+	@Override
 	public List<TaskJobExecution> listJobExecutionsWithStepCount(String queryString, Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<JobExecutionWithStepCount> jobExecutions;
