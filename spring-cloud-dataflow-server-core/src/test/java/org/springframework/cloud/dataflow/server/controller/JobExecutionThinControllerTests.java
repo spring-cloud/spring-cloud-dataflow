@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -40,6 +39,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -92,6 +92,15 @@ public class JobExecutionThinControllerTests {
 				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
 				.andExpect(jsonPath("$.content", hasSize(9)));
+	}
+
+	@Test
+	public void testGetAllExecutionsJobExecutionOnlyWithJobNameLike() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions?q=myJob2").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[*].name", containsInAnyOrder(containsString("myJob2"))))
+				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
 	@Test
