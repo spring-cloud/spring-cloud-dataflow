@@ -154,6 +154,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 						responseFields(
 								fieldWithPath("[]").description("An array of applications"),
 								fieldWithPath("[].name").description("The name of the application"),
+								fieldWithPath("[].label").description("The label given for the application"),
 								fieldWithPath("[].type").description("The type of the application. One of " + Arrays
 										.asList(ApplicationType.values())),
 								fieldWithPath("[].uri").description("The uri of the application"),
