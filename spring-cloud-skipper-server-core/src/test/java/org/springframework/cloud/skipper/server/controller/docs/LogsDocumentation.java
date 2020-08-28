@@ -59,7 +59,7 @@ public class LogsDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 				get("/api/release/logs/{releaseName}/{appName}",
-						release.getName(), release.getVersion()))
+						release.getName(), "myapp"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
