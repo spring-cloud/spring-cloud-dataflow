@@ -5,6 +5,11 @@ log:
       log.level: ERROR
       endpoints.sensitive: 'false'
       spring.cloud.dataflow.stream.app.type: sink
+      management.metrics.tags.application.type: ${spring.cloud.dataflow.stream.app.type:unknown}
+      management.metrics.tags.stream.name: ${spring.cloud.dataflow.stream.name:unknown}
+      management.metrics.tags.application.guid: ${spring.cloud.application.guid:unknown}
+      management.metrics.tags.application.name: ${spring.cloud.dataflow.stream.app.label:unknown}
+      management.metrics.tags.instance.index: ${spring.cloud.stream.instanceIndex:0}
     version: 1.1.1.RELEASE
     deploymentProperties:
       spring.cloud.deployer.memory: 4096m
@@ -12,3 +17,8 @@ time:
   spec:
     applicationProperties:
       spring.cloud.dataflow.stream.app.type: source
+      management.metrics.tags.application.type: ${spring.cloud.dataflow.stream.app.type:unknown}
+      management.metrics.tags.stream.name: ${spring.cloud.dataflow.stream.name:unknown}
+      management.metrics.tags.application.guid: ${spring.cloud.application.guid:unknown}
+      management.metrics.tags.application.name: ${spring.cloud.dataflow.stream.app.label:unknown}
+      management.metrics.tags.instance.index: ${spring.cloud.stream.instanceIndex:0}

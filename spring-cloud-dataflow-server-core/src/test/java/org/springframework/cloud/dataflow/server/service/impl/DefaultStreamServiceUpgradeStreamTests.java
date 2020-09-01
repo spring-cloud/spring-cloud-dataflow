@@ -76,10 +76,20 @@ public class DefaultStreamServiceUpgradeStreamTests {
 							null, "log:\n" +
 									"  spec:\n" +
 									"    applicationProperties:\n" +
+									"      management.metrics.tags.application.type: ${spring.cloud.dataflow.stream.app.type:unknown}\n" +
+									"      management.metrics.tags.stream.name: ${spring.cloud.dataflow.stream.name:unknown}\n" +
+									"      management.metrics.tags.application.guid: ${spring.cloud.application.guid:unknown}\n" +
+									"      management.metrics.tags.application.name: ${spring.cloud.dataflow.stream.app.label:unknown}\n" +
+									"      management.metrics.tags.instance.index: ${spring.cloud.stream.instanceIndex:0}\n" +
 									"      spring.cloud.dataflow.stream.app.type: sink\n" +
 									"time:\n" +
 									"  spec:\n" +
 									"    applicationProperties:\n" +
+									"      management.metrics.tags.application.type: ${spring.cloud.dataflow.stream.app.type:unknown}\n" +
+									"      management.metrics.tags.stream.name: ${spring.cloud.dataflow.stream.name:unknown}\n" +
+									"      management.metrics.tags.application.guid: ${spring.cloud.application.guid:unknown}\n" +
+									"      management.metrics.tags.application.name: ${spring.cloud.dataflow.stream.app.label:unknown}\n" +
+									"      management.metrics.tags.instance.index: ${spring.cloud.stream.instanceIndex:0}\n" +
 									"      spring.cloud.dataflow.stream.app.type: source\n", false, null);
 			verifyNoMoreInteractions(this.skipperStreamDeployer);
 		}

@@ -11,6 +11,12 @@
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"
     "spring.cloud.stream.bindings.input.destination": "ticktock.time"
+    "management.metrics.tags.application.type": ${spring.cloud.dataflow.stream.app.type:unknown}
+    "management.metrics.tags.stream.name": ${spring.cloud.dataflow.stream.name:unknown}
+    "management.metrics.tags.application.guid": ${spring.cloud.application.guid:unknown}
+    "management.metrics.tags.application.name": ${spring.cloud.dataflow.stream.app.label:unknown}
+    "management.metrics.tags.instance.index": ${spring.cloud.stream.instanceIndex:0}
+
   "version": "1.2.0.RELEASE"
   "deploymentProperties":
     "spring.cloud.deployer.group": "ticktock"
