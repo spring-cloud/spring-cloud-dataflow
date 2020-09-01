@@ -6,10 +6,10 @@ spring:
           management:
             metrics:
               tags:
-                organization.name: ${vcap.application.org_name:default}
-                space.id: ${vcap.application.space_id:unknown}
-                space.name: ${vcap.application.space_name:unknown}
-                application.name: ${vcap.application.application_name:unknown}
-                application.id: ${vcap.application.application_id:unknown}
-                application.version: ${vcap.application.application_version:unknown}
-                instance.index: ${vcap.application.instance_index:0}
+                organization.name: ^$^{vcap.application.org_name:default}
+                space.id: ^$^{vcap.application.space_id:unknown}
+                space.name: ^$^{vcap.application.space_name:unknown}
+                application.name: ^$^{vcap.application.application_name:unknown}
+                application.id: ^$^{vcap.application.application_id:unknown}
+                application.version: ^$^{vcap.application.application_version:unknown}
+                instance.index: ^$^{vcap.application.instance_index:0}
