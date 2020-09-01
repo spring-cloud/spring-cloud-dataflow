@@ -96,7 +96,7 @@ public class TaskAppDeploymentRequestCreator {
 			String platformName) {
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
-		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
+		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTaskDecoded());
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(
 						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName,

@@ -49,9 +49,9 @@ spring:
         # Statistics generation is required for publishing JPA micrometer metrics.
         # generate_statistics: true
     hibernate:
-        naming:
-          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-          implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   flyway:
     enabled: true
     baselineVersion: 1
@@ -234,8 +234,8 @@ spring:
           management:
             metrics:
               tags:
-                stream.name: ${spring.cloud.dataflow.stream.name:unknown}
-                application.name: ${spring.cloud.dataflow.stream.app.label:unknown}
-                application.type: ${spring.cloud.dataflow.stream.app.type:unknown}
-                instance.index: ${spring.cloud.stream.instanceIndex:0}
-                application.guid: ${spring.cloud.application.guid:unknown}
+                stream.name: ^$^{spring.cloud.dataflow.stream.name:unknown}
+                application.name: ^$^{spring.cloud.dataflow.stream.app.label:unknown}
+                application.type: ^$^{spring.cloud.dataflow.stream.app.type:unknown}
+                instance.index: ^$^{spring.cloud.stream.instanceIndex:0}
+                application.guid: ^$^{spring.cloud.application.guid:unknown}

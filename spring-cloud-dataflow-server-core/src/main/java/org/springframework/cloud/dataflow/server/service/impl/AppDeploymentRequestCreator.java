@@ -237,7 +237,7 @@ public class AppDeploymentRequestCreator {
 	/* default */ Map<String, String> extractAppProperties(StreamAppDefinition appDefinition,
 			Map<String, String> streamDeploymentProperties) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
-		appDeploymentProperties.putAll(this.commonApplicationProperties.getStream());
+		appDeploymentProperties.putAll(this.commonApplicationProperties.getStreamDecoded());
 		// add properties with wild card prefix
 		String wildCardProducerPropertyPrefix = "app.*.producer.";
 		String wildCardConsumerPropertyPrefix = "app.*.consumer.";
