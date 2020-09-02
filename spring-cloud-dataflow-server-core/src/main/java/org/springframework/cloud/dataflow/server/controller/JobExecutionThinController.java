@@ -89,7 +89,7 @@ public class JobExecutionThinController {
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> listJobsOnly(
-			@RequestParam(value = "q", required = false) String queryString,
+			@RequestParam(value = "search", required = false) String queryString,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
 		List<TaskJobExecution> jobExecutions;
 		if (StringUtils.isEmpty(queryString)) {
