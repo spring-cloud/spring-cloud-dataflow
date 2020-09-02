@@ -25,7 +25,7 @@ services:
           },
           "spring.cloud.dataflow.metrics.dashboard": {
              "url":"http://localhost:3000",
-             "type=GRAFANA"
+             "type":"GRAFANA"
           }
         }
 
@@ -35,13 +35,15 @@ services:
     expose:
       - '9096'
       - '7001'
-      - '8081'
+      - '8086'
     ports:
       - '9096:9096'
       - '7001:7001'
-      - '8081:8081'
+      - '8086:8086'
     environment:
       - server.port=9096
+      - micrometer.prometheus-proxy.websocket-port=8086
+      - micrometer.prometheus-proxy.tcp-port=7001
 
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
