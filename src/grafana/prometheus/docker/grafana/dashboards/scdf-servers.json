@@ -33,8 +33,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1598521374307,
+  "iteration": 1599122321770,
   "links": [
     {
       "$$hashKey": "object:199",
@@ -60,6 +59,7 @@
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "The Server's Java virtual machine uptime.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -103,7 +103,7 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "process_uptime_seconds{application=\"$application\"}",
@@ -121,25 +121,30 @@
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "% of heap memory usage.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "decimals": 1,
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "super-light-blue",
+                "color": "dark-green",
                 "value": null
               },
               {
-                "color": "super-light-blue",
-                "value": 80
+                "color": "#EAB839",
+                "value": 70
+              },
+              {
+                "color": "dark-red",
+                "value": 90
               }
             ]
           },
-          "unit": "dateTimeAsIso"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -149,7 +154,7 @@
         "x": 4,
         "y": 1
       },
-      "id": 30,
+      "id": 31,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -159,15 +164,15 @@
           "calcs": [
             "last"
           ],
-          "fields": "",
+          "fields": "/^Value$/",
           "values": false
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "process_start_time_seconds{application=\"$application\"}*1000",
+          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"heap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -175,11 +180,12 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Start time",
+      "title": "Heap usage",
       "type": "stat"
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "The % of CPU usage for the Server process.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -212,7 +218,7 @@
         "x": 8,
         "y": 1
       },
-      "id": 31,
+      "id": 33,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -222,27 +228,29 @@
           "calcs": [
             "last"
           ],
-          "fields": "/^Value$/",
+          "fields": "",
           "values": false
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"heap\"})",
+          "expr": "process_cpu_usage{application=\"$application\"} * 100",
+          "hide": false,
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Heap usage",
+      "title": "Process CPU Usage",
       "type": "stat"
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "The number of error level events per minute that made it to the logs .",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -257,15 +265,15 @@
               },
               {
                 "color": "#EAB839",
-                "value": 70
+                "value": 0.5
               },
               {
                 "color": "dark-red",
-                "value": 80
+                "value": 1
               }
             ]
           },
-          "unit": "percent"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -285,32 +293,35 @@
           "calcs": [
             "last"
           ],
-          "fields": "/^Value$/",
+          "fields": "",
           "values": false
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"nonheap\"})",
+          "expr": "increase(logback_events_total{application=\"$application\", level=\"error\"}[1m])",
           "interval": "",
           "legendFormat": "",
-          "refId": "A"
+          "refId": "B"
         }
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Non-Heap used",
+      "title": "Log Errors",
       "type": "stat"
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "The number of client HTTP error exceptions per minute.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
           "decimals": 2,
           "mappings": [],
+          "min": 0,
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -320,15 +331,15 @@
               },
               {
                 "color": "#EAB839",
-                "value": 70
+                "value": 0.5
               },
               {
                 "color": "dark-red",
-                "value": 80
+                "value": 1
               }
             ]
           },
-          "unit": "percent"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -338,7 +349,7 @@
         "x": 16,
         "y": 1
       },
-      "id": 33,
+      "id": 98,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -353,11 +364,10 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "process_cpu_usage{application=\"$application\"}",
-          "hide": false,
+          "expr": "delta(http_server_requests_seconds_count{application=\"$application\", outcome=\"CLIENT_ERROR\" , status=~\"5..\"}[1m])",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -365,11 +375,207 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Process CPU Usage",
+      "title": "Client HTTP Errors",
+      "type": "stat"
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "ScdfPrometheus",
+      "description": "Rate of of log messages emit by the applicaiton",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 100
+              },
+              {
+                "color": "light-red",
+                "value": 150
+              },
+              {
+                "color": "dark-red",
+                "value": 300
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "id": 99,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "displayMode": "basic",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "topK(10, sum(irate(logback_events_total{application=\"$application\"}[60s])) by (level))",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "{{level}}",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Logs",
+      "type": "bargauge"
+    },
+    {
+      "datasource": "ScdfPrometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-blue",
+                "value": null
+              },
+              {
+                "color": "super-light-blue",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 0,
+        "y": 4
+      },
+      "id": 30,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "process_start_time_seconds{application=\"$application\"}*1000",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Start time",
       "type": "stat"
     },
     {
       "datasource": "ScdfPrometheus",
+      "description": "% of heap memory usage.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 70
+              },
+              {
+                "color": "dark-red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 4,
+        "y": 4
+      },
+      "id": 94,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "/^Value$/",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"heap\"})",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Heap usage",
+      "type": "stat"
+    },
+    {
+      "datasource": "ScdfPrometheus",
+      "description": "System CPU (%) usage for the Server process.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -399,8 +605,8 @@
       "gridPos": {
         "h": 3,
         "w": 4,
-        "x": 20,
-        "y": 1
+        "x": 8,
+        "y": 4
       },
       "id": 34,
       "options": {
@@ -417,10 +623,10 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "system_cpu_usage{application=\"$application\"}",
+          "expr": "system_cpu_usage{application=\"$application\"} * 100",
           "interval": "",
           "legendFormat": "",
           "refId": "B"
@@ -432,13 +638,138 @@
       "type": "stat"
     },
     {
+      "datasource": "ScdfPrometheus",
+      "description": "The number of blocked threads.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 12,
+        "y": 4
+      },
+      "id": 95,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "jvm_threads_states_threads{application=\"$application\", state=\"blocked\"}",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Blocked Threads",
+      "type": "stat"
+    },
+    {
+      "datasource": "ScdfPrometheus",
+      "description": "The number of server HTTP error exceptions per minute.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "decimals": 2,
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 0.5
+              },
+              {
+                "color": "dark-red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 16,
+        "y": 4
+      },
+      "id": 97,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "7.1.5",
+      "targets": [
+        {
+          "expr": "delta(http_server_requests_seconds_count{application=\"$application\", outcome=\"SERVER_ERROR\" , status=~\"5..\"}[1m])",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Server HTTP Errors",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "datasource": "ScdfPrometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 4
+        "y": 7
       },
       "id": 9,
       "panels": [],
@@ -484,7 +815,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 5
+        "y": 8
       },
       "id": 4,
       "interval": null,
@@ -502,10 +833,10 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "topK(10, avg(http_server_requests_seconds_max) by (uri))",
+          "expr": "topK(10, avg(http_server_requests_seconds_max{application=\"$application\"}) by (uri))",
           "instant": true,
           "interval": "",
           "legendFormat": "{{uri}}",
@@ -536,7 +867,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 5
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 6,
@@ -555,7 +886,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -643,8 +974,7 @@
       "datasource": "ScdfPrometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "unit": "ms"
+          "custom": {}
         },
         "overrides": []
       },
@@ -654,7 +984,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 5
+        "y": 8
       },
       "hiddenSeries": false,
       "id": 36,
@@ -672,7 +1002,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -777,7 +1107,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 12
+        "y": 15
       },
       "id": 93,
       "interval": null,
@@ -795,7 +1125,7 @@
         },
         "showUnfilled": true
       },
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "targets": [
         {
           "expr": "topk(10, rate(http_server_requests_seconds_count{application=\"$application\"}[1m]))",
@@ -819,8 +1149,7 @@
       "datasource": "ScdfPrometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "unit": "ops"
+          "custom": {}
         },
         "overrides": []
       },
@@ -830,7 +1159,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 12
+        "y": 15
       },
       "hiddenSeries": false,
       "id": 2,
@@ -847,7 +1176,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -914,8 +1243,7 @@
       "datasource": "ScdfPrometheus",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "unit": "ops"
+          "custom": {}
         },
         "overrides": []
       },
@@ -925,7 +1253,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 12
+        "y": 15
       },
       "hiddenSeries": false,
       "id": 35,
@@ -942,7 +1270,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1008,189 +1336,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
-      },
-      "id": 42,
-      "panels": [
-        {
-          "cacheTimeout": null,
-          "datasource": "ScdfPrometheus",
-          "description": "Rate of of log messages emit by the applicaiton",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {
-                "align": null
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 100
-                  },
-                  {
-                    "color": "light-red",
-                    "value": 150
-                  },
-                  {
-                    "color": "dark-red",
-                    "value": 300
-                  }
-                ]
-              },
-              "unit": "ops"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 4,
-            "x": 0,
-            "y": 3
-          },
-          "id": 45,
-          "interval": null,
-          "links": [],
-          "maxDataPoints": 100,
-          "options": {
-            "displayMode": "basic",
-            "orientation": "vertical",
-            "reduceOptions": {
-              "calcs": [
-                "last"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "pluginVersion": "7.1.3",
-          "targets": [
-            {
-              "expr": "topK(10, sum(irate(logback_events_total{application=\"$application\"}[60s])) by (level))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "{{level}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Logs Rate",
-          "type": "bargauge"
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "ScdfPrometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "unit": "opm"
-            },
-            "overrides": []
-          },
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 7,
-            "w": 20,
-            "x": 4,
-            "y": 3
-          },
-          "hiddenSeries": false,
-          "id": 46,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "percentage": false,
-          "pluginVersion": "7.1.3",
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "increase(logback_events_total{application=\"$application\"}[1m])",
-              "interval": "",
-              "legendFormat": "{{level}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Log Events",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "$$hashKey": "object:370",
-              "format": "opm",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            },
-            {
-              "$$hashKey": "object:371",
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        }
-      ],
-      "title": "Logging",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "datasource": "ScdfPrometheus",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 20
+        "y": 22
       },
       "id": 11,
       "panels": [
@@ -2554,7 +2700,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 23
       },
       "id": 48,
       "panels": [
@@ -3268,7 +3414,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 24
       },
       "id": 56,
       "panels": [],
@@ -3285,7 +3431,8 @@
       "error": false,
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -3303,7 +3450,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 86,
@@ -3321,7 +3468,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3331,7 +3478,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "system_cpu_usage{application=\"$application\"}",
+          "expr": "system_cpu_usage{application=\"$application\"} * 100",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3342,7 +3489,7 @@
           "step": 2400
         },
         {
-          "expr": "process_cpu_usage{application=\"$application\"}",
+          "expr": "process_cpu_usage{application=\"$application\"} * 100",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3351,7 +3498,7 @@
           "refId": "B"
         },
         {
-          "expr": "avg_over_time(process_cpu_usage{application=\"$application\"}[1h])",
+          "expr": "avg_over_time(process_cpu_usage{application=\"$application\"}[1h]) * 100",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3389,10 +3536,10 @@
         {
           "$$hashKey": "object:2216",
           "decimals": 1,
-          "format": "percentunit",
+          "format": "percent",
           "label": "",
           "logBase": 1,
-          "max": "1",
+          "max": "100",
           "min": 0,
           "show": true
         },
@@ -3439,7 +3586,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 88,
@@ -3457,7 +3604,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3564,7 +3711,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 90,
@@ -3582,7 +3729,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3706,7 +3853,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 23
+        "y": 25
       },
       "hiddenSeries": false,
       "id": 92,
@@ -3726,7 +3873,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3815,7 +3962,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 30
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 70,
@@ -3833,7 +3980,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -3949,7 +4096,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 30
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 72,
@@ -3967,7 +4114,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4083,7 +4230,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 30
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 74,
@@ -4102,7 +4249,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4218,7 +4365,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 30
+        "y": 32
       },
       "hiddenSeries": false,
       "id": 76,
@@ -4236,7 +4383,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4349,7 +4496,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 37
+        "y": 39
       },
       "hiddenSeries": false,
       "id": 64,
@@ -4367,7 +4514,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4447,7 +4594,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 37
+        "y": 39
       },
       "hiddenSeries": false,
       "id": 66,
@@ -4465,7 +4612,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4556,7 +4703,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 37
+        "y": 39
       },
       "hiddenSeries": false,
       "id": 68,
@@ -4574,7 +4721,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4669,9 +4816,9 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 8,
         "x": 0,
-        "y": 44
+        "y": 46
       },
       "hiddenSeries": false,
       "id": 60,
@@ -4689,7 +4836,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4785,9 +4932,9 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 44
+        "w": 8,
+        "x": 8,
+        "y": 46
       },
       "hiddenSeries": false,
       "id": 62,
@@ -4805,7 +4952,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -4883,6 +5030,100 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "ScdfPrometheus",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 46
+      },
+      "hiddenSeries": false,
+      "id": 46,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pluginVersion": "7.1.5",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "increase(logback_events_total{application=\"$application\"}[1m])",
+          "interval": "",
+          "legendFormat": "{{level}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Log Events",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:370",
+          "format": "opm",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:371",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "ScdfPrometheus",
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -4905,7 +5146,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 51
+        "y": 53
       },
       "hiddenSeries": false,
       "id": 78,
@@ -4923,7 +5164,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -5031,7 +5272,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 51
+        "y": 53
       },
       "hiddenSeries": false,
       "id": 80,
@@ -5049,7 +5290,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -5148,7 +5389,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 51
+        "y": 53
       },
       "hiddenSeries": false,
       "id": 82,
@@ -5166,7 +5407,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -5274,7 +5515,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 51
+        "y": 53
       },
       "hiddenSeries": false,
       "id": 84,
@@ -5292,7 +5533,7 @@
       "links": [],
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.3",
+      "pluginVersion": "7.1.5",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -5419,5 +5660,5 @@
   "timezone": "",
   "title": "Servers",
   "uid": "scdf-servers",
-  "version": 6
+  "version": 1
 }
