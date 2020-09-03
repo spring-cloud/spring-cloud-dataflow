@@ -9,39 +9,42 @@ services:
       - |
         SPRING_APPLICATION_JSON=
         {
-          "spring.cloud.dataflow.applicationProperties":{
-             "task.management.metrics.export.prometheus":{
-                "enabled":true,
-                "rsocket.enabled":true,
-                "rsocket.host":"prometheus-rsocket-proxy",
-                "rsocket.port":7001
-             },
-             "stream.management.metrics.export.prometheus":{
-                "enabled":true,
-                "rsocket.enabled":true,
-                "rsocket.host":"prometheus-rsocket-proxy",
-                "rsocket.port":7001
-             }
+          "management.metrics.export.prometheus":{
+             "enabled":true,
+             "rsocket.enabled":true,
+             "rsocket.host":"prometheus-rsocket-proxy",
+             "rsocket.port":7001
           },
           "spring.cloud.dataflow.metrics.dashboard": {
              "url":"http://localhost:3000",
-             "type=GRAFANA"
-          }
+             "type": "GRAFANA"
+          },
+          "spring.jpa.properties.hibernate.generate_statistics":true
         }
 
+  skipper-server:
+    environment:
+      - management.metrics.export.prometheus.enabled=true
+      - management.metrics.export.prometheus.rsocket.enabled=true
+      - management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy
+      - management.metrics.export.prometheus.rsocket.port=7001
+      - spring.jpa.properties.hibernate.generate_statistics=true
+
   prometheus-rsocket-proxy:
-    image: micrometermetrics/prometheus-rsocket-proxy:0.11.0
+    image: micrometermetrics/prometheus-rsocket-proxy:1.2.1
     container_name: prometheus-rsocket-proxy
     expose:
       - '9096'
       - '7001'
-      - '8081'
+      - '8086'
     ports:
       - '9096:9096'
       - '7001:7001'
-      - '8081:8081'
+      - '8086:8086'
     environment:
       - server.port=9096
+      - micrometer.prometheus-proxy.tcp-port=7001
+      - micrometer.prometheus-proxy.websocket-port=8086
 
   grafana:
     image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
