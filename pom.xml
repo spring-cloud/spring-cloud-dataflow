@@ -100,7 +100,7 @@
 		<findbugs.version>3.0.2</findbugs.version>
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
 		<commons-text.version>1.8</commons-text.version>
-		<prometheus-rsocket-spring.version>1.0.0</prometheus-rsocket-spring.version>
+		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 		<joda-time.version>2.10.6</joda-time.version>
 	</properties>
 	<modules>

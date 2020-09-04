@@ -511,7 +511,7 @@
     },
     {
       "datasource": "ScdfPrometheus",
-      "description": "% of heap memory usage.",
+      "description": "% of non-heap memory usage.",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -562,7 +562,7 @@
       "pluginVersion": "7.1.5",
       "targets": [
         {
-          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"heap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_used_bytes{application=\"$application\", area=\"nonheap\"})*100/sum(jvm_memory_max_bytes{application=\"$application\", area=\"nonheap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -570,7 +570,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Heap usage",
+      "title": "Non-Heap usage",
       "type": "stat"
     },
     {
