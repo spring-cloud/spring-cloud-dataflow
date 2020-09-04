@@ -3,6 +3,7 @@ management:
     tags:
       application: ${info.app.name}
       application.version: ${info.app.version}
+      service: "scdf server"
     web:
       server:
         request:
