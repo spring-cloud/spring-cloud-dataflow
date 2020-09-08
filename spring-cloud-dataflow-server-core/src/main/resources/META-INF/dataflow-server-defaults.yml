@@ -154,6 +154,7 @@ spring:
             - GET    /streams/definitions            => hasRole('ROLE_VIEW')
             - GET    /streams/definitions/*          => hasRole('ROLE_VIEW')
             - GET    /streams/definitions/*/related  => hasRole('ROLE_VIEW')
+            - GET    /streams/definitions/*/applications  => hasRole('ROLE_VIEW')
             - POST   /streams/definitions            => hasRole('ROLE_CREATE')
             - DELETE /streams/definitions/*          => hasRole('ROLE_DESTROY')
             - DELETE /streams/definitions            => hasRole('ROLE_DESTROY')
