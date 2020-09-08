@@ -11,6 +11,7 @@ management:
     tags:
       application: "@project.artifactId@"
       application.version: "@project.version@"
+      service: "skipper server"
     web:
       server:
         request:

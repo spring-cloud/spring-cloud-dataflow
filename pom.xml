@@ -77,7 +77,7 @@
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
 		<build-helper-maven-plugin>1.9.1</build-helper-maven-plugin>
-		<prometheus-rsocket-spring.version>1.0.0</prometheus-rsocket-spring.version>
+		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 	</properties>
 
 	<modules>
