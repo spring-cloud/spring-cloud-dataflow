@@ -235,12 +235,21 @@ spring:
           management:
             metrics:
               tags:
-                stream.name: ^$^{spring.cloud.dataflow.stream.name:unknown}
-                application.name: ^$^{spring.cloud.dataflow.stream.app.label:unknown}
-                application.type: ^$^{spring.cloud.dataflow.stream.app.type:unknown}
-                instance.index: ^$^{spring.cloud.stream.instanceIndex:0}
-                application.guid: ^$^{spring.cloud.application.guid:unknown}
+#                stream.name: ^$^{spring.cloud.dataflow.stream.name:unknown}
+#                application.name: ^$^{spring.cloud.dataflow.stream.app.label:unknown}
+#                application.type: ^$^{spring.cloud.dataflow.stream.app.type:unknown}
+#                instance.index: ^$^{spring.cloud.stream.instanceIndex:0}
+#                application.guid: ^$^{spring.cloud.application.guid:unknown}
+
+                stream.name: ${ds}{spring.cloud.dataflow.stream.name:unknown}
+                application.name: ${ds}{spring.cloud.dataflow.stream.app.label:unknown}
+                application.type: ${ds}{spring.cloud.dataflow.stream.app.type:unknown}
+                instance.index: ${ds}{spring.cloud.stream.instanceIndex:0}
+                application.guid: ${ds}{spring.cloud.application.guid:unknown}
+
                 # The application tag is used by the Servers dashboard and the WF Boot tile.
-                application: ^$^{spring.cloud.dataflow.stream.name:unknown}-^$^{spring.cloud.dataflow.stream.app.label:unknown}-^$^{spring.cloud.dataflow.stream.app.type:unknown}
+#                application: ^$^{spring.cloud.dataflow.stream.name:unknown}-^$^{spring.cloud.dataflow.stream.app.label:unknown}-^$^{spring.cloud.dataflow.stream.app.type:unknown}
+                application: ${ds}{spring.cloud.dataflow.stream.name:unknown}-${ds}{spring.cloud.dataflow.stream.app.label:unknown}-${ds}{spring.cloud.dataflow.stream.app.type:unknown}
                 # The service tag is required by the WF boot tile.
                 service: "stream application"
+ds: "$"

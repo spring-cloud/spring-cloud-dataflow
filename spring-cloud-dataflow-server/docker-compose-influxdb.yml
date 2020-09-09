@@ -14,7 +14,7 @@ services:
               "uri":"http://influxdb:8086"
           },
           "spring.cloud.dataflow.metrics.dashboard": {
-             "url":"http://localhost:3000",
+             "url":"http://localhost:3000"
           }
         }
 
