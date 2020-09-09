@@ -23,12 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
-import org.springframework.cloud.skipper.server.deployer.ReleaseManager;
-import org.springframework.cloud.skipper.server.deployer.ReleaseManagerFactory;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
-import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,16 +47,13 @@ public class HandleHealthCheckStep {
 
 	private final DeleteStep deleteStep;
 
-	private final ReleaseManagerFactory releaseManagerFactory;
 
 	public HandleHealthCheckStep(ReleaseRepository releaseRepository,
 			AppDeployerDataRepository appDeployerDataRepository,
-			DeleteStep deleteStep,
-			ReleaseManagerFactory releaseManagerFactory) {
+			DeleteStep deleteStep) {
 		this.releaseRepository = releaseRepository;
 		this.appDeployerDataRepository = appDeployerDataRepository;
 		this.deleteStep = deleteStep;
-		this.releaseManagerFactory = releaseManagerFactory;
 	}
 
 	@Transactional
@@ -71,7 +65,7 @@ public class HandleHealthCheckStep {
 			deleteExistingRelease(existingRelease, applicationNamesToUpgrade);
 		}
 		else {
-			deleteReplacingRelease(replacingRelease, timeout, cancel);
+			deleteReplacingRelease(replacingRelease, timeout, cancel, applicationNamesToUpgrade);
 		}
 	}
 
@@ -88,18 +82,24 @@ public class HandleHealthCheckStep {
 				replacingRelease.getVersion());
 	}
 
-	private void deleteReplacingRelease(Release replacingRelease, Long timeout, boolean cancel) {
+	private void deleteReplacingRelease(Release replacingRelease, Long timeout, boolean cancel, List<String> applicationNamesToUpgrade) {
 		try {
 			if (!cancel) {
 				logger.error("New release " + replacingRelease.getName() + " was not detected as healthy after " + timeout
 						+ " milliseconds.  " + "Keeping existing release, and Deleting apps of replacing release");
 			}
-			String kind = ManifestUtils.resolveKind(replacingRelease.getManifest().getData());
-			ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
-			releaseManager.delete(replacingRelease);
+
+			// Delete only changed app and do not set status with delete step as it's done here
+			AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
+					.findByReleaseNameAndReleaseVersionRequired(
+						replacingRelease.getName(), replacingRelease.getVersion());
+			logger.info("Deleting changed applications from replacing release {}-v{}",
+				replacingRelease.getName(),
+				replacingRelease.getVersion());
+			this.deleteStep.delete(replacingRelease, existingAppDeployerData, applicationNamesToUpgrade, false);
+
 			Status status = new Status();
 			status.setStatusCode(StatusCode.FAILED);
-			replacingRelease.getInfo().setStatus(status);
 			replacingRelease.getInfo().setStatus(status);
 			String desc = cancel ? "Cancelled after " + timeout + " ms."
 					: "Did not detect apps in replacing release as healthy after " + timeout + " ms.";
@@ -133,7 +133,7 @@ public class HandleHealthCheckStep {
 			logger.info("Deleting changed applications from existing release {}-v{}",
 					existingRelease.getName(),
 					existingRelease.getVersion());
-			this.deleteStep.delete(existingRelease, existingAppDeployerData, applicationNamesToUpgrade);
+			this.deleteStep.delete(existingRelease, existingAppDeployerData, applicationNamesToUpgrade, true);
 		}
 		catch (DataAccessException e) {
 			logger.debug("Error1 deleteExistingRelease {}", e);

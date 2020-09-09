@@ -154,34 +154,30 @@ public class ReleaseService {
 		Assert.notNull(installRequest.getPackageIdentifier(), "Package identifier must not be null");
 		Assert.isTrue(StringUtils.hasText(installRequest.getPackageIdentifier().getPackageName()),
 				"Package name must not be empty");
+
 		try {
-			Release latestRelease = this.releaseRepository.findLatestRelease(installRequest.getInstallProperties()
-					.getReleaseName());
-			if (latestRelease != null &&
-					!latestRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
-				throw new SkipperException("Release with the name [" +
-						installRequest.getInstallProperties().getReleaseName()
-						+ "] already exists and it is not deleted.");
+			Release latestNonFailedRelease = this.releaseRepository
+					.findTopByNameAndInfoStatusStatusCodeNotOrderByVersionDesc(
+							installRequest.getInstallProperties().getReleaseName(), StatusCode.FAILED);
+			if (latestNonFailedRelease != null
+					&& !latestNonFailedRelease.getInfo().getStatus().getStatusCode().equals(StatusCode.DELETED)) {
+				throw new SkipperException(
+						"Release with the name [" + installRequest.getInstallProperties().getReleaseName()
+								+ "] already exists and it is not deleted.");
 			}
-		}
-		catch (ReleaseNotFoundException e) {
+		} catch (ReleaseNotFoundException e) {
 			// ignore as this is expected.
 		}
 	}
 
 	protected Release install(PackageMetadata packageMetadata, InstallProperties installProperties) {
 		Assert.notNull(packageMetadata, "Can't download package, PackageMetadata is a null value.");
-		Release existingDeletedRelease = this.releaseRepository
-				.findLatestReleaseIfDeleted(installProperties.getReleaseName());
-		int releaseVersion;
-		if (existingDeletedRelease != null) {
-			logger.info("Re-using existing release name [{}] of previously deleted release.",
-					installProperties.getReleaseName());
-			releaseVersion = existingDeletedRelease.getVersion() + 1;
+		Release latestRelease = null;
+		try {
+			latestRelease = this.releaseRepository.findLatestRelease(installProperties.getReleaseName());
+		} catch (ReleaseNotFoundException e) {
 		}
-		else {
-			releaseVersion = 1;
-		}
+		int releaseVersion = latestRelease != null ? latestRelease.getVersion() + 1 : 1;
 
 		Release release = createInitialRelease(installProperties, this.packageService.downloadPackage(packageMetadata),
 				releaseVersion);

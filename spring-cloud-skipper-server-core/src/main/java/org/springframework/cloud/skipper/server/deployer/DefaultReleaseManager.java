@@ -70,7 +70,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  */
-@SuppressWarnings({ "unchecked", "deprecation" })
+@SuppressWarnings({ "unchecked" })
 public class DefaultReleaseManager implements ReleaseManager {
 
 	public static final String SPRING_CLOUD_DEPLOYER_COUNT = "spring.cloud.deployer.count";
@@ -548,13 +548,14 @@ public class DefaultReleaseManager implements ReleaseManager {
 		AppDeployerData appDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(release.getName(), release.getVersion());
 		List<String> deploymentIds = (appDeployerData != null) ? appDeployerData.getDeploymentIds() : Collections.EMPTY_LIST;
+		logger.debug("DeploymentIds to undeploy {}", deploymentIds);
 		if (!deploymentIds.isEmpty()) {
 			for (String deploymentId : deploymentIds) {
 				try {
 					appDeployer.undeploy(deploymentId);
 				}
 				catch (Exception e) {
-					this.logger.error(String.format("Exception undeploying the application with the deploymentId %s. "
+					logger.error(String.format("Exception undeploying the application with the deploymentId %s. "
 							+ "Exception message: %s", deploymentId, e.getMessage()));
 				}
 			}

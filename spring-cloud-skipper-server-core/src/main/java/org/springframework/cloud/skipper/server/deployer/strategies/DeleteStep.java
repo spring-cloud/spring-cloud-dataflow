@@ -23,8 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -51,31 +49,29 @@ public class DeleteStep {
 	}
 
 	public Release delete(Release release, AppDeployerData existingAppDeployerData,
-			List<String> applicationNamesToDelete) {
+			List<String> applicationNamesToDelete, boolean setStatus) {
 		AppDeployer appDeployer = this.deployerRepository.findByNameRequired(release.getPlatformName())
 				.getAppDeployer();
 
 		Map<String, String> appNamesAndDeploymentIds = (existingAppDeployerData!= null) ?
-				existingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
+				existingAppDeployerData.getDeploymentDataAsMap() : Collections.emptyMap();
 
 		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
 			if (applicationNamesToDelete.contains(appNameAndDeploymentId.getKey())) {
-				AppStatus appStatus = appDeployer.status(appNameAndDeploymentId.getValue());
-				if (appStatus.getState().equals(DeploymentState.deployed)) {
-					appDeployer.undeploy(appNameAndDeploymentId.getValue());
-				}
-				else {
-					logger.warn("For Release name {}, did not undeploy existing app {} as its status is not "
-							+ "'deployed'.", release.getName(), appNameAndDeploymentId.getKey());
-				}
+				logger.debug("For Release name {}, undeploying existing app {}", release.getName(),
+						appNameAndDeploymentId.getKey());
+				// simply attempt to undeploy and let caller stack to handle errors if any
+				appDeployer.undeploy(appNameAndDeploymentId.getValue());
 			}
 		}
 
-		Status deletedStatus = new Status();
-		deletedStatus.setStatusCode(StatusCode.DELETED);
-		release.getInfo().setStatus(deletedStatus);
-		release.getInfo().setDescription("Delete complete");
-		this.releaseRepository.save(release);
+		if (setStatus) {
+			Status deletedStatus = new Status();
+			deletedStatus.setStatusCode(StatusCode.DELETED);
+			release.getInfo().setStatus(deletedStatus);
+			release.getInfo().setDescription("Delete complete");
+			this.releaseRepository.save(release);
+		}
 		return release;
 	}
 }

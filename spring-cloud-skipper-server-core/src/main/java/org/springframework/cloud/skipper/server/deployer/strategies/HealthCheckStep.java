@@ -55,18 +55,24 @@ public class HealthCheckStep {
 				.findByReleaseNameAndReleaseVersionRequired(
 						replacingRelease.getName(), replacingRelease.getVersion());
 		Map<String, String> appNamesAndDeploymentIds = (replacingAppDeployerData!= null) ?
-				replacingAppDeployerData.getDeploymentDataAsMap() : Collections.EMPTY_MAP;
+				replacingAppDeployerData.getDeploymentDataAsMap() : Collections.emptyMap();
 		AppDeployer appDeployer = this.deployerRepository
 				.findByNameRequired(replacingRelease.getPlatformName())
 				.getAppDeployer();
 		logger.debug("Getting status for apps in replacing release {}-v{}", replacingRelease.getName(),
 				replacingRelease.getVersion());
-		for (Map.Entry<String, String> appNameAndDeploymentId : appNamesAndDeploymentIds.entrySet()) {
-			AppStatus status = appDeployer.status(appNameAndDeploymentId.getValue());
-			if (status.getState() == DeploymentState.deployed) {
-				return true;
-			}
-		}
-		return false;
+		// Check all apps and don't go beyond first failed as that is not needed,
+		// assume healthy otherwise
+		return appNamesAndDeploymentIds.entrySet().stream()
+			.map(e -> {
+				logger.debug("Checking status for appName={}, deploymentId={}", e.getKey(), e.getValue());
+				AppStatus status = appDeployer.status(e.getValue());
+				logger.debug("Got status {} for appName={}, deploymentId={}",
+						status != null ? status.getState() : null, e.getKey(), e.getValue());
+				return status.getState() == DeploymentState.deployed;
+			})
+			.filter(deployed -> !deployed)
+			.findFirst()
+			.orElse(true);
 	}
 }

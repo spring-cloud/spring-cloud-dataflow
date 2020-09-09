@@ -156,8 +156,14 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	}
 
 	protected Release upgrade(UpgradeRequest upgradeRequest) throws InterruptedException {
+		return upgrade(upgradeRequest, true);
+	}
+
+	protected Release upgrade(UpgradeRequest upgradeRequest, boolean doAssert) throws InterruptedException {
 		Release release = skipperStateMachineService.upgradeRelease(upgradeRequest);
-		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
+		if (doAssert) {
+			assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
+		}
 		return release;
 	}
 

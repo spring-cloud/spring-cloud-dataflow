@@ -79,7 +79,7 @@ public class UpgradeCheckTargetAppsAction extends AbstractUpgradeStartAction {
 			// missing cutoff, indicate exceed
 			return true;
 		}
-		log.debug("Testing cutOffTime {} to now {}", cutOffTime, now);
+		log.debug("Testing cutOffTime {} to now {} diff {}", cutOffTime, now, cutOffTime - now);
 		return now > cutOffTime;
 	}
 }

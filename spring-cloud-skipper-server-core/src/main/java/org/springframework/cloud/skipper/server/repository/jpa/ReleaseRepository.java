@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.server.repository.jpa;
 import java.util.List;
 
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -65,6 +66,11 @@ public interface ReleaseRepository extends KeyValueRepository<Release, Long>, Re
 	@Transactional(readOnly = true)
 	@RestResource(exported = false)
 	Release findTopByNameOrderByVersionDesc(@Param("name") String name);
+
+	@Transactional(readOnly = true)
+	@RestResource(exported = false)
+	Release findTopByNameAndInfoStatusStatusCodeNotOrderByVersionDesc(@Param("name") String name,
+		@Param("statusCode") StatusCode statusCode);
 
 	@Transactional(readOnly = true)
 	@RestResource(exported = false)

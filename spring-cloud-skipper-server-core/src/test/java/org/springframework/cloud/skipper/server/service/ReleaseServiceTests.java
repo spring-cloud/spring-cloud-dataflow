@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.service;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 import org.junit.After;
@@ -53,6 +54,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 /**
  * Tests ReleaseService methods.
@@ -538,4 +540,54 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		delete(rolledBackRelease.getName());
 	}
 
+	@Test
+	public void testFailedUpdate() throws Exception {
+		String releaseName = "logrelease";
+
+		ConfigValues installConfig = new ConfigValues();
+		installConfig.setRaw("spec:\n  applicationProperties:\n    server.port: 8081\n");
+
+		InstallProperties installProperties = createInstallProperties(releaseName);
+		installProperties.setConfigValues(installConfig);
+
+		InstallRequest installRequest = new InstallRequest();
+		installRequest.setInstallProperties(installProperties);
+
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName("log");
+		packageIdentifier.setPackageVersion("1.0.0");
+		installRequest.setPackageIdentifier(packageIdentifier);
+
+		Release release1 = install(installRequest);
+		assertThat(release1).isNotNull();
+		assertThat(release1.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+
+		await().atMost(Duration.ofSeconds(30)).until(() ->
+			this.releaseService.status(releaseName, release1.getVersion()).getStatus().getStatusCode() == StatusCode.DEPLOYED);
+
+		ConfigValues upgradeConfig = new ConfigValues();
+		upgradeConfig.setRaw("spec:\n  applicationProperties:\n    server.port: 8082\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator/fake\n");
+
+		UpgradeProperties upgradeProperties = new UpgradeProperties();
+		upgradeProperties.setReleaseName(releaseName);
+		upgradeProperties.setConfigValues(upgradeConfig);
+
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		upgradeRequest.setTimeout(20000L);
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+
+		packageIdentifier = new PackageIdentifier();
+		String packageName = "log";
+		String packageVersion = "1.0.0";
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		Release release2 = upgrade(upgradeRequest, false);
+		assertThat(release2).isNotNull();
+
+		await().atMost(Duration.ofSeconds(60)).pollInterval(Duration.ofSeconds(1)).until(() ->
+			this.releaseService.status(releaseName, release2.getVersion()).getStatus().getStatusCode() == StatusCode.FAILED);
+
+		delete(release1.getName());
+	}
 }

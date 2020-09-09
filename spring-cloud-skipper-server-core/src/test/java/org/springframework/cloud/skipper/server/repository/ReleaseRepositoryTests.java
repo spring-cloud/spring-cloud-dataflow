@@ -370,7 +370,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			assertThat(e.getMessage())
 					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
-					.contains("Active Releases [stableB,multipleRevisions1,multipleRevisions2,multipleRevisions3]");
+					.contains("Active Releases [multipleRevisions2,multipleRevisions3]");
 
 		}
 
@@ -386,7 +386,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 			assertThat(e.getMessage())
 					.contains("Can not delete Package Metadata [package2:1.0.1] in Repository [local]")
 					.contains("Not all releases of this package have the status DELETED.")
-					.contains("Active Releases [multipleRevisions1,multipleRevisions2,multipleRevisions3]");
+					.contains("Active Releases [multipleRevisions2,multipleRevisions3]");
 
 		}
 	}

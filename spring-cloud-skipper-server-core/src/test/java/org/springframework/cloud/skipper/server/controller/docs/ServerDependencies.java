@@ -274,10 +274,8 @@ public class ServerDependencies implements AsyncConfigurer {
 
 	@Bean
 	public HandleHealthCheckStep healthCheckAndDeleteStep(ReleaseRepository releaseRepository,
-			AppDeployerDataRepository appDeployerDataRepository, DeleteStep deleteStep,
-			ReleaseManagerFactory releaseManagerFactory) {
-		return new HandleHealthCheckStep(releaseRepository, appDeployerDataRepository, deleteStep,
-				releaseManagerFactory);
+			AppDeployerDataRepository appDeployerDataRepository, DeleteStep deleteStep) {
+		return new HandleHealthCheckStep(releaseRepository, appDeployerDataRepository, deleteStep);
 	}
 
 	@Bean(name = SkipperServerConfiguration.SKIPPER_EXECUTOR)
