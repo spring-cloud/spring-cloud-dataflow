@@ -24,6 +24,7 @@
 	<packaging>jar</packaging>
 	<properties>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
+		<java-cfenv.version>2.2.0.RELEASE</java-cfenv.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -34,6 +35,11 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-rest-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.pivotal.cfenv</groupId>
+			<artifactId>java-cfenv</artifactId>
+			<version>${java-cfenv.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
