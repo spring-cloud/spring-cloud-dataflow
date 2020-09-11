@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ import static org.mockito.Mockito.when;
  * @author Eric Bottard
  * @author Christian Tzolov
  * @author Gunnar Hillert
+ * @author Chris Schaefer
  */
 @RunWith(SpringRunner.class)
 public class DefaultStreamServiceTests {
@@ -282,6 +283,28 @@ public class DefaultStreamServiceTests {
 
 		Assert.assertEquals("2.0.0",
 				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
+	}
+
+	@Test
+	public void testInvalidStreamName() {
+		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
+		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
+
+		String[] streamNames = { "$stream", "stream$", "st_ream" };
+
+		for (String streamName : streamNames) {
+			try {
+				final StreamDefinition expectedStreamDefinition = new StreamDefinition(streamName, "time | log");
+				when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
+
+				this.defaultStreamService.createStream(streamName, "time | log", "demo stream", false);
+			} catch (Exception e) {
+				Assert.assertTrue(e instanceof InvalidStreamDefinitionException);
+				Assert.assertEquals(e.getMessage(), "Stream name must consist of alphanumeric characters or '-', " +
+						"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+						"or 'abc-123')");
+			}
+		}
 	}
 
 	public ArgumentCaptor<StreamDeploymentRequest> testStreamDeploy(Map<String, String> deploymentProperties) {

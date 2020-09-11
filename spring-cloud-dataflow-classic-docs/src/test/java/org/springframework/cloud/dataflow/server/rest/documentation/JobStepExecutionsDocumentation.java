@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 			documentation.dontDocument(() -> this.mockMvc.perform(
 					post("/tasks/definitions")
-							.param("name", "DOCJOB_1")
+							.param("name", "DOCJOB1")
 							.param("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
 

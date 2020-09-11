@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 			initialize();
 			createJobExecution(JOB_NAME, BatchStatus.STARTED);
-			createJobExecution(JOB_NAME + "_1", BatchStatus.STOPPED);
+			createJobExecution(JOB_NAME + "1", BatchStatus.STOPPED);
 
 
 			jdbcTemplate = new JdbcTemplate(this.dataSource);
@@ -94,7 +94,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 			documentation.dontDocument(() -> this.mockMvc.perform(
 					post("/tasks/definitions")
-							.param("name", "DOCJOB_1")
+							.param("name", "DOCJOB1")
 							.param("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
 

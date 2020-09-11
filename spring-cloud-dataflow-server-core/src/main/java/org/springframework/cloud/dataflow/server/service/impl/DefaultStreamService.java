@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -82,6 +83,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author Gunnar Hillert
+ * @author Chris Schaefer
  */
 @Transactional
 public class DefaultStreamService implements StreamService {
@@ -89,6 +91,11 @@ public class DefaultStreamService implements StreamService {
 	public static final String DEFAULT_SKIPPER_PACKAGE_VERSION = "1.0.0";
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultStreamService.class);
+
+	private static final Pattern STREAM_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
+	private static final String STREAM_NAME_VALIDATION_MSG = "Stream name must consist of alphanumeric characters " +
+			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+			"or 'abc-123')";
 
 	/**
 	 * The repository this controller will use for stream CRUD operations.
@@ -393,6 +400,10 @@ public class DefaultStreamService implements StreamService {
 						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
 								appName, applicationType));
 			}
+		}
+
+		if ( !STREAM_NAME_PATTERN.matcher(streamName).matches()) {
+			errorMessages.add(STREAM_NAME_VALIDATION_MSG);
 		}
 
 		if (!errorMessages.isEmpty()) {
