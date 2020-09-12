@@ -1,0 +1,4 @@
+my:
+  test:
+    static.property: "Test"
+    property.with.placeholder: ${my.placeholder}

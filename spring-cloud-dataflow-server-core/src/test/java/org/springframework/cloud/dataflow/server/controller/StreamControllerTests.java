@@ -66,6 +66,8 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSp
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -1108,11 +1110,88 @@ public class StreamControllerTests {
 	}
 
 	@Test
+	public void testDefaultApplicationPropertiesYamlResource() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesPropertyResource() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"));
+	}
+
+
+	private void testDefaultApplicationPropertiesResource(Resource newResource) throws Exception {
+		Resource oldResource = appsProperties.getStreamResource();
+
+		try {
+			repository.save(new StreamDefinition("myStream", "time | log"));
+
+			appsProperties.setStreamResource(newResource);
+
+			mockMvc.perform(post("/streams/deployments/myStream")).andExpect(status().isCreated());
+
+			ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+			verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+			ArgumentCaptor<InstallRequest> installRequestCaptor = ArgumentCaptor.forClass(InstallRequest.class);
+			verify(skipperClient, times(1)).install(installRequestCaptor.capture());
+
+			List<UploadRequest> updateRequests = uploadRequestCaptor.getAllValues();
+			assertThat(updateRequests).hasSize(1);
+			List<InstallRequest> installRequests = installRequestCaptor.getAllValues();
+			assertThat(installRequests).hasSize(1);
+
+			InstallRequest installRequest = installRequests.iterator().next();
+			assertThat(installRequest.getInstallProperties().getPlatformName()).isEqualTo("default");
+			assertThat(installRequest.getInstallProperties().getReleaseName()).isEqualTo("myStream");
+			assertThat(installRequest.getPackageIdentifier().getRepositoryName()).isEqualTo("local");
+			assertThat(installRequest.getPackageIdentifier().getPackageName()).isEqualTo("myStream");
+			assertThat(installRequest.getPackageIdentifier().getPackageVersion()).isEqualTo("1.0.0");
+
+			Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+			Package logPackage = findChildPackageByName(pkg, "log");
+			assertThat(logPackage).isNotNull();
+
+			SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+
+			// Check for the presence of defaults/test-application-stream-common-properties-defaults.yml properties.
+			assertThat(logSpec.getApplicationProperties().get("my.test.static.property")).isEqualTo("Test");
+			assertThat(logSpec.getApplicationProperties().get("my.test.property.with.placeholder")).isEqualTo("${my.placeholder}");
+
+			// Default stream metrics tags are overridden and should not be set
+			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.stream.name")).isNull();
+			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.name")).isNull();
+			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.type")).isNull();
+			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.instance.index")).isNull();
+			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.guid")).isNull();
+
+			Package timePackage = findChildPackageByName(pkg, "time");
+			assertThat(timePackage);
+
+			SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+			assertThat(timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY)).isEqualTo("myStream");
+			assertThat(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY)).isNull();
+
+			// Check for the presence of defaults/test-application-stream-common-properties-defaults.yml properties.
+			assertThat(timeSpec.getApplicationProperties().get("my.test.static.property")).isEqualTo("Test");
+			assertThat(timeSpec.getApplicationProperties().get("my.test.property.with.placeholder")).isEqualTo("${my.placeholder}");
+
+			// Default stream metrics tags are overridden and should not be set
+			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.stream.name")).isNull();
+			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.name")).isNull();
+			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.type")).isNull();
+			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.instance.index")).isNull();
+			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.guid")).isNull();
+		} finally {
+			this.appsProperties.setStreamResource(oldResource);
+		}
+	}
+
+	@Test
 	public void testDeployWithCommonApplicationProperties() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
-		appsProperties.getStream().put("spring.cloud.stream.fake.binder.host", "fakeHost");
-		appsProperties.getStream().put("spring.cloud.stream.fake.binder.port", "fakePort");
-		appsProperties.getStream().put("spring.cloud.stream.pass.through.placeholder", "^$^{test.test}");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("app.*.producer.partitionKeyExpression", "payload");
 		properties.put("deployer.*.count", "2");
@@ -1146,23 +1225,19 @@ public class StreamControllerTests {
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 
-		// Default stream metrics tags
+		// Default stream metrics tags for logSpec
 		assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.stream.name"))
 				.isEqualTo("${spring.cloud.dataflow.stream.name:unknown}");
 		assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.name"))
-				.isEqualTo("${spring.cloud.dataflow.stream.app.label:unknown}");
+				.isEqualTo("${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}");
 		assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.type"))
 				.isEqualTo("${spring.cloud.dataflow.stream.app.type:unknown}");
 		assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.instance.index"))
-				.isEqualTo("${spring.cloud.stream.instanceIndex:0}");
+				.isEqualTo("${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}");
 		assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.application.guid"))
 				.isEqualTo("${spring.cloud.application.guid:unknown}");
 
-		assertThat(logSpec.getApplicationProperties().get("spring.cloud.stream.pass.through.placeholder"))
-				.isEqualTo("${test.test}");
 		assertThat(logSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT)).isEqualTo("2");
-		assertThat(logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.host")).isEqualTo("fakeHost");
-		assertThat(logSpec.getApplicationProperties().get("spring.cloud.stream.fake.binder.port")).isEqualTo("fakePort");
 		assertThat(logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.partitioned")).isEqualTo("true");
 		assertThat(logSpec.getApplicationProperties().get("spring.cloud.stream.bindings.input.consumer.concurrency")).isEqualTo("3");
 		assertThat(logSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY)).isEqualTo("2");
@@ -1173,14 +1248,25 @@ public class StreamControllerTests {
 		assertThat(timePackage);
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+
+		// Default stream metrics tags for logSpec
+		assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.stream.name"))
+				.isEqualTo("${spring.cloud.dataflow.stream.name:unknown}");
+		assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.name"))
+				.isEqualTo("${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}");
+		assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.type"))
+				.isEqualTo("${spring.cloud.dataflow.stream.app.type:unknown}");
+		assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.instance.index"))
+				.isEqualTo("${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}");
+		assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.guid"))
+				.isEqualTo("${spring.cloud.application.guid:unknown}");
+
 		assertThat(timeSpec.getApplicationProperties().get(StreamPropertyKeys.INSTANCE_COUNT)).isEqualTo("2");
 		assertThat(timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionCount")).isEqualTo("2");
 		assertThat(timeSpec.getApplicationProperties().get("spring.cloud.stream.bindings.output.producer.partitionKeyExpression")).isEqualTo("payload");
 		assertThat(timeSpec.getDeploymentProperties().get(AppDeployer.COUNT_PROPERTY_KEY)).isEqualTo("2");
 		assertThat(timeSpec.getDeploymentProperties().get(AppDeployer.GROUP_PROPERTY_KEY)).isEqualTo("myStream");
 		assertThat(timeSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY)).isNull();
-
-//		appsProperties.getStream().clear();
 	}
 
 	@Test

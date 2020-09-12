@@ -55,7 +55,9 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -435,31 +437,47 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testLaunchWithCommonProperties() throws Exception {
+	public void testLaunchWithDefaultApplicationPropertiesYamlResource() throws Exception {
+		testLaunchWithCommonProperties(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-task-common-properties-defaults.yml"));
+	}
 
-		appsProperties.getTask().put("spring.cloud.task.common.property", "commonProperty");
-		appsProperties.getTask().put("spring.cloud.task.pass.through.placeholder", "^$^{test.test}");
+	@Test
+	public void testLaunchWithDefaultApplicationPropertiesPropertyResource() throws Exception {
+		testLaunchWithCommonProperties(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-task-common-properties-defaults.properties"));
+	}
 
-		repository.save(new TaskDefinition("myTask", "foo"));
-		this.registry.save("foo", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+	private void testLaunchWithCommonProperties(Resource newResource) throws Exception {
 
-		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isCreated());
+		Resource oldResource = appsProperties.getTaskResource();
 
-		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+		try {
+			appsProperties.setTaskResource(newResource);
 
-		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
-		assertThat(request.getDefinition().getProperties().get("spring.cloud.task.common.property")).isEqualTo("commonProperty");
-		assertThat(request.getDefinition().getProperties().get("spring.cloud.task.pass.through.placeholder")).isEqualTo("${test.test}");
+			repository.save(new TaskDefinition("myTask", "foo"));
+			this.registry.save("foo", ApplicationType.task,
+					"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
-		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+			mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
+					.andDo(print()).andExpect(status().isCreated());
 
-		// Destroy should be called only if there was a launch task
-		Mockito.verify(taskLauncher).destroy("myTask");
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+			AppDeploymentRequest request = argumentCaptor.getValue();
+			assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
+			assertThat(request.getDefinition().getProperties().get("my.test.static.property")).isEqualTo("Test");
+			assertThat(request.getDefinition().getProperties().get("my.test.property.with.placeholder")).isEqualTo("${my.placeholder}");
+
+			mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
+					.andExpect(status().isOk());
+
+			// Destroy should be called only if there was a launch task
+			Mockito.verify(taskLauncher).destroy("myTask");
+		} finally {
+			appsProperties.setTaskResource(oldResource);
+		}
 	}
 
 	@Test

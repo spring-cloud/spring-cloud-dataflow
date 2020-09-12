@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,6 +101,16 @@ public class TaskServiceUtils {
 		return taskDeploymentProperties;
 	}
 
+	/**
+	 * Updates the task definition with the datasource properties.
+	 * @param taskDefinition the {@link TaskDefinition} to be updated.
+	 * @param dataSourceProperties the dataSource properties used by SCDF.
+	 * @return the updated {@link TaskDefinition}
+	 */
+	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
+			DataSourceProperties dataSourceProperties) {
+		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
+	}
 	/**
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
@@ -250,5 +262,24 @@ public class TaskServiceUtils {
 			addDatabaseCredentials = true;
 		}
 		return addDatabaseCredentials;
+	}
+
+	/**
+	 * Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+	 * Doesn't override existing properties!
+	 * The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+	 *
+	 * @param defaultPropertied
+	 * @param appDeploymentProperties
+	 */
+	public static void contributeCommonProperties(Optional<Properties> defaultPropertied, Map<String, String> appDeploymentProperties) {
+		defaultPropertied
+				.ifPresent(
+						defaults -> defaults.entrySet().stream()
+								.filter(e -> e.getKey() != null)
+								.filter(e -> e.getValue() != null)
+								.filter(e -> !appDeploymentProperties.containsKey(e.getKey().toString())) // Exclude the explicitly set properties.
+								.forEach(e -> appDeploymentProperties.put(e.getKey().toString(), e.getValue().toString())));
+
 	}
 }

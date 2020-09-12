@@ -23,27 +23,10 @@ package org.springframework.cloud.dataflow.core;
  */
 public class StreamPropertyKeys {
 
-	/**
-	 * This is the spring boot property key that Spring Cloud Stream uses to filter the
-	 * metrics to import when the specific Spring Cloud Stream "application" trigger is fired
-	 * for metrics export.
-	 */
-	public static final String METRICS_TRIGGER_INCLUDES = "spring.metrics.export.triggers.application.includes";
 
 	// @formatter:off (not working)
 	static final String PREFIX = "spring.cloud.stream.";
-	/**
-	 * Prefix for Spring Cloud Stream Metrics.
-	 */
-	public static final String METRICS_PREFIX = PREFIX + "metrics.";
-	/**
-	 * METRICS Key property key.
-	 */
-	public static final String METRICS_KEY = METRICS_PREFIX + "key";
-	/**
-	 * METRICS properties property key.
-	 */
-	public static final String METRICS_PROPERTIES = METRICS_PREFIX + "properties";
+
 	/**
 	 * Instance Count property key.
 	 */

@@ -3,19 +3,27 @@
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar"
   "applicationProperties":
-    "spring.metrics.export.triggers.application.includes": "integration**"
     "spring.cloud.dataflow.stream.app.label": "log"
-    "spring.cloud.stream.metrics.key": "ticktock.log.${spring.cloud.application.guid}"
-    "spring.cloud.stream.bindings.input.group": "ticktock"
-    "spring.cloud.stream.metrics.properties": "spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*"
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"
+
+    "spring.cloud.stream.bindings.input.group": "ticktock"
     "spring.cloud.stream.bindings.input.destination": "ticktock.time"
-    "management.metrics.tags.application.type": ${spring.cloud.dataflow.stream.app.type:unknown}
+
     "management.metrics.tags.stream.name": ${spring.cloud.dataflow.stream.name:unknown}
+    "management.metrics.tags.application.name": ${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}
+    "management.metrics.tags.application.type": ${spring.cloud.dataflow.stream.app.type:unknown}
     "management.metrics.tags.application.guid": ${spring.cloud.application.guid:unknown}
-    "management.metrics.tags.application.name": ${spring.cloud.dataflow.stream.app.label:unknown}
-    "management.metrics.tags.instance.index": ${spring.cloud.stream.instanceIndex:0}
+    "management.metrics.tags.instance.index": ${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
+
+    "management.metrics.tags.application.version": ${vcap.application.application_version:unknown}
+    "management.metrics.tags.organization.name": ${vcap.application.org_name:default}
+    "management.metrics.tags.space.name": ${vcap.application.space_name:unknown}
+    "management.metrics.tags.application.id": ${vcap.application.application_id:unknown}
+    "management.metrics.tags.space.id": ${vcap.application.space_id:unknown}
+
+    "management.metrics.tags.application": ${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
+    "management.metrics.tags.service": "stream application"
 
   "version": "1.2.0.RELEASE"
   "deploymentProperties":

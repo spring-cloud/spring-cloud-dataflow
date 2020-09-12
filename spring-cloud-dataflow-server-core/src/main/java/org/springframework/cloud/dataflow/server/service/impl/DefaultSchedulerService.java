@@ -168,10 +168,14 @@ public class DefaultSchedulerService implements SchedulerService {
 		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties,
 				TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), launcher.getType()));
 
-		Map<String, String> appDeploymentProperties = new HashMap<>(
-				CommonApplicationProperties.passThroughPlaceholderDecoder(commonApplicationProperties.getTaskDecoded()));
+		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
+
+		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+		// Doesn't override existing properties!
+		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(), appDeploymentProperties);
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
