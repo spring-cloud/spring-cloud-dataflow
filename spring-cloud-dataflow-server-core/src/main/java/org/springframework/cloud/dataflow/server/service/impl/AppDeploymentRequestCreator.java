@@ -209,12 +209,9 @@ public class AppDeploymentRequestCreator {
 			// Doesn't override existing properties!
 			// The placeholders defined in the stream-resource file are not resolved by SCDF but passed to the apps as they are.
 			this.commonApplicationProperties.getStreamResourceProperties()
-					.ifPresent(
-							defaults -> defaults.entrySet().stream()
-									.filter(e -> e.getKey() != null)
-									.filter(e -> e.getValue() != null)
-									.filter(e -> !appDeployTimeProperties.containsKey(e.getKey().toString())) // Exclude the explicitly set properties.
-									.forEach(e -> appDeployTimeProperties.put(e.getKey().toString(), e.getValue().toString())));
+					.ifPresent(defaults -> defaults.entrySet().stream()
+							.filter(e -> e.getValue() != null)
+							.forEach(e -> appDeployTimeProperties.putIfAbsent(e.getKey().toString(), e.getValue().toString())));
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable

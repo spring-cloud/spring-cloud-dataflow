@@ -60,7 +60,7 @@ public class TaskServiceUtils {
 	 * @return String containing the CTR task definition.
 	 */
 	public static String createComposedTaskDefinition(String graph) {
-			return createComposedTaskDefinition(null, graph);
+		return createComposedTaskDefinition(null, graph);
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class TaskServiceUtils {
 	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph) {
 		Assert.hasText(graph, "graph must not be empty or null");
 		String composedTaskRunnerName = TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME;
-		if(StringUtils.hasText(alternateComposedTaskRunnerName)) {
+		if (StringUtils.hasText(alternateComposedTaskRunnerName)) {
 			composedTaskRunnerName = alternateComposedTaskRunnerName;
 		}
 		return String.format("%s --graph=\"%s\"", composedTaskRunnerName, graph);
@@ -111,6 +111,7 @@ public class TaskServiceUtils {
 			DataSourceProperties dataSourceProperties) {
 		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
 	}
+
 	/**
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
@@ -124,7 +125,7 @@ public class TaskServiceUtils {
 		Assert.notNull(taskDefinition, "taskDefinition must not be null");
 		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
 		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
-		if(setDatabaseCredentials) {
+		if (setDatabaseCredentials) {
 			// password may be empty
 			if (StringUtils.hasText(dataSourceProperties.getPassword())) {
 				builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
@@ -200,7 +201,7 @@ public class TaskServiceUtils {
 					}
 				}
 			}
-			if(isPutDataFlowServerUriKey) {
+			if (isPutDataFlowServerUriKey) {
 				appDeploymentProperties.put(dataFlowServerUriKey, dataflowServerUri);
 			}
 		}
@@ -220,8 +221,8 @@ public class TaskServiceUtils {
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
 		String scdfTaskName = String.format("%s.%s.%s.", prefix, taskNode.getName(),
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-		Set<String> propertyKeys = taskDeploymentProperties.keySet().
-				stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
+		Set<String> propertyKeys = taskDeploymentProperties.keySet().stream()
+				.filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
 				.collect(Collectors.toSet());
 		for (String taskProperty : propertyKeys) {
 			if (result.length() != 0) {
@@ -269,17 +270,13 @@ public class TaskServiceUtils {
 	 * Doesn't override existing properties!
 	 * The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
 	 *
-	 * @param defaultPropertied
-	 * @param appDeploymentProperties
+	 * @param defaultProperties Default properties, if any, to contribute to the launch app properties.
+	 * @param appDeploymentProperties App deployment properties passed to the Task at launch.
 	 */
-	public static void contributeCommonProperties(Optional<Properties> defaultPropertied, Map<String, String> appDeploymentProperties) {
-		defaultPropertied
-				.ifPresent(
-						defaults -> defaults.entrySet().stream()
-								.filter(e -> e.getKey() != null)
-								.filter(e -> e.getValue() != null)
-								.filter(e -> !appDeploymentProperties.containsKey(e.getKey().toString())) // Exclude the explicitly set properties.
-								.forEach(e -> appDeploymentProperties.put(e.getKey().toString(), e.getValue().toString())));
+	public static void contributeCommonProperties(Optional<Properties> defaultProperties, Map<String, String> appDeploymentProperties) {
+		defaultProperties.ifPresent(defaults -> defaults.entrySet().stream()
+				.filter(e -> e.getValue() != null)
+				.forEach(e -> appDeploymentProperties.putIfAbsent(e.getKey().toString(), e.getValue().toString())));
 
 	}
 }
