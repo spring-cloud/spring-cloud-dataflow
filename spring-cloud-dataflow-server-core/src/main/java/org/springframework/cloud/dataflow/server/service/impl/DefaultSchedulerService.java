@@ -141,6 +141,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
+		AppRegistration appRegistration;
 		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
 		if (taskNode.isComposed()) {
@@ -148,10 +149,19 @@ public class DefaultSchedulerService implements SchedulerService {
 					TaskServiceUtils.createComposedTaskDefinition(
 							taskNode.toExecutableDSL()));
 			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
+			try {
+				appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+						ApplicationType.task,
+						new URI(this.taskConfigurationProperties.getComposedTaskRunnerUri()));
+			}
+			catch (URISyntaxException e) {
+				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
+			}
 		}
-
-		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
+		else {
+			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+					ApplicationType.task);
+		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 
