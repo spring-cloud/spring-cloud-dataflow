@@ -128,8 +128,13 @@ public class TaskServiceUtils {
 			}
 			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
-		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
-		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		if(!taskDefinition.getProperties().containsKey("spring.datasource.url")) {
+			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
+		}
+		if(!(taskDefinition.getProperties().containsKey("spring.datasource.driverClassName") ||
+				taskDefinition.getProperties().containsKey("spring.datasource.driver-class-name"))) {
+			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		}
 		builder.setTaskName(taskDefinition.getTaskName());
 		builder.setDslText(taskDefinition.getDslText());
 		return builder.build();
