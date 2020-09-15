@@ -95,6 +95,7 @@
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
 		<commons-text.version>1.8</commons-text.version>
 		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
+		<micrometer.version>1.5.3</micrometer.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
@@ -269,6 +270,26 @@
 				<groupId>io.micrometer.prometheus</groupId>
 				<artifactId>prometheus-rsocket-spring</artifactId>
 				<version>${prometheus-rsocket-spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-core</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-wavefront</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-influx</artifactId>
+				<version>${micrometer.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
+				<artifactId>micrometer-registry-prometheus</artifactId>
+				<version>${micrometer.version}</version>
 			</dependency>
 
 		</dependencies>
