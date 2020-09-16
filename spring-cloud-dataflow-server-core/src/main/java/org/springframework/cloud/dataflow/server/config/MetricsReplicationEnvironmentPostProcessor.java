@@ -21,7 +21,7 @@ import java.lang.reflect.Modifier;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketProperties;
+import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 			this.replicateServerMetricsPropertiesToStreamAndTask(environment, WavefrontProperties.class, propertyReplicator);
 			this.replicateServerMetricsPropertiesToStreamAndTask(environment, InfluxProperties.class, propertyReplicator);
 			this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusProperties.class, propertyReplicator);
-			this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusRSocketProperties.class, propertyReplicator);
+			this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusRSocketClientProperties.class, propertyReplicator);
 		}
 
 		// This post-processor is called multiple times but sets the properties only once.

@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner.configuration;
 
-import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketAutoConfiguration;
+import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketClientAutoConfiguration;
 
 import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.InfluxMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
 @Configuration
 @EnableAutoConfiguration(exclude = { DataFlowClientAutoConfiguration.class,
 		WavefrontMetricsExportAutoConfiguration.class, PrometheusMetricsExportAutoConfiguration.class,
-		PrometheusRSocketAutoConfiguration.class, InfluxMetricsExportAutoConfiguration.class })
+		PrometheusRSocketClientAutoConfiguration.class, InfluxMetricsExportAutoConfiguration.class })
 public class DataFlowTestConfiguration {
 
 	@Bean

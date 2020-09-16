@@ -22,7 +22,7 @@ services:
           },
           "spring.cloud.dataflow.metrics.dashboard": {
              "url":"http://localhost:3000",
-             "type=GRAFANA"
+             "type":"GRAFANA"
           }
         }
 
