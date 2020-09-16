@@ -1,0 +1,5 @@
+spring:
+  cloud:
+    dataflow:
+      applicationProperties:
+        stream-resource: "classpath:META-INF/application-stream-common-properties-cloud-defaults.yml"
