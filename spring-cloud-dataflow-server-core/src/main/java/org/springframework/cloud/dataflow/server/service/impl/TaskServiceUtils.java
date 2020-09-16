@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -98,16 +99,6 @@ public class TaskServiceUtils {
 		return taskDeploymentProperties;
 	}
 
-	/**
-	 * Updates the task definition with the datasource properties.
-	 * @param taskDefinition the {@link TaskDefinition} to be updated.
-	 * @param dataSourceProperties the dataSource properties used by SCDF.
-	 * @return the updated {@link TaskDefinition}
-	 */
-	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
-			DataSourceProperties dataSourceProperties) {
-		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
-	}
 	/**
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.

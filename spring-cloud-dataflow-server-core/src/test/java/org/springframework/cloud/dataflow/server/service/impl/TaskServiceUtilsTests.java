@@ -95,12 +95,19 @@ public class TaskServiceUtilsTests {
 		DataSourceProperties dataSourceProperties = getDataSourceProperties();
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
-				dataSourceProperties);
-
+				dataSourceProperties, true);
+		assertThat(definition.getProperties().size()).isEqualTo(5);
 		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
 		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
 		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
 		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+
+		definition = TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties, false);
+		assertThat(definition.getProperties().size()).isEqualTo(3);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
 	}
 
 	@Test
@@ -234,7 +241,6 @@ public class TaskServiceUtilsTests {
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
 		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
 	}
-
 
 	private TaskNode parse(String dsltext) {
 		TaskNode ctn = new TaskParser("test", dsltext, true, true).parse();
