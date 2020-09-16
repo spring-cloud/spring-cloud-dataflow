@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -98,16 +99,6 @@ public class TaskServiceUtils {
 		return taskDeploymentProperties;
 	}
 
-	/**
-	 * Updates the task definition with the datasource properties.
-	 * @param taskDefinition the {@link TaskDefinition} to be updated.
-	 * @param dataSourceProperties the dataSource properties used by SCDF.
-	 * @return the updated {@link TaskDefinition}
-	 */
-	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
-			DataSourceProperties dataSourceProperties) {
-		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
-	}
 	/**
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
@@ -244,5 +235,20 @@ public class TaskServiceUtils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Determines if a database credentials should be added to task properties.
+	 * @param platformType The type of platform.
+	 * @param useKubernetesSecrets User wants to use kubernetes secrets for user name and password.
+	 * @return true if database credentials should be added to task properties.
+	 */
+	public static boolean addDatabaseCredentials(boolean useKubernetesSecrets, String platformType) {
+		boolean addDatabaseCredentials = false;
+		if(!useKubernetesSecrets ||
+				!StringUtils.hasText(platformType) || !platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			addDatabaseCredentials = true;
+		}
+		return addDatabaseCredentials;
 	}
 }

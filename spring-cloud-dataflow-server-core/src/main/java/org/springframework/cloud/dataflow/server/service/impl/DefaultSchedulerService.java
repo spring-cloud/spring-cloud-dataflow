@@ -164,8 +164,9 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
-
-		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties);
+		Launcher launcher = getTaskLauncher(platformName);
+		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties,
+				TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), launcher.getType()));
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
@@ -181,7 +182,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 
-		Launcher launcher = getTaskLauncher(platformName);
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
 
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
@@ -406,4 +406,5 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);
 	}
+
 }
