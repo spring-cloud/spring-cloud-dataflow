@@ -128,11 +128,10 @@ public class TaskServiceUtils {
 			}
 			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
-		if(!taskDefinition.getProperties().containsKey("spring.datasource.url")) {
+		if(!isPropertyPresent("spring.datasource.url", taskDefinition)) {
 			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		}
-		if(!(taskDefinition.getProperties().containsKey("spring.datasource.driverClassName") ||
-				taskDefinition.getProperties().containsKey("spring.datasource.driver-class-name"))) {
+		if(!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
 			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
 		}
 		builder.setTaskName(taskDefinition.getTaskName());
@@ -230,6 +229,19 @@ public class TaskServiceUtils {
 					taskProperty.substring(subTaskName.length()),
 					taskDeploymentProperties.get(taskProperty));
 			taskDeploymentProperties.remove(taskProperty);
+		}
+		return result;
+	}
+
+	private static boolean isPropertyPresent(String property, TaskDefinition taskDefinition) {
+		RelaxedNames relaxedNames = new RelaxedNames(property);
+		boolean result = false;
+		Map<String, String> properties = taskDefinition.getProperties();
+		for (String dataFlowUriKey : relaxedNames) {
+			if (properties.containsKey(dataFlowUriKey)) {
+				result = true;
+				break;
+			}
 		}
 		return result;
 	}

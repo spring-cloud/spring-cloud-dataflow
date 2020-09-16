@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -116,51 +117,42 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testDatabasePropUpdateWithPlatformForUserDriverClassName() {
-		Map<String, String> props = new HashMap<>();
-		props.put("spring.datasource.driverClassName", "foobar");
-		TaskDefinition taskDefinition = (new TaskDefinition.TaskDefinitionBuilder()).
-				addProperties(props).
-				setTaskName("testTask").
-				setRegisteredAppName("testApp").
-				build();
-		DataSourceProperties dataSourceProperties = getDataSourceProperties();
-		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
-				taskDefinition,
-				dataSourceProperties, false);
-
+		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.driverClassName", "foobar");
 		validateProperties(definition, 2);
 		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("foobar");
 
-		props = new HashMap<>();
-		props.put("spring.datasource.driver-class-name", "feebar");
-		taskDefinition = (new TaskDefinition.TaskDefinitionBuilder()).
-				addProperties(props).
-				setTaskName("testTask").
-				setRegisteredAppName("testApp").
-				build();
-		dataSourceProperties = getDataSourceProperties();
-		definition = TaskServiceUtils.updateTaskProperties(
-				taskDefinition,
-				dataSourceProperties, false);
-
+		definition = createUpdatedDefinitionForProperty("spring.datasource.driver-class-name", "feebar");
 		validateProperties(definition, 2);
 		assertThat(definition.getProperties().get("spring.datasource.driver-class-name")).isEqualTo("feebar");
+
+		definition = createUpdatedDefinitionForProperty(null, null);
+		validateProperties(definition, 2);
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
 	}
+
 	@Test
-	public void testDatabasePropUpdateWithPlatformForUUrl() {
+	public void testDatabasePropUpdateWithPlatformForUrl() {
+		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.url", "newurl");
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("newurl");
+
+		definition = createUpdatedDefinitionForProperty(null, null);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+	}
+
+	private TaskDefinition createUpdatedDefinitionForProperty(String key, String value) {
 		Map<String, String> props = new HashMap<>();
-		props.put("spring.datasource.url", "newurl");
+		if(StringUtils.hasText(key) && StringUtils.hasText(value)) {
+			props.put(key, value);
+		}
 		TaskDefinition taskDefinition = (new TaskDefinition.TaskDefinitionBuilder()).
 				addProperties(props).
 				setTaskName("testTask").
 				setRegisteredAppName("testApp").
 				build();
 		DataSourceProperties dataSourceProperties = getDataSourceProperties();
-		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
+		return TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
 				dataSourceProperties, false);
-
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("newurl");
 	}
 
 	private void validateProperties(TaskDefinition definition, int size) {
