@@ -92,7 +92,8 @@ public class TaskAppDeploymentRequestCreator {
 			TaskExecution taskExecution,
 			TaskExecutionInformation taskExecutionInformation,
 			List<String> commandLineArgs,
-			String platformName) {
+			String platformName,
+			String platformType) {
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
@@ -104,7 +105,10 @@ public class TaskAppDeploymentRequestCreator {
 		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
 		// Doesn't override existing properties!
 		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
-		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(), appDeploymentProperties);
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, "common");
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, platformType);
 
 		// Need to keep all properties around, not just 'deployer.*'
 		// as those are a source to restore app specific props

@@ -141,7 +141,7 @@ public class AppDeploymentRequestCreator {
 	 * @return list of AppDeploymentRequests
 	 */
 	public List<AppDeploymentRequest> createRequests(StreamDefinition streamDefinition,
-			Map<String, String> streamDeploymentProperties) {
+			Map<String, String> streamDeploymentProperties, String platformType) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		if (streamDeploymentProperties == null) {
 			streamDeploymentProperties = Collections.emptyMap();
@@ -208,10 +208,8 @@ public class AppDeploymentRequestCreator {
 			// Merge the common properties defined via the spring.cloud.dataflow.common-properties.stream-resource file.
 			// Doesn't override existing properties!
 			// The placeholders defined in the stream-resource file are not resolved by SCDF but passed to the apps as they are.
-			this.commonApplicationProperties.getStreamResourceProperties()
-					.ifPresent(defaults -> defaults.entrySet().stream()
-							.filter(e -> e.getValue() != null)
-							.forEach(e -> appDeployTimeProperties.putIfAbsent(e.getKey().toString(), e.getValue().toString())));
+			contributeCommonApplicationProperties("common", appDeployTimeProperties);
+			contributeCommonApplicationProperties(platformType, appDeployTimeProperties);
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
@@ -226,6 +224,16 @@ public class AppDeploymentRequestCreator {
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
+	}
+
+	private void contributeCommonApplicationProperties(String platformType, Map<String, String> appDeployTimeProperties) {
+		String platformTypePrefix = platformType + ".";
+		this.commonApplicationProperties.getStreamResourceProperties()
+				.ifPresent(defaults -> defaults.entrySet().stream()
+						.filter(e -> e.getValue() != null)
+						.filter(e -> e.getKey().toString().startsWith(platformTypePrefix))
+						.forEach(e -> appDeployTimeProperties.putIfAbsent(
+								e.getKey().toString().replaceFirst(platformTypePrefix, ""), e.getValue().toString())));
 	}
 
 	/**

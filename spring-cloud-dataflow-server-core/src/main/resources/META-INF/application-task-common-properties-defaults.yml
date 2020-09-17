@@ -1,6 +1,12 @@
-management:
-  metrics:
-    tags:
-      # Tags required to use the Wavefront Spring Boot tile.
-      application: ${task.name:unknown}-${task.execution.id:unknown}
-      service: "task application"
+common:
+  management:
+    metrics:
+      tags:
+        application: ${task.name:unknown}-${task.execution.id:unknown}
+        service: "task application"
+
+local:
+
+kubernetes:
+
+cloudfoundry:

@@ -1,4 +1,5 @@
-my:
-  test:
-    static.property: "Test"
-    property.with.placeholder: ${my.placeholder}
+common:
+  my:
+    test:
+      static.property: "Test"
+      property.with.placeholder: ${my.placeholder}

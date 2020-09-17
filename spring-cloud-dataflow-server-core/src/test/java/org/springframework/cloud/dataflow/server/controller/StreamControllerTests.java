@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,7 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
+import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -145,8 +147,10 @@ public class StreamControllerTests {
 		streamStatusInfo.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		when(skipperClient.status(anyString())).thenReturn(streamStatusInfo);
 
-		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
-		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
+		Deployer deployerLocal = new Deployer("default", "local", mock(AppDeployer.class));
+		Deployer deployerK8s = new Deployer("k8s", "kubernetes", mock(AppDeployer.class));
+		Deployer deployerCf = new Deployer("pcf", "cloudfoundry", mock(AppDeployer.class));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployerLocal, deployerK8s, deployerCf));
 
 		when(skipperClient.search(anyString(), eq(false))).thenReturn(new ArrayList<PackageMetadata>());
 	}
@@ -1110,27 +1114,72 @@ public class StreamControllerTests {
 	}
 
 	@Test
-	public void testDefaultApplicationPropertiesYamlResource() throws Exception {
+	public void testDefaultApplicationPropertiesYamlResourceNoPlatform() throws Exception {
 		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
-				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"));
+				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"), new HashMap<>());
 	}
 
 	@Test
-	public void testDefaultApplicationPropertiesPropertyResource() throws Exception {
+	public void testDefaultApplicationPropertiesYamlResourceNoPlatformDefault() throws Exception {
 		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
-				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"));
+				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "default"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesYamlResourceNoPlatformPcf() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "pcf"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesYamlResourceNoPlatformK8s() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.yml"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "k8s"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesPropertyResourceNoPlatform() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"),
+				Collections.emptyMap());
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesPropertyResourceK8s() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "k8s"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesPropertyResourceDefault() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "default"));
+	}
+
+	@Test
+	public void testDefaultApplicationPropertiesPropertyResourcePCF() throws Exception {
+		testDefaultApplicationPropertiesResource(new DefaultResourceLoader().getResource(
+				"classpath:/defaults/test-application-stream-common-properties-defaults.properties"),
+				Collections.singletonMap(SkipperStream.SKIPPER_PLATFORM_NAME, "pcf"));
 	}
 
 
-	private void testDefaultApplicationPropertiesResource(Resource newResource) throws Exception {
+	private void testDefaultApplicationPropertiesResource(Resource newResource, Map<String, String> skipperProperties) throws Exception {
 		Resource oldResource = appsProperties.getStreamResource();
 
 		try {
 			repository.save(new StreamDefinition("myStream", "time | log"));
-
 			appsProperties.setStreamResource(newResource);
-
-			mockMvc.perform(post("/streams/deployments/myStream")).andExpect(status().isCreated());
+			mockMvc.perform(
+					post("/streams/deployments/myStream")
+							.content(new ObjectMapper().writeValueAsBytes(skipperProperties))
+							.contentType(MediaType.APPLICATION_JSON)
+			).andExpect(status().isCreated());
 
 			ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
 			verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
@@ -1142,8 +1191,10 @@ public class StreamControllerTests {
 			List<InstallRequest> installRequests = installRequestCaptor.getAllValues();
 			assertThat(installRequests).hasSize(1);
 
+			String platformName = skipperProperties.getOrDefault(SkipperStream.SKIPPER_PLATFORM_NAME, "default");
+
 			InstallRequest installRequest = installRequests.iterator().next();
-			assertThat(installRequest.getInstallProperties().getPlatformName()).isEqualTo("default");
+			assertThat(installRequest.getInstallProperties().getPlatformName()).isEqualTo(platformName);
 			assertThat(installRequest.getInstallProperties().getReleaseName()).isEqualTo("myStream");
 			assertThat(installRequest.getPackageIdentifier().getRepositoryName()).isEqualTo("local");
 			assertThat(installRequest.getPackageIdentifier().getPackageName()).isEqualTo("myStream");
@@ -1159,6 +1210,18 @@ public class StreamControllerTests {
 			// Check for the presence of defaults/test-application-stream-common-properties-defaults.yml properties.
 			assertThat(logSpec.getApplicationProperties().get("my.test.static.property")).isEqualTo("Test");
 			assertThat(logSpec.getApplicationProperties().get("my.test.property.with.placeholder")).isEqualTo("${my.placeholder}");
+			if (platformName.equalsIgnoreCase("default")) {
+				assertThat(logSpec.getApplicationProperties().get("my.local.static.property")).isEqualTo("TestLocal");
+				assertThat(logSpec.getApplicationProperties().get("my.local.property.with.placeholder")).isEqualTo("${my.placeholder.local}");
+			}
+			else if (platformName.equalsIgnoreCase("k8s")) {
+				assertThat(logSpec.getApplicationProperties().get("my.kubernetes.static.property")).isEqualTo("TestKubernetes");
+				assertThat(logSpec.getApplicationProperties().get("my.kubernetes.property.with.placeholder")).isEqualTo("${my.placeholder.kubernetes}");
+			}
+			else if (platformName.equalsIgnoreCase("cloudfoundry")) {
+				assertThat(logSpec.getApplicationProperties().get("my.cloudfoundry.static.property")).isEqualTo("TestCloudfoundry");
+				assertThat(logSpec.getApplicationProperties().get("my.cloudfoundry.property.with.placeholder")).isEqualTo("${my.placeholder.cloudfoundry}");
+			}
 
 			// Default stream metrics tags are overridden and should not be set
 			assertThat(logSpec.getApplicationProperties().get("management.metrics.tags.stream.name")).isNull();
@@ -1184,7 +1247,8 @@ public class StreamControllerTests {
 			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.type")).isNull();
 			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.instance.index")).isNull();
 			assertThat(timeSpec.getApplicationProperties().get("management.metrics.tags.application.guid")).isNull();
-		} finally {
+		}
+		finally {
 			this.appsProperties.setStreamResource(oldResource);
 		}
 	}

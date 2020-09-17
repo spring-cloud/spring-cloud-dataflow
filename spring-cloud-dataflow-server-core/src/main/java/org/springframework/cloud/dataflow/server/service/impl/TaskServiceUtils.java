@@ -273,10 +273,14 @@ public class TaskServiceUtils {
 	 * @param defaultProperties Default properties, if any, to contribute to the launch app properties.
 	 * @param appDeploymentProperties App deployment properties passed to the Task at launch.
 	 */
-	public static void contributeCommonProperties(Optional<Properties> defaultProperties, Map<String, String> appDeploymentProperties) {
+	public static void contributeCommonProperties(Optional<Properties> defaultProperties,
+			Map<String, String> appDeploymentProperties, String taskPlatformType) {
+		String taskPlatformTypePrefix = taskPlatformType.toLowerCase() + ".";
 		defaultProperties.ifPresent(defaults -> defaults.entrySet().stream()
 				.filter(e -> e.getValue() != null)
-				.forEach(e -> appDeploymentProperties.putIfAbsent(e.getKey().toString(), e.getValue().toString())));
+				.filter(e -> e.getKey().toString().startsWith(taskPlatformTypePrefix))
+				.forEach(e -> appDeploymentProperties.putIfAbsent(
+						e.getKey().toString().replaceFirst(taskPlatformTypePrefix, ""), e.getValue().toString())));
 
 	}
 }
