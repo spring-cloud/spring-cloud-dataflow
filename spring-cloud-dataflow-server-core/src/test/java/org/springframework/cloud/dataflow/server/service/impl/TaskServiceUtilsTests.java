@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -32,6 +33,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -47,7 +49,7 @@ public class TaskServiceUtilsTests {
 	public static final String BASE_GRAPH = "AAA && BBB";
 
 	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
+	public ExpectedException expectedException;
 
 	@Test
 	public void testCreateComposedTaskDefinition() {
@@ -58,16 +60,18 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullNameCheck() {
-		this.expectedException.expect(IllegalArgumentException.class);
-		TaskConfigurationProperties props = new TaskConfigurationProperties();
-		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
-		TaskServiceUtils.createComposedTaskDefinition(null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			TaskConfigurationProperties props = new TaskConfigurationProperties();
+			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
+			TaskServiceUtils.createComposedTaskDefinition(null);
+		});
 	}
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullProperties() {
-		this.expectedException.expect(IllegalArgumentException.class);
-		TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, null);
+		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, null);
+		});
 	}
 
 	@Test
@@ -88,16 +92,11 @@ public class TaskServiceUtilsTests {
 	@Test
 	public void testDatabasePropUpdate() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
-		DataSourceProperties dataSourceProperties = new DataSourceProperties();
-		dataSourceProperties.setUsername("myUser");
-		dataSourceProperties.setDriverClassName("myDriver");
-		dataSourceProperties.setPassword("myPassword");
-		dataSourceProperties.setUrl("myUrl");
+		DataSourceProperties dataSourceProperties = getDataSourceProperties();
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
 				dataSourceProperties);
 
-		assertThat(definition.getProperties().size()).isEqualTo(5);
 		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
 		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
 		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
@@ -107,18 +106,58 @@ public class TaskServiceUtilsTests {
 	@Test
 	public void testDatabasePropUpdateWithPlatform() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
-		DataSourceProperties dataSourceProperties = new DataSourceProperties();
-		dataSourceProperties.setUsername("myUser");
-		dataSourceProperties.setDriverClassName("myDriver");
-		dataSourceProperties.setPassword("myPassword");
-		dataSourceProperties.setUrl("myUrl");
+		DataSourceProperties dataSourceProperties = getDataSourceProperties();
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
 				dataSourceProperties, false);
 
-		assertThat(definition.getProperties().size()).isEqualTo(3);
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		validateProperties(definition, 3);
 		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+	}
+
+	@Test
+	public void testDatabasePropUpdateWithPlatformForUserDriverClassName() {
+		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.driverClassName", "foobar");
+		validateProperties(definition, 2);
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("foobar");
+
+		definition = createUpdatedDefinitionForProperty("spring.datasource.driver-class-name", "feebar");
+		validateProperties(definition, 2);
+		assertThat(definition.getProperties().get("spring.datasource.driver-class-name")).isEqualTo("feebar");
+
+		definition = createUpdatedDefinitionForProperty(null, null);
+		validateProperties(definition, 2);
+		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+	}
+
+	@Test
+	public void testDatabasePropUpdateWithPlatformForUrl() {
+		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.url", "newurl");
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("newurl");
+
+		definition = createUpdatedDefinitionForProperty(null, null);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+	}
+
+	private TaskDefinition createUpdatedDefinitionForProperty(String key, String value) {
+		Map<String, String> props = new HashMap<>();
+		if(StringUtils.hasText(key) && StringUtils.hasText(value)) {
+			props.put(key, value);
+		}
+		TaskDefinition taskDefinition = (new TaskDefinition.TaskDefinitionBuilder()).
+				addProperties(props).
+				setTaskName("testTask").
+				setRegisteredAppName("testApp").
+				build();
+		DataSourceProperties dataSourceProperties = getDataSourceProperties();
+		return TaskServiceUtils.updateTaskProperties(
+				taskDefinition,
+				dataSourceProperties, false);
+	}
+
+	private void validateProperties(TaskDefinition definition, int size) {
+		assertThat(definition.getProperties().size()).isEqualTo(size);
+		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
 		assertThat(definition.getProperties().get("spring.datasource.username")).isNull();
 		assertThat(definition.getProperties().get("spring.datasource.password")).isNull();
 	}
@@ -200,5 +239,14 @@ public class TaskServiceUtilsTests {
 	private TaskNode parse(String dsltext) {
 		TaskNode ctn = new TaskParser("test", dsltext, true, true).parse();
 		return ctn;
+	}
+
+	private DataSourceProperties getDataSourceProperties() {
+		DataSourceProperties dataSourceProperties = new DataSourceProperties();
+		dataSourceProperties.setUsername("myUser");
+		dataSourceProperties.setDriverClassName("myDriver");
+		dataSourceProperties.setPassword("myPassword");
+		dataSourceProperties.setUrl("myUrl");
+		return dataSourceProperties;
 	}
 }
