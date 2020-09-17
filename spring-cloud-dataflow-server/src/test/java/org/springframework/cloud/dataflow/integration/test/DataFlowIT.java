@@ -415,8 +415,8 @@ public class DataFlowIT {
 					.contains("Updated TICKTOCK - TIMESTAMP:"));
 
 			assertThat(stream.history().size()).isEqualTo(2);
-			assertThat(stream.history().get(1)).isEqualTo(DELETED);
-			assertThat(stream.history().get(2)).isEqualTo(DEPLOYED);
+			Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
+			Awaitility.await().until(() -> stream.history().get(2).equals(DEPLOYED));
 
 			// ROLLBACK
 			logger.info("stream-lifecycle-test: ROLLBACK");
