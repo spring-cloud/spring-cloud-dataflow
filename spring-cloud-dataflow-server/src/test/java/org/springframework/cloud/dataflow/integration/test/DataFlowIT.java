@@ -385,7 +385,7 @@ public class DataFlowIT {
 		logger.info("stream-lifecycle-test: DEPLOY");
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("lifecycle-test")
-				.definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
+				.definition("time | log --log.name=\"\" --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create()
 				.deploy(testDeploymentProperties())) {
 
