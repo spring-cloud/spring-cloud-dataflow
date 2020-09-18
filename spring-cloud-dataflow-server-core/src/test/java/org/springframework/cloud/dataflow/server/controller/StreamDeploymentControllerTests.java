@@ -190,12 +190,49 @@ public class StreamDeploymentControllerTests {
 		streamAppDefinitions.add(streamAppDefinition2);
 		when(this.streamDefinitionService.redactDsl(any())).thenReturn("time | log");
 
-		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName());
+		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName(), false);
 		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
 		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
 		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
 		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
 		Assert.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.deployed.name());
+	}
+
+	@Test
+	public void testReuseDeploymentProperties() {
+		Map<String, String> deploymentProperties1 = new HashMap<>();
+		deploymentProperties1.put("test1", "value1");
+		Map<String, String> deploymentProperties2 = new HashMap<>();
+		deploymentProperties2.put("test2", "value2");
+		Map<String, Map<String, String>> streamDeploymentProperties = new HashMap<>();
+		streamDeploymentProperties.put("time", deploymentProperties1);
+		streamDeploymentProperties.put("log", deploymentProperties2);
+		Map<String, String> appVersions = new HashMap<>();
+		appVersions.put("time", "1.0.0.BUILD-SNAPSHOT");
+		appVersions.put("log", "1.0.0.BUILD-SNAPSHOT");
+		StreamDefinition streamDefinition = new StreamDefinition("testStream1", "time | log");
+		StreamDeployment streamDeployment = new StreamDeployment(streamDefinition.getName(),
+				new JSONObject(streamDeploymentProperties).toString());
+		Map<StreamDefinition, DeploymentState> streamDeploymentStates = new HashMap<>();
+		streamDeploymentStates.put(streamDefinition, DeploymentState.undeployed);
+
+		StreamAppDefinition streamAppDefinition1 = new StreamAppDefinition("time", "time", ApplicationType.source, streamDefinition.getName(), new HashMap<>());
+		StreamAppDefinition streamAppDefinition2 = new StreamAppDefinition("log", "log", ApplicationType.sink, streamDefinition.getName(), new HashMap<>());
+
+		when(this.streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
+		when(this.streamService.info(streamDefinition.getName())).thenReturn(streamDeployment);
+		when(this.streamService.state(anyList())).thenReturn(streamDeploymentStates);
+		LinkedList<StreamAppDefinition> streamAppDefinitions = new LinkedList<>();
+		streamAppDefinitions.add(streamAppDefinition1);
+		streamAppDefinitions.add(streamAppDefinition2);
+		when(this.streamDefinitionService.redactDsl(any())).thenReturn("time | log");
+
+		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName(), true);
+		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
+		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
+		Assert.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.undeployed.name());
 	}
 
 }
