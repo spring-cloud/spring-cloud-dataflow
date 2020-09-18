@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.core.dsl.SinkDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.SourceDestinationNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Builds a list of {@link StreamAppDefinition StreamAppDefinitions} out of a parsed
@@ -84,7 +85,8 @@ class StreamApplicationDefinitionBuilder {
 						builder.setProperty(BindingPropertyKeys.OUTPUT_CONTENT_TYPE, argument.getValue());
 					}
 					else {
-						builder.setProperty(argument.getName(), argument.getValue());
+						String value = StringUtils.hasText(argument.getValue()) ? argument.getValue() : "\\\"\\\"";
+						builder.setProperty(argument.getName(), value);
 					}
 				}
 			}
