@@ -236,4 +236,19 @@ public class TaskServiceUtils {
 		}
 		return result;
 	}
+
+	/**
+	 * Determines if a database credentials should be added to task properties.
+	 * @param platformType The type of platform.
+	 * @param useKubernetesSecrets User wants to use kubernetes secrets for user name and password.
+	 * @return true if database credentials should be added to task properties.
+	 */
+	public static boolean addDatabaseCredentials(boolean useKubernetesSecrets, String platformType) {
+		boolean addDatabaseCredentials = false;
+		if(!useKubernetesSecrets ||
+				!StringUtils.hasText(platformType) || !platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			addDatabaseCredentials = true;
+		}
+		return addDatabaseCredentials;
+	}
 }
