@@ -41,6 +41,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -121,6 +122,23 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				delete("/streams/deployments"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document());
+	}
+
+
+	@Test
+	public void info() throws Exception {
+		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
+		this.mockMvc.perform(
+				get("/streams/deployments/{timelog}?reuse-deployment-properties=true", "timelog")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(json))
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("timelog")
+								.description("The name of an existing stream definition (required)")),
+						requestParameters(parameterWithName("reuse-deployment-properties")
+								.description(parameterWithName("The name of the flag to reuse the deployment properties")))
+				));
 	}
 
 	@Test

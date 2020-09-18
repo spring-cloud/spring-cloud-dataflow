@@ -46,6 +46,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -182,8 +183,9 @@ public class StreamDeploymentController {
 	 * @return The stream deployment
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.CREATED)
-	public StreamDeploymentResource info(@PathVariable("name") String name) {
+	@ResponseStatus(HttpStatus.OK)
+	public StreamDeploymentResource info(@PathVariable("name") String name,
+			@RequestParam(value = "reuse-deployment-properties", required = false) Boolean reuseDeploymentProperties) {
 		StreamDefinition streamDefinition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);
@@ -195,7 +197,7 @@ public class StreamDeploymentController {
 			final DeploymentStateResource deploymentStateResource = ControllerUtils.mapState(deploymentState);
 			status = deploymentStateResource.getKey();
 		}
-		return new Assembler(streamDefinition.getDslText(), streamDefinition.getDescription(), status)
+		return new Assembler(streamDefinition.getDslText(), streamDefinition.getDescription(), status, reuseDeploymentProperties)
 				.toModel(streamDeployment);
 	}
 
@@ -225,11 +227,14 @@ public class StreamDeploymentController {
 
 		private final String description;
 
-		public Assembler(String dslText, String description, String status) {
+		private boolean reuseDeploymentProperties;
+
+		public Assembler(String dslText, String description, String status, boolean reuseDeploymentProperties) {
 			super(StreamDeploymentController.class, StreamDeploymentResource.class);
 			this.dslText = dslText;
 			this.description = description;
 			this.status = status;
+			this.reuseDeploymentProperties = reuseDeploymentProperties;
 		}
 
 		@Override
@@ -246,7 +251,8 @@ public class StreamDeploymentController {
 		@Override
 		public StreamDeploymentResource instantiateModel(StreamDeployment streamDeployment) {
 			String deploymentProperties = "";
-			if (StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties()) {
+			if (this.reuseDeploymentProperties ||
+					(StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties())) {
 				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
 				return new StreamDeploymentResource(streamDeployment.getStreamName(),
