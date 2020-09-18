@@ -31,9 +31,14 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -296,6 +301,15 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
 		this.jobRepository.update(jobExecution);
+		TaskManifest manifest = new TaskManifest();
+		manifest.setPlatformName("default");
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+
+		DataflowTaskExecutionMetadataDao metadataDao = new JdbcDataflowTaskExecutionMetadataDao(
+				dataSource, incrementerFactory.getIncrementer("h2", "task_execution_metadata_seq"));
+		TaskManifest taskManifest = new TaskManifest();
+		taskManifest.setPlatformName("default");
+		metadataDao.save(taskExecution, taskManifest);
 	}
 
 }

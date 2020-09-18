@@ -142,11 +142,8 @@ public class TaskAppDeploymentRequestCreator {
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName) {
 		List<String> results = new ArrayList();
 		commandLineArgs.stream()
-				.filter(arg -> !arg.startsWith(TASK_EXECUTION_KEY)
-						&& !arg.startsWith(PLATFORM_NAME_KEY))
+				.filter(arg -> !arg.startsWith(TASK_EXECUTION_KEY))
 				.forEach(results::add);
-
-		results.add(PLATFORM_NAME_KEY + platformName);
 		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
 		return results;
 	}
@@ -155,11 +152,9 @@ public class TaskAppDeploymentRequestCreator {
 		List<String> results = new ArrayList();
 		commandLineArgs.stream()
 				.filter(arg -> !arg.startsWith(TASK_EXECUTION_KEY)
-						&& !arg.startsWith(PLATFORM_NAME_KEY)
 						&& !arg.startsWith(TASK_EXECUTION_APP_NAME))
 				.forEach(results::add);
 
-		results.add(PLATFORM_NAME_KEY + platformName);
 		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
 		results.add(TASK_EXECUTION_APP_NAME + appName);
 		return results;
