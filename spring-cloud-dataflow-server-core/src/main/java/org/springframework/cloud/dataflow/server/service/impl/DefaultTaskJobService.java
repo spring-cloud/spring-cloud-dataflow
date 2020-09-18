@@ -36,6 +36,7 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
@@ -181,9 +182,10 @@ public class DefaultTaskJobService implements TaskJobService {
 		}
 
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		String platformName = getPlatformFromTaskExecution(taskExecution.getArguments());
+		String platformName = taskManifest.getPlatformName();
 		if (platformName != null) {
 			Map<String, String> deploymentProperties = new HashMap<>();
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
@@ -195,18 +197,6 @@ public class DefaultTaskJobService implements TaskJobService {
 					taskExecution.getTaskName(),taskJobExecution.getTaskId()));
 		}
 
-	}
-
-	private String getPlatformFromTaskExecution(List<String> taskExecutionArgs) {
-		final String platformPrefix = "--spring.cloud.data.flow.platformname=";
-		String result = null;
-		for(String arg : taskExecutionArgs) {
-			if(arg.startsWith(platformPrefix)) {
-				result = arg.substring(platformPrefix.length());
-				break;
-			}
-		}
-		return result;
 	}
 
 	/**
