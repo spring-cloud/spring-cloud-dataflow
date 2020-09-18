@@ -399,7 +399,7 @@ public class DataFlowIT {
 					.contains("TICKTOCK - TIMESTAMP:"));
 
 			assertThat(stream.history().size()).isEqualTo(1L);
-			assertThat(stream.history().get(1)).isEqualTo(DEPLOYED);
+			Awaitility.await().until(() -> stream.history().get(1).equals(DEPLOYED));
 
 			// UPDATE
 			logger.info("stream-lifecycle-test: UPDATE");
@@ -429,9 +429,9 @@ public class DataFlowIT {
 					.contains("TICKTOCK - TIMESTAMP:"));
 
 			assertThat(stream.history().size()).isEqualTo(3);
-			assertThat(stream.history().get(1)).isEqualTo(DELETED);
-			assertThat(stream.history().get(2)).isEqualTo(DELETED);
-			assertThat(stream.history().get(3)).isEqualTo(DEPLOYED);
+			Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
+			Awaitility.await().until(() -> stream.history().get(2).equals(DELETED));
+			Awaitility.await().until(() -> stream.history().get(3).equals(DEPLOYED));
 
 			// UNDEPLOY
 			logger.info("stream-lifecycle-test: UNDEPLOY");
@@ -441,9 +441,9 @@ public class DataFlowIT {
 			assertThat(stream.getStatus()).isEqualTo(UNDEPLOYED);
 
 			assertThat(stream.history().size()).isEqualTo(3);
-			assertThat(stream.history().get(1)).isEqualTo(DELETED);
-			assertThat(stream.history().get(2)).isEqualTo(DELETED);
-			assertThat(stream.history().get(3)).isEqualTo(DELETED);
+			Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
+			Awaitility.await().until(() -> stream.history().get(2).equals(DELETED));
+			Awaitility.await().until(() -> stream.history().get(3).equals(DELETED));
 
 			assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(1L);
 			// DESTROY
