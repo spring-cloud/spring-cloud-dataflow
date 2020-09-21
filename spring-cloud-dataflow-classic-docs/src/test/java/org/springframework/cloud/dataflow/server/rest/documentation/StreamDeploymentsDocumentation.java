@@ -132,7 +132,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				get("/streams/deployments/{timelog}?reuse-deployment-properties=true", "timelog")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
