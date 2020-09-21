@@ -62,14 +62,14 @@
 		<spring-cloud-deployer-local.version>2.4.1</spring-cloud-deployer-local.version>
 
 
-		<spring-cloud-deployer-cloudfoundry.version>2.4.2-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.4.2-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.4.2</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.4.2</spring-cloud-deployer-kubernetes.version>
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
 
 		<spring-cloud-skipper.version>2.5.2-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.4.BUILD-SNAPSHOT</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.3</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
