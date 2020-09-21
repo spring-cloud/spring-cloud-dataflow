@@ -23,6 +23,7 @@ import java.util.Arrays;
 
 import com.palantir.docker.compose.DockerComposeExtension;
 import com.palantir.docker.compose.configuration.DockerComposeFiles;
+import com.palantir.docker.compose.configuration.ProjectName;
 import com.palantir.docker.compose.connection.DockerMachine;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -82,24 +83,31 @@ public class DockerComposeFactory {
 			"docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
 			"docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
 			//"docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
+			//"docker-compose-wavefront.yml",     // metrics collection/visualization with Wavefront.
 			//"docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
 			//"docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
 			//"docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
 			//"docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
 	};
 
+	private static boolean isDood = DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOOD, false);
 	/**
 	 * Initialize the docker machine with the required environment variables.
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
+			.withAdditionalEnvironmentVariable("APPS_PORT_RANGE",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, (isDood ? "80" : "")))
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, DEFAULT_DATAFLOW_VERSION))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, DEFAULT_SKIPPER_VERSION))
 			.withAdditionalEnvironmentVariable("STREAM_APPS_URI",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, DEFAULT_STREAM_APPS_URI))
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)))
 			.withAdditionalEnvironmentVariable("TASK_APPS_URI",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, DEFAULT_TASK_APPS_URI))
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)))
+			.withAdditionalEnvironmentVariable("DOCKER_DELETE_CONTAINER_ON_EXIT",
+					"" + DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT, true))
+			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")
 			.build();
 
 	public static Extension startDockerCompose(Path tempFolder) {
@@ -113,17 +121,29 @@ public class DockerComposeFactory {
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN,
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, DEFAULT_SKIPPER_VERSION));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, DEFAULT_STREAM_APPS_URI));
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, DEFAULT_TASK_APPS_URI));
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PATHS,
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
+		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE,
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, (isDood ? "80" : "")));
 
 		String[] dockerComposePaths = new ResourceExtractor(tempFolder).extract(
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
+
+		// If DooD is enabled but the docker-compose-dood.yml is not listed in the dockerComposePaths then
+		// add it explicitly at the end of the list.
+		if (isDood && (!Arrays.asList(dockerComposePaths).contains("docker-compose-dood.yml"))) {
+			String[] dockerComposePathsEx = new String[dockerComposePaths.length + 1];
+			System.arraycopy(dockerComposePaths, 0, dockerComposePathsEx, 0, dockerComposePaths.length);
+			dockerComposePathsEx[dockerComposePaths.length] = "docker-compose-dood.yml";
+			dockerComposePaths = dockerComposePathsEx;
+		}
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
 		return DockerComposeExtension.builder()
+				.projectName(ProjectName.fromString("scdf"))
 				.files(DockerComposeFiles.from(dockerComposePaths))
 				.machine(dockerMachine)
 				.saveLogsTo("target/dockerLogs/DockerComposeIT")

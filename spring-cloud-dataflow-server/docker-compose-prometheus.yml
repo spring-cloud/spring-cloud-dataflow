@@ -35,11 +35,11 @@ services:
 
   skipper-server:
     environment:
-      - management.metrics.export.prometheus.enabled=true
-      - management.metrics.export.prometheus.rsocket.enabled=true
-      - management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy
-      - management.metrics.export.prometheus.rsocket.port=7001
-      - spring.jpa.properties.hibernate.generate_statistics=true
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST=prometheus-rsocket-proxy
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT=7001
+      - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
 
   prometheus-rsocket-proxy:
     image: micrometermetrics/prometheus-rsocket-proxy:1.0.0

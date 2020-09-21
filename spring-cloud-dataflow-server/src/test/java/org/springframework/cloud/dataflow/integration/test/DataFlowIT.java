@@ -221,6 +221,7 @@ public class DataFlowIT {
 
 	@Test
 	public void applicationMetadataTests() {
+		logger.info("application-metadata-test");
 		// Maven app with metadata
 		DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
 				.info("file", ApplicationType.sink, false);
@@ -239,7 +240,6 @@ public class DataFlowIT {
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
-
 
 		// Docker app with container image metadata with escape characters.
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,

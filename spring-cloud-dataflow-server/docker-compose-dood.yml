@@ -1,0 +1,71 @@
+version: '3'
+
+# Allows deploying docker (both Stream and Task) apps. The Docker-out-of-Docker (DooD) approach is used to allow Skipper
+# and DataFlow (running inside docker containers) to deploy stream and task docker apps in per-app docker containers.
+#
+# How to use:
+#   APPS_PORT_RANGE=80 \
+#   COMPOSE_PROJECT_NAME=scdf \
+#   STREAM_APPS_URI=https://dataflow.spring.io/kafka-docker-latest \
+#   TASK_APPS_URI=https://dataflow.spring.io/task-docker-latest \
+#   docker-compose -f ./docker-compose.yml -f ./docker-compose-dood.yml up
+#
+# - The docker-compose-dood.yml extends docker-compose.yml by installing the Docker CLI to the DataFlow and Skipper
+#   servers containers and mounting the server's docker sockets to the Host's socket. Therefore allowing the servers to
+#   use the Host's Docker daemon for deploying the apps. The DOCKER_NETWORK property is used to share the docker-compose
+#   network with the app's containers.
+#
+# - Set APPS_PORT_RANGE=80. In non DooD mode the stream apps are java processes running inside the Skipper container.
+#   The APPS_PORT_RANGE is used to let the Skipper's container expose the java's ports to the host. In DooD mode the
+#   apps are running in their own containers and exposing their ports directly. If APPS_PORT_RANGE is not overridden
+#   then both the apps' and Skipper's containers will try to use the same port ranges
+#   leading to conflicts.
+#
+# - COMPOSE_PROJECT_NAME sets the docker-compose project name. Later is used for naming the network passed to the apps
+#   containers (e.g. SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK).
+#
+# - The STREAM_APPS_URI and TASK_APPS_URI are set to register docker based Stream and Task apps.
+#
+# TIPS:
+#  - If docker-compose exit before the data pipelines are stopped then the containers should be cleaned manually:
+#    docker stop $(docker ps -a -q);  docker rm $(docker ps -a -q)
+#  - Set the DOCKER_DELETE_CONTAINER_ON_EXIT=false to retain the stopped docker containers so you can check their logs:
+#    docker logs <container id>
+services:
+  dataflow-server:
+    environment:
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
+      - CHECK_IF_APPS_PORT_RANGE_IS_SET=${APPS_PORT_RANGE:?When DooD is enabled the APPS_PORT_RANGE must be set to 80}
+    entrypoint: >
+      bin/sh -c "
+         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
+         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
+         mv /tmp/docker/docker /usr/local/bin &&
+         ./wait-for-it.sh -t 180 skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  skipper-server:
+    environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
+    entrypoint: >
+      bin/sh -c "
+         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
+         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
+         mv /tmp/docker/docker /usr/local/bin &&
+         ./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Best effort to set default STREAM_APPS_URI and TASK_APPS_URI values. But because those can be overridden by other
+  # composition YAMLs, it is highly recommended to set the STREAM_APPS_URI and TASK_APPS_URI explicitly!
+  app-import:
+    command: >
+      /bin/sh -c "
+        ./wait-for-it.sh -t 360 dataflow-server:9393;
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';
+        echo 'Docker Stream apps imported'
+        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-docker-latest&force=true}';
+        echo 'Docker Task apps imported'"
