@@ -234,11 +234,18 @@ public class DataFlowIT {
 		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
 
 		// Docker app with container image metadata
-		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.sink,
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
 				"docker:springcloudstream/time-source-kafka:2.1.2.BUILD-SNAPSHOT", null, true);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
-				.info("docker-app-with-container-metadata", ApplicationType.sink, false);
+				.info("docker-app-with-container-metadata", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
+
+		// Docker app with container image metadata with escape characters.
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,
+				"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
+		DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
+		assertThat(dockerAppWithContainerMetadataWithEscapeChars.getOptions()).hasSize(6);
 
 		// Docker app without metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,
@@ -256,7 +263,8 @@ public class DataFlowIT {
 		assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
 
 		// unregister the test apps
-		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.sink);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.source);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata-escape-chars", ApplicationType.source);
 		dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
 		dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
 		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);

@@ -50,12 +50,12 @@ public class DockerComposeFactory {
 	/**
 	 * Data Flow version to use for the tests.
 	 */
-	public static final String DEFAULT_DATAFLOW_VERSION = "2.6.0-SNAPSHOT";
+	public static final String DEFAULT_DATAFLOW_VERSION = "2.6.2-SNAPSHOT";
 
 	/**
 	 * Skipper version used for the tests.
 	 */
-	public static final String DEFAULT_SKIPPER_VERSION = "2.5.0-SNAPSHOT";
+	public static final String DEFAULT_SKIPPER_VERSION = "2.5.1";
 
 	/**
 	 * Pre-registered Task apps used for testing.
