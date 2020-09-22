@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Christian Tzolov
+ * @author Ilayaperumal Gopinathan
  */
 public class ApiDocumentation extends BaseDocumentation {
 
@@ -114,8 +115,8 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
 				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),
-				linkWithRel("streams/deployments").description("Provides Stream deployment operations"),
-				linkWithRel("streams/deployments/{name}").description("Request un-deployment of an existing stream"),
+				linkWithRel("streams/deployments/{name}").description("Request deployment info for a stream definition"),
+				linkWithRel("streams/deployments/{name}{?reuse-deployment-properties}").description("Request deployment info for a stream definition"),
 				linkWithRel("streams/deployments/deployment").description("Request (un-)deployment of an existing stream definition"),
 				linkWithRel("streams/deployments/manifest/{name}/{version}").description("Return a manifest info of a release version"),
 				linkWithRel("streams/deployments/history/{name}").description("Get stream's deployment history as list or Releases for this release"),
@@ -158,9 +159,12 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.streams/logs/{streamName}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/logs/{streamName} is templated"),
 						fieldWithPath("_links.streams/logs/{streamName}/{appName}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/logs/{streamName}/{appName} is templated"),
 
-						fieldWithPath("_links.streams/deployments.href").description("Link to the streams/deployments"),
-						fieldWithPath("_links.streams/deployments/{name}.href").description("Link to the streams/deployments/{name}"),
+						fieldWithPath("_links.streams/deployments/{name}").description("Link streams/deployments/{name} is templated"),
+						fieldWithPath("_links.streams/deployments/{name}.href").description("Link streams/deployments/{name} is templated"),
 						fieldWithPath("_links.streams/deployments/{name}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/{name} is templated"),
+						fieldWithPath("_links.streams/deployments/{name}{?reuse-deployment-properties}.href").description("Link streams/deployments/{name} is templated"),
+						fieldWithPath("_links.streams/deployments/{name}{?reuse-deployment-properties}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/{name} is templated"),
+						fieldWithPath("_links.streams/deployments").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/{name} is templated"),
 						fieldWithPath("_links.streams/deployments/deployment.href").description("Link to the streams/deployments/deployment"),
 						fieldWithPath("_links.streams/deployments/deployment.templated").type(JsonFieldType.BOOLEAN).optional().description("Link streams/deployments/deployment is templated"),
 						fieldWithPath("_links.streams/deployments/manifest/{name}/{version}.href").description("Link to the streams/deployments/manifest/{name}/{version}"),
