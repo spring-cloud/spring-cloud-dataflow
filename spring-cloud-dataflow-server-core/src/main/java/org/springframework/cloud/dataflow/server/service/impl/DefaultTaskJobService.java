@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,15 @@ public class DefaultTaskJobService implements TaskJobService {
 		Assert.notNull(pageable, "pageable must not be null");
 		return getTaskJobExecutionsForList(
 				jobService.listJobExecutionsForJob(jobName, status, getPageOffset(pageable), pageable.getPageSize()));
+	}
+
+	@Override
+	public List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable,
+			Date fromDate, Date toDate) {
+		Assert.notNull(pageable, "pageable must not be null");
+		return getTaskJobExecutionsWithStepCountForList(
+				jobService.listJobExecutionsForJobWithStepCount(fromDate, toDate, getPageOffset(pageable),
+						pageable.getPageSize()));
 	}
 
 	@Override

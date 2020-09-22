@@ -145,6 +145,33 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listThinJobExecutionsByDate() throws Exception {
+		this.mockMvc.perform(
+				get("/jobs/thinexecutions")
+						.param("page", "0")
+						.param("size", "10")
+						.param("fromDate", "2000-09-24T17:00:45,000")
+						.param("toDate", "2050-09-24T18:00:45,000"))
+				.andDo(print())
+				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+				requestParameters(
+						parameterWithName("page")
+								.description("The zero-based page number (optional)"),
+						parameterWithName("size")
+								.description("The requested page size (optional)"),
+						parameterWithName("fromDate")
+								.description("Filter result from a starting date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'"),
+						parameterWithName("toDate")
+								.description("Filter result up to the `to` date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'")),
+				responseFields(
+						subsectionWithPath("_embedded.jobExecutionThinResourceList")
+								.description("Contains a collection of Job Executions without step executions included/"),
+						subsectionWithPath("_links.self").description("Link to the job execution resource"),
+						subsectionWithPath("page").description("Pagination properties")
+				)));
+	}
+
+	@Test
 	public void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/executions")
