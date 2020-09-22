@@ -99,7 +99,7 @@
 									<tag>latest</tag>
 									<tag>${project.version}</tag>
 								</tags>
-								<from>springcloud/openjdk:11.0.8</from>
+								<from>springcloud/baseimage:1.0.0</from>
 								<volumes>
 									<volume>/tmp</volume>
 								</volumes>
