@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -33,6 +34,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -108,6 +110,29 @@ public class JobExecutionThinController {
 		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
 		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
 				taskJobService.countJobExecutionsForJob(jobName, null));
+		return assembler.toModel(page, jobAssembler);
+	}
+
+	/**
+	 * Retrieve all task job executions filtered with the date range specified
+	 *
+	 * @param fromDate the date which start date must be greater than.
+	 * @param toDate the date which start date must be less than.
+	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param assembler for the {@link TaskJobExecution}s
+	 * @return list task/job executions with the specified jobName.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 */
+	@RequestMapping(value = "", method = RequestMethod.GET, params = { "fromDate",
+			"toDate" }, produces = "application/json")
+	@ResponseStatus(HttpStatus.OK)
+	public PagedModel<JobExecutionThinResource> retrieveJobsByDateRange(
+			@RequestParam("fromDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date fromDate,
+			@RequestParam("toDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date toDate,
+			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
+		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, fromDate,
+				toDate);
+		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, jobExecutions.size());
 		return assembler.toModel(page, jobAssembler);
 	}
 

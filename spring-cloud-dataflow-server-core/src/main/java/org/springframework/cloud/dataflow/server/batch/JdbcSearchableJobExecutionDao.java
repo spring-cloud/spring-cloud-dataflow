@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
 
-    private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
+	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
+
+	private static final String DATE_RANGE_FILTER = "E.START_TIME BETWEEN ? AND ?";
 
 	private static final String STATUS_FILTER = "E.STATUS = ?";
 
@@ -87,6 +90,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
 	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
+
+	private PagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
 
 	private DataSource dataSource;
 
@@ -121,6 +126,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
         byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
+		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, DATE_RANGE_FILTER);
 
 		super.afterPropertiesSet();
 
@@ -205,6 +211,29 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public int countJobExecutions(String jobName, BatchStatus status) {
 		return getJdbcTemplate().queryForObject(getQuery(GET_COUNT_BY_JOB_NAME_AND_STATUS), Integer.class, jobName, status.name());
+	}
+
+	/**
+	 * @see SearchableJobExecutionDao#getJobExecutionsWithStepCount(Date, Date, int, int)
+	 */
+	@Override
+	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(Date fromDate,
+			Date toDate, int start, int count) {
+
+		if (start <= 0) {
+			return getJdbcTemplate().query(byDateRangeWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					new JobExecutionStepCountRowMapper(), fromDate, toDate);
+		}
+		try {
+			Long startAfterValue = getJdbcTemplate().queryForObject(
+					byDateRangeWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					fromDate, toDate);
+			return getJdbcTemplate().query(byDateRangeWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
+					new JobExecutionStepCountRowMapper(), fromDate, toDate, startAfterValue);
+		}
+		catch (IncorrectResultSizeDataAccessException e) {
+			return Collections.emptyList();
+		}
 	}
 
 	/**

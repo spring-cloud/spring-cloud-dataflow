@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
@@ -174,5 +175,18 @@ public interface TaskJobService {
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status)
+			throws NoSuchJobException;
+
+	/**
+	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
+	 * filtered by the date range.
+	 *
+	 * @param pageable enumerates the data to be returned.
+	 * @param fromDate the date which start date must be greater than.
+	 * @param toDate the date which start date must be less than.
+	 * @return List containing {@link JobExecutionWithStepCount}s.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 */
+	List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, Date fromDate, Date toDate)
 			throws NoSuchJobException;
 }
