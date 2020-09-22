@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -102,16 +103,6 @@ public class TaskServiceUtils {
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
 	 * @param dataSourceProperties the dataSource properties used by SCDF.
-	 * @return the updated {@link TaskDefinition}
-	 */
-	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
-			DataSourceProperties dataSourceProperties) {
-		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
-	}
-	/**
-	 * Updates the task definition with the datasource properties.
-	 * @param taskDefinition the {@link TaskDefinition} to be updated.
-	 * @param dataSourceProperties the dataSource properties used by SCDF.
 	 * @param setDatabaseCredentials if true database username and password that should be set in the {@link TaskDefinition} .
 	 * @return the updated {@link TaskDefinition}
 	 */
@@ -128,8 +119,12 @@ public class TaskServiceUtils {
 			}
 			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
-		builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
-		builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		if(!isPropertyPresent("spring.datasource.url", taskDefinition)) {
+			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
+		}
+		if(!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
+			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
+		}
 		builder.setTaskName(taskDefinition.getTaskName());
 		builder.setDslText(taskDefinition.getDslText());
 		return builder.build();
@@ -227,5 +222,33 @@ public class TaskServiceUtils {
 			taskDeploymentProperties.remove(taskProperty);
 		}
 		return result;
+	}
+
+	private static boolean isPropertyPresent(String property, TaskDefinition taskDefinition) {
+		RelaxedNames relaxedNames = new RelaxedNames(property);
+		boolean result = false;
+		Map<String, String> properties = taskDefinition.getProperties();
+		for (String dataFlowUriKey : relaxedNames) {
+			if (properties.containsKey(dataFlowUriKey)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Determines if a database credentials should be added to task properties.
+	 * @param platformType The type of platform.
+	 * @param useKubernetesSecrets User wants to use kubernetes secrets for user name and password.
+	 * @return true if database credentials should be added to task properties.
+	 */
+	public static boolean addDatabaseCredentials(boolean useKubernetesSecrets, String platformType) {
+		boolean addDatabaseCredentials = false;
+		if(!useKubernetesSecrets ||
+				!StringUtils.hasText(platformType) || !platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			addDatabaseCredentials = true;
+		}
+		return addDatabaseCredentials;
 	}
 }

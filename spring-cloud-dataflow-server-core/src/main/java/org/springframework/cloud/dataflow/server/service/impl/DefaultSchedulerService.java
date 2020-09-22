@@ -141,6 +141,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
+		AppRegistration appRegistration;
 		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
 		if (taskNode.isComposed()) {
@@ -148,14 +149,24 @@ public class DefaultSchedulerService implements SchedulerService {
 					TaskServiceUtils.createComposedTaskDefinition(
 							taskNode.toExecutableDSL()));
 			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
+			try {
+				appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+						ApplicationType.task,
+						new URI(this.taskConfigurationProperties.getComposedTaskRunnerUri()));
+			}
+			catch (URISyntaxException e) {
+				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
+			}
 		}
-
-		AppRegistration appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
+		else {
+			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+					ApplicationType.task);
+		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
-
-		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties);
+		Launcher launcher = getTaskLauncher(platformName);
+		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties,
+				TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), launcher.getType()));
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
@@ -171,7 +182,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
 
-		Launcher launcher = getTaskLauncher(platformName);
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
 
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
@@ -396,4 +406,5 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);
 	}
+
 }

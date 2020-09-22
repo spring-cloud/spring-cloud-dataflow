@@ -194,8 +194,10 @@ public class StreamDefinitionController {
 		List<AppRegistrationResource> appRegistrations = new ArrayList<>();
 		AppRegistryAssembler appRegistryAssembler = new AppRegistryAssembler();
 		for (StreamAppDefinition streamAppDefinition: streamAppDefinitions) {
-			appRegistrations.add(appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
-					streamAppDefinition.getApplicationType())));
+			AppRegistrationResource appRegistrationResource = appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
+					streamAppDefinition.getApplicationType()));
+			appRegistrationResource.setLabel(streamAppDefinition.getName());
+			appRegistrations.add(appRegistrationResource);
 		}
 		return appRegistrations;
 	}

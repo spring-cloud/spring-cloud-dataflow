@@ -67,7 +67,7 @@ services:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
 
   app-import:
-    image: springcloud/openjdk:2.0.0.RELEASE
+    image: springcloud/openjdk:11.0.8
     container_name: dataflow-app-import
     depends_on:
       - dataflow-server

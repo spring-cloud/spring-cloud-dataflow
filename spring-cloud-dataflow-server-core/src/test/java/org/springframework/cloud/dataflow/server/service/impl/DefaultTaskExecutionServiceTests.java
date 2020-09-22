@@ -78,6 +78,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -115,6 +116,7 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Daniel Serleg
  * @author David Turanski
+ * @author Chris Schaefer
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
@@ -509,7 +511,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
 		}
-		
+
 		private void setupUpgradeForCommandLineArgsChange() throws IOException {
 			 TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
 			 TaskManifest manifest = new TaskManifest();
@@ -866,6 +868,26 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
 			assertEquals("invalid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void validateInvalidTaskNameTest() {
+			String[] taskNames = { "$task", "task$", "ta_sk" };
+
+			for (String taskName : taskNames) {
+				try {
+					initializeSuccessfulRegistry(appRegistry);
+					taskSaveService.saveTaskDefinition(new TaskDefinition(taskName, "AAA --foo=bar"));
+
+					fail("Expected TaskException");
+				} catch (Exception e) {
+					assertTrue(e instanceof TaskException);
+					assertEquals(e.getMessage(), "Task name must consist of alphanumeric characters or '-', start " +
+							"with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+							" or 'abc-123')");
+				}
+			}
 		}
 
 		@Test

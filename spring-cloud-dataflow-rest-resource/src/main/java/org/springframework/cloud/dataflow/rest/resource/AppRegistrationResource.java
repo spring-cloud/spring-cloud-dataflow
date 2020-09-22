@@ -62,6 +62,11 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	private HashSet<String> versions;
 
 	/**
+	 * The label name of the application.
+	 */
+	private String label;
+
+	/**
 	 * Default constructor for serialization frameworks.
 	 */
 	protected AppRegistrationResource() {
@@ -148,6 +153,14 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 */
 	public HashSet<String> getVersions() {
 		return this.versions;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	/**

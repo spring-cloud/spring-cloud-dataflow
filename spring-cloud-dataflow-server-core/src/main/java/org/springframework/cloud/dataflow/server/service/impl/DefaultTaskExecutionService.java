@@ -331,7 +331,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation;
 		try {
 			 taskExecutionInformation = taskExecutionInfoService
-					.findTaskExecutionInformation(taskName, taskDeploymentProperties, addDatabaseCredentials(platform));
+					.findTaskExecutionInformation(taskName, taskDeploymentProperties,
+							TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform));
 
 		} catch (NoSuchTaskDefinitionException e) {
 			if (autoCreateTaskDefinitions) {
@@ -339,7 +340,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
 				taskSaveService.saveTaskDefinition(taskDefinition);
 				taskExecutionInformation = taskExecutionInfoService
-						.findTaskExecutionInformation(taskName, taskDeploymentProperties, addDatabaseCredentials(platform));
+						.findTaskExecutionInformation(taskName, taskDeploymentProperties,
+								TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform));
 			}
 			else {
 				throw e;
@@ -348,14 +350,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskExecutionInformation;
 	}
 
-	private boolean addDatabaseCredentials(String platform) {
-		boolean addDatabaseCredentials = false;
-		if(!this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials() ||
-				!StringUtils.hasText(platform) || !platform.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
-			addDatabaseCredentials = true;
-		}
-		return addDatabaseCredentials;
-	}
 	/**
 	 * Determines if an OAuth token is available and if so, sets it as a deployment property.
 	 *
