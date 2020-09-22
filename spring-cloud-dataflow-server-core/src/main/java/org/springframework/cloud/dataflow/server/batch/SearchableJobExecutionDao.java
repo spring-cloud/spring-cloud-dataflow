@@ -136,7 +136,7 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	int countJobExecutions(String jobName, BatchStatus status);
 
 	/**
-	 * Get the {@link JobExecutionWithStepCount JobExecutions} for a specific job name in
+	 * Get the {@link JobExecutionWithStepCount JobExecutions} for a specific date range in
 	 * reverse order of creation (so normally of execution).
 	 *
 	 * @param fromDate the date which start date must be greater than.
