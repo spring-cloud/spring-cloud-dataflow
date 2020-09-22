@@ -237,7 +237,16 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public void cleanup(long id) {
-		restTemplate.delete(executionLink.expand(id).getHref());
+		cleanup(id, false);
+	}
+
+	@Override
+	public void cleanup(long id, boolean removeData) {
+	    String uriTemplate = executionLink.expand(id).getHref();
+	    if (removeData) {
+	      uriTemplate = uriTemplate + "?action=CLEANUP,REMOVE_DATA";
+	    }
+	    restTemplate.delete(uriTemplate);
 	}
 
 	@Override
