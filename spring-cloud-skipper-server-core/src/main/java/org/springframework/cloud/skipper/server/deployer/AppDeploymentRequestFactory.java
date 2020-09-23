@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @author Ilayaperumal Gopinathan
  */
 public class AppDeploymentRequestFactory {
-
+	private static final String APP_NAME_PROPERY = AppDeployer.PREFIX + "appName";
 	private static final Logger logger = LoggerFactory.getLogger(AppDeploymentRequestFactory.class);
 
 	private final DelegatingResourceLoader delegatingResourceLoader;
@@ -112,9 +112,9 @@ public class AppDeploymentRequestFactory {
 			logger.debug("Defaulting spring.cloud.deployer.group=" + releaseName);
 			deploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, releaseName);
 		}
-		AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition, resource,
-				deploymentProperties);
-		return appDeploymentRequest;
-	}
 
+		deploymentProperties.put(APP_NAME_PROPERY, applicationSpec.getApplicationName());
+
+		return new AppDeploymentRequest(appDefinition, resource, deploymentProperties);
+	}
 }
