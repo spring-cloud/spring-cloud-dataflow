@@ -172,7 +172,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
 
-		Launcher launcher = getTaskLauncher(platformName);
 		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
 		// Doesn't override existing properties!
 		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
