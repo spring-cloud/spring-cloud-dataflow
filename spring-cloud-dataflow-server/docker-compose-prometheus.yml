@@ -6,12 +6,12 @@ services:
 
   dataflow-server:
     environment:
-      - management.metrics.export.prometheus.enabled=true
-      - management.metrics.export.prometheus.rsocket.enabled=true
-      - management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy
-      - management.metrics.export.prometheus.rsocket.port=7001
-      - spring.jpa.properties.hibernate.generate_statistics=true
-      - spring.cloud.dataflow.metrics.dashboard.url=http://localhost:3000
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST=prometheus-rsocket-proxy
+      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT=7001
+      - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
+      - SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL=http://localhost:3000
 
   skipper-server:
     environment:
