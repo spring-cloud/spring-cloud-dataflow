@@ -132,10 +132,10 @@ public class TaskServiceUtils {
 			}
 			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
-		if(!isPropertyPresent("spring.datasource.url", taskDefinition)) {
+		if (!isPropertyPresent("spring.datasource.url", taskDefinition)) {
 			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		}
-		if(!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
+		if (!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
 			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
 		}
 		builder.setTaskName(taskDefinition.getTaskName());
@@ -258,7 +258,7 @@ public class TaskServiceUtils {
 	 */
 	public static boolean addDatabaseCredentials(boolean useKubernetesSecrets, String platformType) {
 		boolean addDatabaseCredentials = false;
-		if(!useKubernetesSecrets ||
+		if (!useKubernetesSecrets ||
 				!StringUtils.hasText(platformType) || !platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
 			addDatabaseCredentials = true;
 		}
