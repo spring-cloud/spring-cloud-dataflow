@@ -185,7 +185,7 @@ public class StreamDeploymentController {
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDeploymentResource info(@PathVariable("name") String name,
-			@RequestParam(value = "reuse-deployment-properties", required = false) Boolean reuseDeploymentProperties) {
+			@RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties) {
 		StreamDefinition streamDefinition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);
