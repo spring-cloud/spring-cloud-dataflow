@@ -41,7 +41,7 @@
 		<spring-cloud-deployer-cloudfoundry.version>2.5.0-M1</spring-cloud-deployer-cloudfoundry.version>
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
-		<spring-cloud-deployer-kubernetes.version>2.5.0-M1</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.5.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
 		<!-- Upgrade until boot have this -->
 		<spring-hateoas.version>1.1.1.RELEASE</spring-hateoas.version>
