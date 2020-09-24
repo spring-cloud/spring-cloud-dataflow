@@ -563,4 +563,11 @@ public class TaskControllerTests {
 				.andDo(print()).andExpect(status().isOk());
 
 	}
+
+	@Test
+	public void testSaveErrorTaskNameTooLong() throws Exception {
+		mockMvc.perform(post("/tasks/definitions/")
+				.param("name", "task_with_name_longer_than_fifty_two_characters_error").param("definition", "task")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is5xxServerError());
+	}
 }
