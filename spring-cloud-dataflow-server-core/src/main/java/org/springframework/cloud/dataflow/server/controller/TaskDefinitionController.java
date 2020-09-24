@@ -124,6 +124,7 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
 									   @RequestParam(value = "description", defaultValue = "") String description) {
+		validateTaskName(name);
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(taskDefinition);
 		return new Assembler().toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
@@ -354,4 +355,10 @@ public class TaskDefinitionController {
 			}
 		}
 	};
+
+	private void validateTaskName(String name) {
+		if (name.length() > 52) {
+			throw new IllegalArgumentException("Length of the task name cannot be greater than 52 characters");
+		}
+	}
 }
