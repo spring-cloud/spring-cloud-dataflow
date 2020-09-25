@@ -163,15 +163,23 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
-			@RequestParam(required = false) boolean manifest,
+			@RequestParam(required = false) boolean manifest, @RequestParam(required = false) String dslText,
 			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
 		if (search != null) {
-			taskDefinitions = repository.findByTaskNameContains(search, pageable);
+			if (dslText != null) {
+				taskDefinitions = repository.findByTaskNameContainsAndDslTextContains(search, dslText, pageable);
+			} else {
+				taskDefinitions = repository.findByTaskNameContains(search, pageable);
+			}
 		}
 		else {
-			taskDefinitions = repository.findAll(pageable);
+			if (dslText != null) {
+				taskDefinitions = repository.findByDslTextContains(dslText, pageable);
+			} else {
+				taskDefinitions = repository.findAll(pageable);
+			}
 		}
 
 		final java.util.HashMap<String, TaskDefinition> taskDefinitionMap = new java.util.HashMap<>();
