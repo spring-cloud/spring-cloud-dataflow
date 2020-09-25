@@ -23,6 +23,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -112,12 +113,14 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByDateRange() throws Exception {
 		final Date toDate = new Date();
 		final Date fromDate = DateUtils.addMinutes(toDate, -10);
-		mockMvc.perform(get("/jobs/thinexecutions/").param("fromDate",
-				new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
-						.format(fromDate)).param("toDate",
-				new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
-						.format(toDate)).accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk())
+		mockMvc.perform(get("/jobs/thinexecutions/")
+				.param("fromDate",
+						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
+								.format(fromDate))
+				.param("toDate",
+						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
+								.format(toDate))
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
 				.andExpect(jsonPath("$.content", hasSize(9)));
