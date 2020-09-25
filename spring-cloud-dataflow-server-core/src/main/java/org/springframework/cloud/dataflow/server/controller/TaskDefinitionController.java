@@ -357,6 +357,9 @@ public class TaskDefinitionController {
 	};
 
 	private void validateTaskName(String name) {
+		// Kubernetes does not support a pod name with length greater than 63 characters. It also
+		// adds 11 characters to the task name to create a pod, hence we need to ensure that task
+		// name added in SCDF has a length pf less than 52 characters.
 		if (name.length() > 52) {
 			throw new IllegalArgumentException("Length of the task name cannot be greater than 52 characters");
 		}
