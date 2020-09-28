@@ -40,11 +40,32 @@ public class ContainerImageParserTests {
 		assertThat(containerImageName.getRepositoryNamespace(), is("scdf/stream"));
 		assertThat(containerImageName.getRepositoryName(), is("spring-cloud-dataflow-acceptance-image-drivers173"));
 		assertThat(containerImageName.getRepositoryTag(), is("123"));
+		assertThat(containerImageName.getRepositoryReference(), is("123"));
+		assertThat(containerImageName.getRepositoryReferenceType(), is(ContainerImage.RepositoryReferenceType.tag));
 
 		assertThat(containerImageName.getRegistryHost(), is("springsource-docker-private-local.jfrog.io:80"));
 		assertThat(containerImageName.getRepository(), is("scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173"));
 
 		assertThat(containerImageName.getCanonicalName(), is("springsource-docker-private-local.jfrog.io:80/scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173:123"));
+	}
+
+	@Test
+	public void testParseWithoutDigest() {
+		ContainerImage containerImageName =
+				containerImageNameParser.parse("springsource-docker-private-local.jfrog.io:80/scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173@sha256:d44e9ac4c4bf53fb0b5424c35c85230a28eb03f24a2ade5bb7f2cc1462846401");
+
+		assertThat(containerImageName.getHostname(), is("springsource-docker-private-local.jfrog.io"));
+		assertThat(containerImageName.getPort(), is("80"));
+		assertThat(containerImageName.getRepositoryNamespace(), is("scdf/stream"));
+		assertThat(containerImageName.getRepositoryName(), is("spring-cloud-dataflow-acceptance-image-drivers173"));
+		assertThat(containerImageName.getRepositoryDigest(), is("sha256:d44e9ac4c4bf53fb0b5424c35c85230a28eb03f24a2ade5bb7f2cc1462846401"));
+		assertThat(containerImageName.getRepositoryReference(), is("sha256:d44e9ac4c4bf53fb0b5424c35c85230a28eb03f24a2ade5bb7f2cc1462846401"));
+		assertThat(containerImageName.getRepositoryReferenceType(), is(ContainerImage.RepositoryReferenceType.digest));
+
+		assertThat(containerImageName.getRegistryHost(), is("springsource-docker-private-local.jfrog.io:80"));
+		assertThat(containerImageName.getRepository(), is("scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173"));
+
+		assertThat(containerImageName.getCanonicalName(), is("springsource-docker-private-local.jfrog.io:80/scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173@sha256:d44e9ac4c4bf53fb0b5424c35c85230a28eb03f24a2ade5bb7f2cc1462846401"));
 	}
 
 	@Test
