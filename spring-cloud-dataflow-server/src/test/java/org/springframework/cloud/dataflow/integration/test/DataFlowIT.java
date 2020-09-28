@@ -686,11 +686,11 @@ public class DataFlowIT {
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
 				String myHttpCounter = httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][6]")
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]")
 						.isEqualTo(String.format("\"%s\"", message1.length()));
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][6]")
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]")
 						.isEqualTo(String.format("\"%s\"", message2.length()));
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][6]")
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]")
 						.isEqualTo(String.format("\"%s\"", message3.length()));
 			});
 		}
