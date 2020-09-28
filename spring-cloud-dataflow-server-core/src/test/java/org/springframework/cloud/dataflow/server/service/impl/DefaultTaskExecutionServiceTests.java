@@ -572,7 +572,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
+			assertEquals(7, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
 		}
 

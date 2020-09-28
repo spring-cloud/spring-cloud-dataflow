@@ -198,6 +198,8 @@
 					<include>META-INF/spring.factories</include>
 					<include>banner.txt</include>
 					<include>META-INF/dataflow-server-defaults.yml</include>
+					<include>META-INF/application-stream-common-properties-defaults.yml</include>
+					<include>META-INF/application-task-common-properties-defaults.yml</include>
 					<include>schemas/**</include>
 					<include>org/**</include>
 					<include>application-*.yml</include>

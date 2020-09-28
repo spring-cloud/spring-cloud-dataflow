@@ -41,6 +41,8 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardType;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
@@ -110,7 +112,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Configuration
 public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
-				ApplicationContextAware {
+		ApplicationContextAware {
 
 	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
 
@@ -374,6 +376,11 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			}
 		}
 
+		if (about.getMonitoringDashboardInfo().getDashboardType() != MonitoringDashboardType.NONE) {
+			modelBuilder.addRow().addValue("Monitoring").addValue(about.getMonitoringDashboardInfo());
+			rowIndex++;
+		}
+
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 		builder.addOutlineBorder(BorderStyle.fancy_double)
 				.paintBorder(BorderStyle.fancy_light, BorderSpecification.INNER).fromTopLeft().toBottomRight()
@@ -382,6 +389,9 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 		Tables.configureKeyValueRendering(builder, ": ");
 
+		builder.on(CellMatchers.ofType(MonitoringDashboardInfo.class)).addFormatter(new DataFlowTables.BeanWrapperFormatter(": "))
+				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
+				.addWrapper(new KeyValueTextWrapper(": "));
 		builder.on(CellMatchers.ofType(FeatureInfo.class)).addFormatter(new DataFlowTables.BeanWrapperFormatter(": "))
 				.addAligner(new KeyValueHorizontalAligner(":")).addSizer(new KeyValueSizeConstraints(": "))
 				.addWrapper(new KeyValueTextWrapper(": "));
@@ -400,6 +410,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				.addWrapper(new KeyValueTextWrapper(": "));
 		rowsWithThinSeparators.forEach(row -> builder.paintBorder(BorderStyle.fancy_light_quadruple_dash, BorderSpecification.TOP)
 				.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
+
 
 		result.add(builder.build());
 
@@ -509,11 +520,11 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			ClientRegistrationRepository shellClientRegistrationRepository,
 			OAuth2AuthorizedClientService shellAuthorizedClientService) {
 		AuthorizedClientServiceOAuth2AuthorizedClientManager manager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
-			shellClientRegistrationRepository, shellAuthorizedClientService);
+				shellClientRegistrationRepository, shellAuthorizedClientService);
 		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
-			.password()
-			.refreshToken()
-			.build();
+				.password()
+				.refreshToken()
+				.build();
 		manager.setAuthorizedClientProvider(authorizedClientProvider);
 		manager.setContextAttributesMapper(request -> {
 			Map<String, Object> contextAttributes = new HashMap<>();

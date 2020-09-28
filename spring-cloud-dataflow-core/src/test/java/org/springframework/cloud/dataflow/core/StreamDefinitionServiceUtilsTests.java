@@ -133,9 +133,6 @@ public class StreamDefinitionServiceUtilsTests {
 				DataFlowPropertyKeys.STREAM_APP_TYPE,
 				DataFlowPropertyKeys.STREAM_APP_LABEL,
 				DataFlowPropertyKeys.STREAM_NAME,
-				StreamPropertyKeys.METRICS_TRIGGER_INCLUDES,
-				StreamPropertyKeys.METRICS_KEY,
-				StreamPropertyKeys.METRICS_PROPERTIES,
 				BindingPropertyKeys.INPUT_GROUP,
 				BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
 				BindingPropertyKeys.OUTPUT_DESTINATION);

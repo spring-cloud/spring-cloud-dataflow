@@ -31,12 +31,13 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
 import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.GrafanaInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardType;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
-import org.springframework.cloud.dataflow.server.config.GrafanaInfoProperties;
+import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -73,7 +74,7 @@ import org.springframework.web.client.RestTemplate;
 @RestController
 @RequestMapping("/about")
 @ExposesResourceFor(AboutResource.class)
-@EnableConfigurationProperties(GrafanaInfoProperties.class)
+@EnableConfigurationProperties({ DataflowMetricsProperties.class })
 public class AboutController {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutController.class);
@@ -97,16 +98,16 @@ public class AboutController {
 
 	private LauncherRepository launcherRepository;
 
-	private GrafanaInfoProperties grafanaProperties;
+	private DataflowMetricsProperties dataflowMetricsProperties;
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, GrafanaInfoProperties grafanaInfoProperties) {
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
-		this.grafanaProperties = grafanaInfoProperties;
+		this.dataflowMetricsProperties = monitoringProperties;
 	}
 
 	/**
@@ -120,10 +121,9 @@ public class AboutController {
 	public AboutResource getAboutResource() {
 		final AboutResource aboutResource = new AboutResource();
 		final FeatureInfo featureInfo = new FeatureInfo();
-		featureInfo.setStreamsEnabled(featuresProperties.isStreamsEnabled());
-		featureInfo.setTasksEnabled(featuresProperties.isTasksEnabled());
-		featureInfo.setSchedulesEnabled(featuresProperties.isSchedulesEnabled());
-		featureInfo.setGrafanaEnabled(this.grafanaProperties.isGrafanaEnabled());
+		featureInfo.setStreamsEnabled(this.featuresProperties.isStreamsEnabled());
+		featureInfo.setTasksEnabled(this.featuresProperties.isTasksEnabled());
+		featureInfo.setSchedulesEnabled(this.featuresProperties.isSchedulesEnabled());
 
 		final VersionInfo versionInfo = getVersionInfo();
 
@@ -202,11 +202,23 @@ public class AboutController {
 		}
 		aboutResource.setRuntimeEnvironment(runtimeEnvironment);
 
-		if (this.grafanaProperties.isGrafanaEnabled()) {
-			final GrafanaInfo grafanaInfo = new GrafanaInfo();
-			grafanaInfo.setUrl(this.grafanaProperties.getUrl());
-			grafanaInfo.setRefreshInterval(this.grafanaProperties.getRefreshInterval());
-			aboutResource.setGrafanaInfo(grafanaInfo);
+		DataflowMetricsProperties.Dashboard dashboard = this.dataflowMetricsProperties.getDashboard();
+		if (dashboard.isEnabled()) {
+			final MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
+			monitoringDashboardInfo.setDashboardType(dashboard.getType());
+			monitoringDashboardInfo.setUrl(dashboard.getUrl());
+			featureInfo.setMonitoringDashboardType(dashboard.getType());
+			if (dashboard.getType() == MonitoringDashboardType.GRAFANA) {
+				monitoringDashboardInfo.setRefreshInterval(dashboard.getGrafana().getRefreshInterval());
+			}
+			else if (dashboard.getType() == MonitoringDashboardType.WAVEFRONT) {
+				monitoringDashboardInfo.setSource(dashboard.getWavefront().getSource());
+			}
+			else {
+				throw new IllegalStateException();
+			}
+
+			aboutResource.setMonitoringDashboardInfo(monitoringDashboardInfo);
 		}
 
 		aboutResource.add(WebMvcLinkBuilder.linkTo(AboutController.class).withSelfRel());

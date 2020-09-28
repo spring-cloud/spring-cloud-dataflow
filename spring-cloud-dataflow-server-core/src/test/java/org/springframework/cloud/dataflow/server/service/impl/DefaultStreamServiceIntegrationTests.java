@@ -164,7 +164,6 @@ public class DefaultStreamServiceIntegrationTests {
 		Object actualYamlLoaded = yaml.load(actualYaml);
 		Object expectedYamlLoaded = yaml.load(expectedYaml);
 
-
 		assertThat(actualYamlLoaded).isEqualTo(expectedYamlLoaded);
 	}
 

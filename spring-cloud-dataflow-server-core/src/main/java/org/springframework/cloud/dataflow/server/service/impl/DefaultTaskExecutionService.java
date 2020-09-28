@@ -282,7 +282,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// Finally create App deployment request
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.createRequest(taskExecution,
-				taskExecutionInformation, commandLineArgs, platformName);
+				taskExecutionInformation, commandLineArgs, platformName, launcher.getType());
 
 		TaskManifest taskManifest = createTaskManifest(platformName, request);
 		String taskDeploymentId = null;
@@ -414,6 +414,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @return an updated {@code AppDeploymentRequest}
 	 */
 	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
+			String platformType,
 			TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution,
 			Map<String, String> deploymentProperties) {
 		AppDeploymentRequest appDeploymentRequest;
@@ -426,7 +427,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		info.setTaskDeploymentProperties(deploymentProperties);
 
 		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
-				createRequest(taskExecution, info, commandLineArgs, platformName);
+				createRequest(taskExecution, info, commandLineArgs, platformName, platformType);
 		return appDeploymentRequest;
 	}
 
