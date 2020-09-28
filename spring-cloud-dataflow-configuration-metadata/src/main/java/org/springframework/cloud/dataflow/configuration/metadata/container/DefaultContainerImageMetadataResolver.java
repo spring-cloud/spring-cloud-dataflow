@@ -193,8 +193,8 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 				.scheme("https")
 				.host(containerImage.getHostname())
 				.port(StringUtils.hasText(containerImage.getPort()) ? containerImage.getPort() : null)
-				.path("v2/{repository}/manifests/{tag}")
-				.build().expand(containerImage.getRepository(), containerImage.getRepositoryTag());
+				.path("v2/{repository}/manifests/{reference}")
+				.build().expand(containerImage.getRepository(), containerImage.getRepositoryReference());
 
 		ResponseEntity<T> manifest = registryRequest.getRestTemplate().exchange(manifestUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
