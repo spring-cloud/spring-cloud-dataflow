@@ -18,7 +18,7 @@ services:
 
   dataflow-server:
     environment:
-      - spring.cloud.dataflow.applicationProperties.stream.spring.rabbitmq.host=rabbitmq
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_RABBITMQ_HOST=rabbitmq
 
   app-import:
     command: >

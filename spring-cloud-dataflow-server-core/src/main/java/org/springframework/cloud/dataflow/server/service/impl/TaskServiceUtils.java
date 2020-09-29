@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,7 +60,7 @@ public class TaskServiceUtils {
 	 * @return String containing the CTR task definition.
 	 */
 	public static String createComposedTaskDefinition(String graph) {
-			return createComposedTaskDefinition(null, graph);
+		return createComposedTaskDefinition(null, graph);
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class TaskServiceUtils {
 	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph) {
 		Assert.hasText(graph, "graph must not be empty or null");
 		String composedTaskRunnerName = TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME;
-		if(StringUtils.hasText(alternateComposedTaskRunnerName)) {
+		if (StringUtils.hasText(alternateComposedTaskRunnerName)) {
 			composedTaskRunnerName = alternateComposedTaskRunnerName;
 		}
 		return String.format("%s --graph=\"%s\"", composedTaskRunnerName, graph);
@@ -103,6 +105,17 @@ public class TaskServiceUtils {
 	 * Updates the task definition with the datasource properties.
 	 * @param taskDefinition the {@link TaskDefinition} to be updated.
 	 * @param dataSourceProperties the dataSource properties used by SCDF.
+	 * @return the updated {@link TaskDefinition}
+	 */
+	public static TaskDefinition updateTaskProperties(TaskDefinition taskDefinition,
+			DataSourceProperties dataSourceProperties) {
+		return updateTaskProperties(taskDefinition, dataSourceProperties, true);
+	}
+
+	/**
+	 * Updates the task definition with the datasource properties.
+	 * @param taskDefinition the {@link TaskDefinition} to be updated.
+	 * @param dataSourceProperties the dataSource properties used by SCDF.
 	 * @param setDatabaseCredentials if true database username and password that should be set in the {@link TaskDefinition} .
 	 * @return the updated {@link TaskDefinition}
 	 */
@@ -112,17 +125,17 @@ public class TaskServiceUtils {
 		Assert.notNull(taskDefinition, "taskDefinition must not be null");
 		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
 		TaskDefinition.TaskDefinitionBuilder builder = TaskDefinition.TaskDefinitionBuilder.from(taskDefinition);
-		if(setDatabaseCredentials) {
+		if (setDatabaseCredentials) {
 			// password may be empty
 			if (StringUtils.hasText(dataSourceProperties.getPassword())) {
 				builder.setProperty("spring.datasource.password", dataSourceProperties.getPassword());
 			}
 			builder.setProperty("spring.datasource.username", dataSourceProperties.getUsername());
 		}
-		if(!isPropertyPresent("spring.datasource.url", taskDefinition)) {
+		if (!isPropertyPresent("spring.datasource.url", taskDefinition)) {
 			builder.setProperty("spring.datasource.url", dataSourceProperties.getUrl());
 		}
-		if(!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
+		if (!isPropertyPresent("spring.datasource.driverClassName", taskDefinition)) {
 			builder.setProperty("spring.datasource.driverClassName", dataSourceProperties.getDriverClassName());
 		}
 		builder.setTaskName(taskDefinition.getTaskName());
@@ -188,7 +201,7 @@ public class TaskServiceUtils {
 					}
 				}
 			}
-			if(isPutDataFlowServerUriKey) {
+			if (isPutDataFlowServerUriKey) {
 				appDeploymentProperties.put(dataFlowServerUriKey, dataflowServerUri);
 			}
 		}
@@ -208,8 +221,8 @@ public class TaskServiceUtils {
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
 		String scdfTaskName = String.format("%s.%s.%s.", prefix, taskNode.getName(),
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-		Set<String> propertyKeys = taskDeploymentProperties.keySet().
-				stream().filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
+		Set<String> propertyKeys = taskDeploymentProperties.keySet().stream()
+				.filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
 				.collect(Collectors.toSet());
 		for (String taskProperty : propertyKeys) {
 			if (result.length() != 0) {
@@ -245,10 +258,29 @@ public class TaskServiceUtils {
 	 */
 	public static boolean addDatabaseCredentials(boolean useKubernetesSecrets, String platformType) {
 		boolean addDatabaseCredentials = false;
-		if(!useKubernetesSecrets ||
+		if (!useKubernetesSecrets ||
 				!StringUtils.hasText(platformType) || !platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
 			addDatabaseCredentials = true;
 		}
 		return addDatabaseCredentials;
+	}
+
+	/**
+	 * Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+	 * Doesn't override existing properties!
+	 * The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+	 *
+	 * @param defaultProperties Default properties, if any, to contribute to the launch app properties.
+	 * @param appDeploymentProperties App deployment properties passed to the Task at launch.
+	 */
+	public static void contributeCommonProperties(Optional<Properties> defaultProperties,
+			Map<String, String> appDeploymentProperties, String taskPlatformType) {
+		String taskPlatformTypePrefix = taskPlatformType.toLowerCase() + ".";
+		defaultProperties.ifPresent(defaults -> defaults.entrySet().stream()
+				.filter(e -> e.getValue() != null)
+				.filter(e -> e.getKey().toString().startsWith(taskPlatformTypePrefix))
+				.forEach(e -> appDeploymentProperties.putIfAbsent(
+						e.getKey().toString().replaceFirst(taskPlatformTypePrefix, ""), e.getValue().toString())));
+
 	}
 }

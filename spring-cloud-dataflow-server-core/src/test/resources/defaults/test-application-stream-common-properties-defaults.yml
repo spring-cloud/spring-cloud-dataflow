@@ -1,0 +1,23 @@
+common:
+  my:
+    test:
+      static.property: "Test"
+      property.with.placeholder: ${my.placeholder}
+
+local:
+  my:
+    local:
+      static.property: "TestLocal"
+      property.with.placeholder: ${my.placeholder.local}
+
+kubernetes:
+  my:
+    kubernetes:
+      static.property: "TestKubernetes"
+      property.with.placeholder: ${my.placeholder.kubernetes}
+
+cloudfoundry:
+  my:
+    cloudfoundry:
+      static.property: "TestCloudfoundry"
+      property.with.placeholder: ${my.placeholder.cloudfoundry}

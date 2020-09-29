@@ -321,7 +321,7 @@ public class DefaultStreamServiceTests {
 		when(streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 
 		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(mock(AppDeploymentRequest.class));
-		when(appDeploymentRequestCreator.createRequests(streamDefinition, new HashMap<>()))
+		when(appDeploymentRequestCreator.createRequests(streamDefinition, new HashMap<>(), "default"))
 				.thenReturn(appDeploymentRequests);
 
 		this.defaultStreamService.deployStream(streamDefinition1.getName(), deploymentProperties);

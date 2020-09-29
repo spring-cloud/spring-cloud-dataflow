@@ -8,12 +8,9 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:time-source-rabbit
   version: 1.2.0.RELEASE
   applicationProperties:
-    spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: time
-    spring.cloud.stream.metrics.key: ticktock.time.${spring.cloud.application.guid}
     trigger.fixed-delay: 200
     spring.cloud.stream.bindings.output.producer.requiredGroups: ticktock
-    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
     spring.cloud.stream.bindings.output.destination: ticktock.time
     spring.cloud.dataflow.stream.name: ticktock
     spring.cloud.dataflow.stream.app.type: source
@@ -30,11 +27,8 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
   version: 1.2.0.RELEASE
   applicationProperties:
-    spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: log
-    spring.cloud.stream.metrics.key: ticktock.log.${spring.cloud.application.guid}
     spring.cloud.stream.bindings.input.group: ticktock
-    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
     log.level: INFO
     spring.cloud.dataflow.stream.name: ticktock
     spring.cloud.dataflow.stream.app.type: sink

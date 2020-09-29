@@ -255,4 +255,7 @@ public final class RelaxedNames implements Iterable<String> {
 		return new RelaxedNames(result.toString());
 	}
 
+	public static String camelCaseToHyphenLower(String name) {
+		return Variation.LOWERCASE.apply(Manipulation.CAMELCASE_TO_HYPHEN.apply(name));
+	}
 }

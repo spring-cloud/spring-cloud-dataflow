@@ -6,6 +6,7 @@
       {
         "metric": {
           "__name__": "my_http_counter_total",
+          "application": "httpCounter-counter-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "counter",
           "application_type": "sink",
@@ -13,6 +14,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "14",
+          "service": "stream application",
           "stream_name": "httpCounter"
         },
         "value": [
@@ -23,6 +25,7 @@
       {
         "metric": {
           "__name__": "my_http_counter_total",
+          "application": "httpCounter-counter-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "counter",
           "application_type": "sink",
@@ -30,6 +33,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "29",
+          "service": "stream application",
           "stream_name": "httpCounter"
         },
         "value": [
@@ -40,6 +44,7 @@
       {
         "metric": {
           "__name__": "my_http_counter_total",
+          "application": "httpCounter-counter-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "counter",
           "application_type": "sink",
@@ -47,6 +52,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "36",
+          "service": "stream application",
           "stream_name": "httpCounter"
         },
         "value": [

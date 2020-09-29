@@ -2091,6 +2091,7 @@ The following topics provide more details:
 * <<api-guide-resources-job-executions-thin-job-execution-list>>
 * <<api-guide-resources-job-executions-job-execution-info-only-list-by-name>>
 * <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-name>>
+* <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-date>>
 * <<api-guide-resources-job-executions-detail>>
 * <<api-guide-resources-job-executions-stop>>
 * <<api-guide-resources-job-executions-restart>>
@@ -2252,6 +2253,45 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-nam
 ===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-thin-job-executions-by-name/http-response.adoc[]
+
+[[api-guide-resources-job-executions-thin-job-execution-info-only-list-by-date]]
+==== List All Job Executions For A Specified Date Range Without Step Executions Included
+
+The job executions endpoint lets you list all job executions.
+The following topics provide more details:
+
+* <<api-guide-resources-job-executions-thin-list-by-date-request-structure>>
+* <<api-guide-resources-job-executions-thin-list-by-date-request-parameters>>
+* <<api-guide-resources-job-executions-thin-list-by-date-example-request>>
+* <<api-guide-resources-job-executions-thin-list-by-date-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-date-request-structure]]
+===== Request Structure
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/http-request.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-date-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-date-example-request]]
+===== Example Request
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/curl-request.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-date-response-structure]]
+===== Response Structure
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/http-response.adoc[]
 
 [[api-guide-resources-job-executions-detail]]
 ==== Job Execution Detail

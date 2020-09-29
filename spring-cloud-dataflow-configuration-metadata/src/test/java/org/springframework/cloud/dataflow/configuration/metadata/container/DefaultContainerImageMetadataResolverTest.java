@@ -209,14 +209,14 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	private void mockManifestRestTemplateCall(Map<String, Object> mapToReturn, String registryHost,
-			String registryPort, String repository, String tag) {
+			String registryPort, String repository, String tagOrDigest) {
 
 		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
 				.scheme("https")
 				.host(registryHost)
 				.port(StringUtils.hasText(registryPort) ? registryPort : null)
-				.path("v2/{repository}/manifests/{tag}")
-				.build().expand(repository, tag);
+				.path("v2/{repository}/manifests/{reference}")
+				.build().expand(repository, tagOrDigest);
 
 
 		when(mockRestTemplate.exchange(

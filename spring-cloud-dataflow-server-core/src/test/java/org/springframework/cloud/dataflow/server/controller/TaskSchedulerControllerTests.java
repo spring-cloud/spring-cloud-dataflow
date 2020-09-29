@@ -75,7 +75,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-@TestPropertySource(properties = {"spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test"})
+@TestPropertySource(properties = { "spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test" })
 public class TaskSchedulerControllerTests {
 
 	@Autowired
@@ -176,12 +176,13 @@ public class TaskSchedulerControllerTests {
 	public void testCreateScheduleLeadingBlanks() throws Exception {
 		createAndVerifySchedule("    mySchedule", "mySchedule");
 	}
+
 	@Test
 	public void testCreateScheduleTrailingBlanks() throws Exception {
 		createAndVerifySchedule("mySchedule      ", "mySchedule");
 	}
 
-	private void createAndVerifySchedule(String scheduleName, String createdScheduleName) throws Exception{
+	private void createAndVerifySchedule(String scheduleName, String createdScheduleName) throws Exception {
 		this.registry.save("testApp", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
@@ -204,19 +205,28 @@ public class TaskSchedulerControllerTests {
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
 		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
-		assertEquals("{\"commandlineArguments\":[],\"taskDefinitionName\":\"testDefinition\","
-				+ "\"taskDefinitionProperties\":{\"spring.datasource.username\":null,\"spring.cloud.task.name\":\"testDefinition\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null},"
-				+ "\"deploymentProperties\":{}}", auditRecord.getAuditData());
+		assertEquals("{\"commandlineArguments\":[]," +
+				"\"taskDefinitionName\":\"testDefinition\"," +
+				"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+				"\"spring.datasource.username\":null,\"spring.datasource.url\":null," +
+				"\"spring.datasource.driverClassName\":null," +
+				"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+				"\"spring.cloud.task.name\":\"testDefinition\"}," +
+				"\"deploymentProperties\":{}}", auditRecord.getAuditData());
 	}
 
 	@Test
 	public void testCreateScheduleWithSensitiveFields() throws Exception {
 		String auditData = createScheduleWithArguments("argument1=foo password=secret");
 
-		assertEquals(
-				"{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
-						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\"," +
+						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
+						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
+						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+						"\"spring.cloud.task.name\":\"testDefinition\"}," +
+						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
+						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}
 
@@ -224,10 +234,15 @@ public class TaskSchedulerControllerTests {
 	public void testCreateScheduleCommaDelimitedArgs() throws Exception {
 		String auditData = createScheduleWithArguments("argument1=foo spring.profiles.active=k8s,master argument3=bar");
 
-		assertEquals(
-				"{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\",\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\","
-						+ "\"taskDefinitionProperties\":{\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\",\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null,\"spring.cloud.task.name\":\"testDefinition\"},"
-						+ "\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\"," +
+						"\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\"," +
+						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
+						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
+						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+						"\"spring.cloud.task.name\":\"testDefinition\"}," +
+						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
+						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
 				auditData);
 	}
 
@@ -287,7 +302,7 @@ public class TaskSchedulerControllerTests {
 	}
 
 
-		@Test
+	@Test
 	public void testRemoveSchedule() throws Exception {
 		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
@@ -301,12 +316,12 @@ public class TaskSchedulerControllerTests {
 
 		AuditActionType[] auditActionTypesCreate = { AuditActionType.CREATE };
 		final Page<AuditRecord> auditRecordsCreate = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
-				auditActionTypesCreate, null, null, PageRequest.of(0,6));
+				auditActionTypesCreate, null, null, PageRequest.of(0, 6));
 
 		AuditActionType[] auditActionTypesDelete = { AuditActionType.DELETE };
 		final Page<AuditRecord> auditRecordsDelete = auditRecordRepository.findByActionTypeAndOperationTypeAndDate(null,
 				auditActionTypesDelete,
-				null, null, PageRequest.of(0,6));
+				null, null, PageRequest.of(0, 6));
 
 		assertEquals(6, auditRecordsCreate.getContent().size());
 		assertEquals(1, auditRecordsDelete.getContent().size());

@@ -154,6 +154,14 @@ public interface TaskOperations {
 	void cleanup(long id);
 
 	/**
+	 * Cleanup any resources associated with the execution for the id specified.
+	 *
+	 * @param id identifier of the task execution
+	 * @param removeData delete the history of the execution
+	 */
+	void cleanup(long id, boolean removeData);
+
+	/**
 	 * Return the validation status for the tasks in an definition.
 	 * @param taskDefinitionName The name of the task definition to be validated.
 	 * @return {@link TaskAppStatusResource} containing the task app statuses.

@@ -1,0 +1,12 @@
+common:
+  management:
+    metrics:
+      tags:
+        application: ${task.name:unknown}-${task.execution.id:unknown}
+        service: "task application"
+
+local:
+
+kubernetes:
+
+cloudfoundry:

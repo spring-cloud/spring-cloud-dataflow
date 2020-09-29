@@ -77,7 +77,6 @@ public class TaskAppDeploymentRequestCreator {
 	}
 
 
-
 	/**
 	 * Create a {@link AppDeploymentRequest} from the provided
 	 * {@link TaskExecutionInformation}, {@link TaskExecution}.
@@ -93,34 +92,43 @@ public class TaskAppDeploymentRequestCreator {
 			TaskExecution taskExecution,
 			TaskExecutionInformation taskExecutionInformation,
 			List<String> commandLineArgs,
-			String platformName) {
+			String platformName,
+			String platformType) {
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(
-						taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName,
+						taskExecutionInformation.isComposed() ? "composed-task-runner" : registeredAppName,
 						taskExecutionInformation.getTaskDeploymentProperties()));
+
+		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+		// Doesn't override existing properties!
+		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, "common");
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, platformType);
 
 		// Need to keep all properties around, not just 'deployer.*'
 		// as those are a source to restore app specific props
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-			.qualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-					taskExecutionInformation.isComposed()? "composed-task-runner" : registeredAppName);
+				.qualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
+						taskExecutionInformation.isComposed() ? "composed-task-runner" : registeredAppName);
 
 		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
 					commandLineArgs);
 		}
-		if(taskExecutionInformation.isComposed()) {
+		if (taskExecutionInformation.isComposed()) {
 			appDeploymentProperties.put("platform-name", platformName);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition,
 				taskExecutionInformation.getMetadataResource(),
 				appDeploymentProperties, this.visibleProperties);
 
-		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed())?this.updateCommandLineArgs(commandLineArgs,
-				taskExecution, platformName, registeredAppName):this.updateCommandLineArgs(commandLineArgs,
+		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed()) ? this.updateCommandLineArgs(commandLineArgs,
+				taskExecution, platformName, registeredAppName) : this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName);
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
@@ -142,6 +150,7 @@ public class TaskAppDeploymentRequestCreator {
 		results.add(TASK_EXECUTION_KEY + taskExecution.getExecutionId());
 		return results;
 	}
+
 	private List<String> updateCommandLineArgs(List<String> commandLineArgs, TaskExecution taskExecution, String platformName, String appName) {
 		List<String> results = new ArrayList();
 		commandLineArgs.stream()
