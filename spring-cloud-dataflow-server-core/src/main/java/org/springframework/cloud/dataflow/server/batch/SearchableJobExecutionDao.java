@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
@@ -133,4 +134,16 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 * this job
 	 */
 	int countJobExecutions(String jobName, BatchStatus status);
+
+	/**
+	 * Get the {@link JobExecutionWithStepCount JobExecutions} for a specific date range in
+	 * reverse order of creation (so normally of execution).
+	 *
+	 * @param fromDate the date which start date must be greater than.
+	 * @param toDate the date which start date must be less than.
+	 * @param start the start index of the instances
+	 * @param count the maximum number of instances to return
+	 * @return the {@link JobExecutionWithStepCount} instances requested
+	 */
+	List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(Date fromDate, Date toDate, int start, int count);
 }

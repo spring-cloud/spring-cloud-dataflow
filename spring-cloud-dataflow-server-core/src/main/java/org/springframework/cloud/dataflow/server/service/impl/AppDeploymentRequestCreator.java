@@ -109,8 +109,8 @@ public class AppDeploymentRequestCreator {
 
 			Resource appResource = appRegistry.getAppResource(appRegistration);
 			Resource metadataResource = appRegistry.getAppMetadataResource(appRegistration);
-			Map<String, String> expandedAppUpdateTimeProperties = (appUpdateTimeProperties.isEmpty()) ? new HashMap<>():
-				this.visibleProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
+			Map<String, String> expandedAppUpdateTimeProperties = (appUpdateTimeProperties.isEmpty()) ? new HashMap<>() :
+					this.visibleProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
 
 			expandedAppUpdateTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, type.toString());
 			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
@@ -141,7 +141,7 @@ public class AppDeploymentRequestCreator {
 	 * @return list of AppDeploymentRequests
 	 */
 	public List<AppDeploymentRequest> createRequests(StreamDefinition streamDefinition,
-			Map<String, String> streamDeploymentProperties) {
+			Map<String, String> streamDeploymentProperties, String platformType) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		if (streamDeploymentProperties == null) {
 			streamDeploymentProperties = Collections.emptyMap();
@@ -199,15 +199,17 @@ public class AppDeploymentRequestCreator {
 			Resource appResource = this.appRegistry.getAppResource(appRegistration);
 			Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 
-			// add properties needed for metrics system
-
 			// TODO removing adding these generated properties has other side effects....
+			// add application's coordinates (stream it is part of, name withing the stream and type)
 			appDeployTimeProperties.put(DataFlowPropertyKeys.STREAM_NAME, currentApp.getStreamName());
 			appDeployTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_LABEL, currentApp.getName());
 			appDeployTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, currentApp.getApplicationType().toString());
-			StringBuilder sb = new StringBuilder().append(currentApp.getStreamName()).append(".")
-					.append(currentApp.getName()).append(".").append("${spring.cloud.application.guid}");
-			appDeployTimeProperties.put(StreamPropertyKeys.METRICS_KEY, sb.toString());
+
+			// Merge the common properties defined via the spring.cloud.dataflow.common-properties.stream-resource file.
+			// Doesn't override existing properties!
+			// The placeholders defined in the stream-resource file are not resolved by SCDF but passed to the apps as they are.
+			contributeCommonApplicationProperties("common", appDeployTimeProperties);
+			contributeCommonApplicationProperties(platformType, appDeployTimeProperties);
 
 			// Merge *definition time* app properties with *deployment time* properties
 			// and expand them to their long form if applicable
@@ -222,6 +224,16 @@ public class AppDeploymentRequestCreator {
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
+	}
+
+	private void contributeCommonApplicationProperties(String platformType, Map<String, String> appDeployTimeProperties) {
+		String platformTypePrefix = platformType + ".";
+		this.commonApplicationProperties.getStreamResourceProperties()
+				.ifPresent(defaults -> defaults.entrySet().stream()
+						.filter(e -> e.getValue() != null)
+						.filter(e -> e.getKey().toString().startsWith(platformTypePrefix))
+						.forEach(e -> appDeployTimeProperties.putIfAbsent(
+								e.getKey().toString().replaceFirst(platformTypePrefix, ""), e.getValue().toString())));
 	}
 
 	/**
@@ -273,7 +285,7 @@ public class AppDeploymentRequestCreator {
 				Map<String, String> appDeploymentProperties = extractAppProperties(prevApp, streamDeploymentProperties);
 				return appDeploymentProperties.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXPRESSION)
 						|| appDeploymentProperties
-								.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
+						.containsKey(BindingPropertyKeys.OUTPUT_PARTITION_KEY_EXTRACTOR_CLASS);
 			}
 		}
 		return false;
@@ -312,10 +324,6 @@ public class AppDeploymentRequestCreator {
 		merged.putAll(appDeployTimeProperties);
 		merged = this.visibleProperties.qualifyProperties(merged, metadataResource);
 
-		merged.putIfAbsent(StreamPropertyKeys.METRICS_PROPERTIES, "spring.application.name,spring.application.index,"
-				+ "spring.cloud.application.*,spring.cloud.dataflow.*");
-		merged.putIfAbsent(StreamPropertyKeys.METRICS_TRIGGER_INCLUDES, "integration**");
-
 		return new AppDefinition(original.getName(), merged);
 	}
 
@@ -350,7 +358,7 @@ public class AppDeploymentRequestCreator {
 	 * contain a count, a value of {@code 1} is returned
 	 */
 	/* default */ int getInstanceCount(Map<String, String> properties) {
-		return Integer.valueOf(properties.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
+		return Integer.parseInt(properties.getOrDefault(AppDeployer.COUNT_PROPERTY_KEY, "1"));
 	}
 
 	/**
@@ -367,7 +375,7 @@ public class AppDeploymentRequestCreator {
 			boolean upstreamAppSupportsPartition) {
 		return upstreamAppSupportsPartition
 				|| (appDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED)
-						&& appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
+				&& appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));
 	}
 
 }

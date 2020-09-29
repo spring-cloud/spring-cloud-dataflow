@@ -3,6 +3,7 @@ management:
     tags:
       application: ${info.app.name}
       application.version: ${info.app.version}
+      service: "scdf server"
     web:
       server:
         request:
@@ -49,9 +50,9 @@ spring:
         # Statistics generation is required for publishing JPA micrometer metrics.
         # generate_statistics: true
     hibernate:
-        naming:
-          physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-          implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   flyway:
     enabled: true
     baselineVersion: 1

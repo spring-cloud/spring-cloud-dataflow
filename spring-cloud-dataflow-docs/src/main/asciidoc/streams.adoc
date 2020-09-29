@@ -1130,11 +1130,8 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
   version: 1.2.0.RELEASE
   applicationProperties:
-    spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: log
-    spring.cloud.stream.metrics.key: httptest.log.${spring.cloud.application.guid}
     spring.cloud.stream.bindings.input.group: httptest
-    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
     spring.cloud.dataflow.stream.name: httptest
     spring.cloud.dataflow.stream.app.type: sink
     spring.cloud.stream.bindings.input.destination: httptest.http
@@ -1153,11 +1150,8 @@ spec:
   resource: maven://org.springframework.cloud.stream.app:http-source-rabbit
   version: 1.2.0.RELEASE
   applicationProperties:
-    spring.metrics.export.triggers.application.includes: integration**
     spring.cloud.dataflow.stream.app.label: http
-    spring.cloud.stream.metrics.key: httptest.http.${spring.cloud.application.guid}
     spring.cloud.stream.bindings.output.producer.requiredGroups: httptest
-    spring.cloud.stream.metrics.properties: spring.application.name,spring.application.index,spring.cloud.application.*,spring.cloud.dataflow.*
     server.port: 9000
     spring.cloud.stream.bindings.output.destination: httptest.http
     spring.cloud.dataflow.stream.name: httptest

@@ -81,7 +81,6 @@ public class LocalServerSecurityWithOAuth2Tests {
 				.andExpect(jsonPath("$._links.dashboard.href", is("http://localhost/dashboard")))
 				.andExpect(jsonPath("$._links.streams/definitions.href", is("http://localhost/streams/definitions")))
 				.andExpect(jsonPath("$._links.streams/definitions/definition.href", is("http://localhost/streams/definitions/{name}")))
-				.andExpect(jsonPath("$._links.streams/deployments.href", is("http://localhost/streams/deployments")))
 				.andExpect(jsonPath("$._links.streams/deployments/deployment.href", is("http://localhost/streams/deployments/{name}")))
 				.andExpect(jsonPath("$._links.runtime/apps.href", is("http://localhost/runtime/apps")))
 				.andExpect(jsonPath("$._links.runtime/apps/{appId}.href", is("http://localhost/runtime/apps/{appId}")))

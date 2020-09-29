@@ -571,29 +571,33 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	public StreamDeployment getStreamInfo(String streamName) {
 		try {
 			String manifest = this.manifest(streamName);
-			List<SpringCloudDeployerApplicationManifest> appManifests =
-					new SpringCloudDeployerApplicationManifestReader().read(manifest);
-			Map<String, Map<String, String>> streamPropertiesMap = new HashMap<>();
-			for (SpringCloudDeployerApplicationManifest applicationManifest : appManifests) {
-				Map<String, String> versionAndDeploymentProperties = new HashMap<>();
-				SpringCloudDeployerApplicationSpec spec = applicationManifest.getSpec();
-				String applicationName = applicationManifest.getApplicationName();
-				versionAndDeploymentProperties.putAll(spec.getDeploymentProperties());
-				versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_RESOURCE, spec.getResource());
-				versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_VERSION, spec.getVersion());
-				streamPropertiesMap.put(applicationName, versionAndDeploymentProperties);
-			}
-			try {
-				ObjectMapper objectMapper = new ObjectMapper();
-				String json = objectMapper.writeValueAsString(streamPropertiesMap);
-				return new StreamDeployment(streamName,json);
-			} catch (Exception e) {
-				throw new IllegalArgumentException("Unable to serializer streamPropertiesMap", e);
+			if (StringUtils.hasText(manifest)) {
+				List<SpringCloudDeployerApplicationManifest> appManifests =
+						new SpringCloudDeployerApplicationManifestReader().read(manifest);
+				Map<String, Map<String, String>> streamPropertiesMap = new HashMap<>();
+				for (SpringCloudDeployerApplicationManifest applicationManifest : appManifests) {
+					Map<String, String> versionAndDeploymentProperties = new HashMap<>();
+					SpringCloudDeployerApplicationSpec spec = applicationManifest.getSpec();
+					String applicationName = applicationManifest.getApplicationName();
+					versionAndDeploymentProperties.putAll(spec.getDeploymentProperties());
+					versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_RESOURCE, spec.getResource());
+					versionAndDeploymentProperties.put(SkipperStream.SKIPPER_SPEC_VERSION, spec.getVersion());
+					streamPropertiesMap.put(applicationName, versionAndDeploymentProperties);
+				}
+				try {
+					ObjectMapper objectMapper = new ObjectMapper();
+					String json = objectMapper.writeValueAsString(streamPropertiesMap);
+					return new StreamDeployment(streamName, json);
+				}
+				catch (Exception e) {
+					throw new IllegalArgumentException("Unable to serializer streamPropertiesMap", e);
+				}
 			}
 		}
 		catch (ReleaseNotFoundException e) {
-			return new StreamDeployment(streamName);
+				return new StreamDeployment(streamName);
 		}
+		return new StreamDeployment(streamName);
 	}
 
 	@Override

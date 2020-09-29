@@ -40,6 +40,8 @@ public final class TimeUtils {
 
 	public static final String DEFAULT_DATAFLOW_TIMEZONE_ID = "UTC";
 
+	public static final String DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss,SSS";
+
 	/**
 	 * Prevent instantiation.
 	 */

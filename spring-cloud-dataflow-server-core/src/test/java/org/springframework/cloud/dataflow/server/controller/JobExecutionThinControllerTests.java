@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -102,6 +107,23 @@ public class JobExecutionThinControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
+
+	@Test
+	public void testGetExecutionsByDateRange() throws Exception {
+		final Date toDate = new Date();
+		final Date fromDate = DateUtils.addMinutes(toDate, -10);
+		mockMvc.perform(get("/jobs/thinexecutions/")
+				.param("fromDate",
+						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
+								.format(fromDate))
+				.param("toDate",
+						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
+								.format(toDate))
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
+				.andExpect(jsonPath("$.content", hasSize(9)));
 	}
 
 }

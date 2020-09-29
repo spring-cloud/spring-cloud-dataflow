@@ -78,6 +78,21 @@ public class DockerComposeFactoryProperties {
 	 */
 	public static final String TEST_DOCKER_COMPOSE_STREAM_APPS_URI = PREFIX + "stream.apps.uri";
 
+	/**
+	 * Overrides the APPS_PORT_RANGE mapped by skipper.
+	 */
+	public static final String TEST_DOCKER_COMPOSE_APPS_PORT_RANGE = PREFIX + "apps.port.range";
+
+	/**
+	 * Shortcut that configures the DooD mode. Automatically sets the env. variables needed for the DooD mode.
+	 */
+	public static final String TEST_DOCKER_COMPOSE_DOOD = PREFIX + "dood";
+
+	/**
+	 * Set to false to keep the exited Docker containers (applicable only in DooD mode).
+	 */
+	public static final String TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT = PREFIX + "docker.delete.container.on.exit";
+
 	public static boolean getBoolean(String propertyName, boolean defaultValue) {
 		String value = get(propertyName, "" + defaultValue);
 		return Boolean.valueOf(value);

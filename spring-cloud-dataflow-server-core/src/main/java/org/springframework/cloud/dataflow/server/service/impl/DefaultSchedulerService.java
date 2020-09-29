@@ -172,6 +172,14 @@ public class DefaultSchedulerService implements SchedulerService {
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
 
+		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+		// Doesn't override existing properties!
+		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, "common");
+		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
+				appDeploymentProperties, launcher.getType().toLowerCase());
+
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
@@ -194,8 +202,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	}
 
 	private String validateScheduleNameForPlatform(String type, String scheduleName) {
-		if(type.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
-			if(scheduleName.length() > MAX_SCHEDULE_NAME_LEN) {
+		if (type.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			if (scheduleName.length() > MAX_SCHEDULE_NAME_LEN) {
 				throw new IllegalArgumentException(String.format("the name specified " +
 						"exceeds the maximum schedule name length of %s.", MAX_SCHEDULE_NAME_LEN));
 			}
@@ -220,17 +228,17 @@ public class DefaultSchedulerService implements SchedulerService {
 		// if more than one launcher has a scheduler and a user didn't specify a platform then that is an error.
 		int launcherCount = 0;
 		if (launcherToUse == null) {
-			if(getPrimaryLauncher() != null) {
+			if (getPrimaryLauncher() != null) {
 				return getPrimaryLauncher();
 			}
-			for(Launcher launcher : launchers) {
-				if(launcher.getScheduler() != null) {
+			for (Launcher launcher : launchers) {
+				if (launcher.getScheduler() != null) {
 					launcherToUse = launcher;
 					launcherCount++;
 				}
 			}
 		}
-		if (launcherCount > 1 ) {
+		if (launcherCount > 1) {
 			throw new IllegalArgumentException("Must select a platform.  " +
 					"A default could not be determined because more than one platform" +
 					" had an associated scheduler");
@@ -247,7 +255,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private List<Launcher> getLaunchers() {
 		List<Launcher> launchers = new ArrayList<>();
 		for (TaskPlatform taskPlatform : this.taskPlatforms) {
-			for(Launcher launcher : taskPlatform.getLaunchers()) {
+			for (Launcher launcher : taskPlatform.getLaunchers()) {
 				launchers.add(launcher);
 			}
 		}
@@ -257,7 +265,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private Launcher getPrimaryLauncher() {
 		Launcher result = null;
 		for (TaskPlatform taskPlatform : this.taskPlatforms) {
-			if(taskPlatform.isPrimary()) {
+			if (taskPlatform.isPrimary()) {
 				for (Launcher launcher : taskPlatform.getLaunchers()) {
 					result = launcher;
 				}
@@ -288,8 +296,8 @@ public class DefaultSchedulerService implements SchedulerService {
 	@Override
 	public void unscheduleForTaskDefinition(String taskDefinitionName) {
 		for (Launcher launcher : getLaunchers()) {
-			for(ScheduleInfo scheduleInfo : listForPlatform(launcher.getName())) {
-				if(scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
+			for (ScheduleInfo scheduleInfo : listForPlatform(launcher.getName())) {
+				if (scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
 					unschedule(scheduleInfo.getScheduleName(), launcher.getName());
 				}
 			}
@@ -316,8 +324,8 @@ public class DefaultSchedulerService implements SchedulerService {
 		Launcher launcher = getTaskLauncher(platformName);
 		List<ScheduleInfo> list = launcher.getScheduler().list();
 		List<ScheduleInfo> result = new ArrayList<>();
-		for(ScheduleInfo scheduleInfo: list) {
-			if(scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
+		for (ScheduleInfo scheduleInfo : list) {
+			if (scheduleInfo.getTaskDefinitionName().equals(taskDefinitionName)) {
 				result.add(scheduleInfo);
 			}
 		}
@@ -360,7 +368,7 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	private List<ScheduleInfo> limitScheduleInfoResultSize(List<ScheduleInfo> resultSet,
 			int schedulerLimitResultSize) {
-		if(resultSet.size() > schedulerLimitResultSize) {
+		if (resultSet.size() > schedulerLimitResultSize) {
 			resultSet = resultSet.subList(0, schedulerLimitResultSize);
 		}
 		return resultSet;

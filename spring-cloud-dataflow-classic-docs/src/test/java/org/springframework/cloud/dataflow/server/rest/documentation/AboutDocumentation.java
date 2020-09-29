@@ -48,8 +48,8 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Describes if streams feature is enabled."),
 						fieldWithPath("featureInfo.tasksEnabled").type(JsonFieldType.BOOLEAN)
 								.description("Describes if tasks feature is enabled."),
-						fieldWithPath("featureInfo.grafanaEnabled").type(JsonFieldType.BOOLEAN)
-								.description("Describes if an URL to an external Grafana dashboards is provided."),
+						fieldWithPath("featureInfo.monitoringDashboardType").type(JsonFieldType.STRING)
+								.description("Name of the external metrics dashboards if provided or none otherwise."),
 
 						fieldWithPath("versionInfo").type(JsonFieldType.OBJECT).description(
 								"Provides details of the Spring Cloud Data Flow Server " + "dependencies."),
@@ -147,13 +147,17 @@ public class AboutDocumentation extends BaseDocumentation {
 								.description("Provides details of the taskLauncher boot version."),
 						fieldWithPath("runtimeEnvironment.taskLaunchers[0].springVersion").type(JsonFieldType.STRING)
 								.description("Provides details of the taskLauncher spring version."),
+						fieldWithPath("monitoringDashboardInfo").type(JsonFieldType.OBJECT).description(
+								"Provides details of how to access the Monitoring Dashboards if provided."),
+						fieldWithPath("monitoringDashboardInfo.url").type(JsonFieldType.STRING).description(
+								"Provides URL of the external monitoring dashboard."),
+						fieldWithPath("monitoringDashboardInfo.dashboardType").type(JsonFieldType.STRING).description(
+								"Type of the monitoring dashboard system."),
+						fieldWithPath("monitoringDashboardInfo.source").type(JsonFieldType.STRING).description(
+								"Unique DataFlow identifier within the monitoring system."),
+						fieldWithPath("monitoringDashboardInfo.refreshInterval").type(JsonFieldType.NUMBER).description(
+								"Provides the time interval (in seconds) for updating the monitoring dashboards.")
 
-						fieldWithPath("grafanaInfo").type(JsonFieldType.OBJECT).description(
-								"Provides details of how to access the Grafana Dashboards if provided."),
-						fieldWithPath("grafanaInfo.url").type(JsonFieldType.STRING).description(
-								"Provides URL of the external Grafana dashboard."),
-						fieldWithPath("grafanaInfo.refreshInterval").type(JsonFieldType.NUMBER).description(
-								"Provides the time interval (in seconds) for updating the Grafana dashboards.")
 				)));
 	}
 }

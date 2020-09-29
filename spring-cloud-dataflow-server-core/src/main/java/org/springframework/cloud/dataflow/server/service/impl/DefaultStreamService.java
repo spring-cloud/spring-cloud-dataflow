@@ -161,8 +161,15 @@ public class DefaultStreamService implements StreamService {
 				.filter(mapEntry -> !mapEntry.getKey().startsWith(SkipperStream.SKIPPER_KEY_PREFIX))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+		final String platformName = skipperDeploymentProperties.getOrDefault(SkipperStream.SKIPPER_PLATFORM_NAME, "default");
+		String platformType = this.platformList().stream()
+				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+				.map(Deployer::getType)
+				.findFirst()
+				.orElse("unknown");
+
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
-				.createRequests(streamDefinition, deploymentPropertiesToUse);
+				.createRequests(streamDefinition, deploymentPropertiesToUse, platformType);
 
 		DeploymentPropertiesUtils.validateSkipperDeploymentProperties(deploymentPropertiesToUse);
 
@@ -402,7 +409,7 @@ public class DefaultStreamService implements StreamService {
 			}
 		}
 
-		if ( !STREAM_NAME_PATTERN.matcher(streamName).matches()) {
+		if (!STREAM_NAME_PATTERN.matcher(streamName).matches()) {
 			errorMessages.add(STREAM_NAME_VALIDATION_MSG);
 		}
 
