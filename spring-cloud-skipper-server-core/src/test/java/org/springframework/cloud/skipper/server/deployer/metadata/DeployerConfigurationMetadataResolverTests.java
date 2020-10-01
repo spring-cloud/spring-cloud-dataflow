@@ -28,117 +28,119 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeployerConfigurationMetadataResolverTests {
 
+	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 21;
+
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withUserConfiguration(Config.class);
 
 	@Test
 	public void testNoFiltersFindsAll() {
 		this.contextRunner
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(17);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES);
+				});
 	}
 
 	@Test
 	public void testExcludeGroup() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.group-excludes=spring.cloud.deployer.local.port-range"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.group-excludes=spring.cloud.deployer.local.port-range"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(15);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES - 2);
+				});
 	}
 
 	@Test
 	public void testExcludeProperty() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.property-excludes=spring.cloud.deployer.local.port-range.low"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.property-excludes=spring.cloud.deployer.local.port-range.low"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(16);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES - 1);
+				});
 	}
 
 	@Test
 	public void testIncludeGroup() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(2);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(2);
+				});
 	}
 
 	@Test
 	public void testIncludeProperty() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(1);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(1);
+				});
 	}
 
 	@Test
 	public void testIncludeMultipleProperty() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low,spring.cloud.deployer.local.port-range.high"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low,spring.cloud.deployer.local.port-range.high"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(2);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(2);
+				});
 	}
 
 	@Test
 	public void testIncludeGroupExcludeProperty() {
 		this.contextRunner
-			.withPropertyValues(
-					"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range",
-					"spring.cloud.skipper.server.deployer-properties.property-excludes=spring.cloud.deployer.local.port-range.low"
-					)
-			.run((context) -> {
-				SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
+				.withPropertyValues(
+						"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range",
+						"spring.cloud.skipper.server.deployer-properties.property-excludes=spring.cloud.deployer.local.port-range.low"
+				)
+				.run((context) -> {
+					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
 					DeployerConfigurationMetadataResolver resolver = new DeployerConfigurationMetadataResolver(
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
-				List<ConfigurationMetadataProperty> data = resolver.resolve();
-				assertThat(data.size()).isEqualTo(1);
-			});
+					List<ConfigurationMetadataProperty> data = resolver.resolve();
+					assertThat(data.size()).isEqualTo(1);
+				});
 	}
 
 	@EnableConfigurationProperties({ SkipperServerProperties.class })
