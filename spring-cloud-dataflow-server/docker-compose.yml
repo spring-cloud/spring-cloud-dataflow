@@ -7,12 +7,18 @@ version: '3'
 #   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
 #   If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
 #   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/.m2  docker-compose up
+# - APPS_PORT_RANGE allows you to override the port range exported by the Skipper server. By default the APPS_PORT_RANGE
+#   must supersede the local deployer's PORTRANGE_LOW and PORTRANGE_HIGH - the ports assigned to the stream apps run inside the Skipper container.
+#   The stream apps tha run in their own docker containers must set [DOCKER_PORTRANGE_LOW, DOCKER_PORTRANGE_HIGH] range that
+#   doesn't overlap with the APPS_PORT_RANGE.
 #
 # Exposed container ports:
 # - 9393:9393               - Data Flow server port (http://localhost:9393/dashboard)
 # - 7577:7577               - Skipper server port (http://localhost:7577/api)
-# - 20000-20105:20000-20105 - Port range for all deployed stream applications. That means you can reach the
-#                             application's actuator endpoints from your host machine.
+# - 20000-20105:20000-20105 - Port range for all deployed stream applications that run inside the Skipper container (e.g. maven:// registered apps).
+#                             That means you can reach the application's actuator endpoints from your host machine.
+#                             The deployed stream applications that run in their own docker containers (e.g. docker:// registered apps),
+#                             can be reached on the the ports they expose.
 services:
   mysql:
     image: mysql:5.7.25
@@ -34,6 +40,8 @@ services:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_HOST_NAME=kafka-broker
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_LOG4J_ROOT_LOGLEVEL=ERROR
+      - KAFKA_LOG4J_LOGGERS=org.apache.zookeeper=ERROR,org.apache.kafka=ERROR,kafka=ERROR,kafka.cluster=ERROR,kafka.controller=ERROR,kafka.coordinator=ERROR,kafka.log=ERROR,kafka.server=ERROR,kafka.zookeeper=ERROR,state.change.logger=ERROR
     depends_on:
       - zookeeper
 
@@ -94,6 +102,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
     entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}

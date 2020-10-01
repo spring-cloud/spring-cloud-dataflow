@@ -91,12 +91,11 @@ public class DockerComposeFactory {
 	};
 
 	private static boolean isDood = DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOOD, false);
+
 	/**
 	 * Initialize the docker machine with the required environment variables.
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
-			.withAdditionalEnvironmentVariable("APPS_PORT_RANGE",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, (isDood ? "80" : "")))
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, DEFAULT_DATAFLOW_VERSION))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
@@ -136,8 +135,6 @@ public class DockerComposeFactory {
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PATHS,
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
-		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, (isDood ? "80" : "")));
 
 		String[] dockerComposePaths = new ResourceExtractor(tempFolder).extract(
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));

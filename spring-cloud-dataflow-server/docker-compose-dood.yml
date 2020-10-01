@@ -4,7 +4,6 @@ version: '3'
 # and DataFlow (running inside docker containers) to deploy stream and task docker apps in per-app docker containers.
 #
 # How to use:
-#   APPS_PORT_RANGE=80 \
 #   COMPOSE_PROJECT_NAME=scdf \
 #   STREAM_APPS_URI=https://dataflow.spring.io/kafka-docker-latest \
 #   TASK_APPS_URI=https://dataflow.spring.io/task-docker-latest \
@@ -15,17 +14,14 @@ version: '3'
 #   use the Host's Docker daemon for deploying the apps. The DOCKER_NETWORK property is used to share the docker-compose
 #   network with the app's containers.
 #
-# - Set APPS_PORT_RANGE=80. In non DooD mode the stream apps are java processes running inside the Skipper container.
-#   The APPS_PORT_RANGE is used to let the Skipper's container expose the java's ports to the host. In DooD mode the
-#   apps are running in their own containers and exposing their ports directly. If APPS_PORT_RANGE is not overridden
-#   then both the apps' and Skipper's containers will try to use the same port ranges
-#   leading to conflicts.
-#
 # - COMPOSE_PROJECT_NAME sets the docker-compose project name. Later is used for naming the network passed to the apps
 #   containers (e.g. SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK).
 #
 # - The STREAM_APPS_URI and TASK_APPS_URI are set to register docker based Stream and Task apps.
 #
+# - The DOCKER_PORTRANGE_LOW=.. and DOCKER_PORTRANGE_HIGH=.. are used to set port range for docker apps different
+#   from port range used by the apps running as java processes in-Skipper. The Skipper container reserves and exports
+#   the java-processes running apps.
 # TIPS:
 #  - If docker-compose exit before the data pipelines are stopped then the containers should be cleaned manually:
 #    docker stop $(docker ps -a -q);  docker rm $(docker ps -a -q)
@@ -36,7 +32,6 @@ services:
     environment:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
-      - CHECK_IF_APPS_PORT_RANGE_IS_SET=${APPS_PORT_RANGE:?When DooD is enabled the APPS_PORT_RANGE must be set to 80}
     entrypoint: >
       bin/sh -c "
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
@@ -50,6 +45,9 @@ services:
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
+      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (e.g. the ports used by the stream apps running inside the Skipper container) !
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
     entrypoint: >
       bin/sh -c "
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
