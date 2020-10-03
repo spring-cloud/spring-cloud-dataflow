@@ -40,7 +40,8 @@ import org.springframework.util.StringUtils;
  *     registry host value is used.
  *   - The repository namespace together with the repository name form an unique REPOSITORY identifier, unique  within
  *     the REGISTRY HOST.
- *   - The TAG represents a particular REPOSITORY instance within the REGISTRY HOST. The DIGEST content-addressable identifier.
+ *   - The TAG or DIGEST can be used as image instance references. The TAG represents a particular REPOSITORY instance
+ *     within the REGISTRY HOST. The DIGEST content-addressable identifier.
  *
  * @author Christian Tzolov
  */
@@ -55,6 +56,7 @@ public class ContainerImage {
 	// and dashes. A tag name may not start with a period or a dash and may contain a maximum of 128 characters.
 	// (https://dockr.ly/3chhQZF)
 	private static final Pattern TAG_PATTERN = Pattern.compile("^[a-zA-Z0-9_][a-zA-Z0-9\\-_.]{0,127}$");
+	// Digest format is defined inn the docker reference code (https://bit.ly/3l8HjYT) and (https://bit.ly/33nBcdk)
 	private static final Pattern DIGEST_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9]*(?:[\\-_+.][A-Za-z][A-Za-z0-9]*)*[:][[\\p{XDigit}]]{32,}$");
 	private static final Pattern HOSTNAME_PATTERN = Pattern.compile("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$");
 	private static final Pattern IP_PATTERN = Pattern.compile("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
