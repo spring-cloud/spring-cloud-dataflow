@@ -116,7 +116,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 		// Determine the OAuth2 token service entry point.
 		verify(noSslVerificationContainerRestTemplate)
-				.exchange(eq(new URI("https://demo.goharbor.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class));
+				.exchange(eq(new URI("https://demo.goharbor.io/v2/")), eq(HttpMethod.GET), any(), eq(Map.class));
 
 		// Get authorization token
 		verify(containerRestTemplate).exchange(
@@ -138,7 +138,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 		// Determine the OAuth2 token service entry point.
 		verify(noSslVerificationContainerRestTemplate)
-				.exchange(eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class));
+				.exchange(eq(new URI("https://demo.repository.io/v2/")), eq(HttpMethod.GET), any(), eq(Map.class));
 
 		// Get authorization token
 		verify(noSslVerificationContainerRestTemplate).exchange(
@@ -165,7 +165,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			HttpClientErrorException httpClientErrorException =
 					HttpClientErrorException.create(HttpStatus.UNAUTHORIZED, "", authenticateHeader, new byte[0], null);
 
-			when(restTemplate.exchange(eq(new URI("https://demo.repository.io/v2/_catalog")),
+			when(restTemplate.exchange(eq(new URI("https://demo.repository.io/v2/")),
 					eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(httpClientErrorException);
 
 
@@ -193,7 +193,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			HttpClientErrorException httpClientErrorException2 =
 					HttpClientErrorException.create(HttpStatus.UNAUTHORIZED, "", authenticateHeader2, new byte[0], null);
 
-			when(restTemplate.exchange(eq(new URI("https://demo.goharbor.io/v2/_catalog")),
+			when(restTemplate.exchange(eq(new URI("https://demo.goharbor.io/v2/")),
 					eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(httpClientErrorException2);
 
 			return restTemplate;

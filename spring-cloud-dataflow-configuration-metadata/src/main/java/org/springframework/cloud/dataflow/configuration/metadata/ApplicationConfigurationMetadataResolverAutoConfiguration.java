@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -134,43 +135,40 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		registryConfigurationMap.values().stream()
 				.filter(rc -> rc.getAuthorizationType() == RegistryConfiguration.AuthorizationType.dockeroauth2)
 				.filter(rc -> !rc.getExtra().containsKey(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
-				.forEach(rc -> {
-							String tokenServiceUri = secretToRegistryConfigurationConverter.getDockerTokenServiceUri(
-									rc.getRegistryHost(), rc.getUser(), rc.getSecret());
-							if (StringUtils.hasText(tokenServiceUri)) {
-								rc.getExtra().put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, tokenServiceUri);
-							}
-						}
-				);
+				.forEach(rc -> secretToRegistryConfigurationConverter.getDockerTokenServiceUri(rc.getRegistryHost())
+						.ifPresent(tokenServiceUri -> rc.getExtra().put(
+								DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY,
+								tokenServiceUri)));
 
 		if (!StringUtils.isEmpty(dockerConfigJsonSecret)) {
 			// Retrieve registry configurations from mounted kubernetes Secret.
 			Map<String, RegistryConfiguration> secretsRegistryConfigurationMap
 					= secretToRegistryConfigurationConverter.convert(dockerConfigJsonSecret);
 
-			// Merge the Secret and the Property based registry configurations.
-			// The properties values when set has precedence over the Secret retrieved one. Later allow to override
-			// some of the Secret properties or set the disableSslVerification for secret based configs.
-			Map<String, RegistryConfiguration> mergedConfigurations = Stream.concat(
-					secretsRegistryConfigurationMap.entrySet().stream(),
-					registryConfigurationMap.entrySet().stream())
-					.collect(Collectors.toMap(
-							Map.Entry::getKey,
-							Map.Entry::getValue,
-							(secretConf, propConf) -> {
-								RegistryConfiguration rc = new RegistryConfiguration();
-								rc.setRegistryHost(secretConf.getRegistryHost());
-								rc.setUser(StringUtils.hasText(propConf.getUser()) ? propConf.getUser() : secretConf.getUser());
-								rc.setSecret(StringUtils.hasText(propConf.getSecret()) ? propConf.getSecret() : secretConf.getSecret());
-								rc.setAuthorizationType(propConf.getAuthorizationType() != null ? propConf.getAuthorizationType() : secretConf.getAuthorizationType());
-								rc.setManifestMediaType(StringUtils.hasText(propConf.getManifestMediaType()) ? propConf.getManifestMediaType() : secretConf.getManifestMediaType());
-								rc.setDisableSslVerification(propConf.isDisableSslVerification());
-								rc.getExtra().putAll(secretConf.getExtra());
-								rc.getExtra().putAll(propConf.getExtra());
-								return rc;
-							}
-					));
-			registryConfigurationMap = mergedConfigurations;
+			if (!CollectionUtils.isEmpty(secretsRegistryConfigurationMap)) {
+				// Merge the Secret and the Property based registry configurations.
+				// The properties values when set has precedence over the Secret retrieved one. Later allow to override
+				// some of the Secret properties or set the disableSslVerification for secret based configs.
+				registryConfigurationMap = Stream.concat(
+						secretsRegistryConfigurationMap.entrySet().stream(),
+						registryConfigurationMap.entrySet().stream())
+						.collect(Collectors.toMap(
+								Map.Entry::getKey,
+								Map.Entry::getValue,
+								(secretConf, propConf) -> {
+									RegistryConfiguration rc = new RegistryConfiguration();
+									rc.setRegistryHost(secretConf.getRegistryHost());
+									rc.setUser(StringUtils.hasText(propConf.getUser()) ? propConf.getUser() : secretConf.getUser());
+									rc.setSecret(StringUtils.hasText(propConf.getSecret()) ? propConf.getSecret() : secretConf.getSecret());
+									rc.setAuthorizationType(propConf.getAuthorizationType() != null ? propConf.getAuthorizationType() : secretConf.getAuthorizationType());
+									rc.setManifestMediaType(StringUtils.hasText(propConf.getManifestMediaType()) ? propConf.getManifestMediaType() : secretConf.getManifestMediaType());
+									rc.setDisableSslVerification(propConf.isDisableSslVerification());
+									rc.getExtra().putAll(secretConf.getExtra());
+									rc.getExtra().putAll(propConf.getExtra());
+									return rc;
+								}
+						));
+			}
 		}
 
 		logger.info("Final Registry Configurations: " + registryConfigurationMap);

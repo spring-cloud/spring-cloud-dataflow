@@ -25,6 +25,9 @@ spec:
           - name: database
             mountPath: /etc/secrets/database
             readOnly: true
+          - name: ctr-registry
+            mountPath: /workspace/runtime/secrets/ctr-registry
+            readOnly: true
         ports:
         - containerPort: 80
         livenessProbe:
@@ -64,7 +67,7 @@ spec:
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
-          value: /etc/secrets
+          value: /etc/secrets,/workspace/runtime/secrets/ctr-registry
         - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
           value: 'http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}'
           # Provide the Skipper service location
@@ -88,3 +91,6 @@ spec:
         - name: database
           secret:
             secretName: mysql
+        - name: ctr-registry
+          secret:
+            secretName: scdf-metadata-regcred

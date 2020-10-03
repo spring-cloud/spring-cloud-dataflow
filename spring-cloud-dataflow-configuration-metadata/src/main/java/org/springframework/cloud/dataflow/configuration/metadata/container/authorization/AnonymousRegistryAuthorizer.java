@@ -38,7 +38,6 @@ public class AnonymousRegistryAuthorizer implements RegistryAuthorizer {
 		Assert.isTrue(registryConfiguration.getAuthorizationType() == this.getType(),
 				"Incorrect type: " + registryConfiguration.getAuthorizationType());
 
-		final HttpHeaders headers = new HttpHeaders();
-		return headers;
+		return new HttpHeaders();
 	}
 }
