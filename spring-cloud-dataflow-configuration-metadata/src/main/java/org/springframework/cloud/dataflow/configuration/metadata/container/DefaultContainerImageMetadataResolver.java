@@ -49,10 +49,10 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 					ContainerImageMetadataProperties.DOCKER_IMAGE_MANIFEST_MEDIA_TYPE));
 
 	private final RestTemplate containerRestTemplate;
-	private RestTemplate noSslVerificationContainerRestTemplate;
+	private final RestTemplate noSslVerificationContainerRestTemplate;
 	private final ContainerImageParser containerImageParser;
 	private final Map<RegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
-	private Map<String, RegistryConfiguration> registryConfigurationMap;
+	private final Map<String, RegistryConfiguration> registryConfigurationMap;
 
 	public static class RegistryRequest {
 
@@ -157,6 +157,10 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 
 		// Find a registry configuration that matches the image's registry host
 		RegistryConfiguration registryConf = this.registryConfigurationMap.get(containerImage.getRegistryHost());
+		if (registryConf == null) {
+			throw new AppMetadataResolutionException(
+					"Could not find an Registry Configuration for: " + containerImage.getRegistryHost());
+		}
 
 		// Retrieve a registry authorizer that supports the configured authorization type.
 		RegistryAuthorizer registryAuthorizer = this.registryAuthorizerMap.get(registryConf.getAuthorizationType());

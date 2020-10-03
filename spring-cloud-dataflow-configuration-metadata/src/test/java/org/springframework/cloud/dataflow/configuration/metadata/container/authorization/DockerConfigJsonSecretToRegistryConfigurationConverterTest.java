@@ -62,7 +62,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	public void testConvertAnonymousRegistry() throws URISyntaxException {
 
 		when(mockRestTemplate.exchange(
-				eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class)))
+				eq(new URI("https://demo.repository.io/v2/")), eq(HttpMethod.GET), any(), eq(Map.class)))
 				.thenReturn(new ResponseEntity<>(new HashMap<>(), HttpStatus.OK));
 
 		String b = "{\"auths\":{\"demo.repository.io\":{}}}";
@@ -108,7 +108,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		HttpClientErrorException httpClientErrorException =
 				HttpClientErrorException.create(HttpStatus.UNAUTHORIZED, "", authenticateHeader, new byte[0], null);
 
-		when(mockRestTemplate.exchange(eq(new URI("https://demo.repository.io/v2/_catalog")),
+		when(mockRestTemplate.exchange(eq(new URI("https://demo.repository.io/v2/")),
 				eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(httpClientErrorException);
 
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
