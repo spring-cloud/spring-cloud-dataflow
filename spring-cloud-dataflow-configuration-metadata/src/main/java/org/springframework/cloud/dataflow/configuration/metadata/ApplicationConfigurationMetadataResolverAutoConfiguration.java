@@ -29,6 +29,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -224,6 +226,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
+
+		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
 		HttpComponentsClientHttpRequestFactory customRequestFactory =
 				new HttpComponentsClientHttpRequestFactory(
