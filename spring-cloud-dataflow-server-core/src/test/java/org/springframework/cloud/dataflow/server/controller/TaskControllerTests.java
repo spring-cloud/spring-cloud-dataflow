@@ -344,6 +344,12 @@ public class TaskControllerTests {
 				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")))
 				.andExpect(jsonPath("$.content[2].dslText", is("task-ooz")));
 	}
+	
+	@Test
+	public void testFindByDslTextAndNameBadRequest() throws Exception {
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("search", "f")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
+	}
 
 	@Test
 	public void testDestroyTask() throws Exception {

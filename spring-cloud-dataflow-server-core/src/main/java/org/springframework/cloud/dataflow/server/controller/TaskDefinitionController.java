@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -156,6 +157,7 @@ public class TaskDefinitionController {
 	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}
 	 * @param search optional findByTaskNameContains parameter
+	 * @param dslText optional findByDslText parameter
 	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
 	 * @param assembler assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
@@ -169,7 +171,7 @@ public class TaskDefinitionController {
 		final Page<TaskDefinition> taskDefinitions;
 		if (search != null) {
 			if (dslText != null) {
-				taskDefinitions = repository.findByTaskNameContainsAndDslTextContains(search, dslText, pageable);
+				throw new TaskQueryParamException(new String[] {"search", "dslText"});
 			} else {
 				taskDefinitions = repository.findByTaskNameContains(search, pageable);
 			}
