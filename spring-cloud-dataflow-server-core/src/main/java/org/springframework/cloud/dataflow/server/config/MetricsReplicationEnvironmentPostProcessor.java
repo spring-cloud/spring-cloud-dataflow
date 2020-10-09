@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 
 import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketClientProperties;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,47 +64,60 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 
-		Properties additionalProperties = new Properties();
+		try {
+			// Disable (only for this processor) the failures on unresolved placeholders.
+			environment.setIgnoreUnresolvableNestedPlaceholders(true);
 
-		// 1. Infer the Monitoring Dashboard properties from the server's metrics configuration properties.
-		this.inferMonitoringDashboardProperties(environment, additionalProperties);
+			Properties additionalProperties = new Properties();
 
-		// 2. Replicates the server's metrics properties to the applicationProperties.stream
-		//    and applicationProperties.task.
-		if (environment.getProperty(MONITORING_PREFIX + ".property-replication", Boolean.class, true)) {
-			// Callback function that checks if the input property is set the server's configuration. If it is then
-			// the property is replicated as a common Stream and Task property.
-			Consumer<String> propertyReplicator = metricsPropertyName -> {
-				if (environment.containsProperty(metricsPropertyName)) {
-					String serverPropertyValue = environment.getProperty(metricsPropertyName);
-					// Overrides only the Stream applicationProperties that have not been set explicitly.
-					String commonStreamPropertyName = COMMON_APPLICATION_PREFIX + ".stream." + metricsPropertyName;
-					if (!environment.containsProperty(commonStreamPropertyName)) {
-						logger.info("Replicate metrics property:" + commonStreamPropertyName + "=" + serverPropertyValue);
-						// if a property with same key occurs multiple times only the first is set.
-						additionalProperties.putIfAbsent(commonStreamPropertyName, serverPropertyValue);
+			// 1. Infer the Monitoring Dashboard properties from the server's metrics configuration properties.
+			this.inferMonitoringDashboardProperties(environment, additionalProperties);
+
+			// 2. Replicates the server's metrics properties to the applicationProperties.stream
+			//    and applicationProperties.task.
+			if (environment.getProperty(MONITORING_PREFIX + ".property-replication", Boolean.class, true)) {
+				// Callback function that checks if the input property is set the server's configuration. If it is then
+				// the property is replicated as a common Stream and Task property.
+				Consumer<String> propertyReplicator = metricsPropertyName -> {
+					if (environment.containsProperty(metricsPropertyName)) {
+						try {
+							String serverPropertyValue = environment.getProperty(metricsPropertyName);
+							// Overrides only the Stream applicationProperties that have not been set explicitly.
+							String commonStreamPropertyName = COMMON_APPLICATION_PREFIX + ".stream." + metricsPropertyName;
+							if (!environment.containsProperty(commonStreamPropertyName)) {
+								logger.info("Replicate metrics property:" + commonStreamPropertyName + "=" + serverPropertyValue);
+								// if a property with same key occurs multiple times only the first is set.
+								additionalProperties.putIfAbsent(commonStreamPropertyName, serverPropertyValue);
+							}
+							// Overrides only the Task applicationProperties that have not been set explicitly.
+							String commonTaskPropertyName = COMMON_APPLICATION_PREFIX + ".task." + metricsPropertyName;
+							if (!environment.containsProperty(commonTaskPropertyName)) {
+								logger.info("Replicate metrics property:" + commonTaskPropertyName + "=" + serverPropertyValue);
+								// if a property with same key occurs multiple times only the first is set.
+								additionalProperties.putIfAbsent(commonTaskPropertyName, serverPropertyValue);
+							}
+						}
+						catch (Throwable throwable) {
+							logger.error("Failed with replicating {}, because of {}", metricsPropertyName,
+									ExceptionUtils.getRootCauseMessage(throwable));
+						}
 					}
-					// Overrides only the Task applicationProperties that have not been set explicitly.
-					String commonTaskPropertyName = COMMON_APPLICATION_PREFIX + ".task." + metricsPropertyName;
-					if (!environment.containsProperty(commonTaskPropertyName)) {
-						logger.info("Replicate metrics property:" + commonTaskPropertyName + "=" + serverPropertyValue);
-						// if a property with same key occurs multiple times only the first is set.
-						additionalProperties.putIfAbsent(commonTaskPropertyName, serverPropertyValue);
-					}
-				}
-			};
+				};
 
-			this.replicateServerMetricsPropertiesToStreamAndTask(environment, WavefrontProperties.class, propertyReplicator);
-			this.replicateServerMetricsPropertiesToStreamAndTask(environment, InfluxProperties.class, propertyReplicator);
-			this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusProperties.class, propertyReplicator);
-			this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusRSocketClientProperties.class, propertyReplicator);
-		}
+				this.replicateServerMetricsPropertiesToStreamAndTask(environment, WavefrontProperties.class, propertyReplicator);
+				this.replicateServerMetricsPropertiesToStreamAndTask(environment, InfluxProperties.class, propertyReplicator);
+				this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusProperties.class, propertyReplicator);
+				this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusRSocketClientProperties.class, propertyReplicator);
+			}
 
-		// This post-processor is called multiple times but sets the properties only once.
-		if (!additionalProperties.isEmpty()) {
-			PropertiesPropertySource propertiesPropertySource =
-					new PropertiesPropertySource(PROPERTY_SOURCE_KEY_NAME, additionalProperties);
-			environment.getPropertySources().addLast(propertiesPropertySource);
+			// This post-processor is called multiple times but sets the properties only once.
+			if (!additionalProperties.isEmpty()) {
+				PropertiesPropertySource propertiesPropertySource =
+						new PropertiesPropertySource(PROPERTY_SOURCE_KEY_NAME, additionalProperties);
+				environment.getPropertySources().addLast(propertiesPropertySource);
+			}
+		} finally {
+			environment.setIgnoreUnresolvableNestedPlaceholders(false);
 		}
 	}
 
