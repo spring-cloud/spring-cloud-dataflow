@@ -12,12 +12,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
-		<version>2.3.2.RELEASE</version>
+		<version>2.3.4.RELEASE</version>
 		<relativePath />
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-boot.version>2.3.2.RELEASE</spring-boot.version>
+		<spring-boot.version>2.3.4.RELEASE</spring-boot.version>
 		<spring-cloud.version>Hoxton.SR6</spring-cloud.version>
 	</properties>
 	<dependencyManagement>
