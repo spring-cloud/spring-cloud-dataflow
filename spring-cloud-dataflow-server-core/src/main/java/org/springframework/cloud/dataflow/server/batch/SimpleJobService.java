@@ -454,6 +454,12 @@ public class SimpleJobService implements JobService, DisposableBean {
 			return jobExecutionDao.getJobExecutionsWithStepCount(fromDate, toDate, start, count);
 	}
 
+	@Override
+	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(
+			int jobInstanceId, int start, int count) {
+		return jobExecutionDao.getJobExecutionsWithStepCountFilteredByJobInstanceId(jobInstanceId, start, count);
+	}
+
 	private List<JobExecution> getJobExecutions(String jobName, BatchStatus status, int pageOffset, int pageSize) {
 		if (StringUtils.isEmpty(jobName)) {
 			if (status != null) {
