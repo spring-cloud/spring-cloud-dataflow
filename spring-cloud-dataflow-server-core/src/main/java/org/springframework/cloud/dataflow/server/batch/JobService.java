@@ -363,4 +363,15 @@ public interface JobService {
 	 */
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(Date fromDate,
 			Date toDate, int start, int count);
+
+	/**
+	 * List the {@link JobExecutionWithStepCount job executions} filtered by job instance id in
+	 * descending order of creation (usually close to execution order).
+	 *
+	 * @param jobInstanceId the job instance id associated with the execution.
+	 * @param start    the start index of the first job execution
+	 * @param count    the maximum number of executions to return
+	 * @return a collection of {@link JobExecutionWithStepCount}
+	 */
+	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, int start, int count);
 }
