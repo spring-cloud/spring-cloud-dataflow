@@ -128,11 +128,12 @@ public class JobExecutionThinControllerTests {
 
 	@Test
 	public void testGetExecutionsByJobInstanceId() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+		mockMvc.perform(get("/jobs/thinexecutions/").param("jobInstanceId", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$.content[0].instanceId", is(1)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
