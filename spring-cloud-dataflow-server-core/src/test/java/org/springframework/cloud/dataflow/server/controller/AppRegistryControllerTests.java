@@ -140,6 +140,15 @@ public class AppRegistryControllerTests {
 	}
 
 	@Test
+	public void testRegisterAppWithNameLongerThan255Characters() throws Exception {
+		mockMvc.perform(post(
+				"/apps/sink/sinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacters")
+						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().is5xxServerError());
+	}
+
+	@Test
 	public void testRegisterApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
