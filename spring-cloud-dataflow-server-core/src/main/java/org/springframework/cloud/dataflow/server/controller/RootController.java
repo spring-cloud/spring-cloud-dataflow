@@ -131,7 +131,7 @@ public class RootController {
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
 					+ "{?name}";
-			root.add(new Link(taskTemplated).withRel("tasks/executions/name"));
+			root.add(Link.of(taskTemplated).withRel("tasks/executions/name"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(TaskExecutionController.class)
 					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskExecutionResource.class, "{id}")
@@ -144,13 +144,13 @@ public class RootController {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
 				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()
 						+ "/instances/{taskDefinitionName}";
-				root.add(new Link(scheduleTemplated).withRel("tasks/schedules/instances"));
+				root.add(Link.of(scheduleTemplated).withRel("tasks/schedules/instances"));
 			}
 			root.add(entityLinks.linkToCollectionResource(JobExecutionResource.class).withRel("jobs/executions"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?name}";
-			root.add(new Link(taskTemplated).withRel("jobs/executions/name"));
+			root.add(Link.of(taskTemplated).withRel("jobs/executions/name"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionResource.class).getHref() + "{?status}";
-			root.add(new Link(taskTemplated).withRel("jobs/executions/status"));
+			root.add(Link.of(taskTemplated).withRel("jobs/executions/status"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(JobExecutionResource.class, "{id}")
 					.withRel("jobs/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkFor(StepExecutionResource.class, "{jobExecutionId}")
@@ -161,15 +161,16 @@ public class RootController {
 					entityLinks.linkFor(StepExecutionProgressInfoResource.class, "{jobExecutionId}").slash("{stepId}")
 							.slash("progress").withRel("jobs/executions/execution/steps/step/progress")));
 			taskTemplated = entityLinks.linkToCollectionResource(JobInstanceResource.class).getHref() + "{?name}";
-			root.add(new Link(taskTemplated).withRel("jobs/instances/name"));
+			root.add(Link.of(taskTemplated).withRel("jobs/instances/name"));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(JobInstanceResource.class, "{id}")
 					.withRel("jobs/instances/instance")));
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/parseTaskTextToGraph"));
 			root.add(entityLinks.linkFor(TaskToolsResource.class).withRel("tools/convertTaskGraphToText"));
 			root.add(entityLinks.linkToCollectionResource(JobExecutionThinResource.class).withRel("jobs/thinexecutions"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?name}";
-			root.add(new Link(taskTemplated).withRel("jobs/thinexecutions/name"));
-
+			root.add(Link.of(taskTemplated).withRel("jobs/thinexecutions/name"));
+			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?jobInstanceId}";
+			root.add(Link.of(taskTemplated).withRel("jobs/thinexecutions/jobInstanceId"));
 
 		}
 		root.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
@@ -177,17 +178,17 @@ public class RootController {
 
 		String completionStreamTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel()
 				.getHref() + ("/stream{?start,detailLevel}");
-		root.add(new Link(completionStreamTemplated).withRel("completions/stream"));
+		root.add(Link.of(completionStreamTemplated).withRel("completions/stream"));
 		String completionTaskTemplated = entityLinks.linkFor(CompletionProposalsResource.class).withSelfRel().getHref()
 				+ ("/task{?start,detailLevel}");
-		root.add(new Link(completionTaskTemplated).withRel("completions/task"));
+		root.add(Link.of(completionTaskTemplated).withRel("completions/task"));
 
 		return root;
 	}
 
 	// Workaround https://github.com/spring-projects/spring-hateoas/issues/234
 	private Link unescapeTemplateVariables(Link raw) {
-		return new Link(raw.getHref().replace("%7B", "{").replace("%7D", "}"), raw.getRel());
+		return Link.of(raw.getHref().replace("%7B", "{").replace("%7D", "}"), raw.getRel());
 	}
 
 }

@@ -91,6 +91,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/executions/name").description("Retrieve Job Executions by Job name"),
 				linkWithRel("jobs/executions/status").description("Retrieve Job Executions by Job status"),
 				linkWithRel("jobs/thinexecutions/name").description("Retrieve Job Executions by Job name with no step executions included"),
+				linkWithRel("jobs/thinexecutions/jobInstanceId").description("Retrieve Job Executions by Job Instance Id with no step executions included"),
 				linkWithRel("jobs/instances/instance").description("Provides the job instance resource for a specific job instance"),
 				linkWithRel("jobs/instances/name").description("Provides the Job instance resource for a specific job name"),
 
@@ -219,6 +220,8 @@ public class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.jobs/thinexecutions/name.href").description("Link to the jobs/thinexecutions/name"),
 						fieldWithPath("_links.jobs/thinexecutions/name.templated").type(JsonFieldType.BOOLEAN).optional().description("Link jobs/executions/name is templated"),
+						fieldWithPath("_links.jobs/thinexecutions/jobInstanceId.href").description("Link to the jobs/thinexecutions/jobInstanceId"),
+						fieldWithPath("_links.jobs/thinexecutions/jobInstanceId.templated").type(JsonFieldType.BOOLEAN).optional().description("Link jobs/executions/jobInstanceId is templated"),
 
 						fieldWithPath("_links.jobs/executions/execution.href").description("Link to the jobs/executions/execution"),
 						fieldWithPath("_links.jobs/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link jobs/executions/execution is templated"),

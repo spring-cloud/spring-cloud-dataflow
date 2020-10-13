@@ -2092,6 +2092,7 @@ The following topics provide more details:
 * <<api-guide-resources-job-executions-job-execution-info-only-list-by-name>>
 * <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-name>>
 * <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-date>>
+* <<api-guide-resources-job-executions-thin-job-execution-info-only-list-by-job-instance-id>>
 * <<api-guide-resources-job-executions-detail>>
 * <<api-guide-resources-job-executions-stop>>
 * <<api-guide-resources-job-executions-restart>>
@@ -2292,6 +2293,45 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-dat
 ===== Response Structure
 
 include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/http-response.adoc[]
+
+[[api-guide-resources-job-executions-thin-job-execution-info-only-list-by-job-instance-id]]
+==== List All Job Executions For A Specified Job Instance Id Without Step Executions Included
+
+The job executions endpoint lets you list all job executions.
+The following topics provide more details:
+
+* <<api-guide-resources-job-executions-thin-list-by-job-instance-id-request-structure>>
+* <<api-guide-resources-job-executions-thin-list-by-job-instance-id-request-parameters>>
+* <<api-guide-resources-job-executions-thin-list-by-job-instance-id-example-request>>
+* <<api-guide-resources-job-executions-thin-list-by-job-instance-id-response-structure>>
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-job-instance-id-request-structure]]
+===== Request Structure
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/http-request.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-job-instance-id-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-job-instance-id-example-request]]
+===== Example Request
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/curl-request.adoc[]
+
+
+
+[[api-guide-resources-job-executions-thin-list-by-job-instance-id-response-structure]]
+===== Response Structure
+
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/http-response.adoc[]
 
 [[api-guide-resources-job-executions-detail]]
 ==== Job Execution Detail
