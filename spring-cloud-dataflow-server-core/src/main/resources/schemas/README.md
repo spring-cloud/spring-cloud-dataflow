@@ -22,7 +22,11 @@ Generic order to apply ddl files is:
 
 5. V3-dataflow.sql
 
-    V3 dataflow schema
+    V3 dataflow schema.
+    
+6. V4-dataflow.sql
+
+    V4 dataflow schema.
 
 To completely disable flyway use Boot property:
 
