@@ -223,6 +223,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		Launcher launcher = this.launcherRepository.findByName(platformName);
+		validateTaskName(taskName, launcher);
 		// Remove since the key for task platform name will not pass validation for app,
 		// deployer, or scheduler prefix.
 		// Then validate
@@ -324,7 +325,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						), platformName);
 
 		return taskExecution.getExecutionId();
-	}	
+	}
+
+	private void validateTaskName(String taskName, Launcher launcher) {
+		if (launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE)
+				|| launcher.getType().equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			if (taskName.length() > 63)
+				throw new IllegalStateException(String.format(
+						"Task name [%s] length must be less than 64 characters to be launched on platform %s",
+						taskName, launcher.getType()));
+		}
+	}
 
 	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties, String platform) {
 
