@@ -16,11 +16,18 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.Test;
 
+import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.core.io.UrlResource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -30,6 +37,7 @@ import static org.junit.Assert.assertNull;
  *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class TaskExecutionResourceTests {
 
@@ -74,5 +82,25 @@ public class TaskExecutionResourceTests {
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
 		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
 	}
+
+	@Test
+	public void testTaskExecutionForTaskExecutionRel() throws Exception{
+		final TaskExecution taskExecution = new TaskExecution();
+		taskExecution.setStartTime(new Date());
+		taskExecution.setEndTime(new Date());
+		taskExecution.setExitCode(0);
+		TaskManifest taskManifest = new TaskManifest();
+		taskManifest.setPlatformName("testplatform");
+		taskManifest.setTaskDeploymentRequest(new AppDeploymentRequest(new AppDefinition("testapp", Collections.emptyMap()), new UrlResource("http://foo")));
+		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), taskManifest);
+		TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+		assertEquals("testplatform", taskExecutionResource.getPlatformName());
+		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+		taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>());
+		taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+		assertNull(taskExecutionResource.getPlatformName());
+		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+	}
+
 
 }

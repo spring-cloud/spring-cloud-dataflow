@@ -46,6 +46,8 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 	private final RestTemplate noSslVerificationContainerRestTemplate;
 
 	public DockerOAuth2RegistryAuthorizer(RestTemplate restTemplate, RestTemplate noSslVerificationContainerRestTemplate) {
+		Assert.notNull(restTemplate, "Non null restTemplate is expected!");
+		Assert.notNull(noSslVerificationContainerRestTemplate, "Non null noSslVerificationContainerRestTemplate is expected!");
 		this.restTemplate = restTemplate;
 		this.noSslVerificationContainerRestTemplate = noSslVerificationContainerRestTemplate;
 	}
@@ -73,18 +75,19 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 			requestHttpHeaders.setBasicAuth(registryConfiguration.getUser(), registryConfiguration.getSecret());
 		}
 
-		String registryAuthUri = registryConfiguration.getExtra().containsKey(DOCKER_REGISTRY_AUTH_URI_KEY) ?
-				registryConfiguration.getExtra().get(DOCKER_REGISTRY_AUTH_URI_KEY) : DEFAULT_DOCKER_REGISTRY_AUTH_URI;
-		UriComponents uriComponents = UriComponentsBuilder.newInstance()
-				.fromHttpUrl(registryAuthUri).build().expand(imageRepository);
+		String registryAuthUri =
+				registryConfiguration.getExtra().getOrDefault(DOCKER_REGISTRY_AUTH_URI_KEY, DEFAULT_DOCKER_REGISTRY_AUTH_URI);
+		UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(registryAuthUri).build().expand(imageRepository);
+
+		final HttpHeaders responseHttpHeaders = new HttpHeaders();
 
 		ResponseEntity<Map> authorization = this.getRestTemplate(registryConfiguration)
 				.exchange(uriComponents.toUri(), HttpMethod.GET, new HttpEntity<>(requestHttpHeaders), Map.class);
 
-		Map<String, String> authorizationBody = (Map<String, String>) authorization.getBody();
-
-		final HttpHeaders responseHttpHeaders = new HttpHeaders();
-		responseHttpHeaders.setBearerAuth(authorizationBody.get(TOKEN_KEY));
+		if (authorization != null) {
+			Map<String, String> authorizationBody = (Map<String, String>) authorization.getBody();
+			responseHttpHeaders.setBearerAuth(authorizationBody.get(TOKEN_KEY));
+		}
 		return responseHttpHeaders;
 	}
 

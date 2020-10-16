@@ -33,6 +33,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,7 +169,11 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Failed to retrieve properties for resource:" + app, e);
+			logger.warn("Failed to retrieve properties for resource {} because of {}",
+					app, ExceptionUtils.getRootCauseMessage(e));
+			if (logger.isDebugEnabled()) {
+				logger.debug("(Details) for failed to retrieve properties for resource:" + app, e);
+			}
 			return Collections.emptyList();
 		}
 
@@ -189,7 +194,11 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			}
 		}
 		catch (Exception e) {
-			logger.warn("Failed to retrieve properties for resource:" + app, e);
+			logger.warn("Failed to retrieve port names for resource {} because of {}",
+					app, ExceptionUtils.getRootCauseMessage(e));
+			if (logger.isDebugEnabled()) {
+				logger.debug("(Details) for failed to retrieve port names for resource:" + app, e);
+			}
 			return Collections.emptyMap();
 		}
 

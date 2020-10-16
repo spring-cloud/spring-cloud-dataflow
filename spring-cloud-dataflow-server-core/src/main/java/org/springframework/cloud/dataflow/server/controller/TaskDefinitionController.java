@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -156,6 +157,7 @@ public class TaskDefinitionController {
 	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}
 	 * @param search optional findByTaskNameContains parameter
+	 * @param dslText optional findByDslText parameter
 	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
 	 * @param assembler assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
@@ -163,15 +165,23 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
-			@RequestParam(required = false) boolean manifest,
+			@RequestParam(required = false) boolean manifest, @RequestParam(required = false) String dslText,
 			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
 		if (search != null) {
-			taskDefinitions = repository.findByTaskNameContains(search, pageable);
+			if (dslText != null) {
+				throw new TaskQueryParamException(new String[] {"search", "dslText"});
+			} else {
+				taskDefinitions = repository.findByTaskNameContains(search, pageable);
+			}
 		}
 		else {
-			taskDefinitions = repository.findAll(pageable);
+			if (dslText != null) {
+				taskDefinitions = repository.findByDslTextContains(dslText, pageable);
+			} else {
+				taskDefinitions = repository.findAll(pageable);
+			}
 		}
 
 		final java.util.HashMap<String, TaskDefinition> taskDefinitionMap = new java.util.HashMap<>();

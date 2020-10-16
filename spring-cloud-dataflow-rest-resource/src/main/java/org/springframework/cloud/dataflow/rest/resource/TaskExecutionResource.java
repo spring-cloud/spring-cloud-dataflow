@@ -108,6 +108,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	private Map<String, String> deploymentProperties;
 
+	/**
+	 * The platform for which the task was executed.
+	 */
+	private String platformName;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -142,6 +147,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 			this.resourceUrl = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getResource().toString();
 			this.appProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDefinition().getProperties();
 			this.deploymentProperties = taskJobExecutionRel.getTaskManifest().getTaskDeploymentRequest().getDeploymentProperties();
+		}
+		if(taskJobExecutionRel.getTaskManifest() != null) {
+			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
 		}
 	}
 
@@ -246,6 +254,14 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public Map<String, String> getDeploymentProperties() {
 		return deploymentProperties;
+	}
+
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
 	}
 
 	/**

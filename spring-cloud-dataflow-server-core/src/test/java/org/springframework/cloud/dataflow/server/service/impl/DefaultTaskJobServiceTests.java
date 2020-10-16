@@ -150,8 +150,11 @@ public class DefaultTaskJobServiceTests {
 			TaskExecutionDao taskExecutionDao, String jobName,
 			int jobExecutionCount, BatchStatus status) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=demo"), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.emptyList(), null);
 		JobExecution jobExecution;
+		JdbcTemplate template = new JdbcTemplate(this.dataSource);
+		template.execute("ALTER SEQUENCE task_execution_metadata_seq RESTART WITH 50");
+		template.execute("INSERT INTO task_execution_metadata (id, task_execution_id, task_execution_manifest) VALUES (1, 1, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')");
 
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(instance,

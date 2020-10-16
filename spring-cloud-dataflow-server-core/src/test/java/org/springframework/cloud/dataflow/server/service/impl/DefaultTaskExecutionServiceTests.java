@@ -532,12 +532,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("--foo=bar"));
 			 TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			 assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			 assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			 assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
 
 			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
 			 lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			 assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			 assertEquals(1, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 		 }
 
 		@Test
@@ -1146,7 +1146,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = argumentCaptor.getValue();
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-			assertEquals(request.getCommandlineArguments().get(2),"--spring.cloud.data.flow.taskappname=composed-task-runner");
+			assertEquals(request.getCommandlineArguments().get(1),"--spring.cloud.data.flow.taskappname=composed-task-runner");
 			assertEquals(
 					"app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m",
 					request.getDefinition().getProperties().get("composed-task-properties"));

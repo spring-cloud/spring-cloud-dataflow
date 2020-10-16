@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.hamcrest.MatcherAssert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,9 +69,11 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -321,6 +324,41 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	public void testFindDslTextContainsSubstring() throws Exception {
+		repository.save(new TaskDefinition("foo", "task-foo"));
+		repository.save(new TaskDefinition("foz", "task-foz"));
+		repository.save(new TaskDefinition("ooz", "task-ooz"));
+
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].dslText", is("task-foo")))
+				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")));
+
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "oz")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(2)))
+
+				.andExpect(jsonPath("$.content[0].dslText", is("task-foz")))
+				.andExpect(jsonPath("$.content[1].dslText", is("task-ooz")));
+
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "o")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.*", hasSize(3)))
+
+				.andExpect(jsonPath("$.content[0].dslText", is("task-foo")))
+				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")))
+				.andExpect(jsonPath("$.content[2].dslText", is("task-ooz")));
+	}
+	
+	@Test
+	public void testFindByDslTextAndNameBadRequest() throws Exception {
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("search", "f")
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
+	}
+
+	@Test
 	public void testDestroyTask() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
 
@@ -495,8 +533,8 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getDefinition().getProperties().get("common.prop2")).isEqualTo("wizz");
-		assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("myTask2");
+		MatcherAssert.assertThat(request.getDefinition().getProperties(), hasEntry("common.prop2", "wizz"));
+		assertEquals("myTask2", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 
 	@Test
@@ -520,10 +558,10 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments()).hasSize(3 + 2); // +2 for spring.cloud.task.executionid and spring.cloud.data.flow.platformname
+		assertEquals(4, request.getCommandlineArguments().size());
 		// don't assume order in a list
-		assertThat(request.getCommandlineArguments()).contains("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'");
-		assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("myTask3");
+		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
+		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 	}
 
 	@Test

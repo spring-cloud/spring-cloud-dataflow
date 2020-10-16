@@ -439,6 +439,13 @@ public class AppRegistryController {
 	}
 
 	private void validateApplicationName(String name) {
+
+		// Check for length of name to be less than 256 character.
+		if (name.length() > 255) {
+			throw new IllegalArgumentException("Length of application name must be less than 256 characters");
+		}
+
+		// Check for invalid characters.
 		char[] invalidWildCards = new char[]{':'};
 		StringBuilder invalidChars = new StringBuilder();
 		for (char invalidWildCard : invalidWildCards) {
