@@ -61,7 +61,7 @@
 		<spring-cloud-deployer.version>2.5.0-SNAPSHOT</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.5.0-SNAPSHOT</spring-cloud-deployer-local.version>
 		<spring-cloud-deployer-cloudfoundry.version>2.5.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.5.0-M2</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.5.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
 
