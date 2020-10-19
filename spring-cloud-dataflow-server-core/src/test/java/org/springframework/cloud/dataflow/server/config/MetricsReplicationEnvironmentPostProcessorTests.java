@@ -132,6 +132,33 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 	}
 
 	@Test
+	public void wavefrontPropertiesReplicationWithPlaceholders() {
+		try (ConfigurableApplicationContext ctx = applicationContext(
+				"--management.metrics.export.wavefront.enabled=true",
+				"--management.metrics.export.wavefront.api-token=${wavefront-api-secret}",
+				"--management.metrics.export.wavefront.uri=https://vmware.wavefront.com",
+				"--management.metrics.export.wavefront.source=my-source",
+				// Inherited property from parent PushRegistryProperties
+				"--management.metrics.export.wavefront.batch-size=20000")) {
+
+			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
+
+				assertThat(ctx.getEnvironment().getProperty(
+						applicationPrefix + "management.metrics.export.wavefront.enabled", Boolean.class)).isTrue();
+				ctx.getEnvironment().setIgnoreUnresolvableNestedPlaceholders(true);
+				assertThat(ctx.getEnvironment().getProperty(
+						applicationPrefix + "management.metrics.export.wavefront.api-token")).isEqualTo("${wavefront-api-secret}");
+				assertThat(ctx.getEnvironment().getProperty(
+						applicationPrefix + "management.metrics.export.wavefront.uri")).isEqualTo("https://vmware.wavefront.com");
+				assertThat(ctx.getEnvironment().getProperty(
+						applicationPrefix + "management.metrics.export.wavefront.source")).isEqualTo("my-source");
+				assertThat(ctx.getEnvironment().getProperty(
+						applicationPrefix + "management.metrics.export.wavefront.batch-size")).isEqualTo("20000");
+			}
+		}
+	}
+
+	@Test
 	public void disabledPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--spring.cloud.dataflow.metrics.property-replication=false",
