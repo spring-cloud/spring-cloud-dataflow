@@ -17,7 +17,7 @@ spec:
       containers:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:2.6.0-SNAPSHOT
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         volumeMounts:
           - name: config
             mountPath: /config
