@@ -50,7 +50,7 @@ public class V2__Add_Descriptions_OriginalDefinition extends BaseJavaMigration {
 					"    task_execution_id int8 NOT NULL,\n" +
 					"    task_execution_manifest TEXT,\n" +
 					"    primary key (id),\n" +
-					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)\n" +
+					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (task_execution_id)\n" +
 					"    REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)\n" +
 					")";
 
