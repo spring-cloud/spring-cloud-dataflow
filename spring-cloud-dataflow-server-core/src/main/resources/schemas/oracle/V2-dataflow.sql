@@ -9,7 +9,7 @@ CREATE TABLE task_execution_metadata (
   task_execution_id  number(19,0) NOT NULL,
   task_execution_manifest CLOB,
   primary key (id),
-  CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)
+  CONSTRAINT TASK_METADATA_FK FOREIGN KEY (task_execution_id)
   REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)
 );
 

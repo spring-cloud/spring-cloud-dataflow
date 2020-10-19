@@ -48,7 +48,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 					"    id BIGINT NOT NULL PRIMARY KEY,\n" +
 					"    task_execution_id BIGINT NOT NULL,\n" +
 					"    task_execution_manifest CLOB,\n" +
-					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (TASK_EXECUTION_ID)\n" +
+					"    CONSTRAINT TASK_METADATA_FK FOREIGN KEY (task_execution_id)\n" +
 					"    REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)\n" +
 					")";
 
