@@ -3,7 +3,7 @@ common:
     metrics:
       tags:
         application: ${task.name:unknown}-${task.execution.id:unknown}
-        service: "task application"
+        service: "task-application"
 
 local:
 

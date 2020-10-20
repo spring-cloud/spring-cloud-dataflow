@@ -11,7 +11,7 @@ common:
 
         # Tags required to use the Wavefront Spring Boot tile.
         application: ${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
-        service: "stream application"
+        service: "stream-application"
 
 local:
 

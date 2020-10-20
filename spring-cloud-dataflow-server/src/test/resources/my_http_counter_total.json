@@ -14,7 +14,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "14",
-          "service": "stream application",
+          "service": "stream-application",
           "stream_name": "httpCounter"
         },
         "value": [
@@ -33,7 +33,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "29",
-          "service": "stream application",
+          "service": "stream-application",
           "stream_name": "httpCounter"
         },
         "value": [
@@ -52,7 +52,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "36",
-          "service": "stream application",
+          "service": "stream-application",
           "stream_name": "httpCounter"
         },
         "value": [
