@@ -231,7 +231,7 @@ public class DefaultTaskJobService implements TaskJobService {
 					}
 				}
 				if(!existsFlag) {
-					result.add(String.format("%s(%s)=%s", key, jobParametersMap.get(key).getType().toString().toLowerCase(), jobParameters.getString(key)));
+					result.add(String.format("%s=%s", key,  jobParameters.getString(key)));
 				}
 			}
 		}
