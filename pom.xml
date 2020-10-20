@@ -78,9 +78,6 @@
 
 		<spring-cloud-common-security-config.version>1.5.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
-		<!-- Upgrade until boot have this -->
-		<spring-hateoas.version>1.1.1.RELEASE</spring-hateoas.version>
-
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
 		<commons-lang.version>2.4</commons-lang.version>
@@ -276,11 +273,6 @@
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
 				<version>${joda-time.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.hateoas</groupId>
-				<artifactId>spring-hateoas</artifactId>
-				<version>${spring-hateoas.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
