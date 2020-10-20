@@ -207,7 +207,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals("{\"commandlineArguments\":[]," +
 				"\"taskDefinitionName\":\"testDefinition\"," +
-				"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+				"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 				"\"spring.datasource.username\":null,\"spring.datasource.url\":null," +
 				"\"spring.datasource.driverClassName\":null," +
 				"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
@@ -220,7 +220,7 @@ public class TaskSchedulerControllerTests {
 		String auditData = createScheduleWithArguments("argument1=foo password=secret");
 
 		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\"," +
-						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
 						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
 						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
@@ -236,7 +236,7 @@ public class TaskSchedulerControllerTests {
 
 		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\"," +
 						"\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\"," +
-						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task application\"," +
+						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
 						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
 						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
