@@ -73,6 +73,8 @@ The xref:getting-started#getting-started[Getting Started] section shows you how 
 
 Note that the shell calls the Data Flow Server's REST API. For more information on making HTTP requests directly to the server, see the <<api-guide, REST API Guide>>.
 
+NOTE: When naming a stream definition, keep in mind that each application in the stream will be created on the platform with the name in the format of `<stream name>-<app name>`.   Thus, the total length of the generated application name can't exceed 58 characters.
+
 [[spring-cloud-dataflow-stream-app-dsl]]
 === Stream Application DSL
 
