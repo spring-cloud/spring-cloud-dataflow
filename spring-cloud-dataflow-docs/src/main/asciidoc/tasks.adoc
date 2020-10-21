@@ -162,6 +162,19 @@ Created new task 'mytask'
 You can obtain a listing of the current task definitions through the RESTful API or the shell.
 To get the task definition list by using the shell, use the `task list` command.
 
+==== Maximum Task Definition Name Length
+The maximum character length of a task definition name is dependent on the platform.
+
+.Maximum Task Definition Name Character Length by Platform
+|===
+|Kubernetes Bare Pods |Kubernetes Jobs | Cloud Foundry | Local
+
+|63
+|52
+|63
+|255
+|===
+
 ==== Automating the Creation of Task Definitions
 
 As of version 2.3.0, you can configure the Data Flow server to automatically create task definitions by setting `spring.cloud.dataflow.task.autocreate-task-definitions` to `true`.
@@ -1260,6 +1273,18 @@ Created schedule 'mytaskschedule'
 In the earlier example, we created a schedule called `mytaskschedule` for the task definition called `mytask`.  This schedule launches `mytask` once a minute.
 
 NOTE: If using Cloud Foundry, the `cron` expression above would be: `*/1 * ? * *`. This is because Cloud Foundry uses the Quartz `cron` expression format.
+
+===== Maximum Length for a Schedule Name
+The maximum character length of a schedule name is dependent on the platform.
+
+.Maximum Schedule Name Character Length by Platform
+|===
+|Kubernetes | Cloud Foundry | Local
+
+|52
+|63
+|N/A
+|===
 
 [[spring-cloud-data-flow-schedule-unscheduling]]
 ==== Deleting a Schedule
