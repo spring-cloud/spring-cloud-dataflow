@@ -36,12 +36,12 @@
 		<spring-cloud-dataflow-common.version>2.7.0-M2</spring-cloud-dataflow-common.version>
 		<java-cfenv-boot.version>2.2.0.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-services-starter-config-client.version>3.1.3.RELEASE</spring-cloud-services-starter-config-client.version>
-		<spring-cloud-deployer.version>2.5.0-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.5.0-SNAPSHOT</spring-cloud-deployer-local.version>
-		<spring-cloud-deployer-cloudfoundry.version>2.5.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer.version>2.5.0-M2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.5.0-M2</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.5.0-M2</spring-cloud-deployer-cloudfoundry.version>
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
-		<spring-cloud-deployer-kubernetes.version>2.5.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-kubernetes.version>2.5.0-M2</spring-cloud-deployer-kubernetes.version>
 
 		<!-- Upgrade until boot have this -->
 		<spring-hateoas.version>1.1.1.RELEASE</spring-hateoas.version>
