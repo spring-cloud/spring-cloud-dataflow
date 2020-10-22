@@ -65,7 +65,7 @@
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.6.0-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.6.0-M2</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.2.3.RELEASE</spring-cloud-task.version>
 
