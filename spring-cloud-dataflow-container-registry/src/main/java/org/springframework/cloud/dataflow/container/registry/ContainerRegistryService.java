@@ -99,34 +99,32 @@ public class ContainerRegistryService {
 	 * @return the list of tags for the image
 	 */
 	public List<String> getTags(String registryName, String repositoryName) {
-
-		ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations.get(registryName);
-		String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
-		if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
-			throw new ContainerRegistryException("Not supported image manifest media type:" + imageManifestMediaType);
-		}
-		Map<String, String> properties = new HashMap<>();
-		properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, repositoryName);
-		HttpHeaders httpHeaders = new HttpHeaders(this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType()).getAuthorizationHeaders(
-				containerRegistryConfiguration, properties));
-		httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
-
-		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
-				.scheme(HTTPS_SCHEME)
-				.host(containerRegistryConfiguration.getRegistryHost())
-				.path(TAGS_LIST_PATH)
-				.build().expand(repositoryName);
-
-		RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
-				this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
-
 		try {
+			ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations.get(registryName);
+			String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
+			if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
+				throw new ContainerRegistryException("Not supported image manifest media type:" + imageManifestMediaType);
+			}
+			Map<String, String> properties = new HashMap<>();
+			properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, repositoryName);
+			HttpHeaders httpHeaders = new HttpHeaders(this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType()).getAuthorizationHeaders(
+					containerRegistryConfiguration, properties));
+			httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
+
+			UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
+					.scheme(HTTPS_SCHEME)
+					.host(containerRegistryConfiguration.getRegistryHost())
+					.path(TAGS_LIST_PATH)
+					.build().expand(repositoryName);
+
+			RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
+					this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
 			return  (manifest != null) ? (List<String>) manifest.getBody().get(TAGS_FIELD) : null;
 		}
 		catch (Exception e) {
-			logger.error(String.format("Exception getting tag information for the %s from %s", repositoryName, containerRegistryConfiguration.getRegistryHost()));
+			logger.error(String.format("Exception getting tag information for the %s from %s", repositoryName, registryName));
 		}
 		return null;
 	}
@@ -137,31 +135,40 @@ public class ContainerRegistryService {
 	 * @return the map of all the repositories
 	 */
 	public Map getRepositories(String registryName) {
+		try {
+			ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations
+					.get(registryName);
+			String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
+			if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
+				throw new ContainerRegistryException(
+						"Not supported image manifest media type:" + imageManifestMediaType);
+			}
 
-		ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations.get(registryName);
-		String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
-		if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
-			throw new ContainerRegistryException("Not supported image manifest media type:" + imageManifestMediaType);
+			Map<String, String> properties = new HashMap<>();
+			properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, registryName);
+			HttpHeaders httpHeaders = new HttpHeaders(
+					this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType())
+							.getAuthorizationHeaders(
+									containerRegistryConfiguration, properties));
+			httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
+
+			UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
+					.scheme(HTTPS_SCHEME)
+					.host(containerRegistryConfiguration.getRegistryHost())
+					.path(CATALOG_LIST_PATH)
+					.build();
+
+			RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
+					this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
+
+			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
+					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
+			return (manifest != null) ? manifest.getBody() : null;
 		}
-
-		Map<String, String> properties = new HashMap<>();
-		properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, registryName);
-		HttpHeaders httpHeaders = new HttpHeaders(this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType()).getAuthorizationHeaders(
-				containerRegistryConfiguration, properties));
-		httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
-
-		UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
-				.scheme(HTTPS_SCHEME)
-				.host(containerRegistryConfiguration.getRegistryHost())
-				.path(CATALOG_LIST_PATH)
-				.build();
-
-		RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
-				this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
-
-		ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
-				HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
-		return (manifest != null) ? manifest.getBody() : null;
+		catch (Exception e) {
+			logger.error(String.format("Exception getting repositories from %s", registryName));
+		}
+		return null;
 	}
 
 	public ContainerRegistryRequest getRegistryRequest(String imageName) {
