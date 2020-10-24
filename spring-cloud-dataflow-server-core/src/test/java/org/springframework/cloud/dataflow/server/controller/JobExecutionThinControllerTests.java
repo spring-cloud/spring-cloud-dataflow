@@ -137,4 +137,14 @@ public class JobExecutionThinControllerTests {
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
 
+	@Test
+	public void testGetExecutionsByTaskExecutionId() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions/").param("taskExecutionId", "4")
+				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content[0].taskExecutionId", is(4)))
+				.andExpect(jsonPath("$.content", hasSize(1)));
+	}
+
 }

@@ -201,4 +201,16 @@ public interface TaskJobService {
 	 */
 	List<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(Pageable pageable, int jobInstanceId)
 			throws NoSuchJobException;
+
+	/**
+	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
+	 * filtered by the task execution id.
+	 *
+	 * @param pageable enumerates the data to be returned.
+	 * @param taskExecutionId the task execution id associated with the execution.
+	 * @return List containing {@link JobExecutionWithStepCount}s.
+	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 */
+	List<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(Pageable pageable, int taskExecutionId)
+			throws NoSuchJobException;
 }

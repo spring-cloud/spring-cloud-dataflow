@@ -174,6 +174,30 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listThinJobExecutionsByTaskExecutionId() throws Exception {
+		this.mockMvc.perform(
+				get("/jobs/thinexecutions")
+						.param("page", "0")
+						.param("size", "10")
+						.param("taskExecutionId", "1"))
+				.andDo(print())
+				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+				requestParameters(
+						parameterWithName("page")
+								.description("The zero-based page number (optional)"),
+						parameterWithName("size")
+								.description("The requested page size (optional)"),
+						parameterWithName("taskExecutionId")
+								.description("Filter result by the task execution id")),
+				responseFields(
+						subsectionWithPath("_embedded.jobExecutionThinResourceList")
+								.description("Contains a collection of Job Executions without step executions included/"),
+						subsectionWithPath("_links.self").description("Link to the job execution resource"),
+						subsectionWithPath("page").description("Pagination properties")
+				)));
+	}
+
+	@Test
 	public void listThinJobExecutionsByDate() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/thinexecutions")
