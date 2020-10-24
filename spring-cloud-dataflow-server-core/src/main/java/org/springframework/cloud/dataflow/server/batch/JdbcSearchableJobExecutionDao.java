@@ -81,6 +81,11 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String NAME_AND_STATUS_FILTER = "I.JOB_NAME LIKE ? AND E.STATUS = ?";
 
+	private static final String TASK_EXECUTION_ID_FILTER =
+			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
+
+	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "TASK_TASK_BATCH B";
+
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private PagingQueryProvider byJobNamePagingQueryProvider;
@@ -96,6 +101,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private PagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
 
 	private PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
+
+	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
 
 	private DataSource dataSource;
 
@@ -134,6 +141,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 				DATE_RANGE_FILTER);
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
 				JOB_INSTANCE_ID_FILTER);
+		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
+				FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
 
 		super.afterPropertiesSet();
 
@@ -256,6 +265,25 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 					jobInstanceId);
 			return getJdbcTemplate().query(byJobInstanceIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), jobInstanceId, startAfterValue);
+		}
+		catch (IncorrectResultSizeDataAccessException e) {
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCountFilteredByTaskExecutionId(
+			int taskExecutionId, int start, int count) {
+		if (start <= 0) {
+			return getJdbcTemplate().query(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					new JobExecutionStepCountRowMapper(), taskExecutionId);
+		}
+		try {
+			Long startAfterValue = getJdbcTemplate().queryForObject(
+					byTaskExecutionIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					taskExecutionId);
+			return getJdbcTemplate().query(byTaskExecutionIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
+					new JobExecutionStepCountRowMapper(), taskExecutionId, startAfterValue);
 		}
 		catch (IncorrectResultSizeDataAccessException e) {
 			return Collections.emptyList();

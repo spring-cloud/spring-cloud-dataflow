@@ -171,6 +171,8 @@ public class RootController {
 			root.add(Link.of(taskTemplated).withRel("jobs/thinexecutions/name"));
 			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?jobInstanceId}";
 			root.add(Link.of(taskTemplated).withRel("jobs/thinexecutions/jobInstanceId"));
+			taskTemplated = entityLinks.linkToCollectionResource(JobExecutionThinResource.class).getHref() + "{?taskExecutionId}";
+			root.add(Link.of(taskTemplated).withRel("jobs/thinexecutions/taskExecutionId"));
 
 		}
 		root.add(entityLinks.linkToCollectionResource(AppRegistrationResource.class).withRel("apps"));
