@@ -146,5 +146,4 @@ public class JobExecutionThinControllerTests {
 				.andExpect(jsonPath("$.content[0].taskExecutionId", is(4)))
 				.andExpect(jsonPath("$.content", hasSize(1)));
 	}
-
 }

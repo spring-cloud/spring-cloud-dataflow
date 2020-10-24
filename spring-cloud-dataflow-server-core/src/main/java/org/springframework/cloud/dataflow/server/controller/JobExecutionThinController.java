@@ -176,8 +176,6 @@ public class JobExecutionThinController {
 		return assembler.toModel(page, jobAssembler);
 	}
 
-
-
 	/**
 	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
 	 * {@link JobExecution}s to {@link JobExecutionThinResource}s.

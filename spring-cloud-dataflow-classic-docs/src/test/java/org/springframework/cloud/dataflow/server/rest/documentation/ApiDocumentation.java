@@ -93,6 +93,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("jobs/thinexecutions/name").description("Retrieve Job Executions by Job name with no step executions included"),
 				linkWithRel("jobs/thinexecutions/jobInstanceId").description("Retrieve Job Executions by Job Instance Id with no step executions included"),
 				linkWithRel("jobs/thinexecutions/taskExecutionId").description("Retrieve Job Executions by Task Execution Id with no step executions included"),
+
 				linkWithRel("jobs/instances/instance").description("Provides the job instance resource for a specific job instance"),
 				linkWithRel("jobs/instances/name").description("Provides the Job instance resource for a specific job name"),
 
