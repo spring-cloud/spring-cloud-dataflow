@@ -136,7 +136,7 @@ public class DefaultTaskJobServiceTests {
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
 		appDeploymentRequest.getCommandlineArguments().contains("--spring.cloud.data.flow.platformname=demo");
-		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param=testparam"));
+		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
 	}
 
 	private void initializeJobs() {
