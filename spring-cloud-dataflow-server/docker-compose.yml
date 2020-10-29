@@ -31,7 +31,7 @@ services:
       - 3306
 
   kafka-broker:
-    image: confluentinc/cp-kafka:5.4.3
+    image: confluentinc/cp-kafka:5.5.2
     container_name: dataflow-kafka
     expose:
       - "9092"
@@ -46,7 +46,7 @@ services:
       - zookeeper
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.4.3
+    image: confluentinc/cp-zookeeper:5.5.2
     container_name: dataflow-kafka-zookeeper
     expose:
       - "2181"
