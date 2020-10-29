@@ -276,7 +276,7 @@ public class StreamCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
 			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
 					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
-			@CliOption(mandatory = false, key = {"description"}, help = "a sort description about the stream", unspecifiedDefaultValue = "") String description,
+			@CliOption(mandatory = false, key = {"description"}, help = "a short description about the stream", unspecifiedDefaultValue = "") String description,
 			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
 		streamOperations().createStream(name, dsl, description, deploy);
 		String message = String.format("Created new stream '%s'", name);
