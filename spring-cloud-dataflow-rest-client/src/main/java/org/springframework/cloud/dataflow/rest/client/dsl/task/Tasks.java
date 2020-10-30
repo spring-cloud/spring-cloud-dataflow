@@ -13,39 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.integration.test.util.task.dsl;
+package org.springframework.cloud.dataflow.rest.client.dsl.task;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 
 /**
+ * Helper utility to retrieve and introspect Tasks already defined in Data Flow.
  * @author Christian Tzolov
  */
 public class Tasks {
 	private final DataFlowOperations dataFlowOperations;
 
-	public Tasks(DataFlowOperations dataFlowOperations) {
+	/**
+	 * Fluent API method to create a {@link Tasks} helper utility.
+	 * @param dataFlowOperations {@link DataFlowOperations} Data Flow Rest client instance.
+	 * @return A Tasks utility helper.
+	 */
+	public static Tasks of(DataFlowOperations dataFlowOperations) {
+		return new Tasks(dataFlowOperations);
+	}
+
+	private Tasks(DataFlowOperations dataFlowOperations) {
 		this.dataFlowOperations = dataFlowOperations;
 	}
 
-	public TaskBuilder builder() {
-		return new TaskBuilder(dataFlowOperations.taskOperations(), dataFlowOperations.jobOperations());
-	}
-
+	/**
+	 * @return All tasks defined currently in Data Flow.
+	 */
 	public List<Task> list() {
 		return this.dataFlowOperations.taskOperations().list().getContent().stream()
-				.map(td -> new Task(td.getName(), this.dataFlowOperations.taskOperations(), this.dataFlowOperations.jobOperations()))
+				.map(td -> new Task(td.getName(), this.dataFlowOperations))
 				.collect(Collectors.toList());
 	}
 
-	public Task get(String taskName) {
+	/**
+	 * @param taskName existing Task name used to retrieve the task.
+	 * @return Task instance identified by the taskName.
+	 */
+	public Optional<Task> get(String taskName) {
 		return this.list().stream()
 				.filter(task -> task.getTaskName().equalsIgnoreCase(taskName))
-				.findFirst().get();
+				.findFirst();
 	}
 
+	/**
+	 * Destroys all Tasks currently defined currently in Data Flow.
+	 */
 	public void destroyAll() {
 		this.dataFlowOperations.taskOperations().destroyAll();
 	}

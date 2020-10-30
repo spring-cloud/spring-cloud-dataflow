@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.integration.test.util.task.dsl;
+package org.springframework.cloud.dataflow.rest.client.dsl.task;
 
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
 

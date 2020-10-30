@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.integration.test.util.task.dsl;
+package org.springframework.cloud.dataflow.rest.client.dsl.task;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 
@@ -27,23 +29,25 @@ import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
  */
 public class TaskSchedules {
 	private final SchedulerOperations schedulerOperations;
-	private Tasks tasks;
+	private final Tasks tasks;
 
-	public TaskSchedules(SchedulerOperations schedulerOperations, Tasks tasks) {
-		this.schedulerOperations = schedulerOperations;
-		this.tasks = tasks;
+	private TaskSchedules(DataFlowOperations dataFlowOperations) {
+		this.schedulerOperations = dataFlowOperations.schedulerOperations();
+		this.tasks = Tasks.of(dataFlowOperations);
 	}
 
-	public TaskScheduleBuilder builder() {
-		return new TaskScheduleBuilder(this.schedulerOperations);
+	public static TaskSchedules of(DataFlowOperations dataFlowOperations) {
+		return new TaskSchedules(dataFlowOperations);
 	}
 
 	public TaskSchedule findByScheduleName(String scheduleName) {
 		if (isScheduled(scheduleName)) {
 			ScheduleInfoResource s = this.schedulerOperations.getSchedule(scheduleName);
-			Task task = this.tasks.get(s.getTaskDefinitionName());
-			String prefix = scheduleName.replace("-scdf-" + task.getTaskName(), "");
-			return new TaskSchedule(prefix, task, schedulerOperations);
+			Optional<Task> task = this.tasks.get(s.getTaskDefinitionName());
+			if (task.isPresent()) {
+				String prefix = scheduleName.replace("-scdf-" + task.get().getTaskName(), "");
+				return new TaskSchedule(prefix, task.get(), schedulerOperations);
+			}
 		}
 		return null;
 	}
@@ -59,7 +63,7 @@ public class TaskSchedules {
 	public List<TaskSchedule> list() {
 		return this.schedulerOperations.list().getContent().stream()
 				.map(s -> {
-					Task task = this.tasks.get(s.getTaskDefinitionName());
+					Task task = this.tasks.get(s.getTaskDefinitionName()).get();
 					String prefix = s.getScheduleName().replace("-scdf-" + task.getTaskName(), "");
 					return new TaskSchedule(prefix, task, schedulerOperations);
 				}).collect(Collectors.toList());

@@ -59,13 +59,13 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
-import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Task;
-import org.springframework.cloud.dataflow.integration.test.util.task.dsl.Tasks;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.Tasks;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -196,7 +196,7 @@ public class DataFlowIT {
 		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
 				testProperties.getPlatformName(), testProperties.getKubernetesAppHostSuffix());
-		tasks = new Tasks(dataFlowOperations);
+		tasks = Tasks.of(dataFlowOperations);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
@@ -786,7 +786,7 @@ public class DataFlowIT {
 	public void timestampTask() {
 		logger.info("task-timestamp-test");
 
-		try (Task task = tasks.builder()
+		try (Task task = Task.builder(dataFlowOperations)
 				.name(randomTaskName())
 				.definition("timestamp")
 				.description("Test timestamp task")
@@ -797,6 +797,7 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.execution(launchId1).isPresent()).isTrue();
 			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			// task second launch
@@ -804,6 +805,7 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.execution(launchId2).isPresent()).isTrue();
 			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			// All
@@ -815,7 +817,7 @@ public class DataFlowIT {
 	public void composedTask() {
 		logger.info("task-composed-task-runner-test");
 
-		try (Task task = tasks.builder()
+		try (Task task = Task.builder(dataFlowOperations)
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test composedTask")
@@ -863,7 +865,7 @@ public class DataFlowIT {
 	public void multipleComposedTaskWithArguments() {
 		logger.info("task-multiple-composed-task-with-arguments-test");
 
-		try (Task task = tasks.builder()
+		try (Task task = Task.builder(dataFlowOperations)
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test multipleComposedTaskhWithArguments")
