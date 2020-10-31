@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.repository.support.AppDeploymen
 import org.springframework.cloud.dataflow.server.repository.support.Order;
 import org.springframework.cloud.dataflow.server.repository.support.PagingQueryProvider;
 import org.springframework.cloud.dataflow.server.repository.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.server.repository.support.SqlPagingQueryUtils;
 import org.springframework.cloud.dataflow.server.service.impl.ResourceDeserializer;
 import org.springframework.cloud.dataflow.server.service.impl.ResourceMixin;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -118,7 +119,8 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	@Override
 	public TaskManifest getLatestManifest(String taskName) {
 		Map<String, Order> sortKeys = new HashMap<>(1);
-		sortKeys.put("e.TASK_EXECUTION_ID", Order.DESCENDING);
+		// Make sure to add the sort keys into
+		sortKeys.put(SqlPagingQueryUtils.getSupportedKey("TASK_EXECUTION_ID"), Order.DESCENDING);
 
 		SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
 

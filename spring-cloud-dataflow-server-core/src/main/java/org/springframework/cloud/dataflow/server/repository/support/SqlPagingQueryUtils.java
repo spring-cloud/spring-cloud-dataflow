@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,36 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Utility class that generates the actual SQL statements used by query providers.
  *
  * @author Glenn Renfro
+ * @author Ilayaperumal Gopinathan
  */
 public class SqlPagingQueryUtils {
 
 	private SqlPagingQueryUtils() {
+	}
+
+	private static Map<String, String> SCDF_SORT_KEY_NAMES = initializeSortKeys();
+
+	private static Map<String, String> initializeSortKeys() {
+		Map<String,String> sortKeysMap = new HashMap<>();
+		sortKeysMap.put("TASK_EXECUTION_ID", "e.TASK_EXECUTION_ID");
+		return sortKeysMap;
+	}
+
+	public static String getSupportedKey(String columnName) {
+		if (SCDF_SORT_KEY_NAMES.containsKey(columnName)) {
+			return SCDF_SORT_KEY_NAMES.get(columnName);
+		}
+		else {
+			throw new RuntimeException("The sort keys need to be added into the supported list for validation");
+		}
 	}
 
 	/**
@@ -116,7 +136,7 @@ public class SqlPagingQueryUtils {
 	 * specifics
 	 * @return a String that can be appended to an ORDER BY clause.
 	 */
-	public static String buildSortClause(AbstractSqlPagingQueryProvider provider) {
+	protected static String buildSortClause(AbstractSqlPagingQueryProvider provider) {
 		return buildSortClause(provider.getSortKeys());
 	}
 
@@ -126,7 +146,8 @@ public class SqlPagingQueryUtils {
 	 * @param sortKeys generates order by clause from map
 	 * @return a String that can be appended to an ORDER BY clause.
 	 */
-	public static String buildSortClause(Map<String, Order> sortKeys) {
+	private static String buildSortClause(Map<String, Order> sortKeys) {
+		validateSortKeys(sortKeys);
 		StringBuilder builder = new StringBuilder();
 		String prefix = "";
 
@@ -146,5 +167,14 @@ public class SqlPagingQueryUtils {
 		}
 
 		return builder.toString();
+	}
+
+	private static void validateSortKeys(Map<String, Order> sortKeys) {
+		Collection<String> sortKeyNames = SCDF_SORT_KEY_NAMES.values();
+		for (Map.Entry<String, Order> entry: sortKeys.entrySet()) {
+			if (!sortKeyNames.contains(entry.getKey())) {
+				throw new RuntimeException(String.format("Sort key %s isn't valid", entry.getKey()));
+			}
+		}
 	}
 }
