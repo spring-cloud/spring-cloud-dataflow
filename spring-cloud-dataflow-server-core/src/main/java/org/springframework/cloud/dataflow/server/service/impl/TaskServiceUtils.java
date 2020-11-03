@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class TaskServiceUtils {
 	 */
 	public static String createComposedTaskDefinition(String alternateComposedTaskRunnerName, String graph) {
 		Assert.hasText(graph, "graph must not be empty or null");
-		String composedTaskRunnerName = TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME;
+		String composedTaskRunnerName = ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME;
 		if (StringUtils.hasText(alternateComposedTaskRunnerName)) {
 			composedTaskRunnerName = alternateComposedTaskRunnerName;
 		}
@@ -282,5 +282,38 @@ public class TaskServiceUtils {
 				.forEach(e -> appDeploymentProperties.putIfAbsent(
 						e.getKey().toString().replaceFirst(taskPlatformTypePrefix, ""), e.getValue().toString())));
 
+	}
+
+	static void addImagePullSecretProperty(Map<String, String> taskDeploymentProperties,
+											ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+		if (composedTaskRunnerConfigurationProperties != null) {
+			String imagePullSecret = composedTaskRunnerConfigurationProperties.getImagePullSecret();
+
+			if (StringUtils.hasText(imagePullSecret)) {
+				String imagePullSecretPropertyKey = "deployer.composed-task-runner.kubernetes.imagePullSecret";
+				taskDeploymentProperties.put(imagePullSecretPropertyKey, imagePullSecret);
+			}
+		}
+	}
+
+	static String getComposedTaskLauncherUri(TaskConfigurationProperties taskConfigurationProperties,
+									  ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+		if(composedTaskRunnerConfigurationProperties != null &&
+				StringUtils.hasText(composedTaskRunnerConfigurationProperties.getUri())) {
+			return composedTaskRunnerConfigurationProperties.getUri();
+		}
+
+		return taskConfigurationProperties.getComposedTaskRunnerUri();
+	}
+
+	static boolean isUseUserAccessToken(TaskConfigurationProperties taskConfigurationProperties,
+						ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+		if (composedTaskRunnerConfigurationProperties != null) {
+			if (composedTaskRunnerConfigurationProperties.isUseUserAccessToken() != null) {
+				return composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
+			}
+		}
+
+		return taskConfigurationProperties.isUseUserAccessToken();
 	}
 }

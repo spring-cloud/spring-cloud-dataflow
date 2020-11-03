@@ -85,7 +85,8 @@ import static org.mockito.Mockito.when;
 		"spring.main.allow-bean-definition-overriding=true",
 		"spring.cloud.dataflow.task.scheduler-task-launcher-url=https://test.test",
 		"spring.cloud.dataflow.features.schedules-enabled=true"})
-@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class, DockerValidatorProperties.class})
+@EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class,
+		DockerValidatorProperties.class, ComposedTaskRunnerConfigurationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class DefaultSchedulerServiceTests {
@@ -117,6 +118,9 @@ public class DefaultSchedulerServiceTests {
 
 	@Autowired
 	private TaskConfigurationProperties taskConfigurationProperties;
+
+	@Autowired
+	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Autowired
 	private CommonApplicationProperties commonApplicationProperties;
@@ -190,11 +194,12 @@ public class DefaultSchedulerServiceTests {
 		launchers.add(launcher);
 		List<TaskPlatform> taskPlatform = Collections.singletonList(new TaskPlatform("testTaskPlatform", launchers));
 
-		return  new DefaultSchedulerService(this.commonApplicationProperties,
+		return new DefaultSchedulerService(this.commonApplicationProperties,
 				taskPlatform, this.taskDefinitionRepository,
 				this.appRegistry, this.resourceLoader,
 				this.taskConfigurationProperties, mock(DataSourceProperties.class), null,
-				this.metaDataResolver, this.schedulerServiceProperties, this.auditRecordService);
+				this.metaDataResolver, this.schedulerServiceProperties, this.auditRecordService,
+				this.composedTaskRunnerConfigurationProperties);
 	}
 
 	public void testScheduleWithLongName(){
@@ -396,7 +401,7 @@ public class DefaultSchedulerServiceTests {
 				taskPlatform, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
 				this.taskConfigurationProperties, mock(DataSourceProperties.class), "uri",
 				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
-				mock(AuditRecordService.class));
+				mock(AuditRecordService.class), this.composedTaskRunnerConfigurationProperties);
 
 		TaskDefinition taskDefinition = new TaskDefinition(BASE_DEFINITION_NAME, definition);
 

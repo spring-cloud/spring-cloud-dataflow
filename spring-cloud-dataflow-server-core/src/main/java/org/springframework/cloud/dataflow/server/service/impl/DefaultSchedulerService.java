@@ -79,6 +79,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final AuditRecordService auditRecordService;
 	private final AuditServiceUtils auditServiceUtils;
 	private final DataSourceProperties dataSourceProperties;
+	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	/**
 	 * Constructor for DefaultSchedulerService
@@ -94,6 +95,37 @@ public class DefaultSchedulerService implements SchedulerService {
 	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this service.
 	 * @param auditRecordService the {@link AuditRecordService} for this service.
 	 */
+	@Deprecated
+	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
+								   List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+								   AppRegistryService registry, ResourceLoader resourceLoader,
+								   TaskConfigurationProperties taskConfigurationProperties,
+								   DataSourceProperties dataSourceProperties, String dataflowServerUri,
+								   ApplicationConfigurationMetadataResolver metaDataResolver,
+								   SchedulerServiceProperties schedulerServiceProperties,
+								   AuditRecordService auditRecordService) {
+
+		this(commonApplicationProperties, taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
+				taskConfigurationProperties, dataSourceProperties, dataflowServerUri, metaDataResolver,
+				schedulerServiceProperties, auditRecordService, null);
+	}
+
+	/**
+	 * Constructor for DefaultSchedulerService
+	 * @param commonApplicationProperties common properties for applications deployed via Spring Cloud Data Flow.
+	 * @param taskPlatforms the {@link TaskPlatform}s for this service.
+	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} for this service.
+	 * @param registry the {@link AppRegistryService} for this service.
+	 * @param resourceLoader the {@link ResourceLoader} for this service.
+	 * @param taskConfigurationProperties the {@link TaskConfigurationProperties} for this service.
+	 * @param dataSourceProperties the {@link DataSourceProperties} for this service.
+	 * @param dataflowServerUri the Spring Cloud Data Flow uri for this service.
+	 * @param metaDataResolver the {@link ApplicationConfigurationMetadataResolver} for this service.
+	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this service.
+	 * @param auditRecordService the {@link AuditRecordService} for this service.
+	 * @param composedTaskRunnerConfigurationProperties the {@link ComposedTaskRunnerConfigurationProperties} for this
+	 *                                                  service
+	 */
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
 			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
 			AppRegistryService registry, ResourceLoader resourceLoader,
@@ -101,7 +133,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			DataSourceProperties dataSourceProperties, String dataflowServerUri,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(taskPlatforms, "taskPlatforms must not be null");
@@ -124,6 +157,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
 		this.dataSourceProperties = dataSourceProperties;
+		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 	}
 
 	@Override
@@ -149,10 +183,12 @@ public class DefaultSchedulerService implements SchedulerService {
 					TaskServiceUtils.createComposedTaskDefinition(
 							taskNode.toExecutableDSL()));
 			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
+			TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties,
+					this.composedTaskRunnerConfigurationProperties);
 			try {
-				appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
-						ApplicationType.task,
-						new URI(this.taskConfigurationProperties.getComposedTaskRunnerUri()));
+				appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+						ApplicationType.task, new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
+						this.composedTaskRunnerConfigurationProperties)));
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
@@ -398,14 +434,15 @@ public class DefaultSchedulerService implements SchedulerService {
 		AppRegistration appRegistration = null;
 		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
 			URI composedTaskUri = null;
+			String composedTaskLauncherUri = TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
+					this.composedTaskRunnerConfigurationProperties);
 			try {
-				composedTaskUri = new URI(taskConfigurationProperties.getComposedTaskRunnerUri());
+				composedTaskUri = new URI(composedTaskLauncherUri);
 			}
 			catch (URISyntaxException e) {
-				throw new IllegalArgumentException("Invalid Composed Task Url: " +
-						taskConfigurationProperties.getComposedTaskRunnerUri());
+				throw new IllegalArgumentException("Invalid Composed Task Url: " + composedTaskLauncherUri);
 			}
-			appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME, ApplicationType.task, composedTaskUri);
+			appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME, ApplicationType.task, composedTaskUri);
 		}
 		else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),

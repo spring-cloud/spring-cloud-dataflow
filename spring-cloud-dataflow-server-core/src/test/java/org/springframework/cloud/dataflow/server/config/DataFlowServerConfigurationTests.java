@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.cloud.dataflow.server.config.features.SchedulerConfig
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
 import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
@@ -86,7 +87,7 @@ public class DataFlowServerConfigurationTests {
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
 				SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-				ResourceLoadingAutoConfiguration.class);
+				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}

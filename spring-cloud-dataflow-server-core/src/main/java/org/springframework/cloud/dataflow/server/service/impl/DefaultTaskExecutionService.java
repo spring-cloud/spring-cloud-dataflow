@@ -142,6 +142,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private TaskConfigurationProperties taskConfigurationProperties;
 
+	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
@@ -159,19 +161,58 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param oauth2TokenUtilsService the oauth2 token server
 	 * @param taskSaveService the task save service
 	 */
+	@Deprecated
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService,
-			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository,
-			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService,
-			TaskConfigurationProperties taskConfigurationProperties) {
+									   AuditRecordService auditRecordService,
+									   TaskRepository taskRepository,
+									   TaskExecutionInfoService taskExecutionInfoService,
+									   TaskDeploymentRepository taskDeploymentRepository,
+									   TaskExecutionCreationService taskExecutionRepositoryService,
+									   TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+									   TaskExplorer taskExplorer,
+									   DataflowTaskExecutionDao dataflowTaskExecutionDao,
+									   DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+									   OAuth2TokenUtilsService oauth2TokenUtilsService,
+									   TaskSaveService taskSaveService,
+									   TaskConfigurationProperties taskConfigurationProperties) {
+		this(launcherRepository, auditRecordService, taskRepository, taskExecutionInfoService, taskDeploymentRepository,
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService, taskConfigurationProperties,
+				null);
+	}
+
+	/**
+	 * Initializes the {@link DefaultTaskExecutionService}.
+	 *
+	 * @param launcherRepository the repository of task launcher used to launch task apps.
+	 * @param auditRecordService the audit record service
+	 * @param taskRepository the repository to use for accessing and updating task executions
+	 * @param taskExecutionInfoService the task execution info service
+	 * @param taskDeploymentRepository the repository to track task deployment
+	 * @param taskExecutionInfoService the service used to setup a task execution
+	 * @param taskExecutionRepositoryService the service used to create the task execution
+	 * @param taskAppDeploymentRequestCreator the task app deployment request creator
+	 * @param taskExplorer the task explorer
+	 * @param dataflowTaskExecutionDao the dataflow task execution dao
+	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
+	 * @param oauth2TokenUtilsService the oauth2 token server
+	 * @param taskSaveService the task save service
+	 * @param composedTaskRunnerConfigurationProperties properties used to configure the composed task runner
+	 */
+	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
+									   AuditRecordService auditRecordService,
+									   TaskRepository taskRepository,
+									   TaskExecutionInfoService taskExecutionInfoService,
+									   TaskDeploymentRepository taskDeploymentRepository,
+									   TaskExecutionCreationService taskExecutionRepositoryService,
+									   TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+									   TaskExplorer taskExplorer,
+									   DataflowTaskExecutionDao dataflowTaskExecutionDao,
+									   DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+									   OAuth2TokenUtilsService oauth2TokenUtilsService,
+									   TaskSaveService taskSaveService,
+									   TaskConfigurationProperties taskConfigurationProperties,
+									   ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
@@ -199,6 +240,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.taskSaveService = taskSaveService;
 		this.taskConfigurationProperties = taskConfigurationProperties;
+		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 	}
 
 	/**
@@ -247,12 +289,12 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation =
 				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, launcher.getType());
 
+		TaskLauncher taskLauncher = findTaskLauncher(platformName);
+
 		if (taskExecutionInformation.isComposed()) {
 			handleAccessToken(commandLineArgs, taskExecutionInformation);
-		}
-
-		TaskLauncher taskLauncher = findTaskLauncher(platformName);
-		if(taskExecutionInformation.isComposed()) {
+			TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties,
+					this.composedTaskRunnerConfigurationProperties);
 			isCTRSplitValidForCurrentCTR(taskLauncher, taskExecutionInformation.getTaskDefinition());
 		}
 
@@ -389,7 +431,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				containsAccessToken = true;
 			}
 		}
-		if(this.taskConfigurationProperties.isUseUserAccessToken()) {
+		if(TaskServiceUtils.isUseUserAccessToken(this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties)) {
 			useUserAccessToken = true;
 		}
 		if (!containsAccessToken && useUserAccessToken && oauth2TokenUtilsService != null) {
