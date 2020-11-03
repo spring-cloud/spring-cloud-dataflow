@@ -822,16 +822,20 @@ public abstract class DefaultTaskExecutionServiceTests {
 			boolean errorCaught = false;
 			when(this.taskLauncher.launch(any())).thenReturn("0");
 			TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+					new ComposedTaskRunnerConfigurationProperties();
 			TaskExecutionInfoService taskExecutionInfoService = new DefaultTaskExecutionInfoService(
 					this.dataSourceProperties, this.appRegistry, this.taskExplorer,
 					mock(TaskDefinitionRepository.class), taskConfigurationProperties,
-					mock(LauncherRepository.class), Collections.singletonList(mock(TaskPlatform.class)));
+					mock(LauncherRepository.class), Collections.singletonList(mock(TaskPlatform.class)),
+					composedTaskRunnerConfigurationProperties);
 			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 					launcherRepository, auditRecordService, taskRepository,
 					taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 					taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 					this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-					mock(OAuth2TokenUtilsService.class), this.taskSaveService, taskConfigurationProperties);
+					mock(OAuth2TokenUtilsService.class), this.taskSaveService, taskConfigurationProperties,
+					composedTaskRunnerConfigurationProperties);
 			try {
 				taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			}

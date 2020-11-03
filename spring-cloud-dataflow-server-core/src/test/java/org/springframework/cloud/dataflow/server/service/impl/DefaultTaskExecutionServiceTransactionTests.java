@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskConfigurationProperties taskConfigurationProperties;
 
 	@Autowired
+	ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	@Autowired
 	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
@@ -146,7 +149,8 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-				mock(OAuth2TokenUtilsService.class), this.taskSaveService, this.taskConfigurationProperties);
+				mock(OAuth2TokenUtilsService.class), this.taskSaveService, this.taskConfigurationProperties,
+				this.composedTaskRunnerConfigurationProperties);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -53,15 +55,12 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testCreateComposedTaskDefinition() {
-		TaskConfigurationProperties props = new TaskConfigurationProperties();
-		props.setComposedTaskRunnerUri("maven://org.springframework.cloud.task.app:composedtaskrunner-task:2.1.3.RELEASE");
 		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH)).isEqualTo("composed-task-runner --graph=\"AAA && BBB\"");
 	}
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullNameCheck() {
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			TaskConfigurationProperties props = new TaskConfigurationProperties();
 			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
 			TaskServiceUtils.createComposedTaskDefinition(null);
 		});
@@ -240,6 +239,74 @@ public class TaskServiceUtilsTests {
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
 		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
+	}
+
+	@Test
+	public void testAddProvidedImagePullSecret() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		composedTaskRunnerConfigurationProperties.setImagePullSecret("regcred");
+
+		Map<String, String> taskDeploymentProperties = new HashMap<>();
+
+		TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, composedTaskRunnerConfigurationProperties);
+
+		String imagePullSecretPropertyKey = "deployer.composed-task-runner.kubernetes.imagePullSecret";
+
+		assertTrue("Task deployment properties are missing composed task runner imagePullSecret",
+				taskDeploymentProperties.containsKey(imagePullSecretPropertyKey));
+
+		assertEquals("Invalid imagePullSecret", "regcred", taskDeploymentProperties.get(imagePullSecretPropertyKey));
+	}
+
+	@Test
+	public void testComposedTaskRunnerUriFromTaskProps() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(composedTaskRunnerConfigurationProperties);
+		taskConfigurationProperties.setComposedTaskRunnerUri("docker://something");
+
+		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
+				composedTaskRunnerConfigurationProperties);
+
+		assertEquals("Invalid task runner URI string", "docker://something", uri);
+	}
+
+	@Test
+	public void testComposedTaskRunnerUriFromCTRProps() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		composedTaskRunnerConfigurationProperties.setUri("docker://something");
+
+		String uri = TaskServiceUtils.getComposedTaskLauncherUri(new TaskConfigurationProperties(),
+				composedTaskRunnerConfigurationProperties);
+
+		assertEquals("Invalid task runner URI string", "docker://something", uri);
+	}
+
+	@Test
+	public void testComposedTaskRunnerUriFromCTRPropsOverridesTaskProps() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		composedTaskRunnerConfigurationProperties.setUri("gcr.io://something");
+
+		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(composedTaskRunnerConfigurationProperties);
+		taskConfigurationProperties.setComposedTaskRunnerUri("docker://something");
+
+		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
+				composedTaskRunnerConfigurationProperties);
+
+		assertEquals("Invalid task runner URI string", "gcr.io://something", uri);
+	}
+
+	@Test
+	public void testImagePullSecretNullCTRProperties() {
+		Map<String, String> taskDeploymentProperties = new HashMap<>();
+		TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, null);
+		assertFalse("Task deployment properties should not contain imagePullSecret",
+				taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret"));
 	}
 
 	private TaskNode parse(String dsltext) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoServic
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
@@ -83,7 +84,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @ConditionalOnTasksEnabled
 @EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
-		DockerValidatorProperties.class, LocalPlatformProperties.class
+		DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class
 })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
@@ -100,6 +101,9 @@ public class TaskConfiguration {
 
 	@Autowired
 	private TaskConfigurationProperties taskConfigurationProperties;
+
+	@Autowired
+	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Bean
 	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
@@ -137,9 +141,11 @@ public class TaskConfiguration {
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
-			LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms) {
+			LauncherRepository launcherRepository, List<TaskPlatform> taskPlatforms,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(dataSourceProperties, registry,
-				taskExplorer, taskDefinitionRepository, taskConfigurationProperties, launcherRepository, taskPlatforms);
+				taskExplorer, taskDefinitionRepository, taskConfigurationProperties, launcherRepository, taskPlatforms,
+				composedTaskRunnerConfigurationProperties);
 	}
 
 	@Bean
@@ -195,7 +201,7 @@ public class TaskConfiguration {
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
 				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService,
-				this.taskConfigurationProperties);
+				this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties);
 		defaultTaskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
 		return defaultTaskExecutionService;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
@@ -145,7 +146,8 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
-@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class, TaskProperties.class })
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class,
+		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
@@ -276,7 +278,8 @@ public class JobDependencies {
 			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService, TaskConfigurationProperties taskConfigurationProperties) {
+			TaskSaveService taskSaveService, TaskConfigurationProperties taskConfigurationProperties,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService,
 				taskRepository,
@@ -284,17 +287,19 @@ public class JobDependencies {
 				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
 				taskExplorer, dataflowTaskExecutionDao,
 				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService,
-				taskSaveService, taskConfigurationProperties);
+				taskSaveService, taskConfigurationProperties, composedTaskRunnerConfigurationProperties);
 	}
 
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-			List<TaskPlatform> taskPlatforms) {
+			List<TaskPlatform> taskPlatforms, ComposedTaskRunnerConfigurationProperties
+																		composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
-				taskConfigurationProperties, launcherRepository, taskPlatforms);
+				taskConfigurationProperties, launcherRepository, taskPlatforms,
+				composedTaskRunnerConfigurationProperties);
 	}
 
 	@Bean

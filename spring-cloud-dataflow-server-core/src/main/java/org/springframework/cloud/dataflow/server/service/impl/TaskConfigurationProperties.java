@@ -16,32 +16,34 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.validation.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
 
 /**
  * Properties used to define the behavior of tasks created by Spring Cloud Data Flow.
  *
  * @author Glenn Renfro
  * @author David Turanski
+ * @author Chris Schaefer
  */
 @Validated
 @ConfigurationProperties(prefix = TaskConfigurationProperties.TASK_PREFIX)
 public class TaskConfigurationProperties {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskConfigurationProperties.class);
 
 	public static final String TASK_PREFIX = DataFlowPropertyKeys.PREFIX + "task";
 
+	@Deprecated
 	public static final String COMPOSED_TASK_RUNNER_NAME = "composed-task-runner";
 
-	/**
-	 * The task application uri to be used for the composed task runner.
-	 */
-	@NotBlank
-	private String composedTaskRunnerUri = "composed-task-runner";
+	@Autowired
+	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	/**
 	 * Whether the server should auto create task definitions if one does not exist for a launch request and
@@ -55,24 +57,24 @@ public class TaskConfigurationProperties {
 	private DeployerProperties deployerProperties = new DeployerProperties();
 
 	/**
-	 * If true SCDF will set the dataflow-server-access-token for the composed
-	 * task runner to the user's token when launching composed tasks.
-	 * Default is false.
-	 */
-	private boolean useUserAccessToken = false;
-
-	/**
 	 * When using the kubernetes platform obtain database username and password
 	 * from secrets vs having dataflow pass them via properties.
 	 */
 	private boolean useKubernetesSecretsForDbCredentials;
 
+	@Deprecated
 	public String getComposedTaskRunnerUri() {
-		return composedTaskRunnerUri;
+		logDeprecationWarning("getUri");
+		return this.composedTaskRunnerConfigurationProperties.getUri();
 	}
 
+	@Deprecated
 	public void setComposedTaskRunnerUri(String composedTaskRunnerUri) {
-		this.composedTaskRunnerUri = composedTaskRunnerUri;
+		logDeprecationWarning("setUri");
+
+		if (!StringUtils.hasText(this.composedTaskRunnerConfigurationProperties.getUri())) {
+			this.composedTaskRunnerConfigurationProperties.setUri(composedTaskRunnerUri);
+		}
 	}
 
 	public DeployerProperties getDeployerProperties() {
@@ -91,12 +93,19 @@ public class TaskConfigurationProperties {
 		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
 	}
 
+	@Deprecated
 	public boolean isUseUserAccessToken() {
-		return useUserAccessToken;
+		logDeprecationWarning();
+		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
 	}
 
+	@Deprecated
 	public void setUseUserAccessToken(boolean useUserAccessToken) {
-		this.useUserAccessToken = useUserAccessToken;
+		logDeprecationWarning();
+
+		if (this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null) {
+			this.composedTaskRunnerConfigurationProperties.setUseUserAccessToken(useUserAccessToken);
+		}
 	}
 
 	public static class DeployerProperties {
@@ -145,5 +154,21 @@ public class TaskConfigurationProperties {
 
 	public void setUseKubernetesSecretsForDbCredentials(boolean useKubernetesSecretsForDbCredentials) {
 		this.useKubernetesSecretsForDbCredentials = useKubernetesSecretsForDbCredentials;
+	}
+
+	private void logDeprecationWarning() {
+		logDeprecationWarning(null);
+	}
+
+	private void logDeprecationWarning(String newMethodName) {
+		String callingMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
+		LOGGER.warn(this.getClass().getName() + "." + callingMethodName
+				+ " is deprecated. Please use " + ComposedTaskRunnerConfigurationProperties.class.getName() + "."
+				+ (newMethodName != null ? newMethodName : callingMethodName));
+	}
+
+	void setComposedTaskRunnerConfigurationProperties(ComposedTaskRunnerConfigurationProperties
+															  composedTaskRunnerConfigurationProperties) {
+		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 	}
 }

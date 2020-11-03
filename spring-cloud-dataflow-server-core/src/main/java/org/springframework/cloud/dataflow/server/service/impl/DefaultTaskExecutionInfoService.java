@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,8 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 	private final List<TaskPlatform> taskPlatforms;
 
+	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
 	/**
 	 * Initializes the {@link DefaultTaskExecutionInfoService}.
 	 *
@@ -93,13 +95,39 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 * @param launcherRepository the launcher repository
 	 * @param taskPlatforms the task platforms
 	 */
+	@Deprecated
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
-			AppRegistryService appRegistryService,
-			TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties,
-			LauncherRepository launcherRepository,
-			List<TaskPlatform> taskPlatforms) {
+										   AppRegistryService appRegistryService,
+										   TaskExplorer taskExplorer,
+										   TaskDefinitionRepository taskDefinitionRepository,
+										   TaskConfigurationProperties taskConfigurationProperties,
+										   LauncherRepository launcherRepository,
+										   List<TaskPlatform> taskPlatforms) {
+		this(dataSourceProperties, appRegistryService, taskExplorer, taskDefinitionRepository,
+				taskConfigurationProperties, launcherRepository, taskPlatforms, null);
+	}
+
+	/**
+	 * Initializes the {@link DefaultTaskExecutionInfoService}.
+	 *
+	 * @param dataSourceProperties the data source properties.
+	 * @param appRegistryService URI registry this service will use to look up app URIs.
+	 * @param taskExplorer the explorer this service will use to lookup task executions
+	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
+	 *     use for task CRUD operations.
+	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
+	 * @param launcherRepository the launcher repository
+	 * @param taskPlatforms the task platforms
+	 * @param composedTaskRunnerConfigurationProperties the properties used to define the behavior of CTR
+	 */
+	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
+										   AppRegistryService appRegistryService,
+										   TaskExplorer taskExplorer,
+										   TaskDefinitionRepository taskDefinitionRepository,
+										   TaskConfigurationProperties taskConfigurationProperties,
+										   LauncherRepository launcherRepository,
+										   List<TaskPlatform> taskPlatforms,
+										   ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -115,6 +143,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.launcherRepository = launcherRepository;
 		this.taskPlatforms = taskPlatforms;
+		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 	}
 
 	@Override
@@ -146,9 +175,10 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(taskDefinitionToUse,
 					dataSourceProperties, addDatabaseCredentials);
 			try {
-				appRegistration = new AppRegistration(TaskConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+				appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
 						ApplicationType.task,
-						new URI(this.taskConfigurationProperties.getComposedTaskRunnerUri()));
+						new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
+								this.composedTaskRunnerConfigurationProperties)));
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);

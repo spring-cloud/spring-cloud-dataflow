@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.ValidationService;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.FileSystemResource;
@@ -56,7 +57,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class,
-		DockerValidatorProperties.class })
+		DockerValidatorProperties.class, ComposedTaskRunnerConfigurationProperties.class })
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class DefaultAppValidationServiceTests {
 

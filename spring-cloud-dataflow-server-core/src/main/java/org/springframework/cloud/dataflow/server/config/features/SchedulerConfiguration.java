@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -70,11 +71,13 @@ public class SchedulerConfiguration {
 			DataSourceProperties dataSourceProperties,
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,
-			AuditRecordService auditRecordService) {
+			AuditRecordService auditRecordService,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
 				taskConfigurationProperties, dataSourceProperties,
-				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService);
+				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService,
+				composedTaskRunnerConfigurationProperties);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {
