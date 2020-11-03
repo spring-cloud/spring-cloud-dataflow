@@ -365,4 +365,14 @@ public class TaskExecutionControllerTests {
 		}
 		return ra;
 	}
+
+	@Test
+	public void testSorting() throws Exception {
+		mockMvc.perform(get("/tasks/executions").param("sort", "TASK_EXECUTION_ID").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk());
+
+		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().is5xxServerError()).andReturn().getResponse().getContentAsString()
+			.contains("NoSuchTaskException");
+	}
 }
