@@ -62,6 +62,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -371,8 +372,8 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(get("/tasks/executions").param("sort", "TASK_EXECUTION_ID").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk());
 
-		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().is5xxServerError()).andReturn().getResponse().getContentAsString()
-			.contains("NoSuchTaskException");
+		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON)).andDo(print())
+			.andExpect(status().is5xxServerError())
+			.andExpect(content().string(containsString("Sorting column WRONG_FIELD not allowed")));
 	}
 }
