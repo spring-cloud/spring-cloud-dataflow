@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: kafka-broker
   labels:
     app: kafka
     component: kafka-broker
 spec:
+  serviceName: "kafka-broker"
   replicas: 1
   selector:
     matchLabels:
@@ -18,23 +19,18 @@ spec:
     spec:
       containers:
       - name: kafka
-        image: wurstmeister/kafka:2.12-2.3.0
+        image: confluentinc/cp-kafka:5.5.2
         ports:
         - containerPort: 9092
         env:
-          - name: ENABLE_AUTO_EXTEND
-            value: "true"
-          - name: KAFKA_RESERVED_BROKER_MAX_ID
-            value: "999999999"
-          - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
-            value: "false"
-          - name: KAFKA_PORT
-            value: "9092"
-          - name: KAFKA_ADVERTISED_PORT
-            value: "9092"
-          - name: KAFKA_ADVERTISED_HOST_NAME
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
+          - name: KAFKA_ADVERTISED_LISTENERS
+            value: "PLAINTEXT://kafka-broker:9092"
           - name: KAFKA_ZOOKEEPER_CONNECT
             value: kafka-zk:2181
+          - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+            value: "1"
+          - name: KAFKA_LOG4J_ROOT_LOGLEVEL
+            value: "DEBUG"
+          - name: KAFKA_LOG4J_LOGGERS
+            value: "org.apache.zookeeper=ERROR,org.apache.kafka=ERROR,kafka=ERROR,kafka.cluster=ERROR,kafka.controller=ERROR,kafka.coordinator=ERROR,kafka.log=ERROR,kafka.server=ERROR,kafka.zookeeper=ERROR,state.change.logger=ERROR"
+
