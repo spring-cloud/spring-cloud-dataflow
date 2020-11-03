@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
@@ -87,6 +88,9 @@ public class TaskExecutionController {
 
 	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
+	private static final List<String> allowedSorts = Arrays.asList("task_execution_id", "task_name", "start_time",
+			"end_time", "exit_code");
+
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
 	 * from a the {@link TaskExplorer}
@@ -124,6 +128,7 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionResource> list(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+		validatePageable(pageable);
 		Page<TaskExecution> taskExecutions = this.explorer.findAll(pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toModel(result, this.taskAssembler);
@@ -141,6 +146,7 @@ public class TaskExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+		validatePageable(pageable);
 		this.taskDefinitionRepository.findById(taskName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
@@ -255,6 +261,20 @@ public class TaskExecutionController {
 							taskManifest));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
+	}
+
+	private static void validatePageable(Pageable pageable) {
+		if (pageable != null) {
+			Sort sort = pageable.getSort();
+			if (sort != null) {
+				for (Sort.Order order : sort) {
+					String property = order.getProperty();
+					if (property != null && !allowedSorts.contains(property.toLowerCase())) {
+						throw new IllegalArgumentException("Sorting column " + order.getProperty() + " not allowed");
+					}
+				}
+			}
+		}
 	}
 
 	/**
