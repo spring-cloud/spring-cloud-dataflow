@@ -305,4 +305,15 @@ public class TaskServiceUtils {
 
 		return taskConfigurationProperties.getComposedTaskRunnerUri();
 	}
+
+	static boolean isUseUserAccessToken(TaskConfigurationProperties taskConfigurationProperties,
+						ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+		if (composedTaskRunnerConfigurationProperties != null) {
+			if (composedTaskRunnerConfigurationProperties.isUseUserAccessToken() != null) {
+				return composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
+			}
+		}
+
+		return taskConfigurationProperties.isUseUserAccessToken();
+	}
 }

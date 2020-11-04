@@ -431,7 +431,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				containsAccessToken = true;
 			}
 		}
-		if(isUseUserAccessToken()) {
+		if(TaskServiceUtils.isUseUserAccessToken(this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties)) {
 			useUserAccessToken = true;
 		}
 		if (!containsAccessToken && useUserAccessToken && oauth2TokenUtilsService != null) {
@@ -441,14 +441,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskExecutionInformation.getTaskDeploymentProperties().put(dataflowAccessTokenPropertyKey, token);
 			}
 		}
-	}
-
-	private boolean isUseUserAccessToken() {
-		if (composedTaskRunnerConfigurationProperties != null) {
-			return composedTaskRunnerConfigurationProperties.isUseUserAccessToken() != null;
-		}
-
-		return taskConfigurationProperties.isUseUserAccessToken();
 	}
 
 	/**

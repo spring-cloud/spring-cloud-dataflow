@@ -309,6 +309,48 @@ public class TaskServiceUtilsTests {
 				taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret"));
 	}
 
+	@Test
+	public void testUseUserAccessTokenFromCTRProps() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(true);
+
+		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
+
+		assertTrue("Use user access token should be true", result);
+	}
+
+	@Test
+	public void testUseUserAccessTokenFromNullCTRProps() {
+		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
+
+		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
+
+		assertFalse("Use user access token should be false", result);
+	}
+
+	@Test
+	public void testUseUserAccessTokenFromTaskProps() {
+		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
+		taskConfigurationProperties.setUseUserAccessToken(true);
+
+		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
+
+		assertTrue("Use user access token should be true", result);
+	}
+
+	@Test
+	public void testUseUserAccessTokenFromTaskPropsDefault() {
+		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
+		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
+
+		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
+
+		assertFalse("Use user access token should be false", result);
+	}
+
 	private TaskNode parse(String dsltext) {
 		TaskNode ctn = new TaskParser("test", dsltext, true, true).parse();
 		return ctn;

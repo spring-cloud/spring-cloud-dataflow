@@ -96,7 +96,9 @@ public class TaskConfigurationProperties {
 	@Deprecated
 	public boolean isUseUserAccessToken() {
 		logDeprecationWarning();
-		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
+
+		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null ? false :
+				this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
 	}
 
 	@Deprecated
@@ -168,7 +170,9 @@ public class TaskConfigurationProperties {
 	}
 
 	void setComposedTaskRunnerConfigurationProperties(ComposedTaskRunnerConfigurationProperties
-															  composedTaskRunnerConfigurationProperties) {
-		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
+							composedTaskRunnerConfigurationProperties) {
+		if (composedTaskRunnerConfigurationProperties != null) {
+			this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
+		}
 	}
 }
