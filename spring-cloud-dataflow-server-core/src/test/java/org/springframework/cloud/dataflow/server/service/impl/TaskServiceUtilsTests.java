@@ -310,7 +310,7 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromCTRProps() {
+	public void testUseUserAccessTokenFromCTRPropsEnabled() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(true);
@@ -318,6 +318,17 @@ public class TaskServiceUtilsTests {
 		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
 
 		assertTrue("Use user access token should be true", result);
+	}
+
+	@Test
+	public void testUseUserAccessTokenFromCTRPropsDisabled() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+				new ComposedTaskRunnerConfigurationProperties();
+		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(false);
+
+		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
+
+		assertFalse("Use user access token should be false", result);
 	}
 
 	@Test
