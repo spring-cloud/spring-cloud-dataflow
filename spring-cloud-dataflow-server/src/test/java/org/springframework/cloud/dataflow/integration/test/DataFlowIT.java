@@ -823,7 +823,7 @@ public class DataFlowIT {
 				.description("Test composedTask")
 				.create()) {
 
-			assertThat(task.children().size()).isEqualTo(2);
+			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
 			// first launch
 
@@ -835,7 +835,7 @@ public class DataFlowIT {
 			assertThat(task.executionStatus(launchId1)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
-			task.children().forEach(childTask -> {
+			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
 				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
@@ -851,7 +851,7 @@ public class DataFlowIT {
 			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
-			task.children().forEach(childTask -> {
+			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
 				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
@@ -871,7 +871,7 @@ public class DataFlowIT {
 				.description("Test multipleComposedTaskhWithArguments")
 				.create()) {
 
-			assertThat(task.children().size()).isEqualTo(2);
+			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
 			// first launch
 			List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
@@ -883,7 +883,7 @@ public class DataFlowIT {
 			assertThat(task.executionStatus(launchId1)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
-			task.children().forEach(childTask -> {
+			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
 				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
@@ -899,7 +899,7 @@ public class DataFlowIT {
 			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
-			task.children().forEach(childTask -> {
+			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
 				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});

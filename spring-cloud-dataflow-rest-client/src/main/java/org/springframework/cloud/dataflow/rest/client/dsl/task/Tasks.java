@@ -59,11 +59,4 @@ public class Tasks {
 				.filter(task -> task.getTaskName().equalsIgnoreCase(taskName))
 				.findFirst();
 	}
-
-	/**
-	 * Destroys all Tasks currently defined currently in Data Flow.
-	 */
-	public void destroyAll() {
-		this.dataFlowOperations.taskOperations().destroyAll();
-	}
 }

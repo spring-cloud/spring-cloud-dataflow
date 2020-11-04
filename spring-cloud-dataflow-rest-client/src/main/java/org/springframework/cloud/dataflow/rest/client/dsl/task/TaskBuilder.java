@@ -36,7 +36,7 @@ public class TaskBuilder {
 	}
 
 	/**
-	 * Fluent API method to set the name of the task.
+	 * Fluent API method to set the name for the task definition.
 	 * @param definitionName - definition name of a Task with the server. Note that the actual task name is computed
 	 *                          form the definition name, task definition and task description.
 	 * @return A {@link TaskBuilder} that provides the next navigation step in the DSL.

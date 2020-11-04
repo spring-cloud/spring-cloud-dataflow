@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents a Task defined on DataFlow server. New Task can be defined with the help of a fluent style builder
@@ -64,9 +65,8 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
  *     }
  * </pre>
  *
- * Use <pre>{@code stop()}</pre> to stop running task execution.
  * Use <pre>{@code close()}</pre> to destroy the task manually. Since tasks are auto-closable you can use the
- * Java tyr() {} instead:
+ * Java try block instead:
  * <pre>
  *
  *     {@code
@@ -82,7 +82,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
  *     }
  * </pre>
  *
- * Use the {@link Tasks} helper to list or retrieve exiting tasks defined in DataFlow:
+ * Use the {@link Tasks} helper to list or retrieve existing tasks defined in DataFlow:
  * <pre>
  *     {@code
  *          Task task = Tasks.of(dataflowOperations).get("myTask")
@@ -145,11 +145,16 @@ public class Task implements AutoCloseable {
 	 * @return long containing the TaskExecutionId
 	 */
 	public long launch(Map<String, String> properties, List<String> arguments) {
+		if (properties == null) {
+			throw new IllegalArgumentException("Task properties can't be null!");
+		}
 		return this.taskOperations.launch(this.taskName, properties, arguments, null);
 	}
 
 	/**
 	 * Stop all Tasks' running {@link org.springframework.cloud.task.repository.TaskExecution}s.
+	 *
+	 * Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
 	 */
 	public void stop() {
 		String commaSeparatedIds = executions().stream()
@@ -158,18 +163,24 @@ public class Task implements AutoCloseable {
 				.map(TaskExecutionResource::getExecutionId)
 				.map(String::valueOf)
 				.collect(Collectors.joining(","));
-		this.taskOperations.stop(commaSeparatedIds);
+		if (StringUtils.hasText(commaSeparatedIds)) {
+			this.taskOperations.stop(commaSeparatedIds);
+		}
 	}
 
 	/**
 	 * Stop a list of {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 * @param taskExecutionIds List of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 *
+	 * Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
 	 */
 	public void stop(long... taskExecutionIds) {
 		String commaSeparatedIds = Stream.of(taskExecutionIds)
 				.map(String::valueOf)
 				.collect(Collectors.joining(","));
-		this.taskOperations.stop(commaSeparatedIds);
+		if (StringUtils.hasText(commaSeparatedIds)) {
+			this.taskOperations.stop(commaSeparatedIds);
+		}
 	}
 
 	/**
@@ -200,7 +211,7 @@ public class Task implements AutoCloseable {
 	}
 
 	/**
-	 *  Find {@link TaskExecutionResource} by a parent execution id.
+	 * Find {@link TaskExecutionResource} by a parent execution id.
 	 * @param parentExecutionId parent task execution id.
 	 * @return Return TaskExecutionResource
 	 */
@@ -225,7 +236,7 @@ public class Task implements AutoCloseable {
 	/**
 	 * @return If a composed task return the list of children sub-tasks. Returns empty list if not composed task.
 	 */
-	public List<Task> children() {
+	public List<Task> composedTaskChildTasks() {
 		return !isComposed() ?
 				new ArrayList<>() :
 				this.taskOperations.list().getContent().stream()

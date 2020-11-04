@@ -118,7 +118,7 @@ public class TaskScheduleIT {
 	@AfterEach
 	public void after() {
 		if (dockerComposeDisabled) {
-			tasks.destroyAll();
+			dataFlowOperations.taskOperations().destroyAll();
 		}
 	}
 
