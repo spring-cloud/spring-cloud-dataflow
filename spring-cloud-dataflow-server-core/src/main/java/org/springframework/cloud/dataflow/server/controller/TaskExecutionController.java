@@ -88,8 +88,9 @@ public class TaskExecutionController {
 
 	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
-	private static final List<String> allowedSorts = Arrays.asList("task_execution_id", "task_name", "start_time",
-			"end_time", "exit_code");
+	private static final List<String> allowedSorts = Arrays.asList("TASK_EXECUTION_ID", "START_TIME", "END_TIME",
+			"TASK_NAME", "EXIT_CODE", "EXIT_MESSAGE", "ERROR_MESSAGE", "LAST_UPDATED", "EXTERNAL_EXECUTION_ID",
+			"PARENT_EXECUTION_ID");
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
@@ -267,7 +268,7 @@ public class TaskExecutionController {
 			if (sort != null) {
 				for (Sort.Order order : sort) {
 					String property = order.getProperty();
-					if (property != null && !allowedSorts.contains(property.toLowerCase())) {
+					if (property != null && !allowedSorts.contains(property.toUpperCase())) {
 						throw new IllegalArgumentException("Sorting column " + order.getProperty() + " not allowed");
 					}
 				}
