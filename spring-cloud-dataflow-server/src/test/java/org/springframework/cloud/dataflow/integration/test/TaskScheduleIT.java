@@ -44,8 +44,7 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
-import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedules;
-import org.springframework.cloud.dataflow.rest.client.dsl.task.Tasks;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskScheduleBuilder;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -88,9 +87,7 @@ public class TaskScheduleIT {
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
 	 */
-	private Tasks tasks;
 	private boolean enabledScheduler;
-	private TaskSchedules schedules;
 	private String platformInfo;
 	private DataFlowTemplate dataFlowOperations;
 
@@ -103,9 +100,7 @@ public class TaskScheduleIT {
 	public void before() {
 		Assumptions.assumingThat(dockerComposeDisabled, () -> {
 			dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
-			tasks = Tasks.of(dataFlowOperations);
 			enabledScheduler = dataFlowOperations.aboutOperation().get().getFeatureInfo().isSchedulesEnabled();
-			schedules = TaskSchedules.of(dataFlowOperations);
 			Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 			Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
 
@@ -139,20 +134,22 @@ public class TaskScheduleIT {
 
 		logger.info("schedule-list-test");
 
+		TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
+
 		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").create();
 			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").create();
 
-			 TaskSchedule taskSchedule1 = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix(randomName("schedule1")).task(task1).create();
-			 TaskSchedule taskSchedule2 = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix(randomName("schedule2")).task(task2).create()) {
+			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).create();
+			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).create()) {
 
 			taskSchedule1.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
 			taskSchedule2.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
 
-			assertThat(schedules.list().size()).isEqualTo(2);
+			assertThat(taskScheduleBuilder.list().size()).isEqualTo(2);
 
 			HashSet<String> scheduleSet = new HashSet<>(Arrays.asList(taskSchedule1.getScheduleName(), taskSchedule2.getScheduleName()));
 
-			for (TaskSchedule taskSchedule : schedules.list()) {
+			for (TaskSchedule taskSchedule : taskScheduleBuilder.list()) {
 				if (scheduleSet.contains(taskSchedule.getScheduleName())) {
 					assertThat(taskSchedule.getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
 				}
@@ -169,30 +166,33 @@ public class TaskScheduleIT {
 
 		logger.info("schedule-find-by-task-test");
 
+		TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
+
 		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").create();
 			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").create();
 
-			 TaskSchedule taskSchedule1 = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix(randomName("schedule1")).task(task1).create();
-			 TaskSchedule taskSchedule2 = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix(randomName("schedule2")).task(task2).create()) {
+			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).create();
+			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).create()) {
 
-			assertThat(schedules.list().size()).isEqualTo(0);
-			assertThat(schedules.list(task1).size()).isEqualTo(0);
-			assertThat(schedules.list(task2).size()).isEqualTo(0);
+
+			assertThat(taskScheduleBuilder.list().size()).isEqualTo(0);
+			assertThat(taskScheduleBuilder.list(task1).size()).isEqualTo(0);
+			assertThat(taskScheduleBuilder.list(task2).size()).isEqualTo(0);
 
 			taskSchedule1.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
 			taskSchedule2.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
 
-			assertThat(schedules.list().size()).isEqualTo(2);
-			assertThat(schedules.list(task1).size()).isEqualTo(1);
-			assertThat(schedules.list(task2).size()).isEqualTo(1);
+			assertThat(taskScheduleBuilder.list().size()).isEqualTo(2);
+			assertThat(taskScheduleBuilder.list(task1).size()).isEqualTo(1);
+			assertThat(taskScheduleBuilder.list(task2).size()).isEqualTo(1);
 
-			assertThat(schedules.list(task1).get(0).getScheduleName()).isEqualTo(taskSchedule1.getScheduleName());
-			assertThat(schedules.list(task1).get(0).getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
-			assertThat(schedules.list(task1).get(0).getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
+			assertThat(taskScheduleBuilder.list(task1).get(0).getScheduleName()).isEqualTo(taskSchedule1.getScheduleName());
+			assertThat(taskScheduleBuilder.list(task1).get(0).getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
+			assertThat(taskScheduleBuilder.list(task1).get(0).getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
 
-			assertThat(schedules.list(task2).get(0).getScheduleName()).isEqualTo(taskSchedule2.getScheduleName());
-			assertThat(schedules.list(task2).get(0).getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
-			assertThat(schedules.list(task2).get(0).getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
+			assertThat(taskScheduleBuilder.list(task2).get(0).getScheduleName()).isEqualTo(taskSchedule2.getScheduleName());
+			assertThat(taskScheduleBuilder.list(task2).get(0).getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
+			assertThat(taskScheduleBuilder.list(task2).get(0).getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);
 		}
 	}
 
@@ -204,7 +204,7 @@ public class TaskScheduleIT {
 		logger.info("schedule-lifecycle-test");
 
 		try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("timestamp").create();
-			 TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix(randomName("schedule")).task(task).create()) {
+			 TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations).prefix(randomName("schedule")).task(task).create()) {
 
 			assertThat(taskSchedule.isScheduled()).isFalse();
 
@@ -213,7 +213,7 @@ public class TaskScheduleIT {
 
 			assertThat(taskSchedule.isScheduled()).isTrue();
 
-			TaskSchedule retrievedSchedule = schedules.findByScheduleName(taskSchedule.getScheduleName());
+			TaskSchedule retrievedSchedule = TaskSchedule.builder(dataFlowOperations).findByScheduleName(taskSchedule.getScheduleName()).get();
 			assertThat(retrievedSchedule.getScheduleName()).isEqualTo(taskSchedule.getScheduleName());
 			assertThat(retrievedSchedule.getScheduleProperties().containsKey(SchedulerPropertyKeys.CRON_EXPRESSION)).isTrue();
 			assertThat(retrievedSchedule.getScheduleProperties().get(SchedulerPropertyKeys.CRON_EXPRESSION)).isEqualTo(DEFAULT_CRON_EXPRESSION);

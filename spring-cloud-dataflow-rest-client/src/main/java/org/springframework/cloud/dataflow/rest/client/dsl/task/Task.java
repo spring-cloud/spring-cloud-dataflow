@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Represents a Task defined on DataFlow server. New Task can be defined with the help of a fluent style builder
- * pattern or use the {@link Tasks} utility to retrieve existing tasks already defined in DataFlow.
+ * pattern or use the {@link Task} static utility methods to retrieve existing tasks already defined in DataFlow.
  *
  * For for instance you can define a new task like this:
  * <pre>
@@ -82,13 +82,8 @@ import org.springframework.util.StringUtils;
  *     }
  * </pre>
  *
- * Use the {@link Tasks} helper to list or retrieve existing tasks defined in DataFlow:
- * <pre>
- *     {@code
- *          Task task = Tasks.of(dataflowOperations).get("myTask")
- *          long launchId = task.launch();
- *     }
- * </pre>
+ * Use the {@link TaskBuilder#allTasks()} and {@link TaskBuilder#findByName(String)}
+ * static helper methods to list or retrieve existing tasks defined in DataFlow.
  *
  * @author Christian Tzolov
  */
@@ -105,6 +100,10 @@ public class Task implements AutoCloseable {
 		this.jobOperations = dataFlowOperations.jobOperations();
 	}
 
+	//--------------------------------------------------------------------------------------------------------
+	//                     Build new or Retrieve an existing Task
+	//--------------------------------------------------------------------------------------------------------
+
 	/**
 	 * Fluent API method to create a {@link TaskBuilder}.
 	 * @param dataFlowOperations {@link DataFlowOperations} Data Flow Rest client instance.
@@ -113,14 +112,7 @@ public class Task implements AutoCloseable {
 	public static TaskBuilder builder(DataFlowOperations dataFlowOperations) {
 		return new TaskBuilder(dataFlowOperations);
 	}
-
-	/**
-	 * @return Return true if composed task or false otherwise.
-	 */
-	public boolean isComposed() {
-		return this.definitionResource().map(TaskDefinitionResource::isComposed).orElse(false);
-	}
-
+	
 	/**
 	 * Launch a task without properties or arguments.
 	 * @return long containing the TaskExecutionId
@@ -190,6 +182,10 @@ public class Task implements AutoCloseable {
 		this.taskOperations.destroy(this.taskName);
 	}
 
+	//--------------------------------------------------------------------------------------------------------
+	//                                    TASK EXECUTIONS
+	//--------------------------------------------------------------------------------------------------------
+
 	/**
 	 * List task executions for this task.
 	 * @return List of task executions for the given task.
@@ -234,6 +230,13 @@ public class Task implements AutoCloseable {
 	}
 
 	/**
+	 * @return Return true if composed task or false otherwise.
+	 */
+	public boolean isComposed() {
+		return this.definitionResource().map(TaskDefinitionResource::isComposed).orElse(false);
+	}
+
+	/**
 	 * @return If a composed task return the list of children sub-tasks. Returns empty list if not composed task.
 	 */
 	public List<Task> composedTaskChildTasks() {
@@ -245,6 +248,10 @@ public class Task implements AutoCloseable {
 						.map(t -> new Task(t.getName(), this.dataFlowOperations))
 						.collect(Collectors.toList());
 	}
+
+	//--------------------------------------------------------------------------------------------------------
+	//                                    TASK JOBS
+	//--------------------------------------------------------------------------------------------------------
 
 	/**
 	 * @return Returns list of {@link JobExecutionResource} belonging to the task.

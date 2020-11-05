@@ -65,7 +65,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
-import org.springframework.cloud.dataflow.rest.client.dsl.task.Tasks;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -168,7 +168,6 @@ public class DataFlowIT {
 	private DataFlowTemplate dataFlowOperations;
 	private RuntimeApplicationHelper runtimeApps;
 	private RestTemplate restTemplate;
-	private Tasks tasks;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as
@@ -196,7 +195,6 @@ public class DataFlowIT {
 		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
 				testProperties.getPlatformName(), testProperties.getKubernetesAppHostSuffix());
-		tasks = Tasks.of(dataFlowOperations);
 		restTemplate = new RestTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
@@ -817,7 +815,9 @@ public class DataFlowIT {
 	public void composedTask() {
 		logger.info("task-composed-task-runner-test");
 
-		try (Task task = Task.builder(dataFlowOperations)
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+
+		try (Task task = taskBuilder
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test composedTask")
@@ -856,16 +856,17 @@ public class DataFlowIT {
 				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
-			assertThat(tasks.list().size()).isEqualTo(3);
+			assertThat(taskBuilder.allTasks().size()).isEqualTo(3);
 		}
-		assertThat(tasks.list().size()).isEqualTo(0);
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}
 
 	@Test
 	public void multipleComposedTaskWithArguments() {
 		logger.info("task-multiple-composed-task-with-arguments-test");
 
-		try (Task task = Task.builder(dataFlowOperations)
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test multipleComposedTaskhWithArguments")
@@ -906,9 +907,9 @@ public class DataFlowIT {
 
 			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
 
-			assertThat(tasks.list().size()).isEqualTo(3);
+			assertThat(taskBuilder.allTasks().size()).isEqualTo(3);
 		}
-		assertThat(tasks.list().size()).isEqualTo(0);
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}
 
 	private static String randomTaskName() {

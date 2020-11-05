@@ -19,12 +19,13 @@ package org.springframework.cloud.dataflow.rest.client.dsl.task;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
 import org.springframework.util.Assert;
 
 /**
  * Represents a Scheduled Task defined on DataFlow server. Tasks can be scheduled defined with the help of a fluent
- * style builder pattern or use the {@link TaskSchedules} utility to retrieve and manage existing task schedules.
+ * style builder pattern or use it to retrieve and manage existing task schedules.
  *
  * For for instance to define a new task task schedule:
  * <pre>
@@ -63,11 +64,11 @@ public class TaskSchedule implements AutoCloseable {
 
 	/**
 	 * Fluent API method to create a {@link TaskScheduleBuilder}.
-	 * @param schedulerOperations {@link SchedulerOperations} Data Flow Rest client instance.
+	 * @param dataFlowOperations {@link DataFlowOperations} Data Flow Rest client instance.
 	 * @return A fluent style builder to create tasks.
 	 */
-	public static TaskScheduleBuilder builder(SchedulerOperations schedulerOperations) {
-		return new TaskScheduleBuilder(schedulerOperations);
+	public static TaskScheduleBuilder builder(DataFlowOperations dataFlowOperations) {
+		return new TaskScheduleBuilder(dataFlowOperations);
 	}
 
 	/**

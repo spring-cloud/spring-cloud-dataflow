@@ -15,6 +15,10 @@
  */
 package org.springframework.cloud.dataflow.rest.client.dsl.task;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 
@@ -75,4 +79,24 @@ public class TaskBuilder {
 				this.taskDefinitionName, this.taskDefinition, this.taskDescription);
 		return new Task(taskDefinitionResource.getName(), this.dataFlowOperations);
 	}
+
+	/**
+	 * @return All tasks defined currently in Data Flow.
+	 */
+	public List<Task> allTasks() {
+		return this.dataFlowOperations.taskOperations().list().getContent().stream()
+				.map(td -> new Task(td.getName(), this.dataFlowOperations))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * @param taskName existing Task name used to retrieve the task.
+	 * @return Task instance identified by the taskName.
+	 */
+	public Optional<Task> findByName(String taskName) {
+		return allTasks().stream()
+				.filter(task -> task.getTaskName().equalsIgnoreCase(taskName))
+				.findFirst();
+	}
+
 }
