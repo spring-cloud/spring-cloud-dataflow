@@ -30,24 +30,18 @@ import org.springframework.util.Assert;
  * For for instance to define a new task task schedule:
  * <pre>
  *     {@code
+ *      TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
  *     	try (Task task = Task.builder(dataFlowOperations).name("myTask").definition("timestamp").create();
- *           TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations.schedulerOperations()).prefix("mySchedule").task(task).create()) {
+ *           TaskSchedule taskSchedule = taskScheduleBuilder.prefix("mySchedule").task(task).create()) {
  *
- *           taskSchedule.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
- *           TaskSchedule retrievedSchedule = schedules.findByScheduleName(taskSchedule.getScheduleName());
+ *           taskSchedule.schedule(Collections.singletonMap("scheduler.cron.expression", "56 20 ? * *"));
+ *
+ *           TaskSchedule retrievedSchedule = taskScheduleBuilder.findByScheduleName(taskSchedule.getScheduleName());
  *           taskSchedule.unschedule();
  *       }
  *     }
  * </pre>
  *
- * <pre>
- *     {@code
- *           taskSchedule.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
- *           TaskSchedule retrievedSchedule = TaskSchedules.of().findByScheduleName(taskSchedule.getScheduleName());
- *           taskSchedule.unschedule();
- *     }
- * </pre>
-
  * @author Christian Tzolov
  */
 public class TaskSchedule implements AutoCloseable {
