@@ -96,6 +96,8 @@
 		<commons-text.version>1.8</commons-text.version>
 		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 		<micrometer.version>1.5.3</micrometer.version>
+		<nimbus-jose.version>8.19</nimbus-jose.version>
+		<nimbus-oidc.version>7.1.1</nimbus-oidc.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
@@ -291,7 +293,16 @@
 				<artifactId>micrometer-registry-prometheus</artifactId>
 				<version>${micrometer.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>${nimbus-jose.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>oauth2-oidc-sdk</artifactId>
+				<version>${nimbus-oidc.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
