@@ -73,7 +73,7 @@ public class TaskBuilder {
 	 * Create new Task instance.
 	 * @return Task instance.
 	 */
-	public Task create() {
+	public Task build() {
 		// Use a TaskDefinitionResource instance to generate a compliant Task name.
 		TaskDefinitionResource taskDefinitionResource = this.dataFlowOperations.taskOperations().create(
 				this.taskDefinitionName, this.taskDefinition, this.taskDescription);

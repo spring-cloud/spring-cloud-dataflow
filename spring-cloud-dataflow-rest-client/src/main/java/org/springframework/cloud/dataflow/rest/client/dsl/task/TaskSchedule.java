@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
  * <pre>
  *     {@code
  *      TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
- *     	try (Task task = Task.builder(dataFlowOperations).name("myTask").definition("timestamp").create();
- *           TaskSchedule taskSchedule = taskScheduleBuilder.prefix("mySchedule").task(task).create()) {
+ *     	try (Task task = Task.builder(dataFlowOperations).name("myTask").definition("timestamp").build();
+ *           TaskSchedule taskSchedule = taskScheduleBuilder.prefix("mySchedule").task(task).build()) {
  *
  *           taskSchedule.schedule(Collections.singletonMap("scheduler.cron.expression", "56 20 ? * *"));
  *
@@ -50,7 +50,7 @@ public class TaskSchedule implements AutoCloseable {
 	private final SchedulerOperations schedulerOperations;
 	private final Task task;
 
-	public TaskSchedule(String prefix, Task task, SchedulerOperations schedulerOperations) {
+	TaskSchedule(String prefix, Task task, SchedulerOperations schedulerOperations) {
 		this.prefix = prefix;
 		this.task = task;
 		this.schedulerOperations = schedulerOperations;
@@ -87,7 +87,7 @@ public class TaskSchedule implements AutoCloseable {
 	 */
 	public boolean isScheduled() {
 		return this.schedulerOperations.list(this.task.getTaskName()).getContent().stream()
-				.anyMatch(sr -> sr.getScheduleName().equals(this.getScheduleName()));
+				.anyMatch(sr -> sr.getScheduleName().equals(this.prefix));
 	}
 
 	/**

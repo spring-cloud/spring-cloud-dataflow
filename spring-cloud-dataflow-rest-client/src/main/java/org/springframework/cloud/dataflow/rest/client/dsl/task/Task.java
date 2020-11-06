@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  *              .name("myComposedTask")
  *              .definition("a: timestamp && b:timestamp")
  *              .description("My Composed Task")
- *              .create();
+ *              .build();
  *     }
  * </pre>
  *
@@ -74,7 +74,7 @@ import org.springframework.util.StringUtils;
  *               .name("myTask")
  *               .definition("timestamp")
  *               .description("Test timestamp task")
- *               .create()) {
+ *               .build()) {
  *
  *                 long launchId1 = task.launch();
  *                 // Do something
@@ -93,7 +93,7 @@ public class Task implements AutoCloseable {
 	private final JobOperations jobOperations;
 	private final DataFlowOperations dataFlowOperations;
 
-	public Task(String taskName, DataFlowOperations dataFlowOperations) {
+	Task(String taskName, DataFlowOperations dataFlowOperations) {
 		this.taskName = taskName;
 		this.dataFlowOperations = dataFlowOperations;
 		this.taskOperations = dataFlowOperations.taskOperations();

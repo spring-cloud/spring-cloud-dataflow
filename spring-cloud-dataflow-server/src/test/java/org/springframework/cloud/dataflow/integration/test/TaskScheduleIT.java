@@ -136,11 +136,11 @@ public class TaskScheduleIT {
 
 		TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
 
-		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").create();
-			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").create();
+		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").build();
+			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").build();
 
-			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).create();
-			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).create()) {
+			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).build();
+			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).build()) {
 
 			taskSchedule1.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
 			taskSchedule2.schedule(Collections.singletonMap(DEFAULT_SCDF_EXPRESSION_KEY, DEFAULT_CRON_EXPRESSION));
@@ -168,11 +168,11 @@ public class TaskScheduleIT {
 
 		TaskScheduleBuilder taskScheduleBuilder = TaskSchedule.builder(dataFlowOperations);
 
-		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").create();
-			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").create();
+		try (Task task1 = Task.builder(dataFlowOperations).name(randomName("task1")).definition("timestamp").build();
+			 Task task2 = Task.builder(dataFlowOperations).name(randomName("task2")).definition("timestamp").build();
 
-			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).create();
-			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).create()) {
+			 TaskSchedule taskSchedule1 = taskScheduleBuilder.prefix(randomName("schedule1")).task(task1).build();
+			 TaskSchedule taskSchedule2 = taskScheduleBuilder.prefix(randomName("schedule2")).task(task2).build()) {
 
 
 			assertThat(taskScheduleBuilder.list().size()).isEqualTo(0);
@@ -203,8 +203,8 @@ public class TaskScheduleIT {
 
 		logger.info("schedule-lifecycle-test");
 
-		try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("timestamp").create();
-			 TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations).prefix(randomName("schedule")).task(task).create()) {
+		try (Task task = Task.builder(dataFlowOperations).name(randomName("task")).definition("timestamp").build();
+			 TaskSchedule taskSchedule = TaskSchedule.builder(dataFlowOperations).prefix(randomName("schedule")).task(task).build()) {
 
 			assertThat(taskSchedule.isScheduled()).isFalse();
 

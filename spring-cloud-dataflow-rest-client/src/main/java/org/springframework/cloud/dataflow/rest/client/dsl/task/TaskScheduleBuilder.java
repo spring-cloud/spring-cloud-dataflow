@@ -51,7 +51,7 @@ public class TaskScheduleBuilder {
 	 * Create new {@link TaskSchedule} instance based on the scheduler name and task.
 	 * @return Returns new {@link TaskSchedule} instance.
 	 */
-	public TaskSchedule create() {
+	public TaskSchedule build() {
 		Assert.notNull(this.task, "The schedule task must be set!");
 		Assert.isTrue(StringUtils.hasText(this.name), "The schedule name must be set!");
 		return new TaskSchedule(this.name, this.task, this.dataFlowOperations.schedulerOperations());

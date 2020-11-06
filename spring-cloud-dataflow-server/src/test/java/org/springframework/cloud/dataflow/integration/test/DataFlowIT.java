@@ -788,7 +788,7 @@ public class DataFlowIT {
 				.name(randomTaskName())
 				.definition("timestamp")
 				.description("Test timestamp task")
-				.create()) {
+				.build()) {
 
 			// task first launch
 			long launchId1 = task.launch();
@@ -821,7 +821,7 @@ public class DataFlowIT {
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test composedTask")
-				.create()) {
+				.build()) {
 
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
@@ -870,7 +870,7 @@ public class DataFlowIT {
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
 				.description("Test multipleComposedTaskhWithArguments")
-				.create()) {
+				.build()) {
 
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
