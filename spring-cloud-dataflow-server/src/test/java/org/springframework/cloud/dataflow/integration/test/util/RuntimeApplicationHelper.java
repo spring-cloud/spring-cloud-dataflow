@@ -171,36 +171,11 @@ public class RuntimeApplicationHelper {
 	}
 
 	/**
-	 * Special installation for SCDF on ATs K8s environments involves ngix ingress server + special watchdog daemon that
-	 * exposes the host names of all Deployed names.
-	 *
-	 * For single instance app the watch dog uses the name convention:
-	 *  - https://[spring.deployment.id].[kubernetesAppHostSuffix] (For example  https://partitioning-test-log-v1.hydra.springapps.io/)
-	 *
-	 * For multiple instances app the watch dog uses the 2 name conventions:
-	 *  - https://[spring.deployment.id].[kubernetesAppHostSuffix] - round robing across all instances (for example  https://partitioning-test-log-v1.hydra.springapps.io/)
-	 *  - https://[pod.name].[kubernetesAppHostSuffix] - to target a particular instance ( for example https://partitioning-test-log-v1-0.hydra.springapps.io/)
-	 *
 	 * @param instanceAttributes runtime attributes of the app instance.
 	 * @return Externally accessible app instance URL
 	 */
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		String appHost = isKubernetesMultipleInstanceApp(instanceAttributes) ? instanceAttributes.get("pod.name")
-				: instanceAttributes.get("spring.deployment.id");
-		String appUrl = String.format("https://%s.%s", appHost, this.kubernetesAppHostSuffix);
-		return appUrl;
-	}
-
-	/**
-	 * Hack that uses the pod.name (e.g. instance id) suffix to determine if this is a single or multiple app instances.
-	 * If uses the pod.name suffix to determine if the app instance belongs to a stateful set or not.
-	 * The K8s deployer uses stateful set for multiple instances apps.
-	 */
-	private boolean isKubernetesMultipleInstanceApp(Map<String, String> instanceAttributes) {
-		String deploymentId = instanceAttributes.get("spring.deployment.id");
-		String instanceId = instanceAttributes.get("pod.name");
-		return instanceId.replace(deploymentId, "").toLowerCase().chars()
-				.filter(ch -> ch >= 'a' && ch <= 'z').distinct().count() == 0;
+		return instanceAttributes.get("url");
 	}
 
 	/**

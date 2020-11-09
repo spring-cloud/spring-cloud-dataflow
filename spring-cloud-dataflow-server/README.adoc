@@ -177,3 +177,75 @@ The `test.docker.compose.paths` property accepts comma separated list of docker 
    -Dtest.docker.compose.dood=true \
    -Dtest.docker.compose.pullOnStartup=false
 ----
+
+## Run Integration Tests against k8s
+
+For this you need a pre-installed Data Flow on GKE or minikube.
+Register the OOTB kafka/docker and task/docker apps and the run:
+
+----
+./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
+    -Dtest.docker.compose.disable.extension=true \
+    -Dtest.docker.compose.dataflowServerUrl=http://your-k8s-scdf-server \
+    -Pfailsafe
+----
+
+* replace `http://your-k8s-scdf-server` with the url of your Data Flow server.
+* the `test.docker.compose.disable.extension=true` property disables the docker-compose fixture.
+* the `test.docker.compose.dataflowServerUrl=` property points to the pre-installed DataFlow REST API.
+
+For the analytic tests you need to pre-install Prometheus according to the installation instructions and forward the prometheus server's 9090 port
+----
+kubectl port-forward prometheus-67896dcc8-7wm4h 9090:9090
+----
+Replace the `prometheus-67896dcc8-7wm4h` with your pod name.
+
+Or use the `test.docker.compose.prometheusUrl` property to set an alternative Prometheus url.
+
+#### Integration Tests with Minikube
+
+The Integration Tests require that the Kubernetes cluster running Data Flow provides a https://kubernetes.io/docs/concepts/services-networking/[Load Balancer] service.
+
+Most cloud providers offer the Load Balancer service by default. For Minikube, you would need to install one yourself.
+The https://metallb.universe.tf/[MetalLB] is a lightweight load balancer implementation for Kubernetes and is one option to provide the `LoadBalancer` service on Minikube.
+
+* Install MetalLB
+----
+kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.8.3/manifests/metallb.yaml
+----
+
+* Create a ConfigMap with the appropriate settings
+
+----
+cat <<EOF >metallbcm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 192.168.99.116/28
+EOF
+----
+
+NOTE: The IP in the addresses section is based on running Minikube via the default VirtualBox driver with default Minikube IP  is `192.168.99.100`.
+For different Minikube configurations, you might need to customize the address.
+
+* Apply the ConfigMap:
+
+----
+kubectl apply -f metallbcm.yaml
+----
+
+At this point MetalLB is setup and ready to hand out IP's to any service of type LoadBalancer, just as things would work in say GKE.
+
+* If a change is made to the ConfigMap and re-applied, bounce the pods in the metallb-system namespace to pick-up the new changes, ie:
+
+----
+kubectl delete pod --all -n metallb-system
+----
