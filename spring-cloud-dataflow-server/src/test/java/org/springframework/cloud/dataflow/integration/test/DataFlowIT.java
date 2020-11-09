@@ -742,9 +742,9 @@ public class DataFlowIT {
 				.put("app.*.management.endpoints.web.exposure.include", "*")
 				.put("app.*.spring.cloud.streamapp.security.enabled", "false");
 
-		// TODO this misterious 80 port set for K8s comes from the ATs and i'm not sure why. But without it partition tests fail.
 		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
 			propertiesBuilder.put("app.*.server.port", "80");
+			propertiesBuilder.put("deployer.*.kubernetes.createLoadBalancer", "true"); // requires metallb
 		}
 
 		return propertiesBuilder.build();
