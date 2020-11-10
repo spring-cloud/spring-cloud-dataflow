@@ -744,7 +744,7 @@ public class DataFlowIT {
 
 		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
 			propertiesBuilder.put("app.*.server.port", "80");
-			propertiesBuilder.put("deployer.*.kubernetes.createLoadBalancer", "true"); // requires metallb
+			propertiesBuilder.put("deployer.*.kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
 		}
 
 		return propertiesBuilder.build();

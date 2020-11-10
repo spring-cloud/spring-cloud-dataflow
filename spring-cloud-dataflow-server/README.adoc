@@ -202,10 +202,12 @@ Replace the `prometheus-67896dcc8-7wm4h` with your pod name.
 
 Or use the `test.docker.compose.prometheusUrl` property to set an alternative Prometheus url.
 
-#### Integration Tests with minikube
+#### Integration Tests with Minikube
 
-Minikube does not come with a load balancer implementation out of the box, which causes issues when one wants to use services exposed as a LoadBalancer.
-MetalLB is a lightweight load balancer implementation for Kubernetes.
+The Integration Tests require that the Kubernetes cluster running Data Flow provides a https://kubernetes.io/docs/concepts/services-networking/[Load Balancer] service.
+
+Most cloud providers offer the Load Balancer service by default. For Minikube, you would need to install one yourself.
+The https://metallb.universe.tf/[MetalLB] is a lightweight load balancer implementation for Kubernetes and is one option to provide the `LoadBalancer` service on Minikube.
 
 * Install MetalLB
 ----
@@ -231,9 +233,8 @@ data:
 EOF
 ----
 
-NOTE: The IP block that is listed in the addresses section is based on my setup. I am running Minikube via the default VirtualBox driver.
-My network adapter 1 is "NAT", adapter 2 is "Host-only". My default Minikube IP is 192.168.99.100.
-Depending on your setup, this may work out of the box, or you may need to customize it as needed.
+NOTE: The IP in the addresses section is based on running Minikube via the default VirtualBox driver with default Minikube IP  is `192.168.99.100`.
+For different Minikube configurations, you might need to customize the address.
 
 * Apply the ConfigMap:
 
