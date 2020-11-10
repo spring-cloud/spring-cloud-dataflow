@@ -34,7 +34,7 @@
 		<spring-statemachine.version>2.2.0.RELEASE</spring-statemachine.version>
 
 		<spring-cloud-dataflow-common.version>2.7.0-RC1</spring-cloud-dataflow-common.version>
-		<java-cfenv-boot.version>2.2.0.RELEASE</java-cfenv-boot.version>
+		<java-cfenv-boot.version>2.2.2.RELEASE</java-cfenv-boot.version>
 		<spring-cloud-services-starter-config-client.version>3.1.3.RELEASE</spring-cloud-services-starter-config-client.version>
 		<spring-cloud-deployer.version>2.5.0-RC1</spring-cloud-deployer.version>
 		<spring-cloud-deployer-local.version>2.5.0-RC1</spring-cloud-deployer-local.version>
