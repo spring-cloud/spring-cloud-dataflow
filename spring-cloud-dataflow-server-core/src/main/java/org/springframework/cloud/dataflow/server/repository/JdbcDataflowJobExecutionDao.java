@@ -94,7 +94,7 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	 * SQL statements for removing Job Instances.
 	 */
 	private static final String  SQL_DELETE_BATCH_JOB_INSTANCE =
-			"DELETE BJI FROM %PREFIX%JOB_INSTANCE BJI " +
+			"DELETE FROM %PREFIX%JOB_INSTANCE BJI " +
 			"WHERE NOT EXISTS ( " +
 			"SELECT JOB_INSTANCE_ID FROM %PREFIX%JOB_EXECUTION BJE WHERE BJI.JOB_INSTANCE_ID = BJE.JOB_INSTANCE_ID)";
 
