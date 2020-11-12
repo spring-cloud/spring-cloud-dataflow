@@ -553,14 +553,14 @@ retrieves the composed task runner upon the first use of composed tasks.
 
 If Maven Central or DockerHub cannot be reached for a given Spring Cloud Data Flow
 deployment, you can specify a new URI from which to retrieve the composed task runner by setting the
-`spring.cloud.dataflow.task.composed.task.runner.uri` property.
+`spring.cloud.dataflow.task.composedtaskrunner.uri` property.
 
 ==== Configuring the Composed Task Runner
 
-The composed task runner application has a `dataflow.server.uri` property that is used for validation and for launching child tasks.
+The composed task runner application has a `dataflow-server-uri` property that is used for validation and for launching child tasks.
 This defaults to `http://localhost:9393`. If you run a distributed Spring Cloud Data Flow server, as you would if you deploy the server on Cloud Foundry or Kubernetes, you need to provide the URI that can be used to access the server.
-You can either provide this by setting the `dataflow.server.uri` property for the composed task runner application when launching a composed task or by setting the `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
-For the latter case, the `dataflow.server.uri` composed task runner application property is automatically set when a composed task is launched.
+You can either provide this by setting the `dataflow-server-uri` property for the composed task runner application when launching a composed task or by setting the `spring.cloud.dataflow.server.uri` property for the Spring Cloud Data Flow server when it is started.
+For the latter case, the `dataflow-server-uri` composed task runner application property is automatically set when a composed task is launched.
 
 ===== Configuration Options
 
@@ -635,7 +635,8 @@ In some cases, it may be preferred that the user's `dataflow-server-access-token
 In this case, set the Spring Cloud Data Flow `spring.cloud.dataflow.task.useUserAccessToken` property to `true`.
 ====
 
-Note that, when using these options as environment variables, convert to uppercase, and replace the hyphens with underscores -- for example: `increment-instance-enabled` becomes `INCREMENT_INSTANCE_ENABLED`.
+To set a property for Composed Task Runner you will need to prefix the property with `app.composed-task-runner.`.
+For example to set the `dataflow-server-uri` property the property will look like `app.composed-task-runner.dataflow-server-uri`.
 
 === The Lifecycle of a Composed Task
 
