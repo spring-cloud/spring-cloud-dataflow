@@ -132,7 +132,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * you can have the test feature that uses the local run SCDF/Skipper/MySQL to deploy and run Stream only test to the
  * remote K8s or CF environments. Note that Tasks can only be run locally!
  *
- * Follow the https://dataflow.spring.io/docs/2.3.0.SNAPSHOT/installation/local/docker-customize/#docker-compose-extensions
+ * Follow the https://dataflow.spring.io/docs/installation/local/docker-customize/#multi-platform-support
  * multi-platform instructions to prepare docker-compose-k8s.yml and docker-compose-cf.yml files.
  *
  * Stream tests on Kubernetes (k8s) platform:
@@ -234,7 +234,7 @@ public class DataFlowIT {
 
 		// Docker app with container image metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
-				"docker:springcloudstream/time-source-kafka:2.1.2.BUILD-SNAPSHOT", null, true);
+				"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
