@@ -1341,16 +1341,16 @@ When a task application is registered (see <<spring-cloud-dataflow-register-task
 
 image::{dataflow-asciidoc}/images/dataflow-task-application-versions.png[Task Application Versions, scaledwidth="50%"]
 
-Versions of an application are managed by registering multiple applications with the same name and coordinates, _except_ the version. For example, if you were to register an application with the following values, you would get one application registered with two versions (2.0.0.RELEASE and 2.1.0.RELEASE):
+Versions of an application are managed by registering multiple applications with the same name and coordinates, _except_ the version. For example, if you were to register an application with the following values, you would get one application registered with two versions (2.1.0.RELEASE and 2.1.1.RELEASE):
 
 * Application 1
 ** Name: `timestamp`
 ** Type: `task`
-** URI: `maven://org.springframework.cloud.task.app:timestamp-task:2.0.0.RELEASE`
+** URI: `maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE`
 * Application 2
 ** Name: `timestamp`
 ** Type: `task`
-** URI: `maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE`
+** URI: `maven://org.springframework.cloud.task.app:timestamp-task:2.1.1.RELEASE`
 
 Besides having multiple versions, Spring Cloud Data Flow needs to know which version to run on the next launch. This is indicated by setting a version to be the default version. Whatever version of a task application is configured as the default version is the one to be run on the next launch request. You can see which version is the default in the UI, as this image shows:
 
