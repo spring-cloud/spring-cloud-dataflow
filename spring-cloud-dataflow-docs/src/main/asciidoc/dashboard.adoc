@@ -280,28 +280,25 @@ On this screen, you can perform the following actions:
 
 On this page, you can view the details of a selected task application, including the list of available options (properties) for that application.
 
-==== Create a Task Definition
-
-The following image shows the list of task applications:
-
-image::{dataflow-asciidoc}/images/dataflow-task-definition-create.png[List of Task Applications, scaledwidth="100%"]
-
-At a minimum, you must provide a name for the new definition.
-You can also specify various properties that are used during the deployment of the application.
-
-NOTE: Each parameter is included only if the Include checkbox is selected.
-
 [[dashboard-task-definition]]
 === Definitions
 
 This page lists the Data Flow task definitions and provides actions to launch or destroy those tasks.
-It also provides a shortcut operation to define one or more tasks with simple textual input, indicated by
-the *Bulk Define Tasks* button.
 
 The following image shows the Definitions page:
 
 .List of Task Definitions
 image::{dataflow-asciidoc}/images/dataflow-task-definitions-list.png[List of Task Definitions, scaledwidth="100%"]
+
+==== Create a Task Definition
+
+The following image shows a task definition composed of the timestamp application as well as the list of task applications that can be used to create a task definiton:
+
+image::{dataflow-asciidoc}/images/dataflow-task-definition-create.png[List of Task Applications, scaledwidth="100%"]
+
+On this page, you can also specify various properties that are used during the deployment of the application.
+Once you are satisfied with the task definition, you can click the *CREATE TASK* button.  A dialog box then asks for a task definition name and description. At a minimum, you must provide a name for the new definition.
+
 
 ==== Creating Composed Task Definitions
 
@@ -326,7 +323,7 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-flo-tab.png[Composed Task Designe
 ==== Launching Tasks
 
 Once the task definition has been created, you can launch the tasks through the dashboard.
-To do so, click the *Definitions* tab and select the task you want to launch by pressing `Launch`.
+To do so, click the *Tasks* tab and select the task you want to launch by pressing `Launch`.
 The following image shows the Task Launch page:
 
 .Task Launch Page
@@ -335,14 +332,14 @@ image::{dataflow-asciidoc}/images/dataflow-task-launch.png[Task Launch, scaledwi
 
 ==== Import/Export Tasks
 
-The *Tasks* tab of the Dashboard includes a new *Utils* page that provides the option to import and export tasks.
+The *Import/Export* page  provides the option to import and export tasks.  This is done by clicking the *Import/Export* option on the left side of page.  From here, click the *Export task(s): Create a JSON file with the selected tasks* option. The `Export Tasks(s)` page appears.
 
 The following image shows the tasks export page:
 
 .Tasks Utils Export page
 image::{dataflow-asciidoc}/images/dataflow-tasks-utils-export.png[Tasks Utils Export, scaledwidth="100%"]
 
-On the Tasks Import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the Tasks Export page.
+Similarly, you can import task definitions. To do so, click the *Import/Export* option on the left side of page. From here, click the *Import task(s): Import tasks from a JSON file* option to show the *Import Tasks* page.  On the *Import Tasks* page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the *Tasks Export* page.
 
 .Tasks Utils Import page
 image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import.png[Tasks Utils Import, scaledwidth="100%"]
@@ -357,9 +354,9 @@ image::{dataflow-asciidoc}/images/dataflow-tasks-utils-import-result.png[Tasks U
 [[dashboard-tasks-executions]]
 === Executions
 
-The *Executions* tab shows the current running and completed task executions. From this page, you can drill down into the *Task Execution* details page. Furthermore, you can relaunch a *Task Execution* or stop a running execution.
+The *Task Executions* tab shows the current running and completed task executions. From this page, you can drill down into the *Task Execution* details page. Furthermore, you can relaunch a *Task Execution* or stop a running execution.
 
-Lastly, you can clean up one or more task executions. This operation removes any associated task or batch job from the underlying persistence store. This operation can only be triggered for _parent_ task executions and cascades down to the child task executions (if there are any).
+Finally, you can clean up one or more task executions. This operation removes any associated task or batch job from the underlying persistence store. This operation can only be triggered for _parent_ task executions and cascades down to the child task executions (if there are any).
 
 The following image shows the *Executions* tab:
 
@@ -369,7 +366,7 @@ image::{dataflow-asciidoc}/images/dataflow-task-executions-list.png[List of Task
 [[dashboard-tasks-execution-detail]]
 === Execution Detail
 
-For each task execution on the *Executions* tab, you can retrieve detailed information about a specific execution by clicking the information icon located to the right of the task execution.
+For each task execution on the *Task Executions* tab, you can retrieve detailed information about a specific execution by clicking the *Execution ID* of the task execution.
 
 image::{dataflow-asciidoc}/images/dataflow-task-execution-detail.png[List of Task Executions, scaledwidth="100%"]
 
@@ -401,7 +398,7 @@ NOTE: Child Spring Cloud Task applications launched via Spring Batch application
 [[dashboard-jobs]]
 == Jobs
 
-The *Jobs* tab of the Dashboard lets you inspect batch jobs.
+The *Job Executions* tab of the Dashboard lets you inspect batch jobs.
 The main section of the screen provides a list of job executions.
 Batch jobs are tasks that each execute one or more batch jobs.
 Each job execution has a reference to the task execution ID (in the Task ID column).
@@ -449,8 +446,6 @@ The following image shows the Step Execution Details page:
 .Step Execution Details
 image::{dataflow-asciidoc}/images/dataflow-step-execution-history.png[Step Execution History, scaledwidth="100%"]
 
-On the top of the page, you can see a progress indicator that shows the respective step, with the option to refresh the indicator.
-A link is provided to view the step execution history.
 
 The Step Execution Details screen provides a complete list of all Step Execution Context key-value pairs.
 
@@ -462,12 +457,9 @@ When that happens, check the server log files for further details.
 
 
 [[dashboard-job-executions-steps-progress]]
-=== Step Execution Progress
+=== Step Execution History
 
-On this screen, you can see a progress bar indicator in regards to the execution
-of the current step. Under the Step Execution History, you can also view various
-metrics associated with the selected step, such as duration, read counts, write
-counts, and others.
+Under *Step Execution History*, you can also view various metrics associated with the selected step, such as duration, read counts, write counts, and others.
 
 endif::omit-tasks-docs[]
 

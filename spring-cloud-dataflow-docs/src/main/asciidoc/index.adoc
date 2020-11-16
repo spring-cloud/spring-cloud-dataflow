@@ -46,20 +46,35 @@ endif::backend-html5[]
 // ======================================================================================
 
 include::preface.adoc[]
+
 include::getting-started.adoc[]
+
 include::applications.adoc[]
+
 include::architecture.adoc[]
+
 include::configuration.adoc[]
+
 include::shell.adoc[]
+
 include::streams.adoc[]
+
 include::streams-developer-guide.adoc[]
+
 include::streams-monitoring.adoc[]
+
 include::tasks.adoc[]
+
 include::task-developer-guide.adoc[]
+
 include::tasks-monitoring.adoc[]
+
 include::dashboard.adoc[]
+
 include::samples.adoc[]
+
 include::api-guide.adoc[]
+
 include::appendix.adoc[]
 
 // ======================================================================================
