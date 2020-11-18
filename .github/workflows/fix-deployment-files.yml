@@ -25,7 +25,7 @@ jobs:
       run: mvn process-resources -P deploymentfiles
 
     - name: Check Deployment Files
-      uses: peter-evans/create-pull-request@v2
+      uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Update k8s deployment files
