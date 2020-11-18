@@ -40,7 +40,7 @@ image::{dataflow-asciidoc}/images/dataflow-dashboard-about.png[The Spring Cloud 
 [[dashboard-apps]]
 == Apps
 
-The *Apps* tab of the dashboard lists all the available applications and provides the controls to register and unregister them (if applicable).
+The *Applications* tab of the dashboard lists all the available applications and provides the controls to register and unregister them (if applicable).
 You can import a number of applications at once by using the Bulk Import Applications action.
 
 The following image shows a typical list of available applications within the dashboard:
@@ -52,7 +52,7 @@ image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of avail
 
 === Bulk Import of Applications
 
-The Bulk Import Applications page provides numerous options for defining and importing a set of applications all at once.
+Applications can be imported in numerious ways which are available on the "Applications" page.
 For bulk import, the application definitions are expected to be expressed in a properties style, as follows:
 
 ====
@@ -72,11 +72,11 @@ processor.transform=maven://org.springframework.cloud.stream.app:transform-proce
 ----
 ====
 
-At the top of the bulk import page, you can specify a URI that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
-Alternatively, by using the *Apps as Properties* textbox , you can directly list each property string. Finally, if the properties are stored in a local file, the *Select Properties File* option opens a local file browser to select the file.
-After setting your definitions through one of these routes, click *Import*.
+In the "Import application coordinates from an HTTP URI location" section, you can specify a URI that points to a properties file stored elsewhere, it should contain properties formatted as shown in the previous example.
+Alternatively, by using the *Apps as Properties* textbox in the "Import application coordinates from a properties file" section , you can directly list each property string. Finally, if the properties are stored in a local file, the *Import a File* option opens a local file browser to select the file.
+After setting your definitions through one of these routes, click *Import Application(s)*.
 
-The following image shows the Bulk Import Applications page:
+The following image shows an example page of one way to bulk import applications:
 
 .Bulk Import Applications
 image::{dataflow-asciidoc}/images/dataflow-bulk-import-applications.png[Bulk Import Applications, scaledwidth="100%"]
