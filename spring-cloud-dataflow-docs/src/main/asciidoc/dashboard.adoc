@@ -52,7 +52,7 @@ image::{dataflow-asciidoc}/images/dataflow-available-apps-list.png[List of avail
 
 === Bulk Import of Applications
 
-Applications can be imported in numerious ways which are available on the "Applications" page.
+Applications can be imported in numerous ways which are available on the "Applications" page.
 For bulk import, the application definitions are expected to be expressed in a properties style, as follows:
 
 ====
