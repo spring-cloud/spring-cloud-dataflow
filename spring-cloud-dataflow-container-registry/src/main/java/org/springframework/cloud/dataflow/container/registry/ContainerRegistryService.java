@@ -140,7 +140,7 @@ public class ContainerRegistryService {
 					this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType())
 							.getAuthorizationHeaders(
 									containerRegistryConfiguration, properties));
-
+			httpHeaders.set(HttpHeaders.ACCEPT, "application/json");
 			UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
 					.scheme(HTTPS_SCHEME)
 					.host(containerRegistryConfiguration.getRegistryHost())
