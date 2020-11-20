@@ -101,15 +101,11 @@ public class ContainerRegistryService {
 	public List<String> getTags(String registryName, String repositoryName) {
 		try {
 			ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations.get(registryName);
-			String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
-			if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
-				throw new ContainerRegistryException("Not supported image manifest media type:" + imageManifestMediaType);
-			}
 			Map<String, String> properties = new HashMap<>();
 			properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, repositoryName);
 			HttpHeaders httpHeaders = new HttpHeaders(this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType()).getAuthorizationHeaders(
 					containerRegistryConfiguration, properties));
-			httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
+			httpHeaders.set(HttpHeaders.ACCEPT, "application/json");
 
 			UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
 					.scheme(HTTPS_SCHEME)
@@ -138,19 +134,12 @@ public class ContainerRegistryService {
 		try {
 			ContainerRegistryConfiguration containerRegistryConfiguration = this.registryConfigurations
 					.get(registryName);
-			String imageManifestMediaType = containerRegistryConfiguration.getManifestMediaType();
-			if (!SUPPORTED_MANIFEST_MEDIA_TYPES.contains(imageManifestMediaType)) {
-				throw new ContainerRegistryException(
-						"Not supported image manifest media type:" + imageManifestMediaType);
-			}
-
 			Map<String, String> properties = new HashMap<>();
 			properties.put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_REPOSITORY_FIELD_KEY, registryName);
 			HttpHeaders httpHeaders = new HttpHeaders(
 					this.registryAuthorizerMap.get(containerRegistryConfiguration.getAuthorizationType())
 							.getAuthorizationHeaders(
 									containerRegistryConfiguration, properties));
-			httpHeaders.set(HttpHeaders.ACCEPT, imageManifestMediaType);
 
 			UriComponents manifestUriComponents = UriComponentsBuilder.newInstance()
 					.scheme(HTTPS_SCHEME)
