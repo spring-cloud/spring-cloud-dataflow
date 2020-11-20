@@ -228,14 +228,14 @@ wide variety of data sources and destinations.
 
 === Import and Export Streams
 
-The *Streams* tab of the Dashboard includes a new *Streams Utils* page that provides the option to import and export streams.
+The *Import/Export* tab of the Dashboard includes a page that provides the option to import and export streams.
 
 The following image shows the streams export page:
 
 .Stream Utils Export page
 image::{dataflow-asciidoc}/images/dataflow-streams-utils-export.png[Stream Utils Export, scaledwidth="100%"]
 
-On the streams import page, you have to import from a valid JSON file. You can either manually draft the file or export the file from the streams export page.
+When importing the streams, you have to import from a valid JSON file. You can either manually draft the file or export the file from the streams export page.
 
 .Stream Utils Import page
 image::{dataflow-asciidoc}/images/dataflow-streams-utils-import.png[Stream Utils Import, scaledwidth="100%"]
