@@ -100,6 +100,8 @@ public class DockerComposeFactory {
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, DEFAULT_STREAM_APPS_URI))
 			.withAdditionalEnvironmentVariable("TASK_APPS_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, DEFAULT_TASK_APPS_URI))
+			.withAdditionalEnvironmentVariable("SCDF_ITS_DOCKERHUB_USER", DockerComposeFactoryProperties.get("SCDF_ITS_DOCKERHUB_USER", ""))
+			.withAdditionalEnvironmentVariable("SCDF_ITS_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("SCDF_ITS_DOCKERHUB_PASSWORD", ""))
 			.build();
 
 	public static Extension startDockerCompose(Path tempFolder) {
