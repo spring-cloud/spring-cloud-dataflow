@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.6.2-SNAPSHOT</version>
+		<version>2.6.2</version>
 		<relativePath />
 	</parent>
 	<licenses>
@@ -55,19 +55,19 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.5.2-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.5.2</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-dataflow-common.version>2.6.2-SNAPSHOT</spring-cloud-dataflow-common.version>
-		<spring-cloud-deployer.version>2.4.2-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.4.2-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-dataflow-common.version>2.6.2</spring-cloud-dataflow-common.version>
+		<spring-cloud-deployer.version>2.4.2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.4.2</spring-cloud-deployer-local.version>
 
 
-		<spring-cloud-deployer-cloudfoundry.version>2.4.3-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.4.3-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.4.3</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.4.3</spring-cloud-deployer-kubernetes.version>
 
 		<kubernetes-client.version>4.10.2</kubernetes-client.version>
 
-		<spring-cloud-skipper.version>2.5.3-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.5.3</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.2.3.RELEASE</spring-cloud-task.version>
 
@@ -78,7 +78,7 @@
 
 		<spring-cloud-services-starter-config-client.version>3.1.3.RELEASE</spring-cloud-services-starter-config-client.version>
 
-		<spring-cloud-common-security-config.version>1.4.2-SNAPSHOT</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.4.2</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 		<commons-io.version>2.4</commons-io.version>
@@ -464,6 +464,14 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</pluginRepository>
+                                <pluginRepository>
+                                        <id>spring-releases</id>
+                                        <name>Spring Releases</name>
+                                        <url>https://repo.spring.io/libs-release-local</url>
+                                        <snapshots>
+                                                <enabled>false</enabled>
+                                        </snapshots>
+                                </pluginRepository>
 			</pluginRepositories>
 		</profile>
 	</profiles>
