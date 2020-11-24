@@ -85,7 +85,7 @@ services:
       - dataflow-server
     command: >
       /bin/sh -c "
-        ./wait-for-it.sh -t 180 dataflow-server:9393;
+        ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
         echo 'Maven Stream apps imported'
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-maven-latest&force=true}';
