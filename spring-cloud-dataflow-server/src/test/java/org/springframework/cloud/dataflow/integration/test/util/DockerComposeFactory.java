@@ -106,8 +106,8 @@ public class DockerComposeFactory {
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)))
 			.withAdditionalEnvironmentVariable("DOCKER_DELETE_CONTAINER_ON_EXIT",
 					"" + DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT, true))
-			.withAdditionalEnvironmentVariable("bamboo.SCDF_ITS_DOCKERHUB_USER", DockerComposeFactoryProperties.get("bamboo.SCDF_ITS_DOCKERHUB_USER", ""))
-			.withAdditionalEnvironmentVariable("bamboo.SCDF_ITS_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("bamboo.SCDF_ITS_DOCKERHUB_PASSWORD", ""))
+			.withAdditionalEnvironmentVariable("SCDF_ITS_DOCKERHUB_USER", DockerComposeFactoryProperties.get("bamboo.SCDF_ITS_DOCKERHUB_USER", ""))
+			.withAdditionalEnvironmentVariable("SCDF_ITS_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("bamboo.SCDF_ITS_DOCKERHUB_PASSWORD", ""))
 			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")
 			.build();
 
