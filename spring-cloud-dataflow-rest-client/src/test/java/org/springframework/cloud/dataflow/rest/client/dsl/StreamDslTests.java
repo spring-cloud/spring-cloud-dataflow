@@ -252,6 +252,30 @@ public class StreamDslTests {
 	}
 
 	@Test
+	public void logs() {
+		String streamLog = "Test stream log";
+		String appLog = "Test app log";
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
+				"time | log", "demo stream");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyString(), anyBoolean()))
+				.thenReturn(ticktockDefinition);
+
+		Stream stream = Stream.builder(client).name("ticktock").description("demo stream")
+				.definition(ticktockDefinition.getDslText()).create()
+				.deploy();
+
+		when(streamOperations.streamExecutionLog(ticktockDefinition.getName())).thenReturn(streamLog);
+		when(streamOperations.streamExecutionLog(ticktockDefinition.getName(), logApplication.getName())).thenReturn(appLog);
+
+		assertThat(stream.logs()).isEqualTo(streamLog);
+		assertThat(stream.logs(new StreamApplication(logApplication.getName()))).isEqualTo(appLog);
+
+		verify(streamOperations, times(1)).streamExecutionLog(stream.getName());
+		verify(streamOperations, times(1)).streamExecutionLog(stream.getName(), logApplication.getName());
+	}
+
+	@Test
 	public void rollback() {
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");

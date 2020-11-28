@@ -88,20 +88,6 @@ public class RuntimeApplicationHelper {
 	}
 
 	/**
-	 * Extract the Logs from the first instance of an application in a stream.
-	 * @param streamName Name of the stream where the application is defined.
-	 * @param appName Name of the applications to retrieve the applicationInstanceLogs for.
-	 * @return Returns the applicationInstanceLogs of the first instance of the specified application.
-	 */
-	public String getFirstInstanceLog(String streamName, String appName) {
-		return this.applicationInstanceLogs(streamName, appName).values().iterator().next();
-	}
-
-	public String getFirstInstanceLog(Stream stream, String appName) {
-		return this.applicationInstanceLogs(stream.getName(), appName).values().iterator().next();
-	}
-
-	/**
 	 *
 	 * @param streamName DataFlow stream for which the log is retrieved.
 	 * @param appName Application inside the stream name for which logs are trieved.
