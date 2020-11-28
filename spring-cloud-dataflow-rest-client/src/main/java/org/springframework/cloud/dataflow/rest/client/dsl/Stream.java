@@ -199,6 +199,25 @@ public class Stream implements AutoCloseable {
 		return resource.getStatus();
 	}
 
+	/**
+	* Gets all the applications' logs for the given stream name
+	* @param streamName stream name
+	* @return the log for said stream
+	*/
+	public String logs(String streamName){
+		return this.client.streamOperations().streamExecutionLog(streamName);
+	}
+
+	/**
+	* Get the logs of a specific application from the stream
+	* @param streamName the stream's name
+	* @param appName application name within stream
+	* @return the log for said application within said stream
+	*/
+	public String logs(String streamName, String appName) {
+        return this.client.streamOperations().streamExecutionLog(streamName, appName);
+    }
+
 	public Map<StreamApplication, Map<String, String>> runtimeApps() {
 
 		StreamStatusResource streamStatus = client.runtimeOperations()

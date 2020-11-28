@@ -161,4 +161,19 @@ public interface StreamOperations {
 	 * @param properties scale deployment properties.
 	 */
 	void scaleApplicationInstances(String streamName, String appName, Integer count, Map<String, String> properties);
+
+	/**
+	 * Retrieves all the applications' logs for the given stream name
+	 * @param streamName name of stream for which to get logs
+	 * @return logs of said stream
+	 */
+	String streamExecutionLog(String streamName);
+
+	/**
+	 * Retrieve the logs of a specific application from the stream
+	 * @param streamName name of stream for which to get logs
+	 * @param appName app name for which to get logs
+	 * @return logs for said application within said stream
+	 */
+	String streamExecutionLog(String streamName, String appName);
 }
