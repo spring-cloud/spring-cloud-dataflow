@@ -35,6 +35,7 @@ services:
       # Override the CTR form maven to docker
       - SPRING_CLOUD_DATAFLOW_TASK_COMPOSED_TASK_RUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=http://dataflow-server:9393
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
@@ -51,6 +52,7 @@ services:
       # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (e.g. the ports used by the stream apps running inside the Skipper container) !
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
