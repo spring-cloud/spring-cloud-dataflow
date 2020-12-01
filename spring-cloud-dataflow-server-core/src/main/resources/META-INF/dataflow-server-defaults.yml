@@ -227,6 +227,9 @@ spring:
             # Task Logs
             - GET /tasks/logs/*                       => hasRole('ROLE_VIEW')
 
+            # Task Ctr
+            - GET    /tasks/ctr/*                     => hasRole('ROLE_VIEW')
+
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_VIEW')

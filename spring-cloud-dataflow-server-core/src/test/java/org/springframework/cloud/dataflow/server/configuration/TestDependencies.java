@@ -89,6 +89,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDefinitionCont
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
+import org.springframework.cloud.dataflow.server.controller.TaskCtrController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
@@ -269,6 +270,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public StreamLogsController streamLogsController(StreamDeployer streamDeployer) {
 		return new StreamLogsController(streamDeployer);
+	}
+
+	@Bean
+	public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
+			TaskConfigurationProperties taskConfigurationProperties,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
+			AppResourceCommon appResourceCommon) {
+		return new TaskCtrController(metadataResolver, taskConfigurationProperties,
+				composedTaskRunnerConfigurationProperties, appResourceCommon);
 	}
 
 	@Bean
