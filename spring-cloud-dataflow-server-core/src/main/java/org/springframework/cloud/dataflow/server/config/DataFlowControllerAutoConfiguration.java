@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamDefinitionCont
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
 import org.springframework.cloud.dataflow.server.controller.StreamValidationController;
+import org.springframework.cloud.dataflow.server.controller.TaskCtrController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
@@ -241,6 +242,12 @@ public class DataFlowControllerAutoConfiguration {
 					streamService,
 					appRegistry,
 					metadataResolver, appRegistryFJPFB, streamDefinitionService, appRegistrationAssemblerProvider);
+		}
+
+		@Bean
+		public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
+				TaskConfigurationProperties taskConfigurationProperties, AppResourceCommon appResourceCommon) {
+			return new TaskCtrController(metadataResolver, taskConfigurationProperties, appResourceCommon);
 		}
 
 		@Bean
