@@ -13,5 +13,5 @@ find_basedir() {
 
 export PROJECTBASEDIR=$(find_basedir)
 
-(cd $PROJECTBASEDIR && exec ./mvnw build-helper:parse-version versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT')
+(cd $PROJECTBASEDIR && ./mvnw build-helper:parse-version versions:set -DprocessAllModules=true -DgenerateBackupPoms=false -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT' && ./mvnw build-helper:parse-version versions:update-property -DgenerateBackupPoms=false -DallowSnapshots=true -Dproperty=spring-cloud-dataflow-build.version -DnewVersion='[${parsedVersion.majorVersion}.${parsedVersion.minorVersion},${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion})')
 
