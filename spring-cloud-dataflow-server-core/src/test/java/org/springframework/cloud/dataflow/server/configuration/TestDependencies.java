@@ -274,8 +274,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
-			TaskConfigurationProperties taskConfigurationProperties, AppResourceCommon appResourceCommon) {
-		return new TaskCtrController(metadataResolver, taskConfigurationProperties, appResourceCommon);
+			TaskConfigurationProperties taskConfigurationProperties,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
+			AppResourceCommon appResourceCommon) {
+		return new TaskCtrController(metadataResolver, taskConfigurationProperties,
+				composedTaskRunnerConfigurationProperties, appResourceCommon);
 	}
 
 	@Bean

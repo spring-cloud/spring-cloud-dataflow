@@ -107,6 +107,7 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
@@ -246,8 +247,11 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
-				TaskConfigurationProperties taskConfigurationProperties, AppResourceCommon appResourceCommon) {
-			return new TaskCtrController(metadataResolver, taskConfigurationProperties, appResourceCommon);
+				TaskConfigurationProperties taskConfigurationProperties,
+				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
+				AppResourceCommon appResourceCommon) {
+			return new TaskCtrController(metadataResolver, taskConfigurationProperties,
+					composedTaskRunnerConfigurationProperties, appResourceCommon);
 		}
 
 		@Bean

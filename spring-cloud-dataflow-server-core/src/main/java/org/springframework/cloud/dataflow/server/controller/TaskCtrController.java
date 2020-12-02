@@ -21,6 +21,7 @@ import java.util.List;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -42,13 +43,16 @@ public class TaskCtrController {
 
 	private final ApplicationConfigurationMetadataResolver metadataResolver;
 	private final TaskConfigurationProperties taskConfigurationProperties;
+	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 	private final AppResourceCommon appResourceCommon;
 
 	public TaskCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
 			TaskConfigurationProperties taskConfigurationProperties,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
 			AppResourceCommon appResourceCommon) {
 		this.metadataResolver = metadataResolver;
 		this.taskConfigurationProperties = taskConfigurationProperties;
+		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 		this.appResourceCommon = appResourceCommon;
 	}
 
@@ -57,7 +61,9 @@ public class TaskCtrController {
 	public List<ConfigurationMetadataProperty> options() {
 		URI ctrUri = null;
 		try {
-			ctrUri = new URI(this.taskConfigurationProperties.getComposedTaskRunnerUri());
+			ctrUri = new URI(composedTaskRunnerConfigurationProperties.getUri() != null
+					? composedTaskRunnerConfigurationProperties.getUri()
+					: this.taskConfigurationProperties.getComposedTaskRunnerUri());
 		} catch (Exception e) {
 			throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 		}
