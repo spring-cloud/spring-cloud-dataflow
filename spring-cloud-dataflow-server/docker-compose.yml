@@ -95,7 +95,7 @@ services:
         echo 'Maven Task apps imported'"
 
   skipper-server:
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.6.0-SNAPSHOT}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.7.0-SNAPSHOT}
     container_name: skipper
     ports:
       - "7577:7577"
