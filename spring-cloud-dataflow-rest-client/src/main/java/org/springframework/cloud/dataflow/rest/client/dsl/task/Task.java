@@ -112,7 +112,7 @@ public class Task implements AutoCloseable {
 	public static TaskBuilder builder(DataFlowOperations dataFlowOperations) {
 		return new TaskBuilder(dataFlowOperations);
 	}
-	
+
 	/**
 	 * Launch a task without properties or arguments.
 	 * @return long containing the TaskExecutionId
@@ -140,7 +140,7 @@ public class Task implements AutoCloseable {
 		if (properties == null) {
 			throw new IllegalArgumentException("Task properties can't be null!");
 		}
-		return this.taskOperations.launch(this.taskName, properties, arguments, null);
+		return this.taskOperations.launch(this.taskName, properties, arguments);
 	}
 
 	/**

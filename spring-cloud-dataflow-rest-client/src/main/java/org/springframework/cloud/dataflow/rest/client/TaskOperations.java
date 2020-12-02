@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,10 +66,9 @@ public interface TaskOperations {
 	 * @param name the name of the task
 	 * @param properties the deployment properties
 	 * @param arguments the command line arguments
-	 * @param alternateComposedTaskRunnerApp  app to use when running composed tasks instead of default
 	 * @return long containing the TaskExecutionId
 	 */
-	long launch(String name, Map<String, String> properties, List<String> arguments, String alternateComposedTaskRunnerApp);
+	long launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
