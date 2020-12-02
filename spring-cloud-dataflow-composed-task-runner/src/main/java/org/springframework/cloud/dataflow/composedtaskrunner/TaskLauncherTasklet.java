@@ -149,7 +149,7 @@ public class TaskLauncherTasklet implements Tasklet {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
 			this.executionId = this.taskOperations.launch(tmpTaskName,
-					this.properties, args, null);
+					this.properties, args);
 
 			stepExecutionContext.put("task-execution-id", executionId);
 			stepExecutionContext.put("task-arguments", args);

@@ -108,8 +108,6 @@ public class TaskCommands implements CommandMarker {
 
 	private static final String VALIDATE = "task validate";
 
-	private static final String CTR_APP_NAME = "composedTaskRunnerName";
-
 	@Autowired
 	protected UserInput userInput;
 
@@ -225,10 +223,7 @@ public class TaskCommands implements CommandMarker {
 			@CliOption(key = {
 					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch") String arguments,
 			@CliOption(key = {
-					PLATFORM_OPTION }, help = "the platform name to use for this launch") String platformName,
-			@CliOption(key = {
-					CTR_APP_NAME }, help = "Composed Task Runner app to use for this launch when not using default") String composedTaskRunnerApp)
-
+					PLATFORM_OPTION }, help = "the platform name to use for this launch") String platformName)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
@@ -242,7 +237,7 @@ public class TaskCommands implements CommandMarker {
 		if (StringUtils.hasText(platformName)) {
 			propertiesToUse.put("spring.cloud.dataflow.task.platformName", platformName);
 		}
-		long taskExecutionId = taskOperations().launch(name, propertiesToUse, argumentsToUse, composedTaskRunnerApp);
+		long taskExecutionId = taskOperations().launch(name, propertiesToUse, argumentsToUse);
 		return String.format("Launched task '%s' with execution id %d", name, taskExecutionId);
 	}
 
