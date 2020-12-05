@@ -154,8 +154,8 @@ public class ComposedRunnerVisitorTests {
 	@Test
 	public void nestedSplitThreadPoolSize() {
 		Throwable exception = assertThrows(BeanCreationException.class, () ->
-				setupContextForGraph("<<AAA || BBB > && CCC || <DDD || EEE> && FFF>", "--splitThreadCorePoolSize=1"));
-		assertThat(exception.getCause().getCause().getMessage()).isEqualTo("Split thread core pool size 1 should be equal or greater than the " +
+				setupContextForGraph("<<AAA || BBB > && CCC || <DDD || EEE> && FFF>", "--splitThreadCorePoolSize=2"));
+		assertThat(exception.getCause().getCause().getMessage()).isEqualTo("Split thread core pool size 2 should be equal or greater than the " +
 				"depth of split flows 3. Try setting the composed task property " +
 				"`splitThreadCorePoolSize`");
 	}
