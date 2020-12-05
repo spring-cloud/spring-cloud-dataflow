@@ -81,9 +81,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 
 	private boolean incrementInstanceEnabled;
 
-	private int splitFlows = 1;
-
-	private boolean hasNestedSplit = false;
+	private int nestedSplits;
 
 	public ComposedRunnerJobFactory(ComposedTaskProperties properties) {
 		this.composedTaskProperties = properties;
@@ -147,8 +145,15 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 				while (!this.visitorDeque.isEmpty() && !this.visitorDeque.peek().equals(splitNode)) {
 					splitNodeDeque.push(this.visitorDeque.pop());
 				}
+				this.nestedSplits = 0;
 				splitNodeDeque.push(this.visitorDeque.pop());
 				handleSplit(splitNodeDeque, splitNode);
+
+				int threadCorePoolSize = this.composedTaskProperties.getSplitThreadCorePoolSize();
+				Assert.isTrue(threadCorePoolSize >= this.nestedSplits,
+						"Split thread core pool size " + threadCorePoolSize + " should be equal or greater "
+								+ "than the depth of split flows " + this.nestedSplits + "."
+								+ " Try setting the composed task property `splitThreadCorePoolSize`");
 			}
 			//When start marker of a DSL flow is found, process it.
 			else if (this.visitorDeque.peek() instanceof FlowNode) {
@@ -177,6 +182,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 	}
 
 	private Flow processSplitNode(Deque<LabelledTaskNode> visitorDeque, SplitNode splitNode) {
+		this.nestedSplits++;
 		Deque<Flow> flows = new LinkedList<>();
 		//For each node in the split process it as a DSL flow.
 		for (LabelledTaskNode taskNode : splitNode.getSeries()) {
@@ -191,14 +197,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 				.build();
 		FlowBuilder<Flow> taskAppFlowBuilder =
 				new FlowBuilder<>("Flow" + UUID.randomUUID().toString());
-		if (this.hasNestedSplit) {
-			this.splitFlows = flows.size();
-			int threadCorePoolSize = this.composedTaskProperties.getSplitThreadCorePoolSize();
-			Assert.isTrue(threadCorePoolSize >= this.splitFlows,
-					"Split thread core pool size " + threadCorePoolSize + " should be equal or greater "
-							+ "than the depth of split flows " + (this.splitFlows +1) + "."
-							+ " Try setting the composed task property `splitThreadCorePoolSize`");
-		}
+
 		return taskAppFlowBuilder.start(nestedSplitFlow).end();
 	}
 
@@ -224,7 +223,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 		ComposedRunnerVisitor splitElementVisitor = new ComposedRunnerVisitor();
 		taskParser.parse().accept(splitElementVisitor);
 
-		Deque splitElementDeque = splitElementVisitor.getFlow();
+		Deque<LabelledTaskNode> splitElementDeque = splitElementVisitor.getFlow();
 		Deque<Flow> elementFlowDeque = new LinkedList<>();
 
 		while (!splitElementDeque.isEmpty()) {
@@ -246,8 +245,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 				splitElementDeque.pop();
 			}
 			else if (splitElementDeque.peek() instanceof SplitNode) {
-				this.hasNestedSplit = true;
-				Deque splitNodeDeque = new LinkedList<>();
+				Deque<LabelledTaskNode> splitNodeDeque = new LinkedList<>();
 				SplitNode splitNode = (SplitNode) splitElementDeque.pop();
 				splitNodeDeque.push(splitNode);
 				while (!splitElementDeque.isEmpty() && !splitElementDeque.peek().equals(splitNode)) {

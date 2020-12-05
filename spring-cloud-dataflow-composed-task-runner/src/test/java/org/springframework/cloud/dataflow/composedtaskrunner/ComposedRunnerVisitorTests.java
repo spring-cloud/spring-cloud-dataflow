@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -124,9 +126,10 @@ public class ComposedRunnerVisitorTests {
 		assertEquals("CCC_0", stepExecution.getStepName());
 	}
 
-	@Test
-	public void splitTest() {
-		setupContextForGraph("<AAA||BBB||CCC>");
+	@ParameterizedTest
+	@ValueSource(ints = {1, 2, 3})
+	public void splitTest(int threadCorePoolSize) {
+		setupContextForGraph("<AAA||BBB||CCC>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
 		assertEquals(3, stepExecutions.size());
@@ -135,9 +138,10 @@ public class ComposedRunnerVisitorTests {
 		assertTrue(stepNames.contains("CCC_0"));
 	}
 
-	@Test
-	public void nestedSplit() {
-		setupContextForGraph("<<AAA || BBB > && CCC || DDD>", "--splitThreadCorePoolSize=5");
+	@ParameterizedTest
+	@ValueSource(ints = {2, 5})
+	public void nestedSplit(int threadCorePoolSize) {
+		setupContextForGraph("<<AAA || BBB > && CCC || DDD>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
 		assertEquals(4, stepExecutions.size());
@@ -147,14 +151,29 @@ public class ComposedRunnerVisitorTests {
 		assertTrue(stepNames.contains("DDD_0"));
 	}
 
-	// @Test re-add later
+	@Test
 	public void nestedSplitThreadPoolSize() {
 		Throwable exception = assertThrows(BeanCreationException.class, () ->
-				setupContextForGraph("<<AAA || BBB > && CCC || <DDD || EEE> && FFF>", "--splitThreadCorePoolSize=1"));
-		assertThat(exception.getCause().getCause().getMessage()).isEqualTo("Split thread core pool size 1 should be equal or greater than the " +
+				setupContextForGraph("<<AAA || BBB > && CCC || <DDD || EEE> && FFF>", "--splitThreadCorePoolSize=2"));
+		assertThat(exception.getCause().getCause().getMessage()).isEqualTo("Split thread core pool size 2 should be equal or greater than the " +
 				"depth of split flows 3. Try setting the composed task property " +
 				"`splitThreadCorePoolSize`");
 	}
+	
+	@Test
+	public void sequentialNestedSplitThreadPoolSize() {
+		setupContextForGraph("<<AAA || BBB> || <CCC || DDD>> && <EEE || FFF>", "--splitThreadCorePoolSize=3");
+		Collection<StepExecution> stepExecutions = getStepExecutions();
+		Set<String> stepNames = getStepNames(stepExecutions);
+		assertEquals(6, stepExecutions.size());
+		assertTrue(stepNames.contains("AAA_0"));
+		assertTrue(stepNames.contains("BBB_0"));
+		assertTrue(stepNames.contains("CCC_0"));
+		assertTrue(stepNames.contains("DDD_0"));
+		assertTrue(stepNames.contains("EEE_0"));
+		assertTrue(stepNames.contains("FFF_0"));
+	}
+	
 
 	@Test
 	public void twoSplitTest() {
