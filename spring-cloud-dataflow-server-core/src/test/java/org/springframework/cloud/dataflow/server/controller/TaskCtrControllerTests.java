@@ -40,10 +40,14 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Tests for TaskCtrController
+ *
+ * @author Janne Valkealahti
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -71,7 +75,6 @@ public class TaskCtrControllerTests {
 	@Test
 	public void testOptions() throws Exception {
 		mockMvc.perform(get("/tasks/ctr/options").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.[?(@.id == 'oauth2-client-credentials-scopes')].name", hasItems("oauth2-client-credentials-scopes")));
 	}

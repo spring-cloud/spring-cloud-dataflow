@@ -246,15 +246,6 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
-				TaskConfigurationProperties taskConfigurationProperties,
-				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
-				AppResourceCommon appResourceCommon) {
-			return new TaskCtrController(metadataResolver, taskConfigurationProperties,
-					composedTaskRunnerConfigurationProperties, appResourceCommon);
-		}
-
-		@Bean
 		@ConditionalOnMissingBean
 		public AppRegistrationAssemblerProvider appRegistryAssemblerProvider() {
 			return new DefaultAppRegistrationAssemblerProvider();
@@ -343,6 +334,15 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public LauncherService launcherService(LauncherRepository launcherRepository) {
 			return new DefaultLauncherService(launcherRepository);
+		}
+
+		@Bean
+		public TaskCtrController tasksCtrController(ApplicationConfigurationMetadataResolver metadataResolver,
+				TaskConfigurationProperties taskConfigurationProperties,
+				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
+				AppResourceCommon appResourceCommon) {
+			return new TaskCtrController(metadataResolver, taskConfigurationProperties,
+					composedTaskRunnerConfigurationProperties, appResourceCommon);
 		}
 	}
 
