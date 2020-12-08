@@ -22,8 +22,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -52,7 +55,8 @@ public abstract class AbstractSchedulerPerPlatformTest {
 
 	@Configuration
 	@EnableAutoConfiguration(exclude = { LocalDataFlowServerAutoConfiguration.class,
-			CloudFoundryDeployerAutoConfiguration.class })
+			CloudFoundryDeployerAutoConfiguration.class, SecurityAutoConfiguration.class,
+			SecurityFilterAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 	public static class AutoConfigurationApplication {
 
 		@Configuration

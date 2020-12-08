@@ -211,7 +211,7 @@ public class RuntimeAppsControllerTests {
 	@Test
 	public void testFindNonExistentAppInstance2() throws Exception {
 		mockMvc.perform(
-				get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0.").accept(MediaType.APPLICATION_JSON))
+				get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.instanceId", is("ticktock4.log-v1-0")))

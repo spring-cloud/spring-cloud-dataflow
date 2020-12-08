@@ -10,6 +10,9 @@ spring:
           uri: http://localhost:${fakeMetricsCollector.port}
   autoconfigure:
     exclude: >-
+      org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,
+      org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration,
+      org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,
       org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,
       org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration,
       org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration,

@@ -22,8 +22,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
@@ -277,7 +280,9 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 
 	@Configuration
 	@Import(TestConfiguration.class)
-	@EnableAutoConfiguration(exclude = { SessionAutoConfiguration.class, FlywayAutoConfiguration.class })
+	@EnableAutoConfiguration(exclude = { SessionAutoConfiguration.class, FlywayAutoConfiguration.class,
+			SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class,
+			ManagementWebSecurityAutoConfiguration.class })
 	@EnableDataFlowServer
 	public static class EmptyDefaultApp {
 	}

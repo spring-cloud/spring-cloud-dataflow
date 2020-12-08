@@ -53,7 +53,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 				LocalDeployerAutoConfiguration.class,
 				CloudFoundryDeployerAutoConfiguration.class,
 				KubernetesAutoConfiguration.class,
-				org.springframework.cloud.kubernetes.KubernetesAutoConfiguration.class,
 				DataSourceAutoConfiguration.class,
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JmxAutoConfiguration.class,
