@@ -15,19 +15,22 @@
  */
 package org.springframework.cloud.skipper.server.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
-import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurerAdapter;
+import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 
 /**
  * @author Mark Pollack
+ * @author Janne Valkealahti
  */
 @Configuration
-public class SpringDataRestConfiguration extends RepositoryRestConfigurerAdapter {
+public class SpringDataRestConfiguration {
 
-	@Override
-	public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config) {
-		config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+	@Bean
+	public RepositoryRestConfigurer skipperRepositoryRestConfigurer() {
+		return RepositoryRestConfigurer.withConfig(c -> {
+			c.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
+		});
 	}
 }

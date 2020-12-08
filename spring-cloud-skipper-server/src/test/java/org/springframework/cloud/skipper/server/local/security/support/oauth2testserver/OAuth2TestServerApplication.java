@@ -62,7 +62,6 @@ import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaReposi
 				LocalDeployerAutoConfiguration.class,
 				CloudFoundryDeployerAutoConfiguration.class,
 				KubernetesAutoConfiguration.class,
-				org.springframework.cloud.kubernetes.KubernetesAutoConfiguration.class,
 				DataSourceAutoConfiguration.class,
 				DataSourceTransactionManagerAutoConfiguration.class,
 				JmxAutoConfiguration.class,
