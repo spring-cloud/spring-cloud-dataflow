@@ -33,7 +33,8 @@ public enum AuditActionType {
 	DEPLOY(300L, "Deploy", "Deploy an Entity"),
 	ROLLBACK(400L, "Rollback", "Rollback an Entity"),
 	UNDEPLOY(500L, "Undeploy", "Undeploy an Entity"),
-	UPDATE(600L, "Update", "Update an Entity");
+	UPDATE(600L, "Update", "Update an Entity"),
+	LOGIN_SUCCESS(700L, "Login", "Successful login");
 
 	private Long id;
 
