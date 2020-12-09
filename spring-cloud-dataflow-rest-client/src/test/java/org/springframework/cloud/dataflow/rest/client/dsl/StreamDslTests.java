@@ -268,8 +268,8 @@ public class StreamDslTests {
 		when(streamOperations.streamExecutionLog(ticktockDefinition.getName())).thenReturn(streamLog);
 		when(streamOperations.streamExecutionLog(ticktockDefinition.getName(), logApplication.getName())).thenReturn(appLog);
 
-		assertThat(stream.logs(stream.getName())).isEqualTo(streamLog);
-		assertThat(stream.logs(stream.getName(), logApplication.getName())).isEqualTo(appLog);
+		assertThat(stream.logs()).isEqualTo(streamLog);
+		assertThat(stream.logs(new StreamApplication(logApplication.getName()))).isEqualTo(appLog);
 
 		verify(streamOperations, times(1)).streamExecutionLog(stream.getName());
 		verify(streamOperations, times(1)).streamExecutionLog(stream.getName(), logApplication.getName());

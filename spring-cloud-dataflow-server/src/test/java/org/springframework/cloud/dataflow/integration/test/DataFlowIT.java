@@ -398,6 +398,9 @@ public class DataFlowIT {
 			assertThat(stream.history().size()).isEqualTo(1L);
 			Awaitility.await().until(() -> stream.history().get(1).equals(DEPLOYED));
 
+			assertThat(stream.logs()).contains("TICKTOCK - TIMESTAMP:");
+			assertThat(stream.logs(new StreamApplication("lifecycle-test.log-v1"))).contains("TICKTOCK - TIMESTAMP:");
+
 			// UPDATE
 			logger.info("stream-lifecycle-test: UPDATE");
 			stream.update(new DeploymentPropertiesBuilder()

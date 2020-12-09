@@ -59,7 +59,9 @@ public class StreamTemplate implements StreamOperations {
 
 	private static final String VALIDATION_REL = "streams/validation";
 
-	private static final String LOGS_REL = "streams/logs/{streamName}/{appName}";
+	private static final String LOGS_REL = "streams/logs/{streamName}";
+
+	private static final String LOGS_APP_REL = "streams/logs/{streamName}/{appName}";
 
 
 	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
@@ -78,6 +80,8 @@ public class StreamTemplate implements StreamOperations {
 
 	private final Link logsLink;
 
+	private final Link logsAppLink;
+
 	private final String dataFlowServerVersion;
 
 	StreamTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
@@ -87,6 +91,7 @@ public class StreamTemplate implements StreamOperations {
 		Assert.notNull(resources.getLink(DEPLOYMENTS_REL), "Deployments relation is required");
 		Assert.notNull(resources.getLink(DEPLOYMENT_REL), "Deployment relation is required");
 		Assert.notNull(resources.getLink(LOGS_REL), "Logs relation is required");
+		Assert.notNull(resources.getLink(LOGS_APP_REL), "Logs app relation is required");
 
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
 				VersionUtils.getThreePartVersion(dataFlowServerVersion),
@@ -102,6 +107,7 @@ public class StreamTemplate implements StreamOperations {
 		this.deploymentLink = resources.getLink(DEPLOYMENT_REL).get();
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.logsLink = resources.getLink(LOGS_REL).get();
+		this.logsAppLink = resources.getLink(LOGS_APP_REL).get();
 
 	}
 
@@ -164,12 +170,12 @@ public class StreamTemplate implements StreamOperations {
 
 	@Override
 	public String streamExecutionLog(String streamName) {
-		return restTemplate.getForObject(logsLink.expand(streamName, null).getHref(), String.class);
+		return restTemplate.getForObject(logsLink.expand(streamName).getHref(), String.class);
 	}
 
 	@Override
 	public String streamExecutionLog(String streamName, String appName) {
-		return restTemplate.getForObject(logsLink.expand(streamName,appName).getHref(), String.class);
+		return restTemplate.getForObject(logsAppLink.expand(streamName,appName).getHref(), String.class);
 	}
 
 	@Override
