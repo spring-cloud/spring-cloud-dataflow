@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.single;
+package org.springframework.cloud.dataflow.server.support;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationListener;
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent;
-import org.springframework.stereotype.Component;
 
 /**
- * Event Listener class to log Login audit events.
+ * Event Listener class to log Login audit events .
  *
  * @author Deepak Gunasekaran
  * 
  */
-@Component
-public class Oauth2LoginEventListener {
+public class AuthenticationSuccessEventListener implements ApplicationListener<InteractiveAuthenticationSuccessEvent> {
 
-	@Autowired
 	private AuditRecordService auditRecordService;
 
-	@EventListener
-	public void handleOAuth2AuthenticationSuccessEvent(
-			InteractiveAuthenticationSuccessEvent authenticationSuccessEvent) {
+	public AuthenticationSuccessEventListener(AuditRecordService auditRecordService) {
+		this.auditRecordService = auditRecordService;
+	}
+
+	@Override
+	public void onApplicationEvent(InteractiveAuthenticationSuccessEvent event) {
 		this.auditRecordService.populateAndSaveAuditRecord(AuditOperationType.LOGIN, AuditActionType.LOGIN_SUCCESS,
 				"Login",
 				"Successful login", null);
