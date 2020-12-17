@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
@@ -37,14 +36,16 @@ import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -69,10 +70,10 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 	private Job job;
 
 	@Autowired
-	private TaskOperations taskOperations;
+	private ComposedTaskProperties composedTaskProperties;
 
 	@Autowired
-	private ComposedTaskProperties composedTaskProperties;
+	ApplicationContext context;
 
 	protected static final String COMPOSED_TASK_PROPS = "app.ComposedTest-AAA.format=yyyy, "
 			+ "app.ComposedTest-BBB.format=mm, "
@@ -83,6 +84,10 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 	public void testComposedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
+		TaskletStep ctrStep = context.getBean("ComposedTest-AAA_0", TaskletStep.class);
+		TaskOperations taskOperations = mock(TaskOperations.class);
+		ReflectionTestUtils.setField(ctrStep.getTasklet(), "taskOperations", taskOperations);
+
 		job.execute(jobExecution);
 
 		Map<String, String> props = new HashMap<>(1);
@@ -95,6 +100,6 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		List<String> args = new ArrayList<>(1);
 		args.add("--baz=boo --foo=bar");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
-		verify(this.taskOperations).launch("ComposedTest-AAA", props, args);
+		verify(taskOperations).launch("ComposedTest-AAA", props, args);
 	}
 }

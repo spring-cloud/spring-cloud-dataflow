@@ -29,9 +29,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
-import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.task.configuration.TaskConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -66,13 +68,16 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	private StepExecutionListener composedTaskStepExecutionListener;
 
 	@Autowired
-	private TaskOperations taskOperations;
-
-	@Autowired
 	private TaskConfigurer taskConfigurer;
 
 	@Autowired
 	private TaskProperties taskProperties;
+
+	@Autowired(required = false)
+	private ClientRegistrationRepository clientRegistrations;
+
+	@Autowired(required = false)
+	private OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient;
 
 	public ComposedTaskRunnerStepFactory(
 			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId) {
@@ -99,8 +104,9 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
 	@Override
 	public Step getObject() throws Exception {
+
 		TaskLauncherTasklet taskLauncherTasklet = new TaskLauncherTasklet(
-				this.taskOperations, taskConfigurer.getTaskExplorer(),
+				this.clientRegistrations, this.clientCredentialsTokenResponseClient, taskConfigurer.getTaskExplorer(),
 				this.composedTaskPropertiesFromEnv, this.taskName, taskProperties);
 
 		List<String> argumentsFromAppProperties = this.composedTaskProperties.getComposedTaskAppArguments().entrySet().stream()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
-
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,11 +61,13 @@ import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 
@@ -280,6 +281,43 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a null exit code.");
 	}
 
+	@Test
+	public void testTaskOperationsConfiguredWithMissingPassword() {
+		try {
+			final ComposedTaskProperties composedTaskProperties = new ComposedTaskProperties();
+			composedTaskProperties.setDataflowServerUsername("foo");
+
+			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
+					this.taskExplorer, composedTaskProperties,
+					TASK_NAME, new TaskProperties());
+			taskLauncherTasklet.taskOperations();
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("A username may be specified only together with a password", e.getMessage());
+			return;
+		}
+		fail("Expected an IllegalArgumentException to be thrown");
+	}
+
+
+	@Test
+	public void testTaskOperationsConfiguredWithMissingUsername() {
+		try {
+			final ComposedTaskProperties composedTaskProperties = new ComposedTaskProperties();
+			composedTaskProperties.setDataflowServerPassword("bar");
+
+			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
+					this.taskExplorer, composedTaskProperties,
+					TASK_NAME, new TaskProperties());
+			taskLauncherTasklet.taskOperations();
+		}
+		catch (IllegalArgumentException e) {
+			assertEquals("A password may be specified only together with a username", e.getMessage());
+			return;
+		}
+		fail("Expected an IllegalArgumentException to be thrown");
+	}
+
 	private void createCompleteTaskExecution(int exitCode) {
 		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
 		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
@@ -297,9 +335,11 @@ public class TaskLauncherTaskletTests {
 	}
 
 	private TaskLauncherTasklet getTaskExecutionTasklet(TaskProperties taskProperties) {
-		return new TaskLauncherTasklet(this.taskOperations,
+		TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 				this.taskExplorer, this.composedTaskProperties,
 				TASK_NAME, taskProperties);
+		ReflectionTestUtils.setField(taskLauncherTasklet, "taskOperations", this.taskOperations);
+		return taskLauncherTasklet;
 	}
 
 	private ChunkContext chunkContext ()
