@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 
 /**
  * Accepts a composed task DSL via the command line args and executes the
  * tasks based on the DSL.
  */
-@SpringBootApplication
+@SpringBootApplication (exclude = {DataFlowClientAutoConfiguration.class})
 public class ComposedTaskRunner {
 
 	public static void main(String[] args) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,8 @@ import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.Infl
 import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusMetricsExportAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.wavefront.WavefrontMetricsExportAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Glenn Renfro
@@ -37,10 +33,5 @@ import static org.mockito.Mockito.mock;
 		WavefrontMetricsExportAutoConfiguration.class, PrometheusMetricsExportAutoConfiguration.class,
 		PrometheusRSocketClientAutoConfiguration.class, InfluxMetricsExportAutoConfiguration.class })
 public class DataFlowTestConfiguration {
-
-	@Bean
-	public TaskOperations taskOperations() {
-		return mock(TaskOperations.class);
-	}
 
 }

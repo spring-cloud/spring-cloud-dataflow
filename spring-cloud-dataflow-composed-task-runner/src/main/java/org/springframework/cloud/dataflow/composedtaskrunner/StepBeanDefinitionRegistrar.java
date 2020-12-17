@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.codehaus.plexus.util.cli.CommandLineUtils;
@@ -28,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -198,16 +201,22 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 
 	private ComposedTaskProperties composedTaskProperties() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		String dataFlowUriString = this.env.getProperty("dataflow-server-uri");
-		String maxWaitTime = this.env.getProperty("max-wait-time");
+		Iterable<ConfigurationPropertySource> propertySources = ConfigurationPropertySources.get(this.env);
+		String dataFlowUriString = getPropertyValue("dataflow-server-uri");
+		String maxWaitTime = getPropertyValue("max-wait-time");
 		String intervalTimeBetweenChecks =
-				this.env.getProperty("interval-time-between-checks");
-		properties.setGraph(this.env.getProperty("graph"));
+				getPropertyValue("interval-time-between-checks");
+		properties.setGraph(getPropertyValue("graph"));
 		properties.setComposedTaskArguments(
-				this.env.getProperty("composed-task-arguments"));
-		properties.setPlatformName(this.env.getProperty("platform-name"));
-		properties.setComposedTaskProperties(this.env.getProperty("composed-task-properties"));
-
+				getPropertyValue("composed-task-arguments"));
+		properties.setPlatformName(getPropertyValue("platform-name"));
+		properties.setComposedTaskProperties(getPropertyValue("composed-task-properties"));
+		properties.setDataflowServerAccessToken(getPropertyValue("dataflow-server-access-token"));
+		properties.setDataflowServerPassword(getPropertyValue("dataflow-server-password"));
+		properties.setDataflowServerUsername(getPropertyValue("dataflow-server-username"));
+		properties.setOauth2ClientCredentialsClientId(getPropertyValue("oauth2-client-credentials-client-id"));
+		properties.setOauth2ClientCredentialsClientSecret(getPropertyValue("oauth2-client-credential-client-secret"));
+		properties.setOauth2ClientCredentialsScopes(StringUtils.commaDelimitedListToSet(getPropertyValue("oauth2-client-credentials-scopes")));
 		if (maxWaitTime != null) {
 			properties.setMaxWaitTime(Integer.valueOf(maxWaitTime));
 		}
@@ -236,6 +245,20 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		return collector.getTaskApps();
 	}
 
+	private String getPropertyValue(String key) {
+		RelaxedNames relaxedNames = new RelaxedNames(key);
+		String result = null;
+		Iterator<String> iter = relaxedNames.iterator();
+		while(iter.hasNext()) {
+			String relaxedName = iter.next();
+			if (this.env.containsProperty(relaxedName)) {
+				result = this.env.getProperty(relaxedName);
+				break;
+			}
+		}
+
+		return result;
+	}
 	/**
 	 * Simple visitor that discovers all the tasks in use in the composed
 	 * task definition.
