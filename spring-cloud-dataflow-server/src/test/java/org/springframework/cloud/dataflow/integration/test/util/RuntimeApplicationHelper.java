@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
-import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.util.Assert;
@@ -85,20 +84,6 @@ public class RuntimeApplicationHelper {
 			}
 		}
 		return appInstanceAttributes;
-	}
-
-	/**
-	 * Extract the Logs from the first instance of an application in a stream.
-	 * @param streamName Name of the stream where the application is defined.
-	 * @param appName Name of the applications to retrieve the applicationInstanceLogs for.
-	 * @return Returns the applicationInstanceLogs of the first instance of the specified application.
-	 */
-	public String getFirstInstanceLog(String streamName, String appName) {
-		return this.applicationInstanceLogs(streamName, appName).values().iterator().next();
-	}
-
-	public String getFirstInstanceLog(Stream stream, String appName) {
-		return this.applicationInstanceLogs(stream.getName(), appName).values().iterator().next();
 	}
 
 	/**

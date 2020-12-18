@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.rest.client.dsl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,12 +27,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
+import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
+import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.PagedModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.anyBoolean;
@@ -58,6 +66,9 @@ public class StreamDslTests {
 	@Mock
 	private StreamOperations streamOperations;
 
+	@Mock
+	private RuntimeOperations runtimeOperations;
+
 	private StreamApplication timeApplication = new StreamApplication("time");
 
 	private StreamApplication filterApplication = new StreamApplication("filter");
@@ -68,6 +79,7 @@ public class StreamDslTests {
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		when(client.streamOperations()).thenReturn(this.streamOperations);
+		when(client.runtimeOperations()).thenReturn(this.runtimeOperations);
 	}
 
 	@Test
@@ -249,6 +261,43 @@ public class StreamDslTests {
 				eq("ticktock"), isA(PackageIdentifier.class), isA(Map.class), eq(false), isNull());
 
 		verify(streamOperations, times(1)).info(eq("ticktock"));
+	}
+
+	@Test
+	public void logs() {
+		String streamLog = "Test stream log";
+		String appLog = "Test app log";
+		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
+				"time | log", "demo stream");
+		ticktockDefinition.setStatus("deploying");
+		when(streamOperations.createStream(anyString(), anyString(), anyString(), anyBoolean()))
+				.thenReturn(ticktockDefinition);
+
+		StreamStatusResource streamStatusResource = new StreamStatusResource();
+		streamStatusResource.setName("streamName");
+
+
+		AppStatusResource appStatusResource = new AppStatusResource("deploymentId", "deployed");
+		appStatusResource.setInstances(new CollectionModel(Arrays.asList(new AppInstanceStatusResource("instanceId", "deployed",
+				Collections.singletonMap(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, "log")))));
+		streamStatusResource.setApplications(new CollectionModel<>(Arrays.asList(appStatusResource)));
+
+		when(runtimeOperations.streamStatus(ticktockDefinition.getName()))
+				.thenReturn(new PagedModel(Arrays.asList(streamStatusResource), null));
+
+		Stream stream = Stream.builder(client).name(ticktockDefinition.getName()).description("demo stream")
+				.definition(ticktockDefinition.getDslText()).create()
+				.deploy();
+
+		when(streamOperations.streamExecutionLog(ticktockDefinition.getName())).thenReturn(streamLog);
+		when(streamOperations.streamExecutionLog(ticktockDefinition.getName(), "deploymentId")).thenReturn(appLog);
+
+		assertThat(stream.logs()).isEqualTo(streamLog);
+		assertThat(stream.logs(new StreamApplication(logApplication.getName()))).isEqualTo(appLog);
+
+		verify(streamOperations, times(1)).streamExecutionLog(stream.getName());
+		verify(streamOperations, times(1)).streamExecutionLog(stream.getName(), "deploymentId");
+		verify(runtimeOperations, times(1)).streamStatus(ticktockDefinition.getName());
 	}
 
 	@Test
