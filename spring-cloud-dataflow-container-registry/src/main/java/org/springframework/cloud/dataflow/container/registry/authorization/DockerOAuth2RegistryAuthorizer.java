@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.container.registry.authorization;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.container.registry.ContainerImage;
+import org.springframework.cloud.dataflow.container.registry.ContainerImageRestTemplateFactory;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,14 +46,12 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 
 	public static final String DOCKER_REGISTRY_REPOSITORY_FIELD_KEY = "repository";
 
-	private final RestTemplate restTemplate;
-	private final RestTemplate noSslVerificationContainerRestTemplate;
+	private final ContainerImageRestTemplateFactory containerImageRestTemplate;
 
-	public DockerOAuth2RegistryAuthorizer(RestTemplate restTemplate, RestTemplate noSslVerificationContainerRestTemplate) {
-		Assert.notNull(restTemplate, "Non null restTemplate is expected!");
-		Assert.notNull(noSslVerificationContainerRestTemplate, "Non null noSslVerificationContainerRestTemplate is expected!");
-		this.restTemplate = restTemplate;
-		this.noSslVerificationContainerRestTemplate = noSslVerificationContainerRestTemplate;
+	public DockerOAuth2RegistryAuthorizer(
+			ContainerImageRestTemplateFactory containerImageRestTemplate) {
+		Assert.notNull(containerImageRestTemplate, "Non null containerImageRestTemplate is expected!");
+		this.containerImageRestTemplate = containerImageRestTemplate;
 	}
 
 	@Override
@@ -123,7 +122,7 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 	}
 
 	private RestTemplate getRestTemplate(ContainerRegistryConfiguration registryConfiguration) {
-		return registryConfiguration.isDisableSslVerification() ?
-				this.noSslVerificationContainerRestTemplate : this.restTemplate;
+		return this.containerImageRestTemplate.getContainerRestTemplate(registryConfiguration.isDisableSslVerification(),
+				registryConfiguration.isUseHttpProxy());
 	}
 }

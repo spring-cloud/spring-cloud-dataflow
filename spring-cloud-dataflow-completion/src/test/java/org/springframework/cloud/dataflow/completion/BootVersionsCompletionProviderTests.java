@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -47,7 +46,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
@@ -118,14 +116,6 @@ public class BootVersionsCompletionProviderTests {
 
 		@MockBean
 		private DefaultContainerImageMetadataResolver containerImageMetadataResolver;
-
-		@MockBean
-		@Qualifier("containerRestTemplate")
-		private RestTemplate containerRestTemplate;
-
-		@MockBean
-		@Qualifier("noSslVerificationContainerRestTemplate")
-		private RestTemplate noSslVerificationContainerRestTemplate;
 
 		@Bean
 		@ConditionalOnMissingBean

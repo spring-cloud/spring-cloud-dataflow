@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Christian Tzolov
@@ -57,6 +58,40 @@ public class ContainerRegistryProperties {
 	 * Registry authentication configuration
 	 */
 	private Map<String, ContainerRegistryConfiguration> registryConfigurations = new HashMap<>();
+
+	/**
+	 * HTTP Cache Proxy
+	 */
+	private HttpProxy httpProxy = new HttpProxy();
+
+	public static class HttpProxy {
+		private String host = "";
+		private int port = 0;
+
+		public String getHost() {
+			return host;
+		}
+
+		public void setHost(String host) {
+			this.host = host;
+		}
+
+		public int getPort() {
+			return port;
+		}
+
+		public void setPort(int port) {
+			this.port = port;
+		}
+
+		public boolean isEnabled() {
+			return StringUtils.hasText(host);
+		}
+	}
+
+	public HttpProxy getHttpProxy() {
+		return httpProxy;
+	}
 
 	public Map<String, ContainerRegistryConfiguration> getRegistryConfigurations() {
 		return registryConfigurations;

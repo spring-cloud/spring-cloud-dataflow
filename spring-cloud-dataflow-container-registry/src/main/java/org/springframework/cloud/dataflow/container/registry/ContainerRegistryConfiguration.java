@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,11 @@ public class ContainerRegistryConfiguration {
 	 */
 	private boolean disableSslVerification = false;
 
+	/**
+	 * If true all container registry communication will be channeled through a pre-configured Http Proxy.
+	 */
+	private boolean useHttpProxy = false;
+
 	public Map<String, String> getExtra() {
 		return extra;
 	}
@@ -181,6 +186,14 @@ public class ContainerRegistryConfiguration {
 		this.disableSslVerification = disableSslVerification;
 	}
 
+	public boolean isUseHttpProxy() {
+		return useHttpProxy;
+	}
+
+	public void setUseHttpProxy(boolean useHttpProxy) {
+		this.useHttpProxy = useHttpProxy;
+	}
+
 	@Override
 	public String toString() {
 		return "ContainerRegistryConfiguration{" +
@@ -189,7 +202,8 @@ public class ContainerRegistryConfiguration {
 				", secret='****'" + '\'' +
 				", authorizationType=" + authorizationType +
 				", manifestMediaType='" + manifestMediaType + '\'' +
-				", disableSslVerification='" + disableSslVerification + '\'' +
+				", disableSslVerification='" + disableSslVerification + '\''
+				+", useHttpProxy='" + useHttpProxy + '\'' +
 				", extra=" + extra +
 				'}';
 	}
