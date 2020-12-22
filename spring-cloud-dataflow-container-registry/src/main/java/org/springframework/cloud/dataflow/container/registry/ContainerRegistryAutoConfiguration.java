@@ -28,6 +28,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -182,14 +183,14 @@ public class ContainerRegistryAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(name = "containerRestTemplate")
-	public RestTemplate containerRestTemplate(RestTemplateBuilder builder) {
+	public RestTemplate containerRestTemplate(RestTemplateBuilder builder, ContainerRegistryProperties properties) {
 		// Create a RestTemplate that uses custom request factory
-		return this.initRestTemplate(builder, HttpClients.custom());
+		return this.initRestTemplate(builder, HttpClients.custom(), properties);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(name = "noSslVerificationContainerRestTemplate")
-	public RestTemplate noSslVerificationContainerRestTemplate(RestTemplateBuilder builder)
+	public RestTemplate noSslVerificationContainerRestTemplate(RestTemplateBuilder builder, ContainerRegistryProperties properties)
 			throws NoSuchAlgorithmException, KeyManagementException {
 
 		// Trust manager that blindly trusts all SSL certificates.
@@ -214,16 +215,25 @@ public class ContainerRegistryAutoConfiguration {
 		return initRestTemplate(builder,
 				HttpClients.custom()
 						.setSSLContext(sslContext)
-						.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE));
+						.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE),
+				properties);
 	}
 
-	private RestTemplate initRestTemplate(RestTemplateBuilder restTemplateBuilder, HttpClientBuilder clientBuilder) {
+	private RestTemplate initRestTemplate(RestTemplateBuilder restTemplateBuilder,
+			HttpClientBuilder clientBuilder,
+			ContainerRegistryProperties properties) {
 		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
 		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
+
+		// Set the HTTP proxy if configured.
+		if (properties.getHttpProxy().isEnabled()) {
+			HttpHost proxy = new HttpHost(properties.getHttpProxy().getHost(), properties.getHttpProxy().getPort());
+			clientBuilder.setProxy(proxy);
+		}
 
 		HttpComponentsClientHttpRequestFactory customRequestFactory =
 				new HttpComponentsClientHttpRequestFactory(
