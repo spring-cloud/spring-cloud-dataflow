@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.container.registry.ContainerImageRestTemplateFactory;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryProperties;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -48,10 +50,18 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	public static final String BEARER_REALM_ATTRIBUTE = "Bearer realm";
 	public static final String SERVICE_ATTRIBUTE = "service";
 
-	private final RestTemplate restTemplate;
+	//	private final RestTemplate restTemplate;
+	private final ContainerImageRestTemplateFactory containerImageRestTemplate;
 
-	public DockerConfigJsonSecretToRegistryConfigurationConverter(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
+	private final Map<String, Boolean> httpProxyPerHost;
+
+	public DockerConfigJsonSecretToRegistryConfigurationConverter(ContainerRegistryProperties properties,
+			ContainerImageRestTemplateFactory containerImageRestTemplate) {
+
+		// Retrieve registry configurations, explicitly declared via properties.
+		this.httpProxyPerHost = properties.getRegistryConfigurations().entrySet().stream()
+				.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), e -> e.getValue().isUseHttpProxy()));
+		this.containerImageRestTemplate = containerImageRestTemplate;
 	}
 
 	/**
@@ -81,7 +91,8 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 					rc.setUser((String) registryMap.get("username"));
 					rc.setSecret((String) registryMap.get("password"));
 
-					Optional<String> tokenAccessUrl = getDockerTokenServiceUri(rc.getRegistryHost());
+					Optional<String> tokenAccessUrl = getDockerTokenServiceUri(rc.getRegistryHost(),
+							true, this.httpProxyPerHost.getOrDefault(rc.getRegistryHost(), false));
 
 					if (tokenAccessUrl.isPresent()) {
 						rc.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
@@ -123,10 +134,11 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	 * @param registryHost Container Registry host to retrieve the tokenServiceUri for.
 	 * @return Returns Token Endpoint Url or null.
 	 */
-	public Optional<String> getDockerTokenServiceUri(String registryHost) {
+	public Optional<String> getDockerTokenServiceUri(String registryHost, boolean disableSSl, boolean useHttpProxy) {
 
 		try {
-			this.restTemplate.exchange(
+			RestTemplate restTemplate = this.containerImageRestTemplate.getContainerRestTemplate(disableSSl, useHttpProxy);
+			restTemplate.exchange(
 					UriComponentsBuilder.newInstance().scheme("https").host(registryHost).path("v2/").build().toUri(),
 					HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), Map.class);
 			return Optional.empty();

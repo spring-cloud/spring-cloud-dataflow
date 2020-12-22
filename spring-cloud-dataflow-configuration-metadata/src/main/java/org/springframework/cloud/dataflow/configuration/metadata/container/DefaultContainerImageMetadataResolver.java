@@ -19,10 +19,6 @@ package org.springframework.cloud.dataflow.configuration.metadata.container;
 import java.util.Collections;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.cloud.dataflow.configuration.metadata.AppMetadataResolutionException;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryException;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryRequest;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
@@ -68,27 +64,25 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 								imageName));
 			}
 
-			String configBlob = this.containerRegistryService.getImageBlob(registryRequest, configDigest, String.class);
+			Map<String, Object> configBlobMap = this.containerRegistryService.getImageBlob(registryRequest, configDigest, Map.class);
 
-			// Parse the config blob string into JSON instance.
-			try {
-				Map<String, Object> configBlobMap = new ObjectMapper().readValue(configBlob, Map.class);
-
-				if (!isNotNullMap(configBlobMap.get("config"))) {
-					throw new ContainerRegistryException(
-							String.format(
-									"Configuration json for image [%s] with digest [%s] has incorrect Config Blog element",
-									imageName, configDigest));
-				}
-
-				Map<String, Object> configElement = (Map<String, Object>) configBlobMap.get("config");
-
-				return isNotNullMap(configElement.get("Labels")) ?
-						(Map<String, String>) configElement.get("Labels") : Collections.emptyMap();
+			if (configBlobMap == null) {
+				throw new ContainerRegistryException(
+						String.format("Failed to retrieve configuration json for image [%s] with digest [%s]",
+								imageName, configDigest));
 			}
-			catch (JsonProcessingException e) {
-				throw new AppMetadataResolutionException("Unable to extract the labels from the Config blob", e);
+
+			if (!isNotNullMap(configBlobMap.get("config"))) {
+				throw new ContainerRegistryException(
+						String.format(
+								"Configuration json for image [%s] with digest [%s] has incorrect Config Blog element",
+								imageName, configDigest));
 			}
+
+			Map<String, Object> configElement = (Map<String, Object>) configBlobMap.get("config");
+
+			return isNotNullMap(configElement.get("Labels")) ?
+					(Map<String, String>) configElement.get("Labels") : Collections.emptyMap();
 		}
 		else {
 			throw new ContainerRegistryException(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.cloud.dataflow.container.registry.ContainerImageRestTemplateFactory;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -50,12 +53,16 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	@Mock
 	private RestTemplate mockRestTemplate;
 
+	@Mock
+	private ContainerImageRestTemplateFactory containerImageRestTemplateFactory;
+
 	private DockerConfigJsonSecretToRegistryConfigurationConverter converter;
 
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(mockRestTemplate);
+		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean())).thenReturn(mockRestTemplate);
+		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(new ContainerRegistryProperties(), containerImageRestTemplateFactory);
 	}
 
 	@Test

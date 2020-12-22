@@ -119,7 +119,7 @@
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.21.0</version>
+				<version>0.33.0</version>
 				<configuration>
 				  <images>
 					<image>

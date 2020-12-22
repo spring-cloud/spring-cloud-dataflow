@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,13 +55,18 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Mock
 	private RestTemplate mockRestTemplate;
 
-	private Map<String, ContainerRegistryConfiguration> registryConfigurationMap = new HashMap<>();
+	@Mock
+	private ContainerImageRestTemplateFactory containerImageRestTemplateFactory;
+
+	private final Map<String, ContainerRegistryConfiguration> registryConfigurationMap = new HashMap<>();
 
 	private ContainerRegistryService containerRegistryService;
 
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
+
+		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean())).thenReturn(mockRestTemplate);
 
 		// DockerHub registry configuration by default.
 		ContainerRegistryConfiguration dockerHubAuthConfig = new ContainerRegistryConfiguration();
@@ -79,8 +85,8 @@ public class DefaultContainerImageMetadataResolverTest {
 		when(registryAuthorizer.getType()).thenReturn(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(ContainerImage.class), any())).thenReturn(new HttpHeaders());
 
-		this.containerRegistryService = new ContainerRegistryService(mockRestTemplate,
-				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer));
+		this.containerRegistryService = new ContainerRegistryService(containerImageRestTemplateFactory,
+				new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer));
 	}
 
 	@Test(expected = ContainerRegistryException.class)
@@ -132,8 +138,9 @@ public class DefaultContainerImageMetadataResolverTest {
 	@Test(expected = ContainerRegistryException.class)
 	public void getImageLabelsMissingRegistryAuthorizer() {
 
-		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(new ContainerRegistryService(mockRestTemplate,
-				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Collections.emptyList()));
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
+				new ContainerRegistryService(containerImageRestTemplateFactory,
+						new ContainerImageParser(), registryConfigurationMap, Collections.emptyList()));
 
 		resolver.getImageLabels("test/image:latest");
 	}
@@ -145,8 +152,8 @@ public class DefaultContainerImageMetadataResolverTest {
 		when(registryAuthorizer.getType()).thenReturn(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
 		when(registryAuthorizer.getAuthorizationHeaders(any(ContainerImage.class), any())).thenReturn(null);
 
-		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(new ContainerRegistryService(mockRestTemplate,
-				mockRestTemplate, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer)));
+		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
+				new ContainerRegistryService(containerImageRestTemplateFactory, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer)));
 
 		resolver.getImageLabels("test/image:latest");
 	}
