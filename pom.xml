@@ -23,7 +23,7 @@
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
 		<spring-cloud-dataflow-build.version>2.8.0-SNAPSHOT</spring-cloud-dataflow-build.version>
-		<spring-boot.version>2.4.0</spring-boot.version>
+		<spring-boot.version>2.4.1</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
