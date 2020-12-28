@@ -54,6 +54,7 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 			TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition,
 			TaskDefinitionResource taskDefinitionResource, boolean manifest) {
 		TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
+		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		TaskExecutionResource taskExecutionResource = (manifest && taskManifest != null) ?
