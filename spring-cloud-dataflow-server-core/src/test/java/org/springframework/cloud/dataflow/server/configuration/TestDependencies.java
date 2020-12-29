@@ -183,15 +183,15 @@ import static org.mockito.Mockito.when;
 		FlywayAutoConfiguration.class,
 		RestTemplateAutoConfiguration.class })
 @EnableWebMvc
-@EnableConfigurationProperties({CommonApplicationProperties.class,
-	VersionInfoProperties.class,
-	DockerValidatorProperties.class,
-	TaskConfigurationProperties.class,
-	TaskProperties.class,
-	DockerValidatorProperties.class,
-	DataflowMetricsProperties.class,
-	ComposedTaskRunnerConfigurationProperties.class,
-	TaskPlatformConfigurationProperties.class})
+@EnableConfigurationProperties({ CommonApplicationProperties.class,
+		VersionInfoProperties.class,
+		DockerValidatorProperties.class,
+		TaskConfigurationProperties.class,
+		TaskProperties.class,
+		DockerValidatorProperties.class,
+		DataflowMetricsProperties.class,
+		ComposedTaskRunnerConfigurationProperties.class,
+		TaskPlatformConfigurationProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -457,7 +457,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new TaskPlatformController(launcherService);
 	}
 
-
 	@Bean
 	LauncherService launcherService(LauncherRepository launcherRepository) {
 		return new DefaultLauncherService(launcherRepository);
@@ -581,8 +580,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource,
+			ApplicationContext context) {
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(
+				dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -598,7 +599,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-			List<TaskPlatform> platforms, ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> platforms,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
 				taskConfigurationProperties, launcherRepository, platforms, composedTaskRunnerConfigurationProperties);

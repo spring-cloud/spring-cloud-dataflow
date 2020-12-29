@@ -53,8 +53,8 @@ public class TaskConfigurationProperties {
 	private TaskPlatformConfigurationProperties taskPlatformConfigurationProperties;
 
 	/**
-	 * Whether the server should auto create task definitions if one does not exist for a launch request and
-	 * a registered task application with the same name does exist.
+	 * Whether the server should auto create task definitions if one does not exist for a
+	 * launch request and a registered task application with the same name does exist.
 	 */
 	private boolean autoCreateTaskDefinitions;
 
@@ -64,8 +64,8 @@ public class TaskConfigurationProperties {
 	private DeployerProperties deployerProperties = new DeployerProperties();
 
 	/**
-	 * When using the kubernetes platform obtain database username and password
-	 * from secrets vs having dataflow pass them via properties.
+	 * When using the kubernetes platform obtain database username and password from secrets
+	 * vs having dataflow pass them via properties.
 	 */
 	private boolean useKubernetesSecretsForDbCredentials;
 
@@ -86,8 +86,10 @@ public class TaskConfigurationProperties {
 
 	public ZoneId getPlatformTimezone() {
 		try {
-			return taskPlatformConfigurationProperties.getTimezone() == null ? null : ZoneId.of(taskPlatformConfigurationProperties.getTimezone());
-		} catch (ZoneRulesException ex) {
+			return taskPlatformConfigurationProperties.getTimezone() == null ? null
+					: ZoneId.of(taskPlatformConfigurationProperties.getTimezone());
+		}
+		catch (ZoneRulesException ex) {
 			LOGGER.warn(ex.getMessage());
 		}
 		return null;
@@ -113,8 +115,8 @@ public class TaskConfigurationProperties {
 	public boolean isUseUserAccessToken() {
 		logDeprecationWarning();
 
-		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null ? false :
-			this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
+		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null ? false
+				: this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
 	}
 
 	@Deprecated
@@ -129,8 +131,11 @@ public class TaskConfigurationProperties {
 	public static class DeployerProperties {
 
 		private String[] propertyIncludes = new String[0];
+
 		private String[] groupIncludes = new String[0];
+
 		private String[] propertyExcludes = new String[0];
+
 		private String[] groupExcludes = new String[0];
 
 		public String[] getPropertyIncludes() {
@@ -181,18 +186,19 @@ public class TaskConfigurationProperties {
 	private void logDeprecationWarning(String newMethodName) {
 		String callingMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
 		LOGGER.warn(this.getClass().getName() + "." + callingMethodName
-			+ " is deprecated. Please use " + ComposedTaskRunnerConfigurationProperties.class.getName() + "."
-			+ (newMethodName != null ? newMethodName : callingMethodName));
+				+ " is deprecated. Please use " + ComposedTaskRunnerConfigurationProperties.class.getName() + "."
+				+ (newMethodName != null ? newMethodName : callingMethodName));
 	}
 
-	void setComposedTaskRunnerConfigurationProperties(ComposedTaskRunnerConfigurationProperties
-		composedTaskRunnerConfigurationProperties) {
+	void setComposedTaskRunnerConfigurationProperties(
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		if (composedTaskRunnerConfigurationProperties != null) {
 			this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 		}
 	}
 
-	void setTaskPlatformConfigurationProperties(TaskPlatformConfigurationProperties taskPlatformConfigurationProperties) {
+	void setTaskPlatformConfigurationProperties(
+			TaskPlatformConfigurationProperties taskPlatformConfigurationProperties) {
 		if (taskPlatformConfigurationProperties != null) {
 			this.taskPlatformConfigurationProperties = taskPlatformConfigurationProperties;
 		}

@@ -65,8 +65,8 @@ import com.cronutils.converter.CronConverter;
 import com.cronutils.converter.CronToCalendarTransformer;
 
 /**
- * Default implementation of the {@link SchedulerService} interface. Provide service methods
- * for Scheduling tasks.
+ * Default implementation of the {@link SchedulerService} interface. Provide service
+ * methods for Scheduling tasks.
  *
  * @author Glenn Renfro
  * @author Chris Schaefer
@@ -79,72 +79,91 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final static int MAX_SCHEDULE_NAME_LEN = 52;
 
 	private CommonApplicationProperties commonApplicationProperties;
+
 	private List<TaskPlatform> taskPlatforms;
+
 	private TaskDefinitionRepository taskDefinitionRepository;
+
 	private AppRegistryService registry;
+
 	private final TaskConfigurationProperties taskConfigurationProperties;
+
 	private final String dataflowServerUri;
+
 	private final VisibleProperties visibleProperties;
+
 	private final SchedulerServiceProperties schedulerServiceProperties;
+
 	private final AuditRecordService auditRecordService;
+
 	private final AuditServiceUtils auditServiceUtils;
+
 	private final DataSourceProperties dataSourceProperties;
+
 	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	/**
 	 * Constructor for DefaultSchedulerService
-	 * @param commonApplicationProperties common properties for applications deployed via Spring Cloud Data Flow.
+	 * @param commonApplicationProperties common properties for applications deployed via
+	 *     Spring Cloud Data Flow.
 	 * @param taskPlatforms the {@link TaskPlatform}s for this service.
 	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} for this service.
 	 * @param registry the {@link AppRegistryService} for this service.
 	 * @param resourceLoader the {@link ResourceLoader} for this service.
-	 * @param taskConfigurationProperties the {@link TaskConfigurationProperties} for this service.
+	 * @param taskConfigurationProperties the {@link TaskConfigurationProperties} for this
+	 *     service.
 	 * @param dataSourceProperties the {@link DataSourceProperties} for this service.
 	 * @param dataflowServerUri the Spring Cloud Data Flow uri for this service.
-	 * @param metaDataResolver the {@link ApplicationConfigurationMetadataResolver} for this service.
-	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this service.
+	 * @param metaDataResolver the {@link ApplicationConfigurationMetadataResolver} for this
+	 *     service.
+	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this
+	 *     service.
 	 * @param auditRecordService the {@link AuditRecordService} for this service.
 	 */
 	@Deprecated
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
-		List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
-		AppRegistryService registry, ResourceLoader resourceLoader,
-		TaskConfigurationProperties taskConfigurationProperties,
-		DataSourceProperties dataSourceProperties, String dataflowServerUri,
-		ApplicationConfigurationMetadataResolver metaDataResolver,
-		SchedulerServiceProperties schedulerServiceProperties,
-		AuditRecordService auditRecordService) {
+			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistryService registry, ResourceLoader resourceLoader,
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSourceProperties dataSourceProperties, String dataflowServerUri,
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService) {
 
 		this(commonApplicationProperties, taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
-			taskConfigurationProperties, dataSourceProperties, dataflowServerUri, metaDataResolver,
-			schedulerServiceProperties, auditRecordService, null);
+				taskConfigurationProperties, dataSourceProperties, dataflowServerUri, metaDataResolver,
+				schedulerServiceProperties, auditRecordService, null);
 	}
 
 	/**
 	 * Constructor for DefaultSchedulerService
-	 * @param commonApplicationProperties common properties for applications deployed via Spring Cloud Data Flow.
+	 * @param commonApplicationProperties common properties for applications deployed via
+	 *     Spring Cloud Data Flow.
 	 * @param taskPlatforms the {@link TaskPlatform}s for this service.
 	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} for this service.
 	 * @param registry the {@link AppRegistryService} for this service.
 	 * @param resourceLoader the {@link ResourceLoader} for this service.
-	 * @param taskConfigurationProperties the {@link TaskConfigurationProperties} for this service.
+	 * @param taskConfigurationProperties the {@link TaskConfigurationProperties} for this
+	 *     service.
 	 * @param dataSourceProperties the {@link DataSourceProperties} for this service.
 	 * @param dataflowServerUri the Spring Cloud Data Flow uri for this service.
-	 * @param metaDataResolver the {@link ApplicationConfigurationMetadataResolver} for this service.
-	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this service.
+	 * @param metaDataResolver the {@link ApplicationConfigurationMetadataResolver} for this
+	 *     service.
+	 * @param schedulerServiceProperties the {@link SchedulerServiceProperties} for this
+	 *     service.
 	 * @param auditRecordService the {@link AuditRecordService} for this service.
-	 * @param composedTaskRunnerConfigurationProperties the {@link ComposedTaskRunnerConfigurationProperties} for this
-	 *                                                  service
+	 * @param composedTaskRunnerConfigurationProperties the
+	 *     {@link ComposedTaskRunnerConfigurationProperties} for this service
 	 */
 	public DefaultSchedulerService(CommonApplicationProperties commonApplicationProperties,
-		List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
-		AppRegistryService registry, ResourceLoader resourceLoader,
-		TaskConfigurationProperties taskConfigurationProperties,
-		DataSourceProperties dataSourceProperties, String dataflowServerUri,
-		ApplicationConfigurationMetadataResolver metaDataResolver,
-		SchedulerServiceProperties schedulerServiceProperties,
-		AuditRecordService auditRecordService,
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistryService registry, ResourceLoader resourceLoader,
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSourceProperties dataSourceProperties, String dataflowServerUri,
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 
 		Assert.notNull(commonApplicationProperties, "commonApplicationProperties must not be null");
 		Assert.notNull(taskPlatforms, "taskPlatforms must not be null");
@@ -172,17 +191,17 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	@Override
 	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskDeploymentProperties,
-		List<String> commandLineArgs) {
+			List<String> commandLineArgs) {
 		schedule(scheduleName, taskDefinitionName, taskDeploymentProperties, commandLineArgs, null);
 	}
 
 	@Override
 	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskDeploymentProperties,
-		List<String> commandLineArgs, String platformName) {
+			List<String> commandLineArgs, String platformName) {
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
-			.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		AppRegistration appRegistration;
@@ -190,15 +209,18 @@ public class DefaultSchedulerService implements SchedulerService {
 		// runner and executable graph.
 		if (taskNode.isComposed()) {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(),
-				TaskServiceUtils.createComposedTaskDefinition(
-					taskNode.toExecutableDSL()));
-			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
+					TaskServiceUtils.createComposedTaskDefinition(
+							taskNode.toExecutableDSL()));
+			taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
+					taskNode);
 			TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties,
-				this.composedTaskRunnerConfigurationProperties);
+					this.composedTaskRunnerConfigurationProperties);
 			try {
-				appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
-					ApplicationType.task, new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
-					this.composedTaskRunnerConfigurationProperties)));
+				appRegistration = new AppRegistration(
+						ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+						ApplicationType.task,
+						new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
+								this.composedTaskRunnerConfigurationProperties)));
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
@@ -206,66 +228,75 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 		else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
+					ApplicationType.task);
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 		Launcher launcher = getTaskLauncher(platformName);
 		taskDefinition = TaskServiceUtils.updateTaskProperties(taskDefinition, this.dataSourceProperties,
-			TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), launcher.getType()));
+				TaskServiceUtils.addDatabaseCredentials(
+						this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), launcher.getType()));
 
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
 		appDeploymentProperties.putAll(
-			TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
+				TaskServiceUtils.extractAppProperties(taskDefinition.getRegisteredAppName(), taskDeploymentProperties));
 
-		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.
+		// Merge the common properties defined via the
+		// spring.cloud.dataflow.common-properties.task-resource file.
 		// Doesn't override existing properties!
-		// The placeholders defined in the task-resource file are not resolved by SCDF but passed to the apps as they are.
+		// The placeholders defined in the task-resource file are not resolved by SCDF but passed
+		// to the apps as they are.
 		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
-			appDeploymentProperties, "common");
+				appDeploymentProperties, "common");
 		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
-			appDeploymentProperties, launcher.getType().toLowerCase());
+				appDeploymentProperties, launcher.getType().toLowerCase());
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-			.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
+				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
 		if (StringUtils.hasText(this.dataflowServerUri) && taskNode.isComposed()) {
-			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties, commandLineArgs);
+			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
+					commandLineArgs);
 		}
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
-			appDeploymentProperties, visibleProperties);
+				appDeploymentProperties, visibleProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
-		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties, taskConfigurationProperties.getPlatformTimezone());
+		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties,
+				taskConfigurationProperties.getPlatformTimezone());
 
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
 
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
-			deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
+				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 
 		launcher.getScheduler().schedule(scheduleRequest);
 
-		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
-			scheduleRequest.getScheduleName(), this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest),
-			launcher.getName());
+		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE,
+				AuditActionType.CREATE,
+				scheduleRequest.getScheduleName(),
+				this.auditServiceUtils.convertScheduleRequestToAuditData(scheduleRequest),
+				launcher.getName());
 	}
 
 	private static String convertCronExpressionForPlatformTimeZone(String cronExpression, ZoneId platformTimezone) {
 		if (platformTimezone != null) {
-			final CronConverter cronConverter = new CronConverter(new CronToCalendarTransformer(), new CalendarToCronTransformer());
+			final CronConverter cronConverter = new CronConverter(new CronToCalendarTransformer(),
+					new CalendarToCronTransformer());
 			return cronConverter.using(cronExpression)
-				.from(ZoneId.systemDefault())
-				.to(platformTimezone)
-				.convert();
+					.from(ZoneId.systemDefault())
+					.to(platformTimezone)
+					.convert();
 		}
 		return cronExpression;
 	}
 
 	private static String convertCronExpressionForServerTimeZone(String cronExpression, ZoneId platformTimezone) {
 		if (platformTimezone != null) {
-			final CronConverter cronConverter = new CronConverter(new CronToCalendarTransformer(), new CalendarToCronTransformer());
+			final CronConverter cronConverter = new CronConverter(new CronToCalendarTransformer(),
+					new CalendarToCronTransformer());
 			return cronConverter.using(cronExpression)
-				.from(platformTimezone)
-				.to(ZoneId.systemDefault())
-				.convert();
+					.from(platformTimezone)
+					.to(ZoneId.systemDefault())
+					.convert();
 		}
 		return cronExpression;
 	}
@@ -274,7 +305,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		if (type.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
 			if (scheduleName.length() > MAX_SCHEDULE_NAME_LEN) {
 				throw new IllegalArgumentException(String.format("the name specified " +
-					"exceeds the maximum schedule name length of %s.", MAX_SCHEDULE_NAME_LEN));
+						"exceeds the maximum schedule name length of %s.", MAX_SCHEDULE_NAME_LEN));
 			}
 			scheduleName = scheduleName.toLowerCase();
 		}
@@ -294,7 +325,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			throw new IllegalArgumentException(String.format("The platform %s does not exist", platformName));
 		}
 		// Get Default Launcher if only one launcher has a scheduler.
-		// if more than one launcher has a scheduler and a user didn't specify a platform then that is an error.
+		// if more than one launcher has a scheduler and a user didn't specify a platform then
+		// that is an error.
 		int launcherCount = 0;
 		if (launcherToUse == null) {
 			if (getPrimaryLauncher() != null) {
@@ -309,11 +341,12 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 		if (launcherCount > 1) {
 			throw new IllegalArgumentException("Must select a platform.  " +
-				"A default could not be determined because more than one platform" +
-				" had an associated scheduler");
+					"A default could not be determined because more than one platform" +
+					" had an associated scheduler");
 		}
 		if (platformName != null && launcherToUse == null) {
-			throw new IllegalArgumentException(String.format("The platform %s does not support a scheduler service.", platformName));
+			throw new IllegalArgumentException(
+					String.format("The platform %s does not support a scheduler service.", platformName));
 		}
 		else if (platformName == null && launcherToUse == null) {
 			throw new IllegalStateException("Could not find a default scheduler.");
@@ -350,10 +383,10 @@ public class DefaultSchedulerService implements SchedulerService {
 			Launcher launcher = getTaskLauncher(platformName);
 			launcher.getScheduler().unschedule(scheduleInfo.getScheduleName());
 			this.auditRecordService.populateAndSaveAuditRecord(
-				AuditOperationType.SCHEDULE,
-				AuditActionType.DELETE, scheduleInfo.getScheduleName(),
-				scheduleInfo.getTaskDefinitionName(),
-				platformName);
+					AuditOperationType.SCHEDULE,
+					AuditActionType.DELETE, scheduleInfo.getScheduleName(),
+					scheduleInfo.getTaskDefinitionName(),
+					platformName);
 		}
 	}
 
@@ -394,7 +427,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		List<ScheduleInfo> list = launcher.getScheduler().list();
 		List<ScheduleInfo> result = updateCronExpressionByResult(taskDefinitionName, list);
 		return limitScheduleInfoResultSize(result,
-			this.schedulerServiceProperties.getMaxSchedulesReturned());
+				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
 	@Override
@@ -408,7 +441,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		List<ScheduleInfo> list = launcher.getScheduler().list();
 		List<ScheduleInfo> result = updateCronExpressionByResult(list);
 		return limitScheduleInfoResultSize(result,
-			this.schedulerServiceProperties.getMaxSchedulesReturned());
+				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
 	@Override
@@ -417,14 +450,14 @@ public class DefaultSchedulerService implements SchedulerService {
 		List<ScheduleInfo> list = launcher.getScheduler().list();
 		List<ScheduleInfo> result = updateCronExpressionByResult(list);
 		return limitScheduleInfoResultSize(result,
-			this.schedulerServiceProperties.getMaxSchedulesReturned());
+				this.schedulerServiceProperties.getMaxSchedulesReturned());
 	}
 
 	@Override
 	public ScheduleInfo getSchedule(String scheduleName, String platformName) {
 		List<ScheduleInfo> result = listForPlatform(platformName).stream()
-			.filter(scheduleInfo -> scheduleInfo.getScheduleName().equals(scheduleName))
-			.collect(Collectors.toList());
+				.filter(scheduleInfo -> scheduleInfo.getScheduleName().equals(scheduleName))
+				.collect(Collectors.toList());
 		Assert.isTrue(!(result.size() > 1), "more than one schedule was returned for scheduleName, should only be one");
 		return result.size() > 0 ? result.get(0) : null;
 	}
@@ -440,23 +473,26 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	private List<ScheduleInfo> updateCronExpressionByResult(String taskDefinitionName, List<ScheduleInfo> list) {
 		return list.stream()
-			.filter(v -> taskDefinitionName == null ? true : v.getTaskDefinitionName().equals(taskDefinitionName))
-			.map(this::convertCronExpressionByResult)
-			.collect(Collectors.toList());
+				.filter(v -> taskDefinitionName == null ? true : v.getTaskDefinitionName().equals(taskDefinitionName))
+				.map(this::convertCronExpressionByResult)
+				.collect(Collectors.toList());
 	}
 
 	private ScheduleInfo convertCronExpressionByResult(ScheduleInfo scheduleInfo) {
 		final Map<String, String> scheduleProperties = scheduleInfo.getScheduleProperties();
 		final String prefix = "spring.cloud.scheduler";
 		scheduleInfo.setScheduleProperties(
-			scheduleProperties.entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(Map.Entry::getKey, mv -> convertCronExpressionForServerTimeZone(mv.getValue(), taskConfigurationProperties.getPlatformTimezone()), (fromWildcard, fromApp) -> fromApp)));
+				scheduleProperties.entrySet().stream()
+						.filter(kv -> kv.getKey().startsWith(prefix))
+						.collect(Collectors.toMap(Map.Entry::getKey,
+								mv -> convertCronExpressionForServerTimeZone(mv.getValue(),
+										taskConfigurationProperties.getPlatformTimezone()),
+								(fromWildcard, fromApp) -> fromApp)));
 		return scheduleInfo;
 	}
 
 	private List<ScheduleInfo> limitScheduleInfoResultSize(List<ScheduleInfo> resultSet,
-		int schedulerLimitResultSize) {
+			int schedulerLimitResultSize) {
 		if (resultSet.size() > schedulerLimitResultSize) {
 			resultSet = resultSet.subList(0, schedulerLimitResultSize);
 		}
@@ -465,40 +501,45 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	/**
 	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
-	 * that start with {@code scheduler.}and qualify all
-	 * property values with the {@code spring.cloud.scheduler.} prefix.
+	 * that start with {@code scheduler.}and qualify all property values with the
+	 * {@code spring.cloud.scheduler.} prefix.
 	 *
 	 * @param input the scheduler properties
 	 * @return scheduler properties for the task
 	 */
-	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input, ZoneId platformTimezone) {
+	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input,
+			ZoneId platformTimezone) {
 		final String prefix = "scheduler.";
 		final int prefixLength = prefix.length();
 
 		return new TreeMap<>(input).entrySet().stream()
-			.filter(kv -> kv.getKey().startsWith(prefix))
-			.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), mv -> convertCronExpressionForPlatformTimeZone(mv.getValue(), platformTimezone),
-				(fromWildcard, fromApp) -> fromApp));
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength),
+						mv -> convertCronExpressionForPlatformTimeZone(mv.getValue(), platformTimezone),
+						(fromWildcard, fromApp) -> fromApp));
 	}
 
 	protected Resource getTaskResource(String taskDefinitionName) {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
-			.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
+				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		AppRegistration appRegistration = null;
 		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
 			URI composedTaskUri = null;
-			String composedTaskLauncherUri = TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
-				this.composedTaskRunnerConfigurationProperties);
+			String composedTaskLauncherUri = TaskServiceUtils.getComposedTaskLauncherUri(
+					this.taskConfigurationProperties,
+					this.composedTaskRunnerConfigurationProperties);
 			try {
 				composedTaskUri = new URI(composedTaskLauncherUri);
 			}
 			catch (URISyntaxException e) {
 				throw new IllegalArgumentException("Invalid Composed Task Url: " + composedTaskLauncherUri);
 			}
-			appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME, ApplicationType.task, composedTaskUri);
-		} else {
+			appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
+					ApplicationType.task, composedTaskUri);
+		}
+		else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
-				ApplicationType.task);
+					ApplicationType.task);
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);

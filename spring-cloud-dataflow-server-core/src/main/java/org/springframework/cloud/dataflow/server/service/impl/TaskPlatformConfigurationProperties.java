@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = TaskPlatformConfigurationProperties.TASK_PLATFORM_PREFIX)
 public class TaskPlatformConfigurationProperties {
 	static final String TASK_PLATFORM_PREFIX = TaskConfigurationProperties.TASK_PREFIX + ".platform";
+
 	private String timezone;
 
 	public String getTimezone() {

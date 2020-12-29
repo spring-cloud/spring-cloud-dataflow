@@ -137,8 +137,9 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
-@EnableConfigurationProperties({DockerValidatorProperties.class, TaskConfigurationProperties.class,
-	TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class, TaskPlatformConfigurationProperties.class})
+@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class,
+		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class,
+		TaskPlatformConfigurationProperties.class })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
@@ -203,7 +204,6 @@ public class JobDependencies {
 	LauncherService launcherService(LauncherRepository launcherRepository) {
 		return new DefaultLauncherService(launcherRepository);
 	}
-
 
 	@Bean
 	public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
@@ -285,8 +285,8 @@ public class JobDependencies {
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-			List<TaskPlatform> taskPlatforms, ComposedTaskRunnerConfigurationProperties
-																		composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> taskPlatforms,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
 				taskConfigurationProperties, launcherRepository, taskPlatforms,
@@ -391,7 +391,8 @@ public class JobDependencies {
 
 	@Bean
 	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(
+				dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -407,12 +408,14 @@ public class JobDependencies {
 	public SchedulerService schedulerService() {
 		return new SchedulerService() {
 			@Override
-			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs, String platformName) {
+			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties,
+					List<String> commandLineArgs, String platformName) {
 
 			}
 
 			@Override
-			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
+			public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties,
+					List<String> commandLineArgs) {
 
 			}
 

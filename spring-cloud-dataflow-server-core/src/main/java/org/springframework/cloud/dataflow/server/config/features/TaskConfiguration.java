@@ -75,9 +75,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @ConditionalOnTasksEnabled
-@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class,
-	DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class,
-	TaskPlatformConfigurationProperties.class
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
+		DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class,
+		TaskPlatformConfigurationProperties.class
 })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
@@ -189,13 +189,14 @@ public class TaskConfiguration {
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService) {
-		DefaultTaskExecutionService defaultTaskExecutionService =  new DefaultTaskExecutionService(
+		DefaultTaskExecutionService defaultTaskExecutionService = new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
 				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService,
 				this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties);
-		defaultTaskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
+		defaultTaskExecutionService
+				.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
 		return defaultTaskExecutionService;
 	}
 

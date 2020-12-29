@@ -116,14 +116,14 @@ import static org.mockito.Mockito.when;
 		FlywayAutoConfiguration.class,
 		RestTemplateAutoConfiguration.class })
 @EnableWebMvc
-@EnableConfigurationProperties({CommonApplicationProperties.class,
-	VersionInfoProperties.class,
-	DockerValidatorProperties.class,
-	TaskConfigurationProperties.class,
-	TaskProperties.class,
-	DockerValidatorProperties.class,
-	ComposedTaskRunnerConfigurationProperties.class,
-	TaskPlatformConfigurationProperties.class})
+@EnableConfigurationProperties({ CommonApplicationProperties.class,
+		VersionInfoProperties.class,
+		DockerValidatorProperties.class,
+		TaskConfigurationProperties.class,
+		TaskProperties.class,
+		DockerValidatorProperties.class,
+		ComposedTaskRunnerConfigurationProperties.class,
+		TaskPlatformConfigurationProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -174,8 +174,10 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource,
+			ApplicationContext context) {
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(
+				dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -305,7 +307,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				taskExplorer, dataflowTaskExecutionDao, dataflowTaskExecutionMetadataDao,
 				oauth2TokenUtilsService, taskSaveService, this.taskConfigurationProperties,
 				this.composedTaskRunnerConfigurationProperties);
-		taskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
+		taskExecutionService
+				.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
 		return taskExecutionService;
 	}
 
@@ -313,7 +316,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-		List<TaskPlatform> taskPlatforms, ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> taskPlatforms,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(this.dataSourceProperties,
 				registry, taskExplorer, taskDefinitionRepository,
 				taskConfigurationProperties, launcherRepository, taskPlatforms,
@@ -341,7 +345,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskPlatform taskPlatform(Scheduler scheduler) {
-		Launcher launcher = new Launcher("testTaskPlatform", "defaultType", Mockito.mock(TaskLauncher.class), scheduler);
+		Launcher launcher = new Launcher("testTaskPlatform", "defaultType", Mockito.mock(TaskLauncher.class),
+				scheduler);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		TaskPlatform taskPlatform = new TaskPlatform("testTaskPlatform", launchers);
