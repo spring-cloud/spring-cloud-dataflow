@@ -122,18 +122,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoServic
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
-import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.*;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
@@ -194,14 +183,15 @@ import static org.mockito.Mockito.when;
 		FlywayAutoConfiguration.class,
 		RestTemplateAutoConfiguration.class })
 @EnableWebMvc
-@EnableConfigurationProperties({ CommonApplicationProperties.class,
-		VersionInfoProperties.class,
-		DockerValidatorProperties.class,
-		TaskConfigurationProperties.class,
-		TaskProperties.class,
-		DockerValidatorProperties.class,
-		DataflowMetricsProperties.class,
-		ComposedTaskRunnerConfigurationProperties.class })
+@EnableConfigurationProperties({CommonApplicationProperties.class,
+	VersionInfoProperties.class,
+	DockerValidatorProperties.class,
+	TaskConfigurationProperties.class,
+	TaskProperties.class,
+	DockerValidatorProperties.class,
+	DataflowMetricsProperties.class,
+	ComposedTaskRunnerConfigurationProperties.class,
+	TaskPlatformConfigurationProperties.class})
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
