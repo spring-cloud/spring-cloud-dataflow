@@ -188,6 +188,11 @@
 			<artifactId>jsr305</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.cronutils</groupId>
+			<artifactId>cron-utils</artifactId>
+			<version>${cronutils.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>

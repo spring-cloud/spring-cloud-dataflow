@@ -83,16 +83,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
-import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
-import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
-import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.*;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
@@ -146,8 +137,8 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
-@EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class,
-		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class})
+@EnableConfigurationProperties({DockerValidatorProperties.class, TaskConfigurationProperties.class,
+	TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class, TaskPlatformConfigurationProperties.class})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 

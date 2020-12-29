@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.time.ZoneId;
+import java.time.zone.ZoneRulesException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,7 @@ import org.springframework.validation.annotation.Validated;
  * @author Glenn Renfro
  * @author David Turanski
  * @author Chris Schaefer
+ * @author 23king
  */
 @Validated
 @ConfigurationProperties(prefix = TaskConfigurationProperties.TASK_PREFIX)
@@ -44,6 +48,9 @@ public class TaskConfigurationProperties {
 
 	@Autowired
 	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	@Autowired
+	private TaskPlatformConfigurationProperties taskPlatformConfigurationProperties;
 
 	/**
 	 * Whether the server should auto create task definitions if one does not exist for a launch request and
@@ -77,6 +84,15 @@ public class TaskConfigurationProperties {
 		}
 	}
 
+	public ZoneId getPlatformTimezone() {
+		try {
+			return taskPlatformConfigurationProperties.getTimezone() == null ? null : ZoneId.of(taskPlatformConfigurationProperties.getTimezone());
+		} catch (ZoneRulesException ex) {
+			LOGGER.warn(ex.getMessage());
+		}
+		return null;
+	}
+
 	public DeployerProperties getDeployerProperties() {
 		return deployerProperties;
 	}
@@ -98,7 +114,7 @@ public class TaskConfigurationProperties {
 		logDeprecationWarning();
 
 		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null ? false :
-				this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
+			this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
 	}
 
 	@Deprecated
@@ -165,14 +181,20 @@ public class TaskConfigurationProperties {
 	private void logDeprecationWarning(String newMethodName) {
 		String callingMethodName = Thread.currentThread().getStackTrace()[2].getMethodName();
 		LOGGER.warn(this.getClass().getName() + "." + callingMethodName
-				+ " is deprecated. Please use " + ComposedTaskRunnerConfigurationProperties.class.getName() + "."
-				+ (newMethodName != null ? newMethodName : callingMethodName));
+			+ " is deprecated. Please use " + ComposedTaskRunnerConfigurationProperties.class.getName() + "."
+			+ (newMethodName != null ? newMethodName : callingMethodName));
 	}
 
 	void setComposedTaskRunnerConfigurationProperties(ComposedTaskRunnerConfigurationProperties
-							composedTaskRunnerConfigurationProperties) {
+		composedTaskRunnerConfigurationProperties) {
 		if (composedTaskRunnerConfigurationProperties != null) {
 			this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
+		}
+	}
+
+	void setTaskPlatformConfigurationProperties(TaskPlatformConfigurationProperties taskPlatformConfigurationProperties) {
+		if (taskPlatformConfigurationProperties != null) {
+			this.taskPlatformConfigurationProperties = taskPlatformConfigurationProperties;
 		}
 	}
 }
