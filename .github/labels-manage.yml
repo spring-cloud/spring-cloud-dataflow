@@ -1,6 +1,6 @@
 - name: area/batch-task
-  color: F9D0C4 batch and task
-  description: Belongs to
+  color: F9D0C4
+  description: Belongs to batch and task
 - name: area/composed-tasks
   color: F9D0C4
   description: Belongs to ctr
