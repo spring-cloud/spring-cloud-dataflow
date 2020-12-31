@@ -11,7 +11,7 @@ jobs:
     steps:
 
     - name: Handle Issues
-      uses: jvalkeal/issue-handler@v0.0.3
+      uses: jvalkeal/issue-handler@v0.0.4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         config: >
@@ -36,6 +36,18 @@ jobs:
                 "type": "ifThen",
                 "if": "isAction('opened') && !dataInArray('team', actor)",
                 "then": "labelIssue(['status/need-triage'])"
+              },
+              {
+                "name": "Switch to team if user comments",
+                "type": "ifThen",
+                "if": "isEvent('issue_comment') && isAction('created') && actor == context.payload.issue.user.login && labelsContainsAny('for/team-attention')",
+                "then": "[labelIssue('status/need-feedback'), removeLabel('for/team-attention')]"
+              },
+              {
+                "name": "Switch to user if team comments",
+                "type": "ifThen",
+                "if": "isEvent('issue_comment') && isAction('created') && dataInArray('team', actor) && labelsContainsAny('status/need-feedback') ",
+                "then": "[labelIssue('for/team-attention', removeLabel('status/need-feedback'))]"
               },
               {
                 "name": "Manage backport issues",
