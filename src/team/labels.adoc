@@ -1,0 +1,49 @@
+# Issue Labeling
+
+This document contains info about how labeling works, how it's expected
+get used, etc. There's various automations around labeling and once
+having specific labels it's easier to manage various maintenance tasks.
+
+## Background
+
+One big issue we're faced with bug fixes is that firstly once a fix is
+made in a main or a maintenance branch, process to back/forward port it
+to needed brances has been cumbersome, secondly things may get lost in
+translation and thirdly as our milestones track iterations and not an
+actual versions it has been difficult to track these things.
+
+Focus in i.e. this one particular area is that once an issue if fixed, you
+label it with specific labels and automation creates follow up issues
+so that those will not get forgotten.
+
+## Label Categories
+
+We try to keep labels named as `<category>/<something>` which then makes
+it easier to query particular issues. Categories are something like `area`,
+`branch`, `for`, `status` and `type`.
+
+## Stale Issues
+
+NOTE: Due to some issues in an official stale action, this is not
+      yet enabled.
+
+We use GH's _actions/stale_ action to mark issues stale. Issues are marked
+stale after number or days and then label `status/stale` is added. This
+is an indication that issue will get closed later with label
+`status/closed-as-stale` which allows us to go back to those issues.
+You can also exempt issue from this stale handlingby marking it with
+`status/on-hold`.
+
+## Triage Issue
+
+New issues not coming from a team needs to be triaged so there's some magic
+fu in an actions that marks new issues with `status/need-triage`. Essentially
+new issue from a community member don't have any labels, milestone or it
+doesn't come from a list of _contributors_ so can be mark to get triaged.
+
+## Issue Wait Feedback
+
+If issue is marked as `for/team-attention` and user comments on it, label
+are switched to `status/need-feedback`, and vice verca. This eventually
+allows us to handle stale feedback issue and point issues where
+user has provided feedback.

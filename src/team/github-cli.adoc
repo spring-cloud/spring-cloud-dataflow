@@ -1,0 +1,79 @@
+# GitHub Cli
+
+GitHub's Cli link:https://github.com/cli/cli[cli] gives you an
+easier access to its data via its API's. This document outlines
+things what you could do with it to help with various maintenance
+tasks.
+
+## Aliases
+
+Cli doesn't always support everything you'd want to get from it
+but you can alias commands which then goes directly into a project
+to get some raw json out from an api. Here we list things you
+can add.
+
+IMPORTANT: You most likely need to do `set +H` on these commands not to
+           get trouble with bash history. This only when alias is
+           initially set via bash.
+
+Listing project labels:
+
+[source,bash]
+----
+gh alias set listLabels "api graphql -F owner=':owner' -F name=':repo' -f query='
+  query ListLabels(\$name: String!, \$owner: String!) {
+    repository(owner: \$owner, name: \$name) {
+      labels(first: 100) {
+        nodes {
+          name
+          color
+          description
+        }
+      }
+    }
+  }
+'"
+----
+
+Listing all milestones:
+
+[source,bash]
+----
+gh alias set listMilestones "api graphql -F owner=':owner' -F name=':repo' -f query='
+  query ListMilestones(\$name: String!, \$owner: String!) {
+    repository(owner: \$owner, name: \$name) {
+      milestones(first: 100) {
+        nodes {
+          title
+          number
+          description
+          dueOn
+          url
+          state
+          closed
+          closedAt
+          updatedAt
+        }
+      }
+    }
+  }
+'"
+----
+
+Listing open milestones:
+
+[source,bash]
+----
+gh alias set listOpenMilestones "api graphql -F owner=':owner' -F name=':repo' -f query='
+  query ListMilestones(\$name: String!, \$owner: String!) {
+    repository(owner: \$owner, name: \$name) {
+      milestones(first: 100, states: OPEN) {
+        nodes {
+          title
+          dueOn
+        }
+      }
+    }
+  }
+'"
+----
