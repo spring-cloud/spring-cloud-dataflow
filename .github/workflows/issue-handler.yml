@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   issues:
     types: [opened, labeled, unlabeled]
+  issue_comment:
+    types: [created]
 
 jobs:
   labeler:
