@@ -42,14 +42,14 @@ jobs:
               {
                 "name": "Switch to team if user comments",
                 "type": "ifThen",
-                "if": "isEvent('issue_comment') && isAction('created') && actor == context.payload.issue.user.login && labelsContainsAny('for/team-attention')",
-                "then": "[labelIssue('status/need-feedback'), removeLabel('for/team-attention')]"
+                "if": "isEvent('issue_comment') && isAction('created') && actor == context.payload.issue.user.login && labelsContainsAny('status/need-feedback')",
+                "then": "[labelIssue('for/team-attention'), removeLabel('status/need-feedback')]"
               },
               {
                 "name": "Switch to user if team comments",
                 "type": "ifThen",
-                "if": "isEvent('issue_comment') && isAction('created') && dataInArray('team', actor) && labelsContainsAny('status/need-feedback') ",
-                "then": "[labelIssue('for/team-attention', removeLabel('status/need-feedback'))]"
+                "if": "isEvent('issue_comment') && isAction('created') && dataInArray('team', actor) && labelsContainsAny('for/team-attention') ",
+                "then": "[labelIssue('status/need-feedback', removeLabel('for/team-attention'))]"
               },
               {
                 "name": "Manage backport issues",
