@@ -345,7 +345,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// We now have a new props and args what should really get used.
 		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
-
+		//capture merged deployment properties that are not qualified so they can be saved in the manifest for relaunching tasks.
+		Map<String, String> mergedTaskUnqualifiedDeploymentProperties = taskAnalyzer
+				.analyze(
+						previousManifest != null
+								? previousManifest.getTaskDeploymentRequest() != null
+								? previousManifest.getTaskDeploymentRequest().getDeploymentProperties() : null
+								: null,
+						taskExecutionInformation.getTaskDeploymentProperties()).getMergedDeploymentProperties();
 		// Get the merged deployment properties and update the task exec. info
 		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
 
@@ -353,7 +360,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.createRequest(taskExecution,
 				taskExecutionInformation, commandLineArgs, platformName, launcher.getType());
 
-		TaskManifest taskManifest = createTaskManifest(platformName, request);
+		TaskManifest taskManifest = createTaskManifest(platformName, request, mergedTaskUnqualifiedDeploymentProperties);
 		String taskDeploymentId = null;
 
 		try {
@@ -546,10 +553,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
-	private TaskManifest createTaskManifest(String platformName, AppDeploymentRequest appDeploymentRequest) {
+	private TaskManifest createTaskManifest(String platformName, AppDeploymentRequest appDeploymentRequest, Map<String,String> taskDeploymentProperties) {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
-		taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
+		AppDeploymentRequest appRequestWithTaggedProps = new AppDeploymentRequest(
+				appDeploymentRequest.getDefinition(), appDeploymentRequest.getResource(),
+				taskDeploymentProperties,
+				appDeploymentRequest.getCommandlineArguments());
+		taskManifest.setTaskDeploymentRequest(appRequestWithTaggedProps);
 		return taskManifest;
 	}
 
