@@ -31,7 +31,8 @@ public enum AuditOperationType {
 	APP_REGISTRATION(100L, "App Registration"),
 	SCHEDULE(200L, "Schedule"),
 	STREAM(300L, "Stream"),
-	TASK(400L, "Task");
+	TASK(400L, "Task"),
+	LOGIN(500L, "Login");
 
 	private Long id;
 

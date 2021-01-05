@@ -255,7 +255,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records/audit-action-types").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.*", hasSize(6)))
+				.andExpect(jsonPath("$.*", hasSize(7)))
 				.andExpect(jsonPath("$[0].id", is(100)))
 				.andExpect(jsonPath("$[0].name", is("Create")))
 				.andExpect(jsonPath("$[0].description", is("Create an Entity")))
@@ -284,7 +284,12 @@ public class AuditRecordControllerTests {
 				.andExpect(jsonPath("$[5].id", is(600)))
 				.andExpect(jsonPath("$[5].name", is("Update")))
 				.andExpect(jsonPath("$[5].description", is("Update an Entity")))
-				.andExpect(jsonPath("$[5].key", is("UPDATE")));
+				.andExpect(jsonPath("$[5].key", is("UPDATE")))
+
+				.andExpect(jsonPath("$[6].id", is(700)))
+				.andExpect(jsonPath("$[6].name", is("SuccessfulLogin")))
+				.andExpect(jsonPath("$[6].description", is("Successful login")))
+				.andExpect(jsonPath("$[6].key", is("LOGIN_SUCCESS")));
 	}
 
 	@Test
@@ -292,7 +297,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.*", hasSize(4)))
+				.andExpect(jsonPath("$.*", hasSize(5)))
 
 				.andExpect(jsonPath("$[0].id", is(100)))
 				.andExpect(jsonPath("$[0].name", is("App Registration")))
@@ -308,7 +313,11 @@ public class AuditRecordControllerTests {
 
 				.andExpect(jsonPath("$[3].id", is(400)))
 				.andExpect(jsonPath("$[3].name", is("Task")))
-				.andExpect(jsonPath("$[3].key", is("TASK")));
+				.andExpect(jsonPath("$[3].key", is("TASK")))
+
+				.andExpect(jsonPath("$[4].id", is(500)))
+				.andExpect(jsonPath("$[4].name", is("Login")))
+				.andExpect(jsonPath("$[4].key", is("LOGIN")));
 	}
 
 	@Test
