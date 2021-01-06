@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,11 @@ public class TaskAppDeploymentRequestCreator {
 		TaskDefinition taskDefinition = taskExecutionInformation.getTaskDefinition();
 		String registeredAppName = taskDefinition.getRegisteredAppName();
 		Map<String, String> appDeploymentProperties = new HashMap<>(commonApplicationProperties.getTask());
+		String label = TaskServiceUtils.labelForSimpleTask(taskDefinition.getName(), taskDefinition.getDslText());
 		appDeploymentProperties.putAll(
 				TaskServiceUtils.extractAppProperties(
 						taskExecutionInformation.isComposed() ? "composed-task-runner" : registeredAppName,
+						label,
 						taskExecutionInformation.getTaskDeploymentProperties()));
 
 		// Merge the common properties defined via the spring.cloud.dataflow.common-properties.task-resource file.

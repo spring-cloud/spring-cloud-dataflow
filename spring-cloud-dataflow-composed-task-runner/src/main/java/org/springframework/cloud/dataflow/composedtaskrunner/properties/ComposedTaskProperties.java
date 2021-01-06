@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.composedtaskrunner.properties;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -120,6 +122,16 @@ public class ComposedTaskProperties {
 	 * The arguments to be used for each of the tasks.
 	 */
 	private String composedTaskArguments;
+
+	/**
+	 * Properties for defining task app arguments.
+	 */
+	private Map<String, String> composedTaskAppArguments = new HashMap<>();
+
+	/**
+	 * Properties for defining task app properties.
+	 */
+	private Map<String, String> composedTaskAppProperties = new HashMap<>();
 
 	/**
 	 * Specifies whether to allow split core threads to timeout.
@@ -242,6 +254,22 @@ public class ComposedTaskProperties {
 
 	public void setComposedTaskArguments(String composedTaskArguments) {
 		this.composedTaskArguments = composedTaskArguments;
+	}
+
+	public Map<String, String> getComposedTaskAppArguments() {
+		return composedTaskAppArguments;
+	}
+
+	public void setComposedTaskAppArguments(Map<String, String> composedTaskAppArguments) {
+		this.composedTaskAppArguments = composedTaskAppArguments;
+	}
+
+	public Map<String, String> getComposedTaskAppProperties() {
+		return composedTaskAppProperties;
+	}
+
+	public void setComposedTaskAppProperties(Map<String, String> composedTaskAppProperties) {
+		this.composedTaskAppProperties = composedTaskAppProperties;
 	}
 
 	public boolean isSplitThreadAllowCoreThreadTimeout() {

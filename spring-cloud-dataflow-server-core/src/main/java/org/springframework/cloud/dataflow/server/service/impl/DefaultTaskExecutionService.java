@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,6 +289,32 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation =
 				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, launcher.getType());
 
+		// pre prosess command-line args
+		// moving things like app.<label> = arg
+		// into deployment properties if ctr and removing
+		// prefix if simple task.
+		if (taskExecutionInformation.isComposed()) {
+			List<String> composedTaskArguments = new ArrayList<>();
+			commandLineArgs.forEach(arg -> {
+				if (arg.startsWith("app.")) {
+					// composedTaskAppArguments.add(arg);
+					composedTaskArguments.add("--composed-task-app-arguments." + arg);
+				}
+				else {
+					composedTaskArguments.add(arg);
+				}
+			});
+			logger.info("composedTaskArguments {}", StringUtils.collectionToCommaDelimitedString(composedTaskArguments));
+			commandLineArgs = composedTaskArguments;
+		} else {
+			// remove argument prefix for simple task
+			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();
+			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
+			commandLineArgs = commandLineArgs.stream().map(arg -> {
+				return arg.replaceFirst(regex, "");
+			}).collect(Collectors.toList());
+		}
+
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 
 		if (taskExecutionInformation.isComposed()) {
@@ -303,7 +329,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// Get the previous manifest
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
-		
+
 		// Analysing task to know what to bring forward from existing
 		TaskAnalysisReport report = taskAnalyzer
 				.analyze(
@@ -329,7 +355,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskManifest taskManifest = createTaskManifest(platformName, request);
 		String taskDeploymentId = null;
-		
+
 		try {
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				verifyTaskIsNotRunning(taskName, taskExecution, taskLauncher);
@@ -457,34 +483,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	/**
-	 * Updates the deployment properties on the provided {@code AppDeploymentRequest}
-	 *
-	 * @param commandLineArgs command line args for the task execution
-	 * @param platformName name of the platform configuration to use
-	 * @param taskExecutionInformation details about the task execution request
-	 * @param taskExecution task execution data
-	 * @param deploymentProperties properties of the deployment
-	 * @return an updated {@code AppDeploymentRequest}
-	 */
-	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
-			String platformType,
-			TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution,
-			Map<String, String> deploymentProperties) {
-		AppDeploymentRequest appDeploymentRequest;
-		TaskExecutionInformation info = new TaskExecutionInformation();
-		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
-		info.setAppResource(taskExecutionInformation.getAppResource());
-		info.setComposed(taskExecutionInformation.isComposed());
-		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
-		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-		info.setTaskDeploymentProperties(deploymentProperties);
-
-		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
-				createRequest(taskExecution, info, commandLineArgs, platformName, platformType);
-		return appDeploymentRequest;
-	}
-
-	/**
 	 * A task should not be allowed to be launched when one is running (allowing the upgrade
 	 * to proceed may kill running task instances of that definition on certain platforms).
 	 *
@@ -544,7 +542,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	/**
 	 * Create a {@code TaskManifest}
 	 *
-	 * @param platformName name of the platform configuration to run the task on	 * 
+	 * @param platformName name of the platform configuration to run the task on
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
@@ -764,7 +762,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		this.logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
+		logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,11 @@ public class ComposedTaskRunnerStepFactoryTests {
 		public TaskOperations taskOperations;
 
 		@Bean
+		public ComposedTaskProperties composedTaskProperties() {
+			return new ComposedTaskProperties();
+		}
+
+		@Bean
 		public TaskProperties taskProperties() {
 			return new TaskProperties();
 		}
@@ -106,7 +111,7 @@ public class ComposedTaskRunnerStepFactoryTests {
 
 		@Bean
 		public ComposedTaskRunnerStepFactory stepFactory(TaskProperties taskProperties) {
-			return new ComposedTaskRunnerStepFactory(new ComposedTaskProperties(), "FOOBAR");
+			return new ComposedTaskRunnerStepFactory(new ComposedTaskProperties(), "FOOBAR", "BAR");
 		}
 	}
 }

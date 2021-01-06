@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,17 @@ package org.springframework.cloud.dataflow.composedtaskrunner.properties;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -30,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * @author Gunnar Hillert
  */
 public class ComposedTaskPropertiesTests {
+
+	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
 	@Test
 	public void testGettersAndSetters() throws URISyntaxException{
@@ -72,5 +82,30 @@ public class ComposedTaskPropertiesTests {
 		assertFalse(properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
 		assertNull(properties.getDataflowServerUsername());
 		assertNull(properties.getDataflowServerPassword());
+	}
+
+	@Test
+	public void testComposedTaskAppArguments() {
+		this.contextRunner
+				.withInitializer(context -> {
+					Map<String, Object> map = new HashMap<>();
+					map.put("composed-task-app-arguments.app.AAA", "arg1");
+					map.put("composed-task-app-arguments.app.AAA.1", "arg2");
+					map.put("composed-task-app-arguments.app.AAA.2", "arg3");
+					context.getEnvironment().getPropertySources().addLast(new SystemEnvironmentPropertySource(
+						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, map));
+				})
+				.withUserConfiguration(Config1.class)
+				.run((context) -> {
+					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
+					assertThat(properties.getComposedTaskAppArguments()).hasSize(3);
+					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA", "arg1");
+					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.1", "arg2");
+					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.2", "arg3");
+				});
+	}
+
+	@EnableConfigurationProperties({ ComposedTaskProperties.class })
+	private static class Config1 {
 	}
 }
