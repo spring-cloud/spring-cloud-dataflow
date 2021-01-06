@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
+import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -188,8 +189,27 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		else {
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(originalTaskDefinition,
 					dataSourceProperties, addDatabaseCredentials);
-			appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
-					ApplicationType.task);
+
+			String label = null;
+			if (taskNode.getTaskApp() != null) {
+				TaskAppNode taskAppNode = taskNode.getTaskApp();
+				if (taskAppNode.getLabel() != null) {
+					label = taskAppNode.getLabel().stringValue();
+				}
+				else {
+					label = taskAppNode.getName();
+				}
+			}
+			String version = taskDeploymentProperties.get("version." + label);
+			// if we have version, use that or rely on default version set
+			if (version == null) {
+				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
+						ApplicationType.task);
+			}
+			else {
+				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
+						ApplicationType.task, version);
+			}
 		}
 
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinitionToUse.getRegisteredAppName());

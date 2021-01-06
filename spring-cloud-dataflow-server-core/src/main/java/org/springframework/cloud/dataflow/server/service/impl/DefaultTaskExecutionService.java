@@ -289,6 +289,32 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation =
 				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, launcher.getType());
 
+		// pre prosess command-line args
+		// moving things like app.<label> = arg
+		// into deployment properties if ctr and removing
+		// prefix if simple task.
+		if (taskExecutionInformation.isComposed()) {
+			List<String> composedTaskArguments = new ArrayList<>();
+			commandLineArgs.forEach(arg -> {
+				if (arg.startsWith("app.")) {
+					// composedTaskAppArguments.add(arg);
+					composedTaskArguments.add("--composed-task-app-arguments." + arg);
+				}
+				else {
+					composedTaskArguments.add(arg);
+				}
+			});
+			logger.info("composedTaskArguments {}", StringUtils.collectionToCommaDelimitedString(composedTaskArguments));
+			commandLineArgs = composedTaskArguments;
+		} else {
+			// remove argument prefix for simple task
+			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();
+			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
+			commandLineArgs = commandLineArgs.stream().map(arg -> {
+				return arg.replaceFirst(regex, "");
+			}).collect(Collectors.toList());
+		}
+
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 
 		if (taskExecutionInformation.isComposed()) {
@@ -303,7 +329,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// Get the previous manifest
 		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
-		
+
 		// Analysing task to know what to bring forward from existing
 		TaskAnalysisReport report = taskAnalyzer
 				.analyze(
@@ -329,7 +355,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		TaskManifest taskManifest = createTaskManifest(platformName, request);
 		String taskDeploymentId = null;
-		
+
 		try {
 			if(launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
 				verifyTaskIsNotRunning(taskName, taskExecution, taskLauncher);
@@ -544,7 +570,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	/**
 	 * Create a {@code TaskManifest}
 	 *
-	 * @param platformName name of the platform configuration to run the task on	 * 
+	 * @param platformName name of the platform configuration to run the task on
 	 * @param appDeploymentRequest the details about the deployment to be executed
 	 * @return {@code TaskManifest}
 	 */
@@ -764,7 +790,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		this.logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
+		logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
 
 	}
 

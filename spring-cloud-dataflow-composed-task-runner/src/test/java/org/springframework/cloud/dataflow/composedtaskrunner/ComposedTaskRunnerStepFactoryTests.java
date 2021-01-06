@@ -70,6 +70,11 @@ public class ComposedTaskRunnerStepFactoryTests {
 		public TaskOperations taskOperations;
 
 		@Bean
+		public ComposedTaskProperties composedTaskProperties() {
+			return new ComposedTaskProperties();
+		}
+
+		@Bean
 		public TaskProperties taskProperties() {
 			return new TaskProperties();
 		}
@@ -106,7 +111,7 @@ public class ComposedTaskRunnerStepFactoryTests {
 
 		@Bean
 		public ComposedTaskRunnerStepFactory stepFactory(TaskProperties taskProperties) {
-			return new ComposedTaskRunnerStepFactory(new ComposedTaskProperties(), "FOOBAR");
+			return new ComposedTaskRunnerStepFactory(new ComposedTaskProperties(), "FOOBAR", "BAR");
 		}
 	}
 }

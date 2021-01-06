@@ -265,7 +265,7 @@ public final class DeploymentPropertiesUtils {
 		for (Entry<String, String> property : properties.entrySet()) {
 			String key = property.getKey();
 			if (!key.startsWith("app.") && !key.startsWith("deployer.")
-					&& !key.startsWith("scheduler.")) {
+					&& !key.startsWith("scheduler.") && !key.startsWith("version.")) {
 				throw new IllegalArgumentException(
 						"Only deployment property keys starting with 'app.', 'deployer.' or, 'scheduler.' allowed, got '" + key + "'");
 			}
