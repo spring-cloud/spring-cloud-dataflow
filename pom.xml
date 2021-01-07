@@ -67,7 +67,7 @@
 
 		<spring-cloud-skipper.version>2.7.0-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.2.3.RELEASE</spring-cloud-task.version>
+		<spring-cloud-task.version>2.2.5.RELEASE</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
