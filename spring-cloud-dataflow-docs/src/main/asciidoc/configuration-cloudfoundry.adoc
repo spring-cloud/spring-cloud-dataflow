@@ -478,7 +478,7 @@ Even when configuring the Data Flow server to use 10G of space, there is the pos
 the available space on the local disk. To prevent this, `jar` artifacts downloaded from external sources, i.e., apps registered as `http` or `maven` resources, are automatically deleted whenever the application is deployed, whether or not the deployment request succeeds.
 This behavior is optimal for production environments in which container runtime stability is more critical than I/O latency incurred during deployment.
 In development environments deployment happens more frequently. Additionally, the `jar` artifact (or a lighter `metadata` jar) contains metadata describing application configuration properties
-which is used by various operations related to application configuration, more frequently performed during pre-production activities.
+which is used by various operations related to application configuration, more frequently performed during pre-production activities (see link:https://dataflow.spring.io/docs/applications/application-metadata[Application Metadata] for details).
 To provide a more responsive interactive developer experience at the expense of more disk usage in pre-production environments, you can set the CloudFoundry deployer property `autoDeleteMavenArtifacts` to `false`.
 
 If you deploy the Data Flow server by using the default `port` health check type, you must explicitly monitor the disk space on the server in order to avoid running out space.

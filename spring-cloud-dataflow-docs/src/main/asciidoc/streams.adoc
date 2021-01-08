@@ -174,8 +174,8 @@ dataflow:> stream create --definition "http --server.port=8000 | log" --name myh
 ----
 ====
 
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
-If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>>, you can use tab completion in the shell after typing `--` to get a list of candidate property names.
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-application-properties>>.
+If you have link:https://dataflow.spring.io/docs/applications/application-metadata/#using-application-metadata[registered application property metadata], you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
 The shell provides tab completion for application properties. The `app info --name <appName> --type <appType>` shell command provides additional documentation for all the supported properties.
 
@@ -505,144 +505,6 @@ NOTE: In some cases, the resource is resolved on the server side. In others, the
 URI is passed to a runtime container instance, where it is resolved. See
 the specific documentation of each Data Flow Server for more detail.
 
-[[spring-cloud-dataflow-stream-app-whitelisting]]
-==== Whitelisting Application Properties
-
-Stream and Task applications are Spring Boot applications that are aware of many <<spring-cloud-dataflow-global-properties>>, such as `server.port`, but also families of properties, such as those with the prefix `spring.jmx` and `logging`. When creating your own application, you should create a list of allowed properties so that the shell and the UI can display them first as primary properties when presenting options through tab completion or in drop-down boxes.
-
-To create a list of allowed application properties, create a file named `spring-configuration-metadata-whitelist.properties` in the `META-INF` resource directory. There are two property keys that you can use inside this file. The first key is named `configuration-properties.classes`. The value is a comma-separated list of fully qualified `@ConfigurationProperty` class names. The second key is `configuration-properties.names`, whose value is a comma-separated list of property names. This can contain the full name of the property, such as `server.port`, or a partial name to allow a category of property names, such as `spring.jmx`.
-
-The link:https://github.com/spring-cloud-stream-app-starters[Spring Cloud Stream application starters] are a good place to look for examples of usage. The following example comes from the file sink's `spring-configuration-metadata-whitelist.properties` file:
-
-====
-[source,bash]
-----
-configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
-----
-====
-
-If we also want to add `server.port` to be allowed, it would become the following line:
-
-====
-[source,bash]
-----
-configuration-properties.classes=org.springframework.cloud.stream.app.file.sink.FileSinkProperties
-configuration-properties.names=server.port
-----
-====
-
-[IMPORTANT]
-=====
-Add 'spring-boot-configuration-processor' as an optional dependency to generate configuration metadata file for the properties.
-
-====
-[source,xml]
-----
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-configuration-processor</artifactId>
-    <optional>true</optional>
-</dependency>
-----
-====
-
-The allow support works only for uber-jar application artifacts. At the moment, the metadata properties are not retrievable from the Dockerized application images directly —- a dedicated companion metadata JAR is required.
-
-The `configuration-properties.names` can allow properties that are defined in the property class annotated with `@ConfigurationProperties`. The properties defined with `@Value` annotations cannot be allowed.
-=====
-
-[[spring-cloud-dataflow-stream-app-metadata-artifact]]
-==== Creating and Using a Dedicated Metadata Artifact
-
-You can go a step further in the process of describing the main properties that your stream or task application supports by
-creating a metadata companion artifact. This jar file contains only the Spring boot JSON file about
-configuration properties metadata and the allow file described in the previous section.
-
-The following example shows the contents of such an artifact, for the canonical `log` sink:
-
-====
-[source, bash]
-----
-$ jar tvf log-sink-rabbit-1.2.1.BUILD-SNAPSHOT-metadata.jar
-373848 META-INF/spring-configuration-metadata.json
-   174 META-INF/spring-configuration-metadata-whitelist.properties
-----
-====
-
-Note that the `spring-configuration-metadata.json` file is quite large. This is because it contains the concatenation of _all_ the properties that
-are available at runtime to the `log` sink (some of them come from `spring-boot-actuator.jar`, some of them come from
-`spring-boot-autoconfigure.jar`, some more from `spring-cloud-starter-stream-sink-log.jar`, and so on). Data Flow
-always relies on all those properties, even when a companion artifact is not available, but here all have been merged
-into a single file.
-
-To help with that (you do not want to try to craft this giant JSON file by hand), you can use the
-following plugin in your build:
-
-====
-[source, xml]
-----
-<plugin>
- 	<groupId>org.springframework.cloud</groupId>
- 	<artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
- 	<executions>
- 		<execution>
- 			<id>aggregate-metadata</id>
- 			<phase>compile</phase>
- 			<goals>
- 				<goal>aggregate-metadata</goal>
- 			</goals>
- 		</execution>
- 	</executions>
- </plugin>
-----
-====
-
-NOTE: This plugin comes in addition to the `spring-boot-configuration-processor` that creates the individual JSON files.
-Be sure to configure both.
-
-The benefits of a companion artifact include:
-
-* Being much lighter. (The companion artifact is usually a few kilobytes, as opposed to megabytes for the actual application.) Consequently, they are quicker to download,
-allowing quicker feedback when using, for example, `app info` or the Dashboard UI.
-* As a consequence of being lighter, they can be used in resource-constrained environments (such as PaaS), where metadata is
-the only piece of information needed.
-* For environments that do not deal with Spring Boot uber jars directly (for example, Docker-based runtimes, such as
-Kubernetes or Cloud Foundry), this is the only way to provide metadata about the properties supported by the application.
-
-Remember, though, that this is entirely optional when dealing with uber jars. The uber jar itself also includes the
-metadata.
-
-==== Using the Companion Artifact
-
-Once you have a companion artifact, you need to make the system aware of it so that it can be used.
-
-When registering a single application with `app register`, you can use the optional `--metadata-uri` option in the shell:
-
-====
-[source,bash,subs=attributes]
-----
-dataflow:>app register --name log --type sink
-    --uri maven://org.springframework.cloud.stream.app:log-sink:2.1.0.RELEASE
-    --metadata-uri maven://org.springframework.cloud.stream.app:log-sink:jar:metadata:2.1.0.RELEASE
-----
-====
-
-When registering several files by using the `app import` command, the file should contain a `<type>.<name>.metadata` line
-in addition to each `<type>.<name>` line. Strictly speaking, doing so is optional (if some apps have it but some others do not, it works), but it is best practice.
-
-The following example shows a Dockerized application, where the metadata artifact is being hosted in a Maven repository (retrieving
-it through `http://` or `file://` would also work).
-
-====
-[source, properties]
-----
-...
-source.http=docker:springcloudstream/http-source-rabbit:latest
-source.http.metadata=maven://org.springframework.cloud.stream.app:http-source-rabbit:jar:metadata:2.1.0.RELEASE
-...
-----
-====
-
 [[custom-applications]]
 ==== Creating Custom Applications
 
@@ -705,7 +567,8 @@ dataflow:>stream info ticktock
 ----
 ====
 
-==== Application Properties
+[[spring-cloud-dataflow-application-properties]]
+==== Stream Application Properties
 
 Application properties are the properties associated with each application in the stream. When the application is deployed, the application properties are applied to the application through
 command-line arguments or environment variables, depending on the underlying deployment implementation.
@@ -719,10 +582,10 @@ dataflow:> stream create --definition "time | log" --name ticktock
 ----
 ====
 
-The `app info --name <appName> --type <appType>` shell command displays the allowed application properties for the application.
-For more about property allowing, see <<spring-cloud-dataflow-stream-app-whitelisting>>.
+The `app info --name <appName> --type <appType>` shell command displays the exposed application properties for the application.
+For more about exposed properties, see link:https://dataflow.spring.io/docs/applications/application-metadata[Application Metadata].
 
-The following listing shows the allowed properties for the `time` application:
+The following listing shows the exposed properties for the `time` application:
 
 ====
 [source,bash,options="nowrap"]
@@ -746,7 +609,7 @@ dataflow:> app info --name time --type source
 ----
 ====
 
-The following listing shows the allowed properties for the `log` application:
+The following listing shows the exposed properties for the `log` application:
 
 ====
 [source,bash,options="nowrap"]
@@ -775,7 +638,7 @@ dataflow:> stream create --definition "time --fixed-delay=5 | log --level=WARN" 
 ====
 
 Note that, in the preceding example, the `fixed-delay` and `level` properties defined for the `time` and `log` applications are the "`short-form`" property names provided by the shell completion.
-These "`short-form`" property names are applicable only for the allowed properties. In all other cases, you should use only fully qualified property names.
+These "`short-form`" property names are applicable only for the exposed properties. In all other cases, you should use only fully qualified property names.
 
 [[spring-cloud-dataflow-global-properties]]
 ==== Common Application Properties
