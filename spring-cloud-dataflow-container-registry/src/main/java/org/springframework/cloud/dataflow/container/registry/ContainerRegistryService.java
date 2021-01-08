@@ -167,6 +167,10 @@ public class ContainerRegistryService {
 
 		// Find a registry configuration that matches the image's registry host
 		ContainerRegistryConfiguration registryConf = this.registryConfigurations.get(containerImage.getRegistryHost());
+		if (registryConf == null) {
+			throw new ContainerRegistryException(
+					"Could not find an Registry Configuration for: " + containerImage.getRegistryHost());
+		}
 
 		// Retrieve a registry authorizer that supports the configured authorization type.
 		RegistryAuthorizer registryAuthorizer = this.registryAuthorizerMap.get(registryConf.getAuthorizationType());
