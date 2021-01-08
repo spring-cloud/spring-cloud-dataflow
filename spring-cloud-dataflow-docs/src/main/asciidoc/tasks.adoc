@@ -254,8 +254,8 @@ dataflow:> task create --definition "timestamp --timestamp.format=\"yyyy\"" --na
 ----
 ====
 
-This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-stream-app-whitelisting>>.
-If you have <<spring-cloud-dataflow-stream-app-metadata-artifact, registered application property metadata>> you can use tab completion in the shell after typing `--` to get a list of candidate property names.
+This shorthand behavior is discussed more in the section on <<spring-cloud-dataflow-application-properties>>.
+If you have link:https://dataflow.spring.io/docs/applications/application-metadata/#using-application-metadata[registered application property metadata], you can use tab completion in the shell after typing `--` to get a list of candidate property names.
 
 The shell provides tab completion for application properties. The `app info --name <appName> --type <appType>` shell command provides additional documentation for all the supported properties. The supported task `<appType>` is `task`.
 
