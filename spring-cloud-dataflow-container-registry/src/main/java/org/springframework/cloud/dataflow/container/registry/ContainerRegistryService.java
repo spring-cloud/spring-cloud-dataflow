@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.container.registry.authorization.DockerOAuth2RegistryAuthorizer;
 import org.springframework.cloud.dataflow.container.registry.authorization.RegistryAuthorizer;
 import org.springframework.http.HttpEntity;
@@ -62,9 +61,7 @@ public class ContainerRegistryService {
 
 	private static final String IMAGE_BLOB_DIGEST_PATH = "v2/{repository}/blobs/{digest}";
 
-	private final RestTemplate containerRestTemplate;
-
-	private final RestTemplate noSslVerificationContainerRestTemplate;
+	private final ContainerImageRestTemplateFactory containerImageRestTemplateFactory;
 
 	private final ContainerImageParser containerImageParser;
 
@@ -72,13 +69,11 @@ public class ContainerRegistryService {
 
 	private final Map<ContainerRegistryConfiguration.AuthorizationType, RegistryAuthorizer> registryAuthorizerMap;
 
-	public ContainerRegistryService(@Qualifier("containerRestTemplate") RestTemplate containerRestTemplate,
-			@Qualifier("noSslVerificationContainerRestTemplate") RestTemplate trustAnySslRestTemplate,
+	public ContainerRegistryService(ContainerImageRestTemplateFactory containerImageRestTemplateFactory,
 			ContainerImageParser containerImageParser,
 			Map<String, ContainerRegistryConfiguration> registryConfigurations,
 			List<RegistryAuthorizer> registryAuthorizers) {
-		this.containerRestTemplate = containerRestTemplate;
-		this.noSslVerificationContainerRestTemplate  = trustAnySslRestTemplate;
+		this.containerImageRestTemplateFactory = containerImageRestTemplateFactory;
 		this.containerImageParser = containerImageParser;
 		this.registryConfigurations = registryConfigurations;
 		this.registryAuthorizerMap = new HashMap<>();
@@ -113,8 +108,9 @@ public class ContainerRegistryService {
 					.path(TAGS_LIST_PATH)
 					.build().expand(repositoryName);
 
-			RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
-					this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
+			RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
+					containerRegistryConfiguration.isDisableSslVerification(), containerRegistryConfiguration.isUseHttpProxy());
+
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
 			return  (manifest != null) ? (List<String>) manifest.getBody().get(TAGS_FIELD) : null;
@@ -147,8 +143,9 @@ public class ContainerRegistryService {
 					.path(CATALOG_LIST_PATH)
 					.build();
 
-			RestTemplate requestRestTemplate = containerRegistryConfiguration.isDisableSslVerification() ?
-					this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
+
+			RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
+					containerRegistryConfiguration.isDisableSslVerification(), containerRegistryConfiguration.isUseHttpProxy());
 
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
@@ -186,8 +183,8 @@ public class ContainerRegistryService {
 					"Could not obtain authorized headers for: " + containerImage + ", config:" + registryConf);
 		}
 
-		RestTemplate requestRestTemplate = registryConf.isDisableSslVerification() ?
-				this.noSslVerificationContainerRestTemplate : this.containerRestTemplate;
+		RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
+				registryConf.isDisableSslVerification(), registryConf.isUseHttpProxy());
 
 		return new ContainerRegistryRequest(containerImage, registryConf, authHttpHeaders, requestRestTemplate);
 	}
