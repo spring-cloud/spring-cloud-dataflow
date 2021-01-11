@@ -114,3 +114,7 @@ We welcome contributions! Follow this [link](https://github.com/spring-cloud/spr
 Then navigate to `Intellij IDEA > Preferences` and select the Eclipse Code Formatter.  Select the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
 Enable the `Eclipse code formatter` by clicking `Use the Eclipse code formatter` then click the *OK* button.
 ** NOTE: If you configure the `Eclipse Code Formatter` from `File > Other Settings > Default Settings` it will set this policy across all of your Intellij projects.
+
+## License
+
+Spring Cloud Data Flow is Open Source software released under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.html).
