@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1605014671496,
+  "id": 2,
+  "iteration": 1609965919220,
   "links": [
     {
       "$$hashKey": "object:1867",
@@ -27,6 +27,7 @@
   ],
   "panels": [
     {
+      "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
@@ -35,7 +36,8 @@
         "y": 0
       },
       "id": 47,
-      "title": "Row title",
+      "panels": [],
+      "title": "",
       "type": "row"
     },
     {
@@ -48,7 +50,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 2,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 1
@@ -71,7 +73,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 5
       },
       "id": 43,
       "panels": [],
@@ -79,7 +81,7 @@
       "type": "row"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -104,7 +106,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 4
+        "y": 6
       },
       "id": 36,
       "options": {
@@ -136,7 +138,7 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "fieldConfig": {
         "defaults": {
           "custom": {},
@@ -161,7 +163,7 @@
         "h": 5,
         "w": 4,
         "x": 4,
-        "y": 4
+        "y": 6
       },
       "id": 33,
       "options": {
@@ -217,7 +219,7 @@
         "h": 5,
         "w": 4,
         "x": 8,
-        "y": 4
+        "y": 6
       },
       "id": 34,
       "options": {
@@ -275,7 +277,7 @@
         "h": 5,
         "w": 4,
         "x": 12,
-        "y": 4
+        "y": 6
       },
       "id": 37,
       "options": {
@@ -333,7 +335,7 @@
         "h": 5,
         "w": 8,
         "x": 16,
-        "y": 4
+        "y": 6
       },
       "id": 41,
       "options": {
@@ -369,7 +371,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 11
       },
       "id": 26,
       "panels": [],
@@ -396,7 +398,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 12
       },
       "hiddenSeries": false,
       "id": 24,
@@ -497,7 +499,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 10
+        "y": 12
       },
       "hiddenSeries": false,
       "id": 20,
@@ -594,7 +596,7 @@
         "h": 9,
         "w": 4,
         "x": 16,
-        "y": 10
+        "y": 12
       },
       "hiddenSeries": false,
       "id": 38,
@@ -699,7 +701,7 @@
         "h": 9,
         "w": 4,
         "x": 20,
-        "y": 10
+        "y": 12
       },
       "hiddenSeries": false,
       "id": 40,
@@ -797,7 +799,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 19
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 30,
@@ -898,7 +900,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 19
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 39,
@@ -998,7 +1000,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 19
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 18,
@@ -1090,7 +1092,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 30
       },
       "id": 9,
       "panels": [],
@@ -1117,7 +1119,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 29
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 2,
@@ -1215,7 +1217,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 29
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 6,
@@ -1313,7 +1315,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 29
+        "y": 31
       },
       "hiddenSeries": false,
       "id": 5,
@@ -1417,7 +1419,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 38
+        "y": 40
       },
       "hiddenSeries": false,
       "id": 10,
@@ -1516,7 +1518,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 38
+        "y": 40
       },
       "hiddenSeries": false,
       "id": 11,
@@ -1615,7 +1617,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 38
+        "y": 40
       },
       "hiddenSeries": false,
       "id": 27,
@@ -1699,7 +1701,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "This metric reflects the ratio of data compression in the batches of data the producer sends to the broker. A higher compression rate indicates greater efficiency. If this metric drops, it could indicate that there’s a problem with the shape of data or that a rogue producer is sending uncompressed data.",
       "fieldConfig": {
         "defaults": {
@@ -1714,7 +1716,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 47
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 4,
@@ -1797,7 +1799,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "Average number of bytes sent per partition per request (e.g. data size send to different partition on the topic). \nIndicates partition skewness, partition throughput etc. Helps for partition strategy optimizations.",
       "fieldConfig": {
         "defaults": {
@@ -1812,7 +1814,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 47
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 12,
@@ -1910,7 +1912,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 47
+        "y": 49
       },
       "hiddenSeries": false,
       "id": 22,
@@ -2009,7 +2011,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 56
+        "y": 58
       },
       "hiddenSeries": false,
       "id": 7,
@@ -2108,7 +2110,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 56
+        "y": 58
       },
       "hiddenSeries": false,
       "id": 28,
@@ -2208,7 +2210,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 56
+        "y": 58
       },
       "hiddenSeries": false,
       "id": 29,
@@ -2294,7 +2296,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 65
+        "y": 67
       },
       "id": 16,
       "panels": [],
@@ -2321,7 +2323,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 66
+        "y": 68
       },
       "hiddenSeries": false,
       "id": 21,
@@ -2418,7 +2420,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 66
+        "y": 68
       },
       "hiddenSeries": false,
       "id": 31,
@@ -2521,7 +2523,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 66
+        "y": 68
       },
       "hiddenSeries": false,
       "id": 19,
@@ -2605,7 +2607,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 77
       },
       "id": 49,
       "panels": [],
@@ -2632,7 +2634,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 76
+        "y": 78
       },
       "hiddenSeries": false,
       "id": 50,
@@ -2751,7 +2753,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 76
+        "y": 78
       },
       "hiddenSeries": false,
       "id": 52,
@@ -2866,7 +2868,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 76
+        "y": 78
       },
       "hiddenSeries": false,
       "id": 51,
@@ -2956,7 +2958,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 85
+        "y": 87
       },
       "id": 54,
       "panels": [],
@@ -2975,7 +2977,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 86
+        "y": 88
       },
       "id": 56,
       "options": {
@@ -2989,7 +2991,7 @@
       "type": "text"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "The total number of records processed by a source node.",
       "fieldConfig": {
         "defaults": {
@@ -3015,7 +3017,7 @@
         "h": 5,
         "w": 4,
         "x": 8,
-        "y": 86
+        "y": 88
       },
       "id": 57,
       "options": {
@@ -3047,7 +3049,7 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "The total number of records dropped within this task.",
       "fieldConfig": {
         "defaults": {
@@ -3073,7 +3075,7 @@
         "h": 5,
         "w": 4,
         "x": 12,
-        "y": 86
+        "y": 88
       },
       "id": 58,
       "options": {
@@ -3105,7 +3107,7 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "The total number of enforced processing for this task.",
       "fieldConfig": {
         "defaults": {
@@ -3131,7 +3133,7 @@
         "h": 5,
         "w": 4,
         "x": 16,
-        "y": 86
+        "y": 88
       },
       "id": 59,
       "options": {
@@ -3163,7 +3165,7 @@
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": "ScdfPrometheus",
       "description": "Ratio between the total number of commit and process operations for this task.",
       "fieldConfig": {
         "defaults": {
@@ -3189,7 +3191,7 @@
         "h": 5,
         "w": 4,
         "x": 20,
-        "y": 86
+        "y": 88
       },
       "id": 60,
       "options": {
@@ -3240,7 +3242,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 91
+        "y": 93
       },
       "hiddenSeries": false,
       "id": 61,
@@ -3343,7 +3345,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 91
+        "y": 93
       },
       "hiddenSeries": false,
       "id": 62,
@@ -3446,7 +3448,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 91
+        "y": 93
       },
       "hiddenSeries": false,
       "id": 66,
@@ -3549,7 +3551,7 @@
         "h": 9,
         "w": 8,
         "x": 0,
-        "y": 100
+        "y": 102
       },
       "hiddenSeries": false,
       "id": 64,
@@ -3646,7 +3648,7 @@
         "h": 9,
         "w": 8,
         "x": 8,
-        "y": 100
+        "y": 102
       },
       "hiddenSeries": false,
       "id": 65,
@@ -3743,7 +3745,7 @@
         "h": 9,
         "w": 8,
         "x": 16,
-        "y": 100
+        "y": 102
       },
       "hiddenSeries": false,
       "id": 63,
@@ -3831,8 +3833,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "str2",
-          "value": "str2"
+          "text": "str",
+          "value": "str"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values(stream_name)",
@@ -3856,13 +3858,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": [
-            "word-count"
-          ],
-          "value": [
-            "word-count"
-          ]
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "ScdfPrometheus",
         "definition": "label_values({stream_name=\"$stream_name\"},application_name)",
@@ -3873,24 +3871,19 @@
         "name": "application_name",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "All",
             "value": "$__all"
           },
           {
             "selected": false,
-            "text": "log2",
-            "value": "log2"
+            "text": "log",
+            "value": "log"
           },
           {
             "selected": false,
-            "text": "time2",
-            "value": "time2"
-          },
-          {
-            "selected": true,
-            "text": "word-count",
-            "value": "word-count"
+            "text": "time",
+            "value": "time"
           }
         ],
         "query": "label_values({stream_name=\"$stream_name\"},application_name)",
@@ -3926,8 +3919,13 @@
           },
           {
             "selected": false,
-            "text": "str2.word-count-v1-0",
-            "value": "str2.word-count-v1-0"
+            "text": "str.log-v1-0",
+            "value": "str.log-v1-0"
+          },
+          {
+            "selected": false,
+            "text": "str.time-v1-0",
+            "value": "str.time-v1-0"
           }
         ],
         "query": "label_values({application_name=~\"$application_name\",stream_name=~\"$stream_name\"},application_guid)",
@@ -3964,5 +3962,5 @@
   "timezone": "",
   "title": "SCDF Kafka",
   "uid": "WXuXivdMz",
-  "version": 18
+  "version": 1
 }
