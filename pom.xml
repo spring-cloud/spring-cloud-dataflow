@@ -55,7 +55,7 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>2.5.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>2.5.2</spring-cloud-dataflow-ui.version>
 
 		<spring-cloud-dataflow-common.version>2.6.3</spring-cloud-dataflow-common.version>
 		<spring-cloud-deployer.version>2.4.3</spring-cloud-deployer.version>
