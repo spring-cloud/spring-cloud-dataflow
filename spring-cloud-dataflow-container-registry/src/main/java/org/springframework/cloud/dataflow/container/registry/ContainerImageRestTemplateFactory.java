@@ -141,6 +141,7 @@ public class ContainerImageRestTemplateFactory {
 		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
 		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
+		mediaTypeList.add(new MediaType("application", "*+json"));
 		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
