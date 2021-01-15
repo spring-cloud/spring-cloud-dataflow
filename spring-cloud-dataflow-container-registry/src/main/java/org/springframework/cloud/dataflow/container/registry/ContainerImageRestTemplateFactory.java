@@ -40,7 +40,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -138,20 +138,14 @@ public class ContainerImageRestTemplateFactory {
 	}
 
 	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy) {
-		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter() {
-			@Override
-			public boolean supports(Class<?> clazz) {
-				return true;
-			}
-		};
-		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
-		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
-		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
 		// Set the HTTP proxy if configured.
 		if (withHttpProxy) {
+			if (!properties.getHttpProxy().isEnabled()) {
+				throw new ContainerRegistryException("Registry Configuration uses a HttpProxy but non is configured!");
+			}
 			HttpHost proxy = new HttpHost(properties.getHttpProxy().getHost(), properties.getHttpProxy().getPort());
 			clientBuilder.setProxy(proxy);
 		}
@@ -162,8 +156,15 @@ public class ContainerImageRestTemplateFactory {
 								.setRedirectStrategy(new DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy())
 								.build());
 
+		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
+		// Therefore extend the MappingJackson2HttpMessageConverter media-types to include application/octet-stream.
+		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
+		List<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
+		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);
+
 		return restTemplateBuilder
-				.additionalMessageConverters(octetToStringMessageConverter)
+				.additionalMessageConverters(octetSupportJsonConverter)
 				.requestFactory(() -> customRequestFactory)
 				.build();
 	}
