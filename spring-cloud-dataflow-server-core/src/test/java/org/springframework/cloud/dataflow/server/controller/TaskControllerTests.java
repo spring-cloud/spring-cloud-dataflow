@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -63,6 +65,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -139,6 +142,12 @@ public class TaskControllerTests {
 	@Autowired
 	private CommonApplicationProperties appsProperties;
 
+	private boolean initialized = false;
+
+	private static List<String> SAMPLE_ARGUMENT_LIST;
+
+	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -147,6 +156,17 @@ public class TaskControllerTests {
 		launcherRepository.save(new Launcher("default", "local", taskLauncher));
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn("testID");
 
+		if (!initialized) {
+			SAMPLE_ARGUMENT_LIST = new LinkedList<>();
+			SAMPLE_ARGUMENT_LIST.add("--password=password");
+			SAMPLE_ARGUMENT_LIST.add("--regular=value");
+
+			SAMPLE_CLEANSED_ARGUMENT_LIST = new LinkedList<>();
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("--password=******");
+			SAMPLE_CLEANSED_ARGUMENT_LIST.add("--regular=value");
+
+			initialized = true;
+		}
 
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put("app.test.key1", "value1");
@@ -157,6 +177,7 @@ public class TaskControllerTests {
 
 		final TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
 		taskExecutionRunning.setStartTime(new Date());
+		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
 		when(taskExplorer.getTaskExecution(taskExecutionRunning.getExecutionId())).thenReturn(taskExecutionRunning);
 		this.dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
@@ -166,6 +187,8 @@ public class TaskControllerTests {
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
 		taskExecutionComplete.setExitCode(0);
+		taskExecutionComplete.setArguments(SAMPLE_ARGUMENT_LIST);
+
 		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
 		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
 		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
@@ -351,7 +374,7 @@ public class TaskControllerTests {
 				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")))
 				.andExpect(jsonPath("$.content[2].dslText", is("task-ooz")));
 	}
-	
+
 	@Test
 	public void testFindByDslTextAndNameBadRequest() throws Exception {
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("search", "f")
@@ -566,10 +589,10 @@ public class TaskControllerTests {
 
 	@Test
 	public void testDisplaySingleTask() throws Exception {
-		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
+		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp --password=password");
 		repository.save(taskDefinition);
 
-		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
+		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp --regular=value");
 		repository.save(taskDefinition2);
 
 		TaskDefinition taskDefinition3 = new TaskDefinition("myTask3", "timestamp");
@@ -577,17 +600,29 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json("{name: \"myTask\"}"))
-				.andExpect(content().json("{status: \"RUNNING\"}"))
-				.andExpect(content().json("{dslText: \"timestamp\"}"));
+		verifyTaskArgs(
+				SAMPLE_CLEANSED_ARGUMENT_LIST,
+				"$.lastTaskExecution.",
+				mockMvc
+						.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().json("{name: \"myTask\"}"))
+						.andExpect(content().json("{status: \"RUNNING\"}"))
+						.andExpect(content().json("{dslText: \"timestamp --password='******'\"}")));
 
-		mockMvc.perform(get("/tasks/definitions/myTask2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json("{name: \"myTask2\"}"))
-				.andExpect(content().json("{status: \"COMPLETE\"}"))
-				.andExpect(content().json("{dslText: \"timestamp\"}"));
+		verifyTaskArgs(
+				SAMPLE_CLEANSED_ARGUMENT_LIST,
+				"$.lastTaskExecution.",
+				mockMvc
+						.perform(get("/tasks/definitions/myTask2").accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk())
+						.andExpect(content().json("{name: \"myTask2\"}"))
+						.andExpect(content().json("{status: \"COMPLETE\"}"))
+						.andExpect(content().json("{dslText: \"timestamp --regular=value\"}")));
 
-		mockMvc.perform(get("/tasks/definitions/myTask3").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc
+				.perform(get("/tasks/definitions/myTask3").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
 				.andExpect(content().json("{name: \"myTask3\"}"))
 				.andExpect(content().json("{status: \"UNKNOWN\"}"))
 				.andExpect(content().json("{dslText: \"timestamp\"}"));
@@ -601,10 +636,10 @@ public class TaskControllerTests {
 
 	@Test
 	public void testGetAllTasks() throws Exception {
-		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp");
+		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp --password=123");
 		repository.save(taskDefinition);
 
-		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp");
+		TaskDefinition taskDefinition2 = new TaskDefinition("myTask2", "timestamp --regular=value");
 		repository.save(taskDefinition2);
 
 		TaskDefinition taskDefinition3 = new TaskDefinition("myTask3", "timestamp");
@@ -612,11 +647,16 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].lastTaskExecution.",
+				mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+						.andDo(print()))
 				.andExpect(jsonPath("$.content", hasSize(3)))
-				.andExpect(jsonPath("$.content[*].name", containsInAnyOrder("myTask", "myTask2", "myTask3")))
-				.andExpect(jsonPath("$.content[*].dslText", containsInAnyOrder("timestamp", "timestamp", "timestamp")))
-				.andExpect(jsonPath("$.content[*].status", containsInAnyOrder("RUNNING", "COMPLETE", "UNKNOWN")));
+				.andExpect(jsonPath("$.content[*].name",
+						containsInAnyOrder("myTask", "myTask2", "myTask3")))
+				.andExpect(jsonPath("$.content[*].dslText",
+						containsInAnyOrder("timestamp --password='******'", "timestamp --regular=value", "timestamp")))
+				.andExpect(jsonPath("$.content[*].status",
+						containsInAnyOrder("RUNNING", "COMPLETE", "UNKNOWN")));
 	}
 
 	@Test
@@ -649,5 +689,13 @@ public class TaskControllerTests {
 		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk());
 
+	}
+
+	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {
+		ra.andExpect(jsonPath(prefix + "arguments", hasSize(expectedArgs.size())));
+		for (int argCount = 0; argCount < expectedArgs.size(); argCount++) {
+			ra.andExpect(jsonPath(String.format(prefix + "arguments[%d]", argCount), is(expectedArgs.get(argCount))));
+		}
+		return ra;
 	}
 }
