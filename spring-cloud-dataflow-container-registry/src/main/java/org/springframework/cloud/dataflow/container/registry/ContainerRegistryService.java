@@ -113,7 +113,7 @@ public class ContainerRegistryService {
 
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
-			return  (manifest != null) ? (List<String>) manifest.getBody().get(TAGS_FIELD) : null;
+			return  (List<String>) manifest.getBody().get(TAGS_FIELD);
 		}
 		catch (Exception e) {
 			logger.error(String.format("Exception getting tag information for the %s from %s", repositoryName, registryName));
@@ -149,7 +149,7 @@ public class ContainerRegistryService {
 
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
-			return (manifest != null) ? manifest.getBody() : null;
+			return manifest.getBody();
 		}
 		catch (Exception e) {
 			logger.error(String.format("Exception getting repositories from %s", registryName));
@@ -209,7 +209,7 @@ public class ContainerRegistryService {
 
 		ResponseEntity<T> manifest = registryRequest.getRestTemplate().exchange(manifestUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
-		return (manifest != null) ? manifest.getBody() : null;
+		return manifest.getBody();
 	}
 
 	public <T> T getImageBlob(ContainerRegistryRequest registryRequest, String configDigest, Class<T> responseClassType) {
@@ -227,6 +227,6 @@ public class ContainerRegistryService {
 		ResponseEntity<T> blob = registryRequest.getRestTemplate().exchange(blobUriComponents.toUri(),
 				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 
-		return (blob != null) ? blob.getBody() : null;
+		return blob.getBody();
 	}
 }

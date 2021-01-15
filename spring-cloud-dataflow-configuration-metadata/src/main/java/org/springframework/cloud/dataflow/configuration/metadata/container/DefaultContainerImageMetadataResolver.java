@@ -68,12 +68,21 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 								imageName));
 			}
 
-			String configBlob = this.containerRegistryService.getImageBlob(registryRequest, configDigest, String.class);
+			Object configBlobObj = this.containerRegistryService.getImageBlob(registryRequest, configDigest, Object.class);
 
 			// Parse the config blob string into JSON instance.
 			try {
-				Map<String, Object> configBlobMap = new ObjectMapper().readValue(configBlob, Map.class);
-
+				Map<String, Object> configBlobMap = null;
+				if (configBlobObj instanceof String) {
+					configBlobMap = new ObjectMapper().readValue((String) configBlobObj, Map.class);
+				} else if (configBlobObj instanceof Map) {
+					configBlobMap = (Map<String, Object>) configBlobObj;
+				} else {
+					throw new ContainerRegistryException(
+							String.format(
+									"Configuration json for image [%s] with digest [%s] has incorrect Config Blog element",
+									imageName, configDigest));
+				}
 				if (!isNotNullMap(configBlobMap.get("config"))) {
 					throw new ContainerRegistryException(
 							String.format(

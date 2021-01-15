@@ -138,10 +138,14 @@ public class ContainerImageRestTemplateFactory {
 	}
 
 	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy) {
-		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter();
+		StringHttpMessageConverter octetToStringMessageConverter = new StringHttpMessageConverter() {
+			@Override
+			public boolean supports(Class<?> clazz) {
+				return true;
+			}
+		};
 		List<MediaType> mediaTypeList = new ArrayList(octetToStringMessageConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
-		mediaTypeList.add(new MediaType("application", "*+json"));
 		octetToStringMessageConverter.setSupportedMediaTypes(mediaTypeList);
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
