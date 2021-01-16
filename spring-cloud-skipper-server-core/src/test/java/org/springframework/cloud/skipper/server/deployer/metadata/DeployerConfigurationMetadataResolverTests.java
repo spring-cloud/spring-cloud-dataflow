@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeployerConfigurationMetadataResolverTests {
 
-	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 21;
+	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 23;
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withUserConfiguration(Config.class);
