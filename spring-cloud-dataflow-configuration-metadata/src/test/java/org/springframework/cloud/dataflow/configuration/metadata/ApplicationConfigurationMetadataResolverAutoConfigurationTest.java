@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -177,7 +179,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 				eq(HttpMethod.GET), any(), eq(Map.class));
 		// Get Blobs
 		verify(containerRestTemplate).exchange(eq(new URI("https://demo.goharbor.io/v2/test/image/blobs/test_digest")),
-				eq(HttpMethod.GET), any(), eq(String.class));
+				eq(HttpMethod.GET), any(), eq(Map.class));
 	}
 
 	@Test
@@ -199,7 +201,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 				eq(HttpMethod.GET), any(), eq(Map.class));
 		// Get Blobs
 		verify(noSslVerificationContainerRestTemplate).exchange(eq(new URI("https://demo.repository.io/v2/disabledssl/image/blobs/test_digest")),
-				eq(HttpMethod.GET), any(), eq(String.class));
+				eq(HttpMethod.GET), any(), eq(Map.class));
 	}
 
 	@ImportAutoConfiguration({ ContainerRegistryAutoConfiguration.class, ApplicationConfigurationMetadataResolverAutoConfiguration.class })
@@ -221,7 +223,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 		}
 
 		@Bean(name = "noSslVerificationContainerRestTemplate")
-		RestTemplate noSslVerificationContainerRestTemplate() throws URISyntaxException {
+		RestTemplate noSslVerificationContainerRestTemplate() throws URISyntaxException, JsonProcessingException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			// demo.repository.io
@@ -249,8 +251,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			when(restTemplate
 					.exchange(
 							eq(new URI("https://demo.repository.io/v2/disabledssl/image/blobs/test_digest")),
-							eq(HttpMethod.GET), any(), eq(String.class)))
-					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(blobValue(), HttpStatus.OK));
 
 			// demo.goharbor.io
 			HttpHeaders authenticateHeader2 = new HttpHeaders();
@@ -265,7 +267,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 		}
 
 		@Bean(name = "containerRestTemplate")
-		RestTemplate containerRestTemplate() throws URISyntaxException {
+		RestTemplate containerRestTemplate() throws URISyntaxException, JsonProcessingException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			when(restTemplate
@@ -283,14 +285,14 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			when(restTemplate
 					.exchange(
 							eq(new URI("https://demo.goharbor.io/v2/test/image/blobs/test_digest")),
-							eq(HttpMethod.GET), any(), eq(String.class)))
-					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(blobValue(), HttpStatus.OK));
 
 			return restTemplate;
 		}
 
 		@Bean(name = "containerRestTemplateWithHttpProxy")
-		RestTemplate containerRestTemplateWithHttpProxy() throws URISyntaxException {
+		RestTemplate containerRestTemplateWithHttpProxy() throws URISyntaxException, JsonProcessingException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			when(restTemplate
@@ -308,14 +310,14 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			when(restTemplate
 					.exchange(
 							eq(new URI("https://demo2.goharbor.io/v2/test/image/blobs/test_digest")),
-							eq(HttpMethod.GET), any(), eq(String.class)))
-					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(blobValue(), HttpStatus.OK));
 
 			return restTemplate;
 		}
 
 		@Bean(name = "noSslVerificationContainerRestTemplateWithHttpProxy")
-		RestTemplate noSslVerificationContainerRestTemplateWithHttpProxy() throws URISyntaxException {
+		RestTemplate noSslVerificationContainerRestTemplateWithHttpProxy() throws URISyntaxException, JsonProcessingException {
 			RestTemplate restTemplate = Mockito.mock(RestTemplate.class);
 
 			// demo.repository.io
@@ -343,8 +345,8 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 			when(restTemplate
 					.exchange(
 							eq(new URI("https://demo2.repository.io/v2/disabledssl/image/blobs/test_digest")),
-							eq(HttpMethod.GET), any(), eq(String.class)))
-					.thenReturn(new ResponseEntity<>("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", HttpStatus.OK));
+							eq(HttpMethod.GET), any(), eq(Map.class)))
+					.thenReturn(new ResponseEntity<>(blobValue(), HttpStatus.OK));
 
 			// demo.goharbor.io
 			HttpHeaders authenticateHeader2 = new HttpHeaders();
@@ -357,5 +359,10 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 			return restTemplate;
 		}
+
+		public Map blobValue() throws JsonProcessingException {
+			return new ObjectMapper().readValue("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }", Map.class);
+		}
+
 	}
 }
