@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -96,7 +98,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabels() {
+	public void getImageLabels() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -112,7 +114,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabelsFromPrivateRepository() {
+	public void getImageLabelsFromPrivateRepository() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -129,10 +131,8 @@ public class DefaultContainerImageMetadataResolverTest {
 
 	@Test(expected = ContainerRegistryException.class)
 	public void getImageLabelsMissingRegistryConfiguration() {
-
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
-
-		resolver.getImageLabels("test/image:latest");
+		resolver.getImageLabels("somehost:8083/test/image:latest");
 	}
 
 	@Test(expected = ContainerRegistryException.class)
@@ -183,7 +183,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabelsWithInvalidLabels() {
+	public void getImageLabelsWithInvalidLabels() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -217,7 +217,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	private void mockBlogRestTemplateCall(String jsonResponse, String registryHost, String registryPort,
-			String repository, String digest) {
+			String repository, String digest) throws JsonProcessingException {
 
 		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
 				.scheme("https")
@@ -230,8 +230,8 @@ public class DefaultContainerImageMetadataResolverTest {
 				eq(blobUriComponents.toUri()),
 				eq(HttpMethod.GET),
 				any(HttpEntity.class),
-				eq(String.class)))
-				.thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.OK));
+				eq(Map.class)))
+				.thenReturn(new ResponseEntity<>(new ObjectMapper().readValue(jsonResponse, Map.class), HttpStatus.OK));
 	}
 
 	private class MockedDefaultContainerImageMetadataResolver extends DefaultContainerImageMetadataResolver {
