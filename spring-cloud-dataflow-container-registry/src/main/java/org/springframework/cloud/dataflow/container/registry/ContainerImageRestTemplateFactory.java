@@ -21,7 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +43,36 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
+ * Created RestTemplates can be configured to use Http Proxy and/or bypassing the SSL verification.
+ *
+ * For configuring a Http Proxy in need to:
+ *  1. Add http proxy configuration using the spring.cloud.dataflow.container.httpProxy.* properties.
+ *  2. For every {@link ContainerRegistryConfiguration} that has to interact via the http proxy set the use-http-proxy
+ *     flag to true. For example:
+ *     <code>spring.cloud.dataflow.container.registry-configurations[reg-name].use-http-proxy=ture</code>
+ *
+ * Following example configures the default (e.g. DockerHub) registry to use the HTTP Proxy (my-proxy.test:8080)
+ * while the dockerhub-mirror and the private-snapshots registry configurations allow direct communication:
+ * <code>
+ *     spring:
+ *   cloud:
+ *     dataflow:
+ *       container:
+ *         httpProxy:
+ *           host: my-proxy.test
+ *           port: 8080
+ *         registry-configurations:
+ *           default:
+ *             use-http-proxy: true
+ *           dockerhub-mirror:
+ *             authorization-type: anonymous
+ *             registry-host: containerhub.aaa.bbb.ccc:8888
+ *           private-snapshots:
+ *             authorization-type: anonymous
+ *             registry-host: containerhub.aaa.bbb.ccc:7777
+ * </code>
+ *
  * @author Christian Tzolov
  */
 public class ContainerImageRestTemplateFactory {
@@ -52,8 +81,16 @@ public class ContainerImageRestTemplateFactory {
 
 	private final ContainerRegistryProperties properties;
 
-	private final Map<CacheKey, RestTemplate> restTemplateCache;
+	/**
+	 * Depends on the disablesSslVerification and useHttpProxy a 4 different RestTemplate configurations might be
+	 * used at the same time for interacting with different container registries.
+	 * The cache map allows reusing the RestTemplates for given useHttpProxy and disablesSslVerification combination.
+	 */
+	private final ConcurrentHashMap<CacheKey, RestTemplate> restTemplateCache;
 
+	/**
+	 * Unique key for any useHttpProxy and disablesSslVerification combination.
+	 */
 	private static class CacheKey {
 		private final boolean disablesSslVerification;
 		private final boolean useHttpProxy;
@@ -103,7 +140,7 @@ public class ContainerImageRestTemplateFactory {
 		}
 	}
 
-	public RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy)
+	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy)
 			throws NoSuchAlgorithmException, KeyManagementException {
 
 		if (!skipSslVerification) {
