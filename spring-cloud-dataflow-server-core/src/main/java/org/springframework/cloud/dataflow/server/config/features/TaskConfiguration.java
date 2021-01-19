@@ -51,7 +51,16 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoServic
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
-import org.springframework.cloud.dataflow.server.service.impl.*;
+import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskJobService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveService;
+import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.TaskPlatformConfigurationProperties;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -75,9 +84,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @Configuration
 @ConditionalOnTasksEnabled
-@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class,
-	DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class,
-	TaskPlatformConfigurationProperties.class
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
+		DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class,
+		TaskPlatformConfigurationProperties.class
 })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
@@ -189,7 +198,7 @@ public class TaskConfiguration {
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService) {
-		DefaultTaskExecutionService defaultTaskExecutionService =  new DefaultTaskExecutionService(
+		DefaultTaskExecutionService defaultTaskExecutionService = new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,

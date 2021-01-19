@@ -55,8 +55,8 @@ import org.springframework.core.io.ResourceLoader;
 
 @Configuration
 @Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
-@EnableConfigurationProperties({TaskConfigurationProperties.class, CommonApplicationProperties.class,
-	SchedulerServiceProperties.class, TaskPlatformConfigurationProperties.class})
+@EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
+		SchedulerServiceProperties.class, TaskPlatformConfigurationProperties.class })
 public class SchedulerConfiguration {
 
 	private static Logger logger = LoggerFactory.getLogger(SchedulerConfiguration.class);
@@ -67,19 +67,19 @@ public class SchedulerConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-		List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
-		AppRegistryService registry, ResourceLoader resourceLoader,
-		TaskConfigurationProperties taskConfigurationProperties,
-		DataSourceProperties dataSourceProperties,
-		ApplicationConfigurationMetadataResolver metaDataResolver,
-		SchedulerServiceProperties schedulerServiceProperties,
-		AuditRecordService auditRecordService,
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+			AppRegistryService registry, ResourceLoader resourceLoader,
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSourceProperties dataSourceProperties,
+			ApplicationConfigurationMetadataResolver metaDataResolver,
+			SchedulerServiceProperties schedulerServiceProperties,
+			AuditRecordService auditRecordService,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-			taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
-			taskConfigurationProperties, dataSourceProperties,
-			this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService,
-			composedTaskRunnerConfigurationProperties);
+				taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
+				taskConfigurationProperties, dataSourceProperties,
+				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService,
+				composedTaskRunnerConfigurationProperties);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {
