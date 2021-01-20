@@ -700,7 +700,7 @@ You can configure the entry point style as follows:
 
 [source,options=nowrap]
 ----
-scheduler.kubernetes.entryPointStyle=<Entry Point Style>
+deployer.kubernetes.entryPointStyle=<Entry Point Style>
 ----
 
 
@@ -725,13 +725,13 @@ Using the `boot` Entry Point Style corresponds to using the `exec` style `ENTRYP
 
 ==== Environment Variables
 
-To influence the environment settings for a given application, you can take advantage of the `spring.cloud.scheduler.kubernetes.environmentVariables` property.
+To influence the environment settings for a given application, you can take advantage of the `spring.cloud.deployer.kubernetes.environmentVariables` property.
 For example, a common requirement in production settings is to influence the JVM memory arguments.
 You can achieve this by using the `JAVA_TOOL_OPTIONS` environment variable, as the following example shows:
 
 [source]
 ----
-scheduler.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
+deployer.kubernetes.environmentVariables=JAVA_TOOL_OPTIONS=-Xmx1024m
 ----
 
 NOTE: When deploying stream applications or launching task applications where some of the properties may contain sensitive information, use the `shell` or `boot` as the `entryPointStyle`. This is because the `exec` (default) converts all properties to command line arguments and thus may not be secure in some environments.
@@ -765,7 +765,7 @@ The following example shows how you can individually configure containers:
 
 [source,options=nowrap]
 ----
-scheduler.kubernetes.imagePullPolicy=Always
+deployer.kubernetes.imagePullPolicy=Always
 ----
 
 
@@ -793,7 +793,7 @@ Once you have created the secret, use the `imagePullSecret` property to set the 
 
 [source]
 ----
-scheduler.kubernetes.imagePullSecret=mysecret
+deployer.kubernetes.imagePullSecret=mysecret
 ----
 
 
@@ -842,7 +842,7 @@ Then you can configure the service account to use on a per-schedule basis as fol
 
 [source,options=nowrap]
 ----
-scheduler.kubernetes.taskServiceAccountName=myserviceaccountname
+deployer.kubernetes.taskServiceAccountName=myserviceaccountname
 ----
 
 
