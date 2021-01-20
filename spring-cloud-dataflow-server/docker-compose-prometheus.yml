@@ -1,6 +1,7 @@
 version: '3'
 
 # Extends the default docker-compose.yml with Prometheus/Grafana monitoring configuration
+# In order to set the version of the dataflow prometheus, Use 'export DATAFLOW_VERSION=local-server-image-tag'
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-prometheus.yml up
 services:
 
@@ -38,13 +39,13 @@ services:
       - micrometer.prometheus-proxy.tcp-port=7001
 
   grafana:
-    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:-latest}
     container_name: grafana
     ports:
       - '3000:3000'
 
   prometheus:
-    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:?DATAFLOW_VERSION is not set! Use 'export DATAFLOW_VERSION=local-server-image-tag'}
+    image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:-latest}
     container_name: prometheus
     ports:
       - '9090:9090'
