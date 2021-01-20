@@ -98,6 +98,12 @@ Fore more information please refer to the [Git documentation, Formatting and Whi
 
 ----
 
+## Running Spring Cloud Data Server
+
+For executing the SCDF server, the main entry point is [SCDF Server Folder](./spring-cloud-dataflow-server). It has all the docker-compose defined to launch the server locally. One can also launch it via IDE if they can select the `src` folder of [SCDF Server Folder](./spring-cloud-dataflow-server/src) and enable to debug the main server file: [DataFlowServerApplication](./spring-cloud-dataflow-server/src/main/java/org/springframework/cloud/dataflow/server/single/DataFlowServerApplication.java)
+
+----
+
 ## Contributing
 
 We welcome contributions! Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc) for more information on how to contribute.
