@@ -8,7 +8,7 @@
 		<relativePath />
 	</parent>
 	<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-	<version>2.7.1-SNAPSHOT</version>
+	<version>2.7.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>spring-cloud-dataflow-dependencies</name>
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from
@@ -27,103 +27,103 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell-core</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-completion</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-core-dsl</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-core</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-client</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-registry</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-container-registry</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server-core</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-autoconfigure</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-ui</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 				<type>test-jar</type>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-audit</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-platform-kubernetes</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-test</artifactId>
-				<version>2.7.1-SNAPSHOT</version>
+				<version>2.7.2-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
