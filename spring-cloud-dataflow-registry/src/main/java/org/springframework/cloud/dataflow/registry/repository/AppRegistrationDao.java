@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Component
-public class AppRegistrationDao {
+public class AppRegistrationDao implements CustomAppRegistrationRepository {
 
   private final EntityManager entityManager;
 
@@ -46,6 +46,7 @@ public class AppRegistrationDao {
     this.entityManager = entityManager;
   }
 
+  @Override
   public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
       String name, String version, boolean defaultVersion, Pageable pageable) {
     CriteriaBuilder cb = entityManager.getCriteriaBuilder();

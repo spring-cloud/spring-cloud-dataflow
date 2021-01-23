@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -34,6 +35,7 @@ import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDa
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -217,6 +219,9 @@ import static org.mockito.Mockito.when;
 @EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TestDependencies extends WebMvcConfigurationSupport {
+
+	@Autowired
+	EntityManager entityManager;
 
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
@@ -413,7 +418,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			AppResourceCommon appResourceService, AuditRecordService auditRecordService) {
 		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService,
-				mock(AppRegistrationDao.class));
+				new AppRegistrationDao(entityManager));
 	}
 
 	@Bean

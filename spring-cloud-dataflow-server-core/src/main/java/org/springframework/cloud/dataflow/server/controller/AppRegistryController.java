@@ -132,7 +132,7 @@ public class AppRegistryController {
 	 * @param version optional findByTaskVersionEquals parameter
 	 * @return the list of registered applications
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends AppRegistrationResource> list(
 			Pageable pageable,
@@ -142,36 +142,8 @@ public class AppRegistryController {
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false) boolean defaultVersion) {
 
-		// Page<AppRegistration> pagedRegistrations = (defaultVersion) ?
-		// this.appRegistryService.findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(type, search,
-		// pageable)
-		// : this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
-		// pageable);
-
 		Page<AppRegistration> pagedRegistrations = this.appRegistryService
 				.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, search, version, defaultVersion, pageable);
-
-		return pagedResourcesAssembler.toModel(pagedRegistrations, this.appRegistryAssembler);
-	}
-
-	@GetMapping("test")
-	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<? extends AppRegistrationResource> test(
-			Pageable pageable,
-			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
-			@RequestParam(value = "type", required = false) ApplicationType type,
-			@RequestParam(required = false) String search,
-			@RequestParam(required = false) String version,
-			@RequestParam(required = false) boolean defaultVersion) {
-
-		 Page<AppRegistration> pagedRegistrations = (defaultVersion) ?
-		 this.appRegistryService.findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(type, search,
-		 pageable)
-		 : this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
-		 pageable);
-
-//		Page<AppRegistration> pagedRegistrations = this.appRegistryService
-//				.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, search, version, defaultVersion, pageable);
 
 		return pagedResourcesAssembler.toModel(pagedRegistrations, this.appRegistryAssembler);
 	}
