@@ -105,13 +105,25 @@ public interface AppRegistryService {
 	Page<AppRegistration> findAll(Pageable pageable);
 
 	/**
-	 * @param type appliation type
+	 * @param type application type
 	 * @param name application name
 	 * @param pageable Pagination information
 	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the
 	 * pagination.
 	 */
 	Page<AppRegistration> findAllByTypeAndNameIsLike(ApplicationType type, String name, Pageable pageable);
+
+	/**
+	 * @param type application type
+	 * @param name application name
+	 * @param version application version
+	 * @param defaultVersion application default version
+	 * @param pageable Pagination information
+	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the
+	 * pagination.
+	 */
+	Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
+			String name, String version, boolean defaultVersion, Pageable pageable);
 
 
 	/**

@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -123,6 +124,7 @@ import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -227,8 +229,10 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
-			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService);
+				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService,
+				AppRegistrationDao appRegistrationDao) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService,
+					appRegistrationDao);
 		}
 
 		@Bean

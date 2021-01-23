@@ -22,11 +22,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Bootstrap class for the Spring Cloud Data Flow Server.
@@ -45,6 +47,7 @@ import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
 		CloudFoundryDeployerAutoConfiguration.class,
 		KubernetesAutoConfiguration.class
 })
+@ComponentScan(basePackageClasses = {AppRegistrationDao.class})
 @EnableDataFlowServer
 public class DataFlowServerApplication {
 

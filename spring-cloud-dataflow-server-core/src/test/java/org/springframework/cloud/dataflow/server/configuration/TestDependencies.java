@@ -58,6 +58,7 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -411,7 +412,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
 			AppResourceCommon appResourceService, AuditRecordService auditRecordService) {
-		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService);
+		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService,
+				mock(AppRegistrationDao.class));
 	}
 
 	@Bean

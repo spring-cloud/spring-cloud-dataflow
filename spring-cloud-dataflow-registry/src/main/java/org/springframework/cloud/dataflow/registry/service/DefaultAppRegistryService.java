@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
@@ -87,15 +88,20 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	protected final AuditServiceUtils auditServiceUtils;
 
+	private final AppRegistrationDao appRegistrationDao;
+
 	public DefaultAppRegistryService(AppRegistrationRepository appRegistrationRepository,
-			AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
+			AppResourceCommon appResourceCommon, AuditRecordService auditRecordService,
+			AppRegistrationDao appRegistrationDao) {
 		Assert.notNull(appResourceCommon, "'appResourceCommon' must not be null");
 		Assert.notNull(appRegistrationRepository, "'appRegistrationRepository' must not be null");
 		Assert.notNull(auditRecordService, "'auditRecordService' must not be null");
+		Assert.notNull(appRegistrationDao, "'appRegistrationDao' must not be null");
 		this.appResourceCommon = appResourceCommon;
 		this.appRegistrationRepository = appRegistrationRepository;
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
+		this.appRegistrationDao = appRegistrationDao;
 	}
 
 	@Override
@@ -180,6 +186,13 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			result = this.appRegistrationRepository.findAllByType(type, pageable);
 		}
 		return result;
+	}
+
+	@Override
+	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
+			String name, String version, boolean defaultVersion, Pageable pageable) {
+		return appRegistrationDao.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, name, version,
+				defaultVersion, pageable);
 	}
 
 	@Override

@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -128,7 +129,7 @@ public class BootVersionsCompletionProviderTests {
 
 			return new DefaultAppRegistryService(mock(AppRegistrationRepository.class),
 					new AppResourceCommon(new MavenProperties(), new FileSystemResourceLoader()),
-					mock(DefaultAuditRecordService.class)) {
+					mock(DefaultAuditRecordService.class), mock(AppRegistrationDao.class)) {
 
 				@Override
 				public boolean appExist(String name, ApplicationType type) {
