@@ -17,8 +17,9 @@
     "management.metrics.tags.instance.index": ${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
 
     "management.metrics.tags.application": ${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
-    "management.metrics.tags.service": "stream-application"
 
+    "wavefront.application.name": ${spring.cloud.dataflow.stream.name:unknown}
+    "wavefront.application.service": ${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
   "version": "1.2.0.RELEASE"
   "deploymentProperties":
     "spring.cloud.deployer.group": "ticktock"
