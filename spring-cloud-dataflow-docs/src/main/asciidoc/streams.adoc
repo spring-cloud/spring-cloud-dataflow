@@ -415,19 +415,19 @@ and Spring Boot 2.1.x:
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://dataflow.spring.io/rabbitmq-maven-latest
+|https://dataflow.spring.io/rabbitmq-maven-einstein
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-maven
 
 |RabbitMQ + Docker
-|https://dataflow.spring.io/rabbitmq-docker-latest
+|https://dataflow.spring.io/rabbitmq-docker-einstein
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-rabbit-docker
 
 |Apache Kafka + Maven
-|https://dataflow.spring.io/kafka-maven-latest
+|https://dataflow.spring.io/kafka-maven-einstein
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-maven
 
 |Apache Kafka + Docker
-|https://dataflow.spring.io/kafka-docker-latest
+|https://dataflow.spring.io/kafka-docker-einstein
 |https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
@@ -469,7 +469,7 @@ As an example, if you would like to register all out-of-the-box stream applicati
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-einstein
 ----
 ====
 
@@ -478,7 +478,7 @@ Alternatively, you can register all the stream applications with the Rabbit bind
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-einstein
 ----
 ====
 
