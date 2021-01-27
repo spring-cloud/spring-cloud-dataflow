@@ -32,6 +32,8 @@ import org.springframework.util.Assert;
  */
 public class TaskJobExecutionRel {
 
+	private final Double ctrPercentComplete;
+
 	private final TaskExecution taskExecution;
 
 	private final List<Long> jobExecutionIds;
@@ -58,9 +60,24 @@ public class TaskJobExecutionRel {
 	 * @param taskManifest to be associated with the task execution
 	 */
 	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest) {
-		Assert.notNull(taskExecution, "taskExecution must not be null");;
+		this(taskExecution, jobExecutionIds, taskManifest, null);
+	}
+
+
+	/**
+	 * Constructor that establishes the relationship between a {@link TaskExecution} and
+	 * the Job Execution Ids of the jobs that were executed within it.
+	 *
+	 * @param taskExecution to be associated with the job execution ids.
+	 * @param jobExecutionIds to be associated with the task execution.
+	 * @param taskManifest to be associated with the task execution
+	 * @param ctrPercentComplete the estimated percentage of a composed task execution that has completed.
+	 */
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest, Double ctrPercentComplete) {
+		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.taskExecution = taskExecution;
 		this.taskManifest = taskManifest;
+		this.ctrPercentComplete = ctrPercentComplete;
 		if (jobExecutionIds == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}
@@ -89,5 +106,9 @@ public class TaskJobExecutionRel {
 	 */
 	public TaskManifest getTaskManifest() {
 		return taskManifest;
+	}
+
+	public Double getCtrPercentComplete() {
+		return ctrPercentComplete;
 	}
 }

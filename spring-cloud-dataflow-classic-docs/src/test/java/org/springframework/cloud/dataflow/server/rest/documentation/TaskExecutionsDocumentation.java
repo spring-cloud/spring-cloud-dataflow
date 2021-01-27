@@ -116,6 +116,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("jobExecutionIds").description("The job executions ids of the task executions"),
 								fieldWithPath("errorMessage").description("The error message of the task execution"),
 								fieldWithPath("externalExecutionId").description("The external id of the task execution"),
+								fieldWithPath("ctrTaskCompletePercent").description("The completed percentage of a composed task execution"),
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),

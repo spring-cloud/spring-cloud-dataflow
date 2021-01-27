@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -1159,6 +1161,75 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertFalse(request.getDefinition().getProperties().containsKey("app.foo"));
 			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
 			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentComplete() throws InterruptedException{
+			TaskDefinition taskDefinition = prepCTRForPercentTests();
+			Date startTime = new Date();
+			Calendar endCalendar = Calendar.getInstance();
+			endCalendar.setTime(startTime);
+			endCalendar.add(Calendar.SECOND, 5);
+			Date endTime = endCalendar.getTime();
+			initializeCtrForPercentTests(startTime, endTime, taskDefinition);
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					new Date(), Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			Thread.sleep(2500);
+			assertTrue(this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition, taskExecution.getExecutionId()) > .5);
+			this.taskExecutionRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, endTime, "BAR");
+			assertEquals(Double.valueOf(1.0), this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition,taskExecution.getExecutionId()));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentNoDefinition() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+			taskExecutionRepositoryService.createTaskExecution("seqTask");
+			assertNull(this.taskExecutionService.getComposedTaskPercentCompleted(null,1L));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentEpoch() {
+			TaskDefinition taskDefinition = prepCTRForPercentTests();
+			Date startTime = new Date(0);
+			Date endTime = startTime;
+			initializeCtrForPercentTests(startTime, endTime, taskDefinition);
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					new Date(), Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			assertNull(this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition, taskExecution.getExecutionId()));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentInvalidTaskExecutionId() {
+			TaskDefinition taskDefinition = prepCTRForPercentTests();
+			initializeCtrForPercentTests(new Date(), new Date(), taskDefinition);
+			Exception ex = Assertions.assertThrows(IllegalArgumentException.class,
+					() -> this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition, 58L));
+			assertEquals("composedTaskExecutionId does not exist", ex.getMessage());
+		}
+
+		private TaskDefinition prepCTRForPercentTests() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			TaskDefinition taskDefinition = new TaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(taskDefinition);
+			return taskDefinition;
+		}
+
+		private TaskExecution initializeCtrForPercentTests(Date startTime, Date endTime, TaskDefinition taskDefinition) {
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					startTime, Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			assertNull(this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition,taskExecution.getExecutionId()));
+			this.taskExecutionRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, endTime, "BAR");
+			assertEquals(Double.valueOf(1.0), this.taskExecutionService.getComposedTaskPercentCompleted(taskDefinition,taskExecution.getExecutionId()));
+			return taskExecution;
 		}
 
 		@Test

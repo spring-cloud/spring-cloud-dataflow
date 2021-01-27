@@ -55,11 +55,12 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 			TaskDefinitionResource taskDefinitionResource, boolean manifest) {
 		TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
+		Double ctrTaskCompletePercent = this.taskExecutionService.getComposedTaskPercentCompleted(taskExecutionAwareTaskDefinition.getTaskDefinition(), taskExecution.getExecutionId());
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		TaskExecutionResource taskExecutionResource = (manifest && taskManifest != null) ?
-				new TaskExecutionResource(taskExecution, taskManifest) :
-				new TaskExecutionResource(taskExecution);
+				new TaskExecutionResource(taskExecution, taskManifest, ctrTaskCompletePercent) :
+				new TaskExecutionResource(taskExecution, ctrTaskCompletePercent);
 		taskDefinitionResource.setLastTaskExecution(taskExecutionResource);
 		return taskDefinitionResource;
 	}
@@ -78,7 +79,8 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 		TaskDefinitionResource taskDefinitionResource = new TaskDefinitionResource(
 				taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),
 				argumentSanitizer.sanitizeTaskDsl(taskExecutionAwareTaskDefinition.getTaskDefinition()),
-				taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription());
+				taskExecutionAwareTaskDefinition.getTaskDefinition().getDescription(),
+				taskExecutionAwareTaskDefinition.getCtrTaskCompletePercent());
 		taskDefinitionResource.setComposed(composed);
 		if (taskExecutionAwareTaskDefinition.getLatestTaskExecution() != null) {
 			updateTaskExecutionResource(taskExecutionAwareTaskDefinition, taskDefinitionResource,

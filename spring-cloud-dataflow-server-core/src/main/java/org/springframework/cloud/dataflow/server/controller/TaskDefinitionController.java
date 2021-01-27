@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -78,6 +79,8 @@ public class TaskDefinitionController {
 
 	private final TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider;
 
+	private final TaskExecutionService taskExecutionService;
+
 	/**
 	 * Creates a {@code TaskDefinitionController} that delegates
 	 * <ul>
@@ -93,17 +96,20 @@ public class TaskDefinitionController {
 	 */
 	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
 			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
-			TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
+			TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider,
+			TaskExecutionService taskExecutionService) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
 		Assert.notNull(taskDefinitionAssemblerProvider, "taskDefinitionAssemblerProvider must not be null");
+		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		this.explorer = taskExplorer;
 		this.repository = repository;
 		this.taskSaveService = taskSaveService;
 		this.taskDeleteService = taskDeleteService;
 		this.taskDefinitionAssemblerProvider = taskDefinitionAssemblerProvider;
+		this.taskExecutionService = taskExecutionService;
 	}
 
 	/**

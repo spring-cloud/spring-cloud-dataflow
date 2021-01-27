@@ -19,8 +19,10 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -684,6 +686,45 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public TaskManifest findTaskManifestById(Long id) {
 		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
 		return this.dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId());
+	}
+
+	@Override
+	public Double getComposedTaskPercentCompleted(TaskDefinition taskDefinition, Long composedTaskExecutionId) {
+		final double complete = 1.0;
+		Double result = null;
+		long completeTaskCount = 0L;
+		long taskExecutionDuration = 0;
+
+		if(taskDefinition != null) {
+			TaskNode taskNode = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true).parse();
+			if (taskNode.isComposed()) {
+				TaskExecution currentTaskExecution = this.taskExplorer.getTaskExecution(composedTaskExecutionId);
+				Assert.notNull(currentTaskExecution, "composedTaskExecutionId does not exist");
+				if(currentTaskExecution.getEndTime() != null) {
+					return complete;
+				}
+				Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(taskDefinition.getName());
+				Iterator<TaskExecution> taskExecutionIterator = getTaskExecutions(taskExecutionIds).iterator();
+				while (taskExecutionIterator.hasNext()) {
+					TaskExecution taskExecution = taskExecutionIterator.next();
+					if (taskExecution.getEndTime() != null) {
+						completeTaskCount++;
+						taskExecutionDuration = taskExecutionDuration + (taskExecution.getEndTime().getTime() - taskExecution.getStartTime().getTime());
+					}
+				}
+				long averageTaskDuration;
+				if (taskExecutionDuration > 0L) {
+					averageTaskDuration = taskExecutionDuration / completeTaskCount;
+
+					long currentTaskDuration = new Date().getTime() - currentTaskExecution.getStartTime().getTime();
+					result = (double)currentTaskDuration/averageTaskDuration;
+					if (result > complete && currentTaskExecution.getEndTime() != null) {
+						result = complete;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {

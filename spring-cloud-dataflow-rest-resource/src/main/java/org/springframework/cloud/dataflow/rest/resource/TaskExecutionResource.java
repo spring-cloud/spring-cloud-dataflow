@@ -109,6 +109,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	private Map<String, String> deploymentProperties;
 
 	/**
+	 * The estimated percentage of a composed task execution that has completed.
+	 */
+	private Double ctrTaskCompletePercent;
+
+	/**
 	 * The platform for which the task was executed.
 	 */
 	private String platformName;
@@ -136,6 +141,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
+		this.ctrTaskCompletePercent = taskJobExecutionRel.getCtrPercentComplete();
 		if (taskJobExecutionRel.getJobExecutionIds() == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}
@@ -152,7 +158,6 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
 		}
 	}
-
 	/**
 	 * Constructor to initialize the TaskExecutionResource using a
 	 * {@link TaskExecution}.
@@ -160,6 +165,28 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskExecution contains the {@link TaskExecution}
 	 */
 	public TaskExecutionResource(TaskExecution taskExecution) {
+		this(taskExecution, (Double)null);
+	}
+	/**
+	 * Constructor to initialize the TaskExecutionResource using a
+	 * {@link TaskExecution} and {@link TaskManifest}.
+	 *
+	 * @param taskExecution contains the {@link TaskExecution}
+	 * @param taskManifest contains the (@link TaskManifest}
+	 */
+	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest) {
+		this(taskExecution, taskManifest, null);
+	}
+
+
+	/**
+	 * Constructor to initialize the TaskExecutionResource using a
+	 * {@link TaskExecution}.
+	 *
+	 * @param taskExecution contains the {@link TaskExecution}
+	 * @param ctrTaskCompletePercent the estimated percentage of a composed task execution that has completed.
+	 */
+	public TaskExecutionResource(TaskExecution taskExecution, Double ctrTaskCompletePercent) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
@@ -170,6 +197,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskExecution.getEndTime();
 		this.errorMessage = taskExecution.getErrorMessage();
 		this.externalExecutionId = taskExecution.getExternalExecutionId();
+		this.ctrTaskCompletePercent = ctrTaskCompletePercent;
 	}
 
 	/**
@@ -179,21 +207,13 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskExecution contains the {@link TaskExecution}
 	 * @param taskManifest contains the (@link TaskManifest}
 	 */
-	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest) {
-		Assert.notNull(taskExecution, "taskExecution must not be null");
+	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest, Double ctrTaskCompletePercent) {
+		this(taskExecution, ctrTaskCompletePercent);
 		Assert.notNull(taskManifest, "taskManifest must not be null");
-		this.executionId = taskExecution.getExecutionId();
-		this.exitCode = taskExecution.getExitCode();
-		this.taskName = taskExecution.getTaskName();
-		this.exitMessage = taskExecution.getExitMessage();
-		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
-		this.startTime = taskExecution.getStartTime();
-		this.endTime = taskExecution.getEndTime();
-		this.errorMessage = taskExecution.getErrorMessage();
-		this.externalExecutionId = taskExecution.getExternalExecutionId();
 		this.resourceUrl = taskManifest.getTaskDeploymentRequest().getResource().toString();
 		this.appProperties = taskManifest.getTaskDeploymentRequest().getDefinition().getProperties();
 		this.deploymentProperties = taskManifest.getTaskDeploymentRequest().getDeploymentProperties();
+		this.ctrTaskCompletePercent = ctrTaskCompletePercent;
 	}
 
 	public long getExecutionId() {
@@ -254,6 +274,10 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public Map<String, String> getDeploymentProperties() {
 		return deploymentProperties;
+	}
+
+	public Double getCtrTaskCompletePercent() {
+		return ctrTaskCompletePercent;
 	}
 
 	public String getPlatformName() {
