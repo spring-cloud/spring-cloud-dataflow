@@ -618,21 +618,21 @@ public class DataFlowIT {
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS
 	// -----------------------------------------------------------------------
-	@DisplayName("Test Analytics Counters")
+	@DisplayName("Test Analytics")
 	@Test
 	public void analyticsCounter() {
 
 		if (!prometheusPresent() && !influxPresent()) {
-			logger.info("stream-analytics-counter-test: SKIP - no metrics configured!");
+			logger.info("stream-analytics-test: SKIP - no metrics configured!");
 		}
 
 		Assumptions.assumeTrue(prometheusPresent() || influxPresent());
 
-		logger.info("stream-analytics-counter-test");
+		logger.info("stream-analytics-test");
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("httpCounter")
-				.definition("http | counter --counter.name=my_http_counter --counter.tag.expression.msgSize=payload.length()")
+				.name("httpAnalytics")
+				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
 				.deploy(testDeploymentProperties())) {
 
@@ -649,27 +649,23 @@ public class DataFlowIT {
 
 			// Prometheus tests
 			Assumptions.assumingThat(this::prometheusPresent, () -> {
-				logger.info("stream-analytics-counter-test: Prometheus");
+				logger.info("stream-analytics-test: Prometheus");
 
 				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 				Awaitility.await().until(() -> (int) JsonPath.parse(
-						httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_counter_total"))
+						httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 						.read("$.data.result.length()") > 0);
 
-				JsonAssertions.assertThatJson(httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_counter_total"))
-						.isEqualTo(resourceToString("classpath:/my_http_counter_total.json"));
-
-				JsonAssertions.assertThatJson(httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=message_my_http_counter_total"))
-						.inPath("$.data.result[0].value[1]")
-						.isEqualTo("\"3\"");
+				JsonAssertions.assertThatJson(httpGet(testProperties.getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+						.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
 			});
 
 			// InfluxDB tests
 			Assumptions.assumingThat(this::influxPresent, () -> {
-				logger.info("stream-analytics-counter-test: InfluxDB");
+				logger.info("stream-analytics-test: InfluxDB");
 
 				// Wait for ~1 min for Micrometer to send first metrics to Influx.
-				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\""))
+				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
 						.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
 
 				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
@@ -683,7 +679,7 @@ public class DataFlowIT {
 						.isEqualTo("myinfluxdb");
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-				String myHttpCounter = httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_counter\"");
+				String myHttpCounter = httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]")
 						.isEqualTo(String.format("\"%s\"", message1.length()));
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]")
@@ -734,8 +730,10 @@ public class DataFlowIT {
 	private Map<String, String> testDeploymentProperties() {
 		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log")
+				.put("app.*.logging.file", "${PID}-test.log") // Keep it for Boot 2.x compatibility.
+				.put("app.*.logging.file.name", "${PID}-test.log")
 				.put("app.*.endpoints.logfile.sensitive", "false")
+				.put("app.*.endpoints.logfile.enabled", "true")
 				.put("app.*.management.endpoints.web.exposure.include", "*")
 				.put("app.*.spring.cloud.streamapp.security.enabled", "false");
 

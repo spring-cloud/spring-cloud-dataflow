@@ -5,16 +5,16 @@
     "result": [
       {
         "metric": {
-          "__name__": "my_http_counter_total",
-          "application": "httpCounter-counter-sink",
+          "__name__": "my_http_analytics_total",
+          "application": "httpAnalytics-analytics-sink",
           "application_guid": "${json-unit.ignore}",
-          "application_name": "counter",
+          "application_name": "analytics",
           "application_type": "sink",
           "instance": "prometheus-rsocket-proxy:9096",
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "14",
-          "stream_name": "httpCounter"
+          "stream_name": "httpAnalytics"
         },
         "value": [
           "${json-unit.ignore}",
@@ -23,16 +23,16 @@
       },
       {
         "metric": {
-          "__name__": "my_http_counter_total",
-          "application": "httpCounter-counter-sink",
+          "__name__": "my_http_analytics_total",
+          "application": "httpAnalytics-analytics-sink",
           "application_guid": "${json-unit.ignore}",
-          "application_name": "counter",
+          "application_name": "analytics",
           "application_type": "sink",
           "instance": "prometheus-rsocket-proxy:9096",
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "29",
-          "stream_name": "httpCounter"
+          "stream_name": "httpAnalytics"
         },
         "value": [
           "${json-unit.ignore}",
@@ -41,16 +41,16 @@
       },
       {
         "metric": {
-          "__name__": "my_http_counter_total",
-          "application": "httpCounter-counter-sink",
+          "__name__": "my_http_analytics_total",
+          "application": "httpAnalytics-analytics-sink",
           "application_guid": "${json-unit.ignore}",
-          "application_name": "counter",
+          "application_name": "analytics",
           "application_type": "sink",
           "instance": "prometheus-rsocket-proxy:9096",
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "36",
-          "stream_name": "httpCounter"
+          "stream_name": "httpAnalytics"
         },
         "value": [
           "${json-unit.ignore}",
