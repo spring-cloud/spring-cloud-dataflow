@@ -48,17 +48,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-batch</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-server-core</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.flywaydb</groupId>
-					<artifactId>flyway-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-task-batch</artifactId>
@@ -123,6 +113,17 @@
 			<artifactId>plexus-utils</artifactId>
 			<version>${plexus.utils.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-common-security-config-web</artifactId>
+			<version>${spring-cloud-common-security-config.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer.prometheus</groupId>
+			<artifactId>prometheus-rsocket-spring</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
