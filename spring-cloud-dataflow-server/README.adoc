@@ -154,7 +154,7 @@ SCDF, Skipper servers installed, or the versions Stream and Task apps:
 ----
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe
    -Dtest.docker.compose.paths=docker-compose.yml,docker-compose-influxdb.yml,docker-compose-postgres.yml,docker-compose-rabbitmq.yml
-   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-latest
+   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-einstein
    -Dtest.docker.compose.dataflow.version=2.7.0-SNAPSHOT
    -Dtest.docker.compose.skipper.version=2.6.0-SNAPSHOT
 ----
@@ -164,7 +164,7 @@ The `test.docker.compose.paths` property accepts comma separated list of docker 
 ----
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe \
    -Dtest.docker.compose.paths=docker-compose.yml,docker-compose-dood.yml,docker-compose-prometheus.yml \
-   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-latest \
+   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-einstein \
    -Dtest.docker.compose.task.apps.uri=https://dataflow.spring.io/task-docker-latest \
    -Dtest.docker.compose.dataflow.version=2.7.0-SNAPSHOT \
    -Dtest.docker.compose.skipper.version=2.6.0-SNAPSHOT \
