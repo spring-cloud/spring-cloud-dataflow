@@ -198,17 +198,18 @@ public class TaskDefinitionController {
 		PagedModel<? extends TaskDefinitionResource> taskDefinitionResources = assembler.toModel(taskExecutionAwareTaskDefinitions,
 				this.taskDefinitionAssemblerProvider.getTaskDefinitionAssembler(manifest));
 		// Classify the composed task elements by iterating through the task definitions that are part of this page.
-		updateComposedTaskElement(taskDefinitionResources.getContent());
+		updateComposedTaskElement(taskDefinitionResources.getContent(), taskDefinitions);
 		return taskDefinitionResources;
 	}
 
 
-	private Collection<? extends TaskDefinitionResource> updateComposedTaskElement(Collection<? extends TaskDefinitionResource> taskDefinitionResources) {
+	private Collection<? extends TaskDefinitionResource> updateComposedTaskElement(Collection<? extends TaskDefinitionResource> taskDefinitionResources,
+			Page<TaskDefinition> taskDefinitions) {
 		Map<String, TaskDefinitionResource> taskNameResources = new HashMap<>();
 		for (TaskDefinitionResource taskDefinitionResource: taskDefinitionResources) {
 			taskNameResources.put(taskDefinitionResource.getName(), taskDefinitionResource);
 		}
-		for (TaskDefinitionResource taskDefinition: taskDefinitionResources) {
+		for (TaskDefinition taskDefinition: taskDefinitions) {
 			TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 			TaskNode taskNode = taskParser.parse();
 			if (taskNode.isComposed()) {
