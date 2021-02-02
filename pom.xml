@@ -102,6 +102,7 @@
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
+		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-autoconfigure</module>
 		<module>spring-cloud-dataflow-server</module>
@@ -117,7 +118,6 @@
 		<module>spring-cloud-starter-dataflow-server</module>
 		<module>spring-cloud-starter-dataflow-ui</module>
 		<module>spring-cloud-dataflow-audit</module>
-		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-test</module>
 	</modules>
 	<dependencyManagement>
