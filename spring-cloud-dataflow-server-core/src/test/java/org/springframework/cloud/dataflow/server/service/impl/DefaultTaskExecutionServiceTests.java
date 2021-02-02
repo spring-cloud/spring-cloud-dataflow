@@ -567,68 +567,64 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 
 		private void setupUpgradeForCommandLineArgsChange() throws IOException {
-			 TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			 TaskManifest manifest = new TaskManifest();
-			 manifest.setPlatformName("default");
-			 AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
-					 new FileUrlResource("src/test/resources/apps/foo-task"));
-			 manifest.setTaskDeploymentRequest(request);
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
 
-			 this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			 this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			 this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
 
-			 initializeSuccessfulRegistry(appRegistry);
+			initializeSuccessfulRegistry(appRegistry);
 
-			 when(taskLauncher.launch(any())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 
-			 Map<String,String> deploymentProperties = new HashMap<>(1);
+			Map<String,String> deploymentProperties = new HashMap<>(1);
 
-			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("--foo=bar"));
-			 TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			 assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
-			 assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("--foo=bar"));
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
 
-			 this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
-			 lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			 assertEquals(1, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
-		 }
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
+			lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+		}
 
-		 @Test
-		 @DirtiesContext
-		 public void testCommandLineArgAppPrefixes() throws IOException {
-			 this.setupCommandLineArgAppPrefixes();
+		@Test
+		@DirtiesContext
+		public void testCommandLineArgAppPrefixes() throws IOException {
+			this.setupCommandLineArgAppPrefixes();
 
-			 verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
-		 }
+			verify(this.taskLauncher, times(0)).destroy(TASK_NAME_ORIG);
+		}
 
-		 private void setupCommandLineArgAppPrefixes() throws IOException {
-			  TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			  TaskManifest manifest = new TaskManifest();
-			  manifest.setPlatformName("default");
-			  AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
-					  new FileUrlResource("src/test/resources/apps/foo-task"));
-			  manifest.setTaskDeploymentRequest(request);
+		private void setupCommandLineArgAppPrefixes() throws IOException {
+			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+			TaskManifest manifest = new TaskManifest();
+			manifest.setPlatformName("default");
+			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+					new FileUrlResource("src/test/resources/apps/foo-task"));
+			manifest.setTaskDeploymentRequest(request);
 
-			  this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			  this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			  this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			this.taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
 
-			  initializeSuccessfulRegistry(appRegistry);
+			initializeSuccessfulRegistry(appRegistry);
 
-			  when(taskLauncher.launch(any())).thenReturn("0");
+			when(taskLauncher.launch(any())).thenReturn("0");
 
-			  Map<String,String> deploymentProperties = new HashMap<>(1);
+			Map<String,String> deploymentProperties = new HashMap<>(1);
 
-			  this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("app.demo.1=--foo=bar"));
-			  TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			  assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
-			  assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
-
-			//   this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
-			//   lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			//   assertEquals(1, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
-		  }
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("app.demo.1=--foo=bar"));
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
+			assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
+		}
 
 		@Test
 		@DirtiesContext

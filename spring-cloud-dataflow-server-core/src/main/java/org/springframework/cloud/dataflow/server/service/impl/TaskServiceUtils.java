@@ -96,7 +96,7 @@ public class TaskServiceUtils {
 		for (TaskApp subTask : taskNode.getTaskApps()) {
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
-			result = updateVersionProperties(taskNode, subTask, taskDeploymentProperties, result, "version");
+			result = updateVersionProperties(taskNode, subTask, taskDeploymentProperties, result);
 			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "app"));
 		}
 		if (result.length() != 0) {
@@ -285,17 +285,16 @@ public class TaskServiceUtils {
 	}
 
 	private static String updateVersionProperties(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,
-			String result, String prefix) {
+			String result) {
+		String prefix = "version";
 		String subTaskName1 = String.format("%s.%s-%s", prefix, taskNode.getName(),
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
 		String subTaskName2 = String.format("%s.%s", prefix,
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-		// String subTaskName3 = subTask.getLabel() == null ? subTask.getName() : subTask.getLabel();
 		String subTaskName3 = subTask.getName();
 
 		String versionProperties = taskDeploymentProperties.entrySet().stream()
 				.filter(e -> e.getKey().startsWith(subTaskName1) || e.getKey().startsWith(subTaskName2))
-				// .map(e -> e.getKey() + "=" + e.getValue())
 				.map(e -> String.format("%s.%s", subTaskName1, subTaskName3) + "=" + e.getValue())
 				.collect(Collectors.joining(", "));
 		if (StringUtils.hasText(versionProperties)) {

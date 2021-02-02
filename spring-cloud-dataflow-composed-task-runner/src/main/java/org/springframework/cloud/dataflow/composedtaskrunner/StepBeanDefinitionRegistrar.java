@@ -261,7 +261,7 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 				if (taskApps.containsKey(transition.getTargetApp().getName())) {
 					int updatedCount = taskApps.get(transition.getTargetApp().getName()).count + 1;
 					taskApps.put(transition.getTargetApp().getName(), new TaskAppNodeHolder(transition.getTargetApp(), updatedCount));
-					}
+				}
 				else {
 					taskApps.put(transition.getTargetApp().getName(), new TaskAppNodeHolder(transition.getTargetApp(), 0));
 				}
