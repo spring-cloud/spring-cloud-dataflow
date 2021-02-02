@@ -455,6 +455,28 @@ public class TaskControllerTests {
 				.andExpect(jsonPath("$.name", is("a1-t2")))
 				.andExpect(jsonPath("$.composedTaskElement", is(true)));
 	}
+	@Test
+	public void testCTRElementUpdateValidate() throws Exception {
+		repository.save(new TaskDefinition("a1", "t1: task --foo='a|b' && t2: task2"));
+		repository.save(new TaskDefinition("a2", "task"));
+		repository.save(new TaskDefinition("a1-t1", "task"));
+		repository.save(new TaskDefinition("a1-t2", "task"));
+
+		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(4)))
+				.andExpect(jsonPath("$.content[0].name", is("a1")))
+				.andExpect(jsonPath("$.content[0].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$.content[1].name", is("a2")))
+				.andExpect(jsonPath("$.content[1].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$.content[2].name", is("a1-t1")))
+				.andExpect(jsonPath("$.content[2].composedTaskElement", is(true)))
+				.andExpect(jsonPath("$.content[3].name", is("a1-t2")))
+				.andExpect(jsonPath("$.content[3].composedTaskElement", is(true)));
+
+		mockMvc.perform(get("/tasks/definitions/a1-t2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.name", is("a1-t2")))
+				.andExpect(jsonPath("$.composedTaskElement", is(true)));
+	}
 
 
 	@Test
