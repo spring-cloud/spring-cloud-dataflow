@@ -249,6 +249,16 @@ public class Task implements AutoCloseable {
 						.collect(Collectors.toList());
 	}
 
+	/**
+	 * @param childTaskLabel Name of the child composed task (excluding the parent prefix).
+	 * @return The child composed task for the given name.
+	 */
+	public Optional<Task> composedTaskChildTaskByLabel(String childTaskLabel) {
+		return this.composedTaskChildTasks().stream()
+				.filter(childTask -> childTask.getTaskName().endsWith("-" + childTaskLabel)).findFirst();
+	}
+
+
 	//--------------------------------------------------------------------------------------------------------
 	//                                    TASK JOBS
 	//--------------------------------------------------------------------------------------------------------

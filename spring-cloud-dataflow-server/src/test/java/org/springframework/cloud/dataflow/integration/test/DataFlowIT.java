@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,6 +60,7 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
@@ -67,6 +69,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -74,7 +77,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * DataFlow smoke tests that by default uses docker-compose files to install the Data Flow local platform:
@@ -369,8 +375,8 @@ public class DataFlowIT {
 				return (logs.size() == 2) && logs.stream()
 						// partition order is undetermined
 						.map(log -> (log.contains("WOODCHUCK-0")) ?
-								Arrays.asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains) :
-								Arrays.asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could").stream().allMatch(log::contains))
+								asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains) :
+								asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could").stream().allMatch(log::contains))
 						.reduce(Boolean::logicalAnd)
 						.orElse(false);
 			});
@@ -874,7 +880,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
 			// first launch
-			List<String> arguments = Arrays.asList("--increment-instance-enabled=true");
+			List<String> arguments = asList("--increment-instance-enabled=true");
 			long launchId1 = task.launch(arguments);
 
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
@@ -911,7 +917,410 @@ public class DataFlowIT {
 		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}
 
+	@Test
+	public void ctrLaunchTest() {
+		logger.info("composed-task-ctrLaunch-test");
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition("a: timestamp && b:timestamp")
+				.description("ctrLaunchTest")
+				.build()) {
+
+			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.hasSameElementsAs(fullTaskNames(task, "a", "b"));
+
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+
+			// Parent Task Successfully completed
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// Child tasks successfully completed
+			task.composedTaskChildTasks().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			// Attempt a job restart
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+
+			Exception exception = assertThrows(DataFlowClientException.class, () -> {
+				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+			});
+
+			assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
+		}
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+	}
+
+	@Test
+	public void ctrFailedGraph() {
+		logger.info("composed-task-ctrFailedGraph-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
+				"scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && timestamp",
+				emptyList(), // successful
+				asList("scenario"),  // failed
+				asList("timestamp")); // not-run
+	}
+
+	@Test
+	public void ctrSplit() {
+		logger.info("composed-task-split-test");
+		allSuccessfulExecutions("ComposedTask Split Test",
+				"<t1:timestamp || t2:timestamp || t3:timestamp>",
+				"t1", "t2", "t3");
+	}
+
+	@Test
+	public void ctrSequential() {
+		logger.info("composed-task-sequential-test");
+		allSuccessfulExecutions("ComposedTask Sequential Test",
+				"t1:timestamp && t2:timestamp && t3:timestamp",
+				"t1", "t2", "t3");
+	}
+
+	@Test
+	public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
+		logger.info("composed-task-SequentialTransitionAndSplitWithScenarioFailed-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Failed Test",
+				"t1: timestamp && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
+				asList("t1", "t3"), // successful
+				asList("scenario"),  // failed
+				asList("t4", "t5", "t6")); // not-run
+	}
+
+	@Test
+	public void ctrSequentialTransitionAndSplitWithScenarioOk() {
+		logger.info("composed-task-SequentialTransitionAndSplitWithScenarioOk-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Ok Test",
+				"t1: timestamp && t2: scenario 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
+				asList("t1", "t2", "t4", "t5", "t6"), // successful
+				emptyList(),  // failed
+				asList("t3")); // not-run
+	}
+
+	@Test
+	public void ctrNestedSplit() {
+		logger.info("composed-task-NestedSplit");
+		allSuccessfulExecutions("ctrNestedSplit",
+				"<<t1: timestamp || t2: timestamp > && t3: timestamp || t4: timestamp>",
+				"t1", "t2", "t3", "t4");
+	}
+
+	@Test
+	public void testEmbeddedFailedGraph() {
+		logger.info("composed-task-EmbeddedFailedGraph-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Embedded Failed Graph Test",
+				String.format("a: timestamp && b:scenario  --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", randomJobName()),
+				asList("a"), // successful
+				asList("b"),  // failed
+				asList("c")); // not-run
+	}
+
+	@Test
+	public void twoSplitTest() {
+		logger.info("composed-task-twoSplit-test");
+		allSuccessfulExecutions("twoSplitTest",
+				"<t1: timestamp ||t2: timestamp||t3: timestamp> && <t4: timestamp||t5: timestamp>",
+				"t1", "t2", "t3", "t4", "t5");
+	}
+
+	@Test
+	public void sequentialAndSplitTest() {
+		logger.info("composed-task-sequentialAndSplit-test");
+		allSuccessfulExecutions("sequentialAndSplitTest",
+				"<t1: timestamp && <t2: timestamp || t3: timestamp || t4: timestamp> && t5: timestamp>",
+				"t1", "t2", "t3", "t4", "t5");
+	}
+
+	@Test
+	public void sequentialTransitionAndSplitFailedInvalidTest() {
+		logger.info("composed-task-sequentialTransitionAndSplitFailedInvalid-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split Failed Invalid Test",
+				"t1: timestamp && b:scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp && t3: timestamp && t4: timestamp && <t5:timestamp || t6: timestamp> && t7: timestamp",
+				asList("t1", "t2"), // successful
+				asList("b"),  // failed
+				asList("t3", "t4", "t5", "t6", "t7")); // not-run
+	}
+
+	@Test
+	public void sequentialAndSplitWithFlowTest() {
+		logger.info("composed-task-sequentialAndSplitWithFlow-test");
+		allSuccessfulExecutions("sequentialAndSplitWithFlowTest",
+				"t1: timestamp && <t2: timestamp && t3: timestamp || t4: timestamp ||t5: timestamp> && t6: timestamp",
+				"t1", "t2", "t3", "t4", "t5", "t6");
+	}
+
+	@Test
+	public void sequentialAndFailedSplitTest() {
+		logger.info("composed-task-sequentialAndFailedSplit-test");
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition(String.format("t1: timestamp && <t2: timestamp ||b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: timestamp> && t4: timestamp", randomJobName()))
+				.description("sequentialAndFailedSplitTest")
+				.build()) {
+
+			assertThat(task.composedTaskChildTasks().size()).isEqualTo(5);
+			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.hasSameElementsAs(fullTaskNames(task, "b", "t1", "t2", "t3", "t4"));
+
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+
+			// Parent Task
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// Successful
+			childTasksBySuffix(task, "t1", "t2", "t3").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			// Failed tasks
+			childTasksBySuffix(task, "b").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+			});
+
+			// Not run tasks
+			childTasksBySuffix(task, "t4").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(0);
+			});
+
+			// Parent Task
+			assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
+
+			// restart job
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+
+			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
+
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			childTasksBySuffix(task, "b").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(2);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			childTasksBySuffix(task, "t4").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
+		}
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+	}
+
+	@Test
+	public void failedBasicTransitionTest() {
+		logger.info("composed-task-failedBasicTransition-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Failed Basic Transition Test",
+				"b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
+				asList("t1"), // successful
+				asList("b"),  // failed
+				asList("t2")); // not-run
+	}
+
+	@Test
+	public void successBasicTransitionTest() {
+		logger.info("composed-task-successBasicTransition-test");
+		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Success Basic Transition Test",
+				"b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
+				asList("b", "t2"), // successful
+				emptyList(),  // failed
+				asList("t1")); // not-run
+	}
+
+	@Test
+	public void basicTransitionWithTransitionTest() {
+		logger.info("composed-task-basicTransitionWithTransition-test");
+		mixedSuccessfulFailedAndUnknownExecutions("basicTransitionWithTransitionTest",
+				"b1: scenario  --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp * ->t3: timestamp ",
+				asList("b1", "b2", "t3"), // successful
+				emptyList(),  // failed
+				asList("t1", "t2")); // not-run
+	}
+
+	@Test
+	public void wildCardOnlyInLastPositionTest() {
+		logger.info("composed-task-wildCardOnlyInLastPosition-test");
+		mixedSuccessfulFailedAndUnknownExecutions("wildCardOnlyInLastPositionTest",
+				"b1: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false * ->t3: timestamp ",
+				asList("b1", "b2", "t3"), // successful
+				emptyList(),  // failed
+				asList("t1")); // not-run
+	}
+
+	@Test
+	public void failedCTRRetryTest() {
+		logger.info("composed-task-failedCTRRetry-test");
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition(String.format("b1:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && t1:timestamp", randomJobName()))
+				.description("failedCTRRetryTest")
+				.build()) {
+
+			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
+			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.hasSameElementsAs(fullTaskNames(task, "b1", "t1"));
+
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+
+			// Parent Task
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// Failed tasks
+			childTasksBySuffix(task, "b1").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+			});
+
+			// Not run tasks
+			childTasksBySuffix(task, "t1").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(0);
+			});
+
+			// Parent Task
+			assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
+
+			// restart job
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+
+			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
+
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+
+			childTasksBySuffix(task, "b1").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(2);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			childTasksBySuffix(task, "t1").forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
+		}
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+
+	}
+
+	private void allSuccessfulExecutions(String taskDescription, String taskDefinition, String... childLabels) {
+		mixedSuccessfulFailedAndUnknownExecutions(taskDescription, taskDefinition, asList(childLabels),
+				emptyList(), emptyList());
+	}
+
+	private void mixedSuccessfulFailedAndUnknownExecutions(String taskDescription, String taskDefinition,
+			List<String> successfulTasks, List<String> failedTasks, List<String> unknownTasks) {
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition(taskDefinition)
+				.description(taskDescription)
+				.build()) {
+
+			ArrayList<String> allTasks = new ArrayList<>(successfulTasks);
+			allTasks.addAll(failedTasks);
+			allTasks.addAll(unknownTasks);
+
+			assertThat(task.composedTaskChildTasks().size()).isEqualTo(allTasks.size());
+			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.hasSameElementsAs(fullTaskNames(task, allTasks.toArray(new String[0])));
+
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+
+			// Parent Task
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// Successful tasks
+			childTasksBySuffix(task, successfulTasks.toArray(new String[0])).forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			// Failed tasks
+			childTasksBySuffix(task, failedTasks.toArray(new String[0])).forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+			});
+
+			// Not run tasks
+			childTasksBySuffix(task, unknownTasks.toArray(new String[0])).forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(0);
+			});
+
+			// Parent Task
+			assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
+		}
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+	}
+
+	private List<String> fullTaskNames(Task task, String... childTaskNames) {
+		return java.util.stream.Stream.of(childTaskNames)
+				.map(cn -> task.getTaskName() + "-" + cn.trim()).collect(Collectors.toList());
+	}
+
+	private List<Task> childTasksBySuffix(Task task, String... suffixes) {
+		return java.util.stream.Stream.of(suffixes)
+				.map(suffix -> task.composedTaskChildTaskByLabel(suffix).get()).collect(Collectors.toList());
+	}
+
 	private static String randomTaskName() {
 		return "task-" + UUID.randomUUID().toString().substring(0, 10);
+	}
+
+	private String randomJobName() {
+		return "job-" + UUID.randomUUID().toString().substring(0, 10);
+	}
+
+	private static List<String> asList(String... names) {
+		return Arrays.asList(names);
+	}
+
+	private static List<String> emptyList() {
+		return Collections.emptyList();
 	}
 }
