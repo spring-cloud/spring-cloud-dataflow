@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link DefaultTaskSaveService} interface. Provide service
@@ -98,8 +99,9 @@ public class DefaultTaskSaveService implements TaskSaveService {
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().forEach(task -> {
+				String labelPrefix = StringUtils.hasText(task.getLabel()) ? task.getLabel() + ":" : "";
 				// Add arguments to child task definitions
-				String generatedTaskDSL = task.getName() + task.getArguments().entrySet().stream()
+				String generatedTaskDSL = labelPrefix + task.getName() + task.getArguments().entrySet().stream()
 						.map(argument -> String.format(" --%s=%s", argument.getKey(),
 								DefinitionUtils.autoQuotes(argument.getValue())))
 						.collect(Collectors.joining());

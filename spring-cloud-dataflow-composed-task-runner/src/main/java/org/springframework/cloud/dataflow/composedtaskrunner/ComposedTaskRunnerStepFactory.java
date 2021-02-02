@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,15 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 			.collect(Collectors.toList());
 
 		taskLauncherTasklet.setArguments(argumentsToUse);
-		taskLauncherTasklet.setProperties(this.taskSpecificProps);
+
+		Map<String, String> propertiesFrom = this.composedTaskProperties.getComposedTaskAppProperties().entrySet().stream()
+			.filter(e -> e.getKey().startsWith("app." + taskNameId))
+			.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+		Map<String, String> propertiesToUse = new HashMap<>();
+		propertiesToUse.putAll(this.taskSpecificProps);
+		propertiesToUse.putAll(propertiesFrom);
+
+		taskLauncherTasklet.setProperties(propertiesToUse);
 
 		String stepName = this.taskName;
 

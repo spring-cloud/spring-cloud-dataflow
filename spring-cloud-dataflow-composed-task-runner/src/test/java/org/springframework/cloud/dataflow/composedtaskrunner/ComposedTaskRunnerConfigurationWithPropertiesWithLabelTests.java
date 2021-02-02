@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2017-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -39,25 +41,27 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.Assert;
 
-import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author Janne Valkealahti
+ * @author Glenn Renfro
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
-@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
+@TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l3","max-wait-time=1010",
+		"composed-task-app-properties.app.l1.AAA.format=yyyy",
 		"interval-time-between-checks=1100",
-        "composed-task-app-arguments.app.AAA.0=--arg1=value1",
-        "composed-task-app-arguments.app.AAA.1=--arg2=value2",
+		"composed-task-arguments=--baz=boo",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
+public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -79,14 +83,17 @@ public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
 		job.execute(jobExecution);
 
 		Map<String, String> props = new HashMap<>(1);
-		assertThat(composedTaskProperties.getComposedTaskProperties()).isNull();
-		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
-		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
-		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
+		props.put("app.l1.AAA.format", "yyyy");
+		Map<String, String> composedTaskAppProperties = new HashMap<>(1);
+		composedTaskAppProperties.put("app.l1.AAA.format", "yyyy");
+
+		assertEquals(composedTaskAppProperties, composedTaskProperties.getComposedTaskAppProperties());
+		assertEquals(1010, composedTaskProperties.getMaxWaitTime());
+		assertEquals(1100, composedTaskProperties.getIntervalTimeBetweenChecks());
+		assertEquals("https://bar", composedTaskProperties.getDataflowServerUri().toASCIIString());
 		List<String> args = new ArrayList<>(1);
-		args.add("--arg2=value2");
-		args.add("--arg1=value1");
-		assertThat(job.getJobParametersIncrementer()).withFailMessage("JobParametersIncrementer must not be null.").isNotNull();
-		verify(this.taskOperations).launch("ComposedTest-AAA", props, args);
+		args.add("--baz=boo");
+		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
+		verify(this.taskOperations).launch("ComposedTest-l1", props, args);
 	}
 }

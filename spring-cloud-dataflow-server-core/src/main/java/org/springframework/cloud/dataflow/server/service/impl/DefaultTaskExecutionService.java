@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,34 +480,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskExecution.getTaskName());
 		}
 		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
-	}
-
-	/**
-	 * Updates the deployment properties on the provided {@code AppDeploymentRequest}
-	 *
-	 * @param commandLineArgs command line args for the task execution
-	 * @param platformName name of the platform configuration to use
-	 * @param taskExecutionInformation details about the task execution request
-	 * @param taskExecution task execution data
-	 * @param deploymentProperties properties of the deployment
-	 * @return an updated {@code AppDeploymentRequest}
-	 */
-	private AppDeploymentRequest updateDeploymentProperties(List<String> commandLineArgs, String platformName,
-			String platformType,
-			TaskExecutionInformation taskExecutionInformation, TaskExecution taskExecution,
-			Map<String, String> deploymentProperties) {
-		AppDeploymentRequest appDeploymentRequest;
-		TaskExecutionInformation info = new TaskExecutionInformation();
-		info.setTaskDefinition(taskExecutionInformation.getTaskDefinition());
-		info.setAppResource(taskExecutionInformation.getAppResource());
-		info.setComposed(taskExecutionInformation.isComposed());
-		info.setMetadataResource(taskExecutionInformation.getMetadataResource());
-		info.setOriginalTaskDefinition(taskExecutionInformation.getOriginalTaskDefinition());
-		info.setTaskDeploymentProperties(deploymentProperties);
-
-		appDeploymentRequest = this.taskAppDeploymentRequestCreator.
-				createRequest(taskExecution, info, commandLineArgs, platformName, platformType);
-		return appDeploymentRequest;
 	}
 
 	/**

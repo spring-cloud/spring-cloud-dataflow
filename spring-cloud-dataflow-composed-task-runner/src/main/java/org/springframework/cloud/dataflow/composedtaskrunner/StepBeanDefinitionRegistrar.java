@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 	 */
 	static class TaskAppsMapCollector extends TaskVisitor {
 
-		// Map<String, Integer> taskApps = new HashMap<>();
 		Map<String, TaskAppNodeHolder> taskApps = new HashMap<>();
 
 		@Override
@@ -252,7 +251,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 				taskApps.put(taskApp.getName(), new TaskAppNodeHolder(taskApp, updatedCount));
 			}
 			else {
-				// taskApps.put(taskApp.getName(), 0);
 				taskApps.put(taskApp.getName(), new TaskAppNodeHolder(taskApp, 0));
 			}
 		}
@@ -265,7 +263,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 					taskApps.put(transition.getTargetApp().getName(), new TaskAppNodeHolder(transition.getTargetApp(), updatedCount));
 					}
 				else {
-					// taskApps.put(transition.getTargetApp().getName(), 0);
 					taskApps.put(transition.getTargetApp().getName(), new TaskAppNodeHolder(transition.getTargetApp(), 0));
 				}
 			}
@@ -285,5 +282,4 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 			this.count = count;
 		}
 	}
-
 }

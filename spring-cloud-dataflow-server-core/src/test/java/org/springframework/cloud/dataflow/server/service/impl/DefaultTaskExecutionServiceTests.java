@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private final static String BASE_TASK_NAME = "myTask";
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+
+	private final static String TASK_NAME_ORIG2 = BASE_TASK_NAME + "_ORIG2";
 
 	private final static String K8_PLATFORM = "k8platform";
 
@@ -618,7 +620,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			  Map<String,String> deploymentProperties = new HashMap<>(1);
 
-			  this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("app.demo=--foo=bar"));
+			  this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("app.demo.1=--foo=bar"));
 			  TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 			  assertEquals(2, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			  assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
@@ -691,6 +693,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG2, "l2:demo2"));
 		}
 
 		@Test
@@ -714,6 +718,46 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskWithPropertiesAppNameTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			Map<String, String> taskDeploymentProperties = new HashMap<>();
+			taskDeploymentProperties.put("app.demo.format", "yyyy");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>()));
+
+			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
+			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertEquals("0", taskDeployment.getTaskDeploymentId());
+			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
+			assertEquals("default", taskDeployment.getPlatformName());
+			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(taskLauncher, times(1)).launch(argumentCaptor.capture());
+			assertEquals("yyyy", argumentCaptor.getValue().getDeploymentProperties().get("app.demo.format"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeSingleTaskWithPropertiesAppLabelTest() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			Map<String, String> taskDeploymentProperties = new HashMap<>();
+			taskDeploymentProperties.put("app.l2.format", "yyyy");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG2, taskDeploymentProperties, new LinkedList<>()));
+
+			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
+			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertEquals("0", taskDeployment.getTaskDeploymentId());
+			assertEquals(TASK_NAME_ORIG2, taskDeployment.getTaskDefinitionName());
+			assertEquals("default", taskDeployment.getPlatformName());
+			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(taskLauncher, times(1)).launch(argumentCaptor.capture());
+			assertEquals("yyyy", argumentCaptor.getValue().getDeploymentProperties().get("app.l2.format"));
 		}
 
 		@Test
@@ -1309,6 +1353,27 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void executeComposedTaskWithLabelsV2() {
+			String dsl = "t1: AAA && t2: BBB";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition(new TaskDefinition("seqTask", dsl));
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			Map<String, String> properties = new HashMap<>();
+			properties.put("app.t1.timestamp.format", "YYYY");
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+			AppDeploymentRequest request = argumentCaptor.getValue();
+			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+			assertEquals("YYYY",
+					request.getDefinition().getProperties().get("composed-task-app-properties.app.t1.timestamp.format"));
+		}
+
+		@Test
+		@DirtiesContext
 		public void createSequenceComposedTask() {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "AAA && BBB";
@@ -1465,7 +1530,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			String dsl = "LLL: AAA && BBB";
 			taskSaveService.saveTaskDefinition(new TaskDefinition("deleteTask", dsl));
-			verifyTaskExistsInRepo("deleteTask-LLL", "AAA", taskDefinitionRepository);
+			verifyTaskExistsInRepo("deleteTask-LLL", "LLL:AAA", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask-BBB", "BBB", taskDefinitionRepository);
 			verifyTaskExistsInRepo("deleteTask", dsl, taskDefinitionRepository);
 

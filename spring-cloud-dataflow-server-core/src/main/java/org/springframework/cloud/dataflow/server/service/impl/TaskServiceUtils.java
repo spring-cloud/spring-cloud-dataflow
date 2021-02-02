@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.dsl.TaskApp;
+import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
@@ -91,14 +92,19 @@ public class TaskServiceUtils {
 		Assert.notNull(taskDeploymentProperties, "taskDeploymentProperties must not be null");
 		Assert.notNull(taskNode, "taskNode must not be null");
 		String result = "";
+		Map<String, String> taskAppProperties = new HashMap<>();
 		for (TaskApp subTask : taskNode.getTaskApps()) {
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
 			result = updateVersionProperties(taskNode, subTask, taskDeploymentProperties, result, "version");
+			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "app"));
 		}
 		if (result.length() != 0) {
 			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
 		}
+		taskAppProperties.entrySet().stream().forEach(e -> {
+			taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties." + e.getKey(), e.getValue());
+		});
 		return taskDeploymentProperties;
 	}
 
@@ -151,9 +157,20 @@ public class TaskServiceUtils {
 	 * @return a map containing the app properties for a task.
 	 */
 	public static Map<String, String> extractAppProperties(String name, Map<String, String> taskDeploymentProperties) {
+		return extractAppProperties(name, null, taskDeploymentProperties);
+	}
+
+	/**
+	 * Extract app properties from the deployment properties by task name.
+	 * @param name the task app name to search for in the deployment properties.
+	 * @param label the taks app label to search for in the deployment properties.
+	 * @param taskDeploymentProperties the properties for the task deployment.
+	 * @return a map containing the app properties for a task.
+	 */
+	public static Map<String, String> extractAppProperties(String name, String label, Map<String, String> taskDeploymentProperties) {
 		Assert.hasText(name, "name must not be empty or null");
 		Assert.notNull(taskDeploymentProperties, "taskDeploymentProperties must not be null");
-		return extractPropertiesByPrefix("app", name, taskDeploymentProperties);
+		return extractPropertiesByPrefix("app", name, label, taskDeploymentProperties);
 	}
 
 	/**
@@ -209,11 +226,40 @@ public class TaskServiceUtils {
 	}
 
 	private static Map<String, String> extractPropertiesByPrefix(String type,
-			String name, Map<String, String> taskDeploymentProperties) {
-		final String prefix = type + "." + name + ".";
+			String name, String label, Map<String, String> taskDeploymentProperties) {
+		final String prefix1 = type + "." + name + ".";
+		final String prefix2 = StringUtils.hasText(label) ? type + "." + label + "." + name + "." : null;
+
+		Map<String, String> props = taskDeploymentProperties.entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(prefix1))
+				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix1.length()), kv -> kv.getValue()));
+		if (label != null) {
+			Map<String, String> props2 = taskDeploymentProperties.entrySet().stream()
+					.filter(kv -> kv.getKey().startsWith(prefix2))
+					.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix2.length()), kv -> kv.getValue()));
+			props.putAll(props2);
+		}
+		return props;
+	}
+
+	public static String labelForSimpleTask(String name, String dsl) {
+		TaskParser taskParser = new TaskParser(name, dsl, true, true);
+		TaskNode taskNode = taskParser.parse();
+		TaskAppNode taskApp = taskNode.getTaskApp();
+
+		if (taskApp != null) {
+			return taskApp.getLabel() != null ? taskApp.getLabel().stringValue() : null;
+		}
+		return null;
+	}
+
+	private static Map<String, String> getTaskAppProperties(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,
+			String prefix) {
+		String subTaskName = String.format("%s.%s.", prefix,
+				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
 		return taskDeploymentProperties.entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> kv.getKey().substring(prefix.length()), kv -> kv.getValue()));
+				.filter(kv -> kv.getKey().startsWith(subTaskName))
+				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue()));
 	}
 
 	private static String updateProperties(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,6 +127,11 @@ public class ComposedTaskProperties {
 	 * Properties for defining task app arguments.
 	 */
 	private Map<String, String> composedTaskAppArguments = new HashMap<>();
+
+	/**
+	 * Properties for defining task app properties.
+	 */
+	private Map<String, String> composedTaskAppProperties = new HashMap<>();
 
 	/**
 	 * Specifies whether to allow split core threads to timeout.
@@ -257,6 +262,14 @@ public class ComposedTaskProperties {
 
 	public void setComposedTaskAppArguments(Map<String, String> composedTaskAppArguments) {
 		this.composedTaskAppArguments = composedTaskAppArguments;
+	}
+
+	public Map<String, String> getComposedTaskAppProperties() {
+		return composedTaskAppProperties;
+	}
+
+	public void setComposedTaskAppProperties(Map<String, String> composedTaskAppProperties) {
+		this.composedTaskAppProperties = composedTaskAppProperties;
 	}
 
 	public boolean isSplitThreadAllowCoreThreadTimeout() {
