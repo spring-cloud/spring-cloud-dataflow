@@ -59,6 +59,7 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
@@ -78,6 +79,8 @@ import org.springframework.web.client.RestTemplate;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * DataFlow smoke tests that by default uses docker-compose files to install the Data Flow local platform:
@@ -915,6 +918,50 @@ public class DataFlowIT {
 	}
 
 	@Test
+	public void ctrLaunchTest() {
+		logger.info("composed-task-ctrLaunch-test");
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition("a: timestamp && b:timestamp")
+				.description("ctrLaunchTest")
+				.build()) {
+
+			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.hasSameElementsAs(fullTaskNames(task, "a", "b"));
+
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+
+			// Parent Task Successfully completed
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			// Child tasks successfully completed
+			task.composedTaskChildTasks().forEach(childTask -> {
+				assertThat(childTask.executions().size()).isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			});
+
+			// Attempt a job restart
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+
+			Exception exception = assertThrows(DataFlowClientException.class, () -> {
+				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+			});
+
+			assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
+		}
+		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
+	}
+
+		@Test
 	public void ctrFailedGraph() {
 		logger.info("composed-task-ctrFailedGraph-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
@@ -1058,7 +1105,10 @@ public class DataFlowIT {
 			assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
 
 			// restart job
-			dataFlowOperations.jobOperations().executionRestart(task.executions().stream().findFirst().get().getExecutionId());
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
 
 			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
 
@@ -1163,7 +1213,10 @@ public class DataFlowIT {
 			assertThat(taskBuilder.allTasks().size()).isEqualTo(task.composedTaskChildTasks().size() + 1);
 
 			// restart job
-			dataFlowOperations.jobOperations().executionRestart(task.executions().stream().findFirst().get().getExecutionId());
+			assertThat(task.executions().size()).isEqualTo(1);
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(1);
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
 
 			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
 
