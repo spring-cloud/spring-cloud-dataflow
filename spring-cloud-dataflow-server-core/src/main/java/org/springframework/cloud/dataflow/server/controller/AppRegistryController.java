@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
+import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.core.io.ByteArrayResource;
@@ -391,12 +392,11 @@ public class AppRegistryController {
 	 * Register all applications listed in a properties file or provided as key/value pairs.
 	 *
 	 * @param pageable Pagination information
-	 * @param pagedResourcesAssembler the resource asembly for app registrations
+	 * @param pagedResourcesAssembler the resource assembly for app registrations
 	 * @param uri URI for the properties file
 	 * @param apps key/value pairs representing applications, separated by newlines
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the collection of registered applications
-	 * @throws IOException if can't store the Properties object to byte output stream
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -405,13 +405,13 @@ public class AppRegistryController {
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
 			@RequestParam(value = "apps", required = false) String apps,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) throws IOException {
+			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {
 			registrations.addAll(this.appRegistryService.importAll(force, this.resourceLoader.getResource(uri)));
 		}
-		else if (!StringUtils.isEmpty(apps)) {
+		else if (StringUtils.hasLength(apps)) {
 			ByteArrayResource bar = new ByteArrayResource(apps.getBytes());
 			registrations.addAll(this.appRegistryService.importAll(force, bar));
 		}
@@ -428,24 +428,23 @@ public class AppRegistryController {
 	 * {@link org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader}.
 	 */
 	private void prefetchMetadata(List<AppRegistration> appRegistrations) {
-		forkJoinPool.execute(() -> {
-			appRegistrations.stream().filter(r -> r.getMetadataUri() != null).parallel().forEach(r -> {
-				logger.info("Eagerly fetching {}", r.getMetadataUri());
-				try {
-					this.appRegistryService.getAppMetadataResource(r);
-				}
-				catch (Exception e) {
-					logger.warn("Could not fetch " + r.getMetadataUri(), e);
-				}
-			});
-		});
+		forkJoinPool.execute(
+				() -> appRegistrations.stream().filter(r -> r.getMetadataUri() != null).parallel().forEach(r -> {
+					logger.info("Eagerly fetching {}", r.getMetadataUri());
+					try {
+						this.appRegistryService.getAppMetadataResource(r);
+					}
+					catch (Exception e) {
+						logger.warn("Could not fetch {}", r.getMetadataUri(), e);
+					}
+				}));
 	}
 
 	private void validateApplicationName(String name) {
 
 		// Check for length of name to be less than 256 character.
 		if (name.length() > 255) {
-			throw new IllegalArgumentException("Length of application name must be less than 256 characters");
+			throw new InvalidApplicationNameException("Length of application name must be less than 256 characters");
 		}
 
 		// Check for invalid characters.
@@ -458,7 +457,7 @@ public class AppRegistryController {
 		}
 
 		if (!invalidChars.toString().equals("")) {
-			throw new IllegalArgumentException("Application name: '" + name + "' cannot contain: " + invalidChars);
+			throw new InvalidApplicationNameException("Application name: '" + name + "' cannot contain: " + invalidChars);
 		}
 	}
 }

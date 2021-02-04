@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableEx
 import org.springframework.cloud.dataflow.server.repository.CannotDeleteNonParentTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
+import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchAuditRecordException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchScheduleException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
@@ -173,8 +174,8 @@ public class RestControllerAdvice {
 	 *
 	 * @param e one of the exceptions, {@link MissingServletRequestParameterException},
 	 * {@link UnsatisfiedServletRequestParameterException},
-	 * {@link MethodArgumentTypeMismatchException}, or
-	 * {@link InvalidStreamDefinitionException}
+	 * {@link MethodArgumentTypeMismatchException}, {@link InvalidStreamDefinitionException} or
+	 * {@link org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
@@ -182,7 +183,7 @@ public class RestControllerAdvice {
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
 			InvalidDateRangeException.class, CannotDeleteNonParentTaskExecutionException.class,
 			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class,
-			TaskExecutionMissingExternalIdException.class, TaskQueryParamException.class})
+			TaskExecutionMissingExternalIdException.class, TaskQueryParamException.class, InvalidApplicationNameException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public VndErrors onClientGenericBadRequest(Exception e) {
