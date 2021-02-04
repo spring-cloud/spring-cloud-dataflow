@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,23 +32,22 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
-import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskRunnerTaskletTestUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Janne Valkealahti
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
-		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
-		ComposedTaskRunnerConfiguration.class,
-		StepBeanDefinitionRegistrar.class})
+		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
+		ComposedTaskRunnerConfiguration.class})
 @TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
 		"interval-time-between-checks=1100",
         "composed-task-app-arguments.app.AAA.0=--arg1=value1",
@@ -66,7 +63,7 @@ public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
 	private Job job;
 
 	@Autowired
-	private TaskOperations taskOperations;
+	private ApplicationContext context;
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
@@ -78,15 +75,17 @@ public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
 				"ComposedTest", new JobParameters());
 		job.execute(jobExecution);
 
-		Map<String, String> props = new HashMap<>(1);
 		assertThat(composedTaskProperties.getComposedTaskProperties()).isNull();
 		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
 		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
 		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
-		List<String> args = new ArrayList<>(1);
-		args.add("--arg2=value2");
-		args.add("--arg1=value1");
 		assertThat(job.getJobParametersIncrementer()).withFailMessage("JobParametersIncrementer must not be null.").isNotNull();
-		verify(this.taskOperations).launch("ComposedTest-AAA", props, args);
+
+		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
+		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
+		assertThat(result).contains("--arg1=value1", "--arg2=value2");
+		assertThat(result.size()).isEqualTo(2);
+		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
+		assertThat(taskletProperties.size()).isEqualTo(0);
 	}
 }
