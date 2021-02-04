@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -201,7 +199,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 
 	private ComposedTaskProperties composedTaskProperties() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		Iterable<ConfigurationPropertySource> propertySources = ConfigurationPropertySources.get(this.env);
 		String dataFlowUriString = getPropertyValue("dataflow-server-uri");
 		String maxWaitTime = getPropertyValue("max-wait-time");
 		String intervalTimeBetweenChecks =

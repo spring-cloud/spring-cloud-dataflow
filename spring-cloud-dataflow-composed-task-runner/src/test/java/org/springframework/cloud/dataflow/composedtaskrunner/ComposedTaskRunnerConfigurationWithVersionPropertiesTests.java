@@ -34,14 +34,14 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
-import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskRunnerTaskletTestUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Janne Valkealahti
@@ -49,8 +49,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
-		ComposedTaskRunnerConfiguration.class,
-		StepBeanDefinitionRegistrar.class})
+		ComposedTaskRunnerConfiguration.class})
 @TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
 "composed-task-properties=" + ComposedTaskRunnerConfigurationWithVersionPropertiesTests.COMPOSED_TASK_PROPS ,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
@@ -65,7 +64,7 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 	private Job job;
 
 	@Autowired
-	private TaskOperations taskOperations;
+	ApplicationContext context;
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
@@ -88,6 +87,13 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 		List<String> args = new ArrayList<>(1);
 		args.add("--baz=boo --foo=bar");
 		assertThat(job.getJobParametersIncrementer()).withFailMessage("JobParametersIncrementer must not be null.").isNotNull();
-		verify(this.taskOperations).launch("ComposedTest-AAA", props, args);
+
+		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
+		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
+		assertThat(result).contains("--baz=boo --foo=bar");
+		assertThat(result.size()).isEqualTo(1);
+		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
+		assertThat(taskletProperties.size()).isEqualTo(1);
+		assertThat(taskletProperties.get("version.AAA")).isEqualTo("1.0.0");
 	}
 }
