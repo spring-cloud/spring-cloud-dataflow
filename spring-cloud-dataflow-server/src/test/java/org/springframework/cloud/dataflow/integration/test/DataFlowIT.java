@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -76,8 +77,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -961,7 +961,7 @@ public class DataFlowIT {
 		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}
 
-		@Test
+	@Test
 	public void ctrFailedGraph() {
 		logger.info("composed-task-ctrFailedGraph-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
@@ -1314,5 +1314,13 @@ public class DataFlowIT {
 
 	private String randomJobName() {
 		return "job-" + UUID.randomUUID().toString().substring(0, 10);
+	}
+
+	private static List<String> asList(String... names) {
+		return Arrays.asList(names);
+	}
+
+	private static List<String> emptyList() {
+		return Collections.emptyList();
 	}
 }
