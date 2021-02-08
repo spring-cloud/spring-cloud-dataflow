@@ -49,16 +49,6 @@ public class DockerComposeFactory {
 	private static final Logger logger = LoggerFactory.getLogger(DockerComposeFactory.class);
 
 	/**
-	 * Data Flow version to use for the tests.
-	 */
-	public static final String DEFAULT_DATAFLOW_VERSION = "2.8.0-SNAPSHOT";
-
-	/**
-	 * Skipper version used for the tests.
-	 */
-	public static final String DEFAULT_SKIPPER_VERSION = "2.7.0-SNAPSHOT";
-
-	/**
 	 * Pre-registered Task apps used for testing.
 	 */
 	public static final String DEFAULT_TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
@@ -77,17 +67,17 @@ public class DockerComposeFactory {
 
 	/**
 	 * List of docker compose files to mix to bootstrap as a test environment. Most files are found under the
-	 * 'spring-cloud-dataflow/spring-cloud-dataflow-server' folder.
+	 * 'spring-cloud-dataflow/src/docker-compose' folder.
 	 */
 	private static final String[] DEFAULT_DOCKER_COMPOSE_PATHS = {
-			"docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
-			"docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
-			//"docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
-			//"docker-compose-wavefront.yml",     // metrics collection/visualization with Wavefront.
-			//"docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
-			//"docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
-			//"docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
-			//"docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
+			"../src/docker-compose/docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
+			"../src/docker-compose/docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
+			//"../src/docker-compose/docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
+			//"../src/docker-compose/docker-compose-wavefront.yml",     // metrics collection/visualization with Wavefront.
+			//"../src/docker-compose/docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
+			//"../src/docker-compose/docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
+			//"../src/docker-compose/docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
+			//"../src/docker-compose/docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
 	};
 
 	private static boolean isDood = DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOOD, false);
@@ -97,9 +87,9 @@ public class DockerComposeFactory {
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, DEFAULT_DATAFLOW_VERSION))
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, DEFAULT_SKIPPER_VERSION))
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("STREAM_APPS_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)))
 			.withAdditionalEnvironmentVariable("TASK_APPS_URI",
@@ -126,9 +116,9 @@ public class DockerComposeFactory {
 				" - TEST_DOCKER_COMPOSE_PULLONSTARTUP (test.docker.compose.pullOnStartup) enable/disable pulling latest docker images from the Docker Hub. \n");
 
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, DEFAULT_DATAFLOW_VERSION));
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, "default version set in ../src/docker-compose/docker-compose.yml"));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, DEFAULT_SKIPPER_VERSION));
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, "default version set in ../src/docker-compose/docker-compose.yml"));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP,
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP, "true"));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI,
@@ -143,10 +133,10 @@ public class DockerComposeFactory {
 
 		// If DooD is enabled but the docker-compose-dood.yml is not listed in the dockerComposePaths then
 		// add it explicitly at the end of the list.
-		if (isDood && (!Arrays.asList(dockerComposePaths).contains("docker-compose-dood.yml"))) {
+		if (isDood && (!Arrays.asList(dockerComposePaths).contains("../src/docker-compose/docker-compose-dood.yml"))) {
 			String[] dockerComposePathsEx = new String[dockerComposePaths.length + 1];
 			System.arraycopy(dockerComposePaths, 0, dockerComposePathsEx, 0, dockerComposePaths.length);
-			dockerComposePathsEx[dockerComposePaths.length] = "docker-compose-dood.yml";
+			dockerComposePathsEx[dockerComposePaths.length] = "../src/docker-compose/docker-compose-dood.yml";
 			dockerComposePaths = dockerComposePathsEx;
 		}
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));

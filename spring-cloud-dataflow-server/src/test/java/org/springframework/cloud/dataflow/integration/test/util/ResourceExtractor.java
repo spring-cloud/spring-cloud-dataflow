@@ -46,10 +46,10 @@ import org.springframework.util.FileCopyUtils;
  *  Path tempFolder = ...;
  *
  *  String[] extractedResourcesUris = new ResourceExtractor(tempFolder).extractAll(
- * 	  "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-server/docker-compose.yml",
+ * 	  "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/src/docker-compose/docker-compose.yml",
  * 	  "classpath:/docker-compose-prometheus.yml",
- * 	  "file:/Users/Dev/projects/scdf/spring-cloud-dataflow/spring-cloud-dataflow-server/docker-compose-postgres.yml",
- * 	  "file:spring-cloud-dataflow-server/docker-compose-cf.yml",
+ * 	  "file:/Users/Dev/projects/scdf/spring-cloud-dataflow/src/docker-compose/docker-compose-postgres.yml",
+ * 	  "file:../src/docker-compose/docker-compose-cf.yml",
  * 	  "docker-compose-debug-dataflow.yml");
  * </code>
  *

@@ -1,0 +1,25 @@
+version: '3'
+
+# Extends the default docker-compose.yml with Wavefront monitoring configuration
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-wavefront.yml up
+# Configuration:
+#  - WAVEFRONT_KEY environment variable MUST be set to the user's wavefront api key.
+#  - WAVEFRONT_URI (optional) can be used to set the wavefront uri. Defaults to https://vmware.wavefront.com
+#  - WAVEFRONT_SOURCE (optional) can be used to set the wavefront source name. Defaults to scdf-docker-compose
+
+services:
+  dataflow-server:
+    environment:
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
+
+  skipper-server:
+    environment:
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_ENABLED=true
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - MANAGEMENT_METRICS_EXPORT_WAVEFRONT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
+      - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}

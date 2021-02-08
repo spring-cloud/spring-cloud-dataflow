@@ -1,0 +1,32 @@
+version: '3'
+
+# Extends the default docker-compose.yml with Influx/Grafana monitoring configuration
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-influxdb.yml up
+services:
+  dataflow-server:
+    environment:
+      - |
+        SPRING_APPLICATION_JSON=
+        {
+          "management.metrics.export.influx":{
+              "enabled":true,
+              "db":"myinfluxdb",
+              "uri":"http://influxdb:8086"
+          },
+          "spring.cloud.dataflow.metrics.dashboard": {
+             "url":"http://localhost:3000"
+          }
+        }
+
+  influxdb:
+    image: influxdb:1.7.7
+    container_name: influxdb
+    ports:
+      - '8086:8086'
+
+  grafana:
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:-2.8.0-SNAPSHOT}
+    container_name: grafana
+    ports:
+      - '3000:3000'
+
