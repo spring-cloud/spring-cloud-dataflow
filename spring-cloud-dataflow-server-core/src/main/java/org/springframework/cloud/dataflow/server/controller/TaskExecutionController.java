@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -190,12 +191,17 @@ public class TaskExecutionController {
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findByTaskName(taskExecution.getTaskName());
+		Long composedTaskAverageRuntime = null;
+		if(taskDefinition != null) {
+			composedTaskAverageRuntime = this.taskExecutionService.getComposedTaskAverageRuntime(taskDefinition);
+		}
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
-				taskManifest);
+				taskManifest, composedTaskAverageRuntime);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 

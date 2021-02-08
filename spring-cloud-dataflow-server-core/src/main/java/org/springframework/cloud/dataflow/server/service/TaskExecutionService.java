@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 
 /**
@@ -71,8 +72,15 @@ public interface TaskExecutionService {
 
 	/**
 	 * Retrieve the TaskManifest for the execution id provided
-	 * @param id task exectution id
+	 * @param id task execution id
 	 * @return {@code TaskManifest} or null if not found.
 	 */
 	TaskManifest findTaskManifestById(Long id);
+
+	/**
+	 * Retrieve the average runtime of a composed task execution that has completed.
+	 * @param taskDefinition the definition of the composed task.
+	 * @return double containing the percentage of task executions have completed for the composed task.
+	 */
+	Long getComposedTaskAverageRuntime(TaskDefinition taskDefinition);
 }

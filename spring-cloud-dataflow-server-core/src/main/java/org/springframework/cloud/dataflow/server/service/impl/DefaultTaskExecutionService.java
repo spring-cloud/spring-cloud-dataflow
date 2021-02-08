@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -697,6 +698,32 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
 		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
+	}
+
+	@Override
+	public Long getComposedTaskAverageRuntime(TaskDefinition taskDefinition) {
+		long completeTaskCount = 0L;
+		long taskExecutionDuration = 0;
+		Long result = null;
+
+		if(taskDefinition != null) {
+			TaskNode taskNode = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true).parse();
+			if (taskNode.isComposed()) {
+				Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(taskDefinition.getName());
+				Iterator<TaskExecution> taskExecutionIterator = getTaskExecutions(taskExecutionIds).iterator();
+				while (taskExecutionIterator.hasNext()) {
+					TaskExecution taskExecution = taskExecutionIterator.next();
+					if (taskExecution.getEndTime() != null) {
+						completeTaskCount++;
+						taskExecutionDuration = taskExecutionDuration + (taskExecution.getEndTime().getTime() - taskExecution.getStartTime().getTime());
+					}
+				}
+			}
+		}
+		if(completeTaskCount > 0) {
+			result = taskExecutionDuration / completeTaskCount;
+		}
+		return result;
 	}
 
 	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {

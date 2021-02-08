@@ -39,6 +39,11 @@ public class TaskJobExecutionRel {
 	private final TaskManifest taskManifest;
 
 	/**
+	 * The average runtime for completed composed task executions for a specific task definition.
+	 */
+	private Long averageComposedTaskRunTime;
+
+	/**
 	 * Constructor that establishes the relationship between a {@link TaskExecution} and
 	 * the Job Execution Ids of the jobs that were executed within it.
 	 *
@@ -58,6 +63,20 @@ public class TaskJobExecutionRel {
 	 * @param taskManifest to be associated with the task execution
 	 */
 	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest) {
+		this(taskExecution, jobExecutionIds, taskManifest, null);
+	}
+
+
+	/**
+	 * Constructor that establishes the relationship between a {@link TaskExecution} and
+	 * the Job Execution Ids of the jobs that were executed within it.
+	 *
+	 * @param taskExecution to be associated with the job execution ids.
+	 * @param jobExecutionIds to be associated with the task execution.
+	 * @param taskManifest to be associated with the task execution.
+	 * @param averageComposedTaskRunTime average composed task run time for task definition.
+	 */
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest, Long averageComposedTaskRunTime) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");;
 		this.taskExecution = taskExecution;
 		this.taskManifest = taskManifest;
@@ -67,6 +86,7 @@ public class TaskJobExecutionRel {
 		else {
 			this.jobExecutionIds = Collections.unmodifiableList(new ArrayList<>(jobExecutionIds));
 		}
+		this.averageComposedTaskRunTime = averageComposedTaskRunTime;
 	}
 
 	/**
@@ -89,5 +109,12 @@ public class TaskJobExecutionRel {
 	 */
 	public TaskManifest getTaskManifest() {
 		return taskManifest;
+	}
+
+	/**
+	 * @return The average runtime for completed composed task executions for a specific task definition.
+	 */
+	public Long getAverageComposedTaskRunTime() {
+		return averageComposedTaskRunTime;
 	}
 }

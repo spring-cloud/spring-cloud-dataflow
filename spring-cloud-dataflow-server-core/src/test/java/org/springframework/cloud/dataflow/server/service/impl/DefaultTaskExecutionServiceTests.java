@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -1590,6 +1591,66 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
 			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
 		}
+		@Test
+		@DirtiesContext
+		public void testAverageRuntime() throws InterruptedException{
+			TaskDefinition taskDefinition = prepCTRForPercentTests();
+			Date startTime = new Date();
+			Calendar endCalendar = Calendar.getInstance();
+			endCalendar.setTime(startTime);
+			endCalendar.add(Calendar.SECOND, 5);
+			Date endTime = endCalendar.getTime();
+			initializeCtrForPercentTests(startTime, 5, taskDefinition);
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					startTime, Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			this.taskExecutionRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, endTime, "BAR");
+			assertEquals(Long.valueOf(5000), this.taskExecutionService.getComposedTaskAverageRuntime(taskDefinition));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentNoDefinition() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
+			taskExecutionRepositoryService.createTaskExecution("seqTask");
+			assertNull(this.taskExecutionService.getComposedTaskAverageRuntime(null));
+		}
+
+		@Test
+		@DirtiesContext
+		public void verifyPercentEpoch() {
+			TaskDefinition taskDefinition = prepCTRForPercentTests();
+			Date startTime = new Date(0);
+			initializeCtrForPercentTests(startTime, 0, taskDefinition);
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					new Date(), Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			assertEquals(this.taskExecutionService.getComposedTaskAverageRuntime(taskDefinition), Long.valueOf(0));
+		}
+
+		private TaskDefinition prepCTRForPercentTests() {
+			String dsl = "AAA && BBB";
+			initializeSuccessfulRegistry(appRegistry);
+			TaskDefinition taskDefinition = new TaskDefinition("seqTask", dsl);
+			taskSaveService.saveTaskDefinition(taskDefinition);
+			return taskDefinition;
+		}
+
+		private TaskExecution initializeCtrForPercentTests(Date startTime, int waitTime, TaskDefinition taskDefinition) {
+			TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution("seqTask");
+			Calendar endCalendar = Calendar.getInstance();
+			endCalendar.setTime(startTime);
+			endCalendar.add(Calendar.SECOND, waitTime);
+			Date endTime = endCalendar.getTime();
+			this.taskExecutionRepository.startTaskExecution(taskExecution.getExecutionId(), taskExecution.getTaskName(),
+					startTime, Collections.emptyList(), "FOO", taskExecution.getExecutionId());
+			assertNull(this.taskExecutionService.getComposedTaskAverageRuntime(taskDefinition));
+			this.taskExecutionRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, endTime, "BAR");
+			assertEquals(Long.valueOf(waitTime * 1000L), this.taskExecutionService.getComposedTaskAverageRuntime(taskDefinition));
+			return taskExecution;
+		}
+
 	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",

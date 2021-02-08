@@ -113,6 +113,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 */
 	private String platformName;
 
+	/**
+	 * The average runtime for completed composed task executions for a specific task definition.
+	 */
+	private Long averageComposedTaskRunTime;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -151,6 +156,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		if(taskJobExecutionRel.getTaskManifest() != null) {
 			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
 		}
+		this.averageComposedTaskRunTime = taskJobExecutionRel.getAverageComposedTaskRunTime();
 	}
 
 	/**
@@ -262,6 +268,10 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
+	}
+
+	public Long getAverageComposedTaskRunTime() {
+		return averageComposedTaskRunTime;
 	}
 
 	/**

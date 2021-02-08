@@ -117,6 +117,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("errorMessage").description("The error message of the task execution"),
 								fieldWithPath("externalExecutionId").description("The external id of the task execution"),
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
+								fieldWithPath("averageComposedTaskRunTime").description("The average runtime for composed task"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
