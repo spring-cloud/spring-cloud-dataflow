@@ -136,7 +136,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterAppWithInvalidName() throws Exception {
 		mockMvc.perform(post("/apps/sink/log:1")
 				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is5xxServerError());
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().is4xxClientError());
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class AppRegistryControllerTests {
 				"/apps/sink/sinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacterssinkAppToTestIfLengthIsGreaterThanTwoHundredAndFiftyFiveCharacters")
 						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().is5xxServerError());
+				.andDo(print()).andExpect(status().is4xxClientError());
 	}
 
 	@Test
