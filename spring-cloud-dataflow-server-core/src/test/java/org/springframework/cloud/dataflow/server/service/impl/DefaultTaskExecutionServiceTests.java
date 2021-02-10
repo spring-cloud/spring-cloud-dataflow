@@ -404,6 +404,39 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void testRestoresNonDefaultVersion() throws IOException {
+			initializeMultiVersionRegistry(appRegistry);
+
+			when(taskLauncher.launch(any())).thenReturn("0", "1");
+
+			Map<String, String> properties = new HashMap<>(1);
+			properties.put("version.timestamp", "1.0.1");
+
+			long firstTaskExecutionId = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+
+			TaskManifest lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
+
+			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
+
+			properties.clear();
+			long secondTaskExecutionId = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
+			this.taskRepository.completeTaskExecution(secondTaskExecutionId, 0, new Date(), "all done");
+			lastManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
+			// without passing version, we should not get back to default app, in this case foo-task100
+			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			assertEquals(1, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
+
+			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
+		}
+
+		@Test
+		@DirtiesContext
 		public void testSavesRequestedVersionLabel() throws IOException {
 			initializeMultiVersionRegistry(appRegistry);
 

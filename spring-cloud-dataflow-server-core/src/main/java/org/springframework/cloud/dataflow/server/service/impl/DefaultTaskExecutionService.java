@@ -285,9 +285,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 
+		// Get the previous manifest
+		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
+		Map<String, String> previousTaskDeploymentProperties = previousManifest != null
+				&& previousManifest.getTaskDeploymentRequest() != null
+				&& previousManifest.getTaskDeploymentRequest().getDeploymentProperties() != null
+						? previousManifest.getTaskDeploymentRequest().getDeploymentProperties()
+						: Collections.emptyMap();
 
-		TaskExecutionInformation taskExecutionInformation =
-				findOrCreateTaskExecutionInformation(taskName, taskDeploymentProperties, launcher.getType());
+		TaskExecutionInformation taskExecutionInformation = findOrCreateTaskExecutionInformation(taskName,
+				taskDeploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
 		// pre prosess command-line args
 		// moving things like app.<label> = arg
@@ -297,7 +304,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			List<String> composedTaskArguments = new ArrayList<>();
 			commandLineArgs.forEach(arg -> {
 				if (arg.startsWith("app.")) {
-					// composedTaskAppArguments.add(arg);
 					composedTaskArguments.add("--composed-task-app-arguments." + arg);
 				}
 				else {
@@ -326,9 +332,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// Create task execution for the task
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
-
-		// Get the previous manifest
-		TaskManifest previousManifest = this.dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 
 		// Analysing task to know what to bring forward from existing
 		TaskAnalysisReport report = taskAnalyzer
@@ -412,22 +415,28 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 	}
 
-	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName, Map<String, String> taskDeploymentProperties, String platform) {
+	private TaskExecutionInformation findOrCreateTaskExecutionInformation(String taskName,
+			Map<String, String> taskDeploymentProperties, String platform,
+			Map<String, String> previousTaskDeploymentProperties) {
 
 		TaskExecutionInformation taskExecutionInformation;
 		try {
-			 taskExecutionInformation = taskExecutionInfoService
-					.findTaskExecutionInformation(taskName, taskDeploymentProperties,
-							TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform));
+			taskExecutionInformation = taskExecutionInfoService.findTaskExecutionInformation(taskName,
+					taskDeploymentProperties,
+					TaskServiceUtils.addDatabaseCredentials(
+							this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
+					previousTaskDeploymentProperties);
 
 		} catch (NoSuchTaskDefinitionException e) {
 			if (autoCreateTaskDefinitions) {
 				logger.info("Creating a Task Definition {} for registered app name {}", taskName, taskName);
 				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
 				taskSaveService.saveTaskDefinition(taskDefinition);
-				taskExecutionInformation = taskExecutionInfoService
-						.findTaskExecutionInformation(taskName, taskDeploymentProperties,
-								TaskServiceUtils.addDatabaseCredentials(this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform));
+				taskExecutionInformation = taskExecutionInfoService.findTaskExecutionInformation(taskName,
+						taskDeploymentProperties,
+						TaskServiceUtils.addDatabaseCredentials(
+								this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
+						previousTaskDeploymentProperties);
 			}
 			else {
 				throw e;
