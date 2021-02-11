@@ -295,7 +295,15 @@ public class TaskServiceUtils {
 
 		String versionProperties = taskDeploymentProperties.entrySet().stream()
 				.filter(e -> e.getKey().startsWith(subTaskName1) || e.getKey().startsWith(subTaskName2))
-				.map(e -> String.format("%s.%s", subTaskName1, subTaskName3) + "=" + e.getValue())
+				.map(e -> {
+					// ctr subtasks are created like definition is, i.e with labels, need to use those
+					if (StringUtils.hasText(subTask.getLabel())) {
+						return String.format("%s.%s", subTaskName1, subTask.getLabel()) + "=" + e.getValue();
+					}
+					else {
+						return String.format("%s.%s", subTaskName1, subTaskName3) + "=" + e.getValue();
+					}
+				})
 				.collect(Collectors.joining(", "));
 		if (StringUtils.hasText(versionProperties)) {
 			if (result.length() != 0) {

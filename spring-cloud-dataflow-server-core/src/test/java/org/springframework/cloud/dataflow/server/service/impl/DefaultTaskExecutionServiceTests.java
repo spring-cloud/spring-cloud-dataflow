@@ -1147,7 +1147,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = prepComposedTaskRunnerWithVersions(null);
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			assertTrue(request.getDefinition().getProperties().containsKey("composed-task-properties"));
-			assertEquals("version.seqTask-t1.some-name=1.0.0, version.seqTask-t2.some-name=1.0.1",
+			assertEquals("version.seqTask-t1.t1=1.0.0, version.seqTask-t2.t2=1.0.1",
 					request.getDefinition().getProperties().get("composed-task-properties"));
 			assertEquals("globalvalue", request.getDefinition().getProperties().get("globalkey"));
 			assertNull(request.getDefinition().getProperties().get("globalstreamkey"));
