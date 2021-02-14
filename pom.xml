@@ -118,7 +118,7 @@
 			<dependency>
 				<groupId>org.springframework.security.oauth.boot</groupId>
 				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
-				<version>${spring-security-oauth2-autoconfigure.version}</version>
+				<version>${spring-security-oauth2.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
