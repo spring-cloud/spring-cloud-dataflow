@@ -9,6 +9,7 @@ services:
 
   postgres:
     image: postgres:10
+    command: postgres -c 'max_connections=300'
     container_name: dataflow-postgres
     restart: always
     environment:

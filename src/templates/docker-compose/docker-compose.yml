@@ -81,7 +81,7 @@ services:
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
 
-  app-import:
+  app-import-stream:
     image: springcloud/baseimage:1.0.0
     container_name: dataflow-app-import
     depends_on:
@@ -90,7 +90,16 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
-        echo 'Maven Stream apps imported'
+        echo 'Maven Stream apps imported'"
+
+  app-import-task:
+    image: springcloud/baseimage:1.0.0
+    container_name: dataflow-app-import
+    depends_on:
+      - dataflow-server
+    command: >
+      /bin/sh -c "
+        ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-maven-latest&force=true}';
         wget -qO- 'http://dataflow-server:9393/apps/task/scenario/0.0.1-SNAPSHOT' --post-data='uri=maven://io.spring:scenario-task:0.0.1-SNAPSHOT';
         echo 'Maven Task apps imported'"

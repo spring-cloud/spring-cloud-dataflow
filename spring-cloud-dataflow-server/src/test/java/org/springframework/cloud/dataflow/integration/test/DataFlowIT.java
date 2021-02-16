@@ -77,7 +77,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -644,9 +643,9 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			String message1 = "Test message 1";
-			String message2 = "Test message 2 with extension";
-			String message3 = "Test message 2 with double extension";
+			String message1 = "Test message 1"; // length 14
+			String message2 = "Test message 2 with extension";  // length 29
+			String message3 = "Test message 2 with double extension";  // length 36
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
 			httpPost(httpAppUrl, message1);
@@ -684,14 +683,14 @@ public class DataFlowIT {
 						.inPath("$.results[0].series[0].values[1][0]")
 						.isEqualTo("myinfluxdb");
 
+				List<String> messageLengths = java.util.stream.Stream.of(message1, message2, message3)
+						.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
+
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
 				String myHttpCounter = httpGet(testProperties.getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]")
-						.isEqualTo(String.format("\"%s\"", message1.length()));
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]")
-						.isEqualTo(String.format("\"%s\"", message2.length()));
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]")
-						.isEqualTo(String.format("\"%s\"", message3.length()));
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
+				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
 			});
 		}
 	}

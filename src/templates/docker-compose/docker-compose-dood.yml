@@ -64,12 +64,17 @@ services:
 
   # Best effort to set default STREAM_APPS_URI and TASK_APPS_URI values. But because those can be overridden by other
   # composition YAMLs, it is highly recommended to set the STREAM_APPS_URI and TASK_APPS_URI explicitly!
-  app-import:
+  app-import-stream:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';
-        echo 'Docker Stream apps imported'
+        echo 'Docker Stream apps imported'"
+
+  app-import-task:
+    command: >
+      /bin/sh -c "
+        ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-docker-latest&force=true}';
         wget -qO- 'http://dataflow-server:9393/apps/task/scenario/0.0.1-SNAPSHOT' --post-data='uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT';
         echo 'Docker Task apps imported'"
