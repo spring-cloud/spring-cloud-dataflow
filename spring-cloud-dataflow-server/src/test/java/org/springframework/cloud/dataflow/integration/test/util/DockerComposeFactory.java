@@ -101,6 +101,17 @@ public class DockerComposeFactory {
 			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")
 			.build();
 
+	private static String[] addDockerComposeToPath(String[] dockerComposePaths, String additionalDockerCompose) {
+		if (java.util.stream.Stream.of(dockerComposePaths).anyMatch(p -> p.contains(additionalDockerCompose))) {
+			return dockerComposePaths;
+		}
+
+		String[] dockerComposePathsEx = new String[dockerComposePaths.length + 1];
+		System.arraycopy(dockerComposePaths, 0, dockerComposePathsEx, 0, dockerComposePaths.length);
+		dockerComposePathsEx[dockerComposePaths.length] = additionalDockerCompose;
+		return dockerComposePathsEx;
+	}
+
 	public static Extension startDockerCompose(Path tempFolder) {
 
 		if (DockerComposeFactoryProperties.isDockerComposeDisabled()) {
@@ -133,12 +144,13 @@ public class DockerComposeFactory {
 
 		// If DooD is enabled but the docker-compose-dood.yml is not listed in the dockerComposePaths then
 		// add it explicitly at the end of the list.
-		if (isDood && (!Arrays.asList(dockerComposePaths).contains("../src/docker-compose/docker-compose-dood.yml"))) {
-			String[] dockerComposePathsEx = new String[dockerComposePaths.length + 1];
-			System.arraycopy(dockerComposePaths, 0, dockerComposePathsEx, 0, dockerComposePaths.length);
-			dockerComposePathsEx[dockerComposePaths.length] = "../src/docker-compose/docker-compose-dood.yml";
-			dockerComposePaths = dockerComposePathsEx;
+		if (isDood ) {
+			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "../src/docker-compose/docker-compose-dood.yml");
+			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "./src/test/resources/docker-compose-docker-it-task-import.yml");
+		} else {
+			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "./src/test/resources/docker-compose-maven-it-task-import.yml");
 		}
+
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
 		return DockerComposeExtension.builder()
