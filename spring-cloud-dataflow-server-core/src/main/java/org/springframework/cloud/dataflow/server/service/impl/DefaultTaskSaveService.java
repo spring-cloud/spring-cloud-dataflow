@@ -107,7 +107,9 @@ public class DefaultTaskSaveService implements TaskSaveService {
 						.collect(Collectors.joining());
 				TaskDefinition composedTaskElementDefinition = new TaskDefinition(task.getExecutableDSLName(),
 						generatedTaskDSL);
-				saveStandardTaskDefinition(composedTaskElementDefinition);
+				if(!composedTaskElementDefinition.getTaskName().contains("$END")) {
+					saveStandardTaskDefinition(composedTaskElementDefinition);
+				}
 			});
 			taskDefinitionRepository.save(taskDefinition);
 		}
