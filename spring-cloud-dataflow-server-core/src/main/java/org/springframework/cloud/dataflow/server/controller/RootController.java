@@ -138,6 +138,7 @@ public class RootController {
 					.withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(TasksInfoController.class).getInfo(null, null)).withRel("tasks/info/executions"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(TaskLogsController.class).getLog(null, null)).withRel("tasks/logs"));
 
 			if (featuresProperties.isSchedulesEnabled()) {

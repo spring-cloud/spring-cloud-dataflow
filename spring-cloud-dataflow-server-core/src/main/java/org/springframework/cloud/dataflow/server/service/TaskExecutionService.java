@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,4 +75,20 @@ public interface TaskExecutionService {
 	 * @return {@code TaskManifest} or null if not found.
 	 */
 	TaskManifest findTaskManifestById(Long id);
+
+	/**
+	 * Returns all the task execution IDs with the option to include only the completed task executions.
+	 * @param onlyCompleted filter by completed task executions
+	 * @param taskName the task name, if null then retrieve all the tasks
+	 * @since 2.8
+	 */
+	Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName);
+
+	/**
+	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
+	 * @param onlyCompleted filter by completed task executions
+	 * @param taskName the task name, if null then retrieve all the tasks
+	 * @since 2.8
+	 */
+	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName);
 }

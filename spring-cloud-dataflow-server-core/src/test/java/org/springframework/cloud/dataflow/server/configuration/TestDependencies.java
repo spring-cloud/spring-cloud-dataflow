@@ -96,6 +96,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskDefinitionContro
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
+import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.controller.assembler.DefaultAppRegistrationAssemblerProvider;
@@ -476,6 +477,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new TaskExecutionController(
 				explorer, taskExecutionService,
 				taskDefinitionRepository, taskExecutionInfoService, taskDeleteService);
+	}
+
+	@Bean
+	public TasksInfoController taskExecutionsInfoController(TaskExecutionService taskExecutionService) {
+		return new TasksInfoController(taskExecutionService);
 	}
 
 	@Bean

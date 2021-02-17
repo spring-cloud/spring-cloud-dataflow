@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,24 @@ public class JdbcDataflowTaskExecutionDaoTests {
 		}
 		Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(taskName);
 		assertThat(taskExecutionIds.size()).isEqualTo(4);
+	}
+
+	@Test
+	@DirtiesContext
+	public void testGetAllTaskExecutionIds() {
+		String taskName1 = UUID.randomUUID().toString();
+		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName1, 4);
+		String taskName2 = UUID.randomUUID().toString();
+		taskExecutions.addAll(createSampleTaskExecutions(taskName2, 2));
+		for (TaskExecution taskExecution : taskExecutions) {
+			this.taskRepository.createTaskExecution(taskExecution);
+		}
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(true, null)).isEqualTo(0);
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionIds(true, null).size()).isEqualTo(0);
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, null)).isEqualTo(6);
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionIds(false, null).size()).isEqualTo(6);
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName1)).isEqualTo(4);
+		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName2)).isEqualTo(2);
 	}
 
 	private List<TaskExecution> createSampleTaskExecutions(String taskName, int numExecutions) {

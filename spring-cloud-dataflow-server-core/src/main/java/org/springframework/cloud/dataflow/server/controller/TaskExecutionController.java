@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
@@ -225,13 +226,29 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void cleanup(
-			@PathVariable("id") Set<Long> ids,
+	public void cleanup(@PathVariable("id") Set<Long> ids,
 			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions) {
-
 		final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>(Arrays.asList(actions));
-
 		this.taskDeleteService.cleanupExecutions(actionsAsSet, ids);
+	}
+
+	/**
+	 * Cleanup resources associated with one or more task executions. The
+	 * optional {@code actions} and {@code completed} parameters can be used to not only clean up task execution resources,
+	 * but can also trigger the deletion of task execution and job data in the persistence store.
+	 *
+	 * @param actions Defaults to "CLEANUP" if not specified
+	 * @param completed Defaults to cleanup only completed task executions
+	 */
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseStatus(HttpStatus.OK)
+	public void cleanupAll(
+			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions,
+			@RequestParam(defaultValue = "false", name="completed") boolean completed,
+			@RequestParam(defaultValue = "", name="name") String taskName) {
+
+		this.taskDeleteService.cleanupExecutions(new HashSet<>(Arrays.asList(actions)),
+				this.taskExecutionService.getAllTaskExecutionIds(completed, taskName));
 	}
 
 	/**
@@ -294,6 +311,30 @@ public class TaskExecutionController {
 		@Override
 		public TaskExecutionResource instantiateModel(TaskJobExecutionRel taskJobExecutionRel) {
 			return new TaskExecutionResource(taskJobExecutionRel);
+		}
+	}
+
+	/**
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation to assembler TaskExecutionsResource.
+	 */
+	private static class TaskExecutionsAssembler extends RepresentationModelAssemblerSupport<Integer, TaskExecutionsInfoResource> {
+
+		public TaskExecutionsAssembler() {
+			super(TaskExecutionController.class, TaskExecutionsInfoResource.class);
+		}
+
+		@Override
+		public TaskExecutionsInfoResource toModel(Integer totalExecutions) {
+			TaskExecutionsInfoResource taskExecutionsInfoResource = new TaskExecutionsInfoResource();
+			taskExecutionsInfoResource.setTotalExecutions(totalExecutions);
+			return createModelWithId(taskExecutionsInfoResource, totalExecutions);
+		}
+
+		@Override
+		public TaskExecutionsInfoResource instantiateModel(Integer totalExecutions) {
+			TaskExecutionsInfoResource taskExecutionsInfoResource = new TaskExecutionsInfoResource();
+			taskExecutionsInfoResource.setTotalExecutions(totalExecutions);
+			return taskExecutionsInfoResource;
 		}
 	}
 

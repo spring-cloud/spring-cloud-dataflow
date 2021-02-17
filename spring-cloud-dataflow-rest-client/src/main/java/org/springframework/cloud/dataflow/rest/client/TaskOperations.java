@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,22 @@ public interface TaskOperations {
 	 * @param removeData delete the history of the execution
 	 */
 	void cleanup(long id, boolean removeData);
+
+
+	/**
+	 * Cleanup any resources associated with the matching task executions.
+	 *
+	 * @param completed cleanup only completed task executions
+	 * @param taskName the name of the task to cleanup, if null then all the tasks are considered.
+	 */
+	void cleanupAllTaskExecutions(boolean completed, String taskName);
+
+	/**
+	 * Get the task executions count with the option to filter only the completed task executions.
+	 * @param completed cleanup only completed task executions
+	 * @param taskName the name of the task to cleanup, if null then all the tasks are considered.
+	 */
+	Integer getAllTaskExecutionsCount(boolean completed, String taskName);
 
 	/**
 	 * Return the validation status for the tasks in an definition.

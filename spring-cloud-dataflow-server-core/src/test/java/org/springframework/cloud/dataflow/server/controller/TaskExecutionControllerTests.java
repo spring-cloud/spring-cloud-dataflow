@@ -350,15 +350,6 @@ public class TaskExecutionControllerTests {
 						.andExpect(jsonPath("$.content", hasSize(1))));
 	}
 
-	@Test
-	public void testDeleteNonParentTaskExecutionById() throws Exception {
-		mockMvc.perform(delete("/tasks/executions/2"))
-			.andDo(print())
-			.andExpect(status().is(400))
-			.andExpect(jsonPath("content[0].logref", is("CannotDeleteNonParentTaskExecutionException")))
-			.andExpect(jsonPath("content[0].message", is("Cannot delete non-parent TaskExecution with id 1")));
-	}
-
 	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {
 		ra.andExpect(jsonPath(prefix + "arguments", hasSize(expectedArgs.size())));
 		for (int argCount = 0; argCount < expectedArgs.size(); argCount++) {

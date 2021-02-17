@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
@@ -67,6 +68,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
 
+	private static final String EXECUTIONS_INFO_RELATION = "tasks/info/executions";
+
 	private static final String VALIDATION_REL = "tasks/validation";
 
 	private static final String PLATFORM_LIST_RELATION = "tasks/platforms";
@@ -87,6 +90,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsCurrentLink;
 
+	private final Link executionsInfoLink;
+
 	private final Link validationLink;
 
 	private final Link platformListLink;
@@ -104,6 +109,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
+		Assert.notNull(resources.getLink(EXECUTIONS_INFO_RELATION), "Executions info relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
 
@@ -128,6 +134,7 @@ public class TaskTemplate implements TaskOperations {
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
+		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
@@ -245,6 +252,27 @@ public class TaskTemplate implements TaskOperations {
 	    }
 	    restTemplate.delete(uriTemplate);
 	}
+
+	@Override
+	public void cleanupAllTaskExecutions(boolean completed, String taskName) {
+		String uriTemplate = this.executionsLink.getHref() + "?action=CLEANUP,REMOVE_DATA";
+		if (completed) {
+			uriTemplate = uriTemplate + "&completed=true";
+		}
+		if (StringUtils.hasText(taskName)) {
+			uriTemplate = uriTemplate + "&name=" + taskName;
+		}
+		this.restTemplate.delete(uriTemplate);
+	}
+
+	@Override
+	public Integer getAllTaskExecutionsCount(boolean completed, String taskName) {
+		Map<String,String> map = new HashMap<>();
+		map.put("completed", String.valueOf(completed));
+		map.put("name", StringUtils.hasText(taskName) ? taskName : "");
+		return restTemplate.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class).getTotalExecutions();
+	}
+
 
 	@Override
 	public TaskAppStatusResource validateTaskDefinition(String taskDefinitionName)

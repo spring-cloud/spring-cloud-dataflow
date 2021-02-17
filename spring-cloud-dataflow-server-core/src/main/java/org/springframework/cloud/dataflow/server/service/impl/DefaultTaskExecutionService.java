@@ -821,4 +821,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 					taskLauncher.getMaximumConcurrentTasks()));
 		}
 	}
+
+	@Override
+	public Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName) {
+		return this.dataflowTaskExecutionDao.getAllTaskExecutionIds(onlyCompleted, taskName);
+	}
+
+	@Override
+	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
+		return this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(onlyCompleted, taskName);
+	}
 }

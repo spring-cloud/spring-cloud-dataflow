@@ -80,7 +80,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void launchTaskCurrentCount() throws Exception {
+	public void getTaskCurrentCount() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/executions/current"))
 				.andDo(print())
