@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,31 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	private static final String FIND_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
 			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
+
+	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) "
+			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL";
+
+	private static final String GET_ALL_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) "
+			+ "from %PREFIX%EXECUTION";
+
+	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) "
+			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL AND TASK_NAME = :taskName";
+
+	private static final String GET_ALL_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) "
+			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
+
+	private static final String FIND_ALL_COMPLETED_TASK_EXECUTION_IDS = "SELECT TASK_EXECUTION_ID "
+			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL";
+
+	private static final String FIND_ALL_TASK_EXECUTION_IDS = "SELECT TASK_EXECUTION_ID "
+			+ "from %PREFIX%EXECUTION";
+
+	private static final String FIND_ALL_COMPLETED_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
+			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL AND TASK_NAME = :taskName";
+
+	private static final String FIND_ALL_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
+			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
+
 
 	private TaskProperties taskProperties;
 
@@ -160,6 +185,69 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 							return taskExecutionIds;
 						}
 					});
+		}
+		catch (DataAccessException e) {
+			return Collections.emptySet();
+		}
+	}
+
+	@Override
+	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
+		String QUERY = null;
+		MapSqlParameterSource queryParameters = null;
+		if (StringUtils.hasText(taskName)) {
+			queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName, Types.VARCHAR);
+			QUERY = (onlyCompleted) ? GET_COMPLETED_TASK_EXECUTIONS_COUNT_BY_TASK_NAME : GET_ALL_TASK_EXECUTIONS_COUNT_BY_TASK_NAME;
+		}
+		else {
+			QUERY = (onlyCompleted) ? GET_COMPLETED_TASK_EXECUTIONS_COUNT: GET_ALL_TASK_EXECUTIONS_COUNT;
+		}
+		try {
+			return this.jdbcTemplate.query(getQuery(QUERY),
+					queryParameters, new ResultSetExtractor<Integer>() {
+						@Override
+						public Integer extractData(ResultSet resultSet)
+								throws SQLException, DataAccessException {
+							if (resultSet.next()) {
+								return resultSet.getInt("COUNT(TASK_EXECUTION_ID)");
+							}
+							return Integer.valueOf(0);
+						}
+					});
+		}
+		catch (DataAccessException e) {
+			return Integer.valueOf(0);
+		}
+	}
+
+	@Override
+	public Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName) {
+
+		String QUERY = null;
+		MapSqlParameterSource queryParameters = null;
+		if (StringUtils.hasText(taskName)) {
+			queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName, Types.VARCHAR);
+			QUERY = (onlyCompleted) ? FIND_ALL_COMPLETED_TASK_EXECUTION_IDS_BY_TASK_NAME : FIND_ALL_TASK_EXECUTION_IDS_BY_TASK_NAME;
+		}
+		else {
+			QUERY = (onlyCompleted) ? FIND_ALL_COMPLETED_TASK_EXECUTION_IDS : FIND_ALL_TASK_EXECUTION_IDS;
+		}
+		try {
+			return this.jdbcTemplate.query(getQuery(QUERY), queryParameters, new ResultSetExtractor<Set<Long>>() {
+				@Override
+				public Set<Long> extractData(ResultSet resultSet)
+						throws SQLException, DataAccessException {
+					Set<Long> taskExecutionIds = new TreeSet<>();
+
+					while (resultSet.next()) {
+						taskExecutionIds
+								.add(resultSet.getLong("TASK_EXECUTION_ID"));
+					}
+					return taskExecutionIds;
+				}
+			});
 		}
 		catch (DataAccessException e) {
 			return Collections.emptySet();

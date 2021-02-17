@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/validation").description("Provides the validation for a task definition"),
 				linkWithRel("tasks/executions").description("Returns Task executions and allows launching of tasks"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
+				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),
 				linkWithRel("tasks/executions/name").description("Returns all task executions for a given Task name"),
@@ -199,6 +200,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/executions/current.href").description("Link to the tasks/executions/current"),
 						fieldWithPath("_links.tasks/executions/execution.href").description("Link to the tasks/executions/execution"),
 						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/execution is templated"),
+						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
+						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),
 
 						fieldWithPath("_links.tasks/logs.href").description("Link to the tasks/logs"),
 						fieldWithPath("_links.tasks/logs.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/logs is templated"),

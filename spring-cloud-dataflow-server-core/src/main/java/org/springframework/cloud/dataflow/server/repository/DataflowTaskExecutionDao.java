@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,4 +69,19 @@ public interface DataflowTaskExecutionDao {
 	 * @return the Set of task execution IDs
 	 */
 	Set<Long> getTaskExecutionIdsByTaskName(String taskName);
+
+	/**
+	 * Returns the size of all the task executions with the option to include only the completed executions.
+	 * @param onlyCompleted filter by completed task executions
+	 * @param taskName the task name, if null then retrieve all the tasks
+	 */
+	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName);
+
+	/**
+	 * Returns all the task execution IDs of the completed task executions.
+	 * @param onlyCompleted filter by completed task executions
+	 * @param taskName the task name, if null then retrieve all the tasks
+	 */
+	Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName);
+
 }

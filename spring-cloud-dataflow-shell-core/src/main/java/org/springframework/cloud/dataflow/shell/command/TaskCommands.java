@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -366,9 +367,50 @@ public class TaskCommands implements CommandMarker {
 
 	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task "
 			+ "execution")
-	public String cleanup(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id) {
-		taskOperations().cleanup(id);
-		return String.format("Request to clean up resources for task execution %s has been submitted", id);
+	public String cleanup(@CliOption(key = { "", "id" }, help = "the task execution id") Long id,
+			@CliOption(key = { "all" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean all,
+			@CliOption(key = "completed-executions", help = "cleanup only the completed task executions", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean completed,
+			@CliOption(key = "task-name", help = "the name of the task to cleanup") String taskName,
+			@CliOption(key = { "force" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)), "`taskName`, `id` and `all` options are mutually exclusive.");
+		if (all) {
+			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, null);
+			if (taskExecutionsCount > 0) {
+				String taskExecutions = (completed) ? taskExecutionsCount + " completed" : taskExecutionsCount.toString();
+				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
+				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
+				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
+					taskOperations().cleanupAllTaskExecutions(completed, null);
+					return String.format("Request to clean up resources for task executions has been submitted");
+				}
+			}
+			else {
+				return String.format("No %stask executions available for deletion.", (completed) ? "completed " : "");
+			}
+		}
+		else if (StringUtils.hasText(taskName)) {
+			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, taskName);
+			if (taskExecutionsCount > 0) {
+				String taskExecutions = (completed) ? taskExecutionsCount + " completed" : taskExecutionsCount.toString();
+				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
+				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
+				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
+					taskOperations().cleanupAllTaskExecutions(completed, taskName);
+					return String.format("Request to clean up resources for task executions has been submitted");
+				}
+			}
+			else {
+				return String.format("No %stask executions available for deletion.", (completed) ? "completed " : "");
+			}
+		}
+		else {
+			Assert.notNull(id, "Task Execution ID should be set");
+			String warn = "About to delete 1 task execution. Are you sure (y/n)?";
+			if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n")))
+			taskOperations().cleanup(id);
+			return String.format("Request to clean up resources for task execution %s has been submitted", id);
+		}
+		return "Cleanup process is canceled";
 	}
 
 	private TaskOperations taskOperations() {

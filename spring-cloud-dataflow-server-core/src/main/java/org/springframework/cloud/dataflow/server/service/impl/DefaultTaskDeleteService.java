@@ -154,6 +154,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids) {
 		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
 		final SortedSet<Long> nonParentTaskExecutions = new TreeSet<>();
+		final SortedSet<Long> deletableTaskExecutions = new TreeSet<>();
 
 		for (Long id : ids) {
 			final TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
@@ -165,6 +166,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 				if (parentExecutionId != null) {
 					nonParentTaskExecutions.add(parentExecutionId);
+				}
+				else {
+					deletableTaskExecutions.add(taskExecution.getExecutionId());
 				}
 			}
 		}
@@ -183,19 +187,19 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 				this.cleanupExecution(id);
 			}
 		}
-
-		if (!nonParentTaskExecutions.isEmpty()) {
-			if (nonParentTaskExecutions.size() == 1) {
-				throw new CannotDeleteNonParentTaskExecutionException(nonParentTaskExecutions.first());
+		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA)) {
+			if (!deletableTaskExecutions.isEmpty()) {
+				this.deleteTaskExecutions(deletableTaskExecutions);
 			}
-			else {
+			// delete orphaned child execution ids
+			else if (deletableTaskExecutions.isEmpty() && !nonParentTaskExecutions.isEmpty()) {
+				this.deleteTaskExecutions(nonParentTaskExecutions);
+			}
+			else if (!nonParentTaskExecutions.isEmpty()) {
 				throw new CannotDeleteNonParentTaskExecutionException(nonParentTaskExecutions);
 			}
 		}
 
-		if (actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA)) {
-			this.deleteTaskExecutions(ids);
-		}
 	}
 
 	@Override

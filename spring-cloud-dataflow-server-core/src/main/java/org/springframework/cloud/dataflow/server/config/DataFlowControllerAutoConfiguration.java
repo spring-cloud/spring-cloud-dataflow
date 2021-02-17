@@ -83,6 +83,7 @@ import org.springframework.cloud.dataflow.server.controller.TaskExecutionControl
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
+import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
 import org.springframework.cloud.dataflow.server.controller.ToolsController;
 import org.springframework.cloud.dataflow.server.controller.UiController;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
@@ -289,6 +290,11 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		public JobExecutionController jobExecutionController(TaskJobService repository) {
 			return new JobExecutionController(repository);
+		}
+
+		@Bean
+		public TasksInfoController taskExecutionsInfoController(TaskExecutionService taskExecutionService) {
+			return new TasksInfoController(taskExecutionService);
 		}
 
 		@Bean
