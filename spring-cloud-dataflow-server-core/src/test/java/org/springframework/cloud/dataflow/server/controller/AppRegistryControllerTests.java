@@ -661,4 +661,21 @@ public class AppRegistryControllerTests {
 				.andExpect(jsonPath("page.number", is(5)));
 	}
 
+	@Test
+	public void testListApplicationsByVersion() throws Exception {
+		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(4)));
+	}
+
+	@Test
+	public void testListApplicationsByVersionAndSearch() throws Exception {
+		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=time").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(2)));
+		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=timestamp").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("content", hasSize(1)));
+	}
+
 }

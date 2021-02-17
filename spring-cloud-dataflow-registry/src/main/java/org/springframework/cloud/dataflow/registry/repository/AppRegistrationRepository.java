@@ -30,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Ilayaperumal Gopinathan
  */
 @Transactional
-public interface AppRegistrationRepository extends KeyValueRepository<AppRegistration, Long> {
+public interface AppRegistrationRepository
+		extends KeyValueRepository<AppRegistration, Long>, AppRegistrationRepositoryCustom {
 
 	AppRegistration findAppRegistrationByNameAndTypeAndVersion(String name, ApplicationType type, String version);
 
@@ -51,6 +52,8 @@ public interface AppRegistrationRepository extends KeyValueRepository<AppRegistr
 	Page<AppRegistration> findAllByTypeAndDefaultVersionIsTrue(ApplicationType type, Pageable pageable);
 
 	Page<AppRegistration> findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(String name, Pageable pageable);
+
+	List<AppRegistration> findAllByName(String name);
 
 	@Override
 	<S extends AppRegistration> S save(S s);

@@ -80,7 +80,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultAppRegistryService.class);
 
 	private final AppRegistrationRepository appRegistrationRepository;
-
+	
 	private AppResourceCommon appResourceCommon;
 
 	protected final AuditRecordService auditRecordService;
@@ -183,22 +183,25 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	}
 
 	@Override
-	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(ApplicationType type, String name, Pageable pageable) {
+	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(ApplicationType type, String name,
+			Pageable pageable) {
 		Page<AppRegistration> result = null;
 		if (!StringUtils.hasText(name) && type == null) {
 			result = this.appRegistrationRepository.findAllByDefaultVersionIsTrue(pageable);
 		}
 		else if (StringUtils.hasText(name) && type == null) {
-			result = this.appRegistrationRepository.findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(name, pageable);
+			result = this.appRegistrationRepository.findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(name,
+					pageable);
 		}
 		else if (StringUtils.hasText(name)) {
-			result = this.appRegistrationRepository.findAllByTypeAndNameContainingIgnoreCaseAndDefaultVersionIsTrue(type, name, pageable);
+			result = this.appRegistrationRepository
+					.findAllByTypeAndNameContainingIgnoreCaseAndDefaultVersionIsTrue(type, name, pageable);
 		}
 		else {
 			result = this.appRegistrationRepository.findAllByTypeAndDefaultVersionIsTrue(type, pageable);
 		}
-		for (AppRegistration pagedAppRegistration: result.getContent()) {
-			for (AppRegistration appRegistration: this.findAll()) {
+		for (AppRegistration pagedAppRegistration : result.getContent()) {
+			for (AppRegistration appRegistration : this.findAll()) {
 				if (pagedAppRegistration.getName().equals(appRegistration.getName()) &&
 						pagedAppRegistration.getType().equals(appRegistration.getType())) {
 					if (pagedAppRegistration.getVersions() == null) {
@@ -272,7 +275,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	public void delete(String name, ApplicationType type, String version) {
 		this.appRegistrationRepository.deleteAppRegistrationByNameAndTypeAndVersion(name, type, version);
 
-		populateAuditData(AuditActionType.DELETE, new AppRegistration(name, type, version, URI.create(""), URI.create("")));
+		populateAuditData(AuditActionType.DELETE,
+				new AppRegistration(name, type, version, URI.create(""), URI.create("")));
 	}
 
 	@Override
@@ -324,6 +328,13 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	@Override
 	public String getResourceVersion(String uriString) {
 		return this.getResourceVersion(this.appResourceCommon.getResource(uriString));
+	}
+
+	@Override
+	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
+			String name, String version, boolean defaultVersion, Pageable pageable) {
+		return appRegistrationRepository.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, name, version,
+				defaultVersion, pageable);
 	}
 
 	protected Properties loadProperties(Resource resource) {
@@ -383,9 +394,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		return registrations;
 	}
 
-	private BiFunction<HashMap<String, AppRegistration>,
-			? super String[],
-			HashMap<String, AppRegistration>> reduceToAppRegistrations() {
+	private BiFunction<HashMap<String, AppRegistration>, ? super String[], HashMap<String, AppRegistration>> reduceToAppRegistrations() {
 		return (map, lineSplit) -> {
 			String[] typeName = lineSplit[0].split("\\.");
 			if (typeName.length < 2 || typeName.length > 3) {

@@ -63,6 +63,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -128,22 +129,22 @@ public class AppRegistryController {
 	 * @param pageable Pagination information
 	 * @param pagedResourcesAssembler the resource assembler for app registrations
 	 * @param type the application type: source, sink, processor, task
+	 * @param version optional application version
 	 * @param search optional findByTaskNameContains parameter
 	 * @return the list of registered applications
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends AppRegistrationResource> list(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "type", required = false) ApplicationType type,
 			@RequestParam(required = false) String search,
+			@RequestParam(required = false) String version,
 			@RequestParam(required = false) boolean defaultVersion) {
 
-		Page<AppRegistration> pagedRegistrations = (defaultVersion) ?
-				this.appRegistryService.findAllByTypeAndNameIsLikeAndDefaultVersionIsTrue(type, search, pageable)
-				: this.appRegistryService.findAllByTypeAndNameIsLike(type, search,
-				pageable);
+		Page<AppRegistration> pagedRegistrations = this.appRegistryService
+				.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, search, version, defaultVersion, pageable);
 
 		return pagedResourcesAssembler.toModel(pagedRegistrations, this.appRegistryAssembler);
 	}

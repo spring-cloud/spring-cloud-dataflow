@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import javax.persistence.EntityManager;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 
@@ -28,6 +29,8 @@ import org.springframework.boot.autoconfigure.transaction.TransactionManagerCust
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -125,5 +128,10 @@ public class DataFlowServerConfiguration {
 	public AuthenticationSuccessEventListener authenticationSuccessEventListener(
 			AuditRecordService auditRecordService) {
 		return new AuthenticationSuccessEventListener(auditRecordService);
+	}
+	
+	@Bean
+	public AppRegistrationRepositoryCustom appRegistrationRepositoryCustom(EntityManager entityManager) {
+		return new AppRegistrationRepositoryImpl(entityManager);
 	}
 }

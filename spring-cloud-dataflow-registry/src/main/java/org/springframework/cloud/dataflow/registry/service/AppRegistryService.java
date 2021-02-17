@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 
 /**
  * @author Christian Tzolov
@@ -206,4 +207,17 @@ public interface AppRegistryService {
 	 * @return the resource version
 	 */
 	String getResourceVersion(String uriString);
+
+	/**
+	 * Returns all app registrations based on various optional parameters.
+	 * @param type application type
+	 * @param name application name
+	 * @param version application version
+	 * @param defaultVersion application default version
+	 * @param pageable Pagination information
+	 * @return returns all {@link AppRegistration} versions for given name and type. Uses the
+	 * pagination.
+	 */
+	Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(@Nullable ApplicationType type,
+			@Nullable String name, @Nullable String version, boolean defaultVersion, Pageable pageable);
 }
