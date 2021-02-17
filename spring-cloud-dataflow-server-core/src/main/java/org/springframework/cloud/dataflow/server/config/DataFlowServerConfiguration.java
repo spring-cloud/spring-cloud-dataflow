@@ -22,7 +22,9 @@ import javax.sql.DataSource;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -42,9 +44,12 @@ import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
 /**
@@ -78,6 +83,14 @@ public class DataFlowServerConfiguration {
 		return new ForwardedHeaderFilter();
 	}
 
+	@Bean
+	@Primary
+	public PlatformTransactionManager transactionManager(
+			ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+		JpaTransactionManager transactionManager = new JpaTransactionManager();
+		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
+		return transactionManager;
+	}
 
 	@Bean
 	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
