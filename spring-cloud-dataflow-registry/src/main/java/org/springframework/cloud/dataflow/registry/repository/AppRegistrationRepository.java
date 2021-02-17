@@ -52,6 +52,8 @@ public interface AppRegistrationRepository extends KeyValueRepository<AppRegistr
 
 	Page<AppRegistration> findAllByNameContainingIgnoreCaseAndDefaultVersionIsTrue(String name, Pageable pageable);
 
+	List<AppRegistration> findAllByName(String name);
+
 	@Override
 	<S extends AppRegistration> S save(S s);
 

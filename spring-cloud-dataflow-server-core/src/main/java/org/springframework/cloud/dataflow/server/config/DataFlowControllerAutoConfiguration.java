@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -227,8 +228,10 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
-			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService);
+				AppResourceCommon appResourceCommon, AuditRecordService auditRecordService,
+				AppRegistrationDao appRegistrationDao) {
+			return new DefaultAppRegistryService(appRegistrationRepository, appResourceCommon, auditRecordService,
+					appRegistrationDao);
 		}
 
 		@Bean
