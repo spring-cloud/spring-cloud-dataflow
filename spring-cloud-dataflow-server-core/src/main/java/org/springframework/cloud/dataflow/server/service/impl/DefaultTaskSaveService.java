@@ -99,15 +99,15 @@ public class DefaultTaskSaveService implements TaskSaveService {
 		if (taskNode.isComposed()) {
 			// Create the child task definitions needed for the composed task
 			taskNode.getTaskApps().forEach(task -> {
-				String labelPrefix = StringUtils.hasText(task.getLabel()) ? task.getLabel() + ":" : "";
-				// Add arguments to child task definitions
-				String generatedTaskDSL = labelPrefix + task.getName() + task.getArguments().entrySet().stream()
-						.map(argument -> String.format(" --%s=%s", argument.getKey(),
-								DefinitionUtils.autoQuotes(argument.getValue())))
-						.collect(Collectors.joining());
-				TaskDefinition composedTaskElementDefinition = new TaskDefinition(task.getExecutableDSLName(),
-						generatedTaskDSL);
-				if(!composedTaskElementDefinition.getTaskName().contains("$END")) {
+				if (StringUtils.hasText(task.getName()) && !task.getName().equals("$END")) {
+					String labelPrefix = StringUtils.hasText(task.getLabel()) ? task.getLabel() + ":" : "";
+					// Add arguments to child task definitions
+					String generatedTaskDSL = labelPrefix + task.getName() + task.getArguments().entrySet().stream()
+							.map(argument -> String.format(" --%s=%s", argument.getKey(),
+									DefinitionUtils.autoQuotes(argument.getValue())))
+							.collect(Collectors.joining());
+					TaskDefinition composedTaskElementDefinition = new TaskDefinition(task.getExecutableDSLName(),
+							generatedTaskDSL);
 					saveStandardTaskDefinition(composedTaskElementDefinition);
 				}
 			});
