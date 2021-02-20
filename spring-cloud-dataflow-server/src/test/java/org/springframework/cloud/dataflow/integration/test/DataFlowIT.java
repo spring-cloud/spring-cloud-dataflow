@@ -326,12 +326,9 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
-					.values().iterator().next();
-
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(httpApp), message);
+			httpPost(runtimeApps.getApplicationInstanceUrl(stream.getName(), "http"), message);
 
 			Awaitility.await().until(() -> stream.logs(app("log")).contains(message.toUpperCase()));
 		}
@@ -360,13 +357,8 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			Map<String, String> httpApp = runtimeApps.getApplicationInstances(stream.getName(), "http")
-					.values().iterator().next();
-
-			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpApp);
-
 			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
-			httpPost(httpAppUrl, message);
+			httpPost(runtimeApps.getApplicationInstanceUrl(stream.getName(), "http"), message);
 
 			Awaitility.await().until(() -> {
 				Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
@@ -509,8 +501,7 @@ public class DataFlowIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
-			httpPost(httpAppUrl, message);
+			httpPost(runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http"), message);
 
 			Awaitility.await().until(() -> logStream.logs(app("log")).contains(message));
 		}
@@ -536,8 +527,7 @@ public class DataFlowIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpLogStream.getName(), "http");
-			httpPost(httpAppUrl, message);
+			httpPost(runtimeApps.getApplicationInstanceUrl(httpLogStream.getName(), "http"), message);
 
 			Awaitility.await().until(
 					() -> tapStream.logs(app("log")).contains(message));
@@ -570,16 +560,14 @@ public class DataFlowIT {
 
 			String messageOne = "Unique Test message: " + new Random().nextInt();
 
-			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStreamOne.getName(), "http");
-			httpPost(httpAppUrl, messageOne);
+			httpPost(runtimeApps.getApplicationInstanceUrl(httpStreamOne.getName(), "http"), messageOne);
 
 			Awaitility.await().until(
 					() -> logStream.logs(app("log")).contains(messageOne));
 
 			String messageTwo = "Unique Test message: " + new Random().nextInt();
 
-			String httpAppUrl2 = runtimeApps.getApplicationInstanceUrl(httpStreamTwo.getName(), "http");
-			httpPost(httpAppUrl2, messageTwo);
+			httpPost(runtimeApps.getApplicationInstanceUrl(httpStreamTwo.getName(), "http"), messageTwo);
 
 			Awaitility.await().until(
 					() -> logStream.logs(app("log")).contains(messageTwo));
@@ -735,15 +723,15 @@ public class DataFlowIT {
 	private Map<String, String> testDeploymentProperties() {
 		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
-				.put("app.*.logging.file", "${PID}-test.log") // Keep it for Boot 2.x compatibility.
-				.put("app.*.logging.file.name", "${PID}-test.log")
+				.put("app.*.logging.file", "/tmp/${PID}-test.log") // Keep it for Boot 2.x compatibility.
+				.put("app.*.logging.file.name", "/tmp/${PID}-test.log")
 				.put("app.*.endpoints.logfile.sensitive", "false")
 				.put("app.*.endpoints.logfile.enabled", "true")
 				.put("app.*.management.endpoints.web.exposure.include", "*")
 				.put("app.*.spring.cloud.streamapp.security.enabled", "false");
 
 		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
-			propertiesBuilder.put("app.*.server.port", "80");
+			propertiesBuilder.put("app.*.server.port", "8080");
 			propertiesBuilder.put("deployer.*.kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
 		}
 

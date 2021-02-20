@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +109,10 @@ public class RuntimeApplicationHelper {
 	 * @return Returns a map of app instance GUIDs and their Log content. A single entry per app instance.
 	 */
 	public Map<String, String> applicationInstanceLogs(String streamName, String appName) {
+		// For K8s platforms the availability of the app's external URI is not dependent on the application state but
+		// on the availability of the configured Load Balancer. So we need to wait until valid URI is returned.
+		Awaitility.await().until(() -> getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
+				.values().iterator().next()) != null );
 		return this.appInstanceAttributes().values().stream()
 				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
 				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
@@ -123,9 +128,12 @@ public class RuntimeApplicationHelper {
 	 * @return Application URL
 	 */
 	public String getApplicationInstanceUrl(String streamName, String appName) {
-		Map<String, String> instanceAttributes = getApplicationInstances(streamName, appName)
-				.values().iterator().next();
-		return getApplicationInstanceUrl(instanceAttributes);
+		// For K8s platforms the availability of the app's external URI is not dependent on the application state but
+		// on the availability of the configured Load Balancer. So we need to wait until valid URI is returned.
+		Awaitility.await().until(() -> getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
+				.values().iterator().next()) != null );
+		return getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
+				.values().iterator().next());
 	}
 
 	/**
