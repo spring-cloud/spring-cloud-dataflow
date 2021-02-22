@@ -1357,6 +1357,28 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
+		public void executeComposedTaskWithEnd() {
+			String dsl = "timestamp '*'->t1: timestamp 'FOO'->$END";
+			initializeSuccessfulRegistry(appRegistry);
+
+			taskSaveService.saveTaskDefinition(new TaskDefinition("transitionTask", dsl));
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			Map<String, String> properties = new HashMap<>();
+			properties.put("app.t1.timestamp.format", "YYYY");
+			assertEquals(1L, this.taskExecutionService.executeTask("transitionTask", properties, new LinkedList<>()));
+			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
+
+			AppDeploymentRequest request = argumentCaptor.getValue();
+			assertEquals("transitionTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+			assertEquals("YYYY",
+					request.getDefinition().getProperties().get("composed-task-app-properties.app.t1.timestamp.format"));
+
+		}
+
+		@Test
+		@DirtiesContext
 		public void executeComposedTaskWithLabels() {
 			String dsl = "t1: AAA && t2: BBB";
 			initializeSuccessfulRegistry(appRegistry);
