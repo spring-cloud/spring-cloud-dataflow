@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.integration.test;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -60,6 +59,7 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.integration.test.util.SkipSslRestHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
@@ -197,10 +197,9 @@ public class DataFlowIT {
 
 	@BeforeEach
 	public void before() {
-		dataFlowOperations = new DataFlowTemplate(URI.create(testProperties.getDataflowServerUrl()));
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
-				testProperties.getPlatformName(), testProperties.getKubernetesAppHostSuffix());
-		restTemplate = new RestTemplate(); // used for HTTP post in tests
+		dataFlowOperations = SkipSslRestHelper.dataFlowTemplate(testProperties.getDataflowServerUrl());
+		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations, testProperties.getPlatformName());
+		restTemplate = SkipSslRestHelper.restTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));

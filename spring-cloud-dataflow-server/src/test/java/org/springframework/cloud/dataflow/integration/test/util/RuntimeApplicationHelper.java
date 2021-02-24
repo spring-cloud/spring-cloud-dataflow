@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,23 +43,21 @@ public class RuntimeApplicationHelper {
 
 	private final String platformType;
 
-	private RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate = SkipSslRestHelper.restTemplate();
 
-	private DataFlowTemplate dataFlowOperations;
+	private final DataFlowTemplate dataFlowOperations;
 
 	private final String platformName;
-	private String kubernetesAppHostSuffix;
 
-	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName, String kubernetesAppHost) {
+	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName) {
 		Assert.notNull(dataFlowOperations, "Valid dataFlowOperations is expected but was: " + dataFlowOperations);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
-
-		this.kubernetesAppHostSuffix = kubernetesAppHost;
+		logger.debug("platform Name: ["  + platformName + "]");
 		this.dataFlowOperations = dataFlowOperations;
 		this.platformName = platformName;
 		this.platformType = dataFlowOperations.streamOperations().listPlatforms().stream()
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
-				.map(d -> d.getType()).findFirst().get();
+				.map(Deployer::getType).findFirst().get();
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
 	}
 
