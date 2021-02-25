@@ -14,16 +14,8 @@
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from
 		the Spring Initializr.
 	</description>
-	<properties>
-		<mariadb.version>2.4.1</mariadb.version>
-	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.mariadb.jdbc</groupId>
-				<artifactId>mariadb-java-client</artifactId>
-				<version>${mariadb.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell</artifactId>
