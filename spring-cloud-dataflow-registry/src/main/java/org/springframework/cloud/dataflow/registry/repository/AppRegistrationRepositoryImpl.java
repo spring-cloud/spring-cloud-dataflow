@@ -28,6 +28,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.data.domain.Page;
@@ -38,28 +39,26 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * DAO to access {@link org.springframework.cloud.dataflow.core.AppRegistration}. Contains
- * predicate specific operations to make filtering based on optional parameters more
- * efficient. Implements
- * {@link org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao}
- *
+ * Implementation of the
+ * {@link org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom}
+ * interface.
  * @author Siddhant Sorann
  */
-public class JdbcAppRegistrationDao implements AppRegistrationDao {
+public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryCustom {
 
 	private final EntityManager entityManager;
 
-	private final AppRegistrationRepository appRegistrationRepository;
+	@Autowired
+	private AppRegistrationRepository appRegistrationRepository;
 
-	public JdbcAppRegistrationDao(EntityManager entityManager, AppRegistrationRepository appRegistrationRepository) {
+	public AppRegistrationRepositoryImpl(EntityManager entityManager) {
 		Assert.notNull(entityManager, "Entity manager cannot be null");
-		Assert.notNull(appRegistrationRepository, "AppRegistrationRepository cannot be null");
 		this.entityManager = entityManager;
-		this.appRegistrationRepository = appRegistrationRepository;
 	}
 
 	@Override
-	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
+	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(
+			ApplicationType type,
 			String name, String version, boolean defaultVersion, Pageable pageable) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<AppRegistration> cq = cb.createQuery(AppRegistration.class);

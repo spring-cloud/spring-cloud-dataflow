@@ -27,9 +27,8 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
-import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
-import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
-import org.springframework.cloud.dataflow.registry.repository.JdbcAppRegistrationDao;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
+import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -117,10 +116,9 @@ public class DataFlowServerConfiguration {
 			AuditRecordService auditRecordService) {
 		return new AuthenticationSuccessEventListener(auditRecordService);
 	}
-
+	
 	@Bean
-	AppRegistrationDao appRegistrationDao(
-			EntityManager entityManager, AppRegistrationRepository appRegistrationRepository) {
-		return new JdbcAppRegistrationDao(entityManager, appRegistrationRepository);
+	public AppRegistrationRepositoryCustom appRegistrationRepositoryCustom(EntityManager entityManager) {
+		return new AppRegistrationRepositoryImpl(entityManager);
 	}
 }

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
-import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -59,9 +58,7 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
-import org.springframework.cloud.dataflow.registry.repository.JdbcAppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
@@ -413,10 +410,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AppRegistryService appRegistryService(AppRegistrationRepository appRegistrationRepository,
-			AppResourceCommon appResourceService, AuditRecordService auditRecordService,
-			AppRegistrationDao appRegistrationDao) {
-		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService,
-				appRegistrationDao);
+			AppResourceCommon appResourceService, AuditRecordService auditRecordService) {
+		return new DefaultAppRegistryService(appRegistrationRepository, appResourceService, auditRecordService);
 	}
 
 	@Bean
@@ -718,12 +713,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	public OAuth2TokenUtilsService oauth2TokenUtilsService() {
 		return mock(OAuth2TokenUtilsService.class);
-	}
-
-	@Bean
-	public AppRegistrationDao appRegistrationDao(EntityManager entityManager,
-			AppRegistrationRepository appRegistrationRepository) {
-		return new JdbcAppRegistrationDao(entityManager, appRegistrationRepository);
 	}
 	
 }

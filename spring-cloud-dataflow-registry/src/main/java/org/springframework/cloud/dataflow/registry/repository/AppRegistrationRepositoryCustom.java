@@ -23,13 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 /**
- * DAO to access {@link org.springframework.cloud.dataflow.core.AppRegistration}. Contains
- * predicate specific operations to make filtering based on optional parameters more
- * efficient.
- *
+ * Custom Repository interface for managing the {@link AppRegistration} class.
  * @author Siddhant Sorann
  */
-public interface AppRegistrationDao {
+public interface AppRegistrationRepositoryCustom {
 
 	/**
 	 * Function to find all app registrations based on various optional parameters using

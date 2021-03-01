@@ -29,7 +29,6 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -73,8 +72,7 @@ public class DefaultAppRegistryServiceTests {
 	private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	private AppRegistryService appRegistryService = new DefaultAppRegistryService(appRegistrationRepository,
-			new AppResourceCommon(new MavenProperties(), resourceLoader), mock(DefaultAuditRecordService.class), mock(
-					AppRegistrationDao.class));
+			new AppResourceCommon(new MavenProperties(), resourceLoader), mock(DefaultAuditRecordService.class));
 
 	@Test
 	public void testNotFound() {

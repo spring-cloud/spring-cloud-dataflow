@@ -39,7 +39,6 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.registry.repository.AppRegistrationDao;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
@@ -81,9 +80,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultAppRegistryService.class);
 
 	private final AppRegistrationRepository appRegistrationRepository;
-
-	private final AppRegistrationDao appRegistrationDao;
-
+	
 	private AppResourceCommon appResourceCommon;
 
 	protected final AuditRecordService auditRecordService;
@@ -91,8 +88,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	protected final AuditServiceUtils auditServiceUtils;
 
 	public DefaultAppRegistryService(AppRegistrationRepository appRegistrationRepository,
-			AppResourceCommon appResourceCommon, AuditRecordService auditRecordService,
-			AppRegistrationDao appRegistrationDao) {
+			AppResourceCommon appResourceCommon, AuditRecordService auditRecordService) {
 		Assert.notNull(appResourceCommon, "'appResourceCommon' must not be null");
 		Assert.notNull(appRegistrationRepository, "'appRegistrationRepository' must not be null");
 		Assert.notNull(auditRecordService, "'auditRecordService' must not be null");
@@ -100,7 +96,6 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		this.appRegistrationRepository = appRegistrationRepository;
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
-		this.appRegistrationDao = appRegistrationDao;
 	}
 
 	@Override
@@ -338,7 +333,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	@Override
 	public Page<AppRegistration> findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(ApplicationType type,
 			String name, String version, boolean defaultVersion, Pageable pageable) {
-		return appRegistrationDao.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, name, version,
+		return appRegistrationRepository.findAllByTypeAndNameIsLikeAndVersionAndDefaultVersion(type, name, version,
 				defaultVersion, pageable);
 	}
 
