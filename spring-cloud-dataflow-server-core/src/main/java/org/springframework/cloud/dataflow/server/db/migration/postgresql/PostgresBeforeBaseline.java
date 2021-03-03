@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.flywaydb.core.api.callback.Context;
-import org.flywaydb.core.api.callback.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractBaselineCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  * Baselining schema setup for {@code postgres}.
@@ -32,6 +35,7 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractBaselineCa
  */
 public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 
+	private static final Logger logger = LoggerFactory.getLogger(PostgresBeforeBaseline.class);
 	public final static String DROP_AUDIT_RECORDS_AUDIT_ACTION_IDX_INDEX =
 			"drop index if exists AUDIT_RECORDS_AUDIT_ACTION_IDX";
 
@@ -112,11 +116,17 @@ public class PostgresBeforeBaseline extends AbstractBaselineCallback {
 	}
 
 	@Override
-	public boolean canHandleInTransaction(Event event, Context context) {
-		// postgresql is one database where a single any error, even query error,
-		// results transaction to get aborted in a connection, so tell
-		// flyway not to use it. i.e. we check if some tables exists and this
-		// will result errors if table to check is not there.
+	protected boolean doTableExists(Context context, String name) {
+		try {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
+			Boolean result = jdbcTemplate.queryForObject(
+					String.format("SELECT EXISTS (SELECT relname FROM pg_class WHERE relname = '%s')", name),
+					Boolean.class);
+			logger.debug("Table {} exists {}", name, result);
+			return result != null ? result : false;
+		} catch (Exception e) {
+			logger.debug("Error checking if table exists", e);
+		}
 		return false;
 	}
 
