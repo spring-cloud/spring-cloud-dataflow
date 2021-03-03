@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.common.flyway.AbstractCallback;
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
@@ -57,14 +58,7 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 			commands.addAll(defaultCommands);
 		}
 
-		boolean migrateToInitial = true;
-		try {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
-			jdbcTemplate.execute("select 1 from APP_REGISTRATION");
-			migrateToInitial = false;
-		} catch (Exception e) {
-		}
-
+		boolean migrateToInitial = !doTableExists(context, "APP_REGISTRATION");
 		if (migrateToInitial) {
 			logger.info("Did not detect prior Data Flow schema, doing baseline.");
 			commands.addAll(initialSetupMigration.getCommands());
@@ -83,6 +77,19 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 		}
 
 		return commands;
+	}
+
+	protected boolean doTableExists(Context context, String name) {
+		try {
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
+			jdbcTemplate.execute("select 1 from ?", (PreparedStatementCallback) preparedStatement -> {
+				preparedStatement.setString(1, name);
+				return preparedStatement.execute();
+			});
+			return true;
+		} catch (Exception e) {
+		}
+		return false;
 	}
 
 	/**
