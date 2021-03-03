@@ -36,6 +36,11 @@ public class ComposedTaskRunnerConfigurationProperties {
 	private String uri;
 
 	/**
+	 * The task application uri to be used for the composed task runner's metadata.
+	 */
+	private String metaDataUri;
+
+	/**
 	 * The image pull secret to pass as a deployer property to deployed tasks
 	 */
 	private String imagePullSecret;
@@ -68,5 +73,13 @@ public class ComposedTaskRunnerConfigurationProperties {
 
 	public void setUseUserAccessToken(Boolean useUserAccessToken) {
 		this.useUserAccessToken = useUserAccessToken;
+	}
+
+	public String getMetaDataUri() {
+		return metaDataUri;
+	}
+
+	public void setMetaDataUri(String metaDataUri) {
+		this.metaDataUri = metaDataUri;
 	}
 }

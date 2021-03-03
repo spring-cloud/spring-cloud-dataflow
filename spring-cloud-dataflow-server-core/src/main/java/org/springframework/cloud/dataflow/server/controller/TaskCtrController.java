@@ -60,15 +60,19 @@ public class TaskCtrController {
 	@ResponseStatus(HttpStatus.OK)
 	public List<ConfigurationMetadataProperty> options() {
 		URI ctrUri = null;
+		URI metadataUri = null;
 		try {
 			ctrUri = new URI(composedTaskRunnerConfigurationProperties.getUri() != null
 					? composedTaskRunnerConfigurationProperties.getUri()
 					: this.taskConfigurationProperties.getComposedTaskRunnerUri());
+			if(composedTaskRunnerConfigurationProperties.getMetaDataUri() != null) {
+				metadataUri = new URI(composedTaskRunnerConfigurationProperties.getMetaDataUri());
+			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 		}
 
-		Resource resource = this.appResourceCommon.getMetadataResource(ctrUri, null);
+		Resource resource = this.appResourceCommon.getMetadataResource(ctrUri, metadataUri);
 		List<ConfigurationMetadataProperty> properties = this.metadataResolver.listProperties(resource);
 		return properties;
 	}
