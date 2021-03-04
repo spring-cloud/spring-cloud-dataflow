@@ -123,11 +123,11 @@
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.21.0</version>
+				<version>0.33.0</version>
 				<configuration>
 					<images>
 						<image>
-							<name>springcloud/${project.artifactId}</name>
+							<name>cppwfs/${project.artifactId}</name>
 							<build>
 								<tags>
 									<tag>latest</tag>
@@ -137,6 +137,11 @@
 								<volumes>
 									<volume>/tmp</volume>
 								</volumes>
+								<labels>
+									<org.springframework.cloud.dataflow.spring-configuration-metadata.json>
+										${org.springframework.cloud.dataflow.spring.configuration.metadata.json}
+									</org.springframework.cloud.dataflow.spring-configuration-metadata.json>
+								</labels>
 								<env>
 									<LANG>C.UTF-8</LANG>
 								</env>
@@ -158,6 +163,43 @@
 				</configuration>
 			</plugin>
 
+			<plugin>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+				<version>1.0.2</version>
+				<configuration>
+					<storeFilteredMetadata>true</storeFilteredMetadata>
+				</configuration>
+				<executions>
+					<execution>
+						<id>aggregate-metadata</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>aggregate-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>
+									${project.build.outputDirectory}/META-INF/spring-configuration-metadata-encoded.properties
+								</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
