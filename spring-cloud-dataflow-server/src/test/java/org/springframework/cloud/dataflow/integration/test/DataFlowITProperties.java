@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,78 +21,106 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * @author Christian Tzolov
  */
-@ConfigurationProperties(prefix = "test.docker.compose")
+@ConfigurationProperties(prefix = "test")
 public class DataFlowITProperties {
 
-	/**
-	 * Default url to connect to dataflow
-	 */
-	private String dataflowServerUrl = "http://localhost:9393";
+	private DockerProperties docker = new DockerProperties();
 
-	/**
-	 * default - local platform (e.g. docker-compose)
-	 * cf - Cloud Foundry platform, configured in docker-compose-cf.yml
-	 * k8s - GKE/Kubernetes platform, configured via docker-compose-k8s.yml.
-	 */
-	private String platformName = "default";
-
-	/**
-	 * Default url to connect to SCDF's Prometheus TSDB
-	 */
-	private String prometheusUrl = "http://localhost:9090";
-
-	/**
-	 * Default url to connect to SCDF's Influx TSDB
-	 */
-	private String influxUrl = "http://localhost:8086";
-
-	/**
-	 * Kubernetes tests require nginx-ingress and watchdog mechanism to expose the apps  URL
-	 * to public access. Later requires a preconfigured ingress servers domain name suffix.
-	 *
-	 * For example the Hydra AT environment hash the 'hydra.springapps.io' host name and app Urls
-	 * will have the form  https://partitioning-test-log-v1.hydra.springapps.io
-	 * or  https://partitioning-test-log-v1-1.hydra.springapps.io for multiple instance.
-	 */
-	private String kubernetesAppHostSuffix = "";
-
-	public String getDataflowServerUrl() {
-		return dataflowServerUrl;
+	public DockerProperties getDocker() {
+		return docker;
 	}
 
-	public void setDataflowServerUrl(String dataflowServerUrl) {
-		this.dataflowServerUrl = dataflowServerUrl;
+	public void setDocker(DockerProperties docker) {
+		this.docker = docker;
 	}
 
-	public String getPlatformName() {
-		return platformName;
+	public class DockerProperties {
+
+		private DockerComposeProperties compose = new DockerComposeProperties();
+
+		public DockerComposeProperties getCompose() {
+			return compose;
+		}
+
+		public void setCompose(DockerComposeProperties compose) {
+			this.compose = compose;
+		}
 	}
 
-	public void setPlatformName(String platformName) {
-		this.platformName = platformName;
-	}
+	public class DockerComposeProperties {
 
-	public String getPrometheusUrl() {
-		return prometheusUrl;
-	}
+		/**
+		 * Default url to connect to dataflow
+		 */
+		private String dataflowServerUrl = "http://localhost:9393";
 
-	public void setPrometheusUrl(String prometheusUrl) {
-		this.prometheusUrl = prometheusUrl;
-	}
+		/**
+		 * default - local platform (e.g. docker-compose) cf - Cloud Foundry platform,
+		 * configured in docker-compose-cf.yml k8s - GKE/Kubernetes platform, configured
+		 * via docker-compose-k8s.yml.
+		 */
+		private String platformName = "default";
 
-	public String getInfluxUrl() {
-		return influxUrl;
-	}
+		/**
+		 * Default url to connect to SCDF's Prometheus TSDB
+		 */
+		private String prometheusUrl = "http://localhost:9090";
 
-	public void setInfluxUrl(String influxUrl) {
-		this.influxUrl = influxUrl;
-	}
+		/**
+		 * Default url to connect to SCDF's Influx TSDB
+		 */
+		private String influxUrl = "http://localhost:8086";
 
-	public String getKubernetesAppHostSuffix() {
-		return kubernetesAppHostSuffix;
-	}
+		/**
+		 * Kubernetes tests require nginx-ingress and watchdog mechanism to expose the
+		 * apps URL to public access. Later requires a preconfigured ingress servers
+		 * domain name suffix.
+		 *
+		 * For example the Hydra AT environment hash the 'hydra.springapps.io' host name
+		 * and app Urls will have the form
+		 * https://partitioning-test-log-v1.hydra.springapps.io or
+		 * https://partitioning-test-log-v1-1.hydra.springapps.io for multiple instance.
+		 */
+		private String kubernetesAppHostSuffix = "";
 
-	public void setKubernetesAppHostSuffix(String kubernetesAppHostSuffix) {
-		this.kubernetesAppHostSuffix = kubernetesAppHostSuffix;
+		public String getDataflowServerUrl() {
+			return dataflowServerUrl;
+		}
+
+		public void setDataflowServerUrl(String dataflowServerUrl) {
+			this.dataflowServerUrl = dataflowServerUrl;
+		}
+
+		public String getPlatformName() {
+			return platformName;
+		}
+
+		public void setPlatformName(String platformName) {
+			this.platformName = platformName;
+		}
+
+		public String getPrometheusUrl() {
+			return prometheusUrl;
+		}
+
+		public void setPrometheusUrl(String prometheusUrl) {
+			this.prometheusUrl = prometheusUrl;
+		}
+
+		public String getInfluxUrl() {
+			return influxUrl;
+		}
+
+		public void setInfluxUrl(String influxUrl) {
+			this.influxUrl = influxUrl;
+		}
+
+		public String getKubernetesAppHostSuffix() {
+			return kubernetesAppHostSuffix;
+		}
+
+		public void setKubernetesAppHostSuffix(String kubernetesAppHostSuffix) {
+			this.kubernetesAppHostSuffix = kubernetesAppHostSuffix;
+		}
 	}
 }
