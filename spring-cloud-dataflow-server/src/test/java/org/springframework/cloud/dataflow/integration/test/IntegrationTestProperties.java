@@ -22,32 +22,32 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Christian Tzolov
  */
 @ConfigurationProperties(prefix = "test")
-public class DataFlowITProperties {
+public class IntegrationTestProperties {
 
-	private DockerProperties docker = new DockerProperties();
+	private PlatformProperties platform = new PlatformProperties();
 
-	public DockerProperties getDocker() {
-		return docker;
+	public PlatformProperties getPlatform() {
+		return platform;
 	}
 
-	public void setDocker(DockerProperties docker) {
-		this.docker = docker;
+	public void setPlatform(PlatformProperties platform) {
+		this.platform = platform;
 	}
 
-	public class DockerProperties {
+	public static class PlatformProperties {
 
-		private DockerComposeProperties compose = new DockerComposeProperties();
+		private PlatformConnectionProperties connection = new PlatformConnectionProperties();
 
-		public DockerComposeProperties getCompose() {
-			return compose;
+		public PlatformConnectionProperties getConnection() {
+			return connection;
 		}
 
-		public void setCompose(DockerComposeProperties compose) {
-			this.compose = compose;
+		public void setConnection(PlatformConnectionProperties connection) {
+			this.connection = connection;
 		}
 	}
 
-	public class DockerComposeProperties {
+	public static class PlatformConnectionProperties {
 
 		/**
 		 * Default url to connect to dataflow
@@ -55,9 +55,7 @@ public class DataFlowITProperties {
 		private String dataflowServerUrl = "http://localhost:9393";
 
 		/**
-		 * default - local platform (e.g. docker-compose) cf - Cloud Foundry platform,
-		 * configured in docker-compose-cf.yml k8s - GKE/Kubernetes platform, configured
-		 * via docker-compose-k8s.yml.
+		 * default - local platform, cf - Cloud Foundry platform, k8s - GKE/Kubernetes platform
 		 */
 		private String platformName = "default";
 

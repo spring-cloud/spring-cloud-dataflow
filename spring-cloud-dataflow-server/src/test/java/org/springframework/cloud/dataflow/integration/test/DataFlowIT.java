@@ -111,14 +111,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the Data Flow environment.
  *
  * When the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION} is set to true the
- * Docker Compose installation is skipped. In this case the {@link DataFlowITProperties#getDataflowServerUrl} should be
+ * Docker Compose installation is skipped. In this case the {@link IntegrationTestProperties#getPlatform#getConnection} should be
  * used to connect the IT tests to an external pre-configured SCDF server.
  *
  * For example to run the following test suite against SCDF Kubernetes cluster deployed on GKE:
  * <code>
  *    ./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
  *        -Dtest.docker.compose.disable.extension=true \
- *        -Dtest.docker.compose.dataflowServerUrl=https://scdf-server.gke.io \
+ *        -Dtest.platform.connection.dataflowServerUrl=https://scdf-server.gke.io \
  *        -Pfailsafe
  * </code>
  *
@@ -158,14 +158,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Christian Tzolov
  */
 @ExtendWith(SpringExtension.class)
-@EnableConfigurationProperties({ DataFlowITProperties.class })
+@EnableConfigurationProperties({ IntegrationTestProperties.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DataFlowIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFlowIT.class);
 
 	@Autowired
-	private DataFlowITProperties testProperties;
+	private IntegrationTestProperties testProperties;
 
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
@@ -198,9 +198,9 @@ public class DataFlowIT {
 	@BeforeEach
 	public void before() {
 		dataFlowOperations = SkipSslRestHelper
-				.dataFlowTemplate(testProperties.getDocker().getCompose().getDataflowServerUrl());
+				.dataFlowTemplate(testProperties.getPlatform().getConnection().getDataflowServerUrl());
 		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
-				testProperties.getDocker().getCompose().getPlatformName());
+				testProperties.getPlatform().getConnection().getPlatformName());
 		restTemplate = SkipSslRestHelper.restTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
@@ -647,10 +647,10 @@ public class DataFlowIT {
 
 				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 				Awaitility.await().until(() -> (int) JsonPath.parse(
-						httpGet(testProperties.getDocker().getCompose().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+						httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 						.read("$.data.result.length()") > 0);
 
-				JsonAssertions.assertThatJson(httpGet(testProperties.getDocker().getCompose().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+				JsonAssertions.assertThatJson(httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 						.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
 			});
 
@@ -659,7 +659,7 @@ public class DataFlowIT {
 				logger.info("stream-analytics-test: InfluxDB");
 
 				// Wait for ~1 min for Micrometer to send first metrics to Influx.
-				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getDocker().getCompose().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
+				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
 						.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
 
 				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
@@ -668,7 +668,7 @@ public class DataFlowIT {
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
 
 				// http://localhost:8086/query?q=SHOW%20DATABASES
-				JsonAssertions.assertThatJson(httpGet(testProperties.getDocker().getCompose().getInfluxUrl() + "/query?q=SHOW DATABASES"))
+				JsonAssertions.assertThatJson(httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
 						.inPath("$.results[0].series[0].values[1][0]")
 						.isEqualTo("myinfluxdb");
 
@@ -676,7 +676,7 @@ public class DataFlowIT {
 						.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-				String myHttpCounter = httpGet(testProperties.getDocker().getCompose().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
+				String myHttpCounter = httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
@@ -752,11 +752,11 @@ public class DataFlowIT {
 	}
 
 	private boolean prometheusPresent() {
-		return runtimeApps.isServicePresent(testProperties.getDocker().getCompose().getPrometheusUrl() + "/api/v1/query?query=up");
+		return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=up");
 	}
 
 	private boolean influxPresent() {
-		return runtimeApps.isServicePresent(testProperties.getDocker().getCompose().getInfluxUrl() + "/ping");
+		return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getInfluxUrl() + "/ping");
 	}
 
 	private static Condition<String> condition(Predicate predicate) {
