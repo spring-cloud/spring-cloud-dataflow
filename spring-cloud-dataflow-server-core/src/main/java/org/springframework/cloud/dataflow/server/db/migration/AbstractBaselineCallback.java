@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.common.flyway.AbstractCallback;
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
@@ -81,11 +82,14 @@ public abstract class AbstractBaselineCallback extends AbstractCallback {
 	protected boolean doTableExists(Context context, String name) {
 		try {
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(context.getConnection(), true));
-			jdbcTemplate.execute("select 1 from APP_REGISTRATION");
-			return false;
+			jdbcTemplate.execute("select 1 from ?", (PreparedStatementCallback) preparedStatement -> {
+				preparedStatement.setString(1, name);
+				return preparedStatement.execute();
+			});
+			return true;
 		} catch (Exception e) {
 		}
-		return true;
+		return false;
 	}
 
 	/**
