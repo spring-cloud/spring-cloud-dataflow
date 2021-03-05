@@ -44,8 +44,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -165,14 +163,14 @@ public class DataFlowIT {
 	private static final Logger logger = LoggerFactory.getLogger(DataFlowIT.class);
 
 	@Autowired
-	private IntegrationTestProperties testProperties;
+	protected IntegrationTestProperties testProperties;
 
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
 	 */
-	private DataFlowTemplate dataFlowOperations;
-	private RuntimeApplicationHelper runtimeApps;
-	private RestTemplate restTemplate;
+	protected DataFlowTemplate dataFlowOperations;
+	protected RuntimeApplicationHelper runtimeApps;
+	protected RestTemplate restTemplate;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as
@@ -307,11 +305,11 @@ public class DataFlowIT {
 	private static final String SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME = "spring.cloud.dataflow.skipper.platformName";
 
 	// Stream lifecycle states
-	private static final String DEPLOYED = "deployed";
-	private static final String DELETED = "deleted";
-	private static final String UNDEPLOYED = "undeployed";
-	private static final String DEPLOYING = "deploying";
-	private static final String PARTIAL = "partial";
+	public static final String DEPLOYED = "deployed";
+	public static final String DELETED = "deleted";
+	public static final String UNDEPLOYED = "undeployed";
+	public static final String DEPLOYING = "deploying";
+	public static final String PARTIAL = "partial";
 
 	@Test
 	public void streamTransform() {
@@ -684,44 +682,11 @@ public class DataFlowIT {
 		}
 	}
 
-	// -----------------------------------------------------------------------
-	//                     STREAM  CONFIG SERVER (PCF ONLY)
-	// -----------------------------------------------------------------------
-	@Test
-	@EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "cloudfoundry")
-	@DisabledIfSystemProperty(named = "SKIP_CLOUD_CONFIG", matches = "true")
-	public void streamWithConfigServer() {
-
-		logger.info("stream-server-config-test");
-
-		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("TICKTOCK-config-server")
-				.definition("time | log")
-				.create()
-				.deploy(new DeploymentPropertiesBuilder()
-						.putAll(testDeploymentProperties())
-						.put("app.log.spring.profiles.active", "test")
-						.put("deployer.log.cloudfoundry.services", "cloud-config-server")
-						.put("app.log.spring.cloud.config.name", "MY_CONFIG_TICKTOCK_LOG_NAME")
-						.build())) {
-
-			Awaitility.await(stream.getName() + " failed to deploy!")
-					.until(() -> stream.getStatus().equals(DEPLOYED));
-
-			Awaitility.await("Source not started").until(
-					() -> stream.logs(app("time")).contains("Started TimeSource"));
-			Awaitility.await("Sink not started").until(
-					() -> stream.logs(app("log")).contains("Started LogSink"));
-			Awaitility.await("No output found").until(
-					() -> stream.logs(app("log")).contains("TICKTOCK CLOUD CONFIG - TIMESTAMP:"));
-		}
-	}
-
 	/**
 	 * For the purpose of testing, disable security, expose the all actuators, and configure logfiles.
 	 * @return Deployment properties required for the deployment of all test pipelines.
 	 */
-	private Map<String, String> testDeploymentProperties() {
+	protected Map<String, String> testDeploymentProperties() {
 		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				.put("app.*.logging.file", "/tmp/${PID}-test.log") // Keep it for Boot 2.x compatibility.
@@ -739,31 +704,31 @@ public class DataFlowIT {
 		return propertiesBuilder.build();
 	}
 
-	private void httpPost(String url, String message) {
+	protected void httpPost(String url, String message) {
 		restTemplate.postForObject(url, message, String.class);
 	}
 
-	private String httpGet(String url) {
+	protected String httpGet(String url) {
 		return restTemplate.getForObject(url, String.class);
 	}
 
-	private static String resourceToString(String resourcePath) throws IOException {
+	public static String resourceToString(String resourcePath) throws IOException {
 		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
 	}
 
-	private boolean prometheusPresent() {
+	protected boolean prometheusPresent() {
 		return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=up");
 	}
 
-	private boolean influxPresent() {
+	protected boolean influxPresent() {
 		return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getInfluxUrl() + "/ping");
 	}
 
-	private static Condition<String> condition(Predicate predicate) {
+	public static Condition<String> condition(Predicate predicate) {
 		return new Condition<>(predicate, "");
 	}
 
-	private StreamApplication app(String appName) {
+	protected StreamApplication app(String appName) {
 		return new StreamApplication(appName);
 	}
 
