@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -203,7 +204,7 @@ public class DataFlowIT {
 		restTemplate = SkipSslRestHelper.restTemplate(); // used for HTTP post in tests
 
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
-		Awaitility.setDefaultTimeout(Duration.ofMinutes(10));
+		Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
 	}
 
 	@AfterEach
@@ -344,7 +345,7 @@ public class DataFlowIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(stream.getName(), "http"), message);
+			runtimeApps.httpPost(stream.getName(), "http", message);
 
 			Awaitility.await().until(() -> stream.logs(app("log")).contains(message.toUpperCase()));
 		}
@@ -368,13 +369,10 @@ public class DataFlowIT {
 				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
 				.build())) {
 
-			//assertThat(stream.getStatus()).is(
-			//		condition(status -> status.equals(UNDEPLOYED) || status.equals(DEPLOYING) || status.equals(PARTIAL)));
-
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
-			httpPost(runtimeApps.getApplicationInstanceUrl(stream.getName(), "http"), message);
+			runtimeApps.httpPost(stream.getName(), "http", message);
 
 			Awaitility.await().until(() -> {
 				Collection<String> logs = runtimeApps.applicationInstanceLogs(stream.getName(), "log").values();
@@ -517,7 +515,7 @@ public class DataFlowIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http"), message);
+			runtimeApps.httpPost(httpStream.getName(), "http", message);
 
 			Awaitility.await().until(() -> logStream.logs(app("log")).contains(message));
 		}
@@ -543,10 +541,9 @@ public class DataFlowIT {
 
 			String message = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(httpLogStream.getName(), "http"), message);
+			runtimeApps.httpPost(httpLogStream.getName(), "http", message);
 
-			Awaitility.await().until(
-					() -> tapStream.logs(app("log")).contains(message));
+			Awaitility.await().until(() -> tapStream.logs(app("log")).contains(message));
 		}
 	}
 
@@ -576,17 +573,16 @@ public class DataFlowIT {
 
 			String messageOne = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(httpStreamOne.getName(), "http"), messageOne);
+			runtimeApps.httpPost(httpStreamOne.getName(), "http", messageOne);
 
 			Awaitility.await().until(
 					() -> logStream.logs(app("log")).contains(messageOne));
 
 			String messageTwo = "Unique Test message: " + new Random().nextInt();
 
-			httpPost(runtimeApps.getApplicationInstanceUrl(httpStreamTwo.getName(), "http"), messageTwo);
+			runtimeApps.httpPost(httpStreamTwo.getName(), "http", messageTwo);
 
-			Awaitility.await().until(
-					() -> logStream.logs(app("log")).contains(messageTwo));
+			Awaitility.await().until(() -> logStream.logs(app("log")).contains(messageTwo));
 
 		}
 	}
@@ -616,8 +612,8 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> httpStream.getStatus().equals(DEPLOYED));
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
-			httpPost(httpAppUrl, "abcd");
-			httpPost(httpAppUrl, "defg");
+			runtimeApps.httpPost(httpAppUrl, "abcd");
+			runtimeApps.httpPost(httpAppUrl, "defg");
 
 			Awaitility.await().until(() -> fooLogStream.logs(app("log")).contains("abcd-foo"));
 			Awaitility.await().until(() -> barLogStream.logs(app("log")).contains("defg-bar"));
@@ -652,9 +648,9 @@ public class DataFlowIT {
 			String message3 = "Test message 2 with double extension";  // length 36
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
-			httpPost(httpAppUrl, message1);
-			httpPost(httpAppUrl, message2);
-			httpPost(httpAppUrl, message3);
+			runtimeApps.httpPost(httpAppUrl, message1);
+			runtimeApps.httpPost(httpAppUrl, message2);
+			runtimeApps.httpPost(httpAppUrl, message3);
 
 			// Prometheus tests
 			Assumptions.assumingThat(this::prometheusPresent, () -> {
@@ -662,10 +658,10 @@ public class DataFlowIT {
 
 				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 				Awaitility.await().until(() -> (int) JsonPath.parse(
-						httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+						runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 						.read("$.data.result.length()") > 0);
 
-				JsonAssertions.assertThatJson(httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+				JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 						.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
 			});
 
@@ -674,7 +670,7 @@ public class DataFlowIT {
 				logger.info("stream-analytics-test: InfluxDB");
 
 				// Wait for ~1 min for Micrometer to send first metrics to Influx.
-				Awaitility.await().until(() -> !JsonPath.parse(httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
+				Awaitility.await().until(() -> !JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
 						.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
 
 				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
@@ -683,7 +679,7 @@ public class DataFlowIT {
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
 
 				// http://localhost:8086/query?q=SHOW%20DATABASES
-				JsonAssertions.assertThatJson(httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
+				JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
 						.inPath("$.results[0].series[0].values[1][0]")
 						.isEqualTo("myinfluxdb");
 
@@ -691,7 +687,7 @@ public class DataFlowIT {
 						.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
 
 				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-				String myHttpCounter = httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
+				String myHttpCounter = runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
 				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
@@ -721,14 +717,6 @@ public class DataFlowIT {
 		return propertiesBuilder.build();
 	}
 
-	protected void httpPost(String url, String message) {
-		restTemplate.postForObject(url, message, String.class);
-	}
-
-	protected String httpGet(String url) {
-		return restTemplate.getForObject(url, String.class);
-	}
-
 	public static String resourceToString(String resourcePath) throws IOException {
 		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
 	}
@@ -754,6 +742,27 @@ public class DataFlowIT {
 	// -----------------------------------------------------------------------
 	public static final int EXIT_CODE_SUCCESS = 0;
 	public static final int EXIT_CODE_ERROR = 1;
+
+	@Test
+	@EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "local")
+	public void runBatchRemotePartitionJobLocal() {
+		logger.info("runBatchRemotePartitionJob - local");
+
+		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
+		try (Task task = taskBuilder
+				.name(randomTaskName())
+				.definition("batch-remote-partition")
+				.description("runBatchRemotePartitionJob - local")
+				.build()) {
+
+			long launchId = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=local"));
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.execution(launchId).isPresent()).isTrue();
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+		}
+	}
 
 	@Test
 	public void timestampTask() {

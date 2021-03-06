@@ -12,4 +12,5 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps/task/scenario/0.0.1-SNAPSHOT' --post-data='uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT';
+        wget -qO- 'http://dataflow-server:9393/apps/task/batch-remote-partition/0.0.2-SNAPSHOT' --post-data='uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT';
         echo 'CI specific docker Task apps imported'"

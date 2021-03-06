@@ -86,6 +86,7 @@ public class DockerComposeFactory {
 	 * Initialize the docker machine with the required environment variables.
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
+			.withAdditionalEnvironmentVariable("PLATFORM_TYPE", "local")
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
@@ -115,7 +116,7 @@ public class DockerComposeFactory {
 	public static Extension startDockerCompose(Path tempFolder) {
 
 		if (DockerComposeFactoryProperties.isDockerComposeDisabled()) {
-			return (BeforeAllCallback) context -> logger.info("Docker Compose installation is disabled!");
+			return (BeforeAllCallback) context -> logger.debug("Docker Compose installation is disabled!");
 		}
 
 		logger.info("Docker Compose based Integration Tests. \nFollowing environment variables or properties can be used to configure the testing fixture: \n" +

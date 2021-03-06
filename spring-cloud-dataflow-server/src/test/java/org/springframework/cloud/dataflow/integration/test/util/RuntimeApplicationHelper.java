@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.integration.test.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.awaitility.Awaitility;
@@ -28,7 +29,9 @@ import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -52,7 +55,7 @@ public class RuntimeApplicationHelper {
 	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName) {
 		Assert.notNull(dataFlowOperations, "Valid dataFlowOperations is expected but was: " + dataFlowOperations);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
-		logger.debug("platform Name: ["  + platformName + "]");
+		logger.debug("platform Name: [" + platformName + "]");
 		this.dataFlowOperations = dataFlowOperations;
 		this.platformName = platformName;
 		this.platformType = dataFlowOperations.streamOperations().listPlatforms().stream()
@@ -110,8 +113,9 @@ public class RuntimeApplicationHelper {
 	public Map<String, String> applicationInstanceLogs(String streamName, String appName) {
 		// For K8s platforms the availability of the app's external URI is not dependent on the application state but
 		// on the availability of the configured Load Balancer. So we need to wait until valid URI is returned.
-		Awaitility.await().until(() -> getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
-				.values().iterator().next()) != null );
+		Awaitility.await().until(() -> getApplicationInstances(streamName, appName).values().stream()
+				.allMatch(instanceAttributes -> isUrlAccessible(getApplicationInstanceUrl(instanceAttributes) + "/actuator/info")));
+
 		return this.appInstanceAttributes().values().stream()
 				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
 				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
@@ -127,10 +131,11 @@ public class RuntimeApplicationHelper {
 	 * @return Application URL
 	 */
 	public String getApplicationInstanceUrl(String streamName, String appName) {
-		// For K8s platforms the availability of the app's external URI is not dependent on the application state but
+		// For K8s and CF platforms the availability of the app's external URI is not dependent on the application state but
 		// on the availability of the configured Load Balancer. So we need to wait until valid URI is returned.
-		Awaitility.await().until(() -> getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
-				.values().iterator().next()) != null );
+		Awaitility.await().until(() ->
+				isUrlAccessible(getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
+						.values().iterator().next())));
 		return getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
 				.values().iterator().next());
 	}
@@ -197,13 +202,39 @@ public class RuntimeApplicationHelper {
 	 * @return Return ture if the response is not HTTP error and false otherwise.
 	 */
 	public boolean isServicePresent(String serviceUrl) {
-		try {
-			restTemplate.getForObject(serviceUrl, String.class);
-			return true;
-		}
-		catch (Exception e) {
-			//do nothing
+		if (null != serviceUrl) {
+			try {
+				restTemplate.getForObject(serviceUrl, String.class);
+				return true;
+			}
+			catch (Exception e) {
+				//do nothing
+			}
 		}
 		return false;
+	}
+
+	private boolean isUrlAccessible(String serviceUrl) {
+		if (null != serviceUrl) {
+			try {
+				Set<HttpMethod> optionsForAllow = restTemplate.optionsForAllow(serviceUrl);
+				return !CollectionUtils.isEmpty(optionsForAllow);
+			}
+			catch (Exception e) {/* do nothing */}
+		}
+		return false;
+	}
+
+	public void httpPost(String streamName, String appName, String message) {
+		httpPost(this.getApplicationInstanceUrl(streamName, appName), message);
+	}
+
+
+	public void httpPost(String url, String message) {
+		restTemplate.postForObject(url, message, String.class);
+	}
+
+	public String httpGet(String url) {
+		return restTemplate.getForObject(url, String.class);
 	}
 }
