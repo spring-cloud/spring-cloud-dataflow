@@ -392,7 +392,7 @@ public class DataFlowIT {
 	public void streamLifecycle() {
 		logger.info("stream-lifecycle-test: DEPLOY");
 		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("lifecycle-test")
+				.name("lifecycle-test" + randomSuffix())
 				.definition("time | log --log.name=\"\" --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create()
 				.deploy(testDeploymentProperties())) {
@@ -853,7 +853,7 @@ public class DataFlowIT {
 		try (Task task = taskBuilder
 				.name(randomTaskName())
 				.definition("a: timestamp && b:timestamp")
-				.description("Test multipleComposedTaskhWithArguments")
+				.description("Test multipleComposedTaskWithArguments")
 				.build()) {
 
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
@@ -1288,11 +1288,15 @@ public class DataFlowIT {
 	}
 
 	private static String randomTaskName() {
-		return "task-" + UUID.randomUUID().toString().substring(0, 10);
+		return "task-" + randomSuffix();
 	}
 
-	private String randomJobName() {
-		return "job-" + UUID.randomUUID().toString().substring(0, 10);
+	private static String randomJobName() {
+		return "job-" + randomSuffix();
+	}
+
+	private static String randomSuffix() {
+		return UUID.randomUUID().toString().substring(0, 10);
 	}
 
 	private static List<String> asList(String... names) {
