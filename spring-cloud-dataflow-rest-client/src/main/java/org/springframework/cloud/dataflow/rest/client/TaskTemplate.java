@@ -90,7 +90,7 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsCurrentLink;
 
-	private final Link executionsInfoLink;
+	private Link executionsInfoLink;
 
 	private final Link validationLink;
 
@@ -109,7 +109,6 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
-		Assert.notNull(resources.getLink(EXECUTIONS_INFO_RELATION), "Executions info relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
 
@@ -134,7 +133,9 @@ public class TaskTemplate implements TaskOperations {
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
-		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
+		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
+			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
+		}
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
@@ -270,7 +271,13 @@ public class TaskTemplate implements TaskOperations {
 		Map<String,String> map = new HashMap<>();
 		map.put("completed", String.valueOf(completed));
 		map.put("name", StringUtils.hasText(taskName) ? taskName : "");
-		return restTemplate.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class).getTotalExecutions();
+		if (this.executionsInfoLink != null) {
+			return restTemplate
+					.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class)
+					.getTotalExecutions();
+		}
+		// for backwards-compatibility return zero count
+		return 0;
 	}
 
 
