@@ -1,0 +1,5 @@
+test:
+  database:
+    dataflow-version: "@project.version@"
+    skipper-version: "@spring-cloud-skipper.version@"
+    shared-database: false
