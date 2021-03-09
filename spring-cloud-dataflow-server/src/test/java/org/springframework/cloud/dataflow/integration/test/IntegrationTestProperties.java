@@ -24,7 +24,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "test")
 public class IntegrationTestProperties {
 
+	private DatabaseProperties database = new DatabaseProperties();
 	private PlatformProperties platform = new PlatformProperties();
+
+	public DatabaseProperties getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(DatabaseProperties database) {
+		this.database = database;
+	}
 
 	public PlatformProperties getPlatform() {
 		return platform;
@@ -32,6 +41,37 @@ public class IntegrationTestProperties {
 
 	public void setPlatform(PlatformProperties platform) {
 		this.platform = platform;
+	}
+
+	public static class DatabaseProperties {
+
+		private String dataflowVersion;
+		private String skipperVersion;
+		private boolean sharedDatabase;
+
+		public String getDataflowVersion() {
+			return dataflowVersion;
+		}
+
+		public void setDataflowVersion(String dataflowVersion) {
+			this.dataflowVersion = dataflowVersion;
+		}
+
+		public String getSkipperVersion() {
+			return skipperVersion;
+		}
+
+		public void setSkipperVersion(String skipperVersion) {
+			this.skipperVersion = skipperVersion;
+		}
+
+		public boolean isSharedDatabase() {
+			return sharedDatabase;
+		}
+
+		public void setSharedDatabase(boolean sharedDatabase) {
+			this.sharedDatabase = sharedDatabase;
+		}
 	}
 
 	public static class PlatformProperties {

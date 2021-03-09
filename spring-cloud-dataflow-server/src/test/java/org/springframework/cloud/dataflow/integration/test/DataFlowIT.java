@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.integration.test.tags.DockerCompose;
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactory;
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
@@ -164,6 +165,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @EnableConfigurationProperties({ IntegrationTestProperties.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Import(DataFlowOperationsITConfiguration.class)
+@DockerCompose
 public class DataFlowIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFlowIT.class);

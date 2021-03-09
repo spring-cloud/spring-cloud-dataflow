@@ -1,0 +1,9 @@
+spring:
+  autoconfigure:
+    exclude:
+    - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+test:
+  database:
+    dataflow-version: "@project.version@"
+    skipper-version: "@spring-cloud-skipper.version@"
+    shared-database: true
