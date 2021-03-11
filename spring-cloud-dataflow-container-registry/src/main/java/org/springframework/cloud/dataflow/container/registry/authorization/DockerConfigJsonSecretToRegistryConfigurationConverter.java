@@ -49,15 +49,21 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	private static final Logger logger = LoggerFactory.getLogger(DockerConfigJsonSecretToRegistryConfigurationConverter.class);
 	public static final String BEARER_REALM_ATTRIBUTE = "Bearer realm";
 	public static final String SERVICE_ATTRIBUTE = "service";
+	public static final String HTTPS_INDEX_DOCKER_IO_V_1 = "https://index.docker.io/v1/";
+	public static final String DOCKER_IO = "docker.io";
+	public static final String REGISTRY_1_DOCKER_IO = "registry-1.docker.io";
 
 	//	private final RestTemplate restTemplate;
 	private final ContainerImageRestTemplateFactory containerImageRestTemplate;
 
 	private final Map<String, Boolean> httpProxyPerHost;
 
+	private final boolean replaceDefaultDockerRegistryServer;
+
 	public DockerConfigJsonSecretToRegistryConfigurationConverter(ContainerRegistryProperties properties,
 			ContainerImageRestTemplateFactory containerImageRestTemplate) {
 
+		this.replaceDefaultDockerRegistryServer = properties.isReplaceDefaultDockerRegistryServer();
 		// Retrieve registry configurations, explicitly declared via properties.
 		this.httpProxyPerHost = properties.getRegistryConfigurations().entrySet().stream()
 				.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), e -> e.getValue().isUseHttpProxy()));
@@ -86,7 +92,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 				Map<String, ContainerRegistryConfiguration> registryConfigurationMap = new HashMap<>();
 				for (Object registryUrl : authsMap.keySet()) {
 					ContainerRegistryConfiguration rc = new ContainerRegistryConfiguration();
-					rc.setRegistryHost(registryUrl.toString());
+					rc.setRegistryHost(replaceDefaultDockerRegistryServerUrl(registryUrl.toString()));
 					Map registryMap = (Map) authsMap.get(registryUrl.toString());
 					rc.setUser((String) registryMap.get("username"));
 					rc.setSecret((String) registryMap.get("password"));
@@ -118,6 +124,26 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			}
 		}
 		return Collections.emptyMap();
+	}
+
+	/**
+	 * When the `kubectl create secret docker-registry` command is used without explicit docker-server property set
+	 * the later defaults to `https://index.docker.io/v1/` (or to `domain.io`). Those secrets can be used as
+	 * K8s `imagePullSecret` to pull images from Docker Hub but can not be used for SCDF Metadata Container Registry access.
+	 * Later expects a docker-server=registry-1.docker.io instead.
+	 * To be able to reuse docker registry secretes for the purpose of imagePullSecrets and SCDF Container Metadata retrieval.
+	 * by default the `https://index.docker.io/v1/` and `domain.io` docker-server values found in any mounted dockerconfigjson secret
+	 * are replaced by `registry-1.docker.io`.
+	 *
+	 * You can override this behaviour by setting replaceDefaultDockerRegistryServer to false.
+	 *
+	 * @param dockerConfigJsonRegistryHost Docker-Server property value as extracted from the dockerconfigjson.
+	 * @return If input url is "https://index.docker.io/v1/" or "docker.io" then return "registry-1.docker.io". Otherwise return the input url.
+	 */
+	private String replaceDefaultDockerRegistryServerUrl(String dockerConfigJsonRegistryHost) {
+		return (this.replaceDefaultDockerRegistryServer && (DOCKER_IO.equals(dockerConfigJsonRegistryHost)
+				|| HTTPS_INDEX_DOCKER_IO_V_1.equals(dockerConfigJsonRegistryHost))) ?
+				REGISTRY_1_DOCKER_IO : dockerConfigJsonRegistryHost;
 	}
 
 	/**
