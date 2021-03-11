@@ -931,11 +931,14 @@ public class DataFlowIT {
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
 
-			Exception exception = assertThrows(DataFlowClientException.class, () -> {
-				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
+			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
+				Exception exception = assertThrows(DataFlowClientException.class, () -> {
+					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+				});
+				assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
 			});
-
-			assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
 		}
 		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}

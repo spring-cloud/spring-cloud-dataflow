@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.zafarkhaja.semver.Version;
 import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,8 @@ public class RuntimeApplicationHelper {
 
 	private final String platformName;
 
+	private final Version dataflowServerVersion;
+
 	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName) {
 		Assert.notNull(dataFlowOperations, "Valid dataFlowOperations is expected but was: " + dataFlowOperations);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
@@ -61,7 +64,22 @@ public class RuntimeApplicationHelper {
 		this.platformType = dataFlowOperations.streamOperations().listPlatforms().stream()
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
 				.map(Deployer::getType).findFirst().get();
+
+		dataflowServerVersion = Version.valueOf(dataFlowOperations.aboutOperation().get()
+				.getVersionInfo().getImplementation().getVersion());
+
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
+	}
+
+	public Version getDataflowServerVersion() {
+		return dataflowServerVersion;
+	}
+
+	public boolean dataflowServerVersionEqualOrGreaterThan(String version) {
+		return dataflowServerVersion.compareTo(Version.valueOf(version)) >= 0;
+	}
+	public boolean dataflowServerVersionLowerThan(String version) {
+		return dataflowServerVersion.compareTo(Version.valueOf(version)) < 0;
 	}
 
 	public String getPlatformName() {
