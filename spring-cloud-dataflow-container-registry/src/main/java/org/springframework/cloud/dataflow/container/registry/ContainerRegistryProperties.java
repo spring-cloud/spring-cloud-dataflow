@@ -64,6 +64,19 @@ public class ContainerRegistryProperties {
 	 */
 	private HttpProxy httpProxy = new HttpProxy();
 
+	/**
+	 * When the `kubectl create secret docker-registry` command is used without explicit docker-server property set
+	 * the later defaults to `https://index.docker.io/v1/` (or to `domain.io`). Those secrets can be used as
+	 * K8s `imagePullSecret` to pull images from Docker Hub but can not be used for SCDF Metadata Container Registry access.
+	 * Later expects a docker-server=registry-1.docker.io instead.
+	 * To be able to reuse docker registry secretes for the purpose of imagePullSecrets and SCDF Container Metadata retrieval.
+	 * by default the `https://index.docker.io/v1/` and `domain.io` docker-server values found in any mounted dockerconfigjson secret
+	 * are replaced by `registry-1.docker.io`.
+	 *
+	 * You can override this behaviour by setting replaceDefaultDockerRegistryServer to false.
+	 */
+	private boolean replaceDefaultDockerRegistryServer = true;
+
 	public static class HttpProxy {
 		private String host = "";
 		private int port = 0;
@@ -123,6 +136,14 @@ public class ContainerRegistryProperties {
 
 	public void setOfficialRepositoryNamespace(String officialRepositoryNamespace) {
 		this.officialRepositoryNamespace = officialRepositoryNamespace;
+	}
+
+	public boolean isReplaceDefaultDockerRegistryServer() {
+		return replaceDefaultDockerRegistryServer;
+	}
+
+	public void setReplaceDefaultDockerRegistryServer(boolean replaceDefaultDockerRegistryServer) {
+		this.replaceDefaultDockerRegistryServer = replaceDefaultDockerRegistryServer;
 	}
 
 	@Override
