@@ -227,23 +227,19 @@ public class DataFlowIT {
 	public void applicationMetadataMavenTests() {
 		logger.info("application-metadata-maven-test");
 
-		try {
-			// Maven app with metadata
-			DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
-					.info("file", ApplicationType.sink, false);
-			assertThat(mavenAppWithJarMetadata.getOptions()).hasSize(8);
+		// Maven app with metadata
+		DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
+				.info("file", ApplicationType.sink, false);
+		assertThat(mavenAppWithJarMetadata.getOptions()).hasSize(8);
 
-			// Maven app without metadata
-			dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
-					"maven://org.springframework.cloud.stream.app:file-sink-kafka:2.1.1.RELEASE", null, true);
-			DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
-					.info("maven-app-without-metadata", ApplicationType.sink, false);
-			assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
-		}
-		finally {
-			// unregister the test apps
-			dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
-		}
+		// Maven app without metadata
+		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:2.1.1.RELEASE", null, true);
+		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
+				.info("maven-app-without-metadata", ApplicationType.sink, false);
+		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
+		// unregister the test apps
+		dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
 	}
 
 	@Test
@@ -251,44 +247,41 @@ public class DataFlowIT {
 	public void applicationMetadataDockerTests() {
 		logger.info("application-metadata-docker-test");
 
-		try {
-			// Docker app with container image metadata
-			dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
-					"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
-			DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
-					.info("docker-app-with-container-metadata", ApplicationType.source, false);
-			assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
 
-			// Docker app with container image metadata with escape characters.
-			dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,
-					"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
-			DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
-					.info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
-			assertThat(dockerAppWithContainerMetadataWithEscapeChars.getOptions()).hasSize(6);
+		// Docker app with container image metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
+				"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
+		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-container-metadata", ApplicationType.source, false);
+		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
 
-			// Docker app without metadata
-			dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,
-					"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true);
-			DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
-					.info("docker-app-without-metadata", ApplicationType.sink, false);
-			assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
+		// Docker app with container image metadata with escape characters.
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,
+				"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
+		DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
+		assertThat(dockerAppWithContainerMetadataWithEscapeChars.getOptions()).hasSize(6);
 
-			// Docker app with jar metadata
-			dataFlowOperations.appRegistryOperations().register("docker-app-with-jar-metadata", ApplicationType.sink,
-					"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
-					"maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE", true);
-			DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
-					.info("docker-app-with-jar-metadata", ApplicationType.sink, false);
-			assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
-		}
-		finally {
-			// unregister the test apps
-			dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.source);
-			dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata-escape-chars", ApplicationType.source);
-			dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
-			dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
-		}
+		// Docker app without metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,
+				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true);
+		DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-without-metadata", ApplicationType.sink, false);
+		assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
 
+		// Docker app with jar metadata
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-jar-metadata", ApplicationType.sink,
+				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE", true);
+		DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
+				.info("docker-app-with-jar-metadata", ApplicationType.sink, false);
+		assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
+
+		// unregister the test apps
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.source);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata-escape-chars", ApplicationType.source);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
 	}
 
 	// -----------------------------------------------------------------------
