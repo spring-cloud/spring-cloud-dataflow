@@ -50,11 +50,6 @@ public class IntegrationTestProperties {
 	public static class PlatformConnectionProperties {
 
 		/**
-		 * Default url to connect to dataflow
-		 */
-		private String dataflowServerUrl = "http://localhost:9393";
-
-		/**
 		 * default - local platform, cf - Cloud Foundry platform, k8s - GKE/Kubernetes platform
 		 */
 		private String platformName = "default";
@@ -68,26 +63,6 @@ public class IntegrationTestProperties {
 		 * Default url to connect to SCDF's Influx TSDB
 		 */
 		private String influxUrl = "http://localhost:8086";
-
-		/**
-		 * Kubernetes tests require nginx-ingress and watchdog mechanism to expose the
-		 * apps URL to public access. Later requires a preconfigured ingress servers
-		 * domain name suffix.
-		 *
-		 * For example the Hydra AT environment hash the 'hydra.springapps.io' host name
-		 * and app Urls will have the form
-		 * https://partitioning-test-log-v1.hydra.springapps.io or
-		 * https://partitioning-test-log-v1-1.hydra.springapps.io for multiple instance.
-		 */
-		private String kubernetesAppHostSuffix = "";
-
-		public String getDataflowServerUrl() {
-			return dataflowServerUrl;
-		}
-
-		public void setDataflowServerUrl(String dataflowServerUrl) {
-			this.dataflowServerUrl = dataflowServerUrl;
-		}
 
 		public String getPlatformName() {
 			return platformName;
@@ -111,14 +86,6 @@ public class IntegrationTestProperties {
 
 		public void setInfluxUrl(String influxUrl) {
 			this.influxUrl = influxUrl;
-		}
-
-		public String getKubernetesAppHostSuffix() {
-			return kubernetesAppHostSuffix;
-		}
-
-		public void setKubernetesAppHostSuffix(String kubernetesAppHostSuffix) {
-			this.kubernetesAppHostSuffix = kubernetesAppHostSuffix;
 		}
 	}
 }

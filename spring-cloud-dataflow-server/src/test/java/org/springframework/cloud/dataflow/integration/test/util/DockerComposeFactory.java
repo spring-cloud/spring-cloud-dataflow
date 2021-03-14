@@ -169,6 +169,12 @@ public class DockerComposeFactory {
 	}
 
 	public static Path createTempDirectory() {
+
+		// Temp directory is not required when the docker-compose is not used.
+		if (DockerComposeFactoryProperties.isDockerComposeDisabled()) {
+			return null;
+		}
+
 		try {
 			Path tempDirPath = Files.createTempDirectory(null);
 			logger.info("Temp directory: " + tempDirPath);

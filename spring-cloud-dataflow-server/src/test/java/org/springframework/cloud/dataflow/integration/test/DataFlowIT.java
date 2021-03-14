@@ -59,7 +59,6 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
-import org.springframework.cloud.dataflow.integration.test.util.SkipSslRestHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
@@ -72,10 +71,10 @@ import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationR
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -118,7 +117,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * <code>
  *    ./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
  *        -Dtest.docker.compose.disable.extension=true \
- *        -Dtest.platform.connection.dataflowServerUrl=https://scdf-server.gke.io \
+ *        -Dspring.cloud.dataflow.client.server-uri=https://scdf-server.gke.io \
  *        -Pfailsafe
  * </code>
  *
@@ -160,6 +159,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties({ IntegrationTestProperties.class })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(DataFlowOperationsITConfiguration.class)
 public class DataFlowIT {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataFlowIT.class);
@@ -170,9 +170,11 @@ public class DataFlowIT {
 	/**
 	 * REST and DSL clients used to interact with the SCDF server and run the tests.
 	 */
+	@Autowired
 	protected DataFlowTemplate dataFlowOperations;
+
+	@Autowired
 	protected RuntimeApplicationHelper runtimeApps;
-	protected RestTemplate restTemplate;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as
@@ -197,12 +199,6 @@ public class DataFlowIT {
 
 	@BeforeEach
 	public void before() {
-		dataFlowOperations = SkipSslRestHelper
-				.dataFlowTemplate(testProperties.getPlatform().getConnection().getDataflowServerUrl());
-		runtimeApps = new RuntimeApplicationHelper(dataFlowOperations,
-				testProperties.getPlatform().getConnection().getPlatformName());
-		restTemplate = SkipSslRestHelper.restTemplate(); // used for HTTP post in tests
-
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
 	}

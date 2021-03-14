@@ -33,7 +33,6 @@ import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Helper class to retrieve runtime information form DataFlow server.
@@ -47,25 +46,23 @@ public class RuntimeApplicationHelper {
 
 	private final String platformType;
 
-	private final RestTemplate restTemplate = SkipSslRestHelper.restTemplate();
-
-	private final DataFlowTemplate dataFlowOperations;
+	private final DataFlowTemplate dataFlowTemplate;
 
 	private final String platformName;
 
 	private final Version dataflowServerVersion;
 
-	public RuntimeApplicationHelper(DataFlowTemplate dataFlowOperations, String platformName) {
-		Assert.notNull(dataFlowOperations, "Valid dataFlowOperations is expected but was: " + dataFlowOperations);
+	public RuntimeApplicationHelper(DataFlowTemplate dataFlowTemplate, String platformName) {
+		Assert.notNull(dataFlowTemplate, "Valid dataFlowOperations is expected but was: " + dataFlowTemplate);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
 		logger.debug("platform Name: [" + platformName + "]");
-		this.dataFlowOperations = dataFlowOperations;
+		this.dataFlowTemplate = dataFlowTemplate;
 		this.platformName = platformName;
-		this.platformType = dataFlowOperations.streamOperations().listPlatforms().stream()
+		this.platformType = dataFlowTemplate.streamOperations().listPlatforms().stream()
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
 				.map(Deployer::getType).findFirst().get();
 
-		dataflowServerVersion = Version.valueOf(dataFlowOperations.aboutOperation().get()
+		dataflowServerVersion = Version.valueOf(dataFlowTemplate.aboutOperation().get()
 				.getVersionInfo().getImplementation().getVersion());
 
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
@@ -78,6 +75,7 @@ public class RuntimeApplicationHelper {
 	public boolean dataflowServerVersionEqualOrGreaterThan(String version) {
 		return dataflowServerVersion.compareTo(Version.valueOf(version)) >= 0;
 	}
+
 	public boolean dataflowServerVersionLowerThan(String version) {
 		return dataflowServerVersion.compareTo(Version.valueOf(version)) < 0;
 	}
@@ -96,7 +94,7 @@ public class RuntimeApplicationHelper {
 	 */
 	public Map<String, Map<String, String>> appInstanceAttributes() {
 		Map<String, Map<String, String>> appInstanceAttributes = new HashMap<>();
-		Iterable<AppStatusResource> apps = dataFlowOperations.runtimeOperations().status();
+		Iterable<AppStatusResource> apps = dataFlowTemplate.runtimeOperations().status();
 		for (AppStatusResource app : apps) {
 			Iterable<AppInstanceStatusResource> instances = app.getInstances();
 			for (AppInstanceStatusResource instance : instances) {
@@ -202,7 +200,7 @@ public class RuntimeApplicationHelper {
 		String logContent = "";
 		String logFileUrl = String.format("%s/actuator/logfile", instanceUrl);
 		try {
-			logContent = restTemplate.getForObject(logFileUrl, String.class);
+			logContent = dataFlowTemplate.getRestTemplate().getForObject(logFileUrl, String.class);
 			if (logContent == null) {
 				logger.warn("Unable to retrieve logfile from '" + logFileUrl);
 				logContent = "empty";
@@ -222,7 +220,7 @@ public class RuntimeApplicationHelper {
 	public boolean isServicePresent(String serviceUrl) {
 		if (null != serviceUrl) {
 			try {
-				restTemplate.getForObject(serviceUrl, String.class);
+				dataFlowTemplate.getRestTemplate().getForObject(serviceUrl, String.class);
 				return true;
 			}
 			catch (Exception e) {
@@ -235,7 +233,7 @@ public class RuntimeApplicationHelper {
 	private boolean isUrlAccessible(String serviceUrl) {
 		if (null != serviceUrl) {
 			try {
-				Set<HttpMethod> optionsForAllow = restTemplate.optionsForAllow(serviceUrl);
+				Set<HttpMethod> optionsForAllow = dataFlowTemplate.getRestTemplate().optionsForAllow(serviceUrl);
 				return !CollectionUtils.isEmpty(optionsForAllow);
 			}
 			catch (Exception e) {/* do nothing */}
@@ -249,10 +247,10 @@ public class RuntimeApplicationHelper {
 
 
 	public void httpPost(String url, String message) {
-		restTemplate.postForObject(url, message, String.class);
+		dataFlowTemplate.getRestTemplate().postForObject(url, message, String.class);
 	}
 
 	public String httpGet(String url) {
-		return restTemplate.getForObject(url, String.class);
+		return dataFlowTemplate.getRestTemplate().getForObject(url, String.class);
 	}
 }

@@ -13,57 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.springframework.cloud.dataflow.integration.test.util;
+package org.springframework.cloud.dataflow.integration.test;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
+import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * Provisions RestTemplate (instrumented with skip-ssl-validation and debug interceptors)
+ * and RuntimeApplicationHelper.
+ *
+ * It imports the DataFlowClientAutoConfiguration which extends the provide RestTemplate with authentication support
+ * and in turn builds the DataFlowTemplate instance.
+ *
  * @author Christian Tzolov
  */
-public class SkipSslRestHelper {
+@Configuration
+@Import(DataFlowClientAutoConfiguration.class)
+@EnableConfigurationProperties({ IntegrationTestProperties.class })
+public class DataFlowOperationsITConfiguration {
 
-	private SkipSslRestHelper() {
+	@Bean
+	public RestTemplate restTemplate(DataFlowClientProperties dataFlowClientProperties) throws URISyntaxException {
+		RestTemplate restTemplate = new RestTemplate(HttpClientConfigurer
+				.create(new URI(dataFlowClientProperties.getServerUri()))
+				.skipTlsCertificateVerification(dataFlowClientProperties.isSkipSslValidation())
+				.buildClientHttpRequestFactory());
 
-	}
-
-	public static DataFlowTemplate dataFlowTemplate(String dataflowUrl) {
-		return new DataFlowTemplate(URI.create(dataflowUrl), restTemplate());
-	}
-
-	public static RestTemplate restTemplate() {
-		RestTemplate restTemplate = new RestTemplate();
-		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-		try {
-			httpClientBuilder.setSSLContext(SSLContexts.custom().loadTrustMaterial((chain, authType) -> true).build());
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
-		restTemplate.setRequestFactory(new BufferingClientHttpRequestFactory(
-				new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build())));
 		restTemplate.setInterceptors(Arrays.asList(new AcceptCharsetInterceptor(), new LoggingInterceptor()));
+
 		return restTemplate;
+	}
+
+	@Bean
+	public RuntimeApplicationHelper runtimeApplicationHelper(DataFlowTemplate dataFlowOperations,
+			IntegrationTestProperties testProperties) {
+
+		return new RuntimeApplicationHelper(dataFlowOperations,
+				testProperties.getPlatform().getConnection().getPlatformName());
 	}
 
 	static class AcceptCharsetInterceptor implements ClientHttpRequestInterceptor {
@@ -110,4 +120,5 @@ public class SkipSslRestHelper {
 			}
 		}
 	}
+
 }

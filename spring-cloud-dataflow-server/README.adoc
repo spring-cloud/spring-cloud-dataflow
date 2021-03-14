@@ -186,13 +186,13 @@ Register the OOTB kafka/docker and task/docker apps and the run:
 ----
 ./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
     -Dtest.docker.compose.disable.extension=true \
-    -Dtest.platform.connection.dataflowServerUrl=http://your-k8s-scdf-server \
+    -Dspring.cloud.dataflow.client.server-uri=http://your-k8s-scdf-server \
     -Pfailsafe
 ----
 
 * replace `http://your-k8s-scdf-server` with the url of your Data Flow server.
 * the `test.docker.compose.disable.extension=true` property disables the docker-compose fixture.
-* the `test.platform.connection.dataflowServerUrl=` property points to the pre-installed DataFlow REST API.
+* the `spring.cloud.dataflow.client.server-uri=` property points to the pre-installed DataFlow REST API.
 
 For the analytic tests you need to pre-install Prometheus according to the installation instructions and forward the prometheus server's 9090 port
 ----
