@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -108,7 +111,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 						.end())
 				.end();
 		if(this.incrementInstanceEnabled) {
-			builder.incrementer(new RunIdIncrementer());
+			builder.incrementer(new ComposedTaskRunIdIncrementer());
 		}
 		return builder.build();
 	}
@@ -351,5 +354,20 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 		Step currentStep = this.context.getBean(beanName, Step.class);
 
 		return new FlowBuilder<Flow>(beanName).from(currentStep).end();
+	}
+
+	static class ComposedTaskRunIdIncrementer extends RunIdIncrementer {
+
+		private static final String RUN_ID_KEY = "run.id";
+
+		@Override
+		public JobParameters getNext(JobParameters parameters) {
+			JobParameter runIdParameter = (parameters == null) ? null : parameters.getParameters().get(RUN_ID_KEY);
+			JobParametersBuilder builder = new JobParametersBuilder();
+			if (runIdParameter != null) {
+				builder.addParameter(RUN_ID_KEY, runIdParameter);
+			}
+			return super.getNext(builder.toJobParameters());
+		}
 	}
 }
