@@ -35,7 +35,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerConfigurationJobIncrementerTests.JOB_NAME;
 
 /**
  * @author Glenn Renfro
@@ -48,11 +47,11 @@ import static org.springframework.cloud.dataflow.composedtaskrunner.ComposedTask
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 @TestPropertySource(properties = {"graph=AAA && BBB && CCC",
 		"increment-instance-enabled=true",
-		"spring.cloud.task.name=" + JOB_NAME})
+		"spring.cloud.task.name=" + ComposedTaskRunnerConfigurationJobIncrementerTests.JOB_NAME})
 public class ComposedTaskRunnerConfigurationJobIncrementerTests {
 
-	static final String JOB_NAME = "footest";
-	static final String RUN_ID_KEY = "run.id";
+	public static final String JOB_NAME = "footest";
+	private static final String RUN_ID_KEY = "run.id";
 
 	@Autowired
 	private JobRepository jobRepository;
