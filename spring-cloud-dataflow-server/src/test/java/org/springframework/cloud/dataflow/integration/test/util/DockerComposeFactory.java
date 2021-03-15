@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.integration.test.util;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -145,10 +143,11 @@ public class DockerComposeFactory {
 
 		// If DooD is enabled but the docker-compose-dood.yml is not listed in the dockerComposePaths then
 		// add it explicitly at the end of the list.
-		if (isDood ) {
+		if (isDood) {
 			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "../src/docker-compose/docker-compose-dood.yml");
 			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "./src/test/resources/docker-compose-docker-it-task-import.yml");
-		} else {
+		}
+		else {
 			dockerComposePaths = addDockerComposeToPath(dockerComposePaths, "./src/test/resources/docker-compose-maven-it-task-import.yml");
 		}
 
@@ -166,16 +165,5 @@ public class DockerComposeFactory {
 				// set to false to test with local dataflow and skipper images.
 				.pullOnStartup(DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP, true))
 				.build();
-	}
-
-	public static Path createTempDirectory() {
-		try {
-			Path tempDirPath = Files.createTempDirectory(null);
-			logger.info("Temp directory: " + tempDirPath);
-			return tempDirPath;
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("Could not create the temp directory");
-		}
 	}
 }
