@@ -35,7 +35,6 @@ import com.jayway.jsonpath.JsonPath;
 import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +48,7 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,10 +177,13 @@ public class DataFlowIT {
 	protected RuntimeApplicationHelper runtimeApps;
 
 	/**
-	 * Folder that collects the external docker-compose YAML files such as
-	 * coming from external classpath, http/https or file locations.
+	 * Folder that collects the external docker-compose YAML files such as coming from external classpath,
+	 * http/https or file locations.
+	 * Note: Needs to be static, because as a part of the dockerCompose extension it is shared with all tests.
+	 * TODO: Explore if the temp-folder can be created and destroyed internally inside the dockerCompose extension.
 	 */
-	static Path tempYamlFolder = DockerComposeFactory.createTempDirectory();
+	@TempDir
+	static Path tempDockerComposeYamlFolder;
 
 	/**
 	 * A JUnit 5 extension to bring up Docker containers defined in docker-compose-xxx.yml files before running tests.
@@ -188,14 +191,7 @@ public class DataFlowIT {
 	 * disable the extension.
 	 */
 	@RegisterExtension
-	public static Extension dockerCompose = DockerComposeFactory.startDockerCompose(tempYamlFolder);
-
-	@AfterAll
-	public static void afterAll() {
-		if (tempYamlFolder != null && tempYamlFolder.toFile().exists()) {
-			tempYamlFolder.toFile().delete();
-		}
-	}
+	public static Extension dockerCompose = DockerComposeFactory.startDockerCompose(tempDockerComposeYamlFolder);
 
 	@BeforeEach
 	public void before() {
