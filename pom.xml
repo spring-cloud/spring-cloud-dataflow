@@ -558,11 +558,6 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</repository>
-				<repository>
-					<id>spring-plugins</id>
-					<name>Spring Maven Plugins Repository</name>
-					<url>https://repo.spring.io/plugins-release</url>
-				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
