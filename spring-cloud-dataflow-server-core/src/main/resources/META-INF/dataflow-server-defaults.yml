@@ -186,7 +186,7 @@ spring:
             - GET /streams/validation/*              => hasRole('ROLE_VIEW')
 
             # Stream Logs
-            - GET /streams/logs/*                    => hasRole('ROLE_VIEW')
+            - GET /streams/logs/**                    => hasRole('ROLE_VIEW')
 
             # Task Definitions
 
