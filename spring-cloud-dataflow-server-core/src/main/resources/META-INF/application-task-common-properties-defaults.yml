@@ -2,7 +2,7 @@ common:
   management:
     metrics:
       tags:
-        application: ${task.name:unknown}-${task.execution.id:unknown}
+        application: ${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}
         service: "task-application"
 
 local:
