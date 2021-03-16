@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,16 @@ public class Db2PagingQueryProvider extends AbstractSqlPagingQueryProvider {
 	@Override
 	public String getPageQuery(Pageable pageable) {
 		long offset = pageable.getOffset() + 1;
-		return generateRowNumSqlQueryWithNesting(getSelectClause(), false,
-				"TMP_ROW_NUM BETWEEN " + offset + " AND " + (offset + pageable.getPageSize()));
+		return generateRowNumSqlQueryWithNesting(getSelectClause(),
+				"TMP_ROW_NUM >= " + offset + " AND TMP_ROW_NUM < " + (offset + pageable.getPageSize()));
 	}
 
-	private String generateRowNumSqlQueryWithNesting(String selectClause, boolean remainingPageQuery,
-			String rowNumClause) {
+	private String generateRowNumSqlQueryWithNesting(String selectClause, String rowNumClause) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT ").append(selectClause).append(" FROM (SELECT ").append(selectClause).append(", ")
 				.append("ROW_NUMBER() OVER() as TMP_ROW_NUM");
 		sql.append(" FROM (SELECT ").append(selectClause).append(" FROM ").append(this.getFromClause());
-		SqlPagingQueryUtils.buildWhereClause(this, remainingPageQuery, sql);
+		SqlPagingQueryUtils.buildWhereClause(this, false, sql);
 		sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this));
 		sql.append(")) WHERE ").append(rowNumClause);
 
