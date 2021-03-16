@@ -210,7 +210,7 @@ public class TaskSchedulerControllerTests {
 				"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 				"\"spring.datasource.username\":null,\"spring.datasource.url\":null," +
 				"\"spring.datasource.driverClassName\":null," +
-				"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+				"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 				"\"spring.cloud.task.name\":\"testDefinition\"}," +
 				"\"deploymentProperties\":{}}", auditRecord.getAuditData());
 	}
@@ -223,7 +223,7 @@ public class TaskSchedulerControllerTests {
 						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
 						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
-						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
 						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
@@ -239,7 +239,7 @@ public class TaskSchedulerControllerTests {
 						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
 						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
-						"\"management.metrics.tags.application\":\"${task.name:unknown}-${task.execution.id:unknown}\"," +
+						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
 						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
