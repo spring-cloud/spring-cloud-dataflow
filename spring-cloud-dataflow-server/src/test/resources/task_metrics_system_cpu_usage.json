@@ -1,0 +1,25 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {
+          "__name__": "system_cpu_usage",
+          "application": "${json-unit.ignore}",
+          "instance": "prometheus-rsocket-proxy:9096",
+          "job": "local-rsocket-connected",
+          "service": "task-application",
+          "task_execution_id": "${json-unit.ignore}",
+          "task_external_execution_id": "unknown",
+          "task_name": "${json-unit.ignore}",
+          "task_parent_execution_id": "unknown"
+        },
+        "value": [
+          "${json-unit.ignore}",
+          "${json-unit.ignore}"
+        ]
+      }
+    ]
+  }
+}

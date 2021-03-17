@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.integration.test;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.jayway.jsonpath.JsonPath;
@@ -73,8 +75,10 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -777,6 +781,49 @@ public class DataFlowIT {
 
 			// All
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+		}
+	}
+
+	@Test
+	public void taskMetricsPrometheus() throws IOException {
+		if (!prometheusPresent()) {
+			logger.info("task-metrics-test: SKIP - no metrics configured!");
+		}
+
+		Assumptions.assumeTrue(prometheusPresent());
+
+		logger.info("task-metrics-test: Prometheus");
+
+		// task-demo-metrics-prometheus source: https://bit.ly/3bUfzWh
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("task-demo-metrics-prometheus --task.demo.delay.fixed=0s")
+				.description("Test task metrics")
+				.build()) {
+
+			// task launch id
+			long launchId = task.launch();
+
+			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(1);
+			assertThat(task.execution(launchId).isPresent()).isTrue();
+			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			// All
+			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+
+			URI qplUri = UriComponentsBuilder.fromHttpUrl(testProperties.getPlatform().getConnection().getPrometheusUrl()
+					+ String.format("/api/v1/query?query=system_cpu_usage{service=\"task-application\",application=\"%s-%s\"}",
+					task.getTaskName(), launchId)).build().toUri();
+
+			Supplier<String> pqlTaskMetricsQuery = () ->
+					dataFlowOperations.getRestTemplate().exchange(qplUri, HttpMethod.GET, null, String.class).getBody();
+
+			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+			Awaitility.await().until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get())
+					.read("$.data.result.length()") > 0);
+
+			JsonAssertions.assertThatJson(pqlTaskMetricsQuery.get())
+					.isEqualTo(resourceToString("classpath:/task_metrics_system_cpu_usage.json"));
 		}
 	}
 
