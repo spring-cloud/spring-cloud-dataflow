@@ -99,6 +99,7 @@ spring:
             ## Releases
 
             - GET /api/releases                   => hasRole('ROLE_VIEW')
+            - GET /api/releases/**                => hasRole('ROLE_VIEW')
 
             # Statuses
 
