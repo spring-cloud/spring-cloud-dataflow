@@ -382,7 +382,7 @@ public class DataFlowIT {
 		logger.info("stream-lifecycle-test: DEPLOY");
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("lifecycle-test" + randomSuffix())
-				.definition("time | log --log.name=\"\" --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
+				.definition("time | log --log.name='TEST' --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create()
 				.deploy(testDeploymentProperties())) {
 
@@ -732,6 +732,15 @@ public class DataFlowIT {
 	public static final int EXIT_CODE_SUCCESS = 0;
 	public static final int EXIT_CODE_ERROR = 1;
 
+	private List<String> composedTaskLaunchArguments(String... additionalArguments) {
+		// the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
+		// oauth2-protected SCDF installations and is ignored otherwise.
+		List<String> commonTaskArguments = new ArrayList<>();
+		commonTaskArguments.addAll(Arrays.asList("--dataflow-server-use-user-access-token=true"));
+		commonTaskArguments.addAll(Arrays.asList(additionalArguments));
+		return commonTaskArguments;
+	}
+
 	@Test
 	@EnabledIfSystemProperty(named = "PLATFORM_TYPE", matches = "local")
 	public void runBatchRemotePartitionJobLocal() {
@@ -744,7 +753,7 @@ public class DataFlowIT {
 				.description("runBatchRemotePartitionJob - local")
 				.build()) {
 
-			long launchId = task.launch(Collections.EMPTY_MAP, Arrays.asList("--platform=local"));
+			long launchId = task.launch(Collections.EMPTY_MAP, composedTaskLaunchArguments("--platform=local"));
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(1);
@@ -842,8 +851,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
 			// first launch
-
-			long launchId1 = task.launch();
+			long launchId1 = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 
@@ -859,7 +867,7 @@ public class DataFlowIT {
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
-			long launchId2 = task.launch();
+			long launchId2 = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
@@ -891,8 +899,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(2);
 
 			// first launch
-			List<String> arguments = asList("--increment-instance-enabled=true");
-			long launchId1 = task.launch(arguments);
+			long launchId1 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 
@@ -908,7 +915,7 @@ public class DataFlowIT {
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
 			// second launch
-			long launchId2 = task.launch(arguments);
+			long launchId2 = task.launch(composedTaskLaunchArguments("--increment-instance-enabled=true"));
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
@@ -942,7 +949,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
 					.hasSameElementsAs(fullTaskNames(task, "a", "b"));
 
-			long launchId = task.launch();
+			long launchId = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 
@@ -1088,7 +1095,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
 					.hasSameElementsAs(fullTaskNames(task, "b", "t1", "t2", "t3", "t4"));
 
-			long launchId = task.launch();
+			long launchId = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 
@@ -1202,7 +1209,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
 					.hasSameElementsAs(fullTaskNames(task, "b1", "t1"));
 
-			long launchId = task.launch();
+			long launchId = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 
@@ -1279,7 +1286,7 @@ public class DataFlowIT {
 			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
 					.hasSameElementsAs(fullTaskNames(task, allTasks.toArray(new String[0])));
 
-			long launchId = task.launch();
+			long launchId = task.launch(composedTaskLaunchArguments());
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 
