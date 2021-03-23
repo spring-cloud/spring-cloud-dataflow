@@ -304,7 +304,7 @@ public class AboutController {
 		final String MAVEN_ROOT = "https://repo1.maven.org/maven2";
 
 		String result = MAVEN_ROOT;
-		if (version.endsWith("BUILD-SNAPSHOT")) {
+		if (version.endsWith("-SNAPSHOT")) {
 			result = REPO_SNAPSHOT_ROOT;
 		}
 		else if (version.contains(".M")) {
