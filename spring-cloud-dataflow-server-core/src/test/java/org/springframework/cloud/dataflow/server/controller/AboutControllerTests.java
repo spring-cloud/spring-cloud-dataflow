@@ -148,6 +148,43 @@ public class AboutControllerTests {
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.7.2-SNAPSHOT",
+			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
+	})
+	@AutoConfigureTestDatabase(replace = Replace.ANY)
+	public static class SnapshotUrlTests {
+
+		private MockMvc mockMvc;
+
+		@Rule
+		public LogTestNameRule logTestName = new LogTestNameRule();
+
+		@Autowired
+		private WebApplicationContext wac;
+
+		@Before
+		public void setupMocks() {
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+		}
+
+		@Test
+		public void testSnapshotVersionInfo() throws Exception {
+			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
+					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.7.2-SNAPSHOT/spring-cloud-dataflow-shell-2.7.2-SNAPSHOT.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.7.2-SNAPSHOT")))
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
+					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
+		}
+	}
+
+	@RunWith(SpringRunner.class)
+	@SpringBootTest(classes = TestDependencies.class)
+	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.M1",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
