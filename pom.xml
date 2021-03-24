@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
 	<version>2.9.0-SNAPSHOT</version>
@@ -13,14 +14,14 @@
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
 		<version>2.9.0-SNAPSHOT</version>
-		<relativePath />
+		<relativePath/>
 	</parent>
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
 			<comments>
-				Copyright 2014-2020 the original author or authors.
+				Copyright 2014-2021 the original author or authors.
 
 				Licensed under the Apache License, Version 2.0 (the "License");
 				you may not use this file except in compliance with the License.
@@ -84,6 +85,11 @@
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.15.2</testcontainers.version>
+		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
+		<stream-applications.version>3.0.2</stream-applications.version>
+		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
+		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.3</spring-cloud-dataflow-apps-docs-plugin.version>
+		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.3</spring-cloud-dataflow-apps-metadata-plugin.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-container-registry</module>
@@ -109,6 +115,7 @@
 		<module>spring-cloud-starter-dataflow-ui</module>
 		<module>spring-cloud-dataflow-audit</module>
 		<module>spring-cloud-dataflow-test</module>
+		<module>spring-cloud-dataflow-tasklauncher</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -232,6 +239,29 @@
 				<artifactId>aws-java-sdk-ecr</artifactId>
 				<version>${aws-java-sdk-ecr.version}</version>
 			</dependency>
+			<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
+			<dependency>
+				<groupId>com.wavefront</groupId>
+				<artifactId>wavefront-spring-boot-bom</artifactId>
+				<version>${wavefront-spring-boot-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud.stream.app</groupId>
+				<artifactId>stream-applications-micrometer-common</artifactId>
+				<version>${stream-applications.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud.stream.app</groupId>
+				<artifactId>stream-applications-security-common</artifactId>
+				<version>${stream-applications.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud.stream.app</groupId>
+				<artifactId>stream-applications-postprocessor-common</artifactId>
+				<version>${stream-applications.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -302,6 +332,25 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
 					<version>3.0.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-dataflow-apps-docs-plugin</artifactId>
+					<version>${spring-cloud-dataflow-apps-docs-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>generate-documentation</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>generate-documentation</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.cloud</groupId>
+					<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+					<version>${spring-cloud-dataflow-apps-metadata-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
