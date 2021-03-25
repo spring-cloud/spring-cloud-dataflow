@@ -381,6 +381,7 @@ public class DataFlowIT {
 	}
 
 	@Test
+	@Order(Integer.MIN_VALUE + 10)
 	public void streamAppCrossVersion() {
 		logger.info("stream-app-cross-version-test: DEPLOY");
 
