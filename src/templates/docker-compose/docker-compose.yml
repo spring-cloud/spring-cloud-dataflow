@@ -90,6 +90,8 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
+        wget -qO- 'http://dataflow-server:9393/apps/sink/ver-log/3.0.1' --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:3.0.1';
+        wget -qO- 'http://dataflow-server:9393/apps/sink/ver-log/2.1.5.RELEASE' --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:2.1.5.RELEASE';
         echo 'Maven Stream apps imported'"
 
   app-import-task:

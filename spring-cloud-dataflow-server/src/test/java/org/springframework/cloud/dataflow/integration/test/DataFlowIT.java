@@ -74,6 +74,7 @@ import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationR
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
+import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.http.HttpMethod;
@@ -377,6 +378,71 @@ public class DataFlowIT {
 						.orElse(false);
 			});
 		}
+	}
+
+	@Test
+	public void streamAppCrossVersion() {
+		logger.info("stream-app-cross-version-test: DEPLOY");
+
+		int CURRENT_MANIFEST_INDEX = 0;
+		int VAR_LOG_APP_INDEX = 1;
+		int RANDOM = new Random().nextInt();
+
+		try (Stream stream = Stream.builder(dataFlowOperations)
+				.name("app-cross-version-test" + randomSuffix())
+				.definition("http | ver-log")
+				.create()
+				.deploy(new DeploymentPropertiesBuilder()
+						.putAll(testDeploymentProperties())
+						.put("version.ver-log", "3.0.1")
+						.build())
+		) {
+
+			assertThat(stream.getStatus()).is(
+					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
+
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST_INDEX))
+					.get(VAR_LOG_APP_INDEX).getSpec().getVersion()).isEqualTo("3.0.1");
+
+			runtimeApps.httpPost(stream.getName(), "http", "Test message One - " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message One - " + RANDOM));
+
+			assertThat(stream.history().size()).isEqualTo(1L);
+
+			// UPDATE
+			logger.info("stream-app-cross-version-test: UPDATE");
+
+			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", "2.1.5.RELEASE").build());
+
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST_INDEX))
+					.get(VAR_LOG_APP_INDEX).getSpec().getVersion()).isEqualTo("2.1.5.RELEASE");
+
+			runtimeApps.httpPost(stream.getName(), "http", "Test message Two - " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Two - " + RANDOM));
+
+			assertThat(stream.history().size()).isEqualTo(2);
+
+			// ROLLBACK
+			logger.info("stream-app-cross-version-test: ROLLBACK");
+
+			stream.rollback(0);
+
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST_INDEX))
+					.get(VAR_LOG_APP_INDEX).getSpec().getVersion()).isEqualTo("3.0.1");
+
+			runtimeApps.httpPost(stream.getName(), "http", "Test message Three - " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Three - " + RANDOM));
+
+			assertThat(stream.history().size()).isEqualTo(3);
+		}
+		logger.info("stream-app-cross-version-test: DESTROY");
+		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(0L);
 	}
 
 	@Test
