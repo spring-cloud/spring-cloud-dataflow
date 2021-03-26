@@ -383,6 +383,19 @@ public class DataFlowIT {
 	@Test
 	@Order(Integer.MIN_VALUE + 10)
 	public void streamAppCrossVersion() {
+
+		final String VER_2 = "2.1.5.RELEASE";
+		final String VER_3 = "3.0.1";
+
+		boolean testAppsRegistered = runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VER_3)
+				&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VER_2);
+
+		if (!testAppsRegistered) {
+			logger.info("stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
+		}
+
+		Assumptions.assumeTrue(testAppsRegistered);
+
 		logger.info("stream-app-cross-version-test: DEPLOY");
 
 		int CURRENT_MANIFEST = 0;
@@ -395,7 +408,7 @@ public class DataFlowIT {
 				.create()
 				.deploy(new DeploymentPropertiesBuilder()
 						.putAll(testDeploymentProperties())
-						.put("version.ver-log", "3.0.1")
+						.put("version.ver-log", VER_3)
 						.build())
 		) {
 
@@ -405,25 +418,25 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo("3.0.1");
+					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_3);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message One - " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message One - " + RANDOM));
+			runtimeApps.httpPost(stream.getName(), "http", "Test message One " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message One " + RANDOM));
 
 			assertThat(stream.history().size()).isEqualTo(1L);
 
 			// UPDATE
 			logger.info("stream-app-cross-version-test: UPDATE");
 
-			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", "2.1.5.RELEASE").build());
+			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VER_2).build());
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo("2.1.5.RELEASE");
+					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_2);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message Two - " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Two - " + RANDOM));
+			runtimeApps.httpPost(stream.getName(), "http", "Test message Two " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Two " + RANDOM));
 
 			assertThat(stream.history().size()).isEqualTo(2);
 
@@ -435,10 +448,10 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo("3.0.1");
+					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_3);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message Three - " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Three - " + RANDOM));
+			runtimeApps.httpPost(stream.getName(), "http", "Test message Three " + RANDOM);
+			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Three " + RANDOM));
 
 			assertThat(stream.history().size()).isEqualTo(3);
 		}

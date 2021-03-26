@@ -25,10 +25,12 @@ import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
+import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -253,4 +255,23 @@ public class RuntimeApplicationHelper {
 	public String httpGet(String url) {
 		return dataFlowTemplate.getRestTemplate().getForObject(url, String.class);
 	}
+
+	/**
+	 * Check if an application is registered with DataFlow
+	 * @param name application name
+	 * @param type application type
+	 * @param version application version
+	 * @return Returns true if the application with provided coordinates is registered with DataFlow server and false otherwise.
+	 */
+	public boolean isAppRegistered(String name, ApplicationType type, String version) {
+		try {
+			DetailedAppRegistrationResource registration =
+					dataFlowTemplate.appRegistryOperations().info(name, type, version, false);
+			return registration != null;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
 }
