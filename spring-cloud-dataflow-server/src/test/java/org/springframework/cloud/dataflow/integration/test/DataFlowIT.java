@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -384,23 +385,16 @@ public class DataFlowIT {
 	@Order(Integer.MIN_VALUE + 10)
 	public void streamAppCrossVersion() {
 
-		final String VER_2 = "2.1.5.RELEASE";
-		final String VER_3 = "3.0.1";
+		final String VERSION_2 = "2.1.5.RELEASE";
+		final String VERSION_3 = "3.0.1";
 
-		boolean testAppsRegistered = runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VER_3)
-				&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VER_2);
-
-		if (!testAppsRegistered) {
-			logger.info("stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
-		}
-
-		Assumptions.assumeTrue(testAppsRegistered);
+		Assumptions.assumeTrue(runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_3)
+						&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_2),
+				"stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
 
 		logger.info("stream-app-cross-version-test: DEPLOY");
 
 		int CURRENT_MANIFEST = 0;
-		int VER_LOG = 1;
-		int RANDOM = new Random().nextInt();
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("app-cross-version-test" + randomSuffix())
@@ -408,35 +402,40 @@ public class DataFlowIT {
 				.create()
 				.deploy(new DeploymentPropertiesBuilder()
 						.putAll(testDeploymentProperties())
-						.put("version.ver-log", VER_3)
+						.put("version.ver-log", VERSION_3)
 						.build())
 		) {
 
-			assertThat(stream.getStatus()).is(
-					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
+			Supplier<String> currentVerLogAppVersionSupplier = () -> new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
+					.stream()
+					.filter(m -> m.getMetadata().get("name").equals("ver-log"))
+					.map(m -> m.getSpec().getVersion())
+					.findFirst().get();
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_3);
+			assertThat(currentVerLogAppVersionSupplier.get()).isEqualTo(VERSION_3);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message One " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message One " + RANDOM));
+			Consumer<String> awaitSendAndReceiveTestMessage = message -> {
+				logger.info("  message: " + message);
+				runtimeApps.httpPost(stream.getName(), "http", message);
+				Awaitility.await().until(() -> stream.logs(app("ver-log")).contains(message));
+			};
+
+			awaitSendAndReceiveTestMessage.accept("Test message One " + new Random().nextInt());
 
 			assertThat(stream.history().size()).isEqualTo(1L);
 
 			// UPDATE
 			logger.info("stream-app-cross-version-test: UPDATE");
 
-			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VER_2).build());
+			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2).build());
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_2);
+			assertThat(currentVerLogAppVersionSupplier.get()).isEqualTo(VERSION_2);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message Two " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Two " + RANDOM));
+			awaitSendAndReceiveTestMessage.accept("Test message Two " + new Random().nextInt());
 
 			assertThat(stream.history().size()).isEqualTo(2);
 
@@ -447,11 +446,9 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			assertThat(new SpringCloudDeployerApplicationManifestReader().read(stream.manifest(CURRENT_MANIFEST))
-					.get(VER_LOG).getSpec().getVersion()).isEqualTo(VER_3);
+			assertThat(currentVerLogAppVersionSupplier.get()).isEqualTo(VERSION_3);
 
-			runtimeApps.httpPost(stream.getName(), "http", "Test message Three " + RANDOM);
-			Awaitility.await().until(() -> stream.logs(app("ver-log")).contains("Test message Three " + RANDOM));
+			awaitSendAndReceiveTestMessage.accept("Test message Three " + new Random().nextInt());
 
 			assertThat(stream.history().size()).isEqualTo(3);
 		}
