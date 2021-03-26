@@ -145,7 +145,7 @@ To run the docker compose integration, enable the `-Pfailsafe` maven profile and
 . You can run just the integration tests like this:
 
 ----
-./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe  -Dgroups="docker-compose"
+./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose"
 ----
 
 With the help of the `TestProperties` properties one can change the docker-compose files used, the exact versions of the
@@ -158,11 +158,11 @@ SCDF, Skipper servers installed, or the versions Stream and Task apps:
    -Dtest.docker.compose.dataflow.version=2.8.0-SNAPSHOT \
    -Dtest.docker.compose.skipper.version=2.7.0-SNAPSHOT \
 ----
+
 The `test.docker.compose.paths` property accepts comma separated list of docker compose file names and supports `file:`, `classpath:`, and `http:`/`https:` URI schemas. If the schema prefix is not explicitly set, the file is treated as local one.
 
-
 ----
-./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
+./mvnw clean test-compile integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
    -Dtest.docker.compose.paths=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-dood.yml,../src/docker-compose/docker-compose-prometheus.yml \
    -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-latest \
    -Dtest.docker.compose.task.apps.uri=https://dataflow.spring.io/task-docker-latest \
@@ -172,11 +172,15 @@ The `test.docker.compose.paths` property accepts comma separated list of docker 
    -Dtest.docker.compose.pullOnStartup=false
 ----
 
+Use the `-Dtest.docker.compose.dood=true` property to activate the DooD (Docker-Out-Of-Docker) shortcut that implicitly will add `docker-compose-dood.yml` to your configuration :
+
 ----
-./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
+./mvnw clean test-compile integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
    -Dtest.docker.compose.dood=true \
    -Dtest.docker.compose.pullOnStartup=false
 ----
+
+Use the `-Dit.test=class-name#method-name` to filter only selected tests.
 
 ## Run Integration Tests against k8s
 
@@ -184,7 +188,7 @@ For this you need a pre-installed Data Flow on GKE or minikube.
 Register the OOTB kafka/docker and task/docker apps and the run:
 
 ----
-./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false -Dgroups="docker-compose" \
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false -Dgroups="docker-compose" \
     -Dtest.docker.compose.disable.extension=true \
     -Dspring.cloud.dataflow.client.server-uri=http://your-k8s-scdf-server \
     -Pfailsafe
