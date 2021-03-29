@@ -421,7 +421,6 @@ public class DataFlowIT {
 			// TODO: A known flaw in the handling the messages during stream update could lead to message lost!
 			//       This assert if enabled will validate that a message sent only once is delivered within the timeout interval.
 			Consumer<String> awaitSendAndReceiveTestMessageExactlyOneDelivered = message -> {
-				logger.info("  message: " + message);
 				// send the message once and wait until received.
 				runtimeApps.httpPost(stream.getName(), "http", message);
 				Awaitility.await().until(() -> stream.logs(app("ver-log")).contains(message));
@@ -430,7 +429,6 @@ public class DataFlowIT {
 			// TODO: This is a deliberate (and temporal) test regression that validates that at least one message
 			//  of many identical messages is delivered.
 			Consumer<String> awaitSendAndReceiveTestMessageAtLeastOneDelivered = message -> {
-				logger.info("  message: " + message);
 				Awaitility.await().until(() -> {
 					// keep resending the same message until at least one copy is received.
 					runtimeApps.httpPost(stream.getName(), "http", message);
