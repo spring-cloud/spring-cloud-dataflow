@@ -27,6 +27,16 @@ public class IntegrationTestProperties {
 	private DatabaseProperties database = new DatabaseProperties();
 	private PlatformProperties platform = new PlatformProperties();
 
+	private boolean enableMessageLostCheck = false;
+
+	public boolean isEnableMessageLostCheck() {
+		return enableMessageLostCheck;
+	}
+
+	public void setEnableMessageLostCheck(boolean enableMessageLostCheck) {
+		this.enableMessageLostCheck = enableMessageLostCheck;
+	}
+
 	public DatabaseProperties getDatabase() {
 		return database;
 	}

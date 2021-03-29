@@ -418,19 +418,18 @@ public class DataFlowIT {
 					.map(m -> m.getSpec().getVersion())
 					.findFirst().orElse("none");
 
-			// TODO: There might be a serious flaw in the handling the messages during stream update.
-			//       This leads to message lost!!! This is apparent if using this consumer instead of
-			//       awaitSendAndReceiveTestMessageIgnoreMessageLost!
-			Consumer<String> awaitSendAndReceiveTestMessage = message -> {
+			// TODO: A known flaw in the handling the messages during stream update could lead to message lost!
+			//       This assert if enabled will validate that a message sent only once is delivered within the timeout interval.
+			Consumer<String> awaitSendAndReceiveTestMessageExactlyOneDelivered = message -> {
 				logger.info("  message: " + message);
 				// send the message once and wait until received.
 				runtimeApps.httpPost(stream.getName(), "http", message);
 				Awaitility.await().until(() -> stream.logs(app("ver-log")).contains(message));
 			};
 
-			// TODO: This is deliberate (and temporal) test deviation to let this test pass even in case of message lost.
-			//       Use te awaitSendAndReceiveTestMessage for the correct test!
-			Consumer<String> awaitSendAndReceiveTestMessageIgnoreMessageLost = message -> {
+			// TODO: This is a deliberate (and temporal) test regression that validates that at least one message
+			//  of many identical messages is delivered.
+			Consumer<String> awaitSendAndReceiveTestMessageAtLeastOneDelivered = message -> {
 				logger.info("  message: " + message);
 				Awaitility.await().until(() -> {
 					// keep resending the same message until at least one copy is received.
@@ -439,7 +438,13 @@ public class DataFlowIT {
 				});
 			};
 
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE ONE: %S ", RANDOM_SUFFIX));
+			// Set test.enable-message-lost-check=true to enable stricter consistent message delivery check!
+			// It is disabled by default.
+			Consumer<String> awaitSendAndReceiveTestMessage = testProperties.isEnableMessageLostCheck() ?
+					awaitSendAndReceiveTestMessageExactlyOneDelivered :
+					awaitSendAndReceiveTestMessageAtLeastOneDelivered;
+
+			awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
 			assertThat(stream.history().size()).isEqualTo(1L);
 
@@ -449,7 +454,7 @@ public class DataFlowIT {
 			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE TWO: %S ", RANDOM_SUFFIX));
+			awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
 			assertThat(stream.history().size()).isEqualTo(2);
 
@@ -459,7 +464,7 @@ public class DataFlowIT {
 			stream.rollback(0);
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE THREE: %S ", RANDOM_SUFFIX));
+			awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
 			assertThat(stream.history().size()).isEqualTo(3);
 		}
