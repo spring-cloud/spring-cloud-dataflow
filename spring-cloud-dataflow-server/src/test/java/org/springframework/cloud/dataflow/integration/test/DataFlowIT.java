@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -78,6 +79,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifestReader;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
@@ -395,9 +397,10 @@ public class DataFlowIT {
 		logger.info("stream-app-cross-version-test: DEPLOY");
 
 		int CURRENT_MANIFEST = 0;
+		String RANDOM_SUFFIX = randomSuffix();
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("app-cross-version-test" + randomSuffix())
+				.name("app-cross-version-test" + RANDOM_SUFFIX)
 				.definition("http | ver-log")
 				.create()
 				.deploy(new DeploymentPropertiesBuilder()
@@ -413,9 +416,7 @@ public class DataFlowIT {
 					.stream()
 					.filter(m -> m.getMetadata().get("name").equals("ver-log"))
 					.map(m -> m.getSpec().getVersion())
-					.findFirst().get();
-
-			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
+					.findFirst().orElse("none");
 
 			// TODO: There might be a serious flaw in the handling the messages during stream update.
 			//       This leads to message lost!!! This is apparent if using this consumer instead of
@@ -438,7 +439,8 @@ public class DataFlowIT {
 				});
 			};
 
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept("Test message One " + new Random().nextInt());
+			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE ONE: %S ", RANDOM_SUFFIX));
+			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
 			assertThat(stream.history().size()).isEqualTo(1L);
 
 			// UPDATE
@@ -447,8 +449,8 @@ public class DataFlowIT {
 			stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
+			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE TWO: %S ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept("Test message Two " + new Random().nextInt());
 			assertThat(stream.history().size()).isEqualTo(2);
 
 			// ROLLBACK
@@ -457,12 +459,17 @@ public class DataFlowIT {
 			stream.rollback(0);
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
+			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept(String.format("TEST MESSAGE THREE: %S ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
-			awaitSendAndReceiveTestMessageIgnoreMessageLost.accept("Test message Three " + new Random().nextInt());
 			assertThat(stream.history().size()).isEqualTo(3);
 		}
+
+		// DESTROY
 		logger.info("stream-app-cross-version-test: DESTROY");
-		assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(0L);
+
+		assertThat(Optional.ofNullable(dataFlowOperations.streamOperations().list().getMetadata())
+				.orElse(new PagedModel.PageMetadata(0, 0, 0))
+				.getTotalElements()).isEqualTo(0L);
 	}
 
 	@Test
