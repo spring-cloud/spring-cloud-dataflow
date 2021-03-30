@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -50,7 +53,7 @@ public class TaskExecutionResourceTests {
 	@Test
 	public void testTaskExecutionStatusWithNoStartTime()  {
 		final TaskExecution taskExecution = new TaskExecution();
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
 		assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
 	}
 
@@ -58,7 +61,7 @@ public class TaskExecutionResourceTests {
 	public void testTaskExecutionStatusWithRunningTaskExecution()  {
 		final TaskExecution taskExecution = new TaskExecution();
 		taskExecution.setStartTime(new Date());
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
 		assertEquals(TaskExecutionStatus.RUNNING, taskExecutionResource.getTaskExecutionStatus());
 		assertNull(taskExecutionResource.getExitCode());
 	}
@@ -69,8 +72,34 @@ public class TaskExecutionResourceTests {
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(0);
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
 		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+	}
+
+	@Test
+	public void testCTRExecutionStatusWithSuccessfulJobExecution()  {
+		final TaskExecution taskExecution = new TaskExecution();
+		taskExecution.setStartTime(new Date());
+		taskExecution.setEndTime(new Date());
+		taskExecution.setExitCode(0);
+		JobExecution jobExecution = new JobExecution(1L);
+		jobExecution.setExitStatus(ExitStatus.COMPLETED);
+		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
+		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+	}
+
+	@Test
+	public void testCTRExecutionStatusWithFailedJobExecution()  {
+		final TaskExecution taskExecution = new TaskExecution();
+		taskExecution.setStartTime(new Date());
+		taskExecution.setEndTime(new Date());
+		taskExecution.setExitCode(0);
+		JobExecution jobExecution = new JobExecution(1L);
+		jobExecution.setExitStatus(ExitStatus.FAILED);
+		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
+		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
 	}
 
 	@Test
@@ -79,7 +108,7 @@ public class TaskExecutionResourceTests {
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(123);
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution);
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
 		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
 	}
 
