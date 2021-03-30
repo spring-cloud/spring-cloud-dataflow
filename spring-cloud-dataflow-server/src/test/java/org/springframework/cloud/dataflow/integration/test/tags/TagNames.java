@@ -20,6 +20,7 @@ public abstract class TagNames {
 
 	public static final String PROFILE_DB_SHARED = "dbtests-shared";
 	public static final String PROFILE_DB_SEPARATE = "dbtests-separate";
+	public static final String PROFILE_OAUTH = "oauth";
 
 	public static final String DOCKER_COMPOSE = "docker-compose";
 	public static final String SLOW = "slow";
@@ -48,6 +49,10 @@ public abstract class TagNames {
 	public static final String ORACLE = "oracle";
 
 	public static final String DB2 = "db2";
+
+	public static final String OAUTH = "oauth";
+	public static final String UAA = "uaa";
+	public static final String UAA_4_32 = "uaa_4_32";
 
 	public static final String SKIPPER = "skipper";
 	public static final String SKIPPER_2_0 = "skipper_2_0";

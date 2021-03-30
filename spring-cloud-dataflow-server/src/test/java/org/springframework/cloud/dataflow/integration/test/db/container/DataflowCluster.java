@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
@@ -42,25 +43,31 @@ public class DataflowCluster implements Startable {
 	private final int POSTGRES_PORT = 5432;
 	private final int MYSQL_PORT = 3306;
 	private final int MARIADB_PORT = 3306;
+	private final int UAA_PORT = 8099;
 	private final Map<String, ClusterContainer> dataflowImages;
 	private final Map<String, ClusterContainer> skipperImages;
 	private final Map<String, ClusterContainer> databaseImages;
+	private final Map<String, ClusterContainer> oauthImages;
 	private final boolean sharedDatabase;
 	private JdbcDatabaseContainer<?> runningDatabase;
+	private GenericContainer<?> runningOauth;
 	private JdbcDatabaseContainer<?> runningSkipperDatabase;
 	private JdbcDatabaseContainer<?> runningDataflowDatabase;
 	private SkipperContainer<?> runningSkipper;
 	private DataflowContainer<?> runningDataflow;
 	private ClusterContainer skipperDatabaseClusterContainer;
 	private ClusterContainer dataflowDatabaseClusterContainer;
-	private Network network;
+	private final Network network;
 
-	public DataflowCluster(List<ClusterContainer> databaseContainers, List<ClusterContainer> skipperContainers,
-			List<ClusterContainer> dataflowContainers, boolean sharedDatabase) {
+	public DataflowCluster(List<ClusterContainer> databaseContainers, List<ClusterContainer> oauthContainers,
+			List<ClusterContainer> skipperContainers, List<ClusterContainer> dataflowContainers,
+			boolean sharedDatabase) {
 		Assert.notNull(databaseContainers, "databaseContainers must be set");
+		Assert.notNull(oauthContainers, "oauthContainers must be set");
 		Assert.notNull(skipperContainers, "skipperContainers must be set");
 		Assert.notNull(dataflowContainers, "dataflowContainers must be set");
 		this.databaseImages = databaseContainers.stream().collect(Collectors.toMap(cc -> cc.id, cc -> cc));
+		this.oauthImages = oauthContainers.stream().collect(Collectors.toMap(cc -> cc.id, cc -> cc));
 		this.skipperImages = skipperContainers.stream().collect(Collectors.toMap(cc -> cc.id, cc -> cc));
 		this.dataflowImages = dataflowContainers.stream().collect(Collectors.toMap(cc -> cc.id, cc -> cc));
 		this.sharedDatabase = sharedDatabase;
@@ -75,8 +82,13 @@ public class DataflowCluster implements Startable {
 	public void stop() {
 		stopSkipper();
 		stopDataflow();
+		stopIdentityProvider();
 		stopDatabase();
 		this.network.close();
+	}
+
+	public Network getNetwork() {
+		return network;
 	}
 
 	public void startSkipperDatabase(String id) {
@@ -146,13 +158,35 @@ public class DataflowCluster implements Startable {
 		return sharedDatabase ? runningDatabase : runningDataflowDatabase;
 	}
 
+	public void startIdentityProvider(String id) {
+		ClusterContainer clusterContainer = this.oauthImages.get(id);
+		Assert.notNull(clusterContainer, String.format("Unknown oauth %s", id));
+
+		GenericContainer<?> oauthContainer = new GenericContainer<>(clusterContainer.image);
+		oauthContainer.withNetworkAliases("oauth");
+		oauthContainer.withNetwork(network);
+		oauthContainer.withExposedPorts(UAA_PORT);
+		oauthContainer.start();
+		runningOauth = oauthContainer;
+	}
+
+	public void stopIdentityProvider() {
+		if (runningOauth != null) {
+			runningOauth.stop();
+		}
+	}
+
+	private GenericContainer<?> getIdentityProviderContainer() {
+		return runningOauth;
+	}
+
 	public void startSkipper(String id) {
 		Assert.state(runningSkipper == null, "There's a running skipper");
 		ClusterContainer clusterContainer = this.skipperImages.get(id);
 		Assert.notNull(clusterContainer, String.format("Unknown skipper %s", id));
 		String skipperDatabaseAlias = sharedDatabase ? "database" : "skipperdatabase";
 		SkipperContainer<?> skipperContainer = buildSkipperContainer(clusterContainer, getSkipperDatabaseContainer(),
-				skipperDatabaseAlias);
+				getIdentityProviderContainer(), skipperDatabaseAlias);
 		skipperContainer.start();
 		runningSkipper = skipperContainer;
 	}
@@ -202,7 +236,8 @@ public class DataflowCluster implements Startable {
 		String dataflowDatabaseAlias = sharedDatabase ? "database" : "dataflowdatabase";
 		String skipperDatabaseAlias = sharedDatabase ? "database" : "skipperdatabase";
 		DataflowContainer<?> dataflowContainer = buildDataflowContainer(clusterContainer,
-				getDataflowDatabaseContainer(), runningSkipper, dataflowDatabaseAlias, skipperDatabaseAlias);
+				getDataflowDatabaseContainer(), getIdentityProviderContainer(), runningSkipper, dataflowDatabaseAlias,
+				skipperDatabaseAlias);
 		dataflowContainer.start();
 		runningDataflow = dataflowContainer;
 	}
@@ -276,25 +311,54 @@ public class DataflowCluster implements Startable {
 	}
 
 	private SkipperContainer<?> buildSkipperContainer(ClusterContainer clusterContainer,
-			JdbcDatabaseContainer<?> databaseContainer, String skipperDatabaseAlias) {
+			JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
+			String skipperDatabaseAlias) {
 		logger.info("Building skipper container for {}", clusterContainer);
 		SkipperContainer<?> skipperContainer = new SkipperContainer<>(clusterContainer.image);
 		skipperContainer.withExposedPorts(SKIPPER_PORT);
-		if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
-			skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:postgresql://%s:%s/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
-			skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
-		} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MYSQL)) {
-			skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MYSQL_PORT));
-			skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
-		} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MARIADB)) {
-			skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MARIADB_PORT));
-			skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+		if (databaseContainer != null) {
+			if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
+				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:postgresql://%s:%s/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
+				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
+			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MYSQL)) {
+				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MYSQL_PORT));
+				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MARIADB)) {
+				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MARIADB_PORT));
+				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			}
+			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
+			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
 		}
-		skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-		skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
+
+		if (oauthContainer != null) {
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE", "dataflow.schedule");
+			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE", "openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", "http://oauth:8099/uaa/token_keys");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", "http://oauth:8099/uaa/oauth/token");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", "http://oauth:8099/uaa/userinfo");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", "http://oauth:8099/uaa/oauth/authorize");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", "http://oauth:8099/uaa/introspect");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
+			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
+		}
+
 		skipperContainer.withLogConsumer(new Slf4jLogConsumer(logger));
 		skipperContainer.withNetworkAliases("skipper");
 		skipperContainer.withNetwork(network);
@@ -302,30 +366,59 @@ public class DataflowCluster implements Startable {
 	}
 
 	private DataflowContainer<?> buildDataflowContainer(ClusterContainer clusterContainer,
-			JdbcDatabaseContainer<?> databaseContainer, SkipperContainer<?> skipperContainer,
-			String dataflowDatabaseAlias, String skipperDatabaseAlias) {
+			JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
+			SkipperContainer<?> skipperContainer, String dataflowDatabaseAlias, String skipperDatabaseAlias) {
 		logger.info("Building dataflow container for {}", clusterContainer);
 		DataflowContainer<?> dataflowContainer = new DataflowContainer<>(clusterContainer.image);
 		dataflowContainer.withExposedPorts(DATAFLOW_PORT);
-		if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
-			dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
-			dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
-		} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MYSQL)) {
-			dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MYSQL_PORT));
-			dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
-		} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MARIADB)) {
-			dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
-					String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT));
-			dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+		if (databaseContainer != null) {
+			if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
+				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
+				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
+			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MYSQL)) {
+				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MYSQL_PORT));
+				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MARIADB)) {
+				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT));
+				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			}
+			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
+			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
+
 		}
-		dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-		dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
 		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",
 				String.format("http://%s:%s/api", "skipper", SKIPPER_PORT));
+
+		if (oauthContainer != null) {
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE", "dataflow.schedule");
+			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE", "openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", "http://oauth:8099/uaa/token_keys");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", "http://oauth:8099/uaa/oauth/token");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", "http://oauth:8099/uaa/userinfo");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", "http://oauth:8099/uaa/oauth/authorize");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", "http://oauth:8099/uaa/introspect");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
+			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
+		}
+
 		dataflowContainer.withLogConsumer(new Slf4jLogConsumer(logger));
-		databaseContainer.withNetworkAliases("dataflow");
+		dataflowContainer.withNetworkAliases("dataflow");
 		dataflowContainer.withNetwork(network);
 		return dataflowContainer;
 	}

@@ -1,4 +1,4 @@
-== Spring Cloud Data Flow Server
+= Spring Cloud Data Flow Server
 
 The Data Flow Server deploys Streams by delegating to Spring Cloud Skipper and deploys Tasks directly.
  Both Skipper and the Data Flow server can deploy to the local machine, Cloud Foundry, and Kubernetes.
@@ -90,14 +90,14 @@ If you tail the `stdout_0.log` file from the directory mentioned, you should see
 2016-04-26 15:10:20.322  INFO 59890 --- [pool-1-thread-1] log.sink    : 04/26/16 15:10:20
 ----
 
-## Configuration
+== Configuration
 
-### Default
+=== Default
 To configure the Data Flow Server you can follow the configuration setup guidelines specified in the boot documentation found https://docs.spring.io/spring-boot/docs/1.5.13.RELEASE/reference/html/boot-features-external-config.html[here]
 
 Note: The `dataflow-server.yml` containing the defaults can be found https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-starter-dataflow-server/src/main/resources/dataflow-server.yml[here]
 
-### Spring Cloud Configuration
+=== Spring Cloud Configuration
 The Spring Cloud Data Flow Server offers the user the ability to configure properties via
 https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html[spring-cloud-config].
 All configurations retrieved from the cloud config will take precedence over Boot's
@@ -105,7 +105,7 @@ defaults enumerated above. The Spring Cloud Data Flow Server will look for the s
 `localhost:8888`, however this can be overwritten by setting the `spring.cloud.config.uri`
 property to the desired url.
 
-#### Cloud-Config-Server configuration
+==== Cloud-Config-Server configuration
 
 To specify a repository in the cloud config server configuration.yml for the Data Flow Server,
 setup a repo profile with the pattern `spring-cloud-dataflow-server`. For example:
@@ -132,13 +132,13 @@ property `spring.cloud.config.failFast=true` and the client will halt with an Ex
 
 ==== Note
 If the Data Flow Server cannot connect to the cloud config server, the
-following warning message will be logged: 
+following warning message will be logged:
 ----
 `WARN 42924 --- [main] c.c.c.ConfigServicePropertySourceLocator : Could not locate PropertySource: I/O error on GET request for "http://localhost:8888/spring-cloud-dataflow-server/default":Connection refused; nested exception is java.net.ConnectException: Connection refused`
 ----
 To disable the cloud config server set the `spring.cloud.config.enabled` property to `false`.
 
-## Docker-Compose Integration Tests
+== Docker-Compose Integration Tests
 
 To run the docker compose integration, enable the `-Pfailsafe` maven profile and the `-Dgroups="docker-compose"` JUnit tag.
 
@@ -182,7 +182,7 @@ Use the `-Dtest.docker.compose.dood=true` property to activate the DooD (Docker-
 
 Use the `-Dit.test=class-name#method-name` to filter only selected tests.
 
-## Run Integration Tests against k8s
+== Run Integration Tests against k8s
 
 For this you need a pre-installed Data Flow on GKE or minikube.
 Register the OOTB kafka/docker and task/docker apps and the run:
@@ -206,7 +206,7 @@ Replace the `prometheus-67896dcc8-7wm4h` with your pod name.
 
 Or use the `test.platform.connection.prometheusUrl` property to set an alternative Prometheus url.
 
-#### Integration Tests with Minikube
+=== Integration Tests with Minikube
 
 The Integration Tests require that the Kubernetes cluster running Data Flow provides a https://kubernetes.io/docs/concepts/services-networking/[Load Balancer] service.
 
@@ -252,4 +252,36 @@ At this point MetalLB is setup and ready to hand out IP's to any service of type
 
 ----
 kubectl delete pod --all -n metallb-system
+----
+
+== Testcontainers Integration Tests
+
+Some database and security tests are executed in containers. There are a set
+of junit tags which can be used to disect which tests to run. Here are some
+examples how to run those locally.
+
+Run oauth security tests:
+----
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=oauth -Pfailsafe
+----
+
+Run database tests:
+----
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=database -Pfailsafe
+----
+
+Run mysql or postgres tests:
+----
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=mysql -Pfailsafe
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=postgres -Pfailsafe
+----
+
+Run mysql tests with shared database and with latest dataflow:
+----
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups="mysql&database-shared&dataflow_main" -Pfailsafe
+----
+
+Run database and oauth tests:
+----
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups="database|oauth" -Pfailsafe
 ----

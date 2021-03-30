@@ -1,0 +1,248 @@
+assetBaseUrl: /resources/oss
+encryption:
+  active_key_label: uaa-encryption-key-1
+  encryption_keys:
+  - label: uaa-encryption-key-1
+    passphrase: jfmaan1xuiwbkklytr57
+issuer:
+  uri: http://oauth:8099/uaa
+jwt:
+  token:
+    policy:
+      accessTokenValiditySeconds: 43200
+      activeKeyId: uaa-jwt-key-1
+      global:
+        accessTokenValiditySeconds: 43200
+        refreshTokenValiditySeconds: 2592000
+      keys:
+        uaa-jwt-key-1:
+          signingKey: |
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEowIBAAKCAQEAzRnsPmX2/e3Eu4Kq76AcRyqpBZD6m3J6+OBHSErzTLKh+iRQ
+            FTd3Mjt7H9DXizqKplcvRow+VPh8Uyq8SycqlwG0vJSd+ZEyQeUspQbKFttJjii0
+            cv2JSmmC7CiS5YqBkjkvj87Gn1MxbjElO0sPR3u/zO7KiKz7KWKJex2zEugJNG8g
+            SBCaOovNoPc66m0RDNY2CLCy7IBO8yMHuulSEVl0PgQdX2SMb0kll0YDSSjHv2v4
+            w3p0zy9OooJCVtoQKX/MiQGBs4hZlzKz53QdmOUW1OV4QHS6hUEpu03E5ISbC1fW
+            tT0jlTO2UBanBWH5RacV/g1LxH3gt+ecjsXe/wIDAQABAoIBAQCKaRsPxPnYxVOF
+            gxneGjvbHwPveLZWnvwz5g7Uz5e/Q7GhwE2287Zh1NgzUVmUYM5ekOmbf1s1NneY
+            HHfzc5v/SixxMw4k9IJpC8KEH7/Tiurpn7ie/VBgQjITMxJnC4CDcEoTj2Rk8tyh
+            01Kf3/iQsgduwhs1/x6EADZtOk61y2HdA0PJICvfL4/w7FL5USDJS44fvWU94nZF
+            mLLSdKhoIHMqZyqX6fNpyHoOlY3qFpnQeTyCYxDFhaVYlg7yBCLo59gZovxRE9ZU
+            HWarMcP7YABNdbMsd8MoNS9mu7azHGVLXOuyEuCex6RconrhTTgzND5SEatg8R/2
+            uAYMz7jJAoGBAOUApEx9M9+WUuiqXxnsjl1uW3ypUjir1+nLZpc1RjEeR/2PJ/Ii
+            R/R5g5mkdtqI4SlVGv63Vq05xmforyP70jZmKoJnuW8gwrfw4zBIsGbblgdF1lOY
+            XXNarVoXXVr2X78OP34Erqa7oEPVXYcr6MntFyGNu5wz7FAAPrsNDshdAoGBAOVH
+            71Xdgy8MXnQ9HJ/E/8ULlNmkBXQLviEedSRzdwRH+9M+sqY5AS8bLqVnt9jDrijR
+            wlLfEY6ckUgGs+qdBdevTRxTAixOzf5DVnMmIievp38gQlZTQHy5zq+06mQ05ODx
+            4cMjC9Xkw2WU10jMHoCSK8ANelE0rpI0t2Y6YB8LAoGARg9GNKhxQEwrHUdSRQoc
+            G/VxQ9hBcVkRe1NhFY2U5d4PxEERxYA7Z03ttwmb2wvZZt3EnnzUpbZxPsTvICEg
+            lMf45WB6WMc7Cy9FMjZq0W0Inzz8byLEJFBvjIptYzDQ5hCj2Bfynsv0Igyayoni
+            dDR2ySslZIp2F5ublXpPNXkCgYAd9vHDggij/HTXsijshH18zg+tBe+kg+hcQbPD
+            iMeUKqgxqm8EpEyQUHgfK9fuH1zCfu9rjzWnMrUV+bJHxi++SW3Fdt/A1Ke9RCWn
+            NOOf1igIyDmDOKwj4NCvS/CaGgOTlmkP7KOeV6BlxTcBj5Oo7/GBzwEeXck22Gbj
+            mFt5kwKBgAxPi4rqeYjXkb5c5BvumAL3eStHIoUy9Kl4E1VPuA+FmBP8GUKQR1WZ
+            U0GeR3TVH3YjmVIuw4H5qpPtBn4zDe45OVotRkkRual34TxvDk/coAynlbOOtvGc
+            6wrlDFqoIA8lZzz8/SKLnYfG6cZkTlGHqlPooLLYjSJDb5W2xV3L
+            -----END RSA PRIVATE KEY-----
+      refreshTokenValiditySeconds: 2592000
+    refresh:
+      format: opaque
+login:
+  authorize:
+    url: https://oauth:8099/uaa/oauth/authorize
+  entityBaseURL: http://oauth:8099/uaa
+  entityID: cloudfoundry-saml-login
+  saml:
+    assertionConsumerIndex: 0
+    nameID: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+    signMetaData: true
+    signRequest: true
+    socket:
+      connectionManagerTimeout: 10000
+      soTimeout: 10000
+  selfServiceLinksEnabled: false
+  serviceProviderCertificate: |
+    -----BEGIN CERTIFICATE-----
+    MIIEjzCCAvegAwIBAgIRAPSa1CxCun179dsELMAVNWUwDQYJKoZIhvcNAQELBQAw
+    MzEMMAoGA1UEBhMDVVNBMRYwFAYDVQQKEw1DbG91ZCBGb3VuZHJ5MQswCQYDVQQD
+    EwJjYTAeFw0xOTA2MTgyMjQ4MDJaFw0yMDA2MTcyMjQ4MDJaMD8xDDAKBgNVBAYT
+    A1VTQTEWMBQGA1UEChMNQ2xvdWQgRm91bmRyeTEXMBUGA1UEAxMObG9jYWxob3N0
+    OjgwODAwggGiMA0GCSqGSIb3DQEBAQUAA4IBjwAwggGKAoIBgQDMt7zNInryjy2S
+    2qTxJbrb11Tp5LyCMOeeBOjEZyACuAfbrIinIiiyyeRMfqAEzA3T2sF28UYkP0JJ
+    YHCqyUWLqIoYDw+cWDHDLhzhwqdbm3HLvS2dfTLQB4EpPHHneMq6mL+GFS8IKGFt
+    4G6ZbQWmgAg35CSnXLfB4Bd1mjBdYvbQmLX2TdGLMbvHv/cBRnfMP98hpc6kX0CP
+    nh0bWUBKHSOKodR88hriy3R0sjgQanQkIcqyTW6RBkiqGQHqTTsTxv7oeniH9Reg
+    9TZ5nQ62AH0uVbIFukRJc6kZ3XIYizQ3hLjFupuFesnw/NkIMrop1nR8+bvy/6Uh
+    hfLL06/lXCRMxqKKjqPOx5l+KgBzWE9knQ3PfWczd9P54g4AWSfG2YRBMXr67t1A
+    PVAJWFtQ0T0wttQn/0eWCoGb2pDerMg3DlRrMEQKehHOm9PnN1cwAoPAQw/C+QX9
+    sDOsfMWl1vMRcQy3lEPL3/v3heVxGI0HSB5671G9La0ITekfYxsCAwEAAaOBkTCB
+    jjAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDAYDVR0TAQH/
+    BAIwADAdBgNVHQ4EFgQUN9guVYcboFUixoU8xV1vXdnzZB8wHwYDVR0jBBgwFoAU
+    34ho2O35hjEHhXCg+5W5B96LNDcwGQYDVR0RBBIwEIIObG9jYWxob3N0OjgwODAw
+    DQYJKoZIhvcNAQELBQADggGBAAYMOIhedbhJQejb4lGIMxmbd0NVLB4hxC8Xg49A
+    QWEKE7kOCuLiKUxBANCto7u8vIax34pJXMa+iKm5KJi+QQOEQ+zNJyScpiOcS7r+
+    dTHh8j7Wqubnau6RRtZZj9N6QeX/FMoFxNxyK2Pb9DsVwM+JCJYD/M0sx6oSOkoi
+    i2npMv3KBZRLn3Iv7A+xWlRuykEJONDvd9om5DiOANLk2RXtyX0NX4jU44toQIfu
+    cRCanCy1mMJfuTTn65jnnKJshq2Br7pWRdkeoBMRgbRHqUX0u8Sm9hJ7gxiDxLus
+    EVv94B+U9Ra9S/7FwW5lxNXsaKt6zFKbEf/mj6HRyCheBLkNoe+qCh1Yfp8pogrF
+    VKXNTekOe05+EfFvMdZz+GeHMeV4RxucgJF4+9wlOPcOw8o8LXRqypTtgm/ar09L
+    iI3flyH/IZHwJ0dUoqxM/L+rgSwLC2jdq49UC5hd52f4N5TB7su5J2y0ukj5ZHa3
+    hlE42olbNEGcW5W9Ntgilqx1ZQ==
+    -----END CERTIFICATE-----
+  serviceProviderKey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIG5AIBAAKCAYEAzLe8zSJ68o8tktqk8SW629dU6eS8gjDnngToxGcgArgH26yI
+    pyIossnkTH6gBMwN09rBdvFGJD9CSWBwqslFi6iKGA8PnFgxwy4c4cKnW5txy70t
+    nX0y0AeBKTxx53jKupi/hhUvCChhbeBumW0FpoAIN+Qkp1y3weAXdZowXWL20Ji1
+    9k3RizG7x7/3AUZ3zD/fIaXOpF9Aj54dG1lASh0jiqHUfPIa4st0dLI4EGp0JCHK
+    sk1ukQZIqhkB6k07E8b+6Hp4h/UXoPU2eZ0OtgB9LlWyBbpESXOpGd1yGIs0N4S4
+    xbqbhXrJ8PzZCDK6KdZ0fPm78v+lIYXyy9Ov5VwkTMaiio6jzseZfioAc1hPZJ0N
+    z31nM3fT+eIOAFknxtmEQTF6+u7dQD1QCVhbUNE9MLbUJ/9HlgqBm9qQ3qzINw5U
+    azBECnoRzpvT5zdXMAKDwEMPwvkF/bAzrHzFpdbzEXEMt5RDy9/794XlcRiNB0ge
+    eu9RvS2tCE3pH2MbAgMBAAECggGAfJN+//HwkXSRjiEhaGHGYQubb62zDSLHf8CL
+    CSGcOCtXFNXcXqCJ1arIE8imheTKsVYYjtHqFhqsssxOI4/Rk1gfmN5paIG+3oBM
+    MRHsF/HzAMGBZaoPZsp6TearhelarMxRGD4B3dv81glSJGlUm+qjladuqq3gYMmG
+    XRlUPy/+9BdJ+7WFQ0gjdj2aCRuhwRhJJ0eoBRy1w++61K6uUauDulQaY2JM/CBF
+    INJnDY5KWMZ7e59lHjmNtHz9TmBp8S4+rYJsMZaQJDtLLrw28MNncZtu5ZmYxhXn
+    Ra9komDJ+s6ELDr74GlIbhh/FrndpAC7N89e1HbpL5OIEOX0BzwMPmUlKjy+rs8+
+    JWoZdg3k83/rwzmWAB/InNKUQJwZ9ZQUFZYO4wM0YfxF0H7ZDauEg3et0QCEL7ZU
+    OWmZFzGqbu3WteKd0pSx7RjiHTT79rJkgqrshSwp7dGyuB1uaY0ozgWlg9ZTYD46
+    JoDisfKww5YajW2nAbYeB8op2hRhAoHBAOxn9B7b2BBbMBySNfVGbU1/sc/1kWT9
+    coWugqLmKvjbkHXR/x1zUEPoGDj5ypcn42Tt0uI1ekbO7qERYQNB2lIyhl6A7oxL
+    MkFzvItR0AtIdJj854g+ejHZ/IQUdf16Y3uS/b2ACyxO9khJqDxwSXUbXzHeZATp
+    k9BEuFmoS62CIQ9gdOd1Sh0ZBHd6kqfAEf6PmqeiJWbSUOzb1dWAIIWi2vP1qUs1
+    2+1ktguiMzw8xtDoULey9jS5CaZqpZDmywKBwQDdr2xISx9pQzJqniArWRC/YiRT
+    DZF2ac4j1X9VVP6deNTE31aMUN7d/hfYHUOvwdhUcZm82ScrUnkh0GJUrDlBfEkP
+    n5ewX+z0pLfjDvA4kJOoDUDTpgI14DXbAwNWWSfyN3mOcbYaKfl19FZRYSziv53Z
+    fC5S+Bb4yCe8i6WEsyuXCTMtKrCP6EYHWsZpV+y7z2owtdI+KCNaM8UoBusqJ+VH
+    +tyc3bbdgICOIcLW5K3tW5x3jAC+0xcoZaagmvECgcEAwkfwLMgZed+m22QhafA1
+    9aHCnJhAo9FSI6C2BW/I0vmGb/1jfm19AkGkXnaSUsTaMODuFS9DzRtUqxPgOVAO
+    Psz89n9ZC/zkUTvvMEPNCOjDwdLd6G8H9x4hUt6J1QWW6kBzvR+UjxZZejDmTL0u
+    8UnMYuxUIGFhM6C2LCCOCQrPZparnGgcv2sG67XU/n1vjFeyDp/HwweGsBE+W5ZP
+    o+OhsyoptgCOPDsvDMKA/rkn3xl89GrjwZJr5tLwO/QfAoHBALdoZFDnfiRriPG2
+    w2y5smZ0vxLLnfZ3ESqKf1/NAx6rknUTRhqu6cSGbZnKlG58FQvANO6ORp7MDBXS
+    vxfIqVIpjpTTd/9fTb8V7GF5wXs6+j7GQEUbCqciScxaEM/G0YrPJM2Z/Ixm/9H8
+    BdIscKNk3ybJW9YfFXpctquCab2BMuYxoVqUACH/jLiW/KK5MM4ti3CjbT8pnB4L
+    yOkV2Eg3W7WSsiVCNgHKSBHPktCRv+gprCkn9pHqOTWd7B7iMQKBwFSb15MBtYXX
+    InarextGx55rrk08KTFKlbkYvFK2E6egNRtKkhN0oR8LanXyM8OnnQ8hwlxRn5ym
+    WH4TbeJRzozyzmxd63EGJeuAHgmaMsvfUHCkAsyr75TzennAnOwANOmw5Hamp2j5
+    y74pmF/wzzSpInhPJc16WOpt//2ic2XNUmvmkwSmliepTQfkXbuK9k5KkeMpkcXm
+    OiGsNyt9U069vM8T6T1YvZ9rFwZZbhhD0PL1jYuMIp7B2BpN4JI0wQ==
+    -----END RSA PRIVATE KEY-----
+  serviceProviderKeyPassword: ""
+  url: https://oauth:8099/uaa
+oauth:
+  authorize:
+    ssl: true
+  clients:
+    dataflow:
+      authorities: uaa.resource,dataflow.view,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.create
+      authorized-grant-types: password,implicit,authorization_code,client_credentials,refresh_token
+      autoapprove:
+      - openid
+      - dataflow.view
+      - dataflow.deploy
+      - dataflow.destroy
+      - dataflow.manage
+      - dataflow.modify
+      - dataflow.schedule
+      - dataflow.create
+      redirect-uri: http://dataflow:9393/login
+      scope: openid,password.write,scim.userids,dataflow.view,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.create
+      secret: secret
+    uaa_admin:
+      authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write
+      authorized-grant-types: client_credentials
+      override: true
+      scope: ""
+      secret: fdejwhatgumb99x1ras3
+  user:
+    authorities:
+    - openid
+    - scim.me
+    - cloud_controller.read
+    - cloud_controller.write
+    - cloud_controller_service_permissions.read
+    - password.write
+    - scim.userids
+    - uaa.user
+    - approvals.me
+    - oauth.approvals
+    - profile
+    - roles
+    - user_attributes
+    - uaa.offline_token
+require_https: false
+scim:
+  groups:
+    clients.admin: Create, modify and delete OAuth clients
+    clients.read: Read information about OAuth clients
+    clients.secret: Change the password of an OAuth client
+    clients.write: Create and modify OAuth clients
+    groups.update: Update group information and memberships
+    idps.read: Retrieve identity providers
+    idps.write: Create and update identity providers
+    oauth.approval: Manage approved scopes
+    oauth.login: Authenticate users outside of the UAA
+    openid: Access profile information, i.e. email, first and last name, and phone
+      number
+    password.write: Change your password
+    scim.create: Create users
+    scim.invite: Send invitations to users
+    scim.read: Read all SCIM entities, i.e. users and groups
+    scim.userids: Read user IDs and retrieve users by ID
+    scim.write: Create, modify and delete SCIM entities, i.e. users and groups
+    scim.zones: Control a user's ability to manage a zone
+    uaa.admin: Act as an administrator throughout the UAA
+    uaa.none: Forbid acting as a user
+    uaa.offline_token: Allow offline access
+    uaa.resource: Serve resources protected by the UAA
+    uaa.user: Act as a user in the UAA
+    zones.read: Read identity zones
+    zones.write: Create and update identity zones
+    dataflow.create: Dataflow Create
+    dataflow.deploy: Dataflow Deploy
+    dataflow.destroy: Dataflow Destroy
+    dataflow.manage: Dataflow Manage
+    dataflow.modify: Dataflow Modify
+    dataflow.schedule: Dataflow Schedule
+    dataflow.view: Dataflow View
+  user:
+    override: true
+  userids_enabled: true
+  users:
+  - admin|u3n97o7h2f4ggrsymcox|admin||||uaa
+  - janne|janne|janne@example.com|Janne|Valkealahti|openid,dataflow.view,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.create|uaa
+  - guest|guest|guest@example.com|Guest|Guest|openid,dataflow.view|uaa
+uaa:
+  approvals:
+    url: https://oauth:8099/uaa/approvals
+  limitedFunctionality:
+    enabled: false
+    whitelist:
+      endpoints:
+      - /oauth/authorize/**
+      - /oauth/token/**
+      - /check_token/**
+      - /login/**
+      - /login.do
+      - /logout/**
+      - /logout.do
+      - /saml/**
+      - /autologin/**
+      - /authenticate/**
+      - /idp_discovery/**
+      methods:
+      - GET
+      - HEAD
+      - OPTIONS
+  login:
+    url: https://oauth:8099/uaa/authenticate
+  token:
+    url: https://oauth:8099/uaanoauth/token
+  url: https://oauth:8099/uaa
+variables: []
+zones:
+  internal:
+    hostnames:
+    - oauth:8099

@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,9 +82,14 @@ public abstract class AbstractDataflowTests {
 			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.5", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB)
 			);
+	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
+			ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
+			);
 
 	@Autowired
-    private IntegrationTestProperties testProperties;
+	private IntegrationTestProperties testProperties;
+
+	private GenericContainer<?> toolsContainer = null;
 
 	@AfterEach
 	public void cleanCluster() {
@@ -89,12 +97,26 @@ public abstract class AbstractDataflowTests {
 			dataflowCluster.stop();
 		}
 		dataflowCluster = null;
+		if (toolsContainer != null) {
+			toolsContainer.stop();
+			toolsContainer = null;
+		}
 	}
 
 	@BeforeEach
 	public void setupCluster() {
-		this.dataflowCluster = new DataflowCluster(getDatabaseContainers(), getSkipperContainers(),
-				getDataflowContainers(), testProperties.getDatabase().isSharedDatabase());
+		this.dataflowCluster = new DataflowCluster(getDatabaseContainers(), getOauthContainers(),
+				getSkipperContainers(), getDataflowContainers(), testProperties.getDatabase().isSharedDatabase());
+	}
+
+	protected Container.ExecResult execInToolsContainer(String... command)
+			throws UnsupportedOperationException, IOException, InterruptedException {
+		if (toolsContainer == null) {
+			toolsContainer = new GenericContainer<>("praqma/network-multitool:latest");
+			toolsContainer.withNetwork(dataflowCluster.getNetwork());
+			toolsContainer.start();
+		}
+		return toolsContainer.execInContainer(command);
 	}
 
 	protected DataflowCluster dataflowCluster;
@@ -105,6 +127,11 @@ public abstract class AbstractDataflowTests {
 
 	protected String getSkipperLatestVersion() {
 		return this.testProperties.getDatabase().getSkipperVersion();
+	}
+
+	protected List<ClusterContainer> getOauthContainers() {
+		ArrayList<ClusterContainer> containers = new ArrayList<>(OAUTH_CONTAINERS);
+		return containers;
 	}
 
 	protected List<ClusterContainer> getDatabaseContainers() {
