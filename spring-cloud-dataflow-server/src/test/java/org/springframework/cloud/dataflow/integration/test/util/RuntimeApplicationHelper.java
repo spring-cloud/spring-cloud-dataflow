@@ -65,7 +65,7 @@ public class RuntimeApplicationHelper {
 				.map(Deployer::getType).findFirst().get();
 
 		dataflowServerVersion = Version.valueOf(dataFlowTemplate.aboutOperation().get()
-				.getVersionInfo().getImplementation().getVersion());
+				.getVersionInfo().getCore().getVersion());
 
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
 	}
