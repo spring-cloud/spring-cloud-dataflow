@@ -390,6 +390,10 @@ public class DataFlowIT {
 		final String VERSION_2_1_5 = "2.1.5.RELEASE";
 		final String VERSION_3_0_1 = "3.0.1";
 
+		Assumptions.assumeTrue(!runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)
+						|| runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"),
+				"stream-app-cross-version-test: SKIP - CloudFoundry 2.6 and below!");
+
 		Assumptions.assumeTrue(runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_3_0_1)
 						&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_2_1_5),
 				"stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
@@ -418,29 +422,13 @@ public class DataFlowIT {
 					.map(m -> m.getSpec().getVersion())
 					.findFirst().orElse("none");
 
-			// TODO: A known flaw in the handling the messages during stream update could lead to message lost!
-			//       This assert if enabled will validate that a message sent only once is delivered within the timeout interval.
-			Consumer<String> awaitSendAndReceiveTestMessageExactlyOneDelivered = message -> {
-				// send the message once and wait until received.
-				runtimeApps.httpPost(stream.getName(), "http", message);
-				Awaitility.await().until(() -> stream.logs(app("ver-log")).contains(message));
-			};
-
-			// TODO: This is a deliberate (and temporal) test regression that validates that at least one message
-			//  of many identical messages is delivered.
-			Consumer<String> awaitSendAndReceiveTestMessageAtLeastOneDelivered = message -> {
+			Consumer<String> awaitSendAndReceiveTestMessage = message -> {
 				Awaitility.await().until(() -> {
 					// keep resending the same message until at least one copy is received.
 					runtimeApps.httpPost(stream.getName(), "http", message);
 					return stream.logs(app("ver-log")).contains(message);
 				});
 			};
-
-			// Set test.enable-message-lost-check=true to enable stricter consistent message delivery check!
-			// It is disabled by default.
-			Consumer<String> awaitSendAndReceiveTestMessage = testProperties.isEnableMessageLostCheck() ?
-					awaitSendAndReceiveTestMessageExactlyOneDelivered :
-					awaitSendAndReceiveTestMessageAtLeastOneDelivered;
 
 			awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 1-%s ", RANDOM_SUFFIX));
 			assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
