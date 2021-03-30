@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A HATEOAS representation of a TaskExecution.
@@ -113,6 +115,10 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 */
 	private String platformName;
 
+	private String taskExecutionStatus;
+
+	private String composedTaskJobExecutionStatus;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -151,6 +157,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		if(taskJobExecutionRel.getTaskManifest() != null) {
 			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
 		}
+		this.composedTaskJobExecutionStatus = (taskJobExecutionRel.getComposedTaskJobExecution() != null) ?
+				taskJobExecutionRel.getComposedTaskJobExecution().getJobExecution().getExitStatus().getExitCode() :
+				null;
 	}
 
 	/**
@@ -159,7 +168,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 *
 	 * @param taskExecution contains the {@link TaskExecution}
 	 */
-	public TaskExecutionResource(TaskExecution taskExecution) {
+	public TaskExecutionResource(TaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
@@ -170,6 +179,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskExecution.getEndTime();
 		this.errorMessage = taskExecution.getErrorMessage();
 		this.externalExecutionId = taskExecution.getExternalExecutionId();
+		this.composedTaskJobExecutionStatus = (composedTaskJobExecution != null) ?
+				composedTaskJobExecution.getJobExecution().getExitStatus().getExitCode() :
+				null;
 	}
 
 	/**
@@ -179,7 +191,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskExecution contains the {@link TaskExecution}
 	 * @param taskManifest contains the (@link TaskManifest}
 	 */
-	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest) {
+	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		Assert.notNull(taskManifest, "taskManifest must not be null");
 		this.executionId = taskExecution.getExecutionId();
@@ -194,6 +206,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.resourceUrl = taskManifest.getTaskDeploymentRequest().getResource().toString();
 		this.appProperties = taskManifest.getTaskDeploymentRequest().getDefinition().getProperties();
 		this.deploymentProperties = taskManifest.getTaskDeploymentRequest().getDeploymentProperties();
+		this.composedTaskJobExecutionStatus = (composedTaskJobExecution != null) ?
+				composedTaskJobExecution.getJobExecution().getExitStatus().getExitCode() :
+				null;
 	}
 
 	public long getExecutionId() {
@@ -264,6 +279,10 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.platformName = platformName;
 	}
 
+	public void setTaskExecutionStatus(String taskExecutionStatus) {
+		this.taskExecutionStatus = taskExecutionStatus;
+	}
+
 	/**
 	 * Returns the calculated status of this {@link TaskExecution}.
 	 *
@@ -279,6 +298,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @return TaskExecutionStatus, never null
 	 */
 	public TaskExecutionStatus getTaskExecutionStatus() {
+		if (StringUtils.hasText(this.taskExecutionStatus)) {
+			return TaskExecutionStatus.valueOf(this.taskExecutionStatus);
+		}
 		if (this.startTime == null) {
 			return TaskExecutionStatus.UNKNOWN;
 		}
@@ -286,6 +308,13 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 			return TaskExecutionStatus.RUNNING;
 		}
 		else {
+			if (this.composedTaskJobExecutionStatus != null) {
+				return (this.composedTaskJobExecutionStatus.equals("ABANDONED") ||
+						this.composedTaskJobExecutionStatus.equals("FAILED") ||
+						this.composedTaskJobExecutionStatus.equals("STOPPED")) ?
+						TaskExecutionStatus.ERROR : TaskExecutionStatus.COMPLETE;
+			}
+
 			return (this.exitCode == null) ? TaskExecutionStatus.RUNNING :
 					((this.exitCode == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
 		}

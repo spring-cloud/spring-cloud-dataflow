@@ -1124,6 +1124,7 @@ public class DataFlowIT {
 		logger.info("composed-task-ctrFailedGraph-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ctrFailedGraph",
 				"scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && timestamp",
+				TaskExecutionStatus.ERROR,
 				emptyList(), // successful
 				asList("scenario"),  // failed
 				asList("timestamp")); // not-run
@@ -1150,6 +1151,7 @@ public class DataFlowIT {
 		logger.info("composed-task-SequentialTransitionAndSplitWithScenarioFailed-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Failed Test",
 				"t1: timestamp && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
+				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t3"), // successful
 				asList("scenario"),  // failed
 				asList("t4", "t5", "t6")); // not-run
@@ -1160,6 +1162,7 @@ public class DataFlowIT {
 		logger.info("composed-task-SequentialTransitionAndSplitWithScenarioOk-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Ok Test",
 				"t1: timestamp && t2: scenario 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
+				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t2", "t4", "t5", "t6"), // successful
 				emptyList(),  // failed
 				asList("t3")); // not-run
@@ -1178,6 +1181,7 @@ public class DataFlowIT {
 		logger.info("composed-task-EmbeddedFailedGraph-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Embedded Failed Graph Test",
 				String.format("a: timestamp && b:scenario  --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", randomJobName()),
+				TaskExecutionStatus.ERROR,
 				asList("a"), // successful
 				asList("b"),  // failed
 				asList("c")); // not-run
@@ -1204,6 +1208,7 @@ public class DataFlowIT {
 		logger.info("composed-task-sequentialTransitionAndSplitFailedInvalid-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split Failed Invalid Test",
 				"t1: timestamp && b:scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp && t3: timestamp && t4: timestamp && <t5:timestamp || t6: timestamp> && t7: timestamp",
+				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t2"), // successful
 				asList("b"),  // failed
 				asList("t3", "t4", "t5", "t6", "t7")); // not-run
@@ -1234,11 +1239,14 @@ public class DataFlowIT {
 
 			long launchId = task.launch(composedTaskLaunchArguments());
 
-			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			} else {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.ERROR);
+			}
 
 			// Parent Task
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
@@ -1296,6 +1304,7 @@ public class DataFlowIT {
 		logger.info("composed-task-failedBasicTransition-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Failed Basic Transition Test",
 				"b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
+				TaskExecutionStatus.COMPLETE,
 				asList("t1"), // successful
 				asList("b"),  // failed
 				asList("t2")); // not-run
@@ -1306,6 +1315,7 @@ public class DataFlowIT {
 		logger.info("composed-task-successBasicTransition-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Success Basic Transition Test",
 				"b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
+				TaskExecutionStatus.COMPLETE,
 				asList("b", "t2"), // successful
 				emptyList(),  // failed
 				asList("t1")); // not-run
@@ -1316,6 +1326,7 @@ public class DataFlowIT {
 		logger.info("composed-task-basicTransitionWithTransition-test");
 		mixedSuccessfulFailedAndUnknownExecutions("basicTransitionWithTransitionTest",
 				"b1: scenario  --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp * ->t3: timestamp ",
+				TaskExecutionStatus.COMPLETE,
 				asList("b1", "b2", "t3"), // successful
 				emptyList(),  // failed
 				asList("t1", "t2")); // not-run
@@ -1326,6 +1337,7 @@ public class DataFlowIT {
 		logger.info("composed-task-wildCardOnlyInLastPosition-test");
 		mixedSuccessfulFailedAndUnknownExecutions("wildCardOnlyInLastPositionTest",
 				"b1: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false * ->t3: timestamp ",
+				TaskExecutionStatus.COMPLETE,
 				asList("b1", "b2", "t3"), // successful
 				emptyList(),  // failed
 				asList("t1")); // not-run
@@ -1348,11 +1360,14 @@ public class DataFlowIT {
 
 			long launchId = task.launch(composedTaskLaunchArguments());
 
-			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			} else {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.ERROR);
+			}
 
 			// Parent Task
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
@@ -1381,7 +1396,6 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executionStatus(launchId2)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 
 			childTasksBySuffix(task, "b1").forEach(childTask -> {
@@ -1401,11 +1415,12 @@ public class DataFlowIT {
 	}
 
 	private void allSuccessfulExecutions(String taskDescription, String taskDefinition, String... childLabels) {
-		mixedSuccessfulFailedAndUnknownExecutions(taskDescription, taskDefinition, asList(childLabels),
-				emptyList(), emptyList());
+		mixedSuccessfulFailedAndUnknownExecutions(taskDescription, taskDefinition,
+				TaskExecutionStatus.COMPLETE, asList(childLabels), emptyList(), emptyList());
 	}
 
 	private void mixedSuccessfulFailedAndUnknownExecutions(String taskDescription, String taskDefinition,
+			TaskExecutionStatus parentTaskExecutionStatus,
 			List<String> successfulTasks, List<String> failedTasks, List<String> unknownTasks) {
 
 		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
@@ -1425,11 +1440,14 @@ public class DataFlowIT {
 
 			long launchId = task.launch(composedTaskLaunchArguments());
 
-			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+			} else {
+				Awaitility.await().until(() -> task.executionStatus(launchId) == parentTaskExecutionStatus);
+			}
 
 			// Parent Task
 			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(launchId)).isEqualTo(TaskExecutionStatus.COMPLETE);
 			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 

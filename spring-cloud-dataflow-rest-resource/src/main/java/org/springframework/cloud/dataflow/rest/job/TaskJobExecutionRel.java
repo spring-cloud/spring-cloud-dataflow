@@ -38,16 +38,7 @@ public class TaskJobExecutionRel {
 
 	private final TaskManifest taskManifest;
 
-	/**
-	 * Constructor that establishes the relationship between a {@link TaskExecution} and
-	 * the Job Execution Ids of the jobs that were executed within it.
-	 *
-	 * @param taskExecution to be associated with the job execution ids.
-	 * @param jobExecutionIds to be associated with the task execution.
-	 */
-	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds) {
-		this(taskExecution, jobExecutionIds, null);
-	}
+	private final TaskJobExecution composedTaskJobExecution;
 
 	/**
 	 * Constructor that establishes the relationship between a {@link TaskExecution} and
@@ -55,10 +46,11 @@ public class TaskJobExecutionRel {
 	 *
 	 * @param taskExecution to be associated with the job execution ids.
 	 * @param jobExecutionIds to be associated with the task execution.
-	 * @param taskManifest to be associated with the task execution
+	 * @param taskManifest to be associated with the task execution.
+	 * @param composedTaskJobExecution to be associated with the task execution.
 	 */
-	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest) {
-		Assert.notNull(taskExecution, "taskExecution must not be null");;
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
+		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.taskExecution = taskExecution;
 		this.taskManifest = taskManifest;
 		if (jobExecutionIds == null) {
@@ -67,7 +59,9 @@ public class TaskJobExecutionRel {
 		else {
 			this.jobExecutionIds = Collections.unmodifiableList(new ArrayList<>(jobExecutionIds));
 		}
+		this.composedTaskJobExecution = composedTaskJobExecution;
 	}
+
 
 	/**
 	 * @return the taskExecution for this relationship.
@@ -89,5 +83,9 @@ public class TaskJobExecutionRel {
 	 */
 	public TaskManifest getTaskManifest() {
 		return taskManifest;
+	}
+
+	public TaskJobExecution getComposedTaskJobExecution() {
+		return composedTaskJobExecution;
 	}
 }
