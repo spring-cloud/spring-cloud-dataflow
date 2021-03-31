@@ -42,7 +42,6 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -698,20 +697,26 @@ public class DataFlowIT {
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS
 	// -----------------------------------------------------------------------
-	@DisplayName("Test Analytics")
 	@Test
-	public void analyticsCounter() {
+	public void analyticsCounterInflux() {
 
-		if (!prometheusPresent() && !influxPresent()) {
-			logger.info("stream-analytics-test: SKIP - no metrics configured!");
+		if (!influxPresent()) {
+			logger.info("stream-analytics-test: SKIP - no InfluxDB metrics configured!");
 		}
 
-		Assumptions.assumeTrue(prometheusPresent() || influxPresent());
+		Assumptions.assumeTrue(influxPresent());
 
-		logger.info("stream-analytics-test");
+		if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
+			logger.info("stream-analytics-influx-test: SKIP - no analytics app registered!");
+		}
+
+		Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink),
+				"stream-analytics-test: SKIP - no analytics app registered!");
+
+		logger.info("stream-analytics-influx-test");
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
-				.name("httpAnalytics")
+				.name("httpAnalyticsInflux")
 				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
 				.deploy(testDeploymentProperties())) {
@@ -727,46 +732,73 @@ public class DataFlowIT {
 			runtimeApps.httpPost(httpAppUrl, message2);
 			runtimeApps.httpPost(httpAppUrl, message3);
 
-			// Prometheus tests
-			Assumptions.assumingThat(this::prometheusPresent, () -> {
-				logger.info("stream-analytics-test: Prometheus");
+			// Wait for ~1 min for Micrometer to send first metrics to Influx.
+			Awaitility.await().until(() -> !JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
+					.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
 
-				// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
-				Awaitility.await().until(() -> (int) JsonPath.parse(
-						runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
-						.read("$.data.result.length()") > 0);
+			//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
+			//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
-				JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
-						.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
-			});
+			// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
 
-			// InfluxDB tests
-			Assumptions.assumingThat(this::influxPresent, () -> {
-				logger.info("stream-analytics-test: InfluxDB");
+			// http://localhost:8086/query?q=SHOW%20DATABASES
+			JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
+					.inPath("$.results[0].series[0].values[1][0]")
+					.isEqualTo("myinfluxdb");
 
-				// Wait for ~1 min for Micrometer to send first metrics to Influx.
-				Awaitility.await().until(() -> !JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
-						.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
+			List<String> messageLengths = java.util.stream.Stream.of(message1, message2, message3)
+					.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
 
-				//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
-				//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
+			// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
+			String myHttpCounter = runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
+		}
+	}
 
-				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
+	@Test
+	public void analyticsCounterPrometheus() throws IOException {
 
-				// http://localhost:8086/query?q=SHOW%20DATABASES
-				JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
-						.inPath("$.results[0].series[0].values[1][0]")
-						.isEqualTo("myinfluxdb");
+		if (!runtimeApps.isAppRegistered("analytics", ApplicationType.sink)) {
+			logger.info("stream-analytics-prometheus-test: SKIP - no analytics app registered!");
+		}
 
-				List<String> messageLengths = java.util.stream.Stream.of(message1, message2, message3)
-						.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
+		Assumptions.assumeTrue(runtimeApps.isAppRegistered("analytics", ApplicationType.sink),
+				"stream-analytics-test: SKIP - no analytics app registered!");
 
-				// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-				String myHttpCounter = runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
-				JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
-			});
+		if (!prometheusPresent()) {
+			logger.info("stream-analytics-prometheus-test: SKIP - no Prometheus configured!");
+		}
+
+		Assumptions.assumeTrue(prometheusPresent());
+
+		logger.info("stream-analytics-prometheus-test");
+
+		try (Stream stream = Stream.builder(dataFlowOperations)
+				.name("httpAnalyticsPrometheus")
+				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
+				.create()
+				.deploy(testDeploymentProperties())) {
+
+			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			String message1 = "Test message 1"; // length 14
+			String message2 = "Test message 2 with extension";  // length 29
+			String message3 = "Test message 2 with double extension";  // length 36
+
+			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
+			runtimeApps.httpPost(httpAppUrl, message1);
+			runtimeApps.httpPost(httpAppUrl, message2);
+			runtimeApps.httpPost(httpAppUrl, message3);
+
+			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
+			Awaitility.await().until(() -> (int) JsonPath.parse(
+					runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+					.read("$.data.result.length()") > 0);
+
+			JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+					.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
 		}
 	}
 

@@ -6,7 +6,7 @@
       {
         "metric": {
           "__name__": "my_http_analytics_total",
-          "application": "httpAnalytics-analytics-sink",
+          "application": "httpAnalyticsPrometheus-analytics-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "analytics",
           "application_type": "sink",
@@ -14,7 +14,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "14",
-          "stream_name": "httpAnalytics"
+          "stream_name": "httpAnalyticsPrometheus"
         },
         "value": [
           "${json-unit.ignore}",
@@ -24,7 +24,7 @@
       {
         "metric": {
           "__name__": "my_http_analytics_total",
-          "application": "httpAnalytics-analytics-sink",
+          "application": "httpAnalyticsPrometheus-analytics-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "analytics",
           "application_type": "sink",
@@ -32,7 +32,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "29",
-          "stream_name": "httpAnalytics"
+          "stream_name": "httpAnalyticsPrometheus"
         },
         "value": [
           "${json-unit.ignore}",
@@ -42,7 +42,7 @@
       {
         "metric": {
           "__name__": "my_http_analytics_total",
-          "application": "httpAnalytics-analytics-sink",
+          "application": "httpAnalyticsPrometheus-analytics-sink",
           "application_guid": "${json-unit.ignore}",
           "application_name": "analytics",
           "application_type": "sink",
@@ -50,7 +50,7 @@
           "instance_index": "0",
           "job": "local-rsocket-connected",
           "msgSize": "36",
-          "stream_name": "httpAnalytics"
+          "stream_name": "httpAnalyticsPrometheus"
         },
         "value": [
           "${json-unit.ignore}",

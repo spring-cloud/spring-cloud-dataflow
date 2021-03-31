@@ -274,4 +274,15 @@ public class RuntimeApplicationHelper {
 		}
 	}
 
+	public boolean isAppRegistered(String name, ApplicationType type) {
+		try {
+			DetailedAppRegistrationResource registration =
+					dataFlowTemplate.appRegistryOperations().info(name, type, false);
+			return registration != null;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
 }
