@@ -88,7 +88,6 @@
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<json-unit.version>2.11.1</json-unit.version>
-		<docker-compose-rule.version>1.4.2</docker-compose-rule.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -254,11 +253,6 @@
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-assertj</artifactId>
 				<version>${json-unit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.palantir.docker.compose</groupId>
-				<artifactId>docker-compose-junit-jupiter</artifactId>
-				<version>${docker-compose-rule.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
