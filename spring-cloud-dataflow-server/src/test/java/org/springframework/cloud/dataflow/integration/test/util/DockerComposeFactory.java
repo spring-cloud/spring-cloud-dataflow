@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,16 @@ package org.springframework.cloud.dataflow.integration.test.util;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import com.palantir.docker.compose.DockerComposeExtension;
-import com.palantir.docker.compose.configuration.DockerComposeFiles;
-import com.palantir.docker.compose.configuration.ProjectName;
-import com.palantir.docker.compose.connection.DockerMachine;
-import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
+import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks;
+import org.springframework.cloud.dataflow.common.test.docker.junit5.LegacyDockerComposeExtension;
 
 /**
  * Factory utility that helps to install SCDF & Skipper from Docker Compose files.
@@ -153,7 +154,7 @@ public class DockerComposeFactory {
 
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
-		return DockerComposeExtension.builder()
+		return LegacyDockerComposeExtension.builder()
 				.projectName(ProjectName.fromString("scdf"))
 				.files(DockerComposeFiles.from(dockerComposePaths))
 				.machine(dockerMachine)
@@ -165,5 +166,6 @@ public class DockerComposeFactory {
 				// set to false to test with local dataflow and skipper images.
 				.pullOnStartup(DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP, true))
 				.build();
+
 	}
 }

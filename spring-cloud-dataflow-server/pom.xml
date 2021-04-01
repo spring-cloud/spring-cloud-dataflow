@@ -51,6 +51,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-common-test-docker-junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>net.javacrumbs.json-unit</groupId>
 			<artifactId>json-unit-assertj</artifactId>
 			<scope>test</scope>
@@ -63,11 +68,6 @@
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-runner</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.palantir.docker.compose</groupId>
-			<artifactId>docker-compose-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -251,11 +251,4 @@
 			</pluginRepositories>
 		</profile>
 	</profiles>
-
-	<repositories>
-		<repository>
-			<id>palantir</id>
-			<url>https://dl.bintray.com/palantir/releases</url>
-		</repository>
-	</repositories>
 </project>
