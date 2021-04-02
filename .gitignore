@@ -21,7 +21,10 @@ test-output
 logs/
 scdf-logs/
 .attach_pid*
-.jfrog/
+
+# GitHub actions
+.jfrog
+.m2
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
