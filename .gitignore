@@ -18,6 +18,7 @@ out
 spring-shell.log
 target/
 test-output
+.jfrog/
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
