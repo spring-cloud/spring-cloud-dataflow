@@ -30,8 +30,8 @@ jobs:
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
-          --server-id-resolve=spring \
-          --server-id-deploy=spring \
+          --server-id-resolve=repo.spring.io \
+          --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=release \
           --repo-resolve-snapshots=snapshot \
           --repo-deploy-releases=release \
