@@ -23,6 +23,7 @@ file:/
 .sts4-cache
 .attach*
 .gradle
+.jfrog/
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath
