@@ -20,6 +20,7 @@ jobs:
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+        dispatch-handler-max: 15
         dispatch-handler-config: >
           [
             {
@@ -28,6 +29,96 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-build",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-dataflow-build' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow-common",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-dataflow-common' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-deployer' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-local",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-deployer-local' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-cloudfoundry",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-deployer-cloudfoundry' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-kubernetes",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-deployer-kubernetes' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-common-security-config",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-common-security-config' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-skipper",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-skipper' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow-ui",
+                "ref": "master",
+                "workflow": "build-snapshot-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'build-succeed' && data.repo == 'spring-cloud-dataflow-ui' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow",
                 "ref": "master",
                 "workflow": "build-snapshot-worker.yml"
               }
