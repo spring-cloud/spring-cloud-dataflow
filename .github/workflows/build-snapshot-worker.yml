@@ -80,5 +80,6 @@ jobs:
         dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
         dispatch-handler-client-payload-data: >
           {
-            "event": "build-failed"
+            "event": "build-failed",
+            "message": "spring-cloud-dataflow-build failed"
           }
