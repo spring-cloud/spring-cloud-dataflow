@@ -26,6 +26,14 @@ jobs:
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
 
+    # cache maven .m2
+    - uses: actions/cache@v1
+      with:
+        path: .m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-
+
     # target deploy repos
     - name: Configure JFrog Cli
       run: |
@@ -48,7 +56,7 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog rt mvn -U -B clean install
+        jfrog rt mvn "-Dmaven.repo.local=.m2" -U -B clean install
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname=spring-cloud-skipper-main >> $GITHUB_ENV
