@@ -78,5 +78,5 @@ jobs:
         dispatch-handler-client-payload-data: >
           {
             "event": "build-failed",
-            "message": "spring-cloud-dataflow failed to build"
+            "message": "spring-cloud-dataflow failed"
           }
