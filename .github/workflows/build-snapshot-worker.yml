@@ -25,6 +25,10 @@ jobs:
         version: 1.43.2
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+    - name: Install pack
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        pack-version: 0.18.0
 
     # cache maven .m2
     - uses: actions/cache@v1
@@ -61,6 +65,23 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname=spring-cloud-skipper-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+
+    # build image to local repo to get pushed
+    - name: Build Image
+      env:
+        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+      run: |
+        pack build \
+          --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=8 springsource-docker-private-local.jfrog.io/spring-cloud-skipper-server:$TAG
+
+    # push image to private repo
+    - name: Push image
+      env:
+        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+      run: |
+        jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-skipper-server:$TAG docker-private-local
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
