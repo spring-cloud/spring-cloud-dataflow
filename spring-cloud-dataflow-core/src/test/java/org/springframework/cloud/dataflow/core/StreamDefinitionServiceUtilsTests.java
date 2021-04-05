@@ -73,7 +73,7 @@ public class StreamDefinitionServiceUtilsTests {
 
 	@Test
 	public void testSourceDestinationArgs() {
-		reverseDslTest(":test --group=test > file", 1);
+		reverseDslTest(":test > file --group=test", 1);
 	}
 
 	@Test
@@ -133,7 +133,6 @@ public class StreamDefinitionServiceUtilsTests {
 				DataFlowPropertyKeys.STREAM_APP_TYPE,
 				DataFlowPropertyKeys.STREAM_APP_LABEL,
 				DataFlowPropertyKeys.STREAM_NAME,
-				BindingPropertyKeys.INPUT_GROUP,
 				BindingPropertyKeys.OUTPUT_REQUIRED_GROUPS,
 				BindingPropertyKeys.OUTPUT_DESTINATION);
 
@@ -163,7 +162,9 @@ public class StreamDefinitionServiceUtilsTests {
 	@Test
 	public void testPropertyAutoQuotes() {
 
-		StreamDefinition streamDefinition = new StreamDefinition("streamName", "foo | bar");
+		String streamName = "stream2";
+
+		StreamDefinition streamDefinition = new StreamDefinition(streamName, "foo | bar");
 
 		StreamAppDefinition foo = this.streamDefinitionService.getAppDefinitions(streamDefinition).get(0);
 		StreamAppDefinition bar = this.streamDefinitionService.getAppDefinitions(streamDefinition).get(1);
@@ -174,13 +175,13 @@ public class StreamDefinitionServiceUtilsTests {
 				.setProperty("p3", "ef")
 				.setProperty("p4", "'i' 'j'")
 				.setProperty("p5", "\"k l\"")
-				.build("stream2");
+				.build(streamName);
 
 		StreamAppDefinition bar2 = StreamAppDefinition.Builder.from(bar)
 				.setProperty("p1", "a b")
 				.setProperty("p2", "'c d'")
 				.setProperty("p3", "ef")
-				.build("stream2");
+				.build(streamName);
 
 		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\" | bar --p1='a b' --p2=\"'c d'\" --p3=ef",
 				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), new LinkedList(Arrays.asList(foo2, bar2))));

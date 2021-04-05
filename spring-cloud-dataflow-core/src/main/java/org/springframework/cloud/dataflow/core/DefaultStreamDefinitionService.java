@@ -72,14 +72,15 @@ public class DefaultStreamDefinitionService implements StreamDefinitionService {
 			// Check for Input Named Destination
 			if (appDefinitionIndex == 0 && StringUtils.hasText(inputDestination)) {
 				dslBuilder.append(":").append(inputDestination);
-				if (inputGroup != null && !inputGroup.equals(appDefinition.getStreamName())) {
-					dslBuilder.append(" --group=").append(inputGroup);
-				}
 				dslBuilder.append(" > ");
 			}
 
 			// Add App Definition
 			dslBuilder.append(appDefinition.getName());
+
+			if (inputGroup != null && !inputGroup.equals(appDefinition.getStreamName())) {
+				dslBuilder.append(" --group=").append(inputGroup);
+			}
 
 			if (!appDefinition.getName().equals(appDefinition.getRegisteredAppName())) {
 				dslBuilder.append(": ").append(appDefinition.getRegisteredAppName());
