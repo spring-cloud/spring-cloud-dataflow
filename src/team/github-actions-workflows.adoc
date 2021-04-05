@@ -1,0 +1,34 @@
+# Workflows Documentation
+
+## Train Builds
+
+In dataflow related repos you may see workflows named as _worker_ and in `spring-cloud-dataflow`
+workflows named as _controller_. These are _train_ builds where workflow dispatch is handled
+via GitHub api's and this multi-repo _train_ build is orchestrated, you guessed it, within
+_controller_ workflows.
+
+Action code which handles this _train_ build is in https://github.com/jvalkeal/build-zoo-handler[build-zoo-handler]
+and you can find more docs about it there. In a nutshell when _controller_ workflow is fired,
+rules configuration in it makes a choice which remote repo workflow should be dispatched via
+_workflow dispatch_ api. When _worker_ workflows completes it calls `home` and then _controller_
+can make a choice what to do next. Within these ping-pong dispatches a `context` is kept alive and
+this `context` contains arbitry information what any _worker_ can contribute into it.
+
+Having this in-flight context is helpful when a _train_ release build is done as then _worker_
+workflow can tell what was its released version and related other workflows in any other repos
+can use this information to update project dependencies. Thus we're getting foundation
+to orchestrate various things without that much manual intervention.
+
+### Snapshot Train
+
+This is a simple all repo _train_ which can be fired from `spring-cloud-dataflow` with workflow
+`build-snapshot-controller`. It starts by instructing `spring-cloud-dataflow-build` to do its
+things and ends up last step where `spring-cloud-dataflow` is build.
+
+### Milestone Train
+
+TBD
+
+### Release Train
+
+TBD
