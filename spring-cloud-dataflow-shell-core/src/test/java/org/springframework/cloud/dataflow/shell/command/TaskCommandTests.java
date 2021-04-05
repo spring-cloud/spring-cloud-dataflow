@@ -36,6 +36,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
+import org.springframework.util.ObjectUtils;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -260,11 +261,21 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 0, 3, "End Time");
 		verifyTableValue(table, 0, 4, "Exit Code");
 
-		verifyTableValue(table, 1, 0, TASK_NAME);
-		verifyTableValue(table, 1, 1, TASK_EXECUTION_ID);
-		verifyTableValue(table, 1, 2, startTime);
-		verifyTableValue(table, 1, 3, endTime);
-		verifyTableValue(table, 1, 4, EXIT_CODE);
+		// other tests don't always clean up so need to check matching row
+		int row = 0;
+		for (int i = 0; i < table.getModel().getRowCount(); i++) {
+			if (ObjectUtils.nullSafeEquals(table.getModel().getValue(i, 0), TASK_NAME)) {
+				row = i;
+				break;
+			}
+		}
+		assertTrue("didn't found matching row", row > 0);
+
+		verifyTableValue(table, row, 0, TASK_NAME);
+		verifyTableValue(table, row, 1, TASK_EXECUTION_ID);
+		verifyTableValue(table, row, 2, startTime);
+		verifyTableValue(table, row, 3, endTime);
+		verifyTableValue(table, row, 4, EXIT_CODE);
 	}
 
 	@Test
