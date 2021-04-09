@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.IOException;
+
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,8 +34,19 @@ public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void createSchedule() {
+	public void createScheduleWithProperties() {
 		schedule().create("schedName", "def", "* * * * *", "", "");
+	}
+
+	@Test
+	public void createScheduleWithPropertiesFile() throws IOException {
+		schedule().createWithPropertiesFile("schedName", "def", "* * * * *", "./src/test/resources/taskSchedulerWithPropertiesFile.properties", "");
+	}
+
+	@Test
+	public void tryScheduleWithPropertiesAndPropertiesFile() throws IOException {
+		Assert.assertThrows("You cannot specify both 'properties' and 'propertiesFile'", IllegalArgumentException.class,
+				() -> schedule().createWithPropertiesAndPropertiesFile("schedName", "def", "* * * * *","app.tmp2.foo=bar",  "./src/test/resources/taskSchedulerWithPropertiesFile.properties", ""));
 	}
 
 	@Test
