@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +48,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TaskSchedulerCommands implements CommandMarker {
+
+	private static final String PROPERTIES_OPTION = "properties";
+	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
 
 	private static final String SCHEDULER_CREATE = "task schedule create";
 
@@ -79,15 +84,22 @@ public class TaskSchedulerCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = {
 					"expression" }, help = "the cron expression of the schedule") String expression,
 			@CliOption(key = {
-					"properties" }, help = "a task properties (coma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
+					PROPERTIES_OPTION }, help = "a task properties (coma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
+			@CliOption(key = {
+					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
 			@CliOption(key = {
 					"arguments" }, help = "command line args (space separated string eg.: --arguments 'a b c d'") String arguments,
-			@CliOption(key = { "platform" }, help = "the name of the platform from which to create the schedule") String platform) {
-		Map<String, String> params = DeploymentPropertiesUtils.parse(properties);
-		List<String> args = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
-		params.put("scheduler.cron.expression", expression);
+			@CliOption(key = { "platform" }, help = "the name of the platform from which to create the schedule") String platform) throws IOException {
 
-		scheduleOperations().schedule(name, definitionName, params, args, platform);
+		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
+				propertiesFile);
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
+				propertiesFile, which);
+
+		List<String> args = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
+		propertiesToUse.put("scheduler.cron.expression", expression);
+
+		scheduleOperations().schedule(name, definitionName, propertiesToUse, args, platform);
 		return String.format("Created schedule '%s'", name);
 	}
 

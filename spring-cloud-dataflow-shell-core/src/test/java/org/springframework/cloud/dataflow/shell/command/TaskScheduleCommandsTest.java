@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.IOException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,6 +35,11 @@ public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 	@Test
 	public void createSchedule() {
 		schedule().create("schedName", "def", "* * * * *", "", "");
+	}
+
+	@Test
+	public void createSchedulePropertiesFile() throws IOException {
+		schedule().createWithPropertiesFile("schedName", "def", "* * * * *", "./src/test/resources/taskSchedulerWithPropertiesFile.properties", "");
 	}
 
 	@Test

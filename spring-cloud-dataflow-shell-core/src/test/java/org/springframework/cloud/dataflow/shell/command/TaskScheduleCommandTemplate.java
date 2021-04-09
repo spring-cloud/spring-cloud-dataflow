@@ -15,8 +15,11 @@
  */
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import org.mockito.Mockito;
 
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
@@ -67,8 +71,21 @@ public class TaskScheduleCommandTemplate {
 				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --properties \"%s\" --arguments \"%s\"",
 				name, definition, expression, properties, args);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
-		verify(schedule).schedule(name, definition, Collections.singletonMap("scheduler.cron.expression", "* * * * *"),
+		verify(schedule).schedule(name, definition, Collections.singletonMap("scheduler.cron.expression", expression),
 				Collections.emptyList(), null);
+		assertEquals("Created schedule 'schedName'", cr.getResult());
+	}
+
+	public void createWithPropertiesFile(String name, String definition, String expression, String propertiesFile, String args) throws IOException {
+		String wholeCommand = String.format(
+				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --propertiesFile \"%s\" --arguments \"%s\"",
+				name, definition, expression, propertiesFile, args);
+		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
+
+		Map<String, String> expectedProperties = DeploymentPropertiesUtils.parseDeploymentProperties("", new File(propertiesFile), 1);
+		expectedProperties.put("scheduler.cron.expression", expression);
+
+		verify(schedule).schedule(name, definition, expectedProperties, Collections.emptyList(), null);
 		assertEquals("Created schedule 'schedName'", cr.getResult());
 	}
 
