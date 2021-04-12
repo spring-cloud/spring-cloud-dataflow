@@ -292,8 +292,8 @@ overrides the common property).
 
 Spring Cloud Data Flow lets a user limit the maximum number of concurrently running tasks for each configured platform to prevent the saturation of IaaS or hardware resources.
 By default, the limit is set to `20` for all supported platforms. If the number of concurrently running tasks on a platform instance is greater than or equal to the limit, the next task launch request fails, and an error message is returned through the RESTful API, the Shell, or the UI.
-You can configure this limit for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].deployment.maximumConcurrentTasks`, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
-The `<platform-type>` refers to one of the currently supported deployers: `local`, `cloudfoundry`, or `kubernetes`.
+You can configure this limit for a platform instance by setting the corresponding deployer property, `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximumConcurrentTasks`, where `<account-name>` is the name of a configured platform account (`default` if no accounts are explicitly configured).
+The `<platform-type>` refers to one of the currently supported deployers: `local` or `kubernetes`. For `cloudfoundry`, the property is `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].deployment.maximumConcurrentTasks`.  (The difference is that `deployment` has been added to the path).
 
 The `TaskLauncher` implementation for each supported platform determines the number of currently running tasks by querying the underlying platform's runtime state, if possible. The method for identifying a `task` varies by platform.
 For example, launching a task on the local host uses the `LocalTaskLauncher`. `LocalTaskLauncher` runs a process for each launch request and keeps track of these processes in memory. In this case, we do not query the underlying OS, as it is impractical to identify tasks this way.
