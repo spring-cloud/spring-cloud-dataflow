@@ -27,6 +27,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -71,9 +72,9 @@ public class TaskScheduleCommandTemplate {
 				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --properties \"%s\" --arguments \"%s\"",
 				name, definition, expression, properties, args);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
-		verify(schedule).schedule(name, definition, Collections.singletonMap("scheduler.cron.expression", expression),
+		verify(schedule).schedule(name, definition, Collections.singletonMap(TaskSchedule.CRON_EXPRESSION_KEY, expression),
 				Collections.emptyList(), null);
-		assertEquals("Created schedule 'schedName'", cr.getResult());
+		assertEquals("Created schedule '" + name + "'", cr.getResult());
 	}
 
 	public void createWithPropertiesFile(String name, String definition, String expression, String propertiesFile, String args) throws IOException {
@@ -83,17 +84,26 @@ public class TaskScheduleCommandTemplate {
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
 
 		Map<String, String> expectedProperties = DeploymentPropertiesUtils.parseDeploymentProperties("", new File(propertiesFile), 1);
-		expectedProperties.put("scheduler.cron.expression", expression);
+		expectedProperties.put(TaskSchedule.CRON_EXPRESSION_KEY, expression);
 
 		verify(schedule).schedule(name, definition, expectedProperties, Collections.emptyList(), null);
-		assertEquals("Created schedule 'schedName'", cr.getResult());
+		assertEquals("Created schedule '" + name + "'", cr.getResult());
 	}
+
+	public void createWithPropertiesAndPropertiesFile(String name, String definition, String expression, String properties, String propertiesFile, String args) {
+		String wholeCommand = String.format(
+				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --properties \"%s\"  --propertiesFile \"%s\" --arguments \"%s\"",
+				name, definition, expression, properties, propertiesFile, args);
+		dataFlowShell.executeCommand(wholeCommand);
+	}
+
+
 
 	public void unschedule(String name) {
 		String wholeCommand = String.format("task schedule destroy --name \"%s\"", name);
 		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
 		verify(schedule).unschedule(name, null);
-		assertEquals("Deleted task schedule 'schedName'", cr.getResult());
+		assertEquals("Deleted task schedule '" + name + "'", cr.getResult());
 	}
 
 	public void list() {

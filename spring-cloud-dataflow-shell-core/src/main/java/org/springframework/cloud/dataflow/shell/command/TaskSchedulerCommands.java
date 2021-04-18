@@ -26,6 +26,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.SchedulerOperations;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
 import org.springframework.cloud.dataflow.rest.resource.ScheduleInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
@@ -40,6 +41,7 @@ import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.stereotype.Component;
+
 
 /**
  * Task Scheduler commands
@@ -84,7 +86,7 @@ public class TaskSchedulerCommands implements CommandMarker {
 			@CliOption(mandatory = true, key = {
 					"expression" }, help = "the cron expression of the schedule") String expression,
 			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "a task properties (coma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
+					PROPERTIES_OPTION }, help = "a task properties (comma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
 			@CliOption(key = {
 					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
 			@CliOption(key = {
@@ -97,7 +99,7 @@ public class TaskSchedulerCommands implements CommandMarker {
 				propertiesFile, which);
 
 		List<String> args = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
-		propertiesToUse.put("scheduler.cron.expression", expression);
+		propertiesToUse.put(TaskSchedule.CRON_EXPRESSION_KEY, expression);
 
 		scheduleOperations().schedule(name, definitionName, propertiesToUse, args, platform);
 		return String.format("Created schedule '%s'", name);
