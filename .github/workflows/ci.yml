@@ -1,14 +1,14 @@
-name: Java CI - master
+name: Java CI - main
 
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - '.github/**'
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   build:

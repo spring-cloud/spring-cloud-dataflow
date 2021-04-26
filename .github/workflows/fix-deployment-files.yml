@@ -1,9 +1,9 @@
-name: Fix Deployment Files - master
+name: Fix Deployment Files
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
