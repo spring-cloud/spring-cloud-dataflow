@@ -79,7 +79,7 @@
 		<spring-cloud-common-security-config.version>1.6.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
-		<commons-io.version>2.4</commons-io.version>
+		<commons-io.version>2.7</commons-io.version>
 		<commons-lang.version>2.4</commons-lang.version>
 
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
