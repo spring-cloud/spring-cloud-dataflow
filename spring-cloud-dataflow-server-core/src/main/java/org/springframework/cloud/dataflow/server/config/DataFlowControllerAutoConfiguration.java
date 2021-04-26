@@ -16,12 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.net.URI;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.net.ssl.SSLContext;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,10 +132,12 @@ import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
+import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -134,6 +146,7 @@ import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -426,6 +439,7 @@ public class DataFlowControllerAutoConfiguration {
 			return new StreamDeploymentController(repository, streamService, streamDefinitionService);
 		}
 
+		//dataflow-server      | Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 		@Bean
 		public SkipperClient skipperClient(SkipperClientProperties properties,
 				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
@@ -437,6 +451,18 @@ public class DataFlowControllerAutoConfiguration {
 					new AnnotationLinkRelationProvider(), CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+			if (properties.isSkipSslValidation()) {
+				//restTemplateBuilder.requestFactory(() -> org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer
+				//		.create(URI.create(properties.getServerUri()))
+				//		.skipTlsCertificateVerification(true)
+				//		.buildClientHttpRequestFactory());
+				restTemplateBuilder.requestFactory(() -> HttpClientConfigurer.create()
+						.targetHost(URI.create(properties.getServerUri()))
+						.skipTlsCertificateVerification(true)
+						.buildClientHttpRequestFactory());
+				logger.info("Skipper Client - Skip SSL");
+			}
+
 			RestTemplate restTemplate = restTemplateBuilder
 					.errorHandler(new SkipperClientResponseErrorHandler(objectMapper))
 					.interceptors(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(oauth2TokenUtilsService))
@@ -444,6 +470,51 @@ public class DataFlowControllerAutoConfiguration {
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
 
+			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
+		}
+
+		//dataflow-server      | org.springframework.web.client.HttpClientErrorException$NotFound: 404 : [{"timestamp":"2021-04-26T07:34:47.698+00:00","status":404,"error":"Not Found","exception":"org.springframework.cloud.skipper.ReleaseNotFoundException","message":"","path":"/api/release/manifest/tt","releaseName":"tt"}]
+		//@Bean
+		public SkipperClient skipperClient2(SkipperClientProperties properties,
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
+				@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService) throws Exception {
+
+			final HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+			TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
+			SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+					.loadTrustMaterial(null, acceptingTrustStrategy)
+					.build();
+			SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
+
+			CloseableHttpClient httpClient = HttpClients.custom()
+					.setSSLSocketFactory(csf)
+					.build();
+			requestFactory.setHttpClient(httpClient);
+			restTemplateBuilder.requestFactory(() -> requestFactory);
+			logger.info("Skipper Client - Skip SSL Certificate Verification." + properties.getServerUri());
+			RestTemplate restTemplate = new RestTemplate(requestFactory);
+			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
+		}
+
+		//@Bean
+		public SkipperClient skipperClient3(SkipperClientProperties properties,
+				RestTemplateBuilder restTemplateBuilder, ObjectMapper objectMapper,
+				@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService) throws Exception {
+
+			// wget https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12
+			// mkdir /tmp/keystore
+			// cp ./scdf-test.p12 /tmp/keystore
+			// export HOST_MOUNT_PATH=/tmp/keystore
+			//
+			//  Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+			String trustStorePassword = "scdftest";
+			FileSystemResource fsr = new FileSystemResource("/root/scdf/scdf-test.p12");
+
+			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(fsr.getURI().toURL(), trustStorePassword.toCharArray()).build();
+			HttpClient httpClient = HttpClients.custom().setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext)).build();
+			RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+			logger.info("Skipper Client :" + restTemplate);
 			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}
 
