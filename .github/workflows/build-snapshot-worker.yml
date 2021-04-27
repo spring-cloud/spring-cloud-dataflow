@@ -71,25 +71,25 @@ jobs:
         pack build \
           --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:base \
-          --env BP_JVM_VERSION=8 springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-server:$TAG
+          --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-server:$TAG
         pack build \
           --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:base \
-          --env BP_JVM_VERSION=8 springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-composed-task-runner:$TAG
-
-    # push images to private repo
-    - name: Push image
-      env:
-        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-      run: |
-        jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-server:$TAG docker-private-local
-        jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-composed-task-runner:$TAG docker-private-local
+          --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
 
     # docker hub login
     - uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # push images
+    - name: Push image
+      env:
+        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      run: |
+        docker push springcloud/spring-cloud-dataflow-server:$TAG
+        docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
 
     # build/publish support images
     - name: Publish Grafana Prometheus
