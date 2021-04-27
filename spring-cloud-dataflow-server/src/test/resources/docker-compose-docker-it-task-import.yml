@@ -11,7 +11,7 @@ services:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
-        wget -qO- 'http://dataflow-server:9393/apps/task/scenario/0.0.1-SNAPSHOT' --post-data='uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT';
-        wget -qO- 'http://dataflow-server:9393/apps/task/batch-remote-partition/0.0.2-SNAPSHOT' --post-data='uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT';
-        wget -qO- 'http://dataflow-server:9393/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT' --post-data='uri=docker://springcloudtask/task-demo-metrics-prometheus:0.0.4-SNAPSHOT';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/task/scenario/0.0.1-SNAPSHOT' --no-check-certificate --post-data='uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/task/batch-remote-partition/0.0.2-SNAPSHOT' --no-check-certificate --post-data='uri=docker://springcloud/batch-remote-partition:0.0.2-SNAPSHOT';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/task/task-demo-metrics-prometheus/0.0.4-SNAPSHOT' --no-check-certificate --post-data='uri=docker://springcloudtask/task-demo-metrics-prometheus:0.0.4-SNAPSHOT';
         echo 'CI specific docker Task apps imported'"

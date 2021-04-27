@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
@@ -122,6 +123,7 @@ import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
+import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -443,6 +445,14 @@ public class DataFlowControllerAutoConfiguration {
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
+
+			if (properties.isSkipSslValidation()) {
+				restTemplate.setRequestFactory(HttpClientConfigurer.create()
+						.targetHost(URI.create(properties.getServerUri()))
+						.skipTlsCertificateVerification(true)
+						.buildClientHttpRequestFactory());
+				logger.warn("Skipper Client - Skip SSL Validation is Enabbled!");
+			}
 
 			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}
