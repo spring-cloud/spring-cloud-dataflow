@@ -64,7 +64,7 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
     # build images to local repo to get pushed
-    - name: Build Image
+    - name: Build Images
       env:
         TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
       run: |
@@ -84,6 +84,32 @@ jobs:
       run: |
         jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-server:$TAG docker-private-local
         jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-composed-task-runner:$TAG docker-private-local
+
+    # docker hub login
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # build/publish support images
+    - name: Publish Grafana Prometheus
+      uses: docker/build-push-action@v2
+      with:
+        context: src/grafana/prometheus/docker/grafana
+        push: true
+        tags: springcloud/spring-cloud-dataflow-grafana-prometheus:${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+    - name: Publish Grafana InfluxDB
+      uses: docker/build-push-action@v2
+      with:
+        context: src/grafana/influxdb/docker/grafana
+        push: true
+        tags: springcloud/spring-cloud-dataflow-grafana-influxdb:${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+    - name: Publish Prometheus Local
+      uses: docker/build-push-action@v2
+      with:
+        context: src/grafana/prometheus/docker/prometheus-local
+        push: true
+        tags: springcloud/spring-cloud-dataflow-prometheus-local:${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
