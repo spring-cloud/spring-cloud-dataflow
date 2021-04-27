@@ -77,7 +77,6 @@ services:
       - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_SECRET=${METADATA_DEFAULT_DOCKERHUB_PASSWORD}
     depends_on:
       - kafka-broker
-#    entrypoint: "./wait-for-it.sh -t 180 skipper-server:7577 -- java -Djavax.net.debug=SSL -Djavax.net.ssl.trustStorePassword=scdftest -Djavax.net.ssl.trustStore=/root/scdf/scdf-test.p12 -Djavax.net.ssl.trustStoreType=pkcs12 -jar /maven/spring-cloud-dataflow-server.jar"
     entrypoint: "./wait-for-it.sh -t 180 skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
