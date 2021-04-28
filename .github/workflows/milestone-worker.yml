@@ -52,19 +52,21 @@ jobs:
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
-          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version}
+          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
+          -B
         jfrog rt mvn build-helper:parse-version versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
           -Dproperty=spring-cloud-dataflow-build.version \
-          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version}
+          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
+          -B
         jfrog rt build-clean
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
           -P-spring,stagingmilestone \
-          -DskipTests -U -B
+          -DskipTests -B
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname=spring-cloud-dataflow-build-main-milestone >> $GITHUB_ENV
