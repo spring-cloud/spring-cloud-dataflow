@@ -22,9 +22,6 @@ jobs:
     - name: Handle Zoo Control
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
-        dispatch-handler-extract-context-properties: true
-        ensure-env: |
-          BUILD_ZOO_HANDLER_milestone_version
         dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
         dispatch-handler-max: 15
         dispatch-handler-config: >
