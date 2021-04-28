@@ -136,6 +136,7 @@ jobs:
                 "workflow": "promote-milestone.yml"
               }
             },
+            {
               "if": "data.event == 'promotion-failed'",
               "action": "fail",
               "fail": {
