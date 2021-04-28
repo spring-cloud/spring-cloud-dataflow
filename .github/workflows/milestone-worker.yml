@@ -55,6 +55,7 @@ jobs:
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
           -B
+        echo BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         jfrog rt mvn versions:update-parent \
           -gs .github/settings.xml \
           -Pstagingmilestone \
@@ -67,7 +68,6 @@ jobs:
           -P-spring,stagingmilestone \
           -DskipTests -U -B
         jfrog rt build-publish
-        echo BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname=spring-cloud-common-security-config-main-milestone >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
