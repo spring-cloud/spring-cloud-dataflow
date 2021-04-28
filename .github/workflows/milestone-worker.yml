@@ -53,12 +53,14 @@ jobs:
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
-          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version}
+          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
+          -B
         jfrog rt mvn versions:update-parent \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
-          -DparentVersion='['${BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version}']'
+          -DparentVersion='['${BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version}']' \
+          -B
         jfrog rt build-clean
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
