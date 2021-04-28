@@ -29,8 +29,8 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_build_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_build_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_deployer_local_build_buildname
           BUILD_ZOO_HANDLER_spring_cloud_deployer_local_build_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_build_buildname
@@ -50,7 +50,7 @@ jobs:
       run: |
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber libs-milestone-local
-        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_build_buildnumber libs-milestone-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_build_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_build_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_build_buildnumber libs-milestone-local
