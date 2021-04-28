@@ -65,60 +65,70 @@ jobs:
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
-          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version}
+          -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
+          -B
         jfrog rt mvn versions:update-parent \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
-          -DparentVersion='['${BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version}']'
+          -DparentVersion='['${BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version}']' \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-common.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer-local.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer-cloudfoundry.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer-kubernetes.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-common-security-config.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-skipper.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_skipper_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_skipper_version} \
+          -B
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-ui.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version}
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
+          -B
         jfrog rt build-clean
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
