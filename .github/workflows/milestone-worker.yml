@@ -67,6 +67,7 @@ jobs:
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
           -B
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         jfrog rt mvn versions:update-parent \
           -gs .github/settings.xml \
           -Pstagingmilestone \
@@ -135,7 +136,6 @@ jobs:
           -P-spring,stagingmilestone \
           -DskipTests -U -B
         jfrog rt build-publish
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
