@@ -43,8 +43,8 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_skipper_build_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_build_buildname
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_build_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber
     # promoting build from staging repo into milestone
     - name: Promote Build
       run: |
@@ -57,7 +57,7 @@ jobs:
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_build_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_skipper_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_skipper_build_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_build_buildnumber libs-milestone-local
-        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber libs-milestone-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber libs-milestone-local
 
     # zoo failure
     - name: Notify Build Failure Zoo Handler Controller
