@@ -73,7 +73,8 @@ public class DataFlowOperationsITConfiguration {
 			IntegrationTestProperties testProperties) {
 
 		return new RuntimeApplicationHelper(dataFlowOperations,
-				testProperties.getPlatform().getConnection().getPlatformName());
+				testProperties.getPlatform().getConnection().getPlatformName(),
+				testProperties.getPlatform().getConnection().isApplicationOverHttps());
 	}
 
 	static class AcceptCharsetInterceptor implements ClientHttpRequestInterceptor {

@@ -104,6 +104,11 @@ public class IntegrationTestProperties {
 		 */
 		private String influxUrl = "http://localhost:8086";
 
+		/**
+		 * Streaming applications are behind HTTPS.
+		 */
+		private boolean applicationOverHttps;
+
 		public String getPlatformName() {
 			return platformName;
 		}
@@ -126,6 +131,14 @@ public class IntegrationTestProperties {
 
 		public void setInfluxUrl(String influxUrl) {
 			this.influxUrl = influxUrl;
+		}
+
+		public boolean isApplicationOverHttps() {
+			return applicationOverHttps;
+		}
+
+		public void setApplicationOverHttps(boolean applicationOverHttps) {
+			this.applicationOverHttps = applicationOverHttps;
 		}
 	}
 }

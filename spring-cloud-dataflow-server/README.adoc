@@ -182,6 +182,48 @@ Use the `-Dtest.docker.compose.dood=true` property to activate the DooD (Docker-
 
 Use the `-Dit.test=class-name#method-name` to filter only selected tests.
 
+=== Run Integration Tests with HTTPS connections
+
+----
+./mvnw clean test-compile integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
+   -Dtest.docker.compose.paths=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-ssl.yml \
+   -Dtest.docker.compose.dataflow.uri=https://dataflow-server:9393 \
+   -Dtest.docker.compose.skipper.uri=https://skipper-server:7577 \
+   -Dtest.docker.compose.waiting.for.service.format=https://$HOST:$EXTERNAL_PORT \
+   -Dit.test=DataFlowIT#streamPartitioning \
+   -Dspring.cloud.dataflow.client.server-uri=https://localhost:9393 \
+   -Dspring.cloud.dataflow.client.skip-ssl-validation=true \
+   -Dtest.platform.connection.application-over-https=true
+----
+
+Use the following env. variables to run an IT test from IDE:
+----
+TEST_DOCKER_COMPOSE_PATHS=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-ssl.yml
+TEST_DOCKER_COMPOSE_SKIPPER_URI=https://skipper-server:7577
+TEST_DOCKER_COMPOSE_DATAFLOW_URI=https://dataflow-server:9393
+TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT=https://$HOST:$EXTERNAL_PORT
+TEST_PLATFORM_CONNECTION_APPLICATIONOVERHTTPS=true
+SPRING_CLOUD_DATAFLOW_CLIENT_SKIPSSLVALIDATION=true
+SPRING_CLOUD_DATAFLOW_CLIENT_SERVERURI=https://localhost:9393
+COMPOSE_HTTP_TIMEOUT=300
+----
+
+Use the following env. variables to run an IT test from IDE with existing docker-compose cluster:
+----
+TEST_DOCKER_COMPOSE_DISABLE_EXTENSION=true
+SPRING_CLOUD_DATAFLOW_CLIENT_SERVERURI=https://localhost:9393
+SPRING_CLOUD_DATAFLOW_CLIENT_SKIPSSLVALIDATION=true
+TEST_PLATFORM_CONNECTION_APPLICATIONOVERHTTPS=true
+----
+
+Create HTTPS docker-compose from shell:
+----
+export DATAFLOW_URI=https://dataflow-server:9393
+export SKIPPER_URI=https://skipper-server:7577
+docker-compose -f ./src/docker-compose/docker-compose.yml -f ./src/docker-compose/docker-compose-ssl.yml
+----
+
+
 == Run Integration Tests against k8s
 
 For this you need a pre-installed Data Flow on GKE or minikube.

@@ -17,7 +17,13 @@
 package org.springframework.cloud.dataflow.integration.test.util;
 
 import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.Extension;
@@ -86,8 +92,12 @@ public class DockerComposeFactory {
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
 			.withAdditionalEnvironmentVariable("PLATFORM_TYPE", "local")
+			.withAdditionalEnvironmentVariable("DATAFLOW_URI",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_URI, "http://dataflow-server:9393"))
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, ""))
+			.withAdditionalEnvironmentVariable("SKIPPER_URI",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_URI, "http://skipper-server:7577"))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("STREAM_APPS_URI",
@@ -154,15 +164,38 @@ public class DockerComposeFactory {
 
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
+		// For the purpose of waitingForService when using self-signed certificate (inside DockerPort#isHttpRespondingSuccessfully)
+		// we have to disable the ssl-validation!
+		try {
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null,
+					new TrustManager[] {
+							new X509TrustManager() {
+								public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+								public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+								public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+							}
+					},
+					new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		}
+		catch (Exception e) {
+			logger.warn("Failed to configure Skip SSL Verification!");
+		}
+
+		String waitingForServiceFormat =
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT,
+				"http://$HOST:$EXTERNAL_PORT");
+
 		return LegacyDockerComposeExtension.builder()
 				.projectName(ProjectName.fromString("scdf"))
 				.files(DockerComposeFiles.from(dockerComposePaths))
 				.machine(dockerMachine)
 				.saveLogsTo("target/dockerLogs/DockerComposeIT")
 				.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
-						(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+						(port) -> port.inFormat(waitingForServiceFormat)), org.joda.time.Duration.standardMinutes(10))
 				.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
-						(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+						(port) -> port.inFormat(waitingForServiceFormat)), org.joda.time.Duration.standardMinutes(10))
 				// set to false to test with local dataflow and skipper images.
 				.pullOnStartup(DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP, true))
 				.build();

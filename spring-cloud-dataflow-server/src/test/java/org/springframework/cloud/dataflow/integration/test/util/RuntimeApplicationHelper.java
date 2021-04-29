@@ -54,7 +54,10 @@ public class RuntimeApplicationHelper {
 
 	private final Version dataflowServerVersion;
 
-	public RuntimeApplicationHelper(DataFlowTemplate dataFlowTemplate, String platformName) {
+	private boolean httpsStreamApplications;
+
+	public RuntimeApplicationHelper(DataFlowTemplate dataFlowTemplate, String platformName, boolean httpsStreamApplications) {
+		this.httpsStreamApplications = httpsStreamApplications;
 		Assert.notNull(dataFlowTemplate, "Valid dataFlowOperations is expected but was: " + dataFlowTemplate);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
 		logger.debug("platform Name: [" + platformName + "]");
@@ -177,7 +180,7 @@ public class RuntimeApplicationHelper {
 	}
 
 	private String localApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return String.format("http://localhost:%s",
+		return String.format("%s://localhost:%s", httpsStreamApplications ? "https" : "http",
 				instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_PORT)); // Local Platform only
 	}
 

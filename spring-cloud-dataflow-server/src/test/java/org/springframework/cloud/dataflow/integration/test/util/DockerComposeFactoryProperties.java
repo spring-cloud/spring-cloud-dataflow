@@ -69,6 +69,16 @@ public class DockerComposeFactoryProperties {
 	public static final String TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN = PREFIX + "skipper.version";
 
 	/**
+	 * The DataFlow Server URI. Defaults to http://dataflow-server:9393
+	 */
+	public static final String TEST_DOCKER_COMPOSE_DATAFLOW_URI = PREFIX + "dataflow.uri";
+
+	/**
+	 * The Skipper Server URI. Defaults to http://skipper-server:7577
+	 */
+	public static final String TEST_DOCKER_COMPOSE_SKIPPER_URI = PREFIX + "skipper.uri";
+
+	/**
 	 * Set the app starters bulk install url.
 	 */
 	public static final String TEST_DOCKER_COMPOSE_TASK_APPS_URI = PREFIX + "task.apps.uri";
@@ -92,6 +102,9 @@ public class DockerComposeFactoryProperties {
 	 * Set to false to keep the exited Docker containers (applicable only in DooD mode).
 	 */
 	public static final String TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT = PREFIX + "docker.delete.container.on.exit";
+
+
+	public static final String TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT = PREFIX + "waiting.for.service.format";
 
 	public static boolean getBoolean(String propertyName, boolean defaultValue) {
 		String value = get(propertyName, "" + defaultValue);
