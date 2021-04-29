@@ -77,7 +77,8 @@ services:
       - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRY_CONFIGURATIONS_DEFAULT_SECRET=${METADATA_DEFAULT_DOCKERHUB_PASSWORD}
     depends_on:
       - kafka-broker
-    entrypoint: "./wait-for-it.sh -t 180 skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+      - skipper-server
+    restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
 
@@ -119,6 +120,6 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
-    entrypoint: "./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+    restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
