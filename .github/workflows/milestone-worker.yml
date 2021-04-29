@@ -133,7 +133,7 @@ jobs:
         jfrog rt build-clean
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
-          -P-spring,stagingmilestone \
+          -P-spring,stagingmilestone,full,deploymentfiles \
           -DskipTests -U -B
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
