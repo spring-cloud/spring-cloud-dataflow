@@ -41,7 +41,7 @@ services:
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         ./wait-for-it.sh -t 180 skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+         /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -58,7 +58,7 @@ services:
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         ./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+         /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
