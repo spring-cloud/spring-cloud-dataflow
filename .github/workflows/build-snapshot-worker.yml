@@ -73,7 +73,7 @@ jobs:
       run: |
         pack build \
           --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=8 springcloud/spring-cloud-skipper-server:$TAG
 
     # docker hub login
