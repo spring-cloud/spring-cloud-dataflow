@@ -154,11 +154,11 @@ jobs:
       run: |
         pack build \
           --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-server:$TAG
         pack build \
           --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
 
     # docker hub login
