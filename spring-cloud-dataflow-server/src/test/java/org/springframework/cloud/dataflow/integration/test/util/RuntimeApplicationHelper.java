@@ -193,7 +193,11 @@ public class RuntimeApplicationHelper {
 	 * @return Externally accessible app instance URL
 	 */
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return instanceAttributes.get("url");
+		String appInstanceUrl = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
+		if (httpsStreamApplications) {
+			appInstanceUrl = appInstanceUrl.replace("http:", "https:").toLowerCase();
+		}
+		return appInstanceUrl;
 	}
 
 	/**
