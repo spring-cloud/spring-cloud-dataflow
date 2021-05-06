@@ -23,23 +23,7 @@ jobs:
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.6.2
-    # jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.46.4
-      env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-    # setup frog cli
-    - name: Configure JFrog Cli
-      run: |
-        jfrog rt mvnc \
-          --server-id-resolve=repo.spring.io \
-          --server-id-deploy=repo.spring.io \
-          --repo-resolve-releases=libs-release \
-          --repo-resolve-snapshots=libs-snapshot \
-          --repo-deploy-releases=release \
-          --repo-deploy-snapshots=snapshot
     # build
     - name: Build
       run: |
-        jfrog rt mvn "-Dmaven.repo.local=.m2 -Dartifactory.publish.artifacts=false" -U -B clean package
+        mvn "-Dmaven.repo.local=.m2" -U -B clean package
