@@ -475,10 +475,12 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			CommonApplicationProperties commonApplicationProperties, TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
-			TaskExecutionInfoService taskExecutionInfoService, TaskDeleteService taskDeleteService) {
+			TaskExecutionInfoService taskExecutionInfoService, TaskDeleteService taskDeleteService,
+			TaskJobService taskJobService) {
 		return new TaskExecutionController(
 				explorer, taskExecutionService,
-				taskDefinitionRepository, taskExecutionInfoService, taskDeleteService);
+				taskDefinitionRepository, taskExecutionInfoService,
+				taskDeleteService, taskJobService);
 	}
 
 	@Bean

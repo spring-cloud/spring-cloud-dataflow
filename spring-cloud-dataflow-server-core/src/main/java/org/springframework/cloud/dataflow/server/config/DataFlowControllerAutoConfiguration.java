@@ -263,10 +263,10 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 				TaskExecutionService taskExecutionService,
 				TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
-				TaskDeleteService taskDeleteService) {
+				TaskDeleteService taskDeleteService, TaskJobService taskJobService) {
 			return new TaskExecutionController(explorer, taskExecutionService, taskDefinitionRepository,
 					taskExecutionInfoService,
-					taskDeleteService);
+					taskDeleteService, taskJobService);
 		}
 
 		@Bean

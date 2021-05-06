@@ -154,6 +154,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		if(taskJobExecutionRel.getTaskManifest() != null) {
 			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
 		}
+		this.composedTaskJobExecutionStatus = (taskJobExecutionRel.getComposedTaskJobExecution() != null) ?
+				taskJobExecutionRel.getComposedTaskJobExecution().getJobExecution().getExitStatus().getExitCode() :
+				null;
 	}
 
 	/**
