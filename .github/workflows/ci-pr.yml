@@ -1,10 +1,7 @@
-name: CI
+name: CI PRs
 
 on:
-  workflow_dispatch:
-  push:
-    paths-ignore:
-      - '.github/**'
+  pull_request:
 
 jobs:
   build:
@@ -42,10 +39,7 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=release \
           --repo-deploy-snapshots=snapshot
-        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-build-main >> $GITHUB_ENV
-        echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-    # build and publish
-    - name: Build and Publish
+    # build
+    - name: Build
       run: |
-        jfrog rt mvn "-Dmaven.repo.local=.m2" -U -B clean install
-        jfrog rt build-publish
+        jfrog rt mvn "-Dmaven.repo.local=.m2 -Dartifactory.publish.artifacts=false" -U -B clean package
