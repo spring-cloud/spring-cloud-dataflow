@@ -217,6 +217,10 @@ public class Stream implements AutoCloseable {
         return this.client.streamOperations().streamExecutionLog(this.name, appDeploymentId);
     }
 
+	/**
+	 * @return Returns a map of the stream applications, associating every application with its applications instances
+	 * and their current runtime states: (App -> (AppInstanceId -> AppInstanceState)).
+	 */
 	public Map<StreamApplication, Map<String, String>> runtimeApps() {
 
 		StreamStatusResource streamStatus = client.runtimeOperations()

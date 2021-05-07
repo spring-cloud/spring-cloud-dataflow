@@ -464,17 +464,35 @@ public class DataFlowIT {
 
 	@Test
 	public void streamLifecycle() {
+		streamLifecycleHelper(1, s -> { });
+	}
+
+	@Test
+	public void streamLifecycleWithTwoInstance() {
+		final int numberOfInstancePerApp = 2;
+		streamLifecycleHelper(numberOfInstancePerApp, stream -> {
+			Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
+			assertThat(streamApps.size()).isEqualTo(2);
+			for (Map<String, String> instanceMap : streamApps.values()) {
+				assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); //every apps should have 2 instances.
+			}
+		});
+	}
+
+	private void streamLifecycleHelper(int appInstanceCount, Consumer<Stream> streamAssertions) {
 		logger.info("stream-lifecycle-test: DEPLOY");
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("lifecycle-test" + randomSuffix())
 				.definition("time | log --log.name='TEST' --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
 				.create()
-				.deploy(testDeploymentProperties())) {
-
-			assertThat(stream.getStatus()).is(
-					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
+				.deploy(new DeploymentPropertiesBuilder()
+						.putAll(testDeploymentProperties())
+						.put("deployer.*.count", "" + appInstanceCount)
+						.build())) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			streamAssertions.accept(stream);
 
 			Awaitility.await().until(
 					() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
@@ -489,11 +507,12 @@ public class DataFlowIT {
 			logger.info("stream-lifecycle-test: UPDATE");
 			stream.update(new DeploymentPropertiesBuilder()
 					.put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
-					// TODO investigate why on update the app-starters-core overrides the original web.exposure.include!!!
 					.put("app.*.management.endpoints.web.exposure.include", "*")
 					.build());
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+			streamAssertions.accept(stream);
 
 			Awaitility.await().until(
 					() -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
@@ -507,7 +526,8 @@ public class DataFlowIT {
 			stream.rollback(0);
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
-			assertThat(stream.getStatus()).isEqualTo(DEPLOYED);
+
+			streamAssertions.accept(stream);
 
 			Awaitility.await().until(
 					() -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
@@ -522,7 +542,6 @@ public class DataFlowIT {
 			stream.undeploy();
 
 			Awaitility.await().until(() -> stream.getStatus().equals(UNDEPLOYED));
-			assertThat(stream.getStatus()).isEqualTo(UNDEPLOYED);
 
 			assertThat(stream.history().size()).isEqualTo(3);
 			Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
