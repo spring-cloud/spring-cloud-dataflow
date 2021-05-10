@@ -30,6 +30,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A HATEOAS representation of a TaskExecution.
@@ -113,6 +114,8 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * The platform for which the task was executed.
 	 */
 	private String platformName;
+
+	private String taskExecutionStatus;
 
 	private String composedTaskJobExecutionStatus;
 
@@ -276,6 +279,10 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.platformName = platformName;
 	}
 
+	public void setTaskExecutionStatus(String taskExecutionStatus) {
+		this.taskExecutionStatus = taskExecutionStatus;
+	}
+
 	/**
 	 * Returns the calculated status of this {@link TaskExecution}.
 	 *
@@ -291,6 +298,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @return TaskExecutionStatus, never null
 	 */
 	public TaskExecutionStatus getTaskExecutionStatus() {
+		if (StringUtils.hasText(this.taskExecutionStatus)) {
+			return TaskExecutionStatus.valueOf(this.taskExecutionStatus);
+		}
 		if (this.startTime == null) {
 			return TaskExecutionStatus.UNKNOWN;
 		}
