@@ -186,7 +186,7 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |<none>
 
 |deploymentServiceAccountName
-|Service account name to use for app deployments
+|Service account name used in app deployments. Note: The service account name used for app deployments is derived from the Data Flow servers deployment.
 |<none>
 
 |deploymentLabels
