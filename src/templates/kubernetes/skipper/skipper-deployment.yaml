@@ -20,7 +20,7 @@ spec:
         imagePullPolicy: Always
         volumeMounts:
           - name: config
-            mountPath: /config
+            mountPath: /workspace/config
             readOnly: true
           - name: database
             mountPath: /etc/secrets/database
