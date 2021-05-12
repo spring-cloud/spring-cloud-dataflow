@@ -183,6 +183,11 @@ public class ComposedTaskProperties {
 	 */
 	private String platformName;
 
+	/**
+	 * If true skips SSL certificate validation for SCDF server communication.
+	 */
+	private boolean skipTlsCertificateVerification = false;
+
 	public ComposedTaskProperties() {
 		try {
 			this.dataflowServerUri = new URI("http://localhost:9393");
@@ -374,5 +379,13 @@ public class ComposedTaskProperties {
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
+	}
+
+	public boolean isSkipTlsCertificateVerification() {
+		return skipTlsCertificateVerification;
+	}
+
+	public void setSkipTlsCertificateVerification(boolean skipTlsCertificateVerification) {
+		this.skipTlsCertificateVerification = skipTlsCertificateVerification;
 	}
 }

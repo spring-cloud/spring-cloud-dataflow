@@ -199,13 +199,25 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 
 	private ComposedTaskProperties composedTaskProperties() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
+
+		String skipTlsCertificateVerification = getPropertyValue("skip-tls-certificate-verification");
+		if (skipTlsCertificateVerification != null) {
+			properties.setSkipTlsCertificateVerification(Boolean.parseBoolean(skipTlsCertificateVerification));
+		}
 		String dataFlowUriString = getPropertyValue("dataflow-server-uri");
+		if (dataFlowUriString != null) {
+			properties.setDataflowServerUri(URI.create(dataFlowUriString));
+		}
 		String maxWaitTime = getPropertyValue("max-wait-time");
-		String intervalTimeBetweenChecks =
-				getPropertyValue("interval-time-between-checks");
+		if (maxWaitTime != null) {
+			properties.setMaxWaitTime(Integer.parseInt(maxWaitTime));
+		}
+		String intervalTimeBetweenChecks = getPropertyValue("interval-time-between-checks");
+		if (intervalTimeBetweenChecks != null) {
+			properties.setIntervalTimeBetweenChecks(Integer.parseInt(intervalTimeBetweenChecks));
+		}
 		properties.setGraph(getPropertyValue("graph"));
-		properties.setComposedTaskArguments(
-				getPropertyValue("composed-task-arguments"));
+		properties.setComposedTaskArguments(getPropertyValue("composed-task-arguments"));
 		properties.setPlatformName(getPropertyValue("platform-name"));
 		properties.setComposedTaskProperties(getPropertyValue("composed-task-properties"));
 		properties.setDataflowServerAccessToken(getPropertyValue("dataflow-server-access-token"));
@@ -214,21 +226,6 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		properties.setOauth2ClientCredentialsClientId(getPropertyValue("oauth2-client-credentials-client-id"));
 		properties.setOauth2ClientCredentialsClientSecret(getPropertyValue("oauth2-client-credential-client-secret"));
 		properties.setOauth2ClientCredentialsScopes(StringUtils.commaDelimitedListToSet(getPropertyValue("oauth2-client-credentials-scopes")));
-		if (maxWaitTime != null) {
-			properties.setMaxWaitTime(Integer.valueOf(maxWaitTime));
-		}
-		if (intervalTimeBetweenChecks != null) {
-			properties.setIntervalTimeBetweenChecks(Integer.valueOf(
-					intervalTimeBetweenChecks));
-		}
-		if (dataFlowUriString != null) {
-			try {
-				properties.setDataflowServerUri(new URI(dataFlowUriString));
-			}
-			catch (URISyntaxException e) {
-				throw new IllegalArgumentException("Invalid Data Flow URI");
-			}
-		}
 		return properties;
 	}
 

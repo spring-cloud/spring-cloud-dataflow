@@ -217,6 +217,7 @@ public class TaskLauncherTasklet implements Tasklet {
 	private DataFlowOperations dataFlowOperations() {
 
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
+
 		validateUsernamePassword(this.composedTaskProperties.getDataflowServerUsername(), this.composedTaskProperties.getDataflowServerPassword());
 		HttpClientConfigurer clientHttpRequestFactoryBuilder = null;
 
@@ -252,6 +253,13 @@ public class TaskLauncherTasklet implements Tasklet {
 
 		if (accessTokenValue != null) {
 			restTemplate.getInterceptors().add(new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(accessTokenValue));
+		}
+
+		if (this.composedTaskProperties.isSkipTlsCertificateVerification()) {
+			if (clientHttpRequestFactoryBuilder == null) {
+				clientHttpRequestFactoryBuilder = HttpClientConfigurer.create(this.composedTaskProperties.getDataflowServerUri());
+			}
+			clientHttpRequestFactoryBuilder.skipTlsCertificateVerification();
 		}
 
 		if (clientHttpRequestFactoryBuilder != null) {
