@@ -45,6 +45,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -82,6 +83,8 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 	@Test
 	@DirtiesContext
 	public void testComposedConfiguration() throws Exception {
+		assertFalse(composedTaskProperties.isSkipTlsCertificateVerification());
+
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		TaskletStep ctrStep = context.getBean("ComposedTest-AAA_0", TaskletStep.class);

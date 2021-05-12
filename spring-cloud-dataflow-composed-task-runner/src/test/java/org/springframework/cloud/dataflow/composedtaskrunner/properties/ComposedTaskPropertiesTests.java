@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -53,6 +54,7 @@ public class ComposedTaskPropertiesTests {
 		properties.setDataflowServerUsername("foo");
 		properties.setDataflowServerPassword("bar");
 		properties.setDataflowServerAccessToken("foobar");
+		properties.setSkipTlsCertificateVerification(true);
 		assertEquals("aaa", properties.getComposedTaskProperties());
 		assertEquals("bbb", properties.getComposedTaskArguments());
 		assertEquals(12345, properties.getIntervalTimeBetweenChecks());
@@ -62,12 +64,19 @@ public class ComposedTaskPropertiesTests {
 		assertEquals("foo", properties.getDataflowServerUsername());
 		assertEquals("bar", properties.getDataflowServerPassword());
 		assertEquals("foobar", properties.getDataflowServerAccessToken());
+		assertTrue(properties.isSkipTlsCertificateVerification());
 	}
 
 	@Test
 	public void testDataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertEquals("http://localhost:9393", properties.getDataflowServerUri().toString());
+	}
+
+	@Test
+	public void testSkipSslVerificationDefaults() {
+		ComposedTaskProperties properties = new ComposedTaskProperties();
+		assertFalse(properties.isSkipTlsCertificateVerification());
 	}
 
 	@Test
