@@ -13,9 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     # cache maven repo
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
-        path: .m2
+        path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
@@ -48,5 +48,9 @@ jobs:
     # build and publish
     - name: Build and Publish
       run: |
-        jfrog rt mvn "-Dmaven.repo.local=.m2" -U -B clean install
+        jfrog rt mvn -U -B clean install
         jfrog rt build-publish
+    # clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
