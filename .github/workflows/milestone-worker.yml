@@ -28,6 +28,12 @@ jobs:
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         pack-version: 0.18.0
+    - uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-
 
     # target deploy repos
     - name: Configure JFrog Cli
@@ -175,3 +181,7 @@ jobs:
             "event": "build-failed",
             "message": "spring-cloud-skipper failed"
           }
+    # clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr

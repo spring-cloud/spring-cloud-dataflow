@@ -31,9 +31,9 @@ jobs:
         pack-version: 0.18.0
 
     # cache maven .m2
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
-        path: .m2
+        path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
@@ -60,7 +60,7 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog rt mvn "-Dmaven.repo.local=.m2" -U -B clean install
+        jfrog rt mvn -U -B clean install
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname=spring-cloud-skipper-main >> $GITHUB_ENV
@@ -110,3 +110,7 @@ jobs:
             "event": "build-failed",
             "message": "spring-cloud-skipper failed"
           }
+    # clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
