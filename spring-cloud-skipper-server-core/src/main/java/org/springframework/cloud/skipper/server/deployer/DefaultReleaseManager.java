@@ -40,6 +40,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.app.MultiStateAppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.skipper.ReleaseUpgradeException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Manifest;
@@ -187,8 +188,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 				.analyze(existingRelease, replacingRelease, isForceUpdate, appNamesToUpgrade);
 		List<String> applicationNamesToUpgrade = releaseAnalysisReport.getApplicationNamesToUpgrade();
 		if (releaseAnalysisReport.getReleaseDifference().areEqual() && !isForceUpdate) {
-			throw new SkipperException(
-					"Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
+			throw new ReleaseUpgradeException("Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
 		}
 		AppDeployerData existingAppDeployerData = this.appDeployerDataRepository
 				.findByReleaseNameAndReleaseVersionRequired(

@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
+import org.springframework.cloud.skipper.ReleaseUpgradeException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
@@ -242,6 +243,12 @@ public class ReleaseController {
 	@ResponseStatus(value = HttpStatus.CONFLICT, reason = "Package deletion error")
 	@ExceptionHandler(PackageDeleteException.class)
 	public void handlePackageDeleteException() {
+		// needed for server not to log 500 errors
+	}
+
+	@ResponseStatus(value = HttpStatus.CONFLICT, reason = "Release upgrade exception")
+	@ExceptionHandler(ReleaseUpgradeException.class)
+	public void handleReleaseUpgradeException() {
 		// needed for server not to log 500 errors
 	}
 

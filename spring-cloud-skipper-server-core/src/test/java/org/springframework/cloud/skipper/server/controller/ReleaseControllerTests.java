@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,12 @@ import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.StatusCode;
+import org.springframework.cloud.skipper.domain.UpgradeProperties;
+import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManager;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.http.HttpStatus;
@@ -45,6 +48,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -234,6 +238,32 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		MvcResult response = this.mockMvc.perform(new ErrorDispatcher(result, "/error"))
 				.andReturn();
 		assertThat(response.getResponse().getContentAsString()).contains("ReleaseNotFoundException");
+	}
+
+	@Test
+	public void packageUpgradeWithNoDifference() throws Exception {
+		String releaseName = "myPackage";
+		String packageName = "log";
+		String packageVersion = "1.0.0";
+		Release release = install(packageName, packageVersion, releaseName);
+		assertThat(release.getVersion()).isEqualTo(1);
+
+		// Upgrade
+		UpgradeRequest upgradeRequest = new UpgradeRequest();
+		UpgradeProperties upgradeProperties = createUpdateProperties(releaseName);
+		PackageIdentifier packageIdentifier = new PackageIdentifier();
+		packageIdentifier.setPackageName(packageName);
+		packageIdentifier.setPackageVersion(packageVersion);
+		upgradeRequest.setPackageIdentifier(packageIdentifier);
+		upgradeRequest.setUpgradeProperties(upgradeProperties);
+		PackageMetadata updatePackageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(
+				packageName,
+				packageVersion);
+		assertThat(updatePackageMetadata).isNotNull();
+		MvcResult result = mockMvc.perform(post("/api/release/upgrade")
+				.content(convertObjectToJson(upgradeRequest))).andDo(print())
+				.andExpect(status().is4xxClientError()).andReturn();
+		assertThat(result.getResolvedException().getMessage()).isEqualTo("Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
 	}
 
 	@Test

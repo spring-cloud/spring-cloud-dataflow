@@ -29,6 +29,8 @@ management:
         enabled: false
 server:
   port: 7577
+  error:
+    include-message: always
 spring:
   main:
     banner-mode: "off"
