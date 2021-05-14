@@ -35,8 +35,8 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname
           BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname
           BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname
@@ -53,7 +53,7 @@ jobs:
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber libs-milestone-local
-        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernentes_buildnumber libs-milestone-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname $BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber libs-milestone-local
