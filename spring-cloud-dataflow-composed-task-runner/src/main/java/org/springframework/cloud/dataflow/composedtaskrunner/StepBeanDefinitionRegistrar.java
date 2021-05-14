@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
