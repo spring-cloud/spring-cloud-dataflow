@@ -146,12 +146,12 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
     # zoo tag
-    # - name: Tag Release
-    #   uses: jvalkeal/build-zoo-handler@v0.0.4
-    #   with:
-    #     tag-release-branch: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-    #     tag-release-tag: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-    #     tag-release-tag-prefix: v
+    - name: Tag Release
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        tag-release-branch: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+        tag-release-tag: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+        tag-release-tag-prefix: v
 
     # build images to local repo to get pushed
     - name: Build Images
