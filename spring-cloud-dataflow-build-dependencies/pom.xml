@@ -20,6 +20,7 @@
 		<spring-boot.version>2.4.5</spring-boot.version>
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
 		<junit.version>4.13.1</junit.version>
+		<commons-io.version>2.7</commons-io.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -34,6 +35,11 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
