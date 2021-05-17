@@ -57,7 +57,6 @@
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<commons-io.version>2.7</commons-io.version>
 		<jmockit.version>1.24</jmockit.version>
 
 		<asciidoctor.maven.plugin.version>2.0.0</asciidoctor.maven.plugin.version>
@@ -217,11 +216,6 @@
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>zt-zip</artifactId>
 				<version>${zeroturnaround.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.zafarkhaja</groupId>
