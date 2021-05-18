@@ -1058,3 +1058,17 @@ deployer.<application>.kubernetes.initContainer={containerName: 'test', imageNam
 ====
 
 Replace `<application>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.
+
+==== Lifecycle Support
+
+When you deploy applications, you may attach `postStart` and `preStop` https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/[Lifecycle handlers] to execute commands.
+The Kubernetes API supports other types of handlers besides `exec`. This feature may be extended to support additional actions in a future release.
+To configure the Lifecycle handlers as shown in the linked page above,specify each command as a comma-delimited list, using the following property keys:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.lifecycle.postStart.exec.command=/bin/sh,-c,'echo Hello from the postStart handler > /usr/share/message'
+deployer.<application>.kubernetes.lifecycle.preStop.exec.command=/bin/sh,-c,'nginx -s quit; while killall -0 nginx; do sleep 1; done'
+----
+====
