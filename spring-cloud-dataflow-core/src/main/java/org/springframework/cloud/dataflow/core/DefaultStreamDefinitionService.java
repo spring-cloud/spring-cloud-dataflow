@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
@@ -123,7 +123,7 @@ public class DefaultStreamDefinitionService implements StreamDefinitionService {
 	}
 
 	private String unescape(String text) {
-		return StringEscapeUtils.unescapeHtml(text);
+		return StringEscapeUtils.unescapeHtml4(text);
 	}
 
 }

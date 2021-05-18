@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.util.Assert;
@@ -53,7 +53,7 @@ public class TaskDefinitionToDslConverter {
 		dslBuilder.append(taskDefinition.getRegisteredAppName());
 		for (String propertyName : properties.keySet()) {
 			if (!dataFlowAddedProperties.contains(propertyName)) {
-				String propertyValue = StringEscapeUtils.unescapeHtml(properties.get(propertyName));
+				String propertyValue = StringEscapeUtils.unescapeHtml4(properties.get(propertyName));
 				dslBuilder.append(" --").append(propertyName).append("=").append(
 						DefinitionUtils.escapeNewlines(DefinitionUtils.autoQuotes(propertyValue)));
 			}
