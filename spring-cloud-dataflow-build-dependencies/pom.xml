@@ -21,6 +21,7 @@
 		<spring-cloud.version>2020.0.2</spring-cloud.version>
 		<junit.version>4.13.1</junit.version>
 		<commons-io.version>2.7</commons-io.version>
+		<commons-text.version>1.9</commons-text.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -40,6 +41,11 @@
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
 				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>${commons-text.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
