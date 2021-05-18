@@ -29,6 +29,7 @@ version: '3'
 #    docker logs <container id>
 services:
   dataflow-server:
+    user: root
     environment:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
@@ -39,6 +40,7 @@ services:
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
@@ -47,6 +49,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   skipper-server:
+    user: root
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
@@ -56,6 +59,7 @@ services:
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
