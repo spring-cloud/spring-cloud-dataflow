@@ -82,6 +82,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String VISIBLE_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata.properties";
 
+	private static final String PORT_MAPPING_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-port-mapping.properties";
+
 	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
@@ -138,8 +140,9 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 					+ " is a deprecated. Please use " + VISIBLE_PROPERTIES + " instead.");
 		}
 
+		Resource[] portMappingResources = resourcePatternResolver.getResources(PORT_MAPPING_PROPERTIES);
 		return concatArrays(configurationResources, deprecatedSpringConfigurationResources,
-				deprecatedDataflowConfigurationResources);
+				deprecatedDataflowConfigurationResources, portMappingResources);
 
 	}
 
@@ -318,7 +321,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Set<String> inboundPorts = new HashSet<>();
 			Set<String> outboundPorts = new HashSet<>();
 			Map<String, Set<String>> portsMap = new HashMap<>();
-
 			for (Resource resource : visibleConfigurationMetadataResources(moduleClassLoader)) {
 				Properties properties = new Properties();
 				properties.load(resource.getInputStream());

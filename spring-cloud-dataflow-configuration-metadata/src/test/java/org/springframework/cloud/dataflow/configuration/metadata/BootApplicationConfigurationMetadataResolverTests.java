@@ -155,6 +155,16 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
+	public void shouldReturnPortMappingProperties() {
+		Map<String, Set<String>> portNames = resolver.listPortNames(new ClassPathResource("apps/filter-processor", getClass()));
+		assertThat(portNames.size(), is(2));
+		assertThat(portNames.get("inbound").size(), is(3));
+		assertThat(portNames.get("inbound"), containsInAnyOrder("in1", "in2", "in3"));
+		assertThat(portNames.get("outbound").size(), is(2));
+		assertThat(portNames.get("outbound"), containsInAnyOrder("out1", "out2"));
+	}
+
+	@Test
 	public void appDockerResourceWithInboundOutboundPortMapping() {
 		Map<String, String> result = new HashMap<>();
 		result.put("configuration-properties.inbound-ports", "input1,input2, input3");
