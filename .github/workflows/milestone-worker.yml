@@ -154,11 +154,11 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # push image
-    # - name: Push image
-    #   env:
-    #     TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
-    #   run: |
-    #     docker push springcloud/spring-cloud-skipper-server:$TAG
+    - name: Push image
+      env:
+        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+      run: |
+        docker push springcloud/spring-cloud-skipper-server:$TAG
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
