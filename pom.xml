@@ -72,7 +72,7 @@
 		<maven-checkstyle-plugin.failsOnError>true</maven-checkstyle-plugin.failsOnError>
 		<maven-checkstyle-plugin.failOnViolation>true</maven-checkstyle-plugin.failOnViolation>
 		<maven-checkstyle-plugin.includeTestSourceDirectory>true</maven-checkstyle-plugin.includeTestSourceDirectory>
-		<spring-cloud-build-checkstyle.branch>master</spring-cloud-build-checkstyle.branch>
+		<spring-cloud-build-checkstyle.branch>main</spring-cloud-build-checkstyle.branch>
 		<checkstyle.suppressions.file>
 			https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/${spring-cloud-build-checkstyle.branch}/spring-cloud-dataflow-build-tools/src/checkstyle/checkstyle-suppressions.xml
 		</checkstyle.suppressions.file>
