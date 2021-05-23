@@ -1,6 +1,9 @@
 - name: area/batch-task
   color: F9D0C4
   description: Belongs to batch and task
+- name: area/carvel
+  color: F9D0C4
+  description: Belongs to carvel app features
 - name: area/composed-tasks
   color: F9D0C4
   description: Belongs to ctr
