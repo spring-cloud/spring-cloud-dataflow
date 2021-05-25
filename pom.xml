@@ -85,7 +85,6 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
-		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.15.2</testcontainers.version>
@@ -246,11 +245,6 @@
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>jsr305</artifactId>
 				<version>${findbugs.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.micrometer.prometheus</groupId>
-				<artifactId>prometheus-rsocket-spring</artifactId>
-				<version>${prometheus-rsocket-spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
