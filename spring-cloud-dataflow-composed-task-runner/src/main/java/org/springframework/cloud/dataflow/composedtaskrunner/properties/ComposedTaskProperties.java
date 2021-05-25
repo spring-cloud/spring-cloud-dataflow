@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * Configuration properties used to setup the ComposedTaskRunner.
@@ -126,11 +127,13 @@ public class ComposedTaskProperties {
 	/**
 	 * Properties for defining task app arguments.
 	 */
+	@NestedConfigurationProperty
 	private Map<String, String> composedTaskAppArguments = new HashMap<>();
 
 	/**
 	 * Properties for defining task app properties.
 	 */
+	@NestedConfigurationProperty
 	private Map<String, String> composedTaskAppProperties = new HashMap<>();
 
 	/**
