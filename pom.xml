@@ -68,7 +68,6 @@
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
 		<build-helper-maven-plugin>1.9.1</build-helper-maven-plugin>
-		<prometheus-rsocket-spring.version>1.2.1</prometheus-rsocket-spring.version>
 	</properties>
 
 	<modules>
@@ -101,11 +100,6 @@
 				<version>${spring-cloud-deployer.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>io.micrometer.prometheus</groupId>
-				<artifactId>prometheus-rsocket-spring</artifactId>
-				<version>${prometheus-rsocket-spring.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
