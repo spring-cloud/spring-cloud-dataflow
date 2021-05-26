@@ -62,16 +62,16 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	private static final String FIND_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
 			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
 
-	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) "
+	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) AS count "
 			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL";
 
-	private static final String GET_ALL_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) "
+	private static final String GET_ALL_TASK_EXECUTIONS_COUNT = "SELECT COUNT(TASK_EXECUTION_ID) AS count "
 			+ "from %PREFIX%EXECUTION";
 
-	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) "
+	private static final String GET_COMPLETED_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) AS count "
 			+ "from %PREFIX%EXECUTION where END_TIME IS NOT NULL AND TASK_NAME = :taskName";
 
-	private static final String GET_ALL_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) "
+	private static final String GET_ALL_TASK_EXECUTIONS_COUNT_BY_TASK_NAME = "SELECT COUNT(TASK_EXECUTION_ID) AS count "
 			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
 
 	private static final String FIND_ALL_COMPLETED_TASK_EXECUTION_IDS = "SELECT TASK_EXECUTION_ID "
@@ -210,7 +210,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 						public Integer extractData(ResultSet resultSet)
 								throws SQLException, DataAccessException {
 							if (resultSet.next()) {
-								return resultSet.getInt("COUNT(TASK_EXECUTION_ID)");
+								return resultSet.getInt("count");
 							}
 							return Integer.valueOf(0);
 						}
