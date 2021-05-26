@@ -131,7 +131,11 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		TaskExecution taskExecution = taskExplorer.getTaskExecution(id);
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
-		Assert.hasLength(launchId, "The TaskExecution for id " + id + " did not have an externalExecutionId");
+		if (!StringUtils.hasText(launchId)) {
+			logger.warn(String.format("Did not find External execution ID for taskName = [%s], taskId = [%s].  Nothing to clean up.",
+					taskExecution.getTaskName(), id));
+			return;
+		}
 		TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(launchId);
 		if (taskDeployment == null) {
 			logger.warn(String.format("Did not find TaskDeployment for taskName = [%s], taskId = [%s].  Nothing to clean up.",
