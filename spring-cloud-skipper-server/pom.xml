@@ -11,10 +11,6 @@
 		<version>2.7.0-SNAPSHOT</version>
 	</parent>
 
-	<properties>
-		<docker.image.prefix>springcloud</docker.image.prefix>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -89,44 +85,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.21.0</version>
-				<configuration>
-					<images>
-						<image>
-							<name>springcloud/${project.artifactId}</name>
-							<build>
-								<tags>
-									<tag>latest</tag>
-									<tag>${project.version}</tag>
-								</tags>
-								<from>springcloud/baseimage:1.0.0</from>
-								<volumes>
-									<volume>/tmp</volume>
-								</volumes>
-								<env>
-									<LANG>C.UTF-8</LANG>
-								</env>
-								<entryPoint>
-									<exec>
-										<arg>java</arg>
-										<arg>-Djava.security.egd=file:/dev/./urandom</arg>
-										<arg>-jar</arg>
-										<arg>/maven/spring-cloud-skipper-server.jar</arg>
-									</exec>
-								</entryPoint>
-								<assembly>
-									<name>maven</name>
-									<descriptor>assembly.xml</descriptor>
-									<targetDir>/</targetDir>
-								</assembly>
-							</build>
-						</image>
-					</images>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
