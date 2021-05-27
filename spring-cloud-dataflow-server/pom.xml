@@ -150,43 +150,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.33.0</version>
-				<configuration>
-				  <images>
-					<image>
-					  <name>springcloud/${project.artifactId}</name>
-					  <build>
-						  <tags>
-							  <tag>latest</tag>
-							  <tag>${project.version}</tag>
-						  </tags>
-						<from>springcloud/baseimage:1.0.0</from>
-						<volumes>
-							<volume>/tmp</volume>
-						</volumes>
-						<env>
-							<LANG>C.UTF-8</LANG>
-						</env>
-						<entryPoint>
-						  <exec>
-							<arg>java</arg>
-							<arg>-jar</arg>
-							<arg>/maven/spring-cloud-dataflow-server.jar</arg>
-						  </exec>
-						</entryPoint>
-						<assembly>
-							<name>maven</name>
-							<descriptor>assembly.xml</descriptor>
-							<targetDir>/</targetDir>
-						</assembly>
-					  </build>
-					</image>
-				  </images>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<executions>

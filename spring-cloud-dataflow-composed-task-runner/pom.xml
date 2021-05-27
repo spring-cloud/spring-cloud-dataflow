@@ -121,49 +121,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>io.fabric8</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.33.0</version>
-				<configuration>
-					<images>
-						<image>
-							<name>springcloud/${project.artifactId}</name>
-							<build>
-								<tags>
-									<tag>latest</tag>
-									<tag>${project.version}</tag>
-								</tags>
-								<from>springcloud/openjdk:2.0.0.RELEASE</from>
-								<volumes>
-									<volume>/tmp</volume>
-								</volumes>
-								<labels>
-									<org.springframework.cloud.dataflow.spring-configuration-metadata.json>
-										${org.springframework.cloud.dataflow.spring.configuration.metadata.json}
-									</org.springframework.cloud.dataflow.spring-configuration-metadata.json>
-								</labels>
-								<env>
-									<LANG>C.UTF-8</LANG>
-								</env>
-								<entryPoint>
-									<exec>
-										<arg>java</arg>
-										<arg>-jar</arg>
-										<arg>/maven/composed-task-runner.jar</arg>
-									</exec>
-								</entryPoint>
-								<assembly>
-									<name>maven</name>
-									<descriptor>assembly.xml</descriptor>
-									<targetDir>/</targetDir>
-								</assembly>
-							</build>
-						</image>
-					</images>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
 				<version>1.0.2</version>
