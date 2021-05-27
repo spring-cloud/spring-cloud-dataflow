@@ -13,14 +13,15 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
+    name: Dispatch to scs-dataflow
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-         # Dispatch an event to pivotal-cf/scs-dataflow
-      - name: Dispatch workflow event
-         run: |
-curl -XPOST -u "${{ secrets.PAT_USERNAME}}:${{secrets.PAT_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/pivotal-cf/scs-dataflow/workflows/deploy-at.yaml/dispatches
+      - name: Emit repository_dispatch
+        uses: mvasigh/dispatch-action@main
+        with:
+          # You should create a personal access token and store it in your repository
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repo: scs-dataflow
+          owner: pivotal-cf
+          event_type: deploy-at
