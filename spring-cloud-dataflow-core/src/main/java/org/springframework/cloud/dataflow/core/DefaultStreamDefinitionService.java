@@ -89,6 +89,9 @@ public class DefaultStreamDefinitionService implements StreamDefinitionService {
 			for (String propertyName : props.keySet()) {
 				if (!dataFlowAddedProperties.contains(propertyName)) {
 					String propertyValue = unescape(props.get(propertyName));
+					if (propertyValue.contains("|")) {
+						propertyValue = "'" + propertyValue + "'";
+					}
 					dslBuilder.append(" --").append(propertyName).append("=").append(
 							DefinitionUtils.escapeNewlines(DefinitionUtils.autoQuotes(propertyValue)));
 				}
