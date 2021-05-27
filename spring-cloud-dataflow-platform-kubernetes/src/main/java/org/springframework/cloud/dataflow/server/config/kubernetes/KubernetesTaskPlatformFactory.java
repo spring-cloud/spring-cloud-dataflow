@@ -28,6 +28,7 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesScheduler;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncherProperties;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 /**
@@ -36,25 +37,32 @@ import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
  **/
 public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<KubernetesPlatformProperties> {
 
+	private final KubernetesPlatformTaskLauncherProperties platformTaskLauncherProperties;
+
 	private final boolean schedulesEnabled;
 
 	public KubernetesTaskPlatformFactory(
 			KubernetesPlatformProperties platformProperties,
-			boolean schedulesEnabled) {
+			boolean schedulesEnabled,
+			KubernetesPlatformTaskLauncherProperties kubernetesPlatformTaskLauncherProperties) {
 		super(platformProperties, KUBERNETES_PLATFORM_TYPE);
 		this.schedulesEnabled = schedulesEnabled;
+		this.platformTaskLauncherProperties = kubernetesPlatformTaskLauncherProperties;
 	}
 
 	@Override
 	public Launcher createLauncher(String account) {
 		KubernetesDeployerProperties kubernetesProperties = this.platformProperties.accountProperties(account);
+		KubernetesTaskLauncherProperties taskLauncherProperties = (!this.platformTaskLauncherProperties.getAccounts().isEmpty() &&
+				this.platformTaskLauncherProperties.accountProperties(account) != null) ?
+					this.platformTaskLauncherProperties.accountProperties(account) : new KubernetesTaskLauncherProperties();
 		ContainerFactory containerFactory = new DefaultContainerFactory(
 				this.platformProperties.accountProperties(account));
 		KubernetesClient kubernetesClient =
 				KubernetesClientFactory.getKubernetesClient(this.platformProperties.accountProperties(account));
 
 		KubernetesTaskLauncher kubernetesTaskLauncher = new KubernetesTaskLauncher(
-				kubernetesProperties, kubernetesClient, containerFactory);
+				kubernetesProperties, taskLauncherProperties, kubernetesClient, containerFactory);
 
 		KubernetesSchedulerProperties kubernetesSchedulerProperties = new KubernetesSchedulerProperties();
 		BeanUtils.copyProperties(kubernetesProperties, kubernetesSchedulerProperties);
