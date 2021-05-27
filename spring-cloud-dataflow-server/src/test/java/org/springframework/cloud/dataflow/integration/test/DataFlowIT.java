@@ -330,7 +330,7 @@ public class DataFlowIT {
 				.name("transform-test")
 				.definition("http | transform --expression=payload.toUpperCase() | log")
 				.create()
-				.deploy(testDeploymentProperties())) {
+				.deploy(testDeploymentProperties("http"))) {
 
 			assertThat(stream.getStatus()).is(
 					condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
@@ -354,7 +354,7 @@ public class DataFlowIT {
 				.create();
 
 		try (Stream stream = streamDefinition.deploy(new DeploymentPropertiesBuilder()
-				.putAll(testDeploymentProperties())
+				.putAll(testDeploymentProperties("http", "log"))
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				// Create 2 log instances with partition key computed from the payload.
 				.put("deployer.log.count", "2")
@@ -407,7 +407,7 @@ public class DataFlowIT {
 				.definition("http | ver-log")
 				.create()
 				.deploy(new DeploymentPropertiesBuilder()
-						.putAll(testDeploymentProperties())
+						.putAll(testDeploymentProperties("http"))
 						.put("version.ver-log", VERSION_3_0_1)
 						.build())) {
 
@@ -464,7 +464,8 @@ public class DataFlowIT {
 
 	@Test
 	public void streamLifecycle() {
-		streamLifecycleHelper(1, s -> { });
+		streamLifecycleHelper(1, s -> {
+		});
 	}
 
 	@Test
@@ -601,7 +602,7 @@ public class DataFlowIT {
 						.name("http-destination-source")
 						.definition("http > :LOG-DESTINATION")
 						.create()
-						.deploy(testDeploymentProperties())) {
+						.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> logStream.getStatus().equals(DEPLOYED));
 			Awaitility.await().until(() -> httpStream.getStatus().equals(DEPLOYED));
@@ -622,7 +623,7 @@ public class DataFlowIT {
 						.name("taphttp")
 						.definition("http | log")
 						.create()
-						.deploy(testDeploymentProperties());
+						.deploy(testDeploymentProperties("http"));
 				Stream tapStream = Stream.builder(dataFlowOperations)
 						.name("tapstream")
 						.definition(":taphttp.http > log")
@@ -653,12 +654,12 @@ public class DataFlowIT {
 						.name("http-source-1")
 						.definition("http > :MANY-TO-ONE-DESTINATION")
 						.create()
-						.deploy(testDeploymentProperties());
+						.deploy(testDeploymentProperties("http"));
 				Stream httpStreamTwo = Stream.builder(dataFlowOperations)
 						.name("http-source-2")
 						.definition("http > :MANY-TO-ONE-DESTINATION")
 						.create()
-						.deploy(testDeploymentProperties())) {
+						.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> logStream.getStatus().equals(DEPLOYED));
 			Awaitility.await().until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
@@ -698,7 +699,7 @@ public class DataFlowIT {
 						.name("directed-graph-http-source")
 						.definition("http | router --expression=payload.contains('a')?'foo':'bar'")
 						.create()
-						.deploy(testDeploymentProperties())) {
+						.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> fooLogStream.getStatus().equals(DEPLOYED));
 			Awaitility.await().until(() -> barLogStream.getStatus().equals(DEPLOYED));
@@ -738,7 +739,7 @@ public class DataFlowIT {
 				.name("httpAnalyticsInflux")
 				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
-				.deploy(testDeploymentProperties())) {
+				.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
@@ -798,7 +799,7 @@ public class DataFlowIT {
 				.name("httpAnalyticsPrometheus")
 				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
-				.deploy(testDeploymentProperties())) {
+				.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
@@ -823,9 +824,11 @@ public class DataFlowIT {
 
 	/**
 	 * For the purpose of testing, disable security, expose the all actuators, and configure logfiles.
+	 * @param externallyAccessibleApps names of the stream applications that need to be accessible by the test code.
+	 *          Such as http app to post, messages or apps that need to allow access to the actuator/logfile.
 	 * @return Deployment properties required for the deployment of all test pipelines.
 	 */
-	protected Map<String, String> testDeploymentProperties() {
+	protected Map<String, String> testDeploymentProperties(String... externallyAccessibleApps) {
 		DeploymentPropertiesBuilder propertiesBuilder = new DeploymentPropertiesBuilder()
 				.put(SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME, runtimeApps.getPlatformName())
 				.put("app.*.logging.file", "/tmp/${PID}-test.log") // Keep it for Boot 2.x compatibility.
@@ -837,7 +840,9 @@ public class DataFlowIT {
 
 		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
 			propertiesBuilder.put("app.*.server.port", "8080");
-			propertiesBuilder.put("deployer.*.kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
+			for (String appName : externallyAccessibleApps) {
+				propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
+			}
 		}
 
 		return propertiesBuilder.build();
@@ -1241,7 +1246,8 @@ public class DataFlowIT {
 
 			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-			} else {
+			}
+			else {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.ERROR);
 			}
 
@@ -1362,7 +1368,8 @@ public class DataFlowIT {
 
 			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-			} else {
+			}
+			else {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.ERROR);
 			}
 
@@ -1442,7 +1449,8 @@ public class DataFlowIT {
 
 			if (runtimeApps.dataflowServerVersionLowerThan("2.8.0-SNAPSHOT")) {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-			} else {
+			}
+			else {
 				Awaitility.await().until(() -> task.executionStatus(launchId) == parentTaskExecutionStatus);
 			}
 
