@@ -21,6 +21,6 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
          # Dispatch an event to pivotal-cf/scs-dataflow
-      - name: Dispatch trigger event
+      - name: Dispatch workflow event
          run: |
-curl -XPOST -u "${{ secrets.PAT_USERNAME}}:${{secrets.PAT_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/pivotal-cf/scs-dataflow/dispatches --data '{"event_type": "build_application"}'
+curl -XPOST -u "${{ secrets.PAT_USERNAME}}:${{secrets.PAT_TOKEN}}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/pivotal-cf/scs-dataflow/workflows/deploy-at.yaml/dispatches
