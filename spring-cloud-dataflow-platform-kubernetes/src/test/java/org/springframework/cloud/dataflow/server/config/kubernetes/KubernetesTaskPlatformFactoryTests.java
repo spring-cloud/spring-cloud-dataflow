@@ -70,6 +70,36 @@ public class KubernetesTaskPlatformFactoryTests {
 		taskLauncherProperties.setRestartPolicy(RestartPolicy.Never);
 		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
 		KubernetesPlatformTaskLauncherProperties platformTaskLauncherProperties = new KubernetesPlatformTaskLauncherProperties();
+		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
+				platformProperties, true, platformTaskLauncherProperties);
+
+		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
+		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
+		assertThat(taskPlatform.getLaunchers()).hasSize(1);
+		Launcher taskLauncher = taskPlatform.getLaunchers().get(0);
+		KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
+		assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
+
+		assertThat(taskLauncher.getScheduler()).isNotNull();
+		assertThat(taskLauncher.getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
+		assertThat(taskLauncher.getName()).isEqualTo("k8s");
+		assertThat(taskLauncher.getType()).isEqualTo("Kubernetes");
+		assertThat(taskLauncher.getDescription()).matches("^master url = \\[.+\\], namespace = "
+
+				+ "\\[.+\\], api version = \\[.+\\]$");
+		KubernetesTaskLauncherProperties taskLauncherProps = (KubernetesTaskLauncherProperties) ReflectionTestUtils.getField(taskLauncher.getTaskLauncher(), "taskLauncherProperties");
+	}
+
+	@Test
+	public void kubernetesTaskPlatformWithMultipleAccounts() {
+		KubernetesPlatformProperties platformProperties = new KubernetesPlatformProperties();
+		KubernetesDeployerProperties deployerProperties = new KubernetesDeployerProperties();
+		deployerProperties.getLimits().setMemory("5555Mi");
+		KubernetesTaskLauncherProperties taskLauncherProperties = new KubernetesTaskLauncherProperties();
+		taskLauncherProperties.setBackoffLimit(5);
+		taskLauncherProperties.setRestartPolicy(RestartPolicy.Never);
+		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
+		KubernetesPlatformTaskLauncherProperties platformTaskLauncherProperties = new KubernetesPlatformTaskLauncherProperties();
 		platformTaskLauncherProperties.setAccounts(Collections.singletonMap("test", taskLauncherProperties));
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
 				platformProperties, true, platformTaskLauncherProperties);
@@ -100,5 +130,4 @@ public class KubernetesTaskPlatformFactoryTests {
 		}
 
 	}
-
 }
