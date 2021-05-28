@@ -70,29 +70,34 @@ public class KubernetesTaskPlatformFactoryTests {
 		taskLauncherProperties.setRestartPolicy(RestartPolicy.Never);
 		platformProperties.setAccounts(Collections.singletonMap("k8s", deployerProperties));
 		KubernetesPlatformTaskLauncherProperties platformTaskLauncherProperties = new KubernetesPlatformTaskLauncherProperties();
-		platformTaskLauncherProperties.setAccounts(Collections.singletonMap("k8s", taskLauncherProperties));
+		platformTaskLauncherProperties.setAccounts(Collections.singletonMap("test", taskLauncherProperties));
 		KubernetesTaskPlatformFactory kubernetesTaskPlatformFactory = new KubernetesTaskPlatformFactory(
 				platformProperties, true, platformTaskLauncherProperties);
 
 		TaskPlatform taskPlatform = kubernetesTaskPlatformFactory.createTaskPlatform();
 		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
-		assertThat(taskPlatform.getLaunchers()).hasSize(1);
-		Launcher taskLauncher = taskPlatform.getLaunchers().get(0);
-		KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
-		assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
+		assertThat(taskPlatform.getLaunchers()).hasSize(2);
+		for (Launcher taskLauncher: taskPlatform.getLaunchers()) {
+			assertThat(taskLauncher.getName().equals("k8s") || taskLauncher.getName().equals("test")).isTrue();
+			if (taskLauncher.getName().equals("k8s")) {
+				KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
+				assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
 
-		assertThat(taskLauncher.getScheduler()).isNotNull();
-		assertThat(taskLauncher.getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
-		assertThat(taskLauncher.getName()).isEqualTo("k8s");
-		assertThat(taskLauncher.getType()).isEqualTo("Kubernetes");
-		assertThat(taskLauncher.getDescription()).matches("^master url = \\[.+\\], namespace = "
+				assertThat(taskLauncher.getScheduler()).isNotNull();
+				assertThat(taskLauncher.getTaskLauncher()).isInstanceOf(KubernetesTaskLauncher.class);
+				assertThat(taskLauncher.getName()).isEqualTo("k8s");
+				assertThat(taskLauncher.getType()).isEqualTo("Kubernetes");
+				assertThat(taskLauncher.getDescription()).matches("^master url = \\[.+\\], namespace = "
 
-			+ "\\[.+\\], api version = \\[.+\\]$");
+						+ "\\[.+\\], api version = \\[.+\\]$");
+			}
+			else if (taskLauncher.getName().equals("test")) {
+				KubernetesTaskLauncherProperties taskLauncherProps = (KubernetesTaskLauncherProperties) ReflectionTestUtils.getField(taskLauncher.getTaskLauncher(), "taskLauncherProperties");
 
-		KubernetesTaskLauncherProperties taskLauncherProps = (KubernetesTaskLauncherProperties) ReflectionTestUtils.getField(taskLauncher.getTaskLauncher(), "taskLauncherProperties");
-
-		assertThat(taskLauncherProps.getBackoffLimit()).isEqualTo(5);
-		assertThat(taskLauncherProps.getRestartPolicy()).isEqualTo(RestartPolicy.Never);
+				assertThat(taskLauncherProps.getBackoffLimit()).isEqualTo(5);
+				assertThat(taskLauncherProps.getRestartPolicy()).isEqualTo(RestartPolicy.Never);
+			}
+		}
 
 	}
 
