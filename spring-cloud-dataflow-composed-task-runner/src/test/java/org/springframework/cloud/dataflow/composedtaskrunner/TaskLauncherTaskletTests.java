@@ -23,6 +23,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +42,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
+import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -58,6 +61,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
+import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -134,6 +140,20 @@ public class TaskLauncherTaskletTests {
 		assertEquals(2L, chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id"));
+	}
+
+	@Test
+	@DirtiesContext
+	public void testInvalidTaskOperations() throws Exception{
+		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(null, null,
+				this.taskExplorer, this.composedTaskProperties,
+				TASK_NAME, new TaskProperties());
+		Exception exception = assertThrows(ComposedTaskException.class, () -> {
+			execute(taskLauncherTasklet, null, chunkContext());
+		});
+		AssertionsForClassTypes.assertThat(exception.getMessage()).isEqualTo(
+				"Unable to connect to Data Flow Server to execute task operations. " +
+						"Verify that Data Flow Server's tasks/definitions endpoint can be accessed.");
 	}
 
 	@Test
@@ -376,5 +396,25 @@ public class TaskLauncherTaskletTests {
 			return new JdbcTaskExecutionDao(dataSource);
 		}
 
+	}
+
+	private static class TestTaskLauncherTasklet extends TaskLauncherTasklet {
+		public TestTaskLauncherTasklet(
+				ClientRegistrationRepository clientRegistrations,
+				OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
+				TaskExplorer taskExplorer,
+				ComposedTaskProperties composedTaskProperties, String taskName,
+				TaskProperties taskProperties) {
+			super(clientRegistrations, clientCredentialsTokenResponseClient,taskExplorer,composedTaskProperties,taskName,taskProperties);
+		}
+
+		@Override
+		protected DataFlowOperations dataFlowOperations() {
+			DataFlowOperations dataFlowOperations = Mockito.mock(DataFlowOperations.class);
+			Mockito.doReturn(null)
+					.when(dataFlowOperations)
+					.taskOperations();
+			return dataFlowOperations;
+		}
 	}
 }
