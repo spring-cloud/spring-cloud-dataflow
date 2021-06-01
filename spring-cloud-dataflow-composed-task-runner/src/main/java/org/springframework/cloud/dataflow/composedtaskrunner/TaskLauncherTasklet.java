@@ -32,6 +32,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -207,6 +208,11 @@ public class TaskLauncherTasklet implements Tasklet {
 	public TaskOperations taskOperations() {
 		if(this.taskOperations == null) {
 			this.taskOperations = dataFlowOperations().taskOperations();
+			if (taskOperations == null) {
+				throw new ComposedTaskException("Unable to connect to Data Flow " +
+						"Server to execute task operations. Verify that Data Flow " +
+						"Server's tasks/definitions endpoint can be accessed.");
+			}
 		}
 		return this.taskOperations;
 	}
@@ -214,7 +220,7 @@ public class TaskLauncherTasklet implements Tasklet {
 	/**
 	 * @return new instance of DataFlowOperations
 	 */
-	private DataFlowOperations dataFlowOperations() {
+	protected DataFlowOperations dataFlowOperations() {
 
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
 
