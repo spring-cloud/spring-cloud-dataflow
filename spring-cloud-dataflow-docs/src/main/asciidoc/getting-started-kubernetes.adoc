@@ -1072,3 +1072,17 @@ deployer.<application>.kubernetes.lifecycle.postStart.exec.command=/bin/sh,-c,'e
 deployer.<application>.kubernetes.lifecycle.preStop.exec.command=/bin/sh,-c,'nginx -s quit; while killall -0 nginx; do sleep 1; done'
 ----
 ====
+
+==== Additional Containers
+
+When you deploy applications, you may need one or more containers to be deployed along with the main container.
+This would allow you to adapt some deployment patterns such as sidecar, adapter in case of multi container pod setup.
+
+The following example shows how you can configure additional containers for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.additionalContainers=[{name: 'c1', image: 'busybox:latest', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]},{name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]
+----
+====
