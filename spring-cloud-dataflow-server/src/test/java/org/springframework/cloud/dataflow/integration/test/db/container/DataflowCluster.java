@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -42,6 +43,7 @@ public class DataflowCluster implements Startable {
 	private final int SKIPPER_PORT = 7577;
 	private final int POSTGRES_PORT = 5432;
 	private final int MYSQL_PORT = 3306;
+	private final int MSSQL_PORT = 1433;
 	private final int MARIADB_PORT = 3306;
 	private final int UAA_PORT = 8099;
 	private final Map<String, ClusterContainer> dataflowImages;
@@ -293,6 +295,14 @@ public class DataflowCluster implements Startable {
 				databaseContainer.withNetworkAliases(databaseAlias);
 				databaseContainer.withNetwork(network);
 				return databaseContainer;
+			} else if (clusterContainer.tag.startsWith(TagNames.MSSQL)) {
+				MSSQLServerContainer<?> databaseContainer = new MSSQLServerContainer<>(
+						clusterContainer.image);
+				databaseContainer.acceptLicense();
+				databaseContainer.withExposedPorts(MSSQL_PORT);
+				databaseContainer.withNetworkAliases(databaseAlias);
+				databaseContainer.withNetwork(network);
+				return databaseContainer;
 			}
 		}
 		throw new IllegalArgumentException(String.format("Can't handle database %s", clusterContainer.tag));
@@ -317,6 +327,8 @@ public class DataflowCluster implements Startable {
 		SkipperContainer<?> skipperContainer = new SkipperContainer<>(clusterContainer.image);
 		skipperContainer.withExposedPorts(SKIPPER_PORT);
 		if (databaseContainer != null) {
+			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
+			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
 			if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
@@ -329,9 +341,13 @@ public class DataflowCluster implements Startable {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MARIADB_PORT));
 				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MSSQL)) {
+				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:sqlserver://%s:%s", skipperDatabaseAlias, MSSQL_PORT));
+				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+				skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
+				skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
 			}
-			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
 		}
 
 		if (oauthContainer != null) {
@@ -372,6 +388,8 @@ public class DataflowCluster implements Startable {
 		DataflowContainer<?> dataflowContainer = new DataflowContainer<>(clusterContainer.image);
 		dataflowContainer.withExposedPorts(DATAFLOW_PORT);
 		if (databaseContainer != null) {
+			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
+			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
 			if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
@@ -384,10 +402,13 @@ public class DataflowCluster implements Startable {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT));
 				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MSSQL)) {
+				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
+						String.format("jdbc:sqlserver://%s:%s", dataflowDatabaseAlias, MSSQL_PORT));
+				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+				dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
+				dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
 			}
-			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
-
 		}
 		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",
 				String.format("http://%s:%s/api", "skipper", SKIPPER_PORT));

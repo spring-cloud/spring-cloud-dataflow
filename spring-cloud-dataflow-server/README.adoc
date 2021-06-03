@@ -312,10 +312,11 @@ Run database tests:
 ./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=database -Pfailsafe
 ----
 
-Run mysql or postgres tests:
+Run mysql, postgres or mssql tests:
 ----
 ./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=mysql -Pfailsafe
 ./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=postgres -Pfailsafe
+./mvnw integration-test -pl spring-cloud-dataflow-server -Dgroups=mssql -Pfailsafe
 ----
 
 Run mysql tests with shared database and with latest dataflow:

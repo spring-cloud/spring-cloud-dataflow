@@ -45,6 +45,7 @@ public abstract class TagNames {
 	public static final String MYSQL_8_0 = "mysql_8_0";
 
 	public static final String MSSQL = "mssql";
+	public static final String MSSQL_2019_CU10_ubuntu_20_04 = "mssql_2019_CU10_ubuntu_20_04";
 
 	public static final String ORACLE = "oracle";
 
