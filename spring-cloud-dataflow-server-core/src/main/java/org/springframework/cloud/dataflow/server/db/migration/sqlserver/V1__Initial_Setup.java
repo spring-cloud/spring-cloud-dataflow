@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,9 +109,6 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 			"  constraint TASK_EXEC_BATCH_FK foreign key (TASK_EXECUTION_ID)\n" +
 			"  references TASK_EXECUTION(TASK_EXECUTION_ID)\n" +
 			")";
-
-	private final static String CREATE_TASK_SEQ_SEQUENCE =
-			"CREATE TABLE TASK_SEQ (ID BIGINT IDENTITY)";
 
 	public final static String CREATE_TASK_LOCK_TABLE =
 			"CREATE TABLE TASK_LOCK (\n" +
@@ -258,7 +255,7 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 				SqlCommand.from(CREATE_TASK_EXECUTION_TABLE),
 				SqlCommand.from(CREATE_TASK_EXECUTION_PARAMS_TABLE),
 				SqlCommand.from(CREATE_TASK_TASK_BATCH),
-				SqlCommand.from(CREATE_TASK_SEQ_SEQUENCE),
+				// NOTE: TASK_SEQ handled in R__Task_Sequence
 				SqlCommand.from(CREATE_TASK_LOCK_TABLE));
 	}
 
