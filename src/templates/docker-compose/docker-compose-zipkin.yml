@@ -1,0 +1,19 @@
+version: '3'
+
+# Extends the default docker-compose.yml with Zipkin Server distributed tracing configuration.
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-zipkin.yml up
+
+services:
+
+  zipkin-server:
+    image: openzipkin/zipkin:2.23.2
+    container_name: zipkin-server
+    expose:
+      - '9411'
+    ports:
+      - '9411:9411'
+
+  dataflow-server:
+    environment:
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_ZIPKIN_ENABLED=true
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_ZIPKIN_BASEURL=http://zipkin-server:9411
