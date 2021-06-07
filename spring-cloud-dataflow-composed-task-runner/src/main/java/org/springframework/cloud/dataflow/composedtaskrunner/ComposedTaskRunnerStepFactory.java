@@ -125,7 +125,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
 		taskLauncherTasklet.setArguments(argumentsToUse);
 
-		log.debug("dedoced composed-task-app-properties {}", composedTaskProperties.getComposedTaskAppProperties());
+		log.debug("decoded composed-task-app-properties {}", composedTaskProperties.getComposedTaskAppProperties());
 
 		Map<String, String> propertiesFrom = Base64Utils
 				.decodeMap(this.composedTaskProperties.getComposedTaskAppProperties()).entrySet().stream()

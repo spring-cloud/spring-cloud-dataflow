@@ -32,6 +32,7 @@ public class Base64UtilsTests {
 		assertThat(Base64Utils.decode(null)).isNull();
 		assertThat(Base64Utils.encode(null)).isNull();
 		assertThat(Base64Utils.decode(Base64Utils.encode("foo"))).isEqualTo("foo");
+		assertThat(Base64Utils.decode(Base64Utils.encode("foo.*.1"))).isEqualTo("foo.*.1");
 		assertThat(Base64Utils.decode("juststring")).isEqualTo("juststring");
 	}
 }

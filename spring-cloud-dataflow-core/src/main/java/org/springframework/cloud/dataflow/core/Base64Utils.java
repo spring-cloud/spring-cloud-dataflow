@@ -22,6 +22,8 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.util.StringUtils;
+
 /**
  * Base64 utils to encode/decode boot properties so that we can have special
  * characters in keys.
@@ -34,8 +36,8 @@ public class Base64Utils {
 	private static final String PREFIX = "base64_";
 
 	public static String encode(String str) {
-		if (str == null) {
-			return null;
+		if (!StringUtils.hasLength(str)) {
+			return str;
 		}
 		// need to use without padding as boot will remove '=' chars from keys
 		return PREFIX + new String(Base64.getEncoder().withoutPadding().encode(str.getBytes(DEFAULT_CHARSET)),
@@ -43,8 +45,8 @@ public class Base64Utils {
 	}
 
 	public static String decode(String str) {
-		if (str == null) {
-			return null;
+		if (!StringUtils.hasLength(str)) {
+			return str;
 		}
 		if (str.startsWith(PREFIX)) {
 			return new String(Base64.getDecoder().decode(str.substring(PREFIX.length())), DEFAULT_CHARSET);
