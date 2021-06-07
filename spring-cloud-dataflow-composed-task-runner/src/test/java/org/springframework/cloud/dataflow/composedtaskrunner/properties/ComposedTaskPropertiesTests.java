@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 
@@ -101,16 +102,20 @@ public class ComposedTaskPropertiesTests {
 					map.put("composed-task-app-arguments.app.AAA", "arg1");
 					map.put("composed-task-app-arguments.app.AAA.1", "arg2");
 					map.put("composed-task-app-arguments.app.AAA.2", "arg3");
+					map.put("composed-task-app-arguments." + Base64Utils.encode("app.*.3"), Base64Utils.encode("arg4"));
+					map.put("composed-task-app-arguments." + Base64Utils.encode("app.*.4"), "arg5");
 					context.getEnvironment().getPropertySources().addLast(new SystemEnvironmentPropertySource(
 						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, map));
 				})
 				.withUserConfiguration(Config1.class)
 				.run((context) -> {
 					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
-					assertThat(properties.getComposedTaskAppArguments()).hasSize(3);
+					assertThat(properties.getComposedTaskAppArguments()).hasSize(5);
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA", "arg1");
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.1", "arg2");
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.2", "arg3");
+					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.3", "arg4");
+					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.4", "arg5");
 				});
 	}
 

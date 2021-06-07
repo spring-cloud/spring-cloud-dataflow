@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.RelaxedNames;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
@@ -96,16 +97,17 @@ public class TaskServiceUtils {
 		for (TaskApp subTask : taskNode.getTaskApps()) {
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "app");
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
-			result = updatePropertiesShort(taskNode, subTask, taskDeploymentProperties, result, "app");
-			result = updatePropertiesShort(taskNode, subTask, taskDeploymentProperties, result, "deployer");
 			result = updateVersionProperties(taskNode, subTask, taskDeploymentProperties, result);
 			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "app"));
+			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "deployer"));
 		}
 		if (result.length() != 0) {
 			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
 		}
 		taskAppProperties.entrySet().stream().forEach(e -> {
-			taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties." + e.getKey(), e.getValue());
+			taskDeploymentProperties.put(
+					"app.composed-task-runner.composed-task-app-properties." + Base64Utils.encode(e.getKey()),
+					e.getValue());
 		});
 		return taskDeploymentProperties;
 	}
@@ -259,8 +261,9 @@ public class TaskServiceUtils {
 			String prefix) {
 		String subTaskName = String.format("%s.%s.", prefix,
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		String subTaskNameWildcard = String.format("%s.*.", prefix);
 		return taskDeploymentProperties.entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(subTaskName))
+				.filter(kv -> kv.getKey().startsWith(subTaskName) || kv.getKey().startsWith(subTaskNameWildcard))
 				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue()));
 	}
 
@@ -282,40 +285,6 @@ public class TaskServiceUtils {
 					taskProperty.substring(subTaskName.length()),
 					taskDeploymentProperties.get(taskProperty));
 			taskDeploymentProperties.remove(taskProperty);
-		}
-		return result;
-	}
-
-	private static String updatePropertiesShort(TaskNode taskNode, TaskApp subTask, Map<String, String> taskDeploymentProperties,
-			String result, String prefix) {
-		String subTaskName = String.format("%s.%s-%s.", prefix, taskNode.getName(),
-				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-		String scdfTaskName = String.format("%s.%s.", prefix,
-				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
-		String scdfTaskNameWildcard = String.format("%s.*.", prefix);
-		Set<String> propertyKeys = taskDeploymentProperties.keySet().stream()
-				.filter(taskProperty -> taskProperty.startsWith(scdfTaskName))
-				.collect(Collectors.toSet());
-		Set<String> propertyKeysWildcard = taskDeploymentProperties.keySet().stream()
-				.filter(taskProperty -> taskProperty.startsWith(scdfTaskNameWildcard))
-				.collect(Collectors.toSet());
-		for (String taskProperty : propertyKeysWildcard) {
-			if (result.length() != 0) {
-				result += ", ";
-			}
-			result += String.format("%s%s.%s.%s=%s", subTaskName, prefix,
-					subTask.getName(),
-					taskProperty.substring(scdfTaskNameWildcard.length()),
-					taskDeploymentProperties.get(taskProperty));
-		}
-		for (String taskProperty : propertyKeys) {
-			if (result.length() != 0) {
-				result += ", ";
-			}
-			result += String.format("%s%s.%s.%s=%s", subTaskName, prefix,
-					subTask.getName(),
-					taskProperty.substring(scdfTaskName.length()),
-					taskDeploymentProperties.get(taskProperty));
 		}
 		return result;
 	}

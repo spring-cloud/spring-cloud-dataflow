@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,11 +113,18 @@ public class TaskAppDeploymentRequestCreator {
 		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
 				appDeploymentProperties, platformType);
 
+		Map<String, String> props = taskExecutionInformation.getTaskDeploymentProperties();
+		if (!taskExecutionInformation.isComposed()) {
+			props = props.entrySet().stream()
+					.collect(Collectors.toMap(e -> {
+						return e.getKey().replaceFirst("^deployer\\." + label, "deployer." + registeredAppName);
+					}, e -> e.getValue()));
+		}
+
 		// Need to keep all properties around, not just 'deployer.*'
 		// as those are a source to restore app specific props
-		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
-				.qualifyDeployerProperties(taskExecutionInformation.getTaskDeploymentProperties(),
-						taskExecutionInformation.isComposed() ? "composed-task-runner" : registeredAppName);
+		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils.qualifyDeployerProperties(props,
+				taskExecutionInformation.isComposed() ? "composed-task-runner" : registeredAppName);
 
 		if (StringUtils.hasText(this.dataflowServerUri) && taskExecutionInformation.isComposed()) {
 			TaskServiceUtils.updateDataFlowUriIfNeeded(this.dataflowServerUri, appDeploymentProperties,
