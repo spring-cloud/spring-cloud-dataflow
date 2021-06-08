@@ -52,6 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		"interval-time-between-checks=1100",
         "composed-task-app-arguments.app.AAA.0=--arg1=value1",
         "composed-task-app-arguments.app.AAA.1=--arg2=value2",
+        "composed-task-app-arguments.base64_YXBwLiouMA=--arg3=value3",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
@@ -83,8 +84,8 @@ public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
 
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
-		assertThat(result).contains("--arg1=value1", "--arg2=value2");
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).contains("--arg1=value1", "--arg2=value2", "--arg3=value3");
+		assertThat(result.size()).isEqualTo(3);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
 		assertThat(taskletProperties.size()).isEqualTo(0);
 	}

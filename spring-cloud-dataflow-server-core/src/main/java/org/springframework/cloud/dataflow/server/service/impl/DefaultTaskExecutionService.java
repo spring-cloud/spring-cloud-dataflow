@@ -37,6 +37,7 @@ import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsSe
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -304,7 +305,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			List<String> composedTaskArguments = new ArrayList<>();
 			commandLineArgs.forEach(arg -> {
 				if (arg.startsWith("app.")) {
-					composedTaskArguments.add("--composed-task-app-arguments." + arg);
+					String[] split = arg.split("=", 2);
+					if (split.length == 2) {
+						composedTaskArguments.add("--composed-task-app-arguments." + Base64Utils.encode(split[0]) + "=" + split[1]);
+					}
+					else {
+						composedTaskArguments.add("--composed-task-app-arguments." + arg);
+					}
 				}
 				else {
 					composedTaskArguments.add(arg);

@@ -1413,7 +1413,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.t1.timestamp.format", "YYYY");
-			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>()));
+			List<String> arguments = new ArrayList<>();
+			arguments.add("app.t1.0=foo1");
+			arguments.add("app.*.0=foo2");
+			assertEquals(1L, this.taskExecutionService.executeTask("seqTask", properties, arguments));
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1421,6 +1424,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			String keyWithEncoding = "composed-task-app-properties." + Base64Utils.encode("app.t1.timestamp.format");
 			assertEquals("YYYY", request.getDefinition().getProperties().get(keyWithEncoding));
+			assertTrue(request.getCommandlineArguments().contains("--composed-task-app-arguments." + Base64Utils.encode("app.t1.0") + "=foo1"));
+			assertTrue(request.getCommandlineArguments().contains("--composed-task-app-arguments." + Base64Utils.encode("app.*.0") + "=foo2"));
 		}
 
 		@Test

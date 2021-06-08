@@ -115,8 +115,9 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 				this.clientRegistrations, this.clientCredentialsTokenResponseClient, taskConfigurer.getTaskExplorer(),
 				this.composedTaskPropertiesFromEnv, this.taskName, taskProperties);
 
-		List<String> argumentsFromAppProperties = this.composedTaskProperties.getComposedTaskAppArguments().entrySet().stream()
-			.filter(e -> e.getKey().startsWith("app." + taskNameId))
+		List<String> argumentsFromAppProperties = Base64Utils
+			.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments()).entrySet().stream()
+			.filter(e -> e.getKey().startsWith("app." + taskNameId) || e.getKey().startsWith("app.*."))
 			.map(e -> e.getValue())
 			.collect(Collectors.toList());
 
