@@ -16,14 +16,17 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.batch.operations.BatchRuntimeException;
 import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
@@ -45,7 +48,10 @@ import org.springframework.util.StringUtils;
  */
 public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 
+	private static final Logger logger = LoggerFactory.getLogger(ComposedBatchConfigurer.class);
+
 	private DataSource incrementerDataSource;
+
 	private Map<String, DataFieldMaxValueIncrementer> incrementerMap;
 
 	/**
@@ -125,9 +131,11 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 
 	private boolean isSqlServerTableSequenceAvailable(String incrementerName) {
 		boolean result = false;
-		DatabaseMetaData metaData = null;
+		DatabaseMetaData metaData;
+		Connection connection = null;
 		try {
-			metaData = this.incrementerDataSource.getConnection().getMetaData();
+			connection = this.incrementerDataSource.getConnection();
+			metaData = connection.getMetaData();
 			String[] types = {"TABLE"};
 			ResultSet tables = metaData.getTables(null, null, "%", types);
 			while (tables.next()) {
@@ -138,7 +146,17 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 			}
 		}
 		catch (SQLException sqe) {
-			throw new BatchRuntimeException(sqe.getMessage());
+			logger.warn(sqe.getMessage(), sqe);
+		}
+		finally {
+			if(connection != null) {
+				try {
+					connection.close();
+				}
+				catch (SQLException sqe) {
+					logger.warn(sqe.getMessage(), sqe);
+				}
+			}
 		}
 		return result;
 	}
