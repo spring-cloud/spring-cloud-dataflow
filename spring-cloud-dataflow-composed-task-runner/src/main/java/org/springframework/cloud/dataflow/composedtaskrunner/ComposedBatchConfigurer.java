@@ -123,7 +123,7 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 				incrementerMap.put(incrementerName, incrementer);
 			}
 			catch (Exception exception) {
-				exception.printStackTrace();
+				logger.warn(exception.getMessage(), exception);
 			}
 		}
 		return incrementer;
