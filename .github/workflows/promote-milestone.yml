@@ -59,6 +59,16 @@ jobs:
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber libs-milestone-local
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber libs-milestone-local
 
+    # zoo success
+    - name: Notify Build Success Zoo Handler Controller
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+        dispatch-handler-client-payload-data: >
+          {
+            "event": "promotion-succeed"
+          }
+
     # zoo failure
     - name: Notify Build Failure Zoo Handler Controller
       if: ${{ failure() }}

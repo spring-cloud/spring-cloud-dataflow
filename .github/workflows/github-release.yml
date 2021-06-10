@@ -1,0 +1,138 @@
+name: Github Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-zoo-handler:
+        description: 'Build Zoo Handler Payload'
+        required: true
+
+jobs:
+  ghrelease:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    # zoo extract and ensure
+    - name: Extract Zoo Context Properties
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-extract-context-properties: true
+        ensure-env: |
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_version
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version
+          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version
+          BUILD_ZOO_HANDLER_spring_cloud_skipper_version
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
+
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        RELEASE_NOTES_FILE: ${{runner.temp}}/release_notes.md5
+      run: |
+        echo "# Release Notes" >> $RELEASE_NOTES_FILE
+        echo "## Dependent Projects and Compatibility" >> $RELEASE_NOTES_FILE
+        echo "Component | Version" >> $RELEASE_NOTES_FILE
+        echo "--- | ---" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Build | $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Common | $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Deployer | $BUILD_ZOO_HANDLER_spring_cloud_deployer_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Deployer Local | $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Deployer CF | $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Deployer K8S | $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Common Security Config | $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Skipper | $BUILD_ZOO_HANDLER_spring_cloud_skipper_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow UI | $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version" >> $RELEASE_NOTES_FILE
+        echo "Spring Cloud Dataflow Build | $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" >> $RELEASE_NOTES_FILE
+        echo "## Issues" >> $RELEASE_NOTES_FILE
+
+        gh issue list \
+          --repo spring-cloud/spring-cloud-dataflow-build \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-dataflow-build#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-dataflow-common \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-dataflow-common#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-deployer \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_deployer_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-deployer#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-deployer-local \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-deployer-local#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-deployer-cloudfoundry \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-deployer-cloudfoundry#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-deployer-kubernetes \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-deployer-kubernetes#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-common-security-config \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-common-security-config#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-skipper \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_skipper_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-skipper#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-dataflow-ui \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-dataflow-ui#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+        gh issue list \
+          --repo spring-cloud/spring-cloud-dataflow \
+          --milestone $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
+          --state all --json number,title \
+          --template "{{range .}}spring-cloud/spring-cloud-dataflow#{{.number}} {{.title}}{{\"\n\"}}{{end}}" \
+          >> $RELEASE_NOTES_FILE
+
+        gh release create v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
+          --draft \
+          --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
+          --notes-file $RELEASE_NOTES_FILE
+
+    # zoo success
+    - name: Notify Build Success Zoo Handler Controller
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+        dispatch-handler-client-payload-data: >
+          {
+            "event": "ghrelease-succeed"
+          }
+
+    # zoo failure
+    - name: Notify Build Failure Zoo Handler Controller
+      if: ${{ failure() }}
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        dispatch-handler-client-payload-data: >
+          {
+            "event": "ghrelease-failed"
+          }
