@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,13 +305,21 @@ public class AppRegistryControllerTests {
 	public void testListAppsWithMultiVersions() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-multi-versions.properties"));
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(6)));
+				.andExpect(jsonPath("$.content[*]", hasSize(9)));
 		mockMvc.perform(get("/apps?defaultVersion=true").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(4)))
-				.andExpect(jsonPath("$.content[*].versions", containsInAnyOrder(hasSize(1), hasSize(2), hasSize(2), hasSize(1))))
-				.andExpect(jsonPath("$.content[*].versions", containsInAnyOrder(contains("1.0.0.BUILD-SNAPSHOT"), containsInAnyOrder("1.0.0.RELEASE", "1.0.0.BUILD-SNAPSHOT"),
-						contains("1.0.0.BUILD-SNAPSHOT"), containsInAnyOrder("1.0.0.RELEASE","1.0.0.BUILD-SNAPSHOT"))))
-				.andExpect(jsonPath("$.content[*].defaultVersion", contains(true, true, true, true)));
+				.andExpect(jsonPath("$.content[*]", hasSize(6)))
+				.andExpect(jsonPath("$.content[?(@.name == 'time' && @.type == 'source')]", hasSize(1)))
+				.andExpect(jsonPath("$.content[?(@.name == 'time' && @.type == 'source')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$.content[?(@.name == 'log' && @.type == 'sink')]", hasSize(1)))
+				.andExpect(jsonPath("$.content[?(@.name == 'log' && @.type == 'sink')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'source')]", hasSize(1)))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'source')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'sink')]", hasSize(1)))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'sink')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'source')].versions[*]",
+						containsInAnyOrder("3.0.1")))
+				.andExpect(jsonPath("$.content[?(@.name == 'file' && @.type == 'sink')].versions[*]",
+						containsInAnyOrder("3.0.0", "3.0.1")));
 	}
 
 	@Test
