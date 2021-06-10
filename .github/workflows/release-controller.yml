@@ -144,6 +144,16 @@ jobs:
               }
             },
             {
+              "if": "data.event == 'central-succeed' && data.repo == 'spring-cloud-dataflow' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow",
+                "ref": "main",
+                "workflow": "github-release.yml"
+              }
+            },
+            {
               "if": "data.event == 'promotion-failed'",
               "action": "fail",
               "fail": {
@@ -155,6 +165,13 @@ jobs:
               "action": "fail",
               "fail": {
                 "message": "central sync failed"
+              }
+            },
+            {
+              "if": "data.event == 'ghrelease-failed'",
+              "action": "fail",
+              "fail": {
+                "message": "github release failed"
               }
             },
             {
