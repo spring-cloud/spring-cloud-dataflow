@@ -85,6 +85,7 @@ public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryC
 		if (defaultVersion) {
 			resultList.forEach(appRegistration -> {
 				HashSet<String> versions = appRegistrationRepository.findAllByName(appRegistration.getName()).stream()
+						.filter(ar -> ar.getType() == appRegistration.getType())
 						.map(AppRegistration::getVersion).collect(Collectors.toCollection(HashSet::new));
 				appRegistration.setVersions(versions);
 			});
