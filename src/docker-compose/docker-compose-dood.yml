@@ -34,8 +34,8 @@ services:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
       # Override the CTR form maven to docker
-      #- SPRING_CLOUD_DATAFLOW_TASK_COMPOSED_TASK_RUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.8.0-SNAPSHOT}
-      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.8.0-SNAPSHOT}
+      #- SPRING_CLOUD_DATAFLOW_TASK_COMPOSED_TASK_RUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.8.0-RC1}
+      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.8.0-RC1}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
