@@ -85,6 +85,7 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.cloud.skipper.io.DefaultPackageWriter;
 import org.springframework.cloud.skipper.io.PackageWriter;
+import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -231,6 +232,8 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		this.skipperClient.scale(streamName, ScaleRequest.of(appName, count, properties));
 	}
 
+	// TODO: Consider doing it manually to add tags
+	@NewSpan
 	public Release deployStream(StreamDeploymentRequest streamDeploymentRequest) {
 		validateStreamDeploymentRequest(streamDeploymentRequest);
 		Map<String, String> streamDeployerProperties = streamDeploymentRequest.getStreamDeployerProperties();
