@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -398,8 +399,28 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			}
 		}
 		else {
-			logger.info("TaskLauncher.destroy not invoked for task " +
-					taskDefinition.getTaskName() + ". Did not find a previously launched task to destroy.");
+			if(!findAndDeleteTaskResourcesAcrossPlatforms(taskDefinition)) {
+				logger.info("TaskLauncher.destroy not invoked for task " +
+						taskDefinition.getTaskName() + ". Did not find a previously launched task to destroy.");
+			}
 		}
+	}
+
+	private boolean findAndDeleteTaskResourcesAcrossPlatforms(TaskDefinition taskDefinition) {
+		boolean result = false;
+		Iterable<Launcher> launchers = launcherRepository.findAll();
+		Iterator<Launcher> launcherIterator = launchers.iterator();
+		while(launcherIterator.hasNext()) {
+			Launcher launcher = launcherIterator.next();
+			try {
+				launcher.getTaskLauncher().destroy(taskDefinition.getName());
+				logger.info(String.format("Deleted task app resources for %s in platform %s", taskDefinition.getName(), launcher.getName()));
+				result = true;
+			}
+			catch (Exception ex) {
+				logger.info(String.format("Attempted delete of app resources for %s but none found on platform %s.", taskDefinition.getName(), launcher.getName()));
+			}
+		}
+		return result;
 	}
 }

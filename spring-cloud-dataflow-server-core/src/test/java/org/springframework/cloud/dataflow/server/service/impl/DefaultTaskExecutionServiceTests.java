@@ -734,6 +734,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar", taskDefinitionRepository);
+			taskDeleteService.deleteTaskDefinition("simpleTask", true);
+			String logEntries = outputCapture.toString();
+			assertTrue(logEntries.contains("Deleted task app resources for"));
 		}
 
 		@Test
@@ -749,6 +752,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
 			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			taskDeleteService.deleteTaskDefinition(TASK_NAME_ORIG, true);
+			String logEntries = outputCapture.toString();
+			assertTrue(!logEntries.contains("Deleted task app resources for"));
+			assertTrue(!logEntries.contains("Attempted delete of app resources for"));
 		}
 
 		@Test
@@ -975,6 +982,19 @@ public abstract class DefaultTaskExecutionServiceTests {
 			if (!errorCaught) {
 				fail();
 			}
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeDeleteNoDeploymentWithMultiplePlatforms() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			this.launcherRepository.save(new Launcher("anotherPlatform", "local", taskLauncher));
+			taskDeleteService.deleteTaskDefinition(TASK_NAME_ORIG, true);
+			String logEntries = outputCapture.toString();
+			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform anotherPlatform"));
+			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform default"));
+			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform MyPlatform"));
 		}
 
 		@Test
