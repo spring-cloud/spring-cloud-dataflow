@@ -266,6 +266,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		Launcher launcher = this.launcherRepository.findByName(platformName);
+		if(launcher == null) {
+			throw new IllegalStateException(String.format("No launcher was available for platform %s", platformName));
+		}
 		validateTaskName(taskName, launcher);
 		// Remove since the key for task platform name will not pass validation for app,
 		// deployer, or scheduler prefix.

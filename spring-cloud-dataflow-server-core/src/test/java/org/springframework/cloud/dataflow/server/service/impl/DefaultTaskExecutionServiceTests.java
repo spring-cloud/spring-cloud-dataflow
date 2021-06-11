@@ -102,6 +102,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -938,6 +939,22 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("", this.taskExecutionService.getLog(platformName, taskDeploymentId));
 		}
 
+		@Test
+		@DirtiesContext
+		public void executeSameTaskDefinitionWithInvalidPlatform() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+
+			Map<String, String> deploymentProperties = new HashMap<>();
+			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, "noplatformhere");
+
+			IllegalStateException thrown = assertThrows(
+					IllegalStateException.class,
+					() -> this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>())
+			);
+
+			assertTrue(thrown.getMessage().contains("No launcher was available for platform noplatformhere"));
+		}
 
 		@Test
 		@DirtiesContext
