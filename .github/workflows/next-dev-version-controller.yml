@@ -1,0 +1,131 @@
+name: Next Dev Version Controller
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-zoo-handler:
+        description: 'Build Zoo Handler Payload'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    # initial is when user starts workflow from UI(context is empty)
+    # then train build goes through via repos using defined hander rules
+    - name: Handle Zoo Control
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+        dispatch-handler-max: 15
+        dispatch-handler-config: >
+          [
+            {
+              "if": "initial == true",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow-build",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-dataflow-build' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow-common",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-dataflow-common' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-local",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-local' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-cloudfoundry",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-cloudfoundry' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-deployer-kubernetes",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-kubernetes' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-common-security-config",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-common-security-config' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-skipper",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-skipper' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow-ui",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-dataflow-ui' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow",
+                "ref": "main",
+                "workflow": "next-dev-version-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'next-dev-version-failed'",
+              "action": "fail",
+              "fail": {
+                "message": "hi, something went wrong"
+              }
+            }
+          ]
