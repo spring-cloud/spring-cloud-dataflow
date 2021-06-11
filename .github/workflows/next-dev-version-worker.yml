@@ -115,11 +115,11 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
     # zoo commit
-    #- name: Commit Next Dev Changes
-    #  uses: jvalkeal/build-zoo-handler@v0.0.4
-    #  with:
-    #    commit-changes-branch: main
-    #    commit-changes-message: Next development version
+    - name: Commit Next Dev Changes
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        commit-changes-branch: main
+        commit-changes-message: Next development version
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
