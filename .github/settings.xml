@@ -43,6 +43,14 @@
 			<id>stagingrelease</id>
 			<repositories>
 				<repository>
+					<id>central</id>
+					<name>central</name>
+					<url>https://repo.maven.apache.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
 					<url>https://repo.spring.io/libs-staging-local</url>
