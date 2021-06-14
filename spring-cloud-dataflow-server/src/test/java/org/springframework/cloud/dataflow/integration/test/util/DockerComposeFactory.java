@@ -91,6 +91,7 @@ public class DockerComposeFactory {
 	 * Initialize the docker machine with the required environment variables.
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
+			.withAdditionalEnvironmentVariable("COMPOSE_HTTP_TIMEOUT", "300")
 			.withAdditionalEnvironmentVariable("PLATFORM_TYPE", "local")
 			.withAdditionalEnvironmentVariable("DATAFLOW_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_URI, "http://dataflow-server:9393"))
