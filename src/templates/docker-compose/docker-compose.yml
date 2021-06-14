@@ -5,7 +5,7 @@ version: '3'
 # - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-register.
 # - HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
 #   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
-#   If not set DOCKER_MOUNT_PATH defaults to /root/scdf on dataflow-server and skipper containers.
+#   If not set DOCKER_MOUNT_PATH defaults to /home/cnb/scdf on dataflow-server and skipper containers.
 #   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/.m2  docker-compose up
 # - APPS_PORT_RANGE allows you to override the port range exported by the Skipper server. By default the APPS_PORT_RANGE
 #   must supersede the local deployer's PORTRANGE_LOW and PORTRANGE_HIGH - the ports assigned to the stream apps run inside the Skipper container.
@@ -80,7 +80,7 @@ services:
       - skipper-server
     restart: always
     volumes:
-      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
 
   app-import-stream:
     image: springcloud/baseimage:1.0.0
@@ -122,4 +122,4 @@ services:
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
     restart: always
     volumes:
-      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/root/scdf}
+      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
