@@ -1,0 +1,158 @@
+{
+  "groups": [
+    {
+      "name": "",
+      "type": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "composed-task-app-arguments",
+      "type": "java.util.Map",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "sourceMethod": "getComposedTaskAppArguments()"
+    },
+    {
+      "name": "composed-task-app-properties",
+      "type": "java.util.Map",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "sourceMethod": "getComposedTaskAppProperties()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "composed-task-arguments",
+      "type": "java.lang.String",
+      "description": "The arguments to be used for each of the tasks.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "composed-task-properties",
+      "type": "java.lang.String",
+      "description": "The properties to be used for each of the tasks as well as their deployments.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "dataflow-server-access-token",
+      "type": "java.lang.String",
+      "description": "The optional OAuth2 Access Token.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "dataflow-server-password",
+      "type": "java.lang.String",
+      "description": "The optional password for the dataflow server that will receive task launch requests. Used to access the the dataflow server using Basic Authentication. Not used if dataflowServerAccessToken is set.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "dataflow-server-uri",
+      "type": "java.net.URI",
+      "description": "The URI for the dataflow server that will receive task launch requests. Default is http:\/\/localhost:9393;",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "dataflow-server-username",
+      "type": "java.lang.String",
+      "description": "The optional username for the dataflow server that will receive task launch requests. Used to access the the dataflow server using Basic Authentication. Not used if dataflowServerAccessToken is set.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "increment-instance-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "interval-time-between-checks",
+      "type": "java.lang.Integer",
+      "description": "The amount of time in millis that the ComposedTaskRunner will wait between checks of the database to see if a task has completed.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": 10000
+    },
+    {
+      "name": "max-wait-time",
+      "type": "java.lang.Integer",
+      "description": "The maximum amount of time in millis that a individual step can run before the execution of the Composed task is failed.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "oauth2-client-credentials-client-id",
+      "type": "java.lang.String",
+      "description": "The OAuth2 Client Id (Used for the client credentials grant). If not null, then the following properties are ignored: dataflowServerUsername, dataflowServerPassword, dataflowServerAccessToken",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "oauth2-client-credentials-client-secret",
+      "type": "java.lang.String",
+      "description": "The OAuth2 Client Secret (Used for the client credentials grant).",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "oauth2-client-credentials-scopes",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "OAuth2 Authorization scopes (Used for the client credentials grant).",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "oauth2-client-credentials-token-uri",
+      "type": "java.lang.String",
+      "description": "Token URI for the OAuth2 provider (Used for the client credentials grant).",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "platform-name",
+      "type": "java.lang.String",
+      "description": "The platform property that will be used for each task in the workflow when it is launched.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "skip-tls-certificate-verification",
+      "type": "java.lang.Boolean",
+      "description": "If true skips SSL certificate validation for SCDF server communication.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "split-thread-allow-core-thread-timeout",
+      "type": "java.lang.Boolean",
+      "description": "Specifies whether to allow split core threads to timeout. Default is false;",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "split-thread-core-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Split's core pool size. Default is 4;",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": 4
+    },
+    {
+      "name": "split-thread-keep-alive-seconds",
+      "type": "java.lang.Integer",
+      "description": "Split's thread keep alive seconds. Default is 60.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": 60
+    },
+    {
+      "name": "split-thread-max-pool-size",
+      "type": "java.lang.Integer",
+      "description": "Split's maximum pool size. Default is Integer.MAX_VALUE.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "split-thread-queue-capacity",
+      "type": "java.lang.Integer",
+      "description": "Capacity for Split's  BlockingQueue. Default is Integer.MAX_VALUE.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
+      "name": "split-thread-wait-for-tasks-to-complete-on-shutdown",
+      "type": "java.lang.Boolean",
+      "description": "Whether to wait for scheduled tasks to complete on shutdown, not interrupting running tasks and executing all tasks in the queue. Default is false;",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": false
+    }
+  ],
+  "hints": []
+}
