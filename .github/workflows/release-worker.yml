@@ -122,7 +122,7 @@ jobs:
         jfrog rt build-clean
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
-          -Pstagingrelease,docs \
+          -Pstagingrelease,restdocs,asciidoctordocs \
           -DskipTests -U -B
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname=spring-cloud-skipper-main-release >> $GITHUB_ENV
