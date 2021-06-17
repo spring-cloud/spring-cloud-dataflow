@@ -61,6 +61,9 @@ jobs:
     - name: Build and Publish
       run: |
         jfrog rt mvn -U -B clean install
+        jfrog rt mvn clean install \
+          -Pfull,asciidoctordocs \
+          -U -B
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname=spring-cloud-skipper-main >> $GITHUB_ENV
