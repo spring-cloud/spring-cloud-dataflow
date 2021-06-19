@@ -50,6 +50,10 @@
   color: F9D0C4
   description: Belongs to tests
 
+- name: automation/rlnotes-header
+  color: EDEDED
+  description: Belongs to release notes automation
+
 - name: for/angular4-upgrade
   color: E99695
   description: For Angular 4 update
