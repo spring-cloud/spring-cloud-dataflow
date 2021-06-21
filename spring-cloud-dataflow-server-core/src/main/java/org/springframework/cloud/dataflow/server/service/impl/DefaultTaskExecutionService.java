@@ -531,8 +531,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		 * Use the TaskLauncher to verify the actual state.
 		 */
 		if (runningTaskExecutions.getTotalElements() > 0) {
+			TaskExecution latestRunningExecution = runningTaskExecutions.toList().get(0);
+			if(latestRunningExecution.getExternalExecutionId() == null) {
+				logger.warn("Task repository shows a running task execution for task {} with no externalExecutionId.",
+						taskName);
+				return;
+			}
+			LaunchState launchState = taskLauncher.status(latestRunningExecution.getExternalExecutionId()).getState();
 
-			LaunchState launchState = taskLauncher.status(runningTaskExecutions.toList().get(0).getExternalExecutionId()).getState();
 			if (launchState.equals(LaunchState.running) || launchState.equals(LaunchState.launching)) {
 				throw new IllegalStateException("Unable to update application due to currently running applications");
 			}

@@ -215,7 +215,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
-			validateBasicProperties(Collections.emptyMap(), argument, FAKE_PLATFORM);
+			validateBasicProperties(Collections.emptyMap(), argument, FAKE_PLATFORM, 1L);
 		}
 
 		@Test
@@ -227,13 +227,34 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", K8_PLATFORM);
-			validateBasicProperties(taskDeploymentProperties, argument, K8_PLATFORM);
+			validateBasicProperties(taskDeploymentProperties, argument, K8_PLATFORM, 1L);
+		}
+
+		@Test
+		@DirtiesContext
+		public void testFailedFirstLaunch() throws Exception{
+			this.launcherRepository.save(new Launcher(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, "Cloud Foundry", taskLauncher));
+			initializeSuccessfulRegistry(appRegistry);
+			TaskExecution taskExecution = new TaskExecution(1, 0, TASK_NAME_ORIG, new Date(), new Date(), "", Collections.emptyList(), "", null, null);
+			this.taskRepository.createTaskExecution(taskExecution);
+			TaskManifest taskManifest = new TaskManifest();
+			taskManifest.setPlatformName("Cloud Foundry");
+			AppDefinition taskDefinition = new AppDefinition(TASK_NAME_ORIG, null);
+			AppDeploymentRequest taskDeploymentRequest = new AppDeploymentRequest(taskDefinition, new FileUrlResource("src/test/resources/apps"));
+			taskManifest.setTaskDeploymentRequest(taskDeploymentRequest);
+			dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+			when(taskLauncher.launch(argument.capture())).thenReturn("0");
+			Map<String, String> taskDeploymentProperties = new HashMap<>();
+			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE);
+			validateBasicProperties(taskDeploymentProperties, argument, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, 2L);
+
 		}
 
 		private void validateBasicProperties(Map<String, String> taskDeploymentProperties,
 				ArgumentCaptor<AppDeploymentRequest> argument,
-				String platform) {
-			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG,
+				String platform, long numberOfRunningTasks) {
+			assertEquals(numberOfRunningTasks, this.taskExecutionService.executeTask(TASK_NAME_ORIG,
 					taskDeploymentProperties, new LinkedList<>()));
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertTrue(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
