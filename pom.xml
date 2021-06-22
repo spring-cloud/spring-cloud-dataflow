@@ -70,10 +70,6 @@
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
-		<java-cfenv-boot.version>2.2.2.RELEASE</java-cfenv-boot.version>
-
-		<spring-cloud-services-starter-config-client.version>3.1.3.RELEASE</spring-cloud-services-starter-config-client.version>
-
 		<spring-cloud-common-security-config.version>1.6.1-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
@@ -185,26 +181,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.cfenv</groupId>
-				<artifactId>java-cfenv</artifactId>
-				<version>${java-cfenv-boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.cfenv</groupId>
-				<artifactId>java-cfenv-boot</artifactId>
-				<version>${java-cfenv-boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.cfenv</groupId>
-				<artifactId>java-cfenv-boot-pivotal-sso</artifactId>
-				<version>${java-cfenv-boot.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pivotal.spring.cloud</groupId>
-				<artifactId>spring-cloud-services-starter-config-client</artifactId>
-				<version>${spring-cloud-services-starter-config-client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.shell</groupId>
