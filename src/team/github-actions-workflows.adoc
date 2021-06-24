@@ -27,8 +27,26 @@ things and ends up last step where `spring-cloud-dataflow` is build.
 
 ### Milestone Train
 
-TBD
+This is an all repo _train_ which can be fired from `spring-cloud-dataflow` with workflow
+`milestone-controller`. As this _train_ will build and release a milestone, version postfix
+as `milestone_version=M1` needs to be given. Essentially `-SNAPSHOT` will be replaced by
+given milestone postfix.
+
+Milestone build is done against staging repo, release is promoted and finally GH
+release is created.
 
 ### Release Train
 
-TBD
+This is an all repo _train_ which can be fired from `spring-cloud-dataflow` with workflow
+`release-controller`. No parameters needs to be given as version is fixed to a ones current
+snapshots are using. Essentially same as versions without `-SNAPSHOT` postfix.
+
+Release build is done against staging repo, release is promoted, release is synched
+to maven central and finally GH release is created.
+
+### Next Dev Version Train
+
+This is an all repo _train_ which can be fired from `spring-cloud-dataflow` with workflow
+`next-dev-version-controller`. This should be used after a release where next dev version
+is needed. Simply goes through all repos and switched _patch_ version to next and
+commits changes back to repos.
