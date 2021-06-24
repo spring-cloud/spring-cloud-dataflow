@@ -28,7 +28,11 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_skipper_version
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
-
+    # tooling
+    - name: Install Tooling
+      run: |
+        curl -sSL https://github.com/cbroglie/mustache/releases/download/v1.2.2/mustache_1.2.2_linux_amd64.tar.gz | sudo tar -C /usr/local/bin/ --no-same-owner -xzv mustache
+    # release notes and gh release
     - name: Release
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
