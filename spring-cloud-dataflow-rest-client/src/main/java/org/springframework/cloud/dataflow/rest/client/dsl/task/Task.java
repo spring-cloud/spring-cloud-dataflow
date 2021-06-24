@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
@@ -268,6 +269,13 @@ public class Task implements AutoCloseable {
 	 */
 	public Collection<JobExecutionResource> jobExecutionResources() {
 		return this.jobOperations.executionListByJobName(this.taskName).getContent();
+	}
+
+	/**
+	 * @return Returns list of {@link StepExecutionResource} belonging to the job.
+	 */
+	public Collection<StepExecutionResource> jobStepExecutions(long jobExecutionId) {
+		return this.jobOperations.stepExecutionList(jobExecutionId).getContent();
 	}
 
 	/**

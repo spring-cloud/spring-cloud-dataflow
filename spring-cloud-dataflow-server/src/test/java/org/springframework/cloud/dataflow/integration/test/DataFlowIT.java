@@ -55,6 +55,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -63,6 +64,7 @@ import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFac
 import org.springframework.cloud.dataflow.integration.test.util.DockerComposeFactoryProperties;
 import org.springframework.cloud.dataflow.integration.test.util.ResourceExtractor;
 import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicationHelper;
+import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
@@ -72,6 +74,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -917,10 +920,7 @@ public class DataFlowIT {
 			// task first launch
 			long launchId1 = task.launch();
 
-			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
-			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.execution(launchId1).isPresent()).isTrue();
-			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			validateSuccessfulTaskLaunch(task, launchId1);
 
 			// task second launch
 			long launchId2 = task.launch();
@@ -995,11 +995,7 @@ public class DataFlowIT {
 			// first launch
 			long launchId1 = task.launch(composedTaskLaunchArguments());
 
-			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
-
-			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.executionStatus(launchId1)).isEqualTo(TaskExecutionStatus.COMPLETE);
-			assertThat(task.execution(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			validateSuccessfulTaskLaunch(task, launchId1);
 
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
@@ -1419,6 +1415,299 @@ public class DataFlowIT {
 		}
 		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 
+	}
+
+	@Test
+	public void basicBatchSuccessTest() {
+		//Verify Batch runs successfully
+		logger.info("basic-batch-success-test");
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("scenario")
+				.description("Test scenario batch app")
+				.build()) {
+
+			String stepName = randomStepName();
+			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+			// task first launch
+			long launchId = task.launch(args);
+			//Verify task
+			validateSuccessfulTaskLaunch(task, launchId);
+
+			//Verify that steps can be retrieved
+			verifySuccessfulJobAndStepScenario(task, stepName);
+		}
+	}
+
+	private List<String> createNewJobandStepScenario(String jobName, String stepName) {
+		List<String> result = new ArrayList<>();
+		result.add("--io.spring.jobName=" + jobName);
+		result.add("--io.spring.stepName=" + stepName);
+		return result;
+	}
+	private void validateSuccessfulTaskLaunch(Task task, long launchId) {
+		Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
+		assertThat(task.executions().size()).isEqualTo(1);
+		assertThat(task.execution(launchId).isPresent()).isTrue();
+		assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+	}
+
+	private void verifySuccessfulJobAndStepScenario(Task task, String stepName) {
+		assertThat(task.executions().size()).isEqualTo(1);
+		List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+		assertThat(jobExecutionIds.size()).isEqualTo(1);
+		//Verify that steps can be retrieved
+		task.jobExecutionResources().stream().filter(
+				jobExecution -> jobExecution.getName().equals(task.getTaskName())).
+				forEach(jobExecutionResource -> {
+					assertThat(jobExecutionResource.getStepExecutionCount()).isEqualTo(1);
+					task.jobStepExecutions(jobExecutionResource.getExecutionId()).forEach(stepExecutionResource -> {
+						assertThat(stepExecutionResource.getStepExecution().getStepName()).isEqualTo(stepName);
+					});
+				});
+	}
+
+	private String randomStepName() {
+		return "step-" + randomSuffix();
+	}
+
+	@Test
+	public void basicBatchSuccessRestartTest() {
+		//Verify that batch restart on success fails
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("scenario")
+				.description("Test scenario batch app")
+				.build()) {
+
+			String stepName = randomStepName();
+			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+			// task first launch
+			long launchId = task.launch(args);
+			//Verify task and Job
+			validateSuccessfulTaskLaunch(task, launchId);
+			verifySuccessfulJobAndStepScenario(task, stepName);
+
+			// Attempt a job restart
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+
+			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
+			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
+				Exception exception = assertThrows(DataFlowClientException.class, () -> {
+					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+				});
+				assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
+			});
+		}
+	}
+
+	@Test
+	public void basicBatchFailRestartTest() {
+		// Verify Batch runs successfully
+			logger.info("basic-batch-fail-restart-test");
+			try (Task task = Task.builder(dataFlowOperations)
+					.name(randomTaskName())
+					.definition("scenario")
+					.description("Test scenario batch app that will fail on first pass")
+					.build()) {
+
+				String stepName = randomStepName();
+				List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+				args.add("--io.spring.failBatch=true");
+				// task first launch
+				long launchId = task.launch(args);
+				//Verify task
+				validateSuccessfulTaskLaunch(task, launchId);
+
+				//Verify that batch app that fails can be restarted
+
+				// Attempt a job restart
+				List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+				//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
+				//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+				Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
+					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+					// Wait for job to start
+					Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
+					// Wait for task for the job to complete
+					Awaitility.await().until(() -> task.executions().stream().findFirst().get().getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
+					assertThat(task.jobExecutionResources().size()).isEqualTo(2);
+					List<JobExecutionResource> jobExecutionResources = task.jobInstanceResources().stream().
+							findFirst().get().getJobExecutions().stream().collect(Collectors.toList());
+					List<BatchStatus> batchStatuses = new ArrayList<>();
+					jobExecutionResources.stream().forEach(jobExecutionResource ->
+							batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
+					assertThat(batchStatuses).contains(BatchStatus.FAILED);
+					assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
+				});
+			}
+	}
+
+	@Test
+	public void multipleTaskAppVersionTest() {
+		logger.info("basic-batch-fail-restart-test");
+		Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"),
+				"upgradeRollbackTaskAppVersionTest: SKIP - SCDF 2.7.x and below!");
+
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("timestamp")
+				.description("Test scenario batch app that will fail on first pass")
+				.build()) {
+
+			String stepName = randomStepName();
+			// task first launch
+			long launchId = task.launch();
+			//Verify task
+			validateSuccessfulTaskLaunch(task, launchId);
+			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+
+			if(!runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+				try {
+					appRegistryOperations.register("timestamp", ApplicationType.task,
+							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
+							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE", false);
+				}
+				catch (DataFlowClientException dfe) {
+					logger.info(dfe.getMessage(), dfe);
+				}
+			}
+			else {
+				try {
+					appRegistryOperations.register("timestamp", ApplicationType.task,
+							"docker:springcloudtask/timestamp-task:2.1.0.RELEASE",
+							null, false);
+				}
+				catch (DataFlowClientException dfe) {
+					logger.info(dfe.getMessage(), dfe);
+				}
+			}
+
+			long launchId2 = task.launch(Collections.singletonMap("version.timestamp", "2.1.0.RELEASE"), null);
+			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executions().stream().filter(
+					taskExecutionResource -> taskExecutionResource.getResourceUrl().
+							contains("2.1.0.RELEASE")).collect(Collectors.toList()).size()).
+					isEqualTo(1);
+		}
+	}
+
+	@Test
+	public void basicTaskWithPropertiesTest() {
+		logger.info("basic-task-with-properties-test");
+		String testPropertyKey = "app.timestamp.test-prop-key";
+		String testPropertyValue = "test-prop-value";
+
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("timestamp")
+				.description("Test timestamp app that will use properties")
+				.build()) {
+			String stepName = randomStepName();
+			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+			// task first launch
+			long launchId = task.launch(Collections.singletonMap(testPropertyKey, testPropertyValue), args);
+			//Verify task
+			validateSuccessfulTaskLaunch(task, launchId);
+			long launchId1 = task.launch(args);
+			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executions().stream().filter(taskExecutionResource ->
+					taskExecutionResource.getDeploymentProperties().containsKey(testPropertyKey)).
+					collect(Collectors.toList()).size()).isEqualTo(2);
+
+		}
+	}
+
+	@Test
+	public void taskLaunchInvalidTaskDefinition() {
+		logger.info("task-launch-invalid-task-definition");
+		Exception exception = assertThrows(DataFlowClientException.class, () -> {
+			Task.builder(dataFlowOperations)
+					.name(randomTaskName())
+					.definition("foobar")
+					.description("Test scenario with invalid task definition")
+					.build();
+		});
+		assertTrue(exception.getMessage().contains("The 'task:foobar' application could not be found."));
+	}
+
+	@Test
+	public void taskLaunchWithArguments() {
+		//Launch task with args and verify that they are being used.
+		//Verify Batch runs successfully
+		logger.info("basic-batch-success-test");
+		final String argument = "--timestamp.format=YYYY";
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("timestamp")
+				.description("Test launch apps with arguments app")
+				.build()) {
+
+			String stepName = randomStepName();
+			List<String> baseArgs = createNewJobandStepScenario(task.getTaskName(), stepName);
+			List<String> args = new ArrayList<>(baseArgs);
+			args .add(argument);
+			// task first launch
+			long launchId = task.launch(args);
+			//Verify  first launch
+			validateSuccessfulTaskLaunch(task, launchId);
+			//relaunch task with no args and it should not re-use old.
+			long launchId1 = task.launch(baseArgs);
+			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
+			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executions().stream().filter(execution ->
+					execution.getArguments().contains(argument)).
+					collect(Collectors.toList()).size()).isEqualTo(1);
+		}
+
+	}
+
+	@Test
+	public void taskDefinitionDelete() {
+		logger.info("task-definition-delete");
+		final String taskName;
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("scenario")
+				.description("Test scenario batch app that will fail on first pass")
+				.build()) {
+			taskName = task.getTaskName();
+			String stepName = randomStepName();
+			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+			long launchId = task.launch(args);
+
+			validateSuccessfulTaskLaunch(task, launchId);
+			assertThat(dataFlowOperations.taskOperations().list().getContent().size()).isEqualTo(1);
+		}
+		verifyTaskDefAndTaskExecutionCount(taskName, 0, 1);
+	}
+
+	@Test
+	public void taskDefinitionDeleteWithCleanup() {
+		Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("scenario")
+				.description("Test scenario batch app that will fail on first pass")
+				.build();
+		String stepName = randomStepName();
+		List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+		// task first launch
+		long launchId = task.launch(args);
+		//Verify task
+		validateSuccessfulTaskLaunch(task, launchId);
+		//verify task definition is gone and executions are removed
+		this.dataFlowOperations.taskOperations().destroy(task.getTaskName(), true);
+		verifyTaskDefAndTaskExecutionCount(task.getTaskName(), 0, 0);
+	}
+
+	private void verifyTaskDefAndTaskExecutionCount(String taskName, int taskDefCount, int taskExecCount) {
+		assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream().
+				filter(taskExecution -> taskExecution.getTaskName().equals(taskName)).
+				collect(Collectors.toList()).size()).isEqualTo(taskExecCount);
+		assertThat(dataFlowOperations.taskOperations().list().getContent().size()).isEqualTo(taskDefCount);
 	}
 
 	private void allSuccessfulExecutions(String taskDescription, String taskDefinition, String... childLabels) {
