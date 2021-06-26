@@ -55,22 +55,22 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>3.1.1-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>3.1.2-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-dataflow-common.version>2.8.1-SNAPSHOT</spring-cloud-dataflow-common.version>
-		<spring-cloud-deployer.version>2.6.1-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.6.1-SNAPSHOT</spring-cloud-deployer-local.version>
-		<spring-cloud-deployer-cloudfoundry.version>2.6.1-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.6.1-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-dataflow-common.version>2.8.2-SNAPSHOT</spring-cloud-dataflow-common.version>
+		<spring-cloud-deployer.version>2.6.2-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.6.2-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.6.2-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.6.2-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.7.1-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.7.2-SNAPSHOT</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.3.3</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
-		<spring-cloud-common-security-config.version>1.6.1-SNAPSHOT</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.6.2-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 
