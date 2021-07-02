@@ -20,7 +20,6 @@ import java.util.List;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.deployer.spi.kubernetes.ContainerFactory;
@@ -28,7 +27,6 @@ import org.springframework.cloud.deployer.spi.kubernetes.DefaultContainerFactory
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesScheduler;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncherProperties;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
@@ -65,9 +63,7 @@ public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<K
 		KubernetesTaskLauncher kubernetesTaskLauncher = new KubernetesTaskLauncher(
 				kubernetesProperties, taskLauncherProperties, kubernetesClient, containerFactory);
 
-		KubernetesSchedulerProperties kubernetesSchedulerProperties = new KubernetesSchedulerProperties();
-		BeanUtils.copyProperties(kubernetesProperties, kubernetesSchedulerProperties);
-		Scheduler scheduler = getScheduler(kubernetesSchedulerProperties, kubernetesClient);
+		Scheduler scheduler = getScheduler(kubernetesProperties, kubernetesClient);
 
 		Launcher launcher = new Launcher(account, KUBERNETES_PLATFORM_TYPE, kubernetesTaskLauncher, scheduler);
 
@@ -97,12 +93,12 @@ public class KubernetesTaskPlatformFactory extends AbstractTaskPlatformFactory<K
 		return launchers;
 	}
 
-	private Scheduler getScheduler(KubernetesSchedulerProperties kubernetesSchedulerProperties,
+	private Scheduler getScheduler(KubernetesDeployerProperties kubernetesDeployerProperties,
 			KubernetesClient kubernetesClient) {
 		Scheduler scheduler = null;
 
 		if (schedulesEnabled) {
-			scheduler = new KubernetesScheduler(kubernetesClient, kubernetesSchedulerProperties);
+			scheduler = new KubernetesScheduler(kubernetesClient, kubernetesDeployerProperties);
 		}
 
 		return scheduler;

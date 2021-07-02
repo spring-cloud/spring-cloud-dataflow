@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,7 +63,7 @@ public abstract class AbstractSchedulerPerPlatformTest {
 		@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 		public static class CloudFoundryMockConfig {
 			@MockBean
-			protected CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties;
+			protected CloudFoundryDeploymentProperties cloudFoundryDeploymentProperties;
 
 			@Bean
 			@Primary

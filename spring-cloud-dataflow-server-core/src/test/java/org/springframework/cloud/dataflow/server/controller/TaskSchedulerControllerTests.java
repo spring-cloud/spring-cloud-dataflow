@@ -195,7 +195,7 @@ public class TaskSchedulerControllerTests {
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals(createdScheduleName, scheduleInfo.getScheduleName());
 		assertEquals(1, scheduleInfo.getScheduleProperties().size());
-		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.deployer.cron.expression"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
@@ -213,7 +213,7 @@ public class TaskSchedulerControllerTests {
 				"\"spring.datasource.driverClassName\":null," +
 				"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 				"\"spring.cloud.task.name\":\"testDefinition\"}," +
-				"\"deploymentProperties\":{}}", auditRecord.getAuditData());
+				"\"deploymentProperties\":{\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}", auditRecord.getAuditData());
 	}
 
 	@Test
@@ -227,7 +227,7 @@ public class TaskSchedulerControllerTests {
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
 				auditData);
 	}
 
@@ -243,7 +243,7 @@ public class TaskSchedulerControllerTests {
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
 				auditData);
 	}
 
@@ -260,8 +260,8 @@ public class TaskSchedulerControllerTests {
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals("mySchedule", scheduleInfo.getScheduleName());
-		assertEquals(1, scheduleInfo.getScheduleProperties().size());
-		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+		assertEquals(3, scheduleInfo.getScheduleProperties().size());
+		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.deployer.cron.expression"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 

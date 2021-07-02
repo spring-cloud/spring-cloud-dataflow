@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,11 +225,9 @@ public class DefaultSchedulerService implements SchedulerService {
 				appDeploymentProperties, visibleProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
-
+		deployerDeploymentProperties.putAll(taskDeploymentProperties);
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
-
-		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
-				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
+		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		launcher.getScheduler().schedule(scheduleRequest);
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
@@ -418,13 +416,14 @@ public class DefaultSchedulerService implements SchedulerService {
 	 * @param input the scheduler properties
 	 * @return scheduler properties for the task
 	 */
+	@Deprecated
 	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
 		final String prefix = "scheduler.";
 		final int prefixLength = prefix.length();
 
 		return new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
+				.collect(Collectors.toMap(kv -> "spring.cloud.deployer." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
 	}
 
