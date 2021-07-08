@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.boot.Banner;
@@ -30,7 +31,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,10 +41,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  **/
 public class LocalPlatformTests {
 
+	private ConfigurableApplicationContext context;
+
+	@After
+	public void cleanup() {
+		if (this.context != null) {
+			this.context.close();
+		}
+		this.context = null;
+	}
+
 	@Test
 	public void defaultLocalPlatform() {
-		ApplicationContext context = new SpringApplicationBuilder(TestConfig.class)
-				.web(WebApplicationType.NONE)
+		this.context = new SpringApplicationBuilder(TestConfig.class)
+				.web(WebApplicationType.SERVLET)
 				.bannerMode(Banner.Mode.OFF)
 				.properties(testProperties())
 				.run();
@@ -59,8 +70,8 @@ public class LocalPlatformTests {
 
 	@Test
 	public void multipleLocalPlatformAccounts() {
-		ApplicationContext context = new SpringApplicationBuilder(TestConfig.class)
-				.web(WebApplicationType.NONE)
+		this.context = new SpringApplicationBuilder(TestConfig.class)
+				.web(WebApplicationType.SERVLET)
 				.bannerMode(Banner.Mode.OFF)
 				.properties(testProperties(
 						"spring.cloud.dataflow.task.platform.local.accounts[big].javaOpts=-Xmx2048m",

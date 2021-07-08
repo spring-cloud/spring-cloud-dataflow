@@ -29,9 +29,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.mockito.Mockito;
 
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -39,6 +37,7 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.hateoas.HypermediaAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -64,9 +63,8 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
-import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
-import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
@@ -171,7 +169,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -197,11 +194,11 @@ import static org.mockito.Mockito.when;
  */
 @Configuration
 @EnableSpringDataWebSupport
-@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-@Import(CompletionConfiguration.class)
+@Import({CompletionConfiguration.class})
 @ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class,
 		JacksonAutoConfiguration.class,
 		FlywayAutoConfiguration.class,
+		HypermediaAutoConfiguration.class,
 		RestTemplateAutoConfiguration.class })
 @EnableWebMvc
 @EnableConfigurationProperties({ CommonApplicationProperties.class,
@@ -235,9 +232,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
 		return (builder) -> {
 			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds());
-			builder.mixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
-			builder.mixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
-			builder.modules(new JavaTimeModule());
+			builder.modules(new JavaTimeModule(), new Jackson2DataflowModule());
 		};
 	}
 

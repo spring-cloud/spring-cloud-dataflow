@@ -25,10 +25,8 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
-import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -84,8 +82,7 @@ class JobExecutionUtils
 		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
-				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().registerModule(new Jackson2DataflowModule());
 				jacksonConverter.getObjectMapper().setDateFormat(new ISO8601DateFormatWithMilliSeconds());
 			}
 		}

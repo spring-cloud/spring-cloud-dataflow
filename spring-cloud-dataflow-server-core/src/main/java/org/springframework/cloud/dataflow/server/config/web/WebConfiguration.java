@@ -31,8 +31,6 @@ import io.micrometer.core.instrument.Tags;
 import org.h2.tools.Server;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -40,9 +38,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
-import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -136,12 +133,7 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
 		return (builder) -> {
 			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds(TimeZone.getDefault(), Locale.getDefault(), true));
-			// apply SCDF Batch Mixins to
-			// ignore the JobExecution in StepExecution to prevent infinite loop.
-			// https://github.com/spring-projects/spring-hateoas/issues/333
-			builder.mixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
-			builder.mixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
-			builder.modules(new JavaTimeModule(), new Jdk8Module());
+			builder.modules(new JavaTimeModule(), new Jdk8Module(), new Jackson2DataflowModule());
 		};
 	}
 

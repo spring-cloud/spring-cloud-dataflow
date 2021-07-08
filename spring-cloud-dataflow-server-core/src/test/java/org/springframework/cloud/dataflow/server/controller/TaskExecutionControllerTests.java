@@ -266,11 +266,13 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutions() throws Exception {
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
-				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
-						.andExpect(jsonPath("$.content[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
-						.andExpect(jsonPath("$.content", hasSize(4))));
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
 	}
 
 	@Test
@@ -284,13 +286,14 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].", mockMvc
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].", mockMvc
 				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[1].taskName", is(TASK_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[0].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content[1].jobExecutionIds", hasSize(0)))
-				.andExpect(jsonPath("$.content", hasSize(2))));
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[0].taskName", is(TASK_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[1].taskName", is(TASK_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[0].jobExecutionIds", hasSize(0)))
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[1].jobExecutionIds", hasSize(0)))
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(2))));
 	}
 
 	@Test
@@ -317,7 +320,7 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
 		.andDo(print())
 		.andExpect(status().is(400))
-		.andExpect(jsonPath("content[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
+		.andExpect(jsonPath("_embedded.errors[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
 	}
 
 	@Test
@@ -328,16 +331,16 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testDeleteSingleTaskExecutionById() throws Exception {
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 			mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-					.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
-					.andExpect(jsonPath("$.content", hasSize(4))));
+					.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+					.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "REMOVE_DATA"))
 			.andExpect(status().isOk());
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3)))
-						.andExpect(jsonPath("$.content", hasSize(2))));
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(2))));
 	}
 
 	/**
@@ -348,16 +351,16 @@ public class TaskExecutionControllerTests {
 	 */
 	@Test
 	public void testDeleteThreeTaskExecutionsById() throws Exception {
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 			mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-					.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
-					.andExpect(jsonPath("$.content", hasSize(4))));
+					.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+					.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
 		mockMvc.perform(delete("/tasks/executions/1,3").param("action", "REMOVE_DATA"))
 			.andExpect(status().isOk());
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-						.andExpect(jsonPath("$.content[*].executionId", containsInAnyOrder(4)))
-						.andExpect(jsonPath("$.content", hasSize(1))));
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(1))));
 	}
 
 	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {

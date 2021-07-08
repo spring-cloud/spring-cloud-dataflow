@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client.support;
+package org.springframework.cloud.dataflow.rest.support.jackson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

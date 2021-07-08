@@ -37,6 +37,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -60,7 +61,7 @@ public class RootControllerTests {
 
 	@Test
 	public void testRootControllerResponse() throws Exception {
-		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
+		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
 		String expectedResult = StreamUtils.copyToString(

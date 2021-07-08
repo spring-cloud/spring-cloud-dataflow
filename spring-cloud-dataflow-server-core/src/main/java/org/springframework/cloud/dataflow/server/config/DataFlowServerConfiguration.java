@@ -49,7 +49,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -69,7 +68,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  * @author Michael Minella
  * @author Gunnar Hillert
  */
-@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @EnableSpringDataWebSupport
 @Configuration
 @Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class })
@@ -123,13 +121,13 @@ public class DataFlowServerConfiguration {
 		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
 				"task_execution_metadata_seq"));
 	}
-	
+
 	@Bean
 	public AuthenticationSuccessEventListener authenticationSuccessEventListener(
 			AuditRecordService auditRecordService) {
 		return new AuthenticationSuccessEventListener(auditRecordService);
 	}
-	
+
 	@Bean
 	public AppRegistrationRepositoryCustom appRegistrationRepositoryCustom(EntityManager entityManager) {
 		return new AppRegistrationRepositoryImpl(entityManager);

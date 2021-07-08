@@ -167,26 +167,26 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 
 	}
 
@@ -198,25 +198,25 @@ public class RuntimeStreamsControllerTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(2)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=2")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(1)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=3")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1000&size=30")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 	}
 
 	@Test
@@ -228,29 +228,27 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
-
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 	}
-
 
 	@Test
 	public void testGetResponseByStreamNames() throws Exception {
@@ -262,27 +260,26 @@ public class RuntimeStreamsControllerTests {
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
-				// can't expect ordering anymore
-				.andExpect(jsonPath("$.content[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[0].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[0].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[0].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[1].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[1].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[1].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[1].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))))
 
-				.andExpect(jsonPath("$.content[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
-				.andExpect(jsonPath("$.content[2].applications.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[2].applications.content[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[0].instances.content[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
-				.andExpect(jsonPath("$.content[2].applications.content[1].instances.content[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].name", anyOf(is("ticktock1"), is("ticktock2"), is("ticktock3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].name", anyOf(is("log1"), is("log2"), is("log3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid1"), is("guid3"), is("ticktock3.log3-v1-0"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].name", anyOf(is("time1"), is("time2"), is("time3"))))
+				.andExpect(jsonPath("$._embedded.streamStatusResourceList[2].applications._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].guid", anyOf(is("guid2"), is("guid4"), is("ticktock3.time3-v1-0"))));
 	}
 
 	private AppInstanceStatus instance(String id, String guid, String appName) {
