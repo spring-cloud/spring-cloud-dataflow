@@ -233,15 +233,15 @@ public class StreamControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(3)))
-				.andExpect(jsonPath("$.content[0].name", is("myStream1")))
-				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].name", is("myStream1")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is("time | log")))
 
-				.andExpect(jsonPath("$.content[1].name", is("myStream2")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].name", is("myStream2")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":myStream1 > log")))
 
-				.andExpect(jsonPath("$.content[2].name", is("myStream3")))
-				.andExpect(jsonPath("$.content[2].dslText", is(":myStream1.time > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[2].name", is("myStream3")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[2].dslText", is(":myStream1.time > log")));
 	}
 
 	@Test
@@ -261,25 +261,25 @@ public class StreamControllerTests {
 
 		mockMvc.perform(get("/streams/definitions").param("search", "f")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foo")))
-				.andExpect(jsonPath("$.content[1].name", is("foaz")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].name", is("foo")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].name", is("foaz")));
 
 		mockMvc.perform(get("/streams/definitions").param("search", "o")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(3)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foo")))
-				.andExpect(jsonPath("$.content[1].name", is("foaz")))
-				.andExpect(jsonPath("$.content[2].name", is("ooz")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].name", is("foo")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].name", is("foaz")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[2].name", is("ooz")));
 
 		mockMvc.perform(get("/streams/definitions").param("search", "z")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foaz")))
-				.andExpect(jsonPath("$.content[1].name", is("ooz")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].name", is("foaz")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].name", is("ooz")));
 	}
 
 	@Test
@@ -297,8 +297,8 @@ public class StreamControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(1)))
-				.andExpect(jsonPath("$.content[0].dslText", is(":mapper.time > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is(":mapper.time > log")));
 	}
 
 	@Test
@@ -318,9 +318,9 @@ public class StreamControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].dslText", is(":bar.time > log")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":foo.time > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is(":bar.time > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":foo.time > log")));
 	}
 
 	@Test
@@ -372,38 +372,38 @@ public class StreamControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(6)))
-				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":myStream1 > log")))
-				.andExpect(jsonPath("$.content[2].dslText", is(":myStream2 > log")))
-				.andExpect(jsonPath("$.content[3].dslText", is(":myStream1.time > log")))
-				.andExpect(jsonPath("$.content[4].dslText", is(":myStream3 > log")))
-				.andExpect(jsonPath("$.content[5].dslText", is(":TapOnMyStream3 > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(6)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is("time | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[2].dslText", is(":myStream2 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[3].dslText", is(":myStream1.time > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[4].dslText", is(":myStream3 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[5].dslText", is(":TapOnMyStream3 > log")));
 
 		mockMvc.perform(get("/streams/definitions/myStream5/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].dslText", is("time | log --secret='******'")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":myStream5.time > log --password='******'")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is("time | log --secret='******'")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":myStream5.time > log --password='******'")));
 
 		mockMvc.perform(
 				get("/streams/definitions/myAnotherStream1/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].dslText", is("time | log")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":myAnotherStream1 > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is("time | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":myAnotherStream1 > log")));
 
 		mockMvc.perform(get("/streams/definitions/myStream2/related?nested=true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].dslText", is(":myStream1 > log")))
-				.andExpect(jsonPath("$.content[1].dslText", is(":myStream2 > log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is(":myStream2 > log")));
 	}
 
 	@Test
@@ -462,22 +462,22 @@ public class StreamControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(15)))
-				.andExpect(jsonPath("$.content[0].dslText", is("time --password='******' | log")))
-				.andExpect(jsonPath("$.content[1].dslText", is("time --foo=bar | log")))
-				.andExpect(jsonPath("$.content[2].dslText", is("time | log")))
-				.andExpect(jsonPath("$.content[3].dslText", is(":myStream1 > log")))
-				.andExpect(jsonPath("$.content[4].dslText", is(":myStream2 > log")))
-				.andExpect(jsonPath("$.content[5].dslText", is(":myStream1.time > log")))
-				.andExpect(jsonPath("$.content[6].dslText", is(":myStream3 > log")))
-				.andExpect(jsonPath("$.content[7].dslText", is(":TapOnMyStream3 > log")))
-				.andExpect(jsonPath("$.content[8].dslText", is(":myAnotherStream1 > log")))
-				.andExpect(jsonPath("$.content[9].dslText", is("time --format='YYYY MM DD' | log")))
-				.andExpect(jsonPath("$.content[10].dslText", is("a: time --format='YYYY MM DD' | log")))
-				.andExpect(jsonPath("$.content[11].dslText", is("time --password='******' | log --password='******'")))
-				.andExpect(jsonPath("$.content[12].dslText", is("time --password='******' > :foobar")))
-				.andExpect(jsonPath("$.content[13].dslText", is("time --password='******' --arg=foo | log")))
-				.andExpect(jsonPath("$.content[14].dslText", is("time --password='******' --arg=bar | log")));
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList.*", hasSize(15)))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[0].dslText", is("time --password='******' | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[1].dslText", is("time --foo=bar | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[2].dslText", is("time | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[3].dslText", is(":myStream1 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[4].dslText", is(":myStream2 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[5].dslText", is(":myStream1.time > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[6].dslText", is(":myStream3 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[7].dslText", is(":TapOnMyStream3 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[8].dslText", is(":myAnotherStream1 > log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[9].dslText", is("time --format='YYYY MM DD' | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[10].dslText", is("a: time --format='YYYY MM DD' | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[11].dslText", is("time --password='******' | log --password='******'")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[12].dslText", is("time --password='******' > :foobar")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[13].dslText", is("time --password='******' --arg=foo | log")))
+				.andExpect(jsonPath("$._embedded.streamDefinitionResourceList[14].dslText", is("time --password='******' --arg=bar | log")));
 	}
 
 	@Test
@@ -486,8 +486,8 @@ public class StreamControllerTests {
 				.param("name", "myStream")
 				.param("definition", "foo | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("content[0].logref", is("InvalidStreamDefinitionException")))
-				.andExpect(jsonPath("content[0].message",
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("InvalidStreamDefinitionException")))
+				.andExpect(jsonPath("_embedded.errors[0].message",
 						is("Application name 'foo' with type 'source' does not exist in the " + "app "
 								+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app "
 								+ "registry.")));
@@ -498,8 +498,8 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream")
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("content[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
-				jsonPath("content[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
+				jsonPath("_embedded.errors[0].message", startsWith("111E:(pos 6): Unexpected token.  Expected '.' but was")));
 	}
 
 	@Test
@@ -1372,7 +1372,7 @@ public class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		mockMvc.perform(get("/streams/validation/myStream1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andDo(print()).andExpect(content()
-				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\",\"links\":[]}"));
+				.json("{\"appName\":\"myStream1\",\"appStatuses\":{\"source:time\":\"valid\",\"sink:log\":\"valid\"},\"dsl\":\"time | log\"}"));
 	}
 
 	private SpringCloudDeployerApplicationSpec parseSpec(String yamlString) throws IOException {

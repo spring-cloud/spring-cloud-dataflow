@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client.support;
+package org.springframework.cloud.dataflow.rest.support.jackson;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobInstance;
 
 /**
- * Jackson MixIn for {@link JobParameters} de-serialization.
+ * Jackson MixIn for {@link JobInstance} de-serialization.
  *
  * @author Gunnar Hillert
+ * @author Gary Russell
  * @since 1.0
  */
-@JsonIgnoreProperties("empty")
-public abstract class JobParametersJacksonMixIn {
+@JsonIgnoreProperties({ "instanceId" })
+public abstract class JobInstanceJacksonMixIn {
 
-	@JsonProperty
-	abstract boolean isEmpty();
+	JobInstanceJacksonMixIn(@JsonProperty("id") Long id, @JsonProperty("jobName") String jobName) {
+	}
+
 }

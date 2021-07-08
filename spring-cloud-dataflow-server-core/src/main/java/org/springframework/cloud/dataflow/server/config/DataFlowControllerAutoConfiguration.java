@@ -132,7 +132,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
@@ -437,7 +436,7 @@ public class DataFlowControllerAutoConfiguration {
 			// TODO (Tzolov) review the manual Hal convertion configuration
 			objectMapper.registerModule(new Jackson2HalModule());
 			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
-					new AnnotationLinkRelationProvider(), CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
+					new AnnotationLinkRelationProvider(), CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 			RestTemplate restTemplate = restTemplateBuilder

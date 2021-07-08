@@ -37,9 +37,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.rest.support.jackson.ExecutionContextJacksonMixIn;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
-import org.springframework.cloud.dataflow.rest.support.jackson.StepExecutionJacksonMixIn;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -58,6 +57,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -121,8 +121,7 @@ public class JobStepExecutionControllerTests {
 		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
 			if (converter instanceof MappingJackson2HttpMessageConverter) {
 				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				jacksonConverter.getObjectMapper().addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
-				jacksonConverter.getObjectMapper().addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
+				jacksonConverter.getObjectMapper().registerModule(new Jackson2DataflowModule());
 				jacksonConverter.getObjectMapper().setDateFormat(new ISO8601DateFormatWithMilliSeconds());
 			}
 		}
@@ -157,16 +156,18 @@ public class JobStepExecutionControllerTests {
 
 	@Test
 	public void testGetMultipleStepExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*]", hasSize(3)))
-				.andExpect(jsonPath("$.content[0].stepExecution.id", is(4)))
-				.andExpect(jsonPath("$.content[1].stepExecution.id", is(5)))
-				.andExpect(jsonPath("$.content[2].stepExecution.id", is(6)));
+		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[*]", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[0].stepExecution.id", is(4)))
+				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[1].stepExecution.id", is(5)))
+				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[2].stepExecution.id", is(6)));
 	}
 
 	@Test
 	public void testSingleGetStepExecutionProgress() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk()).andExpect(content().json("{finished: " + false + "}"))
 				.andExpect(content().json("{percentageComplete: " + 0.5 + "}"))
 				.andExpect(jsonPath("$.stepExecutionHistory.count", is(0)))

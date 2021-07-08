@@ -39,6 +39,9 @@ logging:
     org.springframework.boot.web.embedded.tomcat: 'INFO'
     # Silence annoying exception trace logged on info level - gh-2750
     org.hibernate.engine.jdbc.env.internal.LobCreatorBuilderImpl: 'WARN'
+server:
+  error:
+    include-message: always
 spring:
   mvc.async.request-timeout: 120000
   batch:
@@ -98,7 +101,7 @@ spring:
             checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
             checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
       task:
-        composedtaskrunner: 
+        composedtaskrunner:
           uri: "maven://org.springframework.cloud:spring-cloud-dataflow-composed-task-runner:@project.version@"
         deployer-properties:
           group-excludes:

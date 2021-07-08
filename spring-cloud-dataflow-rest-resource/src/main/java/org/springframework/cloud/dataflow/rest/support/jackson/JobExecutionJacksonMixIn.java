@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client.support;
+package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.batch.core.JobExecution;
+
 /**
- * Jackson MixIn for StepExecutionHistory de-serialization.
+ * Jackson MixIn for {@link JobExecution} de-serialization. {@link JobExecution} does not
+ * have a default constructor.
  *
- * @author Ilayaperumal Gopinathan
- * @author Glenn Renfro
+ * @author Gunnar Hillert
  * @since 1.0
  */
+@JsonIgnoreProperties({ "running", "jobId", "stopping" })
+public abstract class JobExecutionJacksonMixIn {
 
-@JsonIgnoreProperties({ "count", "durationPerRead" })
-public abstract class StepExecutionHistoryJacksonMixIn {
-
-	@JsonCreator
-	StepExecutionHistoryJacksonMixIn(@JsonProperty("stepName") String stepName) {
+	JobExecutionJacksonMixIn(@JsonProperty("id") Long id) {
 	}
 
 }

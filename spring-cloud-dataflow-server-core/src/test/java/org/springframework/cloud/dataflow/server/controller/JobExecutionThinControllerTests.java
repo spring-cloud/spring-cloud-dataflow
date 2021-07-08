@@ -94,9 +94,9 @@ public class JobExecutionThinControllerTests {
 	@Test
 	public void testGetAllExecutionsJobExecutionOnly() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$.content", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(9)));
 	}
 
 	@Test
@@ -105,8 +105,8 @@ public class JobExecutionThinControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));
 	}
 
 	@Test
@@ -121,9 +121,9 @@ public class JobExecutionThinControllerTests {
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(toDate))
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$.content", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(9)));
 	}
 
 	@Test
@@ -132,9 +132,9 @@ public class JobExecutionThinControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
-				.andExpect(jsonPath("$.content[0].instanceId", is(1)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].instanceId", is(1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));
 	}
 
 	@Test
@@ -143,8 +143,8 @@ public class JobExecutionThinControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].taskExecutionId", is(4)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].taskExecutionId", is(4)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));
 	}
 
 }

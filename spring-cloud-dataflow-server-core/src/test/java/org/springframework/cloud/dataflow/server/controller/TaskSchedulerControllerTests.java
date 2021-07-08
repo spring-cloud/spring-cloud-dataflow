@@ -56,6 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -119,8 +120,8 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("schedule2");
 		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(2)));
 	}
 
 	@Test
@@ -142,8 +143,8 @@ public class TaskSchedulerControllerTests {
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().json("{content:[{\"logref\":\"NoSuchScheduleException\"," +
-						"\"message\":\"Schedule [scheduleNotExisting] doesn't exist\"}]}"));
+				.andExpect(jsonPath("_embedded.errors.[0].message", is("Schedule [scheduleNotExisting] doesn't exist")))
+				.andExpect(jsonPath("_embedded.errors.[0].logref", is("NoSuchScheduleException")));
 	}
 
 	@Test
@@ -158,8 +159,8 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("bar", "schedule2");
 		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2")))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule2")))
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(1)));
 	}
 
 	@Test

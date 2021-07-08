@@ -287,10 +287,10 @@ public class TaskControllerTests {
 				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties", hasEntry("app.test.key1", "value1")));
 		mockMvc.perform(get("/tasks/definitions")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties", is(nullValue())));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].lastTaskExecution.deploymentProperties", is(nullValue())));
 		mockMvc.perform(get("/tasks/definitions?manifest=true")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].lastTaskExecution.deploymentProperties", hasEntry("app.test.key1", "value1")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].lastTaskExecution.deploymentProperties", hasEntry("app.test.key1", "value1")));
 	}
 
 	@Test
@@ -325,25 +325,25 @@ public class TaskControllerTests {
 
 		mockMvc.perform(get("/tasks/definitions").param("search", "f")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foo")))
-				.andExpect(jsonPath("$.content[1].name", is("foz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("search", "oz")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foz")))
-				.andExpect(jsonPath("$.content[1].name", is("ooz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foz")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("ooz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("search", "o")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
-				.andExpect(jsonPath("$.content[0].name", is("foo")))
-				.andExpect(jsonPath("$.content[1].name", is("foz")))
-				.andExpect(jsonPath("$.content[2].name", is("ooz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].name", is("ooz")));
 	}
 
 	@Test
@@ -354,25 +354,25 @@ public class TaskControllerTests {
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].dslText", is("task-foo")))
-				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foo")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].dslText", is("task-foz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "oz")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].dslText", is("task-foz")))
-				.andExpect(jsonPath("$.content[1].dslText", is("task-ooz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foz")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].dslText", is("task-ooz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "o")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
-				.andExpect(jsonPath("$.content[0].dslText", is("task-foo")))
-				.andExpect(jsonPath("$.content[1].dslText", is("task-foz")))
-				.andExpect(jsonPath("$.content[2].dslText", is("task-ooz")));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foo")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].dslText", is("task-foz")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].dslText", is("task-ooz")));
 	}
 
 	@Test
@@ -407,7 +407,7 @@ public class TaskControllerTests {
 		assertThat(repository.count()).isEqualTo(3);
 
 		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(3)));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)));
 
 		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -423,7 +423,7 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(3)));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)));
 
 		mockMvc.perform(delete("/tasks/definitions/myTask-1").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -441,20 +441,21 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("a1-t2", "task"));
 
 		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(4)))
-				.andExpect(jsonPath("$.content[0].name", is("a1")))
-				.andExpect(jsonPath("$.content[0].composedTaskElement", is(false)))
-				.andExpect(jsonPath("$.content[1].name", is("a2")))
-				.andExpect(jsonPath("$.content[1].composedTaskElement", is(false)))
-				.andExpect(jsonPath("$.content[2].name", is("a1-t1")))
-				.andExpect(jsonPath("$.content[2].composedTaskElement", is(true)))
-				.andExpect(jsonPath("$.content[3].name", is("a1-t2")))
-				.andExpect(jsonPath("$.content[3].composedTaskElement", is(true)));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(4)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("a1")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("a2")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].name", is("a1-t1")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].composedTaskElement", is(true)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[3].name", is("a1-t2")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[3].composedTaskElement", is(true)));
 
 		mockMvc.perform(get("/tasks/definitions/a1-t2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name", is("a1-t2")))
 				.andExpect(jsonPath("$.composedTaskElement", is(true)));
 	}
+
 	@Test
 	public void testCTRElementUpdateValidate() throws Exception {
 		repository.save(new TaskDefinition("a1", "t1: task --foo='a|b' && t2: task2"));
@@ -463,21 +464,20 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("a1-t2", "task"));
 
 		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(4)))
-				.andExpect(jsonPath("$.content[0].name", is("a1")))
-				.andExpect(jsonPath("$.content[0].composedTaskElement", is(false)))
-				.andExpect(jsonPath("$.content[1].name", is("a2")))
-				.andExpect(jsonPath("$.content[1].composedTaskElement", is(false)))
-				.andExpect(jsonPath("$.content[2].name", is("a1-t1")))
-				.andExpect(jsonPath("$.content[2].composedTaskElement", is(true)))
-				.andExpect(jsonPath("$.content[3].name", is("a1-t2")))
-				.andExpect(jsonPath("$.content[3].composedTaskElement", is(true)));
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(4)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("a1")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("a2")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].composedTaskElement", is(false)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].name", is("a1-t1")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].composedTaskElement", is(true)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[3].name", is("a1-t2")))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[3].composedTaskElement", is(true)));
 
 		mockMvc.perform(get("/tasks/definitions/a1-t2").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name", is("a1-t2")))
 				.andExpect(jsonPath("$.composedTaskElement", is(true)));
 	}
-
 
 	@Test
 	public void testMissingApplication() throws Exception {
@@ -485,7 +485,8 @@ public class TaskControllerTests {
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().is5xxServerError())
-				.andExpect(content().json("{content:[{message: \"Unknown task app: no-such-task-app\"}]}"));
+				.andExpect(jsonPath("_embedded.errors[0].message", is("Unknown task app: no-such-task-app")))
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("IllegalArgumentException")));
 	}
 
 	@Test
@@ -493,7 +494,8 @@ public class TaskControllerTests {
 		mockMvc.perform(post("/tasks/executions")
 				.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().json("{content:[{message: \"Could not find task definition named myFoo\"}]}"));
+				.andExpect(jsonPath("_embedded.errors[0].message", is("Could not find task definition named myFoo")))
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchTaskDefinitionException")));
 	}
 
 	@Test
@@ -668,15 +670,15 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$.content[0].lastTaskExecution.",
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskDefinitionResourceList[0].lastTaskExecution.",
 				mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 						.andDo(print()))
-				.andExpect(jsonPath("$.content", hasSize(3)))
-				.andExpect(jsonPath("$.content[*].name",
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[*].name",
 						containsInAnyOrder("myTask", "myTask2", "myTask3")))
-				.andExpect(jsonPath("$.content[*].dslText",
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[*].dslText",
 						containsInAnyOrder("timestamp --password='******'", "timestamp --regular=value", "timestamp")))
-				.andExpect(jsonPath("$.content[*].status",
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[*].status",
 						containsInAnyOrder("RUNNING", "COMPLETE", "UNKNOWN")));
 	}
 
@@ -688,7 +690,7 @@ public class TaskControllerTests {
 
 		mockMvc.perform(get("/tasks/validation/myTask")).andExpect(status().isOk())
 				.andDo(print()).andExpect(content().json(
-				"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\",\"links\":[]}"));
+				"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\"}"));
 
 	}
 

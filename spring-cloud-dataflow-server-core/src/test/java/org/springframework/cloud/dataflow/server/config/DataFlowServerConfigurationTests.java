@@ -57,6 +57,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import static org.junit.Assert.assertFalse;
@@ -160,6 +161,7 @@ public class DataFlowServerConfigurationTests {
 	}
 
 	@EnableDataFlowServer
+	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 	private static class TestConfiguration {
 
 		@Bean

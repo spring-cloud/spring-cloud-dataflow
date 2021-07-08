@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.rest.client.support;
+package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import org.springframework.batch.core.JobParameter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Jackson MixIn for {@link JobParameter} de-serialization.
+ * Jackson MixIn for StepExecutionHistory de-serialization.
  *
- * @author Gunnar Hillert
+ * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  * @since 1.0
  */
-@JsonDeserialize(using = JobParameterJacksonDeserializer.class)
-public abstract class JobParameterJacksonMixIn {
+
+public abstract class StepExecutionHistoryJacksonMixIn {
+
+	@JsonCreator
+	StepExecutionHistoryJacksonMixIn(@JsonProperty("stepName") String stepName) {
+	}
 
 }
