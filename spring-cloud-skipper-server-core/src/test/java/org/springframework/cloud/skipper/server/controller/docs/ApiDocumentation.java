@@ -31,6 +31,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,9 +53,11 @@ public class ApiDocumentation extends BaseDocumentation {
 	public void errors() throws Exception {
 		this.mockMvc
 				.perform(get("/error").requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
-						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/path/not/there").requestAttr(
-								RequestDispatcher.ERROR_MESSAGE,
+						.requestAttr(RequestDispatcher.ERROR_EXCEPTION, new IllegalArgumentException())
+						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/path/not/there")
+						.requestAttr(RequestDispatcher.ERROR_MESSAGE,
 								"The path, 'http://localhost:8080/path/not/there', does not exist."))
+				.andDo(print())
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))
@@ -62,6 +65,7 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("error").description(
 								"The HTTP error that occurred (for example, `Bad Request`)."),
 						fieldWithPath("message").description("A description of the cause of the error."),
+						fieldWithPath("exception").description("An exception class."),
 						fieldWithPath("path").description("The path to which the request was made."),
 						fieldWithPath("status").description("The HTTP status code (for example `400`)."),
 						fieldWithPath("timestamp")

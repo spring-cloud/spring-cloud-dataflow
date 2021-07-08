@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.springframework.cloud.skipper.server.controller;
 
 import java.util.Map;
 
+import org.springframework.boot.web.error.ErrorAttributeOptions;
+import org.springframework.boot.web.error.ErrorAttributeOptions.Include;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.cloud.skipper.PackageDeleteException;
@@ -34,15 +36,15 @@ public class SkipperErrorAttributes extends DefaultErrorAttributes {
 
 	/**
 	 * Instantiate a new skipper error attributes. Forces to include error via
-	 * constructor.
+	 * override.
 	 */
 	public SkipperErrorAttributes() {
-		super(true);
 	}
 
 	@Override
-	public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
-		Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
+	public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+		Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest,
+				options.including(Include.EXCEPTION, Include.MESSAGE).excluding(Include.STACK_TRACE));
 		Throwable error = getError(webRequest);
 		// if we're in our skipper related exceptions, reset message as available from there
 		// as otherwise super method above will resolve message as one possibly set from exception handler

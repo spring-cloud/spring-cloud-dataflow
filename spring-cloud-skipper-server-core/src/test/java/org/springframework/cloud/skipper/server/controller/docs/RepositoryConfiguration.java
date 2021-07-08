@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
@@ -25,6 +28,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
+import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.mock;
 
@@ -70,5 +75,14 @@ public class RepositoryConfiguration {
 	@EnableJpaRepositories(basePackages = "org.springframework.cloud.skipper.server.repository.jpa")
 	@Profile("repository")
 	public class JPARepositoryConfiguration {
+	}
+
+	@Configuration
+	public class HypermediaBareJsonConfiguration implements HypermediaMappingInformation {
+
+		@Override
+		public List<MediaType> getMediaTypes() {
+			return Collections.singletonList(MediaType.APPLICATION_JSON);
+		}
 	}
 }

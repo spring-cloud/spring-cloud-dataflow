@@ -17,6 +17,8 @@ package org.springframework.cloud.skipper.server;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -47,6 +49,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerConfiguratio
 import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -62,7 +65,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * @author Mark Pollack
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AbstractMockMvcTests.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(classes = { AbstractMockMvcTests.TestConfig.class,
+		AbstractMockMvcTests.HypermediaBareJsonConfiguration.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
 public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployedTest {
 
@@ -157,5 +161,14 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {
+	}
+
+	@Configuration
+	static class HypermediaBareJsonConfiguration implements HypermediaMappingInformation {
+
+		@Override
+		public List<MediaType> getMediaTypes() {
+			return Collections.singletonList(MediaType.APPLICATION_JSON);
+		}
 	}
 }
