@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -39,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
@@ -60,7 +60,7 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullNameCheck() {
-		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(IllegalArgumentException.class, () -> {
 			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
 			TaskServiceUtils.createComposedTaskDefinition(null);
 		});
@@ -68,7 +68,7 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testCreateComposeTaskDefinitionNullProperties() {
-		Assertions.assertThrows(IllegalArgumentException.class, () -> {
+		assertThrows(IllegalArgumentException.class, () -> {
 			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, null);
 		});
 	}
