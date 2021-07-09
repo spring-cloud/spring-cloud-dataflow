@@ -36,6 +36,7 @@ import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
+import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
@@ -43,6 +44,7 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -77,16 +79,21 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskDefinitionRepository taskDefinitionRepository;
 
+	private LauncherRepository launcherRepository;
+
 	public DefaultTaskJobService(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+			LauncherRepository launcherRepository) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
+		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionService = taskExecutionService;
+		this.launcherRepository = launcherRepository;
 	}
 
 	@Override
@@ -213,7 +220,23 @@ public class DefaultTaskJobService implements TaskJobService {
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
-		String platformName = taskManifest.getPlatformName();
+		String platformName = null;
+		// if task was launched outside of dataflow there will be no task manifest.
+		// in this scenario, if there is only one platform, then use that platform.
+		// else throw exception.
+		if (taskManifest == null) {
+			Iterable<Launcher> launchers = this.launcherRepository.findAll();
+			List<Launcher> launcherList = new ArrayList<>();
+			launchers.forEach(launcherList::add);
+			if(launcherList.size() == 1) {
+				platformName = launcherList.get(0).getName();
+				logger.info(String.format("No task manifest found for task execution " +
+						"associated with this job.  Using %s platform.", platformName));
+			}
+		}
+		else {
+			platformName = taskManifest.getPlatformName();
+		}
 		if (platformName != null) {
 			Map<String, String> deploymentProperties = new HashMap<>();
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);

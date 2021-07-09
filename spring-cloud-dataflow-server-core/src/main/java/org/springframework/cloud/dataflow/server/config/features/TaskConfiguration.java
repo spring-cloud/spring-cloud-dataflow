@@ -208,8 +208,8 @@ public class TaskConfiguration {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
-		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService);
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService, LauncherRepository launcherRepository) {
+		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService, launcherRepository);
 	}
 
 	@Bean

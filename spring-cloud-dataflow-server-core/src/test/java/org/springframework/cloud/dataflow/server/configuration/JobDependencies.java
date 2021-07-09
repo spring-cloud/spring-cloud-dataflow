@@ -242,8 +242,9 @@ public class JobDependencies {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(JobService jobService, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService) {
-		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskExecutionService);
+			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService,
+			LauncherRepository launcherRepository) {
+		return new DefaultTaskJobService(jobService, taskExplorer, taskDefinitionRepository, taskExecutionService, launcherRepository);
 	}
 
 	@Bean
