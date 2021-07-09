@@ -150,6 +150,10 @@ jobs:
           --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=11 springcloud/spring-cloud-skipper-server:$TAG-jdk11
+        pack build \
+          --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-skipper-server:$TAG-jdk16
 
     # docker hub login
     - uses: docker/login-action@v1
@@ -166,6 +170,7 @@ jobs:
         docker push springcloud/spring-cloud-skipper-server:$TAG-jdk11
         docker tag springcloud/spring-cloud-skipper-server:$TAG-jdk11 springcloud/spring-cloud-skipper-server:$TAG
         docker push springcloud/spring-cloud-skipper-server:$TAG
+        docker push springcloud/spring-cloud-skipper-server:$TAG-jdk16
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
