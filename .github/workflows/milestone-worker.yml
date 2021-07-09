@@ -167,6 +167,10 @@ jobs:
           --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=11 springcloud/spring-cloud-dataflow-server:$TAG-jdk11
         pack build \
+          --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-server:$TAG-jdk16
+        pack build \
           --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk8
@@ -174,6 +178,10 @@ jobs:
           --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
           --env BP_JVM_VERSION=11 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk11
+        pack build \
+          --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk16
 
     # docker hub login
     - uses: docker/login-action@v1
@@ -194,6 +202,8 @@ jobs:
         docker tag springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk11 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
         docker push springcloud/spring-cloud-dataflow-server:$TAG
         docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
+        docker push springcloud/spring-cloud-dataflow-server:$TAG-jdk16
+        docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk16
 
     # build/publish support images
     - name: Publish Grafana Prometheus
