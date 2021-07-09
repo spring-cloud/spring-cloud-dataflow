@@ -30,10 +30,6 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -56,42 +52,42 @@ public class ComposedTaskPropertiesTests {
 		properties.setDataflowServerPassword("bar");
 		properties.setDataflowServerAccessToken("foobar");
 		properties.setSkipTlsCertificateVerification(true);
-		assertEquals("aaa", properties.getComposedTaskProperties());
-		assertEquals("bbb", properties.getComposedTaskArguments());
-		assertEquals(12345, properties.getIntervalTimeBetweenChecks());
-		assertEquals(6789, properties.getMaxWaitTime());
-		assertEquals("http://test", properties.getDataflowServerUri().toString());
-		assertEquals("ddd", properties.getGraph());
-		assertEquals("foo", properties.getDataflowServerUsername());
-		assertEquals("bar", properties.getDataflowServerPassword());
-		assertEquals("foobar", properties.getDataflowServerAccessToken());
-		assertTrue(properties.isSkipTlsCertificateVerification());
+		assertThat(properties.getComposedTaskProperties()).isEqualTo("aaa");
+		assertThat(properties.getComposedTaskArguments()).isEqualTo("bbb");
+		assertThat(properties.getIntervalTimeBetweenChecks()).isEqualTo(12345);
+		assertThat(properties.getMaxWaitTime()).isEqualTo(6789);
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://test");
+		assertThat(properties.getGraph()).isEqualTo("ddd");
+		assertThat(properties.getDataflowServerUsername()).isEqualTo("foo");
+		assertThat(properties.getDataflowServerPassword()).isEqualTo("bar");
+		assertThat(properties.getDataflowServerAccessToken()).isEqualTo("foobar");
+		assertThat(properties.isSkipTlsCertificateVerification()).isTrue();
 	}
 
 	@Test
 	public void testDataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertEquals("http://localhost:9393", properties.getDataflowServerUri().toString());
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
 	}
 
 	@Test
 	public void testSkipSslVerificationDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertFalse(properties.isSkipTlsCertificateVerification());
+		assertThat(properties.isSkipTlsCertificateVerification()).isFalse();
 	}
 
 	@Test
 	public void testThreadDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT, properties.getSplitThreadCorePoolSize());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT, properties.getSplitThreadKeepAliveSeconds());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT, properties.getSplitThreadMaxPoolSize());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT, properties.getSplitThreadQueueCapacity());
-		assertEquals("http://localhost:9393", properties.getDataflowServerUri().toString());
-		assertFalse(properties.isSplitThreadAllowCoreThreadTimeout());
-		assertFalse(properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
-		assertNull(properties.getDataflowServerUsername());
-		assertNull(properties.getDataflowServerPassword());
+		assertThat(properties.getSplitThreadCorePoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT);
+		assertThat(properties.getSplitThreadKeepAliveSeconds()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT);
+		assertThat(properties.getSplitThreadMaxPoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT);
+		assertThat(properties.getSplitThreadQueueCapacity()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT);
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.isSplitThreadAllowCoreThreadTimeout()).isFalse();
+		assertThat(properties.isSplitThreadWaitForTasksToCompleteOnShutdown()).isFalse();
+		assertThat(properties.getDataflowServerUsername()).isNull();
+		assertThat(properties.getDataflowServerPassword()).isNull();
 	}
 
 	@Test

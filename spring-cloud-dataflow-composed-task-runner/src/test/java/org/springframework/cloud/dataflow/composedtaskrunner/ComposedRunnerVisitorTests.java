@@ -47,9 +47,7 @@ import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 /**
@@ -74,29 +72,29 @@ public class ComposedRunnerVisitorTests {
 	public void singleTest() {
 		setupContextForGraph("AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
-		assertEquals(1, stepExecutions.size());
+		assertThat(stepExecutions.size()).isEqualTo(1);
 		StepExecution stepExecution = stepExecutions.iterator().next();
-		assertEquals("AAA_0", stepExecution.getStepName());
+		assertThat(stepExecution.getStepName()).isEqualTo("AAA_0");
 	}
 
 	@Test
 	public void testFailedGraph() {
 		setupContextForGraph("failedStep && AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
-		assertEquals(1, stepExecutions.size());
+		assertThat(stepExecutions.size()).isEqualTo(1);
 		StepExecution stepExecution = stepExecutions.iterator().next();
-		assertEquals("failedStep_0", stepExecution.getStepName());
+		assertThat(stepExecution.getStepName()).isEqualTo("failedStep_0");
 	}
 
 	@Test
 	public void testEmbeddedFailedGraph() {
 		setupContextForGraph("AAA && failedStep && BBB");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
-		assertEquals(2, stepExecutions.size());
+		assertThat(stepExecutions.size()).isEqualTo(2);
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("failedStep_0", sortedStepExecution.get(1).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(1).getStepName()).isEqualTo("failedStep_0");
 	}
 
 //	@Ignore("Disabling till parser can support duplicate tasks")
@@ -104,11 +102,11 @@ public class ComposedRunnerVisitorTests {
 	public void duplicateTaskTest() {
 		setupContextForGraph("AAA && AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
-		assertEquals(2, stepExecutions.size());
+		assertThat(stepExecutions.size()).isEqualTo(2);
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_1", sortedStepExecution.get(0).getStepName());
-		assertEquals("AAA_0", sortedStepExecution.get(1).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_1");
+		assertThat(sortedStepExecution.get(1).getStepName()).isEqualTo("AAA_0");
 
 	}
 
@@ -116,14 +114,14 @@ public class ComposedRunnerVisitorTests {
 	public void testSequential() {
 		setupContextForGraph("AAA && BBB && CCC");
 		List<StepExecution> stepExecutions = getSortedStepExecutions(getStepExecutions());
-		assertEquals(3, stepExecutions.size());
+		assertThat(stepExecutions.size()).isEqualTo(3);
 		Iterator<StepExecution> iterator = stepExecutions.iterator();
 		StepExecution stepExecution = iterator.next();
-		assertEquals("AAA_0", stepExecution.getStepName());
+		assertThat(stepExecution.getStepName()).isEqualTo("AAA_0");
 		stepExecution = iterator.next();
-		assertEquals("BBB_0", stepExecution.getStepName());
+		assertThat(stepExecution.getStepName()).isEqualTo("BBB_0");
 		stepExecution = iterator.next();
-		assertEquals("CCC_0", stepExecution.getStepName());
+		assertThat(stepExecution.getStepName()).isEqualTo("CCC_0");
 	}
 
 	@ParameterizedTest
@@ -132,10 +130,10 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("<AAA||BBB||CCC>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(3, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
+		assertThat(stepExecutions.size()).isEqualTo(3);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
 	}
 
 	@ParameterizedTest
@@ -144,11 +142,11 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("<<AAA || BBB > && CCC || DDD>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(4, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
+		assertThat(stepExecutions.size()).isEqualTo(4);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
 	}
 
 	@Test
@@ -165,13 +163,13 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("<<AAA || BBB> || <CCC || DDD>> && <EEE || FFF>", "--splitThreadCorePoolSize=3");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(6, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("EEE_0"));
-		assertTrue(stepNames.contains("FFF_0"));
+		assertThat(stepExecutions.size()).isEqualTo(6);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
+		assertThat(stepNames.contains("FFF_0")).isTrue();
 	}
 	
 
@@ -180,12 +178,12 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("<AAA||BBB||CCC> && <DDD||EEE>");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(5, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("EEE_0"));
+		assertThat(stepExecutions.size()).isEqualTo(5);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
 	}
 
 	@Test
@@ -193,16 +191,16 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA && <BBB||CCC||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(5, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("EEE_0"));
+		assertThat(stepExecutions.size()).isEqualTo(5);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("EEE_0", sortedStepExecution.get(4).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(4).getStepName()).isEqualTo("EEE_0");
 	}
 
 	@Test
@@ -210,16 +208,16 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(5, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("FFF_0"));
+		assertThat(stepExecutions.size()).isEqualTo(5);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("FFF_0")).isTrue();
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("DDD_0", sortedStepExecution.get(4).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(4).getStepName()).isEqualTo("DDD_0");
 	}
 
 	@Test
@@ -233,10 +231,10 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA && failedStep 'FAILED' -> EEE && FFF && <BBB||CCC> && DDD");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(3, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("failedStep_0"));
-		assertTrue(stepNames.contains("EEE_0"));
+		assertThat(stepExecutions.size()).isEqualTo(3);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("failedStep_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
 	}
 
 	@Test
@@ -244,11 +242,11 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA && <BBB||failedStep||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(4, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("failedStep_0"));
+		assertThat(stepExecutions.size()).isEqualTo(4);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("failedStep_0")).isTrue();
 	}
 
 	@Test
@@ -256,18 +254,18 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA && <BBB && FFF||CCC||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(6, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("BBB_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
-		assertTrue(stepNames.contains("EEE_0"));
-		assertTrue(stepNames.contains("FFF_0"));
+		assertThat(stepExecutions.size()).isEqualTo(6);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("BBB_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
+		assertThat(stepNames.contains("FFF_0")).isTrue();
 
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("EEE_0", sortedStepExecution.get(5).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(5).getStepName()).isEqualTo("EEE_0");
 	}
 
 	@Test
@@ -275,9 +273,9 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("failedStep 'FAILED' -> AAA * -> BBB");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(2, stepExecutions.size());
-		assertTrue(stepNames.contains("failedStep_0"));
-		assertTrue(stepNames.contains("AAA_0"));
+		assertThat(stepExecutions.size()).isEqualTo(2);
+		assertThat(stepNames.contains("failedStep_0")).isTrue();
+		assertThat(stepNames.contains("AAA_0")).isTrue();
 	}
 
 	@Test
@@ -285,9 +283,9 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA 'FAILED' -> BBB * -> CCC");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(2, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("CCC_0"));
+		assertThat(stepExecutions.size()).isEqualTo(2);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
 	}
 
 	@Test
@@ -301,14 +299,14 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA 'FAILED' -> BBB && CCC 'FAILED' -> DDD '*' -> EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(3, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("EEE_0"));
+		assertThat(stepExecutions.size()).isEqualTo(3);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("EEE_0")).isTrue();
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("EEE_0", sortedStepExecution.get(2).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(2).getStepName()).isEqualTo("EEE_0");
 	}
 
 	@Test
@@ -322,14 +320,14 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph("AAA 'FAILED' -> BBB && CCC * -> DDD ");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
-		assertEquals(3, stepExecutions.size());
-		assertTrue(stepNames.contains("AAA_0"));
-		assertTrue(stepNames.contains("CCC_0"));
-		assertTrue(stepNames.contains("DDD_0"));
+		assertThat(stepExecutions.size()).isEqualTo(3);
+		assertThat(stepNames.contains("AAA_0")).isTrue();
+		assertThat(stepNames.contains("CCC_0")).isTrue();
+		assertThat(stepNames.contains("DDD_0")).isTrue();
 		List<StepExecution> sortedStepExecution =
 				getSortedStepExecutions(stepExecutions);
-		assertEquals("AAA_0", sortedStepExecution.get(0).getStepName());
-		assertEquals("DDD_0", sortedStepExecution.get(2).getStepName());
+		assertThat(sortedStepExecution.get(0).getStepName()).isEqualTo("AAA_0");
+		assertThat(sortedStepExecution.get(2).getStepName()).isEqualTo("DDD_0");
 	}
 
 
@@ -383,10 +381,10 @@ public class ComposedRunnerVisitorTests {
 	private Collection<StepExecution> getStepExecutions() {
 		JobExplorer jobExplorer = this.applicationContext.getBean(JobExplorer.class);
 		List<JobInstance> jobInstances = jobExplorer.findJobInstancesByJobName("job", 0, 1);
-		assertEquals(1, jobInstances.size());
+		assertThat(jobInstances.size()).isEqualTo(1);
 		JobInstance jobInstance = jobInstances.get(0);
 		List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
-		assertEquals(1, jobExecutions.size());
+		assertThat(jobExecutions.size()).isEqualTo(1);
 		JobExecution jobExecution = jobExecutions.get(0);
 		return jobExecution.getStepExecutions();
 	}

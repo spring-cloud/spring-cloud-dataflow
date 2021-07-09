@@ -70,8 +70,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -128,18 +127,18 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(1L, chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
+				.get("task-execution-id")).isEqualTo(1L);
 
 		mockReturnValForTaskExecution(2L);
 		chunkContext = chunkContext();
 		createCompleteTaskExecution(0);
 		taskLauncherTasklet = getTaskExecutionTasklet();
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(2L, chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
+				.get("task-execution-id")).isEqualTo(2L);
 	}
 
 	@Test
@@ -169,12 +168,12 @@ public class TaskLauncherTaskletTests {
 		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
 		taskLauncherTasklet.setArguments(null);
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(2L, chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
-		assertEquals("--spring.cloud.task.parent-execution-id=88", ((List)chunkContext.getStepContext()
+				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).get(0));
+				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
 
 	@Test
@@ -195,12 +194,12 @@ public class TaskLauncherTaskletTests {
 		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
 		taskLauncherTasklet.setArguments(null);
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(2L, chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
-		assertEquals("--spring.cloud.task.parent-execution-id=88", ((List)chunkContext.getStepContext()
+				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).get(0));
+				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
 
 	private TaskLauncherTasklet prepTaskLauncherTests() throws Exception{
@@ -210,12 +209,12 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertEquals(1L, chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-execution-id"));
-		assertNull(chunkContext.getStepContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("task-arguments"));
+				.get("task-arguments")).isNull();
 		return taskLauncherTasklet;
 	}
 
@@ -313,7 +312,7 @@ public class TaskLauncherTaskletTests {
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("A username may be specified only together with a password", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("A username may be specified only together with a password");
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown");
@@ -332,7 +331,7 @@ public class TaskLauncherTaskletTests {
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("A password may be specified only together with a username", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("A password may be specified only together with a username");
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown");
