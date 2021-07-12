@@ -22,6 +22,11 @@ management:
   endpoints:
     web:
       base-path: /management
+      exposure:
+        include: "health,info"
+  endpoint:
+    info:
+      enabled: true
   security:
     roles: MANAGE
 logging:
