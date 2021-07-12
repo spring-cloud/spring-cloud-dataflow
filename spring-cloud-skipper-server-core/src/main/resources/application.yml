@@ -7,6 +7,13 @@ management:
   security:
     roles: MANAGE
   context-path: /actuator
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    info:
+      enabled: true
   metrics:
     tags:
       application: "@project.artifactId@"
