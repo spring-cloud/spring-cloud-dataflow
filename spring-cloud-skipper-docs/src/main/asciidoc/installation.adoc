@@ -191,7 +191,7 @@ You can use this image to run the Skipper server in Kubernetes.
 
 
 [[skipper-kubernetes-configuration]]
-=== Kuberenetes configuration
+=== Kubernetes configuration
 
 
 The following example YAML file configures two accounts, named `k8s-dev` and `k8sqa`, on a Kubernetes cluster.
