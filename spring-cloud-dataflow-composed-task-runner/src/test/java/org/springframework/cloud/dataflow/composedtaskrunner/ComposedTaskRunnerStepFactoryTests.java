@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -40,7 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -56,8 +55,8 @@ public class ComposedTaskRunnerStepFactoryTests {
 	@Test
 	public void testStep() throws Exception{
 		Step step = stepFactory.getObject();
-		assertEquals("FOOBAR", step.getName());
-		assertEquals(Integer.MAX_VALUE, step.getStartLimit());
+		assertThat(step.getName()).isEqualTo("FOOBAR");
+		assertThat(step.getStartLimit()).isEqualTo(Integer.MAX_VALUE);
 	}
 
 	@Configuration
