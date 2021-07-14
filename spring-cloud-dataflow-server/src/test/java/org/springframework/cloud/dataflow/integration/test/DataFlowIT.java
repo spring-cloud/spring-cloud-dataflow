@@ -1546,7 +1546,7 @@ public class DataFlowIT {
 
 	@Test
 	public void multipleTaskAppVersionTest() {
-		logger.info("basic-batch-fail-restart-test");
+		logger.info("multiple task app version test");
 		Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"),
 				"upgradeRollbackTaskAppVersionTest: SKIP - SCDF 2.7.x and below!");
 
@@ -1562,8 +1562,8 @@ public class DataFlowIT {
 			//Verify task
 			validateSuccessfulTaskLaunch(task, launchId);
 			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
-
-			if(!runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+			DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp", ApplicationType.task,false);
+			if(taskResource.getUri().startsWith("maven:")) {
 				try {
 					appRegistryOperations.register("timestamp", ApplicationType.task,
 							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
