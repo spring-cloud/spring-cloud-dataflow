@@ -579,7 +579,7 @@ The following example shows how you can individually configure applications:
 ====
 [source,options=nowrap]
 ----
-deployer.<application>.kubernetes.tolerations=[{key: 'mykey' operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
+deployer.<application>.kubernetes.tolerations=[{key: 'mykey', operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
 ----
 ====
 
