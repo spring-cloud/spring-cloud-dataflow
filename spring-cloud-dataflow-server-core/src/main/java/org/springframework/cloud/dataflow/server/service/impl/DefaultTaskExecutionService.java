@@ -64,6 +64,7 @@ import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.listener.TaskExecutionException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -793,7 +794,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (StringUtils.hasText(platformName)) {
 			platformNameToUse = platformName;
 		} else {
-			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
+			TaskExecution platformTaskExecution = taskExecution;
+			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
+			// If TaskExecution does not have an associated platform see if parent task has the platform information.
+			if(taskDeployment == null) {
+				if(platformTaskExecution.getParentExecutionId() != null) {
+					platformTaskExecution = this.taskExplorer.getTaskExecution(platformTaskExecution.getParentExecutionId());
+					taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
+				}
+				if(taskDeployment == null) {
+					throw new TaskExecutionException(String.format("No platform could be found for task execution id %s", taskExecution.getExecutionId()));
+				}
+			}
 			platformNameToUse = taskDeployment.getPlatformName();
 		}
 		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);

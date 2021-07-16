@@ -476,6 +476,8 @@ If you submit a stop for a task execution that has child task executions associa
 WARNING: When stopping a task execution that has a running Spring Batch job, the job is left with a batch status of `STARTED`.
 Each of the supported platforms sends a SIG-INT to the task application when a stop is requested. That allows Spring Cloud Task to capture the state of the app. However, Spring Batch does not handle a SIG-INT and, as a result, the job stops but remains in the STARTED status.
 
+NOTE: When launching Remote Partitioned Spring Batch Task applications, Spring Cloud Data Flow supports stopping a worker partition task directly for both Cloud Foundry and Kubernetes platforms.  Stopping worker partition task is not supported for the local platform.
+
 ==== Stopping a Task Execution that was Started Outside of Spring Cloud Data Flow
 
 You may wish to stop a task that has been launched outside of Spring Cloud Data Flow. An example of this is the worker applications launched by a remote batch partitioned application.

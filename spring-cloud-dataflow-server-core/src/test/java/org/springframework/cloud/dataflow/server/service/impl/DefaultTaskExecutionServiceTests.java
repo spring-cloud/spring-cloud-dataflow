@@ -81,6 +81,7 @@ import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.cloud.task.listener.TaskException;
+import org.springframework.cloud.task.listener.TaskExecutionException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -93,6 +94,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
@@ -831,6 +833,36 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskExecutionService.stopTaskExecution(executionIds);
 			String logEntries = outputCapture.toString();
 			assertTrue(logEntries.contains("Task execution stop request for id 1 for platform default has been submitted"));
+		}
+		@Test
+		@DirtiesContext
+		public void executeStopTaskTestForChildApp() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", 1L);
+			this.taskRepository.createTaskExecution(taskExecution);
+			Set<Long> executionIds = new HashSet<>(1);
+			executionIds.add(2L);
+			taskExecutionService.stopTaskExecution(executionIds);
+			String logEntries = outputCapture.toString();
+			assertTrue(logEntries.contains("Task execution stop request for id 2 for platform default has been submitted"));
+		}
+
+		@Test
+		@DirtiesContext
+		public void executeStopTaskTestAppNoPlatform() {
+			initializeSuccessfulRegistry(appRegistry);
+			when(taskLauncher.launch(any())).thenReturn("0");
+			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", null);
+			this.taskRepository.createTaskExecution(taskExecution);
+			Set<Long> executionIds = new HashSet<>(1);
+			executionIds.add(2L);
+			TaskExecutionException exception = assertThrows(TaskExecutionException.class, () -> {
+				taskExecutionService.stopTaskExecution(executionIds);
+			});
+			assertThat(exception.getMessage()).isEqualTo("No platform could be found for task execution id 2");
 		}
 
 		@Test
