@@ -1705,7 +1705,7 @@ public class DataFlowIT {
 
 	private void verifyTaskDefAndTaskExecutionCount(String taskName, int taskDefCount, int taskExecCount) {
 		assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream().
-				filter(taskExecution -> taskExecution.getTaskName().equals(taskName)).
+				filter(taskExecution -> taskExecution.getTaskName() != null && taskExecution.getTaskName().equals(taskName)).
 				collect(Collectors.toList()).size()).isEqualTo(taskExecCount);
 		assertThat(dataFlowOperations.taskOperations().list().getContent().size()).isEqualTo(taskDefCount);
 	}
