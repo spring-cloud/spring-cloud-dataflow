@@ -8,6 +8,7 @@
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
 		<version>2.9.0-SNAPSHOT</version>
 	</parent>
+
 	<artifactId>spring-cloud-dataflow-tasklauncher</artifactId>
 	<packaging>pom</packaging>
 
@@ -16,6 +17,7 @@
 		<module>spring-cloud-dataflow-tasklauncher-sink</module>
 		<module>spring-cloud-dataflow-tasklauncher-sink-kafka</module>
 		<module>spring-cloud-dataflow-tasklauncher-sink-rabbit</module>
+		<module>spring-cloud-dataflow-tasklauncher-sink-dependencies</module>
 	</modules>
 	<dependencies>
 		<dependency>

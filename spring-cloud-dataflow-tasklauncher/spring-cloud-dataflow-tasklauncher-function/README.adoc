@@ -1,4 +1,4 @@
-# TaskLauncher Function
+# Spring Cloud Dataflow TaskLauncher Function
 
 This module provides a `Function` that uses the Data Flow REST client to launch a registered task on a configured https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-local-tasks[task platform].
 The client must be configured to connect to a remote Data Flow Server, including any required authentication (see Configuration Options below).
@@ -14,7 +14,7 @@ You may inject this as `TaskLauncherFunction` which implements `Function<LaunchR
 You can use `taskLauncherFunction` as a qualifier when injecting.
 
 Once injected, you can use the `apply` method of the `Function` to launch a task.
-The function takes a link:src/main/java/org/springframework/cloud/fn/tasklauncher/LaunchRequest.java[LaunchRequest] as input.
+The function takes a link:src/main/java/org/springframework/cloud/dataflow/tasklauncher/LaunchRequest.java[LaunchRequest] as input.
 This is a simple value object that specifies, at a minimum, the name of the task registered in Data Flow.
 Optionally, you can pass command line arguments as a `List<String>` and deployment properties as a `Map<String, String>`.
 The return value is an `Optional` containing the unique task ID of the launched instance if the launch request is successful.
@@ -25,15 +25,15 @@ NOTE: This version of the tasklauncher requires Spring Cloud Data Flow version 2
 
 Specific properties, including the task platform name are prefixed with `tasklauncher`.
 
-For more information on the various options available, please see link:src/main/java/org/springframework/cloud/fn/tasklauncher/TaskLauncherFunctionProperties.java[TaskLauncherFunctionProperties.java]
+For more information on the various options available, please see link:src/main/java/org/springframework/cloud/dataflow/tasklauncher/TaskLauncherFunctionProperties.java[TaskLauncherFunctionProperties.java]
 
 Data Flow client configuration properties are prefixed with `spring.cloud.dataflow.client`.
 Please see https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-rest-client/src/main/java/org/springframework/cloud/dataflow/rest/client/config/DataFlowClientProperties.java[DataFlowClientProperties.java] for more details.
 
 ## Examples
 
-See this link:src/test/java/org/springframework/cloud/fn/tasklauncher/TaskLauncherFunctionApplicationTests.java[test suite] for examples of how this function is used.
+See this link:src/test/java/org/springframework/cloud/dataflow/tasklauncher/TaskLauncherFunctionApplicationTests.java[test suite] for examples of how this function is used.
 
 ## Other usage
 
-See this link:../../../applications/sink/tasklauncher-sink/README.adoc[README] where this function is used to create a Spring Cloud Stream application to submit task launch requests.
+See the link:../spring-cloud-dataflow-tasklauncher-sink/README.adoc[Tasklauncher Sink documentation] where this function is used to create a Spring Cloud Stream application to submit task launch requests.

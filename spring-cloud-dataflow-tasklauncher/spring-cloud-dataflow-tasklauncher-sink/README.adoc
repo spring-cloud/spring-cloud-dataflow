@@ -1,5 +1,5 @@
 //tag::ref-doc[]
-= Tasklauncher Sink
+= Spring Cloud Dataflow Tasklauncher Sink
 
 This module consumes LaunchRequest messages from a `PollableMessageSource` and uses the Data Flow REST client to launch a registered task on a configured https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-local-tasks[task platform].
 The client must be configured to connect to a remote Data Flow Server, including any required authentication (see Configuration Options below).

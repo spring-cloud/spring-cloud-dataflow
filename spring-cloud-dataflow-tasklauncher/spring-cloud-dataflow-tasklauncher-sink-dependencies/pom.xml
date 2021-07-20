@@ -5,40 +5,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-dataflow-parent</artifactId>
+		<artifactId>spring-cloud-dataflow-tasklauncher</artifactId>
 		<version>2.9.0-SNAPSHOT</version>
-		<relativePath>../../pom.xml</relativePath>
 	</parent>
-	<artifactId>spring-cloud-dataflow-tasklauncher-sink-build</artifactId>
-	<packaging>pom</packaging>
-	<name>spring-cloud-dataflow-tasklauncher-sink-build</name>
-	<description>spring-cloud-dataflow-tasklauncher sink application common build</description>
 
-	<properties>
-		<skipTests>true</skipTests>
-	</properties>
+	<artifactId>spring-cloud-dataflow-tasklauncher-sink-dependencies</artifactId>
+	<packaging>pom</packaging>
+	<name>spring-cloud-dataflow-tasklauncher-sink-dependencies</name>
+	<description>spring-cloud-dataflow-tasklauncher sink application common dependencies</description>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-tasklauncher-sink</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
@@ -117,82 +97,4 @@
 			<artifactId>java-cfenv-boot</artifactId>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
-			<plugin>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
-				<configuration>
-					<storeFilteredMetadata>true</storeFilteredMetadata>
-					<metadataFilter>
-						<names>
-						</names>
-						<sourceTypes>
-							<filter>org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunctionProperties</filter>
-							<filter>org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties
-							</filter>
-							<filter>
-								org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties$Authentication
-							</filter>
-							<filter>
-								org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties$Authentication$Basic
-							</filter>
-							<filter>
-								org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties$Authentication$Oauth2
-							</filter>
-							<filter>TriggerProperties</filter>
-						</sourceTypes>
-					</metadataFilter>
-				</configuration>
-				<executions>
-					<execution>
-						<id>aggregate-metadata</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>aggregate-metadata</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>${skipTests}</skipTests>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>javadoc</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<quiet>true</quiet>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>
