@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,13 @@ import org.apache.http.protocol.HttpContext;
  * Solution is to implement a HTTP redirect strategy that removes the original Authorization headers when the request is
  * redirected toward an Amazon signed URL.
  *
+ * Azure have same type of issues as S3 so header needs to be dropped as well.
+ * (https://docs.microsoft.com/en-us/azure/container-registry/container-registry-faq#authentication-information-is-not-given-in-the-correct-format-on-direct-rest-api-calls)
+ *
  * @author Adam J. Weigold
+ * @author Janne Valkealahti
  */
-public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy extends DefaultRedirectStrategy {
+public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedirectStrategy {
 
 	private static final String AMZ_CREDENTIAL = "X-Amz-Credential";
 
@@ -67,6 +71,11 @@ public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy extends De
 					&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME))) {
 				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
 			}
+		}
+
+		if (request.getRequestLine().getUri().contains("azurecr.io")) {
+			final String method = request.getRequestLine().getMethod();
+			return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
 		}
 
 		return httpUriRequest;
