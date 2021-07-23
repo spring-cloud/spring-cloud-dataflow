@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundr
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformTokenProvider;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundrySchedulerClientProvider;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -67,7 +66,7 @@ import static org.mockito.Mockito.when;
 	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
 	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
 	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
-	"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
+	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
 	})
 @RunWith(SpringRunner.class)
 public class CloudFoundrySchedulerTests {
@@ -138,8 +137,6 @@ public class CloudFoundrySchedulerTests {
 				mock(CloudFoundrySchedulerClientProvider.class);
 			when(cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString()))
 				.thenReturn(mock(SchedulerClient.class));
-			when(cloudFoundrySchedulerClientProvider.schedulerProperties()).thenReturn(
-				new CloudFoundrySchedulerProperties());
 			return cloudFoundrySchedulerClientProvider;
 		}
 

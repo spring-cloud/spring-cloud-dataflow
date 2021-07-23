@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -72,9 +71,9 @@ public class CloudFoundryTaskPlatformAutoConfiguration {
 	public CloudFoundrySchedulerClientProvider schedulerClientProvider(
 			CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
 			CloudFoundryPlatformTokenProvider platformTokenProvider,
-			Optional<CloudFoundrySchedulerProperties> schedulerProperties) {
+			CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
 		return new CloudFoundrySchedulerClientProvider(
-				connectionContextProvider, platformTokenProvider, schedulerProperties);
+				connectionContextProvider, platformTokenProvider, cloudFoundryPlatformProperties);
 	}
 
 	@Bean

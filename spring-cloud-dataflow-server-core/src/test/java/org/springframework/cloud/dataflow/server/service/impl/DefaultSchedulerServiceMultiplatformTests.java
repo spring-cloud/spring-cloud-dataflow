@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
 
-	private static final String SCHEDULER_PREFIX = "spring.cloud.scheduler.";
+	private static final String DEPLOYER_PREFIX = "spring.cloud.deployer.";
 
 	private static final String BASE_SCHEDULE_NAME = "mytaskschedule";
 
@@ -160,8 +160,8 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
 		this.resolvedProperties = new HashMap<>();
-		this.resolvedProperties.put(SCHEDULER_PREFIX + "AAAA", "* * * * *");
-		this.resolvedProperties.put(SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
+		this.resolvedProperties.put(DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.resolvedProperties.put(DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
 		this.commandLineArgs = new ArrayList<>();
 	}
 

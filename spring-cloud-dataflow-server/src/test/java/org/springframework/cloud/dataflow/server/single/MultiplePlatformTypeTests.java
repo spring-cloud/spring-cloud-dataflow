@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
 		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
 		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
-		"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
+		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.scheduler-url=https://localhost"
 	})
 @RunWith(SpringRunner.class)
 public class MultiplePlatformTypeTests {

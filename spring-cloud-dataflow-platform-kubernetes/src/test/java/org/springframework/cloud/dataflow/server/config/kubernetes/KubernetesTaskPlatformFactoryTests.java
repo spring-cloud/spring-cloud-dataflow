@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncher;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesTaskLauncherProperties;
 import org.springframework.cloud.deployer.spi.kubernetes.RestartPolicy;
@@ -77,7 +76,7 @@ public class KubernetesTaskPlatformFactoryTests {
 		assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
 		Launcher taskLauncher = taskPlatform.getLaunchers().get(0);
-		KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
+		KubernetesDeployerProperties properties = (KubernetesDeployerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
 		assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
 
 		assertThat(taskLauncher.getScheduler()).isNotNull();
@@ -110,7 +109,7 @@ public class KubernetesTaskPlatformFactoryTests {
 		for (Launcher taskLauncher: taskPlatform.getLaunchers()) {
 			assertThat(taskLauncher.getName().equals("k8s") || taskLauncher.getName().equals("test")).isTrue();
 			if (taskLauncher.getName().equals("k8s")) {
-				KubernetesSchedulerProperties properties = (KubernetesSchedulerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
+				KubernetesDeployerProperties properties = (KubernetesDeployerProperties) ReflectionTestUtils.getField(taskLauncher.getScheduler(), "properties");
 				assertThat(properties.getLimits().getMemory()).isEqualTo("5555Mi");
 
 				assertThat(taskLauncher.getScheduler()).isNotNull();

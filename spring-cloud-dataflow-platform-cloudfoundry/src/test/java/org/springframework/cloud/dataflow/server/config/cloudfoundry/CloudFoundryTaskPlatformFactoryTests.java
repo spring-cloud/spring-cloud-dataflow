@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundr
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -126,9 +125,9 @@ public class CloudFoundryTaskPlatformFactoryTests {
 				mock(SchedulerClient.class));
 
 		CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties.getAccounts().get("default");
-		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
-		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
-		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
+		CloudFoundryDeploymentProperties cloudFoundryDeploymentProperties = new CloudFoundryDeploymentProperties();
+		cloudFoundryDeploymentProperties.setSchedulerUrl("https://localhost:9999");
+		cloudFoundryProperties.setDeployment(cloudFoundryDeploymentProperties);
 
 		TaskPlatform taskPlatform = getSchedulePlatform("default");
 		assertThat(taskPlatform.getLaunchers()).hasSize(1);
@@ -155,7 +154,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 		launcher = taskPlatform.getLaunchers().get(1);
 		validateBasicLauncherInfo(launcher, "anotherOrgSpace");
-		assertThat(launcher.getScheduler()).isNotNull();
+		assertThat(launcher.getScheduler()).isNull();
 
 		assertThat(launcher.getDescription()).isEqualTo(
 				"org = [another-org], space = [another-space], url = [https://localhost:9999]");
@@ -181,7 +180,9 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private TaskPlatform getSchedulePlatform(String platformName) {
 		CloudFoundryProperties cloudFoundryProperties = this.cloudFoundryPlatformProperties.getAccounts().get(platformName);
-
+		CloudFoundryDeploymentProperties cloudFoundryDeploymentProperties = new CloudFoundryDeploymentProperties();
+		cloudFoundryDeploymentProperties.setSchedulerUrl("https://localhost:9999");
+		cloudFoundryProperties.setDeployment(cloudFoundryDeploymentProperties);
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
 				.platformProperties(this.cloudFoundryPlatformProperties)
@@ -190,7 +191,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 				.cloudFoundryClientProvider(this.cloudFoundryClientProvider)
 				.cloudFoundrySchedulerClientProvider(Optional.of(this.cloudFoundrySchedulerClientProvider))
 				.schedulesEnabled(true)
-				.schedulerProperties(Optional.of(cloudFoundryProperties.getScheduler()))
+				.schedulerProperties(this.cloudFoundryPlatformProperties.getAccounts().get(platformName).getDeployment())
 				.build();
 
 		TaskPlatform taskPlatform =  taskPlatformFactory.createTaskPlatform();
@@ -206,9 +207,8 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 
 		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();
-		CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties = new CloudFoundrySchedulerProperties();
-		cloudFoundrySchedulerProperties.setSchedulerUrl("https://localhost:9999");
-		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
+		CloudFoundryDeploymentProperties cloudFoundryDeploymentProperties = new CloudFoundryDeploymentProperties();
+		cloudFoundryDeploymentProperties.setSchedulerUrl("https://localhost:9999");
 		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
 		cloudFoundryProperties.setConnection(this.defaultConnectionProperties);
 		Map<String, CloudFoundryProperties> platformMap = new HashMap<>();
@@ -216,7 +216,6 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		cloudFoundryProperties = new CloudFoundryProperties();
 		cloudFoundryProperties.setDeployment(new CloudFoundryDeploymentProperties());
 		cloudFoundryProperties.setConnection(this.anotherOrgSpaceConnectionProperties);
-		cloudFoundryProperties.setScheduler(cloudFoundrySchedulerProperties);
 
 
 		platformMap.put("anotherOrgSpace", cloudFoundryProperties);

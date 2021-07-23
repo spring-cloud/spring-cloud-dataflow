@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public class SimpleTestScheduler implements Scheduler {
 	public void schedule(ScheduleRequest scheduleRequest) {
 		ScheduleInfo schedule = new ScheduleInfo();
 		schedule.setScheduleName(scheduleRequest.getScheduleName());
-		schedule.setScheduleProperties(scheduleRequest.getSchedulerProperties());
+		schedule.setScheduleProperties(scheduleRequest.getDeploymentProperties());
 		schedule.setTaskDefinitionName(scheduleRequest.getDefinition().getName());
-		if (schedule.getScheduleProperties().containsKey("spring.cloud.scheduler.cron.expression") &&
-				schedule.getScheduleProperties().get("spring.cloud.scheduler.cron.expression")
+		if (schedule.getScheduleProperties().containsKey("spring.cloud.deployer.cron.expression") &&
+				schedule.getScheduleProperties().get("spring.cloud.deployer.cron.expression")
 						.equals(INVALID_CRON_EXPRESSION)) {
 			throw new CreateScheduleException("Invalid Cron Expression", new IllegalArgumentException());
 		}

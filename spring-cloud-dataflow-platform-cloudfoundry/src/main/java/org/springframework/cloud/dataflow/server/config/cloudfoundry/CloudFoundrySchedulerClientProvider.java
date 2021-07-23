@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
-import java.util.Optional;
-
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 
 /**
  * @author David Turanski
@@ -33,29 +30,25 @@ public class CloudFoundrySchedulerClientProvider {
 
 	private final CloudFoundryPlatformTokenProvider platformTokenProvider;
 
-	private final Optional<CloudFoundrySchedulerProperties> schedulerProperties;
+	private final CloudFoundryPlatformProperties platformProperties;
 
 	public CloudFoundrySchedulerClientProvider(
 		CloudFoundryPlatformConnectionContextProvider connectionContextProvider,
 		CloudFoundryPlatformTokenProvider platformTokenProvider,
-		Optional<CloudFoundrySchedulerProperties> schedulerProperties) {
+		CloudFoundryPlatformProperties platformProperties) {
 
 
 		this.connectionContextProvider = connectionContextProvider;
 		this.platformTokenProvider = platformTokenProvider;
-		this.schedulerProperties = schedulerProperties;
+		this.platformProperties = platformProperties;
 	}
 
 	public SchedulerClient cloudFoundrySchedulerClient(String account) {
 		return ReactorSchedulerClient.builder()
 				.connectionContext(connectionContextProvider.connectionContext(account))
 				.tokenProvider(platformTokenProvider.tokenProvider(account))
-				.root(Mono.just(schedulerProperties().getSchedulerUrl()))
+				.root(Mono.just(platformProperties.getAccounts().get(account).getDeployment().getSchedulerUrl()))
 				.build();
-	}
-
-	public CloudFoundrySchedulerProperties schedulerProperties() {
-		return this.schedulerProperties.orElseGet(CloudFoundrySchedulerProperties::new);
 	}
 
 }
