@@ -182,6 +182,30 @@ jobs:
           --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:base \
           --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk16
+            pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
+          --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk8
+         pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
+          --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk8
+        pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
+          --env BP_JVM_VERSION=11 springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk11
+         pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
+          --env BP_JVM_VERSION=11 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk11
+        pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk16
+         pack build \
+          --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk16
 
     # docker hub login
     - uses: docker/login-action@v1
@@ -204,6 +228,16 @@ jobs:
         docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
         docker push springcloud/spring-cloud-dataflow-server:$TAG-jdk16
         docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk16
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk8
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk8
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk11
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk11
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk16
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk16
+        docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk11 springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
+        docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk11 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
+        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
 
     # build/publish support images
     - name: Publish Grafana Prometheus
