@@ -77,12 +77,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-utils</artifactId>
-			<version>${plexus.utils.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>io.micrometer.prometheus</groupId>
 			<artifactId>prometheus-rsocket-spring</artifactId>
 			<scope>test</scope>

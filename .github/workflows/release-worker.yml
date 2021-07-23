@@ -205,6 +205,18 @@ jobs:
           --path spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit-$TAG.jar \
           --builder gcr.io/paketo-buildpacks/builder:base \
           --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk16
+        pack build \
+          --path spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
+          --env BP_JVM_VERSION=8 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk8
+        pack build \
+          --path spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=11 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11
+        pack build \
+          --path spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job-$TAG.jar \
+          --builder gcr.io/paketo-buildpacks/builder:base \
+          --env BP_JVM_VERSION=16 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk16
 
     # docker hub login
     - uses: docker/login-action@v1
@@ -237,6 +249,11 @@ jobs:
         docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk11 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
         docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
         docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
+        docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk8
+        docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11
+        docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk16
+        docker tag springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
+        docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
 
     # build/publish support images
     - name: Publish Grafana Prometheus
