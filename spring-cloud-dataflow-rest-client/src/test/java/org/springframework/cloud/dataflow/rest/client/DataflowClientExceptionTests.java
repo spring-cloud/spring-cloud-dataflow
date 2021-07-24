@@ -15,14 +15,14 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert

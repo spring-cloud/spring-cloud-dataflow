@@ -23,9 +23,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -38,14 +37,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Glenn Renfro
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -60,7 +57,7 @@ public class TaskExecutionExplorerTests {
 
 	private JdbcTemplate template;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		template = new JdbcTemplate(dataSource);
 		template.execute("DELETE FROM task_execution");
@@ -69,9 +66,9 @@ public class TaskExecutionExplorerTests {
 	@Test
 	public void testInitializer() throws Exception {
 		int actual = template.queryForObject("SELECT COUNT(*) from TASK_EXECUTION", Integer.class);
-		assertEquals("expected 0 entries returned from task_execution", 0, actual);
+		assertEquals(0, actual, "expected 0 entries returned from task_execution");
 		actual = template.queryForObject("SELECT COUNT(*) from TASK_EXECUTION_PARAMS", Integer.class);
-		assertEquals("expected 0 entries returned from task_execution_params", 0, actual);
+		assertEquals(0, actual, "expected 0 entries returned from task_execution_params");
 	}
 
 	@Test
@@ -83,8 +80,9 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
 		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
-		assertEquals(String.format("expected %s entries returned from task_execution", ENTRY_COUNT), ENTRY_COUNT,
-				resultList.size());
+		assertEquals(ENTRY_COUNT,
+				resultList.size(),
+				String.format("expected %s entries returned from task_execution", ENTRY_COUNT));
 		Map<Long, TaskExecution> actual = new HashMap<>();
 		for (int executionId = 0; executionId < ENTRY_COUNT; executionId++) {
 			TaskExecution taskExecution = resultList.get(executionId);
@@ -92,8 +90,8 @@ public class TaskExecutionExplorerTests {
 		}
 		for (long executionId = 0; executionId < ENTRY_COUNT; executionId++) {
 			TaskExecution taskExecution = actual.get(executionId);
-			assertEquals("expected execution id does not match actual", executionId, taskExecution.getExecutionId());
-			assertEquals("expected taskName does not match actual", "foo", taskExecution.getTaskName());
+			assertEquals(executionId, taskExecution.getExecutionId(), "expected execution id does not match actual");
+			assertEquals("foo", taskExecution.getTaskName(), "expected taskName does not match actual");
 		}
 
 	}
@@ -106,10 +104,10 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
 		List<TaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
-		assertEquals("expected 1 entries returned from task_execution", 1, resultList.size());
+		assertEquals(1, resultList.size(), "expected 1 entries returned from task_execution");
 		TaskExecution taskExecution = resultList.get(0);
-		assertEquals("expected execution id does not match actual", 0, taskExecution.getExecutionId());
-		assertEquals("expected taskName does not match actual", "fee", taskExecution.getTaskName());
+		assertEquals(0, taskExecution.getExecutionId(), "expected execution id does not match actual");
+		assertEquals("fee", taskExecution.getTaskName(), "expected taskName does not match actual");
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {

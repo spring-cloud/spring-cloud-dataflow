@@ -19,9 +19,10 @@ package org.springframework.cloud.dataflow.core;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Christian Tzolov
@@ -86,10 +87,12 @@ public class TaskDefinitionToDslConverterTests {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void compositeTaskDsl() {
-		TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
-		new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+		assertThrows(IllegalArgumentException.class, () -> {
+			TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
+			new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+		});
 	}
 
 }

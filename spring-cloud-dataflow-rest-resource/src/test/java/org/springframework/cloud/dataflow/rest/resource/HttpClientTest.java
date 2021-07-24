@@ -23,12 +23,14 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
 import org.springframework.core.io.ByteArrayResource;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Mike Heath
@@ -57,48 +59,52 @@ public class HttpClientTest {
 		}
 	}
 
-	@Test(expected = Passed.class)
+	@Test
 	public void resourceBasedAuthorizationHeader() throws Exception {
-		final String credentials = "Super Secret Credentials";
+		assertThrows(Passed.class, () -> {
+			final String credentials = "Super Secret Credentials";
 
-		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
+			final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
 
-		final URI targetHost = new URI("http://test.com");
-		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
-				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
-				.addInterceptor((request, context) -> {
-					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
-					Assertions.assertThat(authorization).isEqualTo(credentials);
+			final URI targetHost = new URI("http://test.com");
+			try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
+					.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
+					.addInterceptor((request, context) -> {
+						final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
+						Assertions.assertThat(authorization).isEqualTo(credentials);
 
-					// Throw an exception to short-circuit making an HTTP request
-					throw new Passed();
-				})
-				.buildHttpClient()) {
-			client.execute(new HttpGet(targetHost));
-		}
+						// Throw an exception to short-circuit making an HTTP request
+						throw new Passed();
+					})
+					.buildHttpClient()) {
+				client.execute(new HttpGet(targetHost));
+			}
+		});
 	}
 
 	static final class Passed extends RuntimeException {
 	}
 
-	@Test(expected = TestException.class)
+	@Test
 	public void resourceBasedAuthorizationHeaderResourceCheck() throws Exception {
-		final String credentials = "Super Secret Credentials";
+		assertThrows(TestException.class, () -> {
+			final String credentials = "Super Secret Credentials";
 
-		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), new TestException());
+			final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), new TestException());
 
-		final URI targetHost = new URI("http://test.com");
-		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
-				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
-				.addInterceptor((request, context) -> {
-					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
-					Assertions.assertThat(authorization).isEqualTo(credentials);
+			final URI targetHost = new URI("http://test.com");
+			try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
+					.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
+					.addInterceptor((request, context) -> {
+						final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
+						Assertions.assertThat(authorization).isEqualTo(credentials);
 
-					// Throw an exception to short-circuit making an HTTP request
-					throw new Passed();
-				})
-				.buildHttpClient()) {
-			client.execute(new HttpGet(targetHost));
-		}
+						// Throw an exception to short-circuit making an HTTP request
+						throw new Passed();
+					})
+					.buildHttpClient()) {
+				client.execute(new HttpGet(targetHost));
+			}
+		});
 	}
 }

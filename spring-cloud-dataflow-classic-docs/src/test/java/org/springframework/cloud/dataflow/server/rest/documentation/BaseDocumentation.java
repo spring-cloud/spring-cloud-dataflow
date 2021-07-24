@@ -25,9 +25,9 @@ import java.util.concurrent.Callable;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -81,7 +81,7 @@ public abstract class BaseDocumentation {
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
 				"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
-	@Before
+	@BeforeEach
 	public void setupMocks() throws Exception{
 		reset(springDataflowServer.getSkipperClient());
 

@@ -20,9 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Assert;
+import org.hamcrest.MatcherAssert;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -35,7 +36,6 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -64,7 +64,7 @@ public class LocalServerSecurityWithOAuth2AndExternalAuthoritiesTests {
 	@Test
 	public void testAuthoritiesMapperBean() throws Exception {
 		final AuthoritiesMapper authoritiesMapper = localDataflowResource.getWebApplicationContext().getBean(AuthoritiesMapper.class);
-		Assert.assertTrue(authoritiesMapper instanceof ExternalOauth2ResourceAuthoritiesMapper);
+		Assertions.assertTrue(authoritiesMapper instanceof ExternalOauth2ResourceAuthoritiesMapper);
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class LocalServerSecurityWithOAuth2AndExternalAuthoritiesTests {
 		resourceDetails
 				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
 
-		Assert.assertEquals(0, externalAuthoritiesServer.getRequestCount());
+		Assertions.assertEquals(0, externalAuthoritiesServer.getRequestCount());
 
 		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
 		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
@@ -97,8 +97,8 @@ public class LocalServerSecurityWithOAuth2AndExternalAuthoritiesTests {
 				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.roles", hasSize(3)));
 
-		assertThat(externalAuthoritiesServer.getRequestCount(), is(1));
+		MatcherAssert.assertThat(externalAuthoritiesServer.getRequestCount(), is(1));
 		final RecordedRequest recordedRequest = externalAuthoritiesServer.takeRequest();
-		assertThat(recordedRequest.getHeader("Authorization"), is("Bearer " + accessTokenAsString));
+		MatcherAssert.assertThat(recordedRequest.getHeader("Authorization"), is("Bearer " + accessTokenAsString));
 	}
 }

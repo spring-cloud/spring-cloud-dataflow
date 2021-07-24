@@ -18,9 +18,10 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
@@ -41,9 +42,8 @@ import org.springframework.util.SocketUtils;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link LocalTestDataFlowServer}.
@@ -53,12 +53,12 @@ import static org.junit.Assert.fail;
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
  */
-@Ignore
+@Disabled
 public class LocalConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (context != null) {
 			context.close();
@@ -84,9 +84,9 @@ public class LocalConfigurationTests {
 		// LocalDataFlowServerAutoConfiguration also adds docker and maven resource loaders.
 		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
 		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
-		assertThat(loaders.size(), is(2));
-		assertThat(loaders.get("maven"), notNullValue());
-		assertThat(loaders.get("docker"), notNullValue());
+		MatcherAssert.assertThat(loaders.size(), is(2));
+		MatcherAssert.assertThat(loaders.get("maven"), notNullValue());
+		MatcherAssert.assertThat(loaders.get("docker"), notNullValue());
 	}
 
 	@Test
@@ -125,6 +125,6 @@ public class LocalConfigurationTests {
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
-		assertThat(context.containsBean("appRegistry"), is(false));
+		MatcherAssert.assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }

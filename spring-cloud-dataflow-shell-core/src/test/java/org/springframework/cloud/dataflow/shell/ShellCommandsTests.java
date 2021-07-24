@@ -24,10 +24,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -43,8 +44,7 @@ import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoC
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ResourceUtils;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for {@link org.springframework.cloud.dataflow.shell.ShellCommandLineRunner}.
@@ -53,8 +53,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
-	@After
-	@Before
+	@AfterEach
+	@BeforeEach
 	public void unregisterAll() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		for (AppRegistration appReg : registry.findAll()) {
@@ -78,7 +78,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 				"commands/stream_all_delete.txt,commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
 		assertTrue(runShell(commandFiles));
 
-		assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class).findAll(),
+		MatcherAssert.assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class).findAll(),
 				Matchers.empty());
 	}
 
@@ -93,7 +93,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
 	private void assertAppExists(String name, ApplicationType type) {
 		AppRegistryService registry = AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class);
-		assertTrue(String.format("'%s' application should be registered", name), registry.appExist(name, type));
+		assertTrue(registry.appExist(name, type), String.format("'%s' application should be registered", name));
 	}
 
 	/**

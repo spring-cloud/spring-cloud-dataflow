@@ -27,9 +27,9 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Helper methods for stream commands to execute in the shell.
@@ -118,7 +118,7 @@ public class StreamCommandTemplate {
 	public void deploy(String streamname) {
 		CommandResult cr = shell.executeCommand("stream deploy --name " + streamname);
 		// stateVerifier.waitForDeploy(streamname);
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
 		assertEquals("Deployed stream '" + streamname + "'", cr.getResult());
 	}
 
@@ -129,7 +129,7 @@ public class StreamCommandTemplate {
 	 */
 	public CommandResult validate(String streamName) {
 		CommandResult cr = shell.executeCommand("stream validate --name " + streamName);
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
 		return cr;
 	}
 
@@ -142,8 +142,8 @@ public class StreamCommandTemplate {
 			String streamname = streams.get(s);
 			CommandResult cr = shell.executeCommand("stream destroy --name " + streamname);
 			// stateVerifier.waitForDestroy(streamname);
-			assertTrue("Failure to destroy stream " + streamname + ".  CommandResult = " + cr.toString(),
-					cr.isSuccess());
+			assertTrue(cr.isSuccess(),
+					"Failure to destroy stream " + streamname + ".  CommandResult = " + cr.toString());
 		}
 	}
 
@@ -155,7 +155,7 @@ public class StreamCommandTemplate {
 	public void destroyStream(String stream) {
 		CommandResult cr = shell.executeCommand("stream destroy --name " + stream);
 		// stateVerifier.waitForDestroy(stream);
-		assertTrue("Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString());
 		streams.remove(stream);
 	}
 
@@ -179,7 +179,7 @@ public class StreamCommandTemplate {
 	 */
 	public void verifyExists(String streamName, String definition, boolean deployed) {
 		CommandResult cr = shell.executeCommand("stream list");
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
 
 		Table table = (org.springframework.shell.table.Table) cr.getResult();
 		TableModel model = table.getModel();

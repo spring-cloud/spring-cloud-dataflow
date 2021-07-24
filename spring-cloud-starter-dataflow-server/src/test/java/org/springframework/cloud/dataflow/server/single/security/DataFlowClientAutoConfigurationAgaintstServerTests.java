@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.single.security;
 
-import org.junit.After;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -35,8 +35,8 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Gunnar Hillert
@@ -50,7 +50,7 @@ public class DataFlowClientAutoConfigurationAgaintstServerTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void clean() {
 		if (context != null) {
 			context.close();

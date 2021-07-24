@@ -29,9 +29,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.hamcrest.MatcherAssert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -63,7 +62,6 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -76,7 +74,8 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -98,7 +97,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -148,7 +146,7 @@ public class TaskControllerTests {
 
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -196,14 +194,18 @@ public class TaskControllerTests {
 		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		});
 	}
 
 	@Test

@@ -17,9 +17,9 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.io.IOException;
 
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 
@@ -28,7 +28,7 @@ import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
  */
 public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws InterruptedException {
 		Thread.sleep(2000);
 	}
@@ -45,8 +45,9 @@ public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 
 	@Test
 	public void tryScheduleWithPropertiesAndPropertiesFile() throws IOException {
-		Assert.assertThrows("You cannot specify both 'properties' and 'propertiesFile'", IllegalArgumentException.class,
-				() -> schedule().createWithPropertiesAndPropertiesFile("schedName", "def", "* * * * *","app.tmp2.foo=bar",  "./src/test/resources/taskSchedulerWithPropertiesFile.properties", ""));
+		Assertions.assertThrows(IllegalArgumentException.class,
+				() -> schedule().createWithPropertiesAndPropertiesFile("schedName", "def", "* * * * *","app.tmp2.foo=bar",  "./src/test/resources/taskSchedulerWithPropertiesFile.properties", ""),
+				"You cannot specify both 'properties' and 'propertiesFile'");
 	}
 
 	@Test

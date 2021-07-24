@@ -24,9 +24,9 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -118,7 +118,7 @@ public class TaskCommandTemplate {
 		Thread.sleep(5000);
 		CommandResult cr = shell.executeCommand("task execution log --id " + id);
 
-		assertTrue("Task execution log = " + cr.toString(), cr.toString().contains("Starting"));
+		assertTrue(cr.toString().contains("Starting"), "Task execution log = " + cr.toString());
 
 		return cr.toString();
 	}
@@ -261,7 +261,7 @@ public class TaskCommandTemplate {
 			String taskname = tasks.get(s);
 			CommandResult cr = shell.executeCommand("task destroy --name " + taskname);
 			// stateVerifier.waitForDestroy(taskname);
-			assertTrue("Failure to destroy task " + taskname + ".  CommandResult = " + cr.toString(), cr.isSuccess());
+			assertTrue(cr.isSuccess(), "Failure to destroy task " + taskname + ".  CommandResult = " + cr.toString());
 		}
 	}
 
@@ -273,7 +273,7 @@ public class TaskCommandTemplate {
 	public void destroyTask(String task) {
 		CommandResult cr = shell.executeCommand("task destroy --name " + task);
 		// stateVerifier.waitForDestroy(task);
-		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure to destroy task " + task + ".  CommandResult = " + cr.toString());
 		tasks.remove(task);
 	}
 
@@ -286,7 +286,7 @@ public class TaskCommandTemplate {
 	public void destroyTask(String task, boolean cleanup) {
 		String cleanupString = (cleanup) ? "--cleanup" : "";
 		CommandResult cr = shell.executeCommand("task destroy --name " + task + " " + cleanupString);
-		assertTrue("Failure to destroy task " + task + ".  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure to destroy task " + task + ".  CommandResult = " + cr.toString());
 		tasks.remove(task);
 	}
 
@@ -297,7 +297,7 @@ public class TaskCommandTemplate {
 	public void destroyAllTasks() {
 		CommandResult cr = shell.executeCommand("task all destroy --force");
 		// stateVerifier.waitForDestroy(task);
-		assertTrue("Failure to destroy all tasks. CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure to destroy all tasks. CommandResult = " + cr.toString());
 		tasks.clear();
 	}
 
@@ -309,7 +309,7 @@ public class TaskCommandTemplate {
 	 */
 	public void verifyExists(String taskName, String definition) {
 		CommandResult cr = shell.executeCommand("task list");
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
 		Table table = (Table) cr.getResult();
 		TableModel model = table.getModel();
 		for (int row = 0; row < model.getRowCount(); row++) {

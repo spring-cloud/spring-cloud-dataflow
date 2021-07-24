@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -51,7 +49,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Glenn Renfro
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
@@ -76,7 +73,7 @@ public class AboutControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -106,7 +103,6 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -126,7 +122,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -144,7 +140,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -163,7 +158,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -181,7 +176,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -200,7 +194,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -219,7 +213,6 @@ public class AboutControllerTests {
 	}
 
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -238,7 +231,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -256,7 +249,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -272,7 +264,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -290,7 +282,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -309,7 +300,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -327,7 +318,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -348,7 +338,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -365,7 +355,6 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -397,7 +386,7 @@ public class AboutControllerTests {
 		@Autowired
 		private SkipperClient skipperClient;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();

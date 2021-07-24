@@ -23,10 +23,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -61,11 +60,10 @@ import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,7 +76,6 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = { "spring.main.banner-mode=off"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -97,13 +94,13 @@ public class DefaultStreamServiceIntegrationTests {
 	@MockBean
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void before() throws URISyntaxException {
 		createTickTock();
 		this.skipperClient = MockUtils.configureMock(this.skipperClient);
 	}
 
-	@After
+	@AfterEach
 	public void destroyStream() {
 		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Arrays.asList(new PackageMetadata()));
 		streamService.undeployStream("ticktock");

@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
-@Ignore
+@Disabled
 public class RuntimeStreamStatusForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
 
 	@Test

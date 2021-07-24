@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -46,7 +46,7 @@ public class ProfileApplicationListenerTest {
 
 	private ProfileApplicationListener profileApplicationListener;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		environment = new MockEnvironment();
 		when(event.getEnvironment()).thenReturn(environment);

@@ -22,8 +22,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -46,10 +47,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -77,7 +77,7 @@ public class DefaultAppRegistryServiceTests {
 	@Test
 	public void testNotFound() {
 		AppRegistration registration = appRegistryService.find("foo", ApplicationType.source);
-		assertThat(registration, Matchers.nullValue());
+		MatcherAssert.assertThat(registration, Matchers.nullValue());
 	}
 
 	@Test
@@ -87,8 +87,8 @@ public class DefaultAppRegistryServiceTests {
 				eq(registration.getName()), eq(registration.getType()))).thenReturn(registration);
 
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
-		assertThat(registration2.getName(), is("foo"));
-		assertThat(registration2.getType(), is(ApplicationType.source));
+		MatcherAssert.assertThat(registration2.getName(), is("foo"));
+		MatcherAssert.assertThat(registration2.getType(), is(ApplicationType.source));
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistryService.getAppMetadataResource(registration2);
 
-		assertThat(appMetadataResource.getFilename(), is("foo-source-metadata"));
+		MatcherAssert.assertThat(appMetadataResource.getFilename(), is("foo-source-metadata"));
 	}
 
 	@Test
@@ -113,7 +113,7 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistryService.getAppMetadataResource(registration2);
 
-		assertThat(appMetadataResource.getFilename(), is("foo-source"));
+		MatcherAssert.assertThat(appMetadataResource.getFilename(), is("foo-source"));
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistryService.findAll();
 
-		assertThat(registrations, containsInAnyOrder(
+		MatcherAssert.assertThat(registrations, containsInAnyOrder(
 				allOf(
 						hasProperty("name", is("foo")),
 						hasProperty("uri", is(URI.create("classpath:/foo-source"))),
@@ -226,7 +226,7 @@ public class DefaultAppRegistryServiceTests {
 				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
 		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
 				eq("bar"), eq(ApplicationType.sink), eq("1.0"))).thenReturn(appRegistration());
-		assertThat(appRegistryService.importAll(false,
+		MatcherAssert.assertThat(appRegistryService.importAll(false,
 				new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass())).size(), equalTo(0));
 	}
 
@@ -238,12 +238,12 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(1)).save(appRegistrationCaptor.capture());
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 		AppRegistration appRegistration = registrations.get(0);
-		assertThat(appRegistration, hasProperty("name", is("cassandra")));
-		assertThat(appRegistration, hasProperty("uri",
+		MatcherAssert.assertThat(appRegistration, hasProperty("name", is("cassandra")));
+		MatcherAssert.assertThat(appRegistration, hasProperty("uri",
 				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
-		assertThat(appRegistration, hasProperty("metadataUri",
+		MatcherAssert.assertThat(appRegistration, hasProperty("metadataUri",
 				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
-		assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
+		MatcherAssert.assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
 	}
 
 	@Test
@@ -262,7 +262,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("bar")),
@@ -287,7 +287,7 @@ public class DefaultAppRegistryServiceTests {
 
 		registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("foo")),
@@ -323,7 +323,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("time")),
@@ -365,7 +365,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("time")),
@@ -406,7 +406,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("time")),
@@ -447,7 +447,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("time")),
@@ -488,7 +488,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("time")),
@@ -518,7 +518,7 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
+		MatcherAssert.assertThat(registrations,
 				containsInAnyOrder(
 						allOf(
 								hasProperty("name", is("foo")),

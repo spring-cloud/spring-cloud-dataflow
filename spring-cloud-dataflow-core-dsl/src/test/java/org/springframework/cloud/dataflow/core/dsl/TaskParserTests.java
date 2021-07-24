@@ -22,19 +22,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
 import org.springframework.cloud.dataflow.core.dsl.graph.Link;
 import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and
@@ -704,7 +704,7 @@ public class TaskParserTests {
 				+ "[0-1][1-2][2-3][3-4][fail:1-9][fail2:2-9][9-10][10-4]", spec);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void transitionToSplit() {
 		String spec = "aa 'foo'->:split && bb && split: <cc || dd> && ee";
@@ -1624,8 +1624,7 @@ public class TaskParserTests {
 	}
 
 	private void assertApps(List<TaskApp> taskApps, String... expectedTaskAppNames) {
-		assertEquals("Expected " + expectedTaskAppNames.length + " but was " + taskApps.size() + ": " + taskApps,
-				expectedTaskAppNames.length, taskApps.size());
+		assertEquals(expectedTaskAppNames.length, taskApps.size(), "Expected " + expectedTaskAppNames.length + " but was " + taskApps.size() + ": " + taskApps);
 		Set<String> set2 = new HashSet<String>();
 		for (TaskApp taskApp : taskApps) {
 			StringBuilder s = new StringBuilder();

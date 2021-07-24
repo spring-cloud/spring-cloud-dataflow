@@ -24,9 +24,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +48,8 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -76,7 +76,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws Exception {
 		Thread.sleep(2000);
 		DataSource dataSource = applicationContext.getBean(DataSource.class);
@@ -92,7 +92,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOOBAR, 2));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
@@ -155,8 +155,9 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals("Number of expected rows returned from the table is incorrect", 18,
-				table.getModel().getRowCount());
+		assertEquals(18,
+				table.getModel().getRowCount(),
+				"Number of expected rows returned from the table is incorrect");
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
 		checkCell(table, rowNumber++, 0, "Job Execution Id ");
@@ -183,7 +184,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 						&& table.getModel().getValue(paramRowTwo, 0).equals("foo(STRING) "))) {
 			jobParamsPresent = true;
 		}
-		assertTrue("the table did not contain the correct job parameters ", jobParamsPresent);
+		assertTrue(jobParamsPresent, "the table did not contain the correct job parameters ");
 	}
 
 	@Test
@@ -202,7 +203,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 				|| table.getModel().getValue(1, 4).equals("-bar=BAR,foo=FOO")) {
 			isValidCell = true;
 		}
-		assertTrue("Job Parameters does match expected.", isValidCell);
+		assertTrue(isValidCell, "Job Parameters does match expected.");
 	}
 
 	@Test
@@ -269,17 +270,18 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	private void checkCell(Table table, int row, int column, Object expectedValue) {
-		assertEquals(String.format("Cell %d,%d's value should be %s", row, column, expectedValue), expectedValue,
-				table.getModel().getValue(row, column));
+		assertEquals(expectedValue,
+				table.getModel().getValue(row, column),
+				String.format("Cell %d,%d's value should be %s", row, column, expectedValue));
 	}
 
 	private Table getTable(CommandResult cr) {
-		assertTrue("Command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "Command must be successful");
 		return (Table) cr.getResult();
 	}
 
 	private void verifyColumnNumber(Table table, int columnCount) {
-		assertEquals("Number of columns returned was not expected", columnCount, table.getModel().getColumnCount());
+		assertEquals(columnCount, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 	}
 
 	private long getFirstJobExecutionIdFromTable() {

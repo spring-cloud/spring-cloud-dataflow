@@ -20,8 +20,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,11 +45,9 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -60,7 +58,6 @@ import static org.mockito.Mockito.mock;
  * @author Eric Bottard
  * @author Christian Tzolov
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class,
 		BootVersionsCompletionProviderTests.Mocks.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
@@ -73,30 +70,30 @@ public class BootVersionsCompletionProviderTests {
 	@Test
 	public void testBoot13Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot13 --", 0);
-		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=")), Proposals.proposalThat(is("boot13 --number=")),
+		MatcherAssert.assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=")), Proposals.proposalThat(is("boot13 --number=")),
 				Proposals.proposalThat(is("boot13 --some-string="))));
 
 		// Test that custom classes can also be loaded correctly
 		result = completionProvider.complete("boot13 --level=", 0);
-		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=low")), Proposals.proposalThat(is("boot13 --level=high"))));
+		MatcherAssert.assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --level=low")), Proposals.proposalThat(is("boot13 --level=high"))));
 
 		result = completionProvider.complete("boot13 --number=", 0);
-		assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --number=one")), Proposals.proposalThat(is("boot13 --number=two"))));
+		MatcherAssert.assertThat(result, hasItems(Proposals.proposalThat(is("boot13 --number=one")), Proposals.proposalThat(is("boot13 --number=two"))));
 	}
 
 	@Test
 	public void testBoot14Layout() {
 		List<CompletionProposal> result = completionProvider.complete("boot14 --", 0);
-		assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --level=")), Proposals.proposalThat(is("boot14 --number=")),
+		MatcherAssert.assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --level=")), Proposals.proposalThat(is("boot14 --number=")),
 				Proposals.proposalThat(is("boot14 --some-string="))));
 
 		// Test that custom classes can also be loaded correctly
 		result = completionProvider.complete("boot14 --level=", 0);
-		assertThat(result,
+		MatcherAssert.assertThat(result,
 				hasItems(Proposals.proposalThat(is("boot14 --level=very_low")), Proposals.proposalThat(is("boot14 --level=very_high"))));
 
 		result = completionProvider.complete("boot14 --number=", 0);
-		assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --number=one")), Proposals.proposalThat(is("boot14 --number=two"))));
+		MatcherAssert.assertThat(result, hasItems(Proposals.proposalThat(is("boot14 --number=one")), Proposals.proposalThat(is("boot14 --number=two"))));
 
 	}
 

@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -26,9 +26,10 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProp
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Christian Tzolov
@@ -39,11 +40,13 @@ public class SchedulerPerPlatformTest {
 	@TestPropertySource(properties = { "spring.cloud.dataflow.features.schedules-enabled=false" })
 	public static class AllSchedulerDisabledTests extends AbstractSchedulerPerPlatformTest {
 
-		@Test(expected = NoSuchBeanDefinitionException.class)
+		@Test
 		public void testLocalSchedulerEnabled() {
-			assertFalse(context.getEnvironment().containsProperty("kubernetes_service_host"));
-			assertFalse(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
-			context.getBean(Scheduler.class);
+			assertThrows(NoSuchBeanDefinitionException.class, () -> {
+				assertFalse(context.getEnvironment().containsProperty("kubernetes_service_host"));
+				assertFalse(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
+				context.getBean(Scheduler.class);
+			});
 		}
 	}
 
@@ -52,8 +55,8 @@ public class SchedulerPerPlatformTest {
 
 		@Test
 		public void testLocalSchedulerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
-			assertFalse("CF should be disabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
+			assertFalse(context.getEnvironment().containsProperty("kubernetes_service_host"), "K8s should be disabled");
+			assertFalse(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()), "CF should be disabled");
 
 			Scheduler scheduler = context.getBean(Scheduler.class);
 
@@ -68,8 +71,8 @@ public class SchedulerPerPlatformTest {
 
 		@Test
 		public void testKubernetesSchedulerEnabled() {
-			assertTrue("K8s should be enabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
-			assertFalse("CF should be disabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
+			assertTrue(context.getEnvironment().containsProperty("kubernetes_service_host"), "K8s should be enabled");
+			assertFalse(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()), "CF should be disabled");
 
 
 			KubernetesSchedulerProperties props = context.getBean(KubernetesSchedulerProperties.class);
@@ -84,8 +87,8 @@ public class SchedulerPerPlatformTest {
 
 		@Test
 		public void testCloudFoundryScheudlerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
-			assertTrue("CF should be enabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
+			assertFalse(context.getEnvironment().containsProperty("kubernetes_service_host"), "K8s should be disabled");
+			assertTrue(CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()), "CF should be enabled");
 
 		}
 	}

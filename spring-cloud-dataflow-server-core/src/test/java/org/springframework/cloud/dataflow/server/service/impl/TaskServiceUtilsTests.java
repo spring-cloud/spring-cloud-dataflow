@@ -21,9 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -35,10 +33,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
@@ -49,9 +47,6 @@ import static org.mockito.Mockito.mock;
  */
 public class TaskServiceUtilsTests {
 	public static final String BASE_GRAPH = "AAA && BBB";
-
-	@Rule
-	public ExpectedException expectedException;
 
 	@Test
 	public void testCreateComposedTaskDefinition() {
@@ -210,26 +205,26 @@ public class TaskServiceUtilsTests {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is expected to be in the app deployment properties",
-				appDeploymentProperties.get("dataflowServerUri").equals("https://myserver:9191"));
+		assertTrue(appDeploymentProperties.get("dataflowServerUri").equals("https://myserver:9191"),
+				"dataflowServerUri is expected to be in the app deployment properties");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflow-server-uri", "http://localhost:8080");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"));
+		assertTrue(appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"),
+				"dataflowServerUri is incorrect");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflowServerUri", "http://localhost:8191");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"));
+		assertTrue(appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"),
+				"dataflowServerUri is incorrect");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("DATAFLOW_SERVER_URI", "http://localhost:9000");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
 		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"));
+		assertTrue(appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"),
+				"dataflowServerUri is incorrect");
 		appDeploymentProperties.clear();
 		cmdLineArgs.add("--dataflowServerUri=http://localhost:8383");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
@@ -253,10 +248,10 @@ public class TaskServiceUtilsTests {
 
 		String imagePullSecretPropertyKey = "deployer.composed-task-runner.kubernetes.imagePullSecret";
 
-		assertTrue("Task deployment properties are missing composed task runner imagePullSecret",
-				taskDeploymentProperties.containsKey(imagePullSecretPropertyKey));
+		assertTrue(taskDeploymentProperties.containsKey(imagePullSecretPropertyKey),
+				"Task deployment properties are missing composed task runner imagePullSecret");
 
-		assertEquals("Invalid imagePullSecret", "regcred", taskDeploymentProperties.get(imagePullSecretPropertyKey));
+		assertEquals("regcred", taskDeploymentProperties.get(imagePullSecretPropertyKey), "Invalid imagePullSecret");
 	}
 
 	@Test
@@ -270,7 +265,7 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "docker://something", uri);
+		assertEquals("docker://something", uri, "Invalid task runner URI string");
 	}
 
 	@Test
@@ -282,7 +277,7 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(new TaskConfigurationProperties(),
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "docker://something", uri);
+		assertEquals("docker://something", uri, "Invalid task runner URI string");
 	}
 
 	@Test
@@ -298,15 +293,15 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "gcr.io://something", uri);
+		assertEquals("gcr.io://something", uri, "Invalid task runner URI string");
 	}
 
 	@Test
 	public void testImagePullSecretNullCTRProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, null);
-		assertFalse("Task deployment properties should not contain imagePullSecret",
-				taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret"));
+		assertFalse(taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret"),
+				"Task deployment properties should not contain imagePullSecret");
 	}
 
 	@Test
@@ -317,7 +312,7 @@ public class TaskServiceUtilsTests {
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
 
-		assertTrue("Use user access token should be true", result);
+		assertTrue(result, "Use user access token should be true");
 	}
 
 	@Test
@@ -328,7 +323,7 @@ public class TaskServiceUtilsTests {
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
 
-		assertFalse("Use user access token should be false", result);
+		assertFalse(result, "Use user access token should be false");
 	}
 
 	@Test
@@ -338,7 +333,7 @@ public class TaskServiceUtilsTests {
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertFalse("Use user access token should be false", result);
+		assertFalse(result, "Use user access token should be false");
 	}
 
 	@Test
@@ -349,7 +344,7 @@ public class TaskServiceUtilsTests {
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertTrue("Use user access token should be true", result);
+		assertTrue(result, "Use user access token should be true");
 	}
 
 	@Test
@@ -359,7 +354,7 @@ public class TaskServiceUtilsTests {
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertFalse("Use user access token should be false", result);
+		assertFalse(result, "Use user access token should be false");
 	}
 
 	private TaskNode parse(String dsltext) {

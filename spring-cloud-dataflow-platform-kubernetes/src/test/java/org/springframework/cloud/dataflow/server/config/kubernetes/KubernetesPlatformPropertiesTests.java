@@ -18,8 +18,7 @@ package org.springframework.cloud.dataflow.server.config.kubernetes;
 import java.util.Map;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,14 +29,12 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesClientFactory
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Donovan Muller
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = KubernetesPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("kubernetes-platform-properties")
 public class KubernetesPlatformPropertiesTests {

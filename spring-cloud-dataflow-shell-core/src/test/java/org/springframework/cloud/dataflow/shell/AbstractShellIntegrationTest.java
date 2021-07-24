@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public abstract class AbstractShellIntegrationTest {
 	@Rule
 	public TestName name = new TestName();
 
-	@BeforeClass
+	@BeforeAll
 	public static void startUp() {
 		if (applicationContext == null) {
 			if (System.getProperty(SHUTDOWN_AFTER_RUN) != null) {
@@ -135,7 +135,7 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void shutdown() {
 		if (shutdownAfterRun) {
 			logger.info("Stopping Data Flow Shell");

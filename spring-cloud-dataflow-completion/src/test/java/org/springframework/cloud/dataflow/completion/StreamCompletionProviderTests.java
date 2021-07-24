@@ -16,20 +16,18 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for StreamCompletionProvider.
@@ -43,7 +41,6 @@ import static org.junit.Assert.assertThat;
  * @author Eric Bottard
  * @author Mark Fisher
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @SuppressWarnings("unchecked")
@@ -55,138 +52,138 @@ public class StreamCompletionProviderTests {
 	@Test
 	// <TAB> => file,http,etc
 	public void testEmptyStartShouldProposeSourceOrUnboundApps() {
-		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange")),
+		MatcherAssert.assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange")),
 			Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
-		assertThat(completionProvider.complete("", 1), not(hasItems(Proposals.proposalThat(is("log")))));
+		MatcherAssert.assertThat(completionProvider.complete("", 1), not(hasItems(Proposals.proposalThat(is("log")))));
 	}
 
 	@Test
 	// fi<TAB> => file
 	public void testUnfinishedAppNameShouldReturnCompletions() {
-		assertThat(completionProvider.complete("h", 1), hasItems(Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
-		assertThat(completionProvider.complete("ht", 1), hasItems(Proposals.proposalThat(is("http"))));
-		assertThat(completionProvider.complete("ht", 1), not(hasItems(Proposals.proposalThat(is("hdfs")))));
+		MatcherAssert.assertThat(completionProvider.complete("h", 1), hasItems(Proposals.proposalThat(is("http")), Proposals.proposalThat(is("hdfs"))));
+		MatcherAssert.assertThat(completionProvider.complete("ht", 1), hasItems(Proposals.proposalThat(is("http"))));
+		MatcherAssert.assertThat(completionProvider.complete("ht", 1), not(hasItems(Proposals.proposalThat(is("hdfs")))));
 	}
 
 	@Test
 	public void testUnfinishedUnboundAppNameShouldReturnCompletions2() {
-		assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange"))));
-		assertThat(completionProvider.complete("o", 1), hasItems(Proposals.proposalThat(is("orange"))));
-		assertThat(completionProvider.complete("oran", 1), hasItems(Proposals.proposalThat(is("orange"))));
-		assertThat(completionProvider.complete("orange", 1), hasItems(Proposals.proposalThat(is("orange --expression=")),
+		MatcherAssert.assertThat(completionProvider.complete("", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("o", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("oran", 1), hasItems(Proposals.proposalThat(is("orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("orange", 1), hasItems(Proposals.proposalThat(is("orange --expression=")),
 				Proposals.proposalThat(is("orange --fooble=")),Proposals.proposalThat(is("orange --expresso="))));
-		assertThat(completionProvider.complete("o1: orange||", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
-		assertThat(completionProvider.complete("o1: orange|| ", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
-		assertThat(completionProvider.complete("o1: orange ||", 1), hasItems(Proposals.proposalThat(is("o1: orange || orange"))));
-		assertThat(completionProvider.complete("o1: orange|| or", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
-		assertThat(completionProvider.complete("http | o", 1), empty());
-		assertThat(completionProvider.complete("http|| o", 1), hasItems(Proposals.proposalThat(is("http|| orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("o1: orange||", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("o1: orange|| ", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("o1: orange ||", 1), hasItems(Proposals.proposalThat(is("o1: orange || orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("o1: orange|| or", 1), hasItems(Proposals.proposalThat(is("o1: orange|| orange"))));
+		MatcherAssert.assertThat(completionProvider.complete("http | o", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("http|| o", 1), hasItems(Proposals.proposalThat(is("http|| orange"))));
 	}
 
 	@Test
 	// file | filter <TAB> => file | filter | foo, etc
 	public void testValidSubStreamDefinitionShouldReturnPipe() {
-		assertThat(completionProvider.complete("http | filter ", 1), hasItems(Proposals.proposalThat(is("http | filter | log"))));
-		assertThat(completionProvider.complete("http | filter ", 1),
+		MatcherAssert.assertThat(completionProvider.complete("http | filter ", 1), hasItems(Proposals.proposalThat(is("http | filter | log"))));
+		MatcherAssert.assertThat(completionProvider.complete("http | filter ", 1),
 				not(hasItems(Proposals.proposalThat(is("http | filter | http")))));
 	}
 
 	@Test
 	// file | filter<TAB> => file | filter --foo=, etc
 	public void testValidSubStreamDefinitionShouldReturnAppOptions() {
-		assertThat(completionProvider.complete("http | filter ", 1), hasItems(
+		MatcherAssert.assertThat(completionProvider.complete("http | filter ", 1), hasItems(
 				Proposals.proposalThat(is("http | filter --expression=")), Proposals.proposalThat(is("http | filter --expresso="))));
 		// Same as above, no final space
-		assertThat(completionProvider.complete("http | filter", 1), hasItems(
+		MatcherAssert.assertThat(completionProvider.complete("http | filter", 1), hasItems(
 				Proposals.proposalThat(is("http | filter --expression=")), Proposals.proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file | filter -<TAB> => file | filter --foo,etc
 	public void testOneDashShouldReturnTwoDashes() {
-		assertThat(completionProvider.complete("http | filter -", 1), hasItems(
+		MatcherAssert.assertThat(completionProvider.complete("http | filter -", 1), hasItems(
 				Proposals.proposalThat(is("http | filter --expression=")), Proposals.proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file | filter --<TAB> => file | filter --foo,etc
 	public void testTwoDashesShouldReturnOptions() {
-		assertThat(completionProvider.complete("http | filter --", 1), hasItems(
+		MatcherAssert.assertThat(completionProvider.complete("http | filter --", 1), hasItems(
 				Proposals.proposalThat(is("http | filter --expression=")), Proposals.proposalThat(is("http | filter --expresso="))));
 	}
 
 	@Test
 	// file |<TAB> => file | foo,etc
 	public void testDanglingPipeShouldReturnExtraApps() {
-		assertThat(completionProvider.complete("http |", 1), hasItems(Proposals.proposalThat(is("http | filter"))));
-		assertThat(completionProvider.complete("http | filter |", 1),
+		MatcherAssert.assertThat(completionProvider.complete("http |", 1), hasItems(Proposals.proposalThat(is("http | filter"))));
+		MatcherAssert.assertThat(completionProvider.complete("http | filter |", 1),
 				hasItems(Proposals.proposalThat(is("http | filter | log")), Proposals.proposalThat(is("http | filter | filter2: filter"))));
 	}
 
 	@Test
 	// file --p<TAB> => file --preventDuplicates=, file --pattern=
 	public void testUnfinishedOptionNameShouldComplete() {
-		assertThat(completionProvider.complete("http --p", 1), hasItems(Proposals.proposalThat(is("http --port="))));
+		MatcherAssert.assertThat(completionProvider.complete("http --p", 1), hasItems(Proposals.proposalThat(is("http --port="))));
 	}
 
 	@Test
 	// file | counter --name=foo --inputType=bar<TAB> => we're done
 	public void testSinkWithAllOptionsSetCantGoFurther() {
-		assertThat(completionProvider.complete("http | log --port=1234 --level=debug", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("http | log --port=1234 --level=debug", 1), empty());
 	}
 
 	@Test
 	// file | counter --name=<TAB> => nothing
 	public void testInGenericOptionValueCantProposeAnything() {
-		assertThat(completionProvider.complete("http --port=", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("http --port=", 1), empty());
 	}
 
 	@Test
 	// :foo > <TAB> ==> add app names
 	public void testDestinationIntoApps() {
-		assertThat(completionProvider.complete(":foo >", 1),
+		MatcherAssert.assertThat(completionProvider.complete(":foo >", 1),
 				hasItems(Proposals.proposalThat(is(":foo > filter")), Proposals.proposalThat(is(":foo > log"))));
-		assertThat(completionProvider.complete(":foo >", 1), not(hasItems(Proposals.proposalThat(is(":foo > http")))));
+		MatcherAssert.assertThat(completionProvider.complete(":foo >", 1), not(hasItems(Proposals.proposalThat(is(":foo > http")))));
 	}
 
 	@Test
 	// :foo > <TAB> ==> add app names
 	public void testDestinationIntoAppsVariant() {
-		assertThat(completionProvider.complete(":foo >", 1),
+		MatcherAssert.assertThat(completionProvider.complete(":foo >", 1),
 				hasItems(Proposals.proposalThat(is(":foo > filter")), Proposals.proposalThat(is(":foo > log"))));
 	}
 
 	@Test
 	// http<TAB> (no space) => NOT "http2: http"
 	public void testAutomaticAppLabellingDoesNotGetInTheWay() {
-		assertThat(completionProvider.complete("http", 1), not(hasItems(Proposals.proposalThat(is("http2: http")))));
+		MatcherAssert.assertThat(completionProvider.complete("http", 1), not(hasItems(Proposals.proposalThat(is("http2: http")))));
 	}
 
 	@Test
 	// http --use-ssl=<TAB> => propose true|false
 	public void testValueHintForBooleans() {
-		assertThat(completionProvider.complete("http --use-ssl=", 1),
+		MatcherAssert.assertThat(completionProvider.complete("http --use-ssl=", 1),
 				hasItems(Proposals.proposalThat(is("http --use-ssl=true")), Proposals.proposalThat(is("http --use-ssl=false"))));
 	}
 
 	@Test
 	// .. foo --enum-value=<TAB> => propose enum values
 	public void testValueHintForEnums() {
-		assertThat(completionProvider.complete("http | filter --expresso=", 1),
+		MatcherAssert.assertThat(completionProvider.complete("http | filter --expresso=", 1),
 				hasItems(Proposals.proposalThat(is("http | filter --expresso=SINGLE")),
 						Proposals.proposalThat(is("http | filter --expresso=DOUBLE"))));
 	}
 
 	@Test
 	public void testUnrecognizedPrefixesDontBlowUp() {
-		assertThat(completionProvider.complete("foo", 1), empty());
-		assertThat(completionProvider.complete("foo --", 1), empty());
-		assertThat(completionProvider.complete("http --notavalidoption", 1), empty());
-		assertThat(completionProvider.complete("http --notavalidoption=", 1), empty());
-		assertThat(completionProvider.complete("foo --some-option", 1), empty());
-		assertThat(completionProvider.complete("foo --some-option=", 1), empty());
-		assertThat(completionProvider.complete("foo --some-option=prefix", 1), empty());
-		assertThat(
+		MatcherAssert.assertThat(completionProvider.complete("foo", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("foo --", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("http --notavalidoption", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("http --notavalidoption=", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("foo --some-option", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("foo --some-option=", 1), empty());
+		MatcherAssert.assertThat(completionProvider.complete("foo --some-option=prefix", 1), empty());
+		MatcherAssert.assertThat(
 				completionProvider.complete(
 						"http | filter --port=12 --expression=something " + "--expresso=not-a-valid-prefix", 1),
 				empty());
@@ -198,7 +195,7 @@ public class StreamCompletionProviderTests {
 	 */
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
-		assertThat(completionProvider.complete("http --use-ssl=tr", 1),
+		MatcherAssert.assertThat(completionProvider.complete("http --use-ssl=tr", 1),
 				not(hasItems(Proposals.proposalThat(startsWith("http --use-ssl=tr --port")))));
 	}
 

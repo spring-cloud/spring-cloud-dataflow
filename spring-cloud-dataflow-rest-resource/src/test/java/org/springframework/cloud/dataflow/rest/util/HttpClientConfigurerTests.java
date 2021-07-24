@@ -21,12 +21,12 @@ import java.net.URI;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
@@ -70,7 +70,7 @@ public class HttpClientConfigurerTests {
 			builder.withProxyCredentials(URI.create("spring"), "spring", "cloud");
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The scheme component of the proxyUri must not be empty.", e.getMessage());
+			Assertions.assertEquals("The scheme component of the proxyUri must not be empty.", e.getMessage());
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown.");
@@ -88,7 +88,7 @@ public class HttpClientConfigurerTests {
 			builder.withProxyCredentials(null, null, null);
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The proxyUri must not be null.", e.getMessage());
+			Assertions.assertEquals("The proxyUri must not be null.", e.getMessage());
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown.");
@@ -107,8 +107,8 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
-		Assert.assertNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
+		Assertions.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
+		Assertions.assertNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
 	}
 
 	/**
@@ -124,7 +124,7 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
+		Assertions.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
+		Assertions.assertNotNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
 	}
 }

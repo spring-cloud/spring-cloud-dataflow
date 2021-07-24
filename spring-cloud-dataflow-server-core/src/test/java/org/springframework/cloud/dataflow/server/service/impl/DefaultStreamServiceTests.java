@@ -25,12 +25,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -56,9 +54,11 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -76,11 +76,8 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Chris Schaefer
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class DefaultStreamServiceTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 
@@ -100,7 +97,7 @@ public class DefaultStreamServiceTests {
 
 	private DefaultStreamValidationService streamValidationService;
 
-	@Before
+	@BeforeEach
 	public void setupMock() {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
@@ -141,25 +138,25 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void createStreamWithMissingApps() {
-		when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(false);
-		when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(false);
+		Throwable exception = assertThrows(InvalidStreamDefinitionException.class, () -> {
+			when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(false);
+			when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(false);
 
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Application name 'time' with type 'source' does not exist in the app registry.\n" +
-				"Application name 'log' with type 'sink' does not exist in the app registry.");
-
-		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false);
+			this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false);
+		});
+		assertTrue(exception.getMessage().contains("Application name 'time' with type 'source' does not exist in the app registry.\n" +
+				"Application name 'log' with type 'sink' does not exist in the app registry."));
 	}
 
 	@Test
 	public void createStreamInvalidDsl() {
-		when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(true);
-		when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(true);
+		Throwable exception = assertThrows(InvalidStreamDefinitionException.class, () -> {
+			when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(true);
+			when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(true);
 
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
-
-		this.defaultStreamService.createStream("testStream", "koza", "demo stream", false);
+			this.defaultStreamService.createStream("testStream", "koza", "demo stream", false);
+		});
+		assertTrue(exception.getMessage().contains("Application name 'koza' with type 'app' does not exist in the app registry."));
 	}
 
 	@Test
@@ -204,8 +201,8 @@ public class DefaultStreamServiceTests {
 				new JSONObject(streamDeploymentProperties).toString());
 		when(this.skipperStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		StreamDeployment streamDeployment = this.defaultStreamService.info("test1");
-		Assert.assertEquals(streamDeployment.getStreamName(), streamDefinition1.getName());
-		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}",
+		Assertions.assertEquals(streamDeployment.getStreamName(), streamDefinition1.getName());
+		Assertions.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}",
 				streamDeployment.getDeploymentProperties());
 	}
 
@@ -221,9 +218,9 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
 
-		Assert.assertNotNull(resultStates);
-		Assert.assertEquals(1, resultStates.size());
-		Assert.assertEquals(DeploymentState.deployed, resultStates.get(streamDefinition));
+		Assertions.assertNotNull(resultStates);
+		Assertions.assertEquals(1, resultStates.size());
+		Assertions.assertEquals(DeploymentState.deployed, resultStates.get(streamDefinition));
 	}
 
 	@Test
@@ -236,9 +233,9 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).history(eq("myStream"));
 
-		Assert.assertNotNull(releases);
-		Assert.assertEquals(1, releases.size());
-		Assert.assertEquals("RELEASE666", releases.iterator().next().getName());
+		Assertions.assertNotNull(releases);
+		Assertions.assertEquals(1, releases.size());
+		Assertions.assertEquals("RELEASE666", releases.iterator().next().getName());
 	}
 
 	@Test
@@ -249,9 +246,9 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).platformList();
 
-		Assert.assertNotNull(deployers);
-		Assert.assertEquals(1, deployers.size());
-		Assert.assertEquals("testDeployer", deployers.iterator().next().getName());
+		Assertions.assertNotNull(deployers);
+		Assertions.assertEquals(1, deployers.size());
+		Assertions.assertEquals("testDeployer", deployers.iterator().next().getName());
 	}
 
 	@Test
@@ -261,7 +258,7 @@ public class DefaultStreamServiceTests {
 		String manifest = this.defaultStreamService.manifest("myManifest", 666);
 
 		verify(this.skipperStreamDeployer, times(1)).manifest(anyString(), anyInt());
-		Assert.assertEquals("MANIFEST666", manifest);
+		Assertions.assertEquals("MANIFEST666", manifest);
 	}
 
 	@Test
@@ -270,7 +267,7 @@ public class DefaultStreamServiceTests {
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
-		Assert.assertEquals(DefaultStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION,
+		Assertions.assertEquals(DefaultStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION,
 				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
 	}
 
@@ -281,7 +278,7 @@ public class DefaultStreamServiceTests {
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
-		Assert.assertEquals("2.0.0",
+		Assertions.assertEquals("2.0.0",
 				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
 	}
 
@@ -299,8 +296,8 @@ public class DefaultStreamServiceTests {
 
 				this.defaultStreamService.createStream(streamName, "time | log", "demo stream", false);
 			} catch (Exception e) {
-				Assert.assertTrue(e instanceof InvalidStreamDefinitionException);
-				Assert.assertEquals(e.getMessage(), "Stream name must consist of alphanumeric characters or '-', " +
+				Assertions.assertTrue(e instanceof InvalidStreamDefinitionException);
+				Assertions.assertEquals(e.getMessage(), "Stream name must consist of alphanumeric characters or '-', " +
 						"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
 						"or 'abc-123')");
 			}

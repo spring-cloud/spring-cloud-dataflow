@@ -25,11 +25,8 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -66,9 +63,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -78,15 +74,11 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class DefaultTaskExecutionServiceTransactionTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -139,7 +131,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 
 	private TaskExecutionService transactionTaskService;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.launcherRepository.save(new Launcher("default", "local", new TaskLauncherStub(dataSource)));
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));

@@ -20,10 +20,10 @@ import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -60,9 +60,10 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -78,7 +79,7 @@ public class DataFlowServerConfigurationTests {
 
 	private MutablePropertySources propertySources;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		context = new AnnotationConfigApplicationContext();
 		context.setId("testDataFlowConfig");
@@ -93,7 +94,7 @@ public class DataFlowServerConfigurationTests {
 		propertySources = environment.getPropertySources();
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		if (context != null) {
 			context.close();
@@ -104,7 +105,7 @@ public class DataFlowServerConfigurationTests {
 	 * Verify that embedded server starts if h2 url is specified with default properties.
 	 */
 	@Test
-	@Ignore
+	@Disabled
 	public void testStartEmbeddedH2Server() {
 		Map<String, Object> myMap = new HashMap<>();
 		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
@@ -122,23 +123,25 @@ public class DataFlowServerConfigurationTests {
 	 *
 	 * @throws Throwable if any error occurs and should be handled by the caller.
 	 */
-	@Test(expected = ConnectException.class)
+	@Test
 	public void testDoNotStartEmbeddedH2Server() throws Throwable {
-		Throwable exceptionResult = null;
-		Map<String, Object> myMap = new HashMap<>();
-		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
-		myMap.put("spring.dataflow.embedded.database.enabled", "false");
-		myMap.put("spring.jpa.database", "H2");
-		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
-		context.setEnvironment(environment);
-		try {
-			context.refresh();
-		}
-		catch (BeanCreationException exception) {
-			exceptionResult = exception.getRootCause();
-		}
-		assertNotNull(exceptionResult);
-		throw exceptionResult;
+		assertThrows(ConnectException.class, () -> {
+			Throwable exceptionResult = null;
+			Map<String, Object> myMap = new HashMap<>();
+			myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
+			myMap.put("spring.dataflow.embedded.database.enabled", "false");
+			myMap.put("spring.jpa.database", "H2");
+			propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
+			context.setEnvironment(environment);
+			try {
+				context.refresh();
+			}
+			catch (BeanCreationException exception) {
+				exceptionResult = exception.getRootCause();
+			}
+			assertNotNull(exceptionResult);
+			throw exceptionResult;
+		});
 	}
 
 	/**

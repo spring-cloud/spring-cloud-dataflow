@@ -29,10 +29,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClientException;
@@ -83,6 +81,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -109,7 +108,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Daniel Serleg
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -137,7 +135,7 @@ public class StreamControllerTests {
 	@Autowired
 	private StreamDefinitionService streamDefinitionService;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -155,7 +153,7 @@ public class StreamControllerTests {
 		when(skipperClient.search(anyString(), eq(false))).thenReturn(new ArrayList<PackageMetadata>());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		repository.deleteAll();
 		auditRecordRepository.deleteAll();
@@ -163,9 +161,11 @@ public class StreamControllerTests {
 		assertThat(auditRecordRepository.count()).isZero();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(null, null, null, null, null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new StreamDefinitionController(null, null, null, null, null);
+		});
 	}
 
 	@Test

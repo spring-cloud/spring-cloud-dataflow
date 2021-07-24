@@ -20,9 +20,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -50,7 +50,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -63,7 +62,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -81,7 +79,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Chris Schaefer
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional
@@ -108,7 +105,7 @@ public class AppRegistryControllerTests {
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -123,7 +120,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterVersionedApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		MatcherAssert.assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
 	}
 
 	@Test
@@ -152,7 +149,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		MatcherAssert.assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
 	}
 
 	@Test
@@ -253,39 +250,39 @@ public class AppRegistryControllerTests {
 	public void testRegisterAll() throws Exception {
 		mockMvc.perform(post("/apps").param("apps", "sink.foo=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		MatcherAssert.assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
 	}
 
 	@Test
 	public void testRegisterAllFromFile() throws Exception {
 		mockMvc.perform(post("/apps").param("uri", "classpath:/register-all.txt").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		MatcherAssert.assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
 	}
 
 	@Test
 	public void testRegisterAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
 				is("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT"));
 	}
 
 	@Test
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
 				is("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:1.0.0.BUILD-SNAPSHOT"));
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
+		MatcherAssert.assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
 				is("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:1.0.0.BUILD-SNAPSHOT"));
 	}
 

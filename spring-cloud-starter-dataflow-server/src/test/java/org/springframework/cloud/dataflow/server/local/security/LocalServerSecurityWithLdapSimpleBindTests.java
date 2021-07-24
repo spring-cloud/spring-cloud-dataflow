@@ -16,8 +16,8 @@
 package org.springframework.cloud.dataflow.server.local.security;
 
 import org.junit.ClassRule;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Marius Bogoevici
  * @author Gunnar Hillert
  */
-@Ignore("Ignored until proper UAA integration exists") //FIXME see https://github.com/spring-cloud/spring-cloud-dataflow/issues/2580
+@Disabled("Ignored until proper UAA integration exists") //FIXME see https://github.com/spring-cloud/spring-cloud-dataflow/issues/2580
 public class LocalServerSecurityWithLdapSimpleBindTests {
 
 	private final static LocalDataflowResource localDataflowResource = new LocalDataflowResource(

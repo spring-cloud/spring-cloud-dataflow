@@ -22,9 +22,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -57,7 +56,6 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -68,6 +66,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -83,7 +82,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author David Turanski
  * @author Gunnar Hillert
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -148,7 +146,7 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private TaskJobService taskJobService;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
@@ -197,40 +195,52 @@ public class TaskExecutionControllerTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null, taskExecutionService, taskDefinitionRepository, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(null, taskExecutionService, taskDefinitionRepository, taskExecutionInfoService,
+					taskDeleteService, taskJobService);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingTaskService() {
-		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(taskExplorer, null, taskDefinitionRepository, taskExecutionInfoService,
+					taskDeleteService, taskJobService);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, null, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(taskExplorer, taskExecutionService, null, taskExecutionInfoService,
+					taskDeleteService, taskJobService);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository, null,
-				taskDeleteService, taskJobService);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository, null,
+					taskDeleteService, taskJobService);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingDeleteTaskService() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
-				taskExecutionInfoService, null, taskJobService);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
+					taskExecutionInfoService, null, taskJobService);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskExecutionControllerConstructorMissingDeleteTaskJobService() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
-				taskExecutionInfoService, taskDeleteService, null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
+					taskExecutionInfoService, taskDeleteService, null);
+		});
 	}
 
 	@Test

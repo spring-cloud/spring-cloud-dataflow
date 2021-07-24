@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -41,7 +41,7 @@ public class TaskTemplateTests {
 
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		restTemplate = mock(RestTemplate.class);
 
@@ -68,13 +68,13 @@ public class TaskTemplateTests {
 	private void validateExecutionLinkPresent(String dataFlowVersion) {
 		TestResource testResource = new TestResource();
 		new TaskTemplate(this.restTemplate, testResource, dataFlowVersion);
-		Assert.assertTrue(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
+		Assertions.assertTrue(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
 	private void validateExecutionLinkNotPresent(String version) {
 		TestResource testResource = new TestResource();
 		new TaskTemplate(this.restTemplate, testResource, version);
-		Assert.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
+		Assertions.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
 	public static class TestResource extends RepresentationModel {

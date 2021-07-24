@@ -26,10 +26,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -67,18 +66,17 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class,
 		DefaultSchedulerServiceMultiplatformTests.MultiplatformTaskConfiguration.class,
 		PropertyPlaceholderAutoConfiguration.class }, properties = {
@@ -147,7 +145,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	List<String> commandLineArgs;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception{
 		this.appRegistry.save("demo", ApplicationType.task, "1.0.0.", new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
 		this.appRegistry.save("demo2", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), new URI("file:src/test/resources/apps/foo-task"));
@@ -165,7 +163,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		this.commandLineArgs = new ArrayList<>();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		((SimpleTestScheduler)simpleTestScheduler).getSchedules().clear();
 	}
@@ -176,11 +174,13 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testScheduleWithLongNameOnKuberenetesPlatform() {
-		getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
-				"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
-				this.commandLineArgs, null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
+					"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
+					this.commandLineArgs, null);
+		});
 	}
 
 	@Test
@@ -218,12 +218,14 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 	}
 
-	@Test(expected = CreateScheduleException.class)
+	@Test
 	public void testDuplicate(){
-		schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
-				this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
-		schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
-				this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
+		assertThrows(CreateScheduleException.class, () -> {
+			schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
+					this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
+			schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
+					this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
+		});
 	}
 
 	@Test
@@ -328,14 +330,18 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		assertThat(schedules.size()).isEqualTo(MAX_COUNT);
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testListPaginated() {
-		schedulerService.list(PageRequest.of(0, 1), null);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			schedulerService.list(PageRequest.of(0, 1), null);
+		});
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
+	@Test
 	public void testListWithParamsPaginated() {
-		schedulerService.list(PageRequest.of(0, 1), BASE_DEFINITION_NAME);
+		assertThrows(UnsupportedOperationException.class, () -> {
+			schedulerService.list(PageRequest.of(0, 1), BASE_DEFINITION_NAME);
+		});
 	}
 
 	@Test
@@ -366,18 +372,18 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	public void testScheduleWithCommandLineArguments() throws Exception{
 		List<String> commandLineArguments = getCommandLineArguments(Arrays.asList("--myArg1", "--myArg2"));
 
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 2, commandLineArguments.size());
-		assertEquals("Invalid command line argument", "--myArg1", commandLineArguments.get(0));
-		assertEquals("Invalid command line argument", "--myArg2", commandLineArguments.get(1));
+		assertNotNull(commandLineArguments, "Command line arguments should not be null");
+		assertEquals(2, commandLineArguments.size(), "Invalid number of command line arguments");
+		assertEquals("--myArg1", commandLineArguments.get(0), "Invalid command line argument");
+		assertEquals("--myArg2", commandLineArguments.get(1), "Invalid command line argument");
 	}
 
 	@Test
 	public void testScheduleWithoutCommandLineArguments() throws Exception {
 		List<String> commandLineArguments = getCommandLineArguments(new ArrayList<>());
 
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 0, commandLineArguments.size());
+		assertNotNull(commandLineArguments, "Command line arguments should not be null");
+		assertEquals(0, commandLineArguments.size(), "Invalid number of command line arguments");
 	}
 
 	private List<String> getCommandLineArguments(List<String> commandLineArguments) {

@@ -32,11 +32,10 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 
@@ -45,7 +44,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -90,21 +90,19 @@ import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -125,16 +123,10 @@ import static org.mockito.Mockito.when;
  * @author David Turanski
  * @author Chris Schaefer
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
+@ExtendWith(OutputCaptureExtension.class)
+@SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
 public abstract class DefaultTaskExecutionServiceTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	@Rule
-	public OutputCaptureRule outputCapture = new OutputCaptureRule();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -206,7 +198,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		DataSource dataSource;
 
-		@Before
+		@BeforeEach
 		public void setup() {
 			setupTest(dataSource);
 		}
@@ -261,11 +253,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertTrue(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertNotNull(taskDeployment, "TaskDeployment should not be null");
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals(platform, taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			assertNotNull(taskDeployment.getCreatedOn(), "TaskDeployment createdOn field should not be null");
 		}
 	}
 
@@ -285,7 +277,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		DataSource dataSource;
 
-		@Before
+		@BeforeEach
 		public void setup() {
 			setupTest(dataSource);
 			this.launcherRepository.save(new Launcher(K8_PLATFORM, "Kubernetes", taskLauncher));
@@ -305,11 +297,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertFalse(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertNotNull(taskDeployment, "TaskDeployment should not be null");
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals(K8_PLATFORM, taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			assertNotNull(taskDeployment.getCreatedOn(), "TaskDeployment createdOn field should not be null");
 		}
 	}
 
@@ -319,7 +311,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		private Launcher launcher;
 
-		@Before
+		@BeforeEach
 		public void setup() {
 			this.launcher = this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 
@@ -329,15 +321,17 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDefinitionRepository.findAll();
 		}
 
-		@Test(expected = IllegalStateException.class)
+		@Test
 		@DirtiesContext
 		public void testTaskLaunchRequestUnderUpgrade() {
-			Map<String, List<String>> tasksBeingUpgraded =
-					(Map<String, List<String>>) ReflectionTestUtils.getField(this.taskExecutionService, "tasksBeingUpgraded");
+			assertThrows(IllegalStateException.class, () -> {
+				Map<String, List<String>> tasksBeingUpgraded =
+						(Map<String, List<String>>) ReflectionTestUtils.getField(this.taskExecutionService, "tasksBeingUpgraded");
 
-			tasksBeingUpgraded.put("myTask", Arrays.asList("default"));
+				tasksBeingUpgraded.put("myTask", Arrays.asList("default"));
 
-			this.taskExecutionService.executeTask("myTask", Collections.emptyMap(), Collections.emptyList());
+				this.taskExecutionService.executeTask("myTask", Collections.emptyMap(), Collections.emptyList());
+			});
 		}
 
 		@Test
@@ -519,23 +513,24 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Test
 		@DirtiesContext
 		public void testUpgradeDueToDeploymentPropsChangeForCloudFoundryFailsWhenAlreadyRunning() throws IOException {
-			this.launcherRepository.delete(this.launcher);
-			this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
-			initializeSuccessfulRegistry(appRegistry);
-			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
-			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
-					new FileUrlResource("src/test/resources/apps/foo-task"));
-			manifest.setTaskDeploymentRequest(request);
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			this.taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
-			when(this.taskLauncher.launch(any())).thenReturn("abc");
-			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.running,new HashMap<>()));
-			thrown.expect(IllegalStateException.class);
-			thrown.expectMessage("Unable to update application due to currently running applications");
-			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			Throwable exception = assertThrows(IllegalStateException.class, () -> {
+				this.launcherRepository.delete(this.launcher);
+				this.launcherRepository.save(new Launcher("default", "Cloud Foundry", taskLauncher));
+				initializeSuccessfulRegistry(appRegistry);
+				TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+				TaskManifest manifest = new TaskManifest();
+				manifest.setPlatformName("default");
+				AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+						new FileUrlResource("src/test/resources/apps/foo-task"));
+				manifest.setTaskDeploymentRequest(request);
+				this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+				this.taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+				this.taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
+				when(this.taskLauncher.launch(any())).thenReturn("abc");
+				when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.running, new HashMap<>()));
+				this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			});
+			assertTrue(exception.getMessage().contains("Unable to update application due to currently running applications"));
 		}
 
 		@Test
@@ -720,20 +715,22 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
 		}
 
-		@Test(expected = IllegalStateException.class)
+		@Test
 		@DirtiesContext
 		public void testUpgradeFailureTaskCurrentlyRunning() throws MalformedURLException {
-			TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
-			TaskManifest manifest = new TaskManifest();
-			manifest.setPlatformName("default");
-			AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
-					new FileUrlResource("src/test/resources/apps/foo-task"));
-			manifest.setTaskDeploymentRequest(request);
+			assertThrows(IllegalStateException.class, () -> {
+				TaskExecution myTask = this.taskRepository.createTaskExecution(TASK_NAME_ORIG);
+				TaskManifest manifest = new TaskManifest();
+				manifest.setPlatformName("default");
+				AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("some-name", null),
+						new FileUrlResource("src/test/resources/apps/foo-task"));
+				manifest.setTaskDeploymentRequest(request);
 
-			this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
+				this.dataflowTaskExecutionMetadataDao.save(myTask, manifest);
 
-			initializeSuccessfulRegistry(appRegistry);
-			this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+				initializeSuccessfulRegistry(appRegistry);
+				this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			});
 		}
 	}
 
@@ -741,7 +738,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
-		@Before
+		@BeforeEach
 		public void setup() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
@@ -753,7 +750,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void createSimpleTask() {
+		public void createSimpleTask(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			taskSaveService.saveTaskDefinition(new TaskDefinition("simpleTask", "AAA --foo=bar"));
 			verifyTaskExistsInRepo("simpleTask", "AAA --foo=bar", taskDefinitionRepository);
@@ -764,17 +761,17 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeSingleTaskTest() {
+		public void executeSingleTaskTest(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertNotNull(taskDeployment, "TaskDeployment should not be null");
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			assertNotNull(taskDeployment.getCreatedOn(), "TaskDeployment createdOn field should not be null");
 			taskDeleteService.deleteTaskDefinition(TASK_NAME_ORIG, true);
 			String logEntries = outputCapture.toString();
 			assertTrue(!logEntries.contains("Deleted task app resources for"));
@@ -791,11 +788,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>()));
 
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertNotNull(taskDeployment, "TaskDeployment should not be null");
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			assertNotNull(taskDeployment.getCreatedOn(), "TaskDeployment createdOn field should not be null");
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(taskLauncher, times(1)).launch(argumentCaptor.capture());
 			assertEquals("yyyy", argumentCaptor.getValue().getDeploymentProperties().get("app.demo.format"));
@@ -811,11 +808,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG2, taskDeploymentProperties, new LinkedList<>()));
 
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
-			assertNotNull("TaskDeployment should not be null", taskDeployment);
+			assertNotNull(taskDeployment, "TaskDeployment should not be null");
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
 			assertEquals(TASK_NAME_ORIG2, taskDeployment.getTaskDefinitionName());
 			assertEquals("default", taskDeployment.getPlatformName());
-			assertNotNull("TaskDeployment createdOn field should not be null", taskDeployment.getCreatedOn());
+			assertNotNull(taskDeployment.getCreatedOn(), "TaskDeployment createdOn field should not be null");
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(taskLauncher, times(1)).launch(argumentCaptor.capture());
 			assertEquals("yyyy", argumentCaptor.getValue().getDeploymentProperties().get("app.l2.format"));
@@ -823,7 +820,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeStopTaskTest() {
+		public void executeStopTaskTest(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
@@ -836,7 +833,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 		@Test
 		@DirtiesContext
-		public void executeStopTaskTestForChildApp() {
+		public void executeStopTaskTestForChildApp(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
@@ -867,7 +864,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeStopForSpecificPlatformTaskTest() {
+		public void executeStopForSpecificPlatformTaskTest(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
@@ -913,17 +910,19 @@ public abstract class DefaultTaskExecutionServiceTests {
 			}
 		}
 
-		@Test(expected = NoSuchTaskExecutionException.class)
+		@Test
 		@DirtiesContext
 		public void executeStopInvalidIdTaskTest() {
-			initializeSuccessfulRegistry(appRegistry);
-			when(taskLauncher.launch(any())).thenReturn("0");
-			assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+			assertThrows(NoSuchTaskExecutionException.class, () -> {
+				initializeSuccessfulRegistry(appRegistry);
+				when(taskLauncher.launch(any())).thenReturn("0");
+				assertEquals(1L, this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
 
-			Set<Long> executionIds = new HashSet<>(2);
-			executionIds.add(1L);
-			executionIds.add(5L);
-			taskExecutionService.stopTaskExecution(executionIds);
+				Set<Long> executionIds = new HashSet<>(2);
+				executionIds.add(1L);
+				executionIds.add(5L);
+				taskExecutionService.stopTaskExecution(executionIds);
+			});
 		}
 
 		@Test
@@ -1039,7 +1038,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeDeleteNoDeploymentWithMultiplePlatforms() {
+		public void executeDeleteNoDeploymentWithMultiplePlatforms(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 			this.launcherRepository.save(new Launcher("anotherPlatform", "local", taskLauncher));
@@ -1109,12 +1108,14 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
 		}
 
-		@Test(expected = NoSuchTaskDefinitionException.class)
+		@Test
 		@DirtiesContext
 		public void validateMissingTaskDefinitionTest() {
-			initializeSuccessfulRegistry(appRegistry);
-			ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
-			assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+			assertThrows(NoSuchTaskDefinitionException.class, () -> {
+				initializeSuccessfulRegistry(appRegistry);
+				ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
+				assertEquals("valid", validationStatus.getAppsStatuses().get("task:simpleTask"));
+			});
 		}
 
 		@Test
@@ -1166,7 +1167,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		TaskExecutionInfoService taskExecutionInfoService;
 
-		@Before
+		@BeforeEach
 		public void setup() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 		}
@@ -1209,7 +1210,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		private TaskExecutionService taskExecutionService;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
@@ -1310,8 +1311,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
 					this.taskLauncher, this.appRegistry), Collections.emptyList(),
 					this.taskExecutionService, this.taskLauncher);
-			assertFalse("Should not contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertFalse(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should not contain the property 'dataflow-server-access-token'");
 		}
 
 		@Test
@@ -1324,8 +1325,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
 					this.taskLauncher, this.appRegistry), Collections.emptyList(),
 					this.taskExecutionService, this.taskLauncher);
-			assertFalse("Should not contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertFalse(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should not contain the property 'dataflow-server-access-token'");
 		}
 
 		@Test
@@ -1338,8 +1339,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(prepareEnvironmentForTokenTests(this.taskSaveService,
 					this.taskLauncher, this.appRegistry), arguments,  this.taskExecutionService,
 					this.taskLauncher);
-			assertTrue("Should contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertTrue(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should contain the property 'dataflow-server-access-token'");
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
 		}
 
@@ -1354,8 +1355,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 					prepareEnvironmentForTokenTests(this.taskSaveService,
 					this.taskLauncher, this.appRegistry), arguments,
 					this.taskExecutionService, this.taskLauncher);
-			assertTrue("Should contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertTrue(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should contain the property 'dataflow-server-access-token'");
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
 		}
 
@@ -1371,8 +1372,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			AppDeploymentRequest request = getAppDeploymentRequestForToken(properties, Collections.emptyList(),
 					this.taskExecutionService, this.taskLauncher);
 
-			assertTrue("Should contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertTrue(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should contain the property 'dataflow-server-access-token'");
 
 			boolean containsArgument = false;
 			for (String argument : request.getCommandlineArguments()) {
@@ -1381,7 +1382,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 				}
 			}
 
-			assertFalse("Should not contain the argument 'dataflow-server-access-token'", containsArgument);
+			assertFalse(containsArgument, "Should not contain the argument 'dataflow-server-access-token'");
 			assertEquals("foo-bar-123-token-override", request.getDefinition().getProperties().get("dataflow-server-access-token"));
 		}
 
@@ -1396,8 +1397,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 					this.taskLauncher, this.appRegistry), args,  this.taskExecutionService,
 					this.taskLauncher);
 
-			assertFalse("Should not contain the property 'dataflow-server-access-token'",
-				request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertFalse(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+				"Should not contain the property 'dataflow-server-access-token'");
 
 			boolean containsArgument = false;
 			String argumentValue = null;
@@ -1407,9 +1408,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 					argumentValue = argument;
 				}
 			}
-			assertFalse("Should not contain the property 'dataflow-server-access-token'",
-					request.getCommandlineArguments().contains("dataflow-server-access-token"));
-			assertTrue("Should contain the argument 'dataflow-server-access-token'", containsArgument);
+			assertFalse(request.getCommandlineArguments().contains("dataflow-server-access-token"),
+					"Should not contain the property 'dataflow-server-access-token'");
+			assertTrue(containsArgument, "Should contain the argument 'dataflow-server-access-token'");
 			assertEquals("--dataflow-server-access-token=foo-bar-123-token-override", argumentValue);
 		}
 
@@ -1546,17 +1547,17 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@DirtiesContext
 		public void verifyComposedTaskFlag() {
 			String composedTaskDsl = "<AAA || BBB>";
-			assertTrue("Expected true for composed task", TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl));
+			assertTrue(TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl), "Expected true for composed task");
 			composedTaskDsl = "AAA 'FAILED' -> BBB '*' -> CCC";
-			assertTrue("Expected true for composed task", TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl));
+			assertTrue(TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl), "Expected true for composed task");
 			composedTaskDsl = "AAA && BBB && CCC";
-			assertTrue("Expected true for composed task", TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl));
+			assertTrue(TaskServiceUtils.isComposedTaskDefinition(composedTaskDsl), "Expected true for composed task");
 			String nonComposedTaskDsl = "AAA";
-			assertFalse("Expected false for non-composed task",
-					TaskServiceUtils.isComposedTaskDefinition(nonComposedTaskDsl));
+			assertFalse(TaskServiceUtils.isComposedTaskDefinition(nonComposedTaskDsl),
+					"Expected false for non-composed task");
 			nonComposedTaskDsl = "AAA --foo=bar";
-			assertFalse("Expected false for non-composed task",
-					TaskServiceUtils.isComposedTaskDefinition(nonComposedTaskDsl));
+			assertFalse(TaskServiceUtils.isComposedTaskDefinition(nonComposedTaskDsl),
+					"Expected false for non-composed task");
 		}
 
 		@Test
@@ -1617,7 +1618,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteAll();
-			assertThat(preDeleteSize - 5, is(equalTo(taskDefinitionRepository.count())));
+			MatcherAssert.assertThat(preDeleteSize - 5, is(equalTo(taskDefinitionRepository.count())));
 		}
 
 		@Test
@@ -1633,7 +1634,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
+			MatcherAssert.assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
 		}
 
 		@Test
@@ -1649,7 +1650,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDeleteService.deleteTaskDefinition("deleteTask-BBB");
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			MatcherAssert.assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 		}
 
 		@Test
@@ -1666,7 +1667,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			MatcherAssert.assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
 		}
 
@@ -1682,7 +1683,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			MatcherAssert.assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
 		}
 
 		@Test
@@ -1697,7 +1698,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			catch (IllegalArgumentException iae) {
 				isExceptionThrown = true;
 			}
-			assertTrue("IllegalArgumentException was expected to be thrown", isExceptionThrown);
+			assertTrue(isExceptionThrown, "IllegalArgumentException was expected to be thrown");
 			assertFalse(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
 			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
 			assertFalse(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
@@ -1716,7 +1717,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			catch (DuplicateTaskException de) {
 				isExceptionThrown = true;
 			}
-			assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
+			assertTrue(isExceptionThrown, "DuplicateTaskException was expected to be thrown");
 			assertTrue(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
 			assertTrue(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
 			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
@@ -1735,7 +1736,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			catch (DuplicateTaskException de) {
 				isExceptionThrown = true;
 			}
-			assertTrue("DuplicateTaskException was expected to be thrown", isExceptionThrown);
+			assertTrue(isExceptionThrown, "DuplicateTaskException was expected to be thrown");
 			assertFalse(wasTaskDefinitionCreated("splitTask", taskDefinitionRepository));
 			assertFalse(wasTaskDefinitionCreated("splitTask-AAA", taskDefinitionRepository));
 			assertTrue(wasTaskDefinitionCreated("splitTask-BBB", taskDefinitionRepository));
@@ -1766,7 +1767,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Autowired
 		private TaskExecutionService taskExecutionService;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 			this.launcherRepository.save(new Launcher("MyPlatform", "local", taskLauncher));
@@ -1782,8 +1783,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 					prepareEnvironmentForTokenTests(this.taskSaveService,
 							this.taskLauncher, this.appRegistry), arguments, this.taskExecutionService,
 							this.taskLauncher);
-			assertTrue("Should contain the property 'dataflow-server-access-token'",
-					request.getDefinition().getProperties().containsKey("dataflow-server-access-token"));
+			assertTrue(request.getDefinition().getProperties().containsKey("dataflow-server-access-token"),
+					"Should contain the property 'dataflow-server-access-token'");
 			assertEquals("foo-bar-123-token", request.getDefinition().getProperties().get("dataflow-server-access-token"));
 		}
 	}
@@ -1867,8 +1868,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void verifyTaskExistsInRepo(String taskName, String dsl,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findById(taskName).get();
-		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
-		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
+		MatcherAssert.assertThat(taskDefinition.getName(), is(equalTo(taskName)));
+		MatcherAssert.assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
 	}
 
 	private static boolean wasTaskDefinitionCreated(String taskName,

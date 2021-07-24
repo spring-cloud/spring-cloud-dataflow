@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
@@ -30,8 +30,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Gunnar Hillert
@@ -53,7 +53,7 @@ public class JobExecutionDeserializationTests {
 				new TypeReference<PagedModel<EntityModel<JobExecutionResource>>>() {
 				});
 		final JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
-		assertEquals("Expect 1 JobExecutionInfoResource", 6, paged.getContent().size());
+		assertEquals(6, paged.getContent().size(), "Expect 1 JobExecutionInfoResource");
 		assertEquals(Long.valueOf(6), jobExecutionResource.getJobId());
 		assertEquals("job200616815", jobExecutionResource.getName());
 		assertEquals("COMPLETED", jobExecutionResource.getJobExecution().getStatus().name());

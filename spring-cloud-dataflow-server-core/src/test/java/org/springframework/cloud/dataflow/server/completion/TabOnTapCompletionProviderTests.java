@@ -23,9 +23,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hamcrest.FeatureMatcher;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -51,18 +51,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -87,7 +84,7 @@ public class TabOnTapCompletionProviderTests {
 		};
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
 		this.streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
@@ -98,21 +95,21 @@ public class TabOnTapCompletionProviderTests {
 	@Test
 	// :foo ==> add appropriate app names
 	public void testAppNamesAfterStreamName() {
-		assertThat(completionProvider.complete(":foo", 1),
+		MatcherAssert.assertThat(completionProvider.complete(":foo", 1),
 				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
 	}
 
 	@Test
 	// :foo. ==> add appropriate app names
 	public void testAppNamesAfterStreamNameWithDotAfterStreamName() {
-		assertThat(completionProvider.complete(":foo.", 1),
+		MatcherAssert.assertThat(completionProvider.complete(":foo.", 1),
 				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
 	}
 
 	@Test
 	// : ==> add stream name
 	public void testStreamNameAfterColon() {
-		assertThat(completionProvider.complete(":", 1), hasItems(proposalThat(is(":foo")), proposalThat(is(":bar"))));
+		MatcherAssert.assertThat(completionProvider.complete(":", 1), hasItems(proposalThat(is(":foo")), proposalThat(is(":bar"))));
 	}
 
 	/**

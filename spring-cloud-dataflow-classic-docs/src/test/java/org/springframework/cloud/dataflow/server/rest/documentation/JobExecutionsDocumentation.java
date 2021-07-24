@@ -21,9 +21,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -48,7 +47,6 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -67,7 +65,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Glenn Renfro
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
 @DirtiesContext
 public class JobExecutionsDocumentation extends BaseDocumentation {
@@ -81,7 +78,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private JdbcTemplate jdbcTemplate;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		if (!initialized) {
 			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");

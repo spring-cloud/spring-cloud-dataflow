@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.registry.support;
 import java.net.MalformedURLException;
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -30,7 +30,8 @@ import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -45,10 +46,12 @@ public class AppResourceCommonTests {
 	private ResourceLoader resourceLoader = mock(ResourceLoader.class);
 	private AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), resourceLoader);
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testBadNamedJars() throws Exception {
-		UrlResource urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit.jar");
-		appResourceCommon.getUrlResourceVersion(urlResource);
+		assertThrows(IllegalArgumentException.class, () -> {
+			UrlResource urlResource = new UrlResource("https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit.jar");
+			appResourceCommon.getUrlResourceVersion(urlResource);
+		});
 	}
 
 	@Test

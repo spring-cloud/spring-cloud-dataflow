@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.http.MediaType;

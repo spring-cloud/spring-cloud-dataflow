@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;

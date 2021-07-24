@@ -24,8 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -40,7 +41,6 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -57,7 +57,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 
 	private ApplicationConfigurationMetadataResolver resolver;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		resolver = new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
@@ -68,7 +68,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(new HashMap<>());
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new DockerResource("test/test:latest"));
-		assertThat(properties.size(), is(0));
+		MatcherAssert.assertThat(properties.size(), is(0));
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 						new String(bytes)));
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new DockerResource("test/test:latest"));
-		assertThat(properties.size(), is(3));
+		MatcherAssert.assertThat(properties.size(), is(3));
 	}
 
 	@Test
@@ -94,23 +94,23 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new DockerResource("test/test:latest"));
-		assertThat(properties.size(), is(0));
+		MatcherAssert.assertThat(properties.size(), is(0));
 	}
 
 	@Test
 	public void appSpecificVisiblePropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
 	public void appSpecificVisibleLegacyPropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor-legacy", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
@@ -120,18 +120,18 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		// expresso2 from old format doesn't get read.
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor-both", getClass()));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso3")));
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("filter.expression")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso3")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2")));
 	}
 
 	@Test
 	public void otherPropertiesShouldOnlyBeVisibleInExtensiveCall() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
+		MatcherAssert.assertThat(properties, not(hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"))));
 		properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()), true);
-		assertThat(properties, hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret")));
+		MatcherAssert.assertThat(properties, hasItem(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret")));
 	}
 
 	@Test
@@ -140,8 +140,8 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
 				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()), true);
-		assertThat(properties.size(), is(0));
-		assertThat(full.size(), is(3));
+		MatcherAssert.assertThat(properties.size(), is(0));
+		MatcherAssert.assertThat(full.size(), is(3));
 	}
 
 	@Test
@@ -150,18 +150,18 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()), true);
-		assertThat(properties.size(), is(0));
-		assertThat(full.size(), is(2));
+		MatcherAssert.assertThat(properties.size(), is(0));
+		MatcherAssert.assertThat(full.size(), is(2));
 	}
 
 	@Test
 	public void shouldReturnPortMappingProperties() {
 		Map<String, Set<String>> portNames = resolver.listPortNames(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(portNames.size(), is(2));
-		assertThat(portNames.get("inbound").size(), is(3));
-		assertThat(portNames.get("inbound"), containsInAnyOrder("in1", "in2", "in3"));
-		assertThat(portNames.get("outbound").size(), is(2));
-		assertThat(portNames.get("outbound"), containsInAnyOrder("out1", "out2"));
+		MatcherAssert.assertThat(portNames.size(), is(2));
+		MatcherAssert.assertThat(portNames.get("inbound").size(), is(3));
+		MatcherAssert.assertThat(portNames.get("inbound"), containsInAnyOrder("in1", "in2", "in3"));
+		MatcherAssert.assertThat(portNames.get("outbound").size(), is(2));
+		MatcherAssert.assertThat(portNames.get("outbound"), containsInAnyOrder("out1", "out2"));
 	}
 
 	@Test
@@ -171,11 +171,11 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		result.put("configuration-properties.outbound-ports", "output1, output2");
 		when(this.containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(result);
 		Map<String, Set<String>> portNames = this.resolver.listPortNames(new DockerResource("test/test:latest"));
-		assertThat(portNames.size(), is(2));
-		assertThat(portNames.get("inbound").size(), is(3));
-		assertThat(portNames.get("inbound"), containsInAnyOrder("input1", "input2", "input3"));
-		assertThat(portNames.get("outbound").size(), is(2));
-		assertThat(portNames.get("outbound"), containsInAnyOrder("output1", "output2"));
+		MatcherAssert.assertThat(portNames.size(), is(2));
+		MatcherAssert.assertThat(portNames.get("inbound").size(), is(3));
+		MatcherAssert.assertThat(portNames.get("inbound"), containsInAnyOrder("input1", "input2", "input3"));
+		MatcherAssert.assertThat(portNames.get("outbound").size(), is(2));
+		MatcherAssert.assertThat(portNames.get("outbound"), containsInAnyOrder("output1", "output2"));
 	}
 
 	private Matcher<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {

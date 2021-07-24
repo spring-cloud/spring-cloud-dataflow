@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -41,6 +41,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.anyString;
@@ -74,7 +75,7 @@ public class StreamDslTests {
 
 	private StreamApplication logApplication = new StreamApplication("log");
 
-	@Before
+	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		when(client.streamOperations()).thenReturn(this.streamOperations);
@@ -233,11 +234,13 @@ public class StreamDslTests {
 				eq(false));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testDuplicateNameNoLabel() {
-		Stream.builder(client).name("test").source(timeApplication)
-				.processor(filterApplication).processor(filterApplication)
-				.sink(logApplication).create();
+		assertThrows(IllegalStateException.class, () -> {
+			Stream.builder(client).name("test").source(timeApplication)
+					.processor(filterApplication).processor(filterApplication)
+					.sink(logApplication).create();
+		});
 	}
 
 	@Test

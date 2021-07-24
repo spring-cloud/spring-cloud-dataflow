@@ -22,8 +22,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -48,7 +49,6 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +68,7 @@ public class ConfigCommandTests {
 	@Mock
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
@@ -118,7 +118,7 @@ public class ConfigCommandTests {
 			final Table infoResult = (Table) configCommands.info().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
 					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
-			assertThat(infoResult.render(80), is(expectedOutput));
+			MatcherAssert.assertThat(infoResult.render(80), is(expectedOutput));
 		}
 	}
 
@@ -129,7 +129,7 @@ public class ConfigCommandTests {
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 
 		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, null, false, null, null, null);
-		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
+		MatcherAssert.assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
 	}
 
 	@Test
@@ -165,6 +165,6 @@ public class ConfigCommandTests {
 
 		System.out.println(targetResult);
 
-		assertThat(targetResult, is(expectedTargetMessage));
+		MatcherAssert.assertThat(targetResult, is(expectedTargetMessage));
 	}
 }

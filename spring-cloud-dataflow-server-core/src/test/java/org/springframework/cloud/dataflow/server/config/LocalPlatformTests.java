@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.server.config;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -43,7 +43,7 @@ public class LocalPlatformTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void cleanup() {
 		if (this.context != null) {
 			this.context.close();

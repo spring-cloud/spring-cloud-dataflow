@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.single.security;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -31,7 +31,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -269,7 +269,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		assertTrue(Boolean.valueOf(oAuthServerResponse));
 
-		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+		Assertions.assertThrows(AuthenticationServiceException.class, () -> {
 			localDataflowResource.getMockMvc()
 				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 				.andExpect(status().isUnauthorized());
@@ -279,7 +279,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 			.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 			.andExpect(status().isFound());
 
-		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+		Assertions.assertThrows(AuthenticationServiceException.class, () -> {
 			localDataflowResource.getMockMvc()
 				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 				.andExpect(status().isUnauthorized());
@@ -289,7 +289,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
 		// https://github.com/spring-projects/spring-security/issues/10038
-		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+		Assertions.assertThrows(AuthenticationServiceException.class, () -> {
 			localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
 					.andExpect(status().isUnauthorized());
 		});

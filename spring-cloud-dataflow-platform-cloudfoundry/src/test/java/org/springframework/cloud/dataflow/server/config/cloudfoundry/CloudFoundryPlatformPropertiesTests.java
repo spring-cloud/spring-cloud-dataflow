@@ -18,15 +18,13 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = CloudFoundryPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("cloudfoundry-platform-properties")
 public class CloudFoundryPlatformPropertiesTests {

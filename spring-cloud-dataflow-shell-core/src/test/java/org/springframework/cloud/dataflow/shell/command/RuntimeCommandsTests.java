@@ -22,9 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -36,8 +37,7 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.table.TableModel;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -61,7 +61,7 @@ public class RuntimeCommandsTests {
 
 	private AppStatusResource appStatusResource3;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);
@@ -119,7 +119,7 @@ public class RuntimeCommandsTests {
 		TableModel model = runtimeCommands.list(true, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				MatcherAssert.assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
 			}
 		}
 	}
@@ -137,7 +137,7 @@ public class RuntimeCommandsTests {
 		TableModel model = runtimeCommands.list(false, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				MatcherAssert.assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
 			}
 		}
 	}
@@ -150,7 +150,7 @@ public class RuntimeCommandsTests {
 		assertTrue(model.getRowCount() == 4);
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				MatcherAssert.assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
 			}
 		}
 	}

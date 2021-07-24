@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +37,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -52,13 +52,13 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(StreamCommandTests.class);
 
-	@Before
+	@BeforeEach
 	public void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
-	@After
+	@AfterEach
 	public void destroyStreams() {
 		stream().destroyCreatedStreams();
 	}
@@ -100,26 +100,26 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		stream().createDontDeploy(streamName, "time | log");
 
 		CommandResult cr = stream().validate(streamName);
-		assertTrue("task validate status command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task validate status command must be successful");
 		List results = (List) cr.getResult();
 		Table table = (Table)results.get(0);
-		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
-		assertEquals("First Row First Value should be: Stream Name", "Stream Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Stream Definition", "Stream Definition", table.getModel().getValue(0, 1));
-		assertEquals("Second Row First Value should be: " + streamName, streamName, table.getModel().getValue(1, 0));
-		assertEquals("Second Row Second Value should be: time | log", "time | log", table.getModel().getValue(1, 1));
+		assertEquals(2, table.getModel().getColumnCount(), "Number of columns returned was not expected");
+		assertEquals("Stream Name", table.getModel().getValue(0, 0), "First Row First Value should be: Stream Name");
+		assertEquals("Stream Definition", table.getModel().getValue(0, 1), "First Row Second Value should be: Stream Definition");
+		assertEquals(streamName, table.getModel().getValue(1, 0), "Second Row First Value should be: " + streamName);
+		assertEquals("time | log", table.getModel().getValue(1, 1), "Second Row Second Value should be: time | log");
 
 		String message = String.format("\n%s is a valid stream.", streamName);
-		assertEquals(String.format("Notification should be: %s",message ), message, results.get(1));
+		assertEquals(message, results.get(1), String.format("Notification should be: %s",message ));
 
 		table = (Table)results.get(2);
-		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
-		assertEquals("First Row First Value should be: App Name", "App Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Validation Status", "Validation Status", table.getModel().getValue(0, 1));
-		assertEquals("Second Row First Value should be: source:time", "source:time" , table.getModel().getValue(1, 0));
-		assertEquals("Second Row Second Value should be: valid", "valid", table.getModel().getValue(1, 1));
-		assertEquals("Third Row First Value should be: sink:log", "sink:log" , table.getModel().getValue(2, 0));
-		assertEquals("Third Row Second Value should be: valid", "valid", table.getModel().getValue(2, 1));
+		assertEquals(2, table.getModel().getColumnCount(), "Number of columns returned was not expected");
+		assertEquals("App Name", table.getModel().getValue(0, 0), "First Row First Value should be: App Name");
+		assertEquals("Validation Status", table.getModel().getValue(0, 1), "First Row Second Value should be: Validation Status");
+		assertEquals("source:time" , table.getModel().getValue(1, 0), "Second Row First Value should be: source:time");
+		assertEquals("valid", table.getModel().getValue(1, 1), "Second Row Second Value should be: valid");
+		assertEquals("sink:log" , table.getModel().getValue(2, 0), "Third Row First Value should be: sink:log");
+		assertEquals("valid", table.getModel().getValue(2, 1), "Third Row Second Value should be: valid");
 	}
 
 }

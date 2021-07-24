@@ -18,10 +18,9 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Date;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -41,7 +40,6 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
@@ -50,6 +48,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -61,7 +60,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Gunnar Hillert
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
@@ -86,15 +84,17 @@ public class JobExecutionControllerTests {
 	@Autowired
 	private RequestMappingHandlerAdapter adapter;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(jobRepository, taskBatchDao,
 				dao, wac, adapter);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testJobExecutionControllerConstructorMissingRepository() {
-		new JobExecutionController(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new JobExecutionController(null);
+		});
 	}
 
 	@Test
@@ -135,9 +135,9 @@ public class JobExecutionControllerTests {
 
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
 				new JobParameters());
-		Assert.assertNotNull(jobExecution);
-		Assert.assertEquals(Long.valueOf(6), jobExecution.getId());
-		Assert.assertEquals(BatchStatus.STOPPING, jobExecution.getStatus());
+		Assertions.assertNotNull(jobExecution);
+		Assertions.assertEquals(Long.valueOf(6), jobExecution.getId());
+		Assertions.assertEquals(BatchStatus.STOPPING, jobExecution.getStatus());
 
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isOk());
@@ -150,9 +150,9 @@ public class JobExecutionControllerTests {
 
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
 				new JobParameters());
-		Assert.assertNotNull(jobExecution);
-		Assert.assertEquals(Long.valueOf(7), jobExecution.getId());
-		Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getStatus());
+		Assertions.assertNotNull(jobExecution);
+		Assertions.assertEquals(Long.valueOf(7), jobExecution.getId());
+		Assertions.assertEquals(BatchStatus.STOPPED, jobExecution.getStatus());
 
 	}
 

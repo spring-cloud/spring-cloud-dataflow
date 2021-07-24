@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Christian Tzolov
@@ -34,7 +34,7 @@ public class ArgumentSanitizerTest {
 	private static final String[] keys = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services", "url" };
 
-	@Before
+	@BeforeEach
 	public void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
@@ -42,8 +42,8 @@ public class ArgumentSanitizerTest {
 	@Test
 	public void testSanitizeProperties() {
 		for (String key : keys) {
-			Assert.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			Assert.assertEquals("******", sanitizer.sanitize(key, "bar"));
+			Assertions.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
+			Assertions.assertEquals("******", sanitizer.sanitize(key, "bar"));
 		}
 	}
 
@@ -57,11 +57,11 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assert.assertEquals(keys.length, sanitizedArguments.size());
+		Assertions.assertEquals(keys.length, sanitizedArguments.size());
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			Assert.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			Assertions.assertEquals("--" + keys[order] + "=******", sanitizedString);
 			order++;
 		}
 	}
@@ -69,9 +69,9 @@ public class ArgumentSanitizerTest {
 
 	@Test
 	public void testMultipartProperty() {
-		Assert.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		Assert.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		Assert.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+		Assertions.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
+		Assertions.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
+		Assertions.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
 	}
 
 //	@Test

@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.container.registry.authorization;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
@@ -48,7 +48,7 @@ public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategyTest {
 
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void clean() {
 		if (context != null) {
 			context.close();

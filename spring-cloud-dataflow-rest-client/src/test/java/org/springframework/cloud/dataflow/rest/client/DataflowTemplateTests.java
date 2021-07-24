@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -44,11 +44,12 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -60,12 +61,12 @@ import static org.mockito.Mockito.when;
  */
 public class DataflowTemplateTests {
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		System.setProperty("sun.net.client.defaultConnectTimeout", String.valueOf(100));
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		System.clearProperty("sun.net.client.defaultConnectTimeout");
 	}
@@ -84,9 +85,11 @@ public class DataflowTemplateTests {
 		fail("Expected an IllegalArgumentException to be thrown.");
 	}
 
-	@Test(expected = ResourceAccessException.class)
+	@Test
 	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-		new DataFlowTemplate(new URI("https://doesnotexist:1234"));
+		assertThrows(ResourceAccessException.class, () -> {
+			new DataFlowTemplate(new URI("https://doesnotexist:1234"));
+		});
 	}
 
 	@Test

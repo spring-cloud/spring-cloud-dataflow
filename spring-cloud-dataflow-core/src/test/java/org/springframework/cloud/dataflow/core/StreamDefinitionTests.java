@@ -19,17 +19,17 @@ package org.springframework.cloud.dataflow.core;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.dsl.ParseException;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Mark Fisher
@@ -198,17 +198,17 @@ public class StreamDefinitionTests {
 			new StreamDefinition("test", ":foo > boot");
 		}
 		catch (ParseException expected) {
-			assertThat(expected.getMessage(),
+			MatcherAssert.assertThat(expected.getMessage(),
 					containsString("A destination is not supported in this kind of definition"));
-			assertThat(expected.getPosition(), is(0));
+			MatcherAssert.assertThat(expected.getPosition(), is(0));
 		}
 		try {
 			new StreamDefinition("test", "bart | goo > :foo");
 		}
 		catch (ParseException expected) {
-			assertThat(expected.getMessage(),
+			MatcherAssert.assertThat(expected.getMessage(),
 					containsString("A destination is not supported in this kind of definition"));
-			assertThat(expected.getPosition(), is(13));
+			MatcherAssert.assertThat(expected.getPosition(), is(13));
 		}
 	}
 

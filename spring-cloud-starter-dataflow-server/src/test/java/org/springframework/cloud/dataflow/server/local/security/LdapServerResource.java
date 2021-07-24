@@ -20,7 +20,6 @@ import java.io.FileOutputStream;
 import java.util.UUID;
 
 import org.junit.rules.ExternalResource;
-import org.junit.rules.TemporaryFolder;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.ldap.server.ApacheDSContainer;
@@ -50,7 +49,7 @@ public class LdapServerResource extends ExternalResource {
 
 	private ApacheDSContainer apacheDSContainer;
 
-	private TemporaryFolder temporaryFolder = new TemporaryFolder();
+	private File temporaryFolder = new File("fixme");
 
 	private File workingDir;
 
@@ -77,8 +76,6 @@ public class LdapServerResource extends ExternalResource {
 	protected void before() throws Throwable {
 
 		originalLdapPort = System.getProperty(LDAP_PORT_PROPERTY);
-
-		temporaryFolder.create();
 		apacheDSContainer = new ApacheDSContainer("dc=springframework,dc=org",
 				"classpath:org/springframework/cloud/dataflow/server/local/security/" + this.ldapFileName);
 		int ldapPort = SocketUtils.findAvailableTcpPort();
@@ -86,8 +83,8 @@ public class LdapServerResource extends ExternalResource {
 
 			apacheDSContainer.setLdapOverSslEnabled(true);
 
-			final File temporaryKeyStoreFile = new File(temporaryFolder.getRoot(), "dataflow.keystore");
-			final File temporaryTrustStoreFile = new File(temporaryFolder.getRoot(), "dataflow.truststore");
+			final File temporaryKeyStoreFile = new File(temporaryFolder, "dataflow.keystore");
+			final File temporaryTrustStoreFile = new File(temporaryFolder, "dataflow.truststore");
 
 			FileCopyUtils.copy(keyStoreResource.getInputStream(), new FileOutputStream(temporaryKeyStoreFile));
 			FileCopyUtils.copy(trustStoreResource.getInputStream(), new FileOutputStream(temporaryTrustStoreFile));
@@ -105,7 +102,7 @@ public class LdapServerResource extends ExternalResource {
 
 		apacheDSContainer.setPort(ldapPort);
 		apacheDSContainer.afterPropertiesSet();
-		workingDir = new File(temporaryFolder.getRoot(), UUID.randomUUID().toString());
+		workingDir = new File(temporaryFolder, UUID.randomUUID().toString());
 		apacheDSContainer.setWorkingDirectory(workingDir);
 		apacheDSContainer.start();
 		System.setProperty(LDAP_PORT_PROPERTY, Integer.toString(ldapPort));

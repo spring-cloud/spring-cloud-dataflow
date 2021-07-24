@@ -22,11 +22,12 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,9 @@ import org.springframework.shell.table.Table;
 import org.springframework.util.ObjectUtils;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -72,7 +73,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static JdbcTemplate template;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws InterruptedException{
 		Thread.sleep(2000);
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
@@ -98,7 +99,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
@@ -107,7 +108,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		template.execute(String.format(TASK_EXECUTION_FORMAT, TASK_EXECUTION_ID));
 	}
 
-	@Before
+	@BeforeEach
 	public void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
@@ -122,7 +123,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testTaskLaunchCTRUsingAltCtrName() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
@@ -139,17 +140,21 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().getTaskExecutionLog(taskName);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetLogInvalidPlatform() throws Exception{
-		logger.info("Retrieving task execution log");
-		String taskName = generateUniqueStreamOrTaskName();
-		task().create(taskName, "timestamp");
-		task().getTaskExecutionLogInvalidPlatform(taskName);
+		assertThrows(IllegalArgumentException.class, () -> {
+			logger.info("Retrieving task execution log");
+			String taskName = generateUniqueStreamOrTaskName();
+			task().create(taskName, "timestamp");
+			task().getTaskExecutionLogInvalidPlatform(taskName);
+		});
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testGetLogInvalidId() throws Exception{
-		task().getTaskExecutionLogInvalidId();
+		assertThrows(IllegalArgumentException.class, () -> {
+			task().getTaskExecutionLogInvalidId();
+		});
 	}
 
 	private void testInvalidCTRLaunch(String taskDefinition, String ctrAppName, String expectedExceptionMessage) {
@@ -163,7 +168,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 			assertTrue(e.getMessage().contains(expectedExceptionMessage));
 			isExceptionThrown =  true;
 		}
-		assertTrue("Expected IllegalArgumentException to have been thrown", isExceptionThrown);
+		assertTrue(isExceptionThrown, "Expected IllegalArgumentException to have been thrown");
 	}
 
 	@Test
@@ -197,7 +202,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 			assertTrue(dfce.getMessage().contains("Could not find TaskExecution with id 9001"));
 			isException = true;
 		}
-		assertTrue("Expected IllegalArgumentException to have been thrown", isException);
+		assertTrue(isException, "Expected IllegalArgumentException to have been thrown");
 	}
 
 	@Test
@@ -222,20 +227,20 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 		CommandResult cr = task().taskExecutionList();
-		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution list by name command must be successful");
 		Table table = (Table) cr.getResult();
 		int rowCountBeforeLaunch = table.getModel().getRowCount();
 		task().launch(taskName);
 		cr = task().taskExecutionListByName(taskName);
-		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution list by name command must be successful");
 		table = (Table) cr.getResult();
-		assertEquals("Number of rows returned was not expected", 2, table.getModel().getRowCount());
+		assertEquals(2, table.getModel().getRowCount(), "Number of rows returned was not expected");
 		logger.info("Destroy created task with the cleanup");
 		task().destroyTask(taskName, true);
 		cr = task().taskExecutionList();
-		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution list by name command must be successful");
 		table = (Table) cr.getResult();
-		assertEquals("Number of rows returned was not expected", rowCountBeforeLaunch, table.getModel().getRowCount());
+		assertEquals(rowCountBeforeLaunch, table.getModel().getRowCount(), "Number of rows returned was not expected");
 	}
 
 	@Test
@@ -252,9 +257,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testTaskExecutionList() {
 		logger.info("Retrieve Task Execution List Test");
 		CommandResult cr = task().taskExecutionList();
-		assertTrue("task execution list command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution list command must be successful");
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals(5, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 		verifyTableValue(table, 0, 0, "Task Name");
 		verifyTableValue(table, 0, 1, "ID");
 		verifyTableValue(table, 0, 2, "Start Time");
@@ -269,7 +274,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				break;
 			}
 		}
-		assertTrue("didn't found matching row", row > 0);
+		assertTrue(row > 0, "didn't found matching row");
 
 		verifyTableValue(table, row, 0, TASK_NAME);
 		verifyTableValue(table, row, 1, TASK_EXECUTION_ID);
@@ -283,9 +288,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Task Execution List By Name Test");
 		task().create("mytask", "timestamp");
 		CommandResult cr = task().taskExecutionListByName("mytask");
-		assertTrue("task execution list by name command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution list by name command must be successful");
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 5, table.getModel().getColumnCount());
+		assertEquals(5, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 
 		verifyTableValue(table,0, 0, "Task Name");
 		verifyTableValue(table,0, 1, "ID");
@@ -303,9 +308,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		long value = (long) result.getModel().getValue(findRowForExecutionId(result, TASK_EXECUTION_ID), 1);
 		logger.info("Looking up id " + value);
 		CommandResult cr = task().taskExecutionStatus(value);
-		assertTrue("task execution status command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task execution status command must be successful");
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
+		assertEquals(2, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 		verifyTableValue(table, 0, 0, "Key ");
 		verifyTableValue(table, 1, 0, "Id ");
 		verifyTableValue(table, 2, 0, "Resource URL ");
@@ -337,10 +342,10 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().create(taskName, "timestamp");
 
 		CommandResult cr = task().taskValidate(taskName);
-		assertTrue("task validate status command must be successful", cr.isSuccess());
+		assertTrue(cr.isSuccess(), "task validate status command must be successful");
 		List results = (List) cr.getResult();
 		Table table = (Table) results.get(0);
-		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
+		assertEquals(2, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 
 		verifyTableValue(table, 0, 0, "Task Name");
 		verifyTableValue(table, 0, 1, "Task Definition");
@@ -348,10 +353,10 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 1, 1, "timestamp");
 
 		String message = String.format("\n%s is a valid task.", taskName);
-		assertEquals(String.format("Notification should be: %s", message), message, results.get(1));
+		assertEquals(message, results.get(1), String.format("Notification should be: %s", message));
 
 		table = (Table) results.get(2);
-		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
+		assertEquals(2, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 
 		verifyTableValue(table, 0, 0, "App Name");
 		verifyTableValue(table, 0, 1, "Validation Status");
@@ -363,7 +368,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	public void testCurrentExecutions() {
 		CommandResult cr = task().taskExecutionCurrent();
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 4, table.getModel().getColumnCount());
+		assertEquals(4, table.getModel().getColumnCount(), "Number of columns returned was not expected");
 		verifyTableValue(table, 0, 0, "Platform Name");
 		verifyTableValue(table, 0, 1, "Platform Type");
 		verifyTableValue(table, 0, 2, "Execution Count");
@@ -377,24 +382,25 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testTaskExecutionCleanupById() {
 		CommandResult cr = task().taskExecutionCleanup(10000);
-		assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
+		MatcherAssert.assertThat(cr.getResult(), is("Request to clean up resources for task execution 10000 has been submitted"));
 	}
 
 	@Test
 	public void testPlatformList() {
 		CommandResult cr = task().taskPlatformList();
 		Table table = (Table) cr.getResult();
-		assertEquals("Number of columns returned was not expected", 3, table.getModel().getColumnCount());
-		assertEquals("First Row First Value should be: Platform Name", "Platform Name", table.getModel().getValue(0, 0));
-		assertEquals("First Row Second Value should be: Platform Type", "Platform Type", table.getModel().getValue(0, 1));
-		assertEquals("First Row Second Value should be: Description", "Description", table.getModel().getValue(0, 2));
-		assertEquals("Second Row First Value should be: default", "default", table.getModel().getValue(1, 0));
-		assertEquals("Second Row Second Value should be: Local", "Local", table.getModel().getValue(1, 1));
+		assertEquals(3, table.getModel().getColumnCount(), "Number of columns returned was not expected");
+		assertEquals("Platform Name", table.getModel().getValue(0, 0), "First Row First Value should be: Platform Name");
+		assertEquals("Platform Type", table.getModel().getValue(0, 1), "First Row Second Value should be: Platform Type");
+		assertEquals("Description", table.getModel().getValue(0, 2), "First Row Second Value should be: Description");
+		assertEquals("default", table.getModel().getValue(1, 0), "Second Row First Value should be: default");
+		assertEquals("Local", table.getModel().getValue(1, 1), "Second Row Second Value should be: Local");
 	}
 
 	private void verifyTableValue(Table table, int row, int col, Object expected) {
-		assertEquals(String.format("Row %d, Column %d should be: %s", row, col, expected),expected,
-			table.getModel().getValue(row, col));
+		assertEquals(expected,
+			table.getModel().getValue(row, col),
+			String.format("Row %d, Column %d should be: %s", row, col, expected));
 	}
 
 	private int findRowForExecutionId(Table table, long id) {
@@ -405,7 +411,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				break;
 			}
 		}
-		assertTrue("Task Execution Id specified was not found in execution list", id > -1);
+		assertTrue(id > -1, "Task Execution Id specified was not found in execution list");
 		return result;
 	}
 

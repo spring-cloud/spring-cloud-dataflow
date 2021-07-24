@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Collections;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.boot.SpringApplication;
@@ -41,8 +41,8 @@ public class DataFlowClientAutoConfigurationTests {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
 				"--spring.cloud.dataflow.client.enableDsl=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
-		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
-		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+		Assertions.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
+		Assertions.assertNotNull(applicationContext.getBean(StreamBuilder.class));
 		RestTemplate template = applicationContext.getBean(RestTemplate.class);
 		//No auth
 		Mockito.verify(template, Mockito.times(0)).setRequestFactory(Mockito.any());
@@ -55,14 +55,14 @@ public class DataFlowClientAutoConfigurationTests {
 				"--spring.cloud.dataflow.client.authentication.basic.username=foo",
 				"--spring.cloud.dataflow.client.authentication.basic.password=bar",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
-		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
-		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+		Assertions.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
+		Assertions.assertNotNull(applicationContext.getBean(StreamBuilder.class));
 
 		RestTemplate template = applicationContext.getBean(RestTemplate.class);
 		DataFlowClientProperties properties = applicationContext.getBean(DataFlowClientProperties.class);
-		Assert.assertNotNull(properties.getAuthentication());
-		Assert.assertEquals("foo", properties.getAuthentication().getBasic().getUsername());
-		Assert.assertEquals("bar", properties.getAuthentication().getBasic().getPassword());
+		Assertions.assertNotNull(properties.getAuthentication());
+		Assertions.assertEquals("foo", properties.getAuthentication().getBasic().getUsername());
+		Assertions.assertEquals("bar", properties.getAuthentication().getBasic().getPassword());
 		Mockito.verify(template, Mockito.times(1)).setRequestFactory(Mockito.any());
 		applicationContext.close();
 	}

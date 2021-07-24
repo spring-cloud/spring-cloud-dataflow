@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -62,8 +62,9 @@ import org.springframework.cloud.skipper.domain.VersionInfo;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
 
-import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -238,16 +239,18 @@ public class SkipperStreamDeployerTests {
 		verify(appRegistryService, times(1)).appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testDeployWithNotRegisteredApps() {
-		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		assertThrows(IllegalStateException.class, () -> {
+			AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
-		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
-				.thenReturn(true);
-		when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
-				.thenReturn(false);
+			when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
+					.thenReturn(true);
+			when(appRegistryService.appExist(eq("log"), eq(ApplicationType.sink), eq("1.2.0.RELEASE")))
+					.thenReturn(false);
 
-		testAppRegisteredOnStreamDeploy(appRegistryService);
+			testAppRegisteredOnStreamDeploy(appRegistryService);
+		});
 	}
 
 	private void testAppRegisteredOnStreamDeploy(AppRegistryService appRegistryService) {

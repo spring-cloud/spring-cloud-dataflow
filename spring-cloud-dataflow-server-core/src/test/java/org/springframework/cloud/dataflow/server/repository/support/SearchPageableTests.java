@@ -16,7 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.data.domain.PageRequest;
 
@@ -24,10 +25,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
@@ -128,14 +128,14 @@ public class SearchPageableTests {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
-		assertThat(searchPageable.getColumns(), is(empty()));
+		MatcherAssert.assertThat(searchPageable.getColumns(), is(empty()));
 		assertNotNull(searchPageable.getPageable());
 		assertEquals(searchPageable.getSearchQuery(), "findByTaskNameContains query");
 
 		searchPageable.addColumns("c1", "c2");
 
-		assertThat(searchPageable.getColumns(), hasSize(2));
-		assertThat(searchPageable.getColumns(), contains("c1", "c2"));
+		MatcherAssert.assertThat(searchPageable.getColumns(), hasSize(2));
+		MatcherAssert.assertThat(searchPageable.getColumns(), contains("c1", "c2"));
 
 	}
 }

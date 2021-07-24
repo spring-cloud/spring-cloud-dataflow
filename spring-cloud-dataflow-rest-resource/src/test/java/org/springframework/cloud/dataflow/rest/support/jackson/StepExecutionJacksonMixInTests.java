@@ -19,7 +19,8 @@ package org.springframework.cloud.dataflow.rest.support.jackson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
@@ -27,7 +28,7 @@ import org.springframework.batch.item.ExecutionContext;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
@@ -42,15 +43,17 @@ public class StepExecutionJacksonMixInTests {
 	 *
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
-	@Test(expected = JsonMappingException.class)
+	@Test
 	public void testSerializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
+		assertThrows(JsonMappingException.class, () -> {
 
-		final ObjectMapper objectMapper = new ObjectMapper();
+			final ObjectMapper objectMapper = new ObjectMapper();
 
-		final StepExecution stepExecution = getStepExecution();
-		final String result = objectMapper.writeValueAsString(stepExecution);
+			final StepExecution stepExecution = getStepExecution();
+			final String result = objectMapper.writeValueAsString(stepExecution);
 
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}"));
+			MatcherAssert.assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}"));
+		});
 	}
 
 	/**
@@ -70,15 +73,15 @@ public class StepExecutionJacksonMixInTests {
 		final StepExecution stepExecution = getStepExecution();
 		final String result = objectMapper.writeValueAsString(stepExecution);
 
-		assertThat(result, not(containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}")));
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{"));
+		MatcherAssert.assertThat(result, not(containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}")));
+		MatcherAssert.assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{"));
 
-		assertThat(result, containsString("{\"counter\":1234}"));
-		assertThat(result, containsString("{\"myDouble\":1.123456}"));
-		assertThat(result, containsString("{\"Josh\":4444444444}"));
-		assertThat(result, containsString("{\"awesomeString\":\"Yep\"}"));
-		assertThat(result, containsString("{\"hello\":\"world\""));
-		assertThat(result, containsString("{\"counter2\":9999}"));
+		MatcherAssert.assertThat(result, containsString("{\"counter\":1234}"));
+		MatcherAssert.assertThat(result, containsString("{\"myDouble\":1.123456}"));
+		MatcherAssert.assertThat(result, containsString("{\"Josh\":4444444444}"));
+		MatcherAssert.assertThat(result, containsString("{\"awesomeString\":\"Yep\"}"));
+		MatcherAssert.assertThat(result, containsString("{\"hello\":\"world\""));
+		MatcherAssert.assertThat(result, containsString("{\"counter2\":9999}"));
 	}
 
 	private StepExecution getStepExecution() {

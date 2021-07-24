@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -37,15 +37,15 @@ public class CompletionUtilsTests {
 	@Test
 	public void testLabelQualification() {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
+		MatcherAssert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
 				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter2: filter"));
 
 		streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("transform",
+		MatcherAssert.assertThat(CompletionUtils.maybeQualifyWithLabel("transform",
 				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("transform"));
 
 		streamDefinition = new StreamDefinition("foo", "http | filter | filter2: filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
+		MatcherAssert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
 				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter3: filter"));
 	}
 

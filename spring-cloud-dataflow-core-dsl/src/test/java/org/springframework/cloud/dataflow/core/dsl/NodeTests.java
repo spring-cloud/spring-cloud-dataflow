@@ -17,9 +17,9 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Oleg Zhurakousky

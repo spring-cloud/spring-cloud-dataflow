@@ -33,8 +33,8 @@ import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -77,7 +77,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		when(this.cloudFoundryClient.info())
 				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));

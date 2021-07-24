@@ -20,10 +20,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Gunnar Hillert
@@ -40,9 +40,9 @@ public class DeploymentStateResourceTests {
 
 		final DocumentContext documentContext = JsonPath.parse(result);
 
-		assertThat(documentContext.read("$.key"), is("deployed"));
-		assertThat(documentContext.read("$.displayName"), is("Deployed"));
-		assertThat(documentContext.read("$.description"), is("The stream has been successfully deployed"));
+		MatcherAssert.assertThat(documentContext.read("$.key"), is("deployed"));
+		MatcherAssert.assertThat(documentContext.read("$.displayName"), is("Deployed"));
+		MatcherAssert.assertThat(documentContext.read("$.description"), is("The stream has been successfully deployed"));
 
 	}
 

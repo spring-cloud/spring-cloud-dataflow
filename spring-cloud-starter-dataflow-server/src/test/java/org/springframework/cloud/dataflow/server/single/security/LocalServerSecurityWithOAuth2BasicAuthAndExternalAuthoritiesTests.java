@@ -20,8 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.hamcrest.MatcherAssert;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
@@ -31,7 +32,6 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -74,8 +74,8 @@ public class LocalServerSecurityWithOAuth2BasicAuthAndExternalAuthoritiesTests {
 				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.roles", hasSize(3)));
 
-		assertThat(externalAuthoritiesServer.getRequestCount(), is(1));
+		MatcherAssert.assertThat(externalAuthoritiesServer.getRequestCount(), is(1));
 		final RecordedRequest recordedRequest = externalAuthoritiesServer.takeRequest();
-		assertThat(recordedRequest.getHeader("Authorization"), is(not(emptyString())));
+		MatcherAssert.assertThat(recordedRequest.getHeader("Authorization"), is(not(emptyString())));
 	}
 }

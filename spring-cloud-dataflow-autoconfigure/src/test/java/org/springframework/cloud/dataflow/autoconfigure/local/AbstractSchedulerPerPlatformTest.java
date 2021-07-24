@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.autoconfigure.local;
 
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +38,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * @author Christian Tzolov
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		classes = AbstractSchedulerPerPlatformTest.AutoConfigurationApplication.class)
 @DirtiesContext

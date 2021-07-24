@@ -18,12 +18,11 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.HashMap;
 
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsMapContaining;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
@@ -35,24 +34,23 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class AppDeploymentRequestCreatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	@Before
+	@BeforeEach
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
@@ -70,8 +68,8 @@ public class AppDeploymentRequestCreatorTests {
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
-		org.junit.Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
+		MatcherAssert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
+		MatcherAssert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
 	}
 
 	@Test
@@ -84,24 +82,22 @@ public class AppDeploymentRequestCreatorTests {
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
+		MatcherAssert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
+		MatcherAssert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
 	}
 
 	@Test
 	public void testSameNamePropertiesKOWhenShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setApplicationType(ApplicationType.app)
-				.setProperty("format", "hh").build("streamname");
+		Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+			StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+					.setApplicationType(ApplicationType.app)
+					.setProperty("format", "hh").build("streamname");
 
-		Resource app = new ClassPathResource("/apps/included-source");
+			Resource app = new ClassPathResource("/apps/included-source");
 
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Ambiguous short form property 'format'");
-		thrown.expectMessage("date.format");
-		thrown.expectMessage("time.format");
-
-		this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+			this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+		});
+		assertTrue(exception.getMessage().contains("time.format"));
 	}
 
 	@Test
@@ -115,7 +111,7 @@ public class AppDeploymentRequestCreatorTests {
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
-		org.junit.Assert.assertThat(modified.getProperties(),
+		MatcherAssert.assertThat(modified.getProperties(),
 				IsMapContaining.hasEntry("date.some-long-property", "yy"));
 
 	}

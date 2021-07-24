@@ -21,17 +21,17 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.util.StreamUtils;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
@@ -107,7 +107,7 @@ public class ExecutionContextDeserializationTests {
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Long], it is [(class java.lang.Integer)"));
+			MatcherAssert.assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Long], it is [(class java.lang.Integer)"));
 		}
 
 		try {
@@ -115,7 +115,7 @@ public class ExecutionContextDeserializationTests {
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Double], it is [(class java.lang.Integer)"));
+			MatcherAssert.assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Double], it is [(class java.lang.Integer)"));
 		}
 
 		assertEquals(22222222222L, executionContext.getLong("longNumber"));
@@ -125,7 +125,7 @@ public class ExecutionContextDeserializationTests {
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[longNumber] is not of type: [class java.lang.Integer], it is [(class java.lang.Long)"));
+			MatcherAssert.assertThat(ce.getMessage(), containsString("key=[longNumber] is not of type: [class java.lang.Integer], it is [(class java.lang.Long)"));
 		}
 
 		assertEquals("true", executionContext.get("fooBoolean"));
