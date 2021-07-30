@@ -211,7 +211,8 @@ import static org.mockito.Mockito.when;
 		TaskProperties.class,
 		DockerValidatorProperties.class,
 		DataflowMetricsProperties.class,
-		ComposedTaskRunnerConfigurationProperties.class })
+		ComposedTaskRunnerConfigurationProperties.class,
+		FeaturesProperties.class })
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -291,11 +292,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public FeaturesProperties featuresProperties() {
-		return new FeaturesProperties();
-	}
-
-	@Bean
 	public StreamValidationService streamValidationService(AppRegistryService appRegistry,
 			DockerValidatorProperties dockerValidatorProperties,
 			StreamDefinitionRepository streamDefinitionRepository,
@@ -327,9 +323,11 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			StreamValidationService streamValidationService,
 			AuditRecordService auditRecordService,
-			StreamDefinitionService streamDefinitionService) {
+			StreamDefinitionService streamDefinitionService,
+			FeaturesProperties featuresProperties) {
 		return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
-				appDeploymentRequestCreator, streamValidationService, auditRecordService, streamDefinitionService);
+				appDeploymentRequestCreator, streamValidationService, auditRecordService, streamDefinitionService,
+				featuresProperties);
 	}
 
 	@Bean
@@ -575,8 +573,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			AuditRecordService auditRecordService, AppRegistryService registry) {
-		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
+			AuditRecordService auditRecordService, AppRegistryService registry, FeaturesProperties featuresProperties) {
+		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry, featuresProperties);
 	}
 
 	@Bean

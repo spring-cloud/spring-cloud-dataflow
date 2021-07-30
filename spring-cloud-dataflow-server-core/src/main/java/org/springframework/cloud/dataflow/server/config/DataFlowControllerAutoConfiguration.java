@@ -484,9 +484,11 @@ public class DataFlowControllerAutoConfiguration {
 				StreamDefinitionRepository streamDefinitionRepository,
 				SkipperStreamDeployer skipperStreamDeployer, AppDeploymentRequestCreator appDeploymentRequestCreator,
 				StreamValidationService streamValidationService,
-				AuditRecordService auditRecordService, StreamDefinitionService streamDefinitionService) {
+				AuditRecordService auditRecordService, StreamDefinitionService streamDefinitionService,
+				FeaturesProperties featuresProperties) {
 			return new DefaultStreamService(streamDefinitionRepository, skipperStreamDeployer,
-					appDeploymentRequestCreator, streamValidationService, auditRecordService, streamDefinitionService);
+					appDeploymentRequestCreator, streamValidationService, auditRecordService, streamDefinitionService,
+					featuresProperties);
 		}
 	}
 
