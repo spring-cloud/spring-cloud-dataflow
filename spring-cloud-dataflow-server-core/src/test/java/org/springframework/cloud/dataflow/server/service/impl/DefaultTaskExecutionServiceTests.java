@@ -58,6 +58,7 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
@@ -1142,6 +1143,25 @@ public abstract class DefaultTaskExecutionServiceTests {
 					assertEquals(e.getMessage(), "Task name must consist of alphanumeric characters or '-', start " +
 							"with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
 							" or 'abc-123')");
+				}
+			}
+		}
+
+		@Test
+		@DirtiesContext
+		public void validateInvalidTaskNameWithUnderscoreNameAllowedTest() {
+			String[] taskNames = { "ta_sk" };
+
+			for (String taskName : taskNames) {
+				try {
+					initializeSuccessfulRegistry(appRegistry);
+					FeaturesProperties featuresProperties = mock(FeaturesProperties.class);
+					TaskSaveService taskSaveService = new DefaultTaskSaveService(taskDefinitionRepository,
+							auditRecordService, appRegistry, featuresProperties);
+					when(featuresProperties.isUnderscoreNamesEnabled()).thenReturn(true);
+					taskSaveService.saveTaskDefinition(new TaskDefinition(taskName, "AAA --foo=bar"));
+				} catch (Exception e) {
+					fail("Expected TaskException");
 				}
 			}
 		}
