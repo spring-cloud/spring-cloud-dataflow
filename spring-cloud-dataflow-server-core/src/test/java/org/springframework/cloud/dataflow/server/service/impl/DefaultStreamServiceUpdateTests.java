@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
@@ -79,6 +80,9 @@ public class DefaultStreamServiceUpdateTests {
 	@Autowired
 	private StreamValidationService streamValidationService;
 
+	@Autowired
+	private FeaturesProperties featuresProperties;
+
 	@Test
 	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
@@ -103,7 +107,7 @@ public class DefaultStreamServiceUpdateTests {
 		DefaultStreamService streamService = new DefaultStreamService(streamDefinitionRepository,
 				skipperStreamDeployer,
 				appDeploymentRequestCreator, streamValidationService, auditRecordService,
-				new DefaultStreamDefinitionService());
+				new DefaultStreamDefinitionService(), featuresProperties);
 		StreamDefinition streamDefinition = new StreamDefinition("test", "time | log");
 		this.streamDefinitionRepository.save(streamDefinition);
 		Map<String, String> updateProperties = new HashMap<>();

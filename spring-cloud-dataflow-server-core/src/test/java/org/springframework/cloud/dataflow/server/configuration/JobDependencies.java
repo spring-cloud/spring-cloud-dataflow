@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.JobInstanceController;
@@ -147,7 +148,7 @@ import static org.mockito.Mockito.mock;
 })
 @EnableJpaAuditing
 @EnableConfigurationProperties({ DockerValidatorProperties.class, TaskConfigurationProperties.class,
-		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class})
+		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class, FeaturesProperties.class})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
 
@@ -245,8 +246,8 @@ public class JobDependencies {
 
 	@Bean
 	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			AuditRecordService auditRecordService, AppRegistryService registry) {
-		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
+			AuditRecordService auditRecordService, AppRegistryService registry, FeaturesProperties featuresProperties) {
+		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry, featuresProperties);
 	}
 
 	@Bean

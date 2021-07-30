@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
@@ -59,6 +60,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -100,12 +102,15 @@ public class DefaultStreamServiceTests {
 
 	private DefaultStreamValidationService streamValidationService;
 
+	private FeaturesProperties featuresProperties;
+
 	@Before
 	public void setupMock() {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryService = mock(AppRegistryService.class);
 		this.auditRecordService = mock(AuditRecordService.class); // FIXME
+		this.featuresProperties = mock(FeaturesProperties.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryService,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
@@ -113,7 +118,7 @@ public class DefaultStreamServiceTests {
 		this.streamValidationService = mock(DefaultStreamValidationService.class);
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
-				this.auditRecordService, new DefaultStreamDefinitionService());
+				this.auditRecordService, new DefaultStreamDefinitionService(), this.featuresProperties);
 		when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 	}
 
@@ -298,11 +303,31 @@ public class DefaultStreamServiceTests {
 				when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
 
 				this.defaultStreamService.createStream(streamName, "time | log", "demo stream", false);
+				fail("Stream creation is expected to fail");
 			} catch (Exception e) {
 				Assert.assertTrue(e instanceof InvalidStreamDefinitionException);
 				Assert.assertEquals(e.getMessage(), "Stream name must consist of alphanumeric characters or '-', " +
 						"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
 						"or 'abc-123')");
+			}
+		}
+	}
+
+	@Test
+	public void testInvalidStreamNameWithUnderscoreStreamNamesAllowed() {
+		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
+		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
+		when(this.featuresProperties.isUnderscoreNamesEnabled()).thenReturn(true);
+		String[] streamNames = { "st_ream" };
+
+		for (String streamName : streamNames) {
+			try {
+				final StreamDefinition expectedStreamDefinition = new StreamDefinition(streamName, "time | log");
+				when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
+
+				this.defaultStreamService.createStream(streamName, "time | log", "demo stream", false);
+			} catch (Exception e) {
+				fail("Stream creation should be allowed with underscore");
 			}
 		}
 	}
@@ -314,7 +339,7 @@ public class DefaultStreamServiceTests {
 
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator,
-				this.streamValidationService, this.auditRecordService, new DefaultStreamDefinitionService());
+				this.streamValidationService, this.auditRecordService, new DefaultStreamDefinitionService(), this.featuresProperties);
 
 		StreamDefinition streamDefinition = new StreamDefinition("test1", "time | log");
 

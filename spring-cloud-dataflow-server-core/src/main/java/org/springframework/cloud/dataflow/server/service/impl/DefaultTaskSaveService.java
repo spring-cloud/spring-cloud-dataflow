@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -70,21 +71,27 @@ public class DefaultTaskSaveService implements TaskSaveService {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
+	private final FeaturesProperties featuresProperties;
+
 	public DefaultTaskSaveService(TaskDefinitionRepository taskDefinitionRepository,
-			AuditRecordService auditRecordService, AppRegistryService registry) {
+			AuditRecordService auditRecordService, AppRegistryService registry,
+			FeaturesProperties featuresProperties) {
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		Assert.notNull(registry, "AppRegistryService must not be null");
+		Assert.notNull(featuresProperties, "FeaturesProperties must not be null");
 
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.auditRecordService = auditRecordService;
 		this.registry = registry;
+		this.featuresProperties = featuresProperties;
 	}
 
 	@Override
 	@Transactional
 	public void saveTaskDefinition(TaskDefinition taskDefinition) {
-		if (!TASK_NAME_PATTERN.matcher(taskDefinition.getTaskName()).matches()) {
+		if (!this.featuresProperties.isUnderscoreNamesEnabled() &&
+				!TASK_NAME_PATTERN.matcher(taskDefinition.getTaskName()).matches()) {
 			throw new TaskException(TASK_NAME_VALIDATION_MSG);
 		}
 

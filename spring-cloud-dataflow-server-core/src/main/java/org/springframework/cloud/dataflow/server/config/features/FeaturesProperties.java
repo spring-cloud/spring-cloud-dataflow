@@ -35,11 +35,15 @@ public class FeaturesProperties {
 
 	public static final String TASKS_ENABLED = "tasks-enabled";
 
+	public static final String UNDERSCORE_NAMES_ENABLED = "underscore-names-enabled";
+
 	private boolean streamsEnabled = true;
 
 	private boolean tasksEnabled = true;
 
 	private boolean schedulesEnabled = false;
+
+	private boolean underscoreNamesEnabled = false;
 
 	public boolean isStreamsEnabled() {
 		return this.streamsEnabled;
@@ -63,5 +67,13 @@ public class FeaturesProperties {
 
 	public void setSchedulesEnabled(boolean schedulesEnabled) {
 		this.schedulesEnabled = schedulesEnabled;
+	}
+
+	public boolean isUnderscoreNamesEnabled() {
+		return underscoreNamesEnabled;
+	}
+
+	public void setUnderscoreNamesEnabled(boolean underscoreNamesEnabled) {
+		this.underscoreNamesEnabled = underscoreNamesEnabled;
 	}
 }

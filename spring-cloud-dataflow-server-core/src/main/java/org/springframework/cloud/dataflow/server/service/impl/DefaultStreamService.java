@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployedException;
 import org.springframework.cloud.dataflow.server.controller.StreamAlreadyDeployingException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
@@ -117,12 +118,15 @@ public class DefaultStreamService implements StreamService {
 
 	private final StreamDefinitionService streamDefinitionService;
 
+	private final FeaturesProperties featuresProperties;
+
 	public DefaultStreamService(StreamDefinitionRepository streamDefinitionRepository,
 			SkipperStreamDeployer skipperStreamDeployer,
 			AppDeploymentRequestCreator appDeploymentRequestCreator,
 			StreamValidationService streamValidationService,
 			AuditRecordService auditRecordService,
-			StreamDefinitionService streamDefinitionService) {
+			StreamDefinitionService streamDefinitionService,
+			FeaturesProperties featuresProperties) {
 
 		Assert.notNull(skipperStreamDeployer, "SkipperStreamDeployer must not be null");
 		Assert.notNull(appDeploymentRequestCreator, "AppDeploymentRequestCreator must not be null");
@@ -130,6 +134,7 @@ public class DefaultStreamService implements StreamService {
 		Assert.notNull(streamValidationService, "StreamValidationService must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
+		Assert.notNull(featuresProperties, "FeaturesProperties must not be null");
 
 		this.skipperStreamDeployer = skipperStreamDeployer;
 		this.appDeploymentRequestCreator = appDeploymentRequestCreator;
@@ -138,7 +143,7 @@ public class DefaultStreamService implements StreamService {
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
 		this.streamDefinitionService = streamDefinitionService;
-
+		this.featuresProperties = featuresProperties;
 	}
 
 	/**
@@ -409,7 +414,7 @@ public class DefaultStreamService implements StreamService {
 			}
 		}
 
-		if (!STREAM_NAME_PATTERN.matcher(streamName).matches()) {
+		if (!this.featuresProperties.isUnderscoreNamesEnabled() && !STREAM_NAME_PATTERN.matcher(streamName).matches()) {
 			errorMessages.add(STREAM_NAME_VALIDATION_MSG);
 		}
 
