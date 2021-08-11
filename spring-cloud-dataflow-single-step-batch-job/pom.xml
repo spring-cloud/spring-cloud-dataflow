@@ -88,6 +88,38 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+				<configuration>
+					<storeFilteredMetadata>true</storeFilteredMetadata>
+					<metadataFilter>
+						<names>
+						</names>
+						<sourceTypes>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.SingleStepJobProperties</filter>
+							<filter>org.springframework.boot.autoconfigure.batch.BatchProperties$Job</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemReaderProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemWriterProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcBatchItemWriterProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcCursorItemReaderProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemReaderProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemWriterProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemReaderProperties</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemWriterProperties</filter>
+						</sourceTypes>
+					</metadataFilter>
+				</configuration>
+				<executions>
+					<execution>
+						<id>aggregate-metadata</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>aggregate-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

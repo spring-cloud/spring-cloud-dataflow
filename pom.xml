@@ -268,6 +268,13 @@
 				<artifactId>stream-applications-postprocessor-common</artifactId>
 				<version>${stream-applications.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-dependencies</artifactId>
+				<version>${spring-cloud-deployer.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
