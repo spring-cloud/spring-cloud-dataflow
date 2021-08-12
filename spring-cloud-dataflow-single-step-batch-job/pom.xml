@@ -107,6 +107,21 @@
 							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemWriterProperties</filter>
 							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemReaderProperties</filter>
 							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemWriterProperties</filter>
+							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties</filter>
+							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties$Template</filter>
+							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties$Retry</filter>
+							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties$ListenerRetry</filter>
+							<filter>org.springframework.cloud.task.configuration.TaskProperties</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Consumer</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Producer</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Template</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Listener</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Ssl</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Jaas</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Security</filter>
+							<filter>org.springframework.boot.autoconfigure.kafka.KafkaProperties$Cleanup</filter>
+							<filter>org.springframework.boot.autoconfigure.jdbc.DataSourceProperties</filter>
+							<filter>org.springframework.boot.autoconfigure.jdbc.DataSourceProperties$Xa</filter>
 						</sourceTypes>
 					</metadataFilter>
 				</configuration>
