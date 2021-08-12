@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+
+  dataflow-server:
+    environment:
+# AZURE
+      - spring.cloud.dataflow.container.registry-configurations.azure-registry.registry-host=scdftest.azurecr.io
+      - spring.cloud.dataflow.container.registry-configurations.azure-registry.authorization-type=basicauth
+      - spring.cloud.dataflow.container.registry-configurations.azure-registry.user=${CR_AZURE_USER}
+      - spring.cloud.dataflow.container.registry-configurations.azure-registry.secret=${CR_AZURE_PASS}
+# HARBOR
+      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.registry-host=projects.registry.vmware.com
+      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.authorization-type=basicauth
+#      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.authorization-type=dockeroauth2
+      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.user=${CR_HARBOR_USER}
+      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.secret=${CR_HARBOR_PASS}
+# GITHUB
+      - spring.cloud.dataflow.container.registry-configurations.github-registry.registry-host=ghcr.io
+      - spring.cloud.dataflow.container.registry-configurations.github-registry.authorization-type=dockeroauth2
+      - spring.cloud.dataflow.container.registry-configurations.github-registry.user=${CR_GITHUB_USER}
+      - spring.cloud.dataflow.container.registry-configurations.github-registry.secret=${CR_GITHUB_PASS}

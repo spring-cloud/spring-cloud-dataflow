@@ -288,6 +288,41 @@ public class DataFlowIT {
 		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
 	}
 
+	@Test
+	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	public void githubContainerRegistryTests() {
+		containerRegistryTests("github-log-sink",
+				"docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
+	}
+
+	@Test
+	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	public void azureContainerRegistryTests() {
+		containerRegistryTests("azure-log-sink",
+				"docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
+	}
+
+	@Test
+	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	public void harborContainerRegistryTests() {
+		containerRegistryTests("harbor-log-sink",
+				"docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
+	}
+
+	private void containerRegistryTests(String appName, String appUrl) {
+		logger.info("application-metadata-" + appName + "-container-registry-test");
+
+		// Docker app with container image metadata
+		dataFlowOperations.appRegistryOperations().register( appName, ApplicationType.sink,
+				appUrl, null, true);
+		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
+				.info(appName, ApplicationType.sink, false);
+		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(3);
+
+		// unregister the test apps
+		dataFlowOperations.appRegistryOperations().unregister(appName, ApplicationType.sink);
+	}
+
 	// -----------------------------------------------------------------------
 	//                          PLATFORM  TESTS
 	// -----------------------------------------------------------------------
