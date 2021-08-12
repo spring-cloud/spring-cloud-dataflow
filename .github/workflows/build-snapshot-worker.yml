@@ -164,7 +164,7 @@ jobs:
         docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
         docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk8
         docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11
-        docker tag springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11 springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
+        docker tag springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
         docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
         docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk16
 
