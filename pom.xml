@@ -98,6 +98,7 @@
 		<module>spring-cloud-dataflow-core</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
+		<module>spring-cloud-dataflow-single-step-batch-job</module>
 		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-autoconfigure</module>
@@ -132,6 +133,11 @@
 				<version>${spring-cloud-task.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-single-step-batch-job</artifactId>
+				<version>${spring-cloud-task.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
@@ -261,6 +267,13 @@
 				<groupId>org.springframework.cloud.stream.app</groupId>
 				<artifactId>stream-applications-postprocessor-common</artifactId>
 				<version>${stream-applications.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-deployer-dependencies</artifactId>
+				<version>${spring-cloud-deployer.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
