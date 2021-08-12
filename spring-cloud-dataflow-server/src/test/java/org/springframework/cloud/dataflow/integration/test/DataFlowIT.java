@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.Extension;
@@ -289,21 +290,21 @@ public class DataFlowIT {
 	}
 
 	@Test
-	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
 	public void githubContainerRegistryTests() {
 		containerRegistryTests("github-log-sink",
 				"docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
 	}
 
 	@Test
-	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
 	public void azureContainerRegistryTests() {
 		containerRegistryTests("azure-log-sink",
 				"docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
 	}
 
 	@Test
-	@EnabledIfSystemProperty(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
 	public void harborContainerRegistryTests() {
 		containerRegistryTests("harbor-log-sink",
 				"docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
