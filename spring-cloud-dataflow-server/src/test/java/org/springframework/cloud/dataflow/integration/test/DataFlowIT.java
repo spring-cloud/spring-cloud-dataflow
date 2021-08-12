@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -752,6 +753,45 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> barLogStream.logs(app("log")).contains("defg-bar"));
 		}
 	}
+
+	@Test
+	public void dataflowTaskLauncherSink() {
+		logger.info("dataflow-tasklauncher-sink-test");
+		String uri = String.format("docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:%s",
+				testProperties.getDatabase().getDataflowVersion());
+		dataFlowOperations.appRegistryOperations()
+				.register("tasklauncher", ApplicationType.sink, uri, null, true);
+
+
+		String taskName = randomTaskName();
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(taskName)
+				.definition("timestamp")
+				.description("Test timestamp task")
+				.build()) {
+			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
+					.definition("http | tasklauncher --trigger.initialDelay=100 --trigger.maxPeriod=1000")
+					.create()
+					.deploy(testDeploymentProperties())) {
+
+				Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+				runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}");
+
+				AtomicLong launchId = new AtomicLong();
+				Awaitility.await().until(() -> task.executions().stream().filter(t ->
+						t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
+						.findFirst()
+						.map(t -> launchId.getAndSet(t.getExecutionId())).isPresent()
+				);
+				long id = launchId.get();
+				assertThat(task.executions().size()).isEqualTo(1);
+				assertThat(task.execution(id).isPresent()).isTrue();
+				assertThat(task.execution(id).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			}
+		}
+	}
+
 
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS
