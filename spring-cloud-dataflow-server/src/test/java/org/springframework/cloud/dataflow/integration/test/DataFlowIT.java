@@ -84,7 +84,9 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationMa
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -760,7 +762,7 @@ public class DataFlowIT {
 		String uri = String.format("docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:%s",
 				testProperties.getDatabase().getDataflowVersion());
 		dataFlowOperations.appRegistryOperations()
-				.register("tasklauncher", ApplicationType.sink, uri, null, true);
+				.register("dataflowTaskLauncher", ApplicationType.sink, uri, null, true);
 
 
 		String taskName = randomTaskName();
@@ -770,13 +772,18 @@ public class DataFlowIT {
 				.description("Test timestamp task")
 				.build()) {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
-					.definition("http | tasklauncher --trigger.initialDelay=100 --trigger.maxPeriod=1000")
+					.definition("http | dataflowTaskLauncher --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
+							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
 					.create()
 					.deploy(testDeploymentProperties())) {
 
 				Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
-				runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}");
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+				runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
 
 				AtomicLong launchId = new AtomicLong();
 				Awaitility.await().until(() -> task.executions().stream().filter(t ->
