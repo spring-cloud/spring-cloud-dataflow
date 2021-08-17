@@ -242,7 +242,7 @@ public class DataFlowIT {
 
 		// Maven app without metadata
 		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
-				"maven://org.springframework.cloud.stream.app:file-sink-kafka:2.1.1.RELEASE", null, true);
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true);
 		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
 				.info("maven-app-without-metadata", ApplicationType.sink, false);
 		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
@@ -293,21 +293,21 @@ public class DataFlowIT {
 	}
 
 	@Test
-	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
 	public void githubContainerRegistryTests() {
 		containerRegistryTests("github-log-sink",
 				"docker:ghcr.io/tzolov/log-sink-rabbit:3.1.0-SNAPSHOT");
 	}
 
 	@Test
-	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
 	public void azureContainerRegistryTests() {
 		containerRegistryTests("azure-log-sink",
 				"docker:scdftest.azurecr.io/springcloudstream/log-sink-rabbit:3.1.0-SNAPSHOT");
 	}
 
 	@Test
-	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches="true")
+	@EnabledIfEnvironmentVariable(named = "SCDF_CR_TEST", matches = "true")
 	public void harborContainerRegistryTests() {
 		containerRegistryTests("harbor-log-sink",
 				"docker:projects.registry.vmware.com/scdf/scdftest/log-sink-rabbit:3.1.0-SNAPSHOT");
@@ -317,7 +317,7 @@ public class DataFlowIT {
 		logger.info("application-metadata-" + appName + "-container-registry-test");
 
 		// Docker app with container image metadata
-		dataFlowOperations.appRegistryOperations().register( appName, ApplicationType.sink,
+		dataFlowOperations.appRegistryOperations().register(appName, ApplicationType.sink,
 				appUrl, null, true);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info(appName, ApplicationType.sink, false);
@@ -758,12 +758,20 @@ public class DataFlowIT {
 
 	@Test
 	public void dataflowTaskLauncherSink() {
-		logger.info("dataflow-tasklauncher-sink-test");
-		String uri = String.format("docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:%s",
-				testProperties.getDatabase().getDataflowVersion());
-		dataFlowOperations.appRegistryOperations()
-				.register("dataflowTaskLauncher", ApplicationType.sink, uri, null, true);
+		String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
+		String skipLogMessage = dataflowTaskLauncherAppName + "-sink-test: SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
+		boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName, ApplicationType.sink);
+		if (!isDataflowTaskLauncherAppRegistered) {
+			logger.info(skipLogMessage);
+		}
+		Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipLogMessage);
 
+		DetailedAppRegistrationResource dataflowTaskLauncherRegistration =
+				dataFlowOperations.appRegistryOperations().info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
+
+		logger.info(dataflowTaskLauncherAppName + "-sink-test: "
+				+ dataflowTaskLauncherAppName + " [" + dataflowTaskLauncherRegistration.getVersion()
+				+ "], DataFlow [" + runtimeApps.getDataflowServerVersion() + "]");
 
 		String taskName = randomTaskName();
 		try (Task task = Task.builder(dataFlowOperations)
@@ -772,7 +780,7 @@ public class DataFlowIT {
 				.description("Test timestamp task")
 				.build()) {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
-					.definition("http | dataflowTaskLauncher --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
+					.definition("http | " + dataflowTaskLauncherAppName + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
 							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
 					.create()
 					.deploy(testDeploymentProperties())) {
@@ -787,7 +795,7 @@ public class DataFlowIT {
 
 				AtomicLong launchId = new AtomicLong();
 				Awaitility.await().until(() -> task.executions().stream().filter(t ->
-						t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
+								t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
 						.findFirst()
 						.map(t -> launchId.getAndSet(t.getExecutionId())).isPresent()
 				);
@@ -798,7 +806,6 @@ public class DataFlowIT {
 			}
 		}
 	}
-
 
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS
@@ -900,7 +907,7 @@ public class DataFlowIT {
 
 			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 			Awaitility.await().until(() -> (int) JsonPath.parse(
-					runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+							runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
 					.read("$.data.result.length()") > 0);
 
 			JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
@@ -1528,6 +1535,7 @@ public class DataFlowIT {
 		result.add("--io.spring.stepName=" + stepName);
 		return result;
 	}
+
 	private void validateSuccessfulTaskLaunch(Task task, long launchId) {
 		Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 		assertThat(task.executions().size()).isEqualTo(1);
@@ -1541,7 +1549,7 @@ public class DataFlowIT {
 		assertThat(jobExecutionIds.size()).isEqualTo(1);
 		//Verify that steps can be retrieved
 		task.jobExecutionResources().stream().filter(
-				jobExecution -> jobExecution.getName().equals(task.getTaskName())).
+						jobExecution -> jobExecution.getName().equals(task.getTaskName())).
 				forEach(jobExecutionResource -> {
 					assertThat(jobExecutionResource.getStepExecutionCount()).isEqualTo(1);
 					task.jobStepExecutions(jobExecutionResource.getExecutionId()).forEach(stepExecutionResource -> {
@@ -1588,43 +1596,43 @@ public class DataFlowIT {
 	@Test
 	public void basicBatchFailRestartTest() {
 		// Verify Batch runs successfully
-			logger.info("basic-batch-fail-restart-test");
-			try (Task task = Task.builder(dataFlowOperations)
-					.name(randomTaskName())
-					.definition("scenario")
-					.description("Test scenario batch app that will fail on first pass")
-					.build()) {
+		logger.info("basic-batch-fail-restart-test");
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(randomTaskName())
+				.definition("scenario")
+				.description("Test scenario batch app that will fail on first pass")
+				.build()) {
 
-				String stepName = randomStepName();
-				List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
-				args.add("--io.spring.failBatch=true");
-				// task first launch
-				long launchId = task.launch(args);
-				//Verify task
-				validateSuccessfulTaskLaunch(task, launchId);
+			String stepName = randomStepName();
+			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
+			args.add("--io.spring.failBatch=true");
+			// task first launch
+			long launchId = task.launch(args);
+			//Verify task
+			validateSuccessfulTaskLaunch(task, launchId);
 
-				//Verify that batch app that fails can be restarted
+			//Verify that batch app that fails can be restarted
 
-				// Attempt a job restart
-				List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
-				//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
-				//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
-				Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
-					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
-					// Wait for job to start
-					Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
-					// Wait for task for the job to complete
-					Awaitility.await().until(() -> task.executions().stream().findFirst().get().getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
-					assertThat(task.jobExecutionResources().size()).isEqualTo(2);
-					List<JobExecutionResource> jobExecutionResources = task.jobInstanceResources().stream().
-							findFirst().get().getJobExecutions().stream().collect(Collectors.toList());
-					List<BatchStatus> batchStatuses = new ArrayList<>();
-					jobExecutionResources.stream().forEach(jobExecutionResource ->
-							batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
-					assertThat(batchStatuses).contains(BatchStatus.FAILED);
-					assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
-				});
-			}
+			// Attempt a job restart
+			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
+			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
+			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
+				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+				// Wait for job to start
+				Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
+				// Wait for task for the job to complete
+				Awaitility.await().until(() -> task.executions().stream().findFirst().get().getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
+				assertThat(task.jobExecutionResources().size()).isEqualTo(2);
+				List<JobExecutionResource> jobExecutionResources = task.jobInstanceResources().stream().
+						findFirst().get().getJobExecutions().stream().collect(Collectors.toList());
+				List<BatchStatus> batchStatuses = new ArrayList<>();
+				jobExecutionResources.stream().forEach(jobExecutionResource ->
+						batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
+				assertThat(batchStatuses).contains(BatchStatus.FAILED);
+				assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
+			});
+		}
 	}
 
 	@Test
@@ -1645,8 +1653,8 @@ public class DataFlowIT {
 			//Verify task
 			validateSuccessfulTaskLaunch(task, launchId);
 			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
-			DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp", ApplicationType.task,false);
-			if(taskResource.getUri().startsWith("maven:")) {
+			DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp", ApplicationType.task, false);
+			if (taskResource.getUri().startsWith("maven:")) {
 				try {
 					appRegistryOperations.register("timestamp", ApplicationType.task,
 							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
@@ -1698,7 +1706,7 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
 			assertThat(task.executions().stream().filter(taskExecutionResource ->
-					taskExecutionResource.getDeploymentProperties().containsKey(testPropertyKey)).
+							taskExecutionResource.getDeploymentProperties().containsKey(testPropertyKey)).
 					collect(Collectors.toList()).size()).isEqualTo(2);
 
 		}
@@ -1732,7 +1740,7 @@ public class DataFlowIT {
 			String stepName = randomStepName();
 			List<String> baseArgs = createNewJobandStepScenario(task.getTaskName(), stepName);
 			List<String> args = new ArrayList<>(baseArgs);
-			args .add(argument);
+			args.add(argument);
 			// task first launch
 			long launchId = task.launch(args);
 			//Verify  first launch
@@ -1742,7 +1750,7 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
 			assertThat(task.executions().stream().filter(execution ->
-					execution.getArguments().contains(argument)).
+							execution.getArguments().contains(argument)).
 					collect(Collectors.toList()).size()).isEqualTo(1);
 		}
 
