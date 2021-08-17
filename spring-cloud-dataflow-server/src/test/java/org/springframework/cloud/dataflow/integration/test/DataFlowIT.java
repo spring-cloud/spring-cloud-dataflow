@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -83,7 +84,9 @@ import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationMa
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -752,6 +755,50 @@ public class DataFlowIT {
 			Awaitility.await().until(() -> barLogStream.logs(app("log")).contains("defg-bar"));
 		}
 	}
+
+	@Test
+	public void dataflowTaskLauncherSink() {
+		logger.info("dataflow-tasklauncher-sink-test");
+		String uri = String.format("docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:%s",
+				testProperties.getDatabase().getDataflowVersion());
+		dataFlowOperations.appRegistryOperations()
+				.register("dataflowTaskLauncher", ApplicationType.sink, uri, null, true);
+
+
+		String taskName = randomTaskName();
+		try (Task task = Task.builder(dataFlowOperations)
+				.name(taskName)
+				.definition("timestamp")
+				.description("Test timestamp task")
+				.build()) {
+			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
+					.definition("http | dataflowTaskLauncher --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
+							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
+					.create()
+					.deploy(testDeploymentProperties())) {
+
+				Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+				runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
+
+				AtomicLong launchId = new AtomicLong();
+				Awaitility.await().until(() -> task.executions().stream().filter(t ->
+						t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
+						.findFirst()
+						.map(t -> launchId.getAndSet(t.getExecutionId())).isPresent()
+				);
+				long id = launchId.get();
+				assertThat(task.executions().size()).isEqualTo(1);
+				assertThat(task.execution(id).isPresent()).isTrue();
+				assertThat(task.execution(id).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+			}
+		}
+	}
+
 
 	// -----------------------------------------------------------------------
 	//                       STREAM  METRICS TESTS

@@ -32,6 +32,8 @@ import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResourc
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -257,6 +259,12 @@ public class RuntimeApplicationHelper {
 
 	public void httpPost(String url, String message) {
 		dataFlowTemplate.getRestTemplate().postForObject(url, message, String.class);
+	}
+
+	public void httpPost(String streamName, String appName, String message, HttpHeaders headers) {
+		String url = this.getApplicationInstanceUrl(streamName, appName);
+		HttpEntity<String> entity = new HttpEntity<>(message, headers);
+		dataFlowTemplate.getRestTemplate().postForEntity(url, entity, String.class);
 	}
 
 	public String httpGet(String url) {
