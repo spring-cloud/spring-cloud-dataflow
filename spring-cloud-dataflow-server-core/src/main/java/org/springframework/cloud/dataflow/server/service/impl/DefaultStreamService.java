@@ -168,6 +168,12 @@ public class DefaultStreamService implements StreamService {
 				.findFirst()
 				.orElse("unknown");
 
+
+		if (platformType.equals("kubernetes") && !STREAM_NAME_PATTERN.matcher(streamDefinition.getName()).matches()) {
+			throw new InvalidStreamDefinitionException(String.format("Stream name %s is invalid. %s",
+					streamDefinition.getName(), STREAM_NAME_VALIDATION_MSG));
+		}
+
 		List<AppDeploymentRequest> appDeploymentRequests = this.appDeploymentRequestCreator
 				.createRequests(streamDefinition, deploymentPropertiesToUse, platformType);
 
@@ -407,10 +413,6 @@ public class DefaultStreamService implements StreamService {
 						String.format("Application name '%s' with type '%s' does not exist in the app registry.",
 								appName, applicationType));
 			}
-		}
-
-		if (!STREAM_NAME_PATTERN.matcher(streamName).matches()) {
-			errorMessages.add(STREAM_NAME_VALIDATION_MSG);
 		}
 
 		if (!errorMessages.isEmpty()) {

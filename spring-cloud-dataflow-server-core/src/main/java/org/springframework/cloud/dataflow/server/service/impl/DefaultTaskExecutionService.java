@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -63,6 +64,7 @@ import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -143,6 +145,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private TaskConfigurationProperties taskConfigurationProperties;
 
 	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
+	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters " +
+			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+			"or 'abc-123')";
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -255,7 +262,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
-
+		String platformType = StreamSupport.stream(launcherRepository.findAll().spliterator(), true)
+				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+				.map(Launcher::getType)
+				.findFirst()
+				.orElse("unknown");
+		if (platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE) && !TASK_NAME_PATTERN.matcher(taskName).matches()) {
+			throw new TaskException(String.format("Task name %s is invalid. %s", taskName, TASK_NAME_VALIDATION_MSG));
+		}
 		// Naive local state to prevent parallel launches to break things up
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);

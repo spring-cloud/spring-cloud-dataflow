@@ -62,6 +62,7 @@ import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;
@@ -178,6 +179,16 @@ public class DefaultSchedulerServiceTests {
 				"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
 				this.commandLineArgs, null);
 	}
+
+	@Test(expected = TaskException.class)
+	public void testScheduleWithInvalidTaskNameOnKuberenetesPlatform() {
+		String taskName = "test_a1";
+		taskDefinitionRepository.save(new TaskDefinition(taskName, "demo"));
+		getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
+						"test1", taskName, this.testProperties,
+				this.commandLineArgs, "default");
+	}
+
 
 	@Test
 	public void testScheduleWithCapitalizeNameOnKuberenetesPlatform() {
