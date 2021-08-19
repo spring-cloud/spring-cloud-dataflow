@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -50,6 +52,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerServicePropert
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -63,6 +66,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Chris Schaefer
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultSchedulerService implements SchedulerService {
 
@@ -80,6 +84,11 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final AuditServiceUtils auditServiceUtils;
 	private final DataSourceProperties dataSourceProperties;
 	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
+	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters " +
+			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+			"or 'abc-123')";
 
 	/**
 	 * Constructor for DefaultSchedulerService
@@ -169,6 +178,14 @@ public class DefaultSchedulerService implements SchedulerService {
 	@Override
 	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs, String platformName) {
+		String platformType = StreamSupport.stream(getLaunchers().spliterator(), true)
+				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+				.map(Launcher::getType)
+				.findFirst()
+				.orElse("unknown");
+		if (platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE) && !TASK_NAME_PATTERN.matcher(taskDefinitionName).matches()) {
+			throw new TaskException(String.format("Task name %s is invalid. %s", taskDefinitionName, TASK_NAME_VALIDATION_MSG));
+		}
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)

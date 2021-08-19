@@ -136,9 +136,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
 
-	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
+	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "-ORIG";
 
-	private final static String TASK_NAME_ORIG2 = BASE_TASK_NAME + "_ORIG2";
+	private final static String TASK_NAME_ORIG2 = BASE_TASK_NAME + "-ORIG2";
 
 	private final static String K8_PLATFORM = "k8platform";
 
@@ -998,7 +998,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 				this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
 			} catch (IllegalStateException ise) {
 				errorCaught = true;
-				assertEquals("Task definition [myTask_ORIG] has already been deployed on platform [default].  Requested to deploy on platform [anotherPlatform].", ise.getMessage());
+				assertEquals("Task definition ["+TASK_NAME_ORIG+"] has already been deployed on platform [default].  Requested to deploy on platform [anotherPlatform].", ise.getMessage());
 			}
 			if (!errorCaught) {
 				fail();
@@ -1013,9 +1013,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher("anotherPlatform", "local", taskLauncher));
 			taskDeleteService.deleteTaskDefinition(TASK_NAME_ORIG, true);
 			String logEntries = outputCapture.toString();
-			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform anotherPlatform"));
-			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform default"));
-			assertTrue(logEntries.contains("Deleted task app resources for myTask_ORIG in platform MyPlatform"));
+			assertTrue(logEntries.contains("Deleted task app resources for "+TASK_NAME_ORIG+" in platform anotherPlatform"));
+			assertTrue(logEntries.contains("Deleted task app resources for "+TASK_NAME_ORIG+" in platform default"));
+			assertTrue(logEntries.contains("Deleted task app resources for "+TASK_NAME_ORIG+" in platform MyPlatform"));
 		}
 
 		@Test
@@ -1029,7 +1029,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			}
 			catch (IllegalStateException ise) {
 				errorCaught = true;
-				assertEquals("Deployment ID is null for the task:myTask_ORIG", ise.getMessage());
+				assertEquals("Deployment ID is null for the task:"+TASK_NAME_ORIG, ise.getMessage());
 			}
 			if (!errorCaught) {
 				fail();
@@ -1061,7 +1061,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			}
 			catch (NoSuchTaskDefinitionException ise) {
 				errorCaught = true;
-				assertEquals("Could not find task definition named myTask_ORIG", ise.getMessage());
+				assertEquals("Could not find task definition named "+TASK_NAME_ORIG, ise.getMessage());
 			}
 			if (!errorCaught) {
 				fail();
@@ -1103,14 +1103,39 @@ public abstract class DefaultTaskExecutionServiceTests {
 				try {
 					initializeSuccessfulRegistry(appRegistry);
 					taskSaveService.saveTaskDefinition(new TaskDefinition(taskName, "AAA --foo=bar"));
-
+					this.launcherRepository.save(new Launcher("k8s1", TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE, taskLauncher));
+					this.launcherRepository.save(new Launcher("cf1", TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+					initializeSuccessfulRegistry(appRegistry);
+					Map<String, String> taskDeploymentProperties = new HashMap<>();
+					taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", "k8s1");
+					taskExecutionService.executeTask(taskName, taskDeploymentProperties, Arrays.asList());
 					fail("Expected TaskException");
 				} catch (Exception e) {
 					assertTrue(e instanceof TaskException);
-					assertEquals(e.getMessage(), "Task name must consist of alphanumeric characters or '-', start " +
-							"with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
-							" or 'abc-123')");
+					assertEquals(e.getMessage(), "Task name "+ taskName +" is invalid. Task name must consist of "
+							+ "alphanumeric characters or '-', start with an alphabetic character, and end with an "
+							+ "alphanumeric character (e.g. 'my-name', or 'abc-123')");
 				}
+			}
+			taskDeleteService.deleteAll();
+			for (String taskName : taskNames) {
+				try {
+					initializeSuccessfulRegistry(appRegistry);
+					taskSaveService.saveTaskDefinition(new TaskDefinition(taskName, "AAA --foo=bar"));
+					this.launcherRepository.save(new Launcher("k8s1", TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE, taskLauncher));
+					this.launcherRepository.save(new Launcher("cf1", TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+					initializeSuccessfulRegistry(appRegistry);
+					Map<String, String> taskDeploymentProperties = new HashMap<>();
+					taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", "cf1");
+					taskExecutionService.executeTask(taskName, taskDeploymentProperties, Arrays.asList());
+				}
+				catch (TaskException e) {
+					fail("TaskException is not expected");
+				}
+				catch (IllegalStateException e) {
+					// Ignore for the tests
+				}
+				taskDeleteService.deleteAll();
 			}
 		}
 

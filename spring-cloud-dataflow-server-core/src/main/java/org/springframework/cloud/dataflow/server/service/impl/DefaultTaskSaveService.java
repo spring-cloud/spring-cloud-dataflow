@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -33,7 +32,6 @@ import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.repository.DuplicateTaskException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
-import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -56,9 +54,6 @@ import org.springframework.util.StringUtils;
  * @author Chris Schaefer
  */
 public class DefaultTaskSaveService implements TaskSaveService {
-	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
-	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters or '-', " +
-			"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name',  or 'abc-123')";
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -85,10 +80,6 @@ public class DefaultTaskSaveService implements TaskSaveService {
 	@Override
 	@Transactional
 	public void saveTaskDefinition(TaskDefinition taskDefinition) {
-		if (!TASK_NAME_PATTERN.matcher(taskDefinition.getTaskName()).matches()) {
-			throw new TaskException(TASK_NAME_VALIDATION_MSG);
-		}
-
 		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		if (taskDefinitionRepository.existsById(taskDefinition.getTaskName())) {
