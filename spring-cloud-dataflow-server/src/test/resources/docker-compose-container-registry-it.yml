@@ -4,19 +4,19 @@ services:
 
   dataflow-server:
     environment:
-# AZURE
-      - spring.cloud.dataflow.container.registry-configurations.azure-registry.registry-host=scdftest.azurecr.io
-      - spring.cloud.dataflow.container.registry-configurations.azure-registry.authorization-type=basicauth
-      - spring.cloud.dataflow.container.registry-configurations.azure-registry.user=${CR_AZURE_USER}
-      - spring.cloud.dataflow.container.registry-configurations.azure-registry.secret=${CR_AZURE_PASS}
-# HARBOR
-      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.registry-host=projects.registry.vmware.com
-      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.authorization-type=basicauth
-#      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.authorization-type=dockeroauth2
-      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.user=${CR_HARBOR_USER}
-      - spring.cloud.dataflow.container.registry-configurations.harbor-registry.secret=${CR_HARBOR_PASS}
-# GITHUB
-      - spring.cloud.dataflow.container.registry-configurations.github-registry.registry-host=ghcr.io
-      - spring.cloud.dataflow.container.registry-configurations.github-registry.authorization-type=dockeroauth2
-      - spring.cloud.dataflow.container.registry-configurations.github-registry.user=${CR_GITHUB_USER}
-      - spring.cloud.dataflow.container.registry-configurations.github-registry.secret=${CR_GITHUB_PASS}
+      # AZURE CR
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_AZUREREGISTRY_REGISTRYHOST=scdftest.azurecr.io
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_AZUREREGISTRY_AUTHORIZATIONTYPE=BASICAUTH
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_AZUREREGISTRY_USER=${CR_AZURE_USER}
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_AZUREREGISTRY_SECRET=${CR_AZURE_PASS}
+      # HARBOR CR
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_HARBORREGISTRY_REGISTRYHOST=projects.registry.vmware.com
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_HARBORREGISTRY_AUTHORIZATIONTYPE=basicauth
+      # - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_HARBORREGISTRY_AUTHORIZATIONTYPE=dockeroauth2
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_HARBORREGISTRY_USER=${CR_HARBOR_USER}
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_HARBORREGISTRY_SECRET=${CR_HARBOR_PASS}
+      # GITHUB CR
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_GITHUBREGISTRY_REGISTRYHOST=ghcr.io
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_GITHUBREGISTRY_AUTHORIZATIONTYPE=dockeroauth2
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_GITHUBREGISTRY_USER=${CR_GITHUB_USER}
+      - SPRING_CLOUD_DATAFLOW_CONTAINER_REGISTRYCONFIGURATIONS_GITHUBREGISTRY_SECRET=${CR_GITHUB_PASS}
