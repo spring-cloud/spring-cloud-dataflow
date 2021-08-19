@@ -59,6 +59,7 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -286,23 +287,41 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void testInvalidStreamName() {
+	public void testInvalidStreamNameOnKubernetes() {
 		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
 		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
-
+		Deployer k8sDeployer = new Deployer("k8s1", "kubernetes", null);
+		Deployer cfDeployer = new Deployer("cf1", "cloudfoundry", null);
+		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(k8sDeployer, cfDeployer));
 		String[] streamNames = { "$stream", "stream$", "st_ream" };
-
 		for (String streamName : streamNames) {
 			try {
 				final StreamDefinition expectedStreamDefinition = new StreamDefinition(streamName, "time | log");
-				when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
-
-				this.defaultStreamService.createStream(streamName, "time | log", "demo stream", false);
+				when(this.streamDefinitionRepository.findById(streamName)).thenReturn(Optional.of(expectedStreamDefinition));
+				Map<String, String> k8sProperties = new HashMap<>();
+				k8sProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, k8sDeployer.getName());
+				this.defaultStreamService.deployStream(streamName, k8sProperties);
+				fail("Stream deployment should fail as the stream name is invalid");
 			} catch (Exception e) {
 				Assert.assertTrue(e instanceof InvalidStreamDefinitionException);
-				Assert.assertEquals(e.getMessage(), "Stream name must consist of alphanumeric characters or '-', " +
+				Assert.assertEquals(e.getMessage(), "Stream name "+ streamName +" is invalid. Stream name must consist of alphanumeric characters or '-', " +
 						"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
 						"or 'abc-123')");
+			}
+		}
+		for (String streamName : streamNames) {
+			try {
+				final StreamDefinition expectedStreamDefinition = new StreamDefinition(streamName, "time | log");
+				when(this.streamDefinitionRepository.findById(streamName)).thenReturn(Optional.of(expectedStreamDefinition));
+				Map<String, String> cfProperties = new HashMap<>();
+				cfProperties.put(SkipperStream.SKIPPER_PLATFORM_NAME, cfDeployer.getName());
+				this.defaultStreamService.deployStream(streamName, cfProperties);
+			}
+			catch (InvalidStreamDefinitionException e) {
+				fail("Stream deployment should not fail as the stream name is valid");
+			}
+			catch (IllegalArgumentException e) {
+				//ignore for the deployment
 			}
 		}
 	}
