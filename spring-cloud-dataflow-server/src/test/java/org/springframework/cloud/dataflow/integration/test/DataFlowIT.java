@@ -758,13 +758,22 @@ public class DataFlowIT {
 
 	@Test
 	public void dataflowTaskLauncherSink() {
+
 		String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
-		String skipLogMessage = dataflowTaskLauncherAppName + "-sink-test: SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
+
+		String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test: SKIP - Dataflow version:"
+				+ runtimeApps.getDataflowServerVersion() + " is older than 2.9.0-SNAPSHOT!";
+		if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT")) {
+			logger.info(skipOnIncompatibleDataFlowVersion);
+		}
+		Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"), skipOnIncompatibleDataFlowVersion);
+
+		String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
 		boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName, ApplicationType.sink);
 		if (!isDataflowTaskLauncherAppRegistered) {
-			logger.info(skipLogMessage);
+			logger.info(skipOnMissingAppRegistration);
 		}
-		Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipLogMessage);
+		Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipOnMissingAppRegistration);
 
 		DetailedAppRegistrationResource dataflowTaskLauncherRegistration =
 				dataFlowOperations.appRegistryOperations().info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
