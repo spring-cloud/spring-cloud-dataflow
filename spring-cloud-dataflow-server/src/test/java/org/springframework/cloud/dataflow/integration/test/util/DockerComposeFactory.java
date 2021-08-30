@@ -110,6 +110,12 @@ public class DockerComposeFactory {
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_USER", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_USER", ""))
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_PASSWORD", ""))
 			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")
+			.withAdditionalEnvironmentVariable("CR_AZURE_USER", DockerComposeFactoryProperties.get("CR_AZURE_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_AZURE_PASS", DockerComposeFactoryProperties.get("CR_AZURE_PASS", ""))
+			.withAdditionalEnvironmentVariable("CR_GITHUB_USER", DockerComposeFactoryProperties.get("CR_GITHUB_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_GITHUB_PASS", DockerComposeFactoryProperties.get("CR_GITHUB_PASS", ""))
+			.withAdditionalEnvironmentVariable("CR_HARBOR_USER", DockerComposeFactoryProperties.get("CR_HARBOR_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_HARBOR_PASS", DockerComposeFactoryProperties.get("CR_HARBOR_PASS", ""))
 			.build();
 
 	private static String[] addDockerComposeToPath(String[] dockerComposePaths, String additionalDockerCompose) {

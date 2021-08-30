@@ -20,7 +20,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,7 +35,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy;
+import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderRequestRedirectStrategy;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -190,14 +189,19 @@ public class ContainerImageRestTemplateFactory {
 		HttpComponentsClientHttpRequestFactory customRequestFactory =
 				new HttpComponentsClientHttpRequestFactory(
 						clientBuilder
-								.setRedirectStrategy(new DropAuthorizationHeaderOnSignedS3RequestRedirectStrategy())
+								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy())
+								// Azure redirects may contain double slashes and on default those are normilised
+								.setDefaultRequestConfig(RequestConfig.custom().setNormalizeUri(false).build())
 								.build());
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
-		// Therefore extend the MappingJackson2HttpMessageConverter media-types to include application/octet-stream.
+		// Similarly the Github CR response's media-type is always text/plain although the content is in JSON.
+		// Therefore we extend the MappingJackson2HttpMessageConverter media-types to
+		// include application/octet-stream and text/plain.
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
-		List<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
+		mediaTypeList.add(MediaType.TEXT_PLAIN);
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);
 
 		return restTemplateBuilder
