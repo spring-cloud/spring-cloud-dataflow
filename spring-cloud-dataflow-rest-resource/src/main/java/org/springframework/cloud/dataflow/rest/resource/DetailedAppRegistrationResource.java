@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
@@ -54,6 +56,11 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * Outbound port names configured for the app.
 	 */
 	private final Set<String> outboundPortNames = new HashSet<>();
+
+	/**
+	 * Option groups configured for the app.
+	 */
+	private final Map<String, Set<String>> optionGroups = new HashMap<>();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -148,6 +155,15 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 */
 	public String getShortDescription() {
 		return shortDescription;
+	}
+
+	/**
+	 * Return an option groups.
+	 *
+	 * @return the option groups
+	 */
+	public Map<String, Set<String>> getOptionGroups() {
+		return optionGroups;
 	}
 
 	/**

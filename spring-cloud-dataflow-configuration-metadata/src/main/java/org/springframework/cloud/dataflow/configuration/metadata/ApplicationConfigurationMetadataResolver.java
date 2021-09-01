@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,4 +63,14 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
 
 	public abstract Map<String, Set<String>> listPortNames(Resource metadataResource);
+
+	/**
+	 * Return information about option grouping which is coming from an additional
+	 * metadata files meant to provide more details which options belong together.
+	 * Keys in a map are arbitrary id's and values a full options id's.
+	 *
+	 * @param metadataResource the metadata resource
+	 * @return map of option groups
+	 */
+	public abstract Map<String, Set<String>> listOptionGroups(Resource metadataResource);
 }
