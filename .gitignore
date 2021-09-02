@@ -33,3 +33,13 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.iws
 .idea/*
 rebel.xml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# GitHub actions
+.m2
