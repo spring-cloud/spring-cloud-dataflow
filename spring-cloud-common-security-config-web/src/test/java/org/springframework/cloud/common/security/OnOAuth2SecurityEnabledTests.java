@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.common.security;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
@@ -24,8 +24,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Gunnar Hillert
@@ -35,26 +35,30 @@ public class OnOAuth2SecurityEnabledTests {
 	@Test
 	public void noPropertySet() throws Exception {
 		AnnotationConfigApplicationContext context = load(Config.class);
-		assertThat(context.containsBean("myBean"), equalTo(false));
+		assertThat(context.containsBean("myBean")).isFalse();
 		context.close();
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test
 	public void propertySecurityOauth() throws Exception {
-		load(Config.class, "spring.security.oauth2");
+		assertThatThrownBy(() -> {
+			load(Config.class, "spring.security.oauth2");
+		}).isInstanceOf(IllegalStateException.class);		
 	}
 
 	@Test
 	public void propertyClientId() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "spring.security.oauth2.client.registration.uaa.client-id:12345");
-		assertThat(context.containsBean("myBean"), equalTo(true));
+		AnnotationConfigApplicationContext context = load(Config.class,
+				"spring.security.oauth2.client.registration.uaa.client-id:12345");
+		assertThat(context.containsBean("myBean")).isTrue();
 		context.close();
 	}
 
 	@Test
 	public void clientIdOnlyWithNoValue() throws Exception {
-		AnnotationConfigApplicationContext context = load(Config.class, "spring.security.oauth2.client.registration.uaa.client-id");
-		assertThat(context.containsBean("myBean"), equalTo(true));
+		AnnotationConfigApplicationContext context = load(Config.class,
+				"spring.security.oauth2.client.registration.uaa.client-id");
+		assertThat(context.containsBean("myBean")).isTrue();
 		context.close();
 	}
 

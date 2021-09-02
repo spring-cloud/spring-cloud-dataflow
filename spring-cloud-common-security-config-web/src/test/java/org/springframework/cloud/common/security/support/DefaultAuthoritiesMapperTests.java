@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.common.security.ProviderRoleMapping;
 import org.springframework.security.core.GrantedAuthority;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Gunnar Hillert
@@ -40,40 +38,25 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testNullConstructor() throws Exception {
-		try {
+		assertThatThrownBy(() -> {
 			new DefaultAuthoritiesMapper(null, "");
-		}
-		catch (IllegalArgumentException e) {
-			Assert.assertEquals("providerRoleMappings must not be null.", e.getMessage());
-			return;
-		}
-		Assert.fail("Expected an IllegalArgumentException to be thrown.");
+		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("providerRoleMappings must not be null.");
 	}
 
 	@Test
 	public void testMapScopesToAuthoritiesWithNullParameters() throws Exception {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
-		try {
+		assertThatThrownBy(() -> {
 			authoritiesMapper.mapScopesToAuthorities(null, null, null);
-		}
-		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The scopes argument must not be null.", e.getMessage());
-			return;
-		}
-		Assert.fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The scopes argument must not be null.");
 	}
 
 	@Test
 	public void testMapScopesToAuthoritiesWithNullParameters2() throws Exception {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
-		try {
+		assertThatThrownBy(() -> {
 			authoritiesMapper.mapScopesToAuthorities("myClientId", null, null);
-		}
-		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The scopes argument must not be null.", e.getMessage());
-			return;
-		}
-		Assert.fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The scopes argument must not be null.");
 	}
 
 
@@ -82,10 +65,11 @@ public class DefaultAuthoritiesMapperTests {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", false);
 
 		final Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet(), null);
-		assertThat(authorities, hasSize(7));
+		assertThat(authorities).hasSize(7);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW", "ROLE_DEPLOY", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_DESTROY"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW", "ROLE_DEPLOY", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_DESTROY");
 	}
 
 	@Test
@@ -98,10 +82,10 @@ public class DefaultAuthoritiesMapperTests {
 		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", true);
 
 		final Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities).hasSize(3);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -110,14 +94,10 @@ public class DefaultAuthoritiesMapperTests {
 		roleMapping.setMapOauthScopes(true);
 		roleMapping.addRoleMapping("ROLE_MANAGE", "foo-scope-in-oauth");
 
-		try {
+		assertThatThrownBy(() -> {
 			new DefaultAuthoritiesMapper("uaa", roleMapping);
-		}
-		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The following 6 roles are not mapped: CREATE, DEPLOY, DESTROY, MODIFY, SCHEDULE, VIEW.", e.getMessage());
-			return;
-		}
-		Assert.fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining(
+				"The following 6 roles are not mapped: CREATE, DEPLOY, DESTROY, MODIFY, SCHEDULE, VIEW.");
 	}
 
 	@Test
@@ -151,10 +131,11 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(7));
+		assertThat(authorities).hasSize(7);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -172,10 +153,10 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(3));
+		assertThat(authorities).hasSize(3);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -193,10 +174,11 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(7));
+		assertThat(authorities).hasSize(7);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -210,10 +192,10 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(2));
+		assertThat(authorities).hasSize(2);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_CREATE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -236,10 +218,11 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(7));
+		assertThat(authorities).hasSize(7);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_VIEW");
 	}
 
 	@Test
@@ -262,9 +245,10 @@ public class DefaultAuthoritiesMapperTests {
 
 		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
 
-		assertThat(authorities, hasSize(7));
+		assertThat(authorities).hasSize(7);
 
-		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()),
-			containsInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY", "ROLE_SCHEDULE", "ROLE_VIEW"));
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_VIEW");
 	}
 }

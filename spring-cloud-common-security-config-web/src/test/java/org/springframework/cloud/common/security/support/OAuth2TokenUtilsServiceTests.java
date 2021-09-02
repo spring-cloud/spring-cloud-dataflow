@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.springframework.cloud.common.security.support;
 
 import java.time.Instant;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.security.core.Authentication;
@@ -30,9 +30,8 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,16 +49,10 @@ public class OAuth2TokenUtilsServiceTests {
 		final OAuth2AuthorizedClientService oauth2AuthorizedClientService = mock(OAuth2AuthorizedClientService.class);
 		OAuth2TokenUtilsService oAuth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		try {
+		assertThatThrownBy(() -> {
 			oAuth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		}
-		catch (IllegalStateException e) {
-			assertEquals(
-				"Cannot retrieve the authentication object from the SecurityContext. Are you authenticated?",
-				e.getMessage());
-			return;
-		}
-		fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalStateException.class).hasMessageContaining(
+				"Cannot retrieve the authentication object from the SecurityContext. Are you authenticated?");
 	}
 
 	@Test
@@ -70,15 +63,9 @@ public class OAuth2TokenUtilsServiceTests {
 		final OAuth2AuthorizedClientService oauth2AuthorizedClientService = mock(OAuth2AuthorizedClientService.class);
 		OAuth2TokenUtilsService oAuth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		try {
+		assertThatThrownBy(() -> {
 			oAuth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		}
-		catch (IllegalStateException e) {
-			assertTrue(e.getMessage().startsWith("Unsupported authentication object type"));
-			SecurityContextHolder.getContext().setAuthentication(null);
-			return;
-		}
-		fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalStateException.class).hasMessageContaining("Unsupported authentication object type");
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 
@@ -92,17 +79,10 @@ public class OAuth2TokenUtilsServiceTests {
 		final OAuth2AuthorizedClientService oauth2AuthorizedClientService = mock(OAuth2AuthorizedClientService.class);
 		OAuth2TokenUtilsService oAuth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		try {
+		assertThatThrownBy(() -> {
 			oAuth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		}
-		catch (IllegalStateException e) {
-			assertEquals(
-				"The retrieved principalName must not be null or empty.",
-				e.getMessage());
-			SecurityContextHolder.getContext().setAuthentication(null);
-			return;
-		}
-		fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("The retrieved principalName must not be null or empty.");
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 
@@ -116,17 +96,10 @@ public class OAuth2TokenUtilsServiceTests {
 		final OAuth2AuthorizedClientService oauth2AuthorizedClientService = mock(OAuth2AuthorizedClientService.class);
 		OAuth2TokenUtilsService oAuth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		try {
+		assertThatThrownBy(() -> {
 			oAuth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		}
-		catch (IllegalStateException e) {
-			assertEquals(
-				"The retrieved clientRegistrationId must not be null or empty.",
-				e.getMessage());
-			SecurityContextHolder.getContext().setAuthentication(null);
-			return;
-		}
-		fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("The retrieved clientRegistrationId must not be null or empty.");
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 
@@ -141,17 +114,10 @@ public class OAuth2TokenUtilsServiceTests {
 		when(oauth2AuthorizedClientService.loadAuthorizedClient("uaa", "my-username")).thenReturn(getOAuth2AuthorizedClient());
 		final OAuth2TokenUtilsService oauth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		try {
+		assertThatThrownBy(() -> {
 			oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser();
-		}
-		catch (IllegalStateException e) {
-			assertEquals(
-				"No oauth2AuthorizedClient returned for clientRegistrationId 'CID' and principalName 'my-username'.",
-				e.getMessage());
-			SecurityContextHolder.getContext().setAuthentication(null);
-			return;
-		}
-		fail("Expected an IllegalStateException to be thrown.");
+		}).isInstanceOf(IllegalStateException.class).hasMessageContaining(
+				"No oauth2AuthorizedClient returned for clientRegistrationId 'CID' and principalName 'my-username'.");
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 
@@ -166,7 +132,7 @@ public class OAuth2TokenUtilsServiceTests {
 		when(oauth2AuthorizedClientService.loadAuthorizedClient("uaa", "my-username")).thenReturn(getOAuth2AuthorizedClient());
 		final OAuth2TokenUtilsService oauth2TokenUtilsService = new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 
-		assertEquals("foo-bar-123-token", oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser());
+		assertThat(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).isEqualTo("foo-bar-123-token");
 		SecurityContextHolder.getContext().setAuthentication(null);
 	}
 

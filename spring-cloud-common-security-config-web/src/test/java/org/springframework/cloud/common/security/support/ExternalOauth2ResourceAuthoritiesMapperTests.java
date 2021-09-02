@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,15 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Mike Heath
@@ -42,13 +41,13 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 
 	public static MockWebServer mockBackEnd;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws IOException {
 		mockBackEnd = new MockWebServer();
 		mockBackEnd.start();
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() throws IOException {
 		mockBackEnd.shutdown();
 	}
@@ -59,7 +58,7 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 		assertAuthorities2(mockBackEnd.url("/authorities").uri(), "VIEW", "CREATE", "MANAGE");
 		assertAuthorities2(mockBackEnd.url("/").uri(), "MANAGE");
 		assertAuthorities2(mockBackEnd.url("/").uri(), "DEPLOY", "DESTROY", "MODIFY", "SCHEDULE");
-		assertThat(mockBackEnd.getRequestCount(), is(4));
+		assertThat(mockBackEnd.getRequestCount()).isEqualTo(4);
 	}
 
 	private void assertAuthorities2(URI uri, String... roles) throws Exception {
@@ -72,8 +71,8 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 				new ExternalOauth2ResourceAuthoritiesMapper(uri);
 		final Set<GrantedAuthority> grantedAuthorities = authoritiesExtractor.mapScopesToAuthorities(null, new HashSet<>(), "1234567");
 		for (String role : roles) {
-			assertThat(grantedAuthorities, hasItem(new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + role)));
+			assertThat(grantedAuthorities).containsAnyOf(new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + role));
 		}
-		assertThat(mockBackEnd.takeRequest().getHeader("Authorization"), is("Bearer 1234567"));
+		assertThat(mockBackEnd.takeRequest().getHeader("Authorization")).isEqualTo("Bearer 1234567");
 	}
 }
