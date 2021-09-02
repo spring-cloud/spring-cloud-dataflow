@@ -1,0 +1,16 @@
+{
+    "java.completion.importOrder": [
+        "java",
+        "javax",
+        "",
+        "org.springframework",
+        "#"
+    ],
+    "java.checkstyle.configuration": "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/main/spring-cloud-dataflow-build-tools/src/main/resources/checkstyle.xml",
+    "java.checkstyle.properties": {
+        "checkstyle.suppressions.file": "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/main/spring-cloud-dataflow-build-tools/src/checkstyle/checkstyle-suppressions.xml",
+        "checkstyle.additional.suppressions.file": "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/main/spring-cloud-dataflow-build-tools/src/checkstyle/checkstyle-suppressions-empty.xml",
+        "checkstyle.header.file": "https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-build/main/spring-cloud-dataflow-build-tools/src/main/resources/checkstyle-header.txt"
+    },
+    "java.checkstyle.version": "8.29"
+}
