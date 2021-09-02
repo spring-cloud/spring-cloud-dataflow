@@ -141,7 +141,7 @@ public class OAuth2TokenUtilsServiceTests {
 				.withRegistrationId("uaa")
 				.clientId("clientId")
 				.clientSecret("clientSecret")
-				.redirectUriTemplate("blubba")
+				.redirectUri("blubba")
 				.authorizationUri("blubba")
 				.tokenUri("blubba")
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)

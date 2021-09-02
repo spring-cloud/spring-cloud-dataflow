@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class ExternalOauth2ResourceAuthoritiesMapper implements AuthoritiesMappe
 
 		final Set<GrantedAuthority> authorities = new HashSet<>();
 		for (String permission : response.getBody()) {
-			if (StringUtils.isEmpty(permission)) {
+			if (!StringUtils.hasText(permission)) {
 				logger.warn("Received an empty permission from {}", roleProviderUri);
 			} else {
 				final CoreSecurityRoles securityRole = CoreSecurityRoles.fromKey(permission.toUpperCase());

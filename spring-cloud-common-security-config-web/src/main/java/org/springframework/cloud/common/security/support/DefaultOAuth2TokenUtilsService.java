@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,11 +82,11 @@ public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 		final String principalName = auth2AuthenticationToken.getName();
 		final String clientRegistrationId = auth2AuthenticationToken.getAuthorizedClientRegistrationId();
 
-		if (StringUtils.isEmpty(principalName)) {
+		if (!StringUtils.hasText(principalName)) {
 			throw new IllegalStateException("The retrieved principalName must not be null or empty.");
 		}
 
-		if (StringUtils.isEmpty(clientRegistrationId)) {
+		if (!StringUtils.hasText(clientRegistrationId)) {
 			throw new IllegalStateException("The retrieved clientRegistrationId must not be null or empty.");
 		}
 
