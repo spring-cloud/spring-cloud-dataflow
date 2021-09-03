@@ -1,6 +1,22 @@
 //tag::ref-doc[]
-= Spring Cloud Dataflow Tasklauncher Sink
+= Spring Cloud Data Flow Tasklauncher Sink
 
+[NOTE]
+Use of this app currently requires manual registration.
+This app is a REST client of Spring Cloud Data Flow.
+Frequently users have experienced errors caused by using a version incompatible with the deployed SCDF server.
+To address this issue, as of SCDF 2.9.x, this app is included in the Spring Cloud Dataflow repository, and build and release, to ensure API compatibility and interoperability with the current SCDF server version.
+As a consequence, the `dataflow-tasklauncher` sink is no longer part of the pre-packaged apps release, and no longer included in the bulk import.
+
+To manually register the `dataflow-tasklauncher` for either the `rabbit` or `kafka` binder, use one of the following URLs:
+
+ docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-<binder>:<SCDF-version>
+
+ maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-<binder>:<SCDF-version>
+
+Example: `docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:2.9.0`
+
+== About
 This module consumes LaunchRequest messages from a `PollableMessageSource` and uses the Data Flow REST client to launch a registered task on a configured https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-local-tasks[task platform].
 The client must be configured to connect to a remote Data Flow Server, including any required authentication (see Configuration Options below).
 
