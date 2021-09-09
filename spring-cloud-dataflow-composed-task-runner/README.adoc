@@ -1,0 +1,128 @@
+//tag::ref-doc[]
+:image-root: images
+
+= Composed Task Runner
+
+A task that executes a tasks in a directed graph as specified by a DSL that is
+passed in via the `--graph` command line argument.
+
+== Overview
+The Composed Task Runner parses the graph DSL and for each node in the graph it
+will execute a restful call against a specified https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/[Spring Cloud Data Flow]
+instance to launch the associated task definition.  For each task definition that is executed the
+Composed Task Runner will poll the database to verify that the task completed.
+Once complete the Composed Task Runner will either continue to the next task in
+the graph or fail based on how the DSL specified the sequence of tasks should
+be executed.
+
+== Graph DSL
+
+The Graph DSL is comprised of Task Definitions that have been defined within
+the Spring Cloud Data Flow server referenced by the data-flow-uri
+(default: http://localhost:9393).
+These definitions can be placed into a derived graph based on a DSL through
+the use of sequences, transitions, splits, or a combination therein.
+
+== Traversing the graph
+Composed Task Runner is built using
+https://docs.spring.io/spring-batch/reference/html/[Spring Batch]
+to execute the directed graph.   As such each node in the graph is a
+https://docs.spring.io/spring-batch/reference/html/domain.html#domainStep[Step].
+As discussed in the overview, each step in the graph will post a request to a
+Spring Cloud Data Flow Server to execute a task definition.  If the task launched by
+the step fails to complete within the time specified by the `maxWaitTime`
+property, a
+org.springframework.cloud.task.app.composedtaskrunner.support.TimeoutException
+will be thrown.  Once task launched by the step completes,
+the ComposedTaskRunner will set the `ExitStatus` of that step based on the following rules:
+
+* If the `TaskExecution` has an `ExitMessage` that will be used as the `ExitStatus`
+* If no `ExitMessage` is present and the `ExitCode` is set to 0 then the `ExitStatus`
+for the step will be `COMPLETED`.
+* If no `ExitMessage` is present and the `ExitCode` is set to 1 then the `ExitStatus`
+for the step will be `FAILED`.
+
+If the state of any step in the graph is set to  FAILED and is not handled by
+the DSL the Directed Graph execution will terminate.
+
+=== Sequences
+The Composed Task Runner supports the ability to traverse sequences of task
+definitions.  This is represented by a task definition name followed by the
+`&&` symbol then the next task definition to be launched.
+For example if we have tasks AAA, BBB and CCC to be launched in sequence it
+will look  like this:
+```
+AAA && BBB && CCC
+```
+image::{image-root}/basicsequence.png[basic sequence]
+
+You can execute the same task multiple times in a sequence.  For example:
+```
+AAA && AAA && AAA
+```
+image::{image-root}/samejobsequence.png[basic sequence with repeated job definition]
+
+If an `ExitStatus` 'FAILED' is returned in a sequence the Composed Task
+Runner will terminate.  For example if `AAA && BBB && CCC` composed task is
+executed and BBB fails.  Then CCC will not be launched.
+
+=== Transitions
+The Composed Task Runner supports the ability to control what tasks get
+executed based on the `ExitStatus` of the previous task.  This is
+done by specifying `ExitStatus` after the task definition followed by
+the `->` operator and the task definition that should be launched based on
+the result.  For example:
+```
+AAA 'FAILED' -> BBB 'COMPLETED' -> CCC
+```
+image::{image-root}/basictransition.png[basic transition]
+
+Will launch AAA and if AAA fails then BBB will be launched.  Else if AAA
+completes successfully then CCC will launch.
+
+You can also have a sequence that follows a transition.  For example:
+```
+AAA 'FAILED' -> BBB && CCC && DDD
+```
+image::{image-root}/basictransitionwithsequence.png[basic transition with sequence]
+
+Will launch AAA and for any `ExitStatus` that is returned other than 'FAILED' then
+CCC && DDD  will be launched.  However if AAA returns 'FAILED' then BBB will
+be launched, but CCC && DDD will not.
+
+==== Wildcard
+Wildcards are also supported in transitions.
+For example:
+```
+AAA 'FAILED' -> BBB '*'->CCC
+```
+image::{image-root}/basictransitionwithwildcard.png[basic transition with wildcard]
+
+In the case above AAA will launch and any `ExitStatus` other than FAILED will
+launch CCC.
+
+=== Splits
+Allows a user to execute tasks in parallel.
+For example:
+```
+<AAA || BBB || CCC>
+```
+image::{image-root}/basicsplit.png[basic split]
+
+Will launch AAA, BBB and CCC in parallel.   When launching splits as a part of a
+composed task all elements of the split must finish successfully before the
+next task definition can be launched for example:
+```
+<AAA || BBB || CCC> && DDD && EEE
+```
+image::{image-root}/basicsplitwithsequence.png[basic split with sequence]
+
+In the case above once AAA, BBB and CCC complete sucessfully then DDD and EEE
+will be launched in the sequence enumerated above.  However if one of the task
+definitions fails in the split then DDD and EEE will not fire.  For example if
+BBB fails then AAA and CCC will be marked successful and BBB will be marked a
+failure and DDD and EEE will not be launched.
+
+== Configuration
+
+See the [Configuring Composed Task Runner](https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#spring-cloud-dataflow-composed-tasks) in the Spring Cloud Data Flow reference guide.

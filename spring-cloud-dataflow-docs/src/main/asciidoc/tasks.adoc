@@ -543,19 +543,9 @@ Spring Cloud Data Flow lets you create a directed graph, where each node of the 
 This is done by using the DSL for composed tasks.
 You can create a composed task through the RESTful API, the Spring Cloud Data Flow Shell, or the Spring Cloud Data Flow UI.
 
-=== Configuring the Composed Task Runner
+=== The Composed Task Runner
 
-Composed tasks are run through a task application called the Composed Task Runner.
-
-==== Registering the Composed Task Runner
-
-By default, Spring Cloud Data Flow retrieves the composed task runner application from
-Maven Central for Cloud Foundry and local deployments and DockerHub for Kubernetes.  It
-retrieves the composed task runner upon the first use of composed tasks.
-
-If Maven Central or DockerHub cannot be reached for a given Spring Cloud Data Flow
-deployment, you can specify a new URI from which to retrieve the composed task runner by setting the
-`spring.cloud.dataflow.task.composedtaskrunner.uri` property.
+Composed tasks are run through a task application called the Composed Task Runner. The Spring Cloud Data Flow server automatically deploys the Composed Task Runner when launching a composed task.
 
 ==== Configuring the Composed Task Runner
 
