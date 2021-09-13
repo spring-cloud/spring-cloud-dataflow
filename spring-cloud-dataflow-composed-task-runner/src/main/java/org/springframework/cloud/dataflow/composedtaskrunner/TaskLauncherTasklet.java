@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,11 @@ import org.springframework.web.client.RestTemplate;
  * @author Glenn Renfro
  */
 public class TaskLauncherTasklet implements Tasklet {
+	final static String IGNORE_EXIT_MESSAGE = "IGNORE_EXIT_MESSAGE";
+
+	final static String IGNORE_EXIT_MESSAGE_PROPERTY = "ignoreExitMessage";
+
+	final static String IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN = "ignore-exit-message";
 
 	private ComposedTaskProperties composedTaskProperties;
 
@@ -170,6 +176,10 @@ public class TaskLauncherTasklet implements Tasklet {
 			this.executionId = taskOperations.launch(tmpTaskName,
 					this.properties, args);
 
+			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
+			if (ignoreExitMessage != null) {
+				stepExecutionContext.put(IGNORE_EXIT_MESSAGE, ignoreExitMessage);
+			}
 			stepExecutionContext.put("task-execution-id", executionId);
 			stepExecutionContext.put("task-arguments", args);
 		}
@@ -282,5 +292,58 @@ public class TaskLauncherTasklet implements Tasklet {
 		if (!StringUtils.hasText(password) && StringUtils.hasText(userName)) {
 			throw new IllegalArgumentException("A username may be specified only together with a password");
 		}
+	}
+
+	private Boolean isIgnoreExitMessage(List<String> args, Map<String, String> properties) {
+		Boolean result = null;
+		if (properties != null) {
+			for (String key : properties.keySet()) {
+				if (key.contains(IGNORE_EXIT_MESSAGE_PROPERTY)) {
+					if (properties.get(key).toLowerCase().equals("true")) {
+						result = true;
+						break;
+					}
+				}
+				else if (key.contains(IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN)) {
+					if (properties.get(key).toLowerCase().equals("true")) {
+						result = true;
+						break;
+					}
+				}
+			}
+		}
+		if (args != null) {
+			for (String arg : args) {
+				Boolean commandLineResult = isIgnoreExitMessageSetInCmdLine(arg);
+				if(commandLineResult != null) {
+					result = commandLineResult;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
+	private Boolean isIgnoreExitMessageSetInCmdLine(String commandLine) {
+		Boolean result = null;
+		String[] parsedCommandLine = StringUtils.delimitedListToStringArray(commandLine, " ");
+		List<String> args = Arrays.asList(parsedCommandLine);
+		for (String arg : args) {
+			if (arg.contains(IGNORE_EXIT_MESSAGE_PROPERTY)
+					|| arg.contains(IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN)) {
+				int firstEquals = arg.indexOf('=');
+				if (firstEquals != -1) {
+					// todo: should key only be a "flag" as in: put(key, true)?
+					String val = arg.substring(firstEquals + 1).trim();
+					if (val.toLowerCase().equals("true")) {
+						result = true;
+						break;
+					} else {
+						result = false;
+					}
+				}
+			}
+		}
+		return result;
 	}
 }
