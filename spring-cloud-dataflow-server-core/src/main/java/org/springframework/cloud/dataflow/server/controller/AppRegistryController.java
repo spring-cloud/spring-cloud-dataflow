@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,6 +54,7 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -62,6 +64,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -224,21 +227,27 @@ public class AppRegistryController {
 	 * @param uri URI for the module artifact (e.g. {@literal maven://group:artifact:version})
 	 * @param metadataUri URI for the metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @param artefactValidation if {@code true},checks the URI artefact existence.
 	 */
 	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(value = "force", defaultValue = "false") boolean force,
+			@RequestParam(value = "artefact-validation", defaultValue = "false") boolean artefactValidation) {
 
 		validateApplicationName(name);
-		appRegistryService.validate(appRegistryService.getDefaultApp(name, type), uri, version);
-		AppRegistration previous = appRegistryService.find(name, type, version);
+		this.appRegistryService.validate(this.appRegistryService.getDefaultApp(name, type), uri, version);
+
+		AppRegistration previous = this.appRegistryService.find(name, type, version);
 		if (!force && previous != null) {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
+			if (artefactValidation && !isMetadataResourceExists(type, name, version, uri, metadataUri)) {
+				throw new NonExistingApplicationArtefactException(metadataUri != null ? metadataUri :  uri);
+			}
 			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
 					metadataUri != null ? new URI(metadataUri) : null);
 			prefetchMetadata(Arrays.asList(registration));
@@ -248,14 +257,24 @@ public class AppRegistryController {
 		}
 	}
 
+	private boolean isMetadataResourceExists(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
+			@PathVariable("version") String version,
+			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri) throws URISyntaxException {
+
+		return this.metadataResolver.isMetadataResourceExists(
+				this.appRegistryService.getAppMetadataResource(
+						new AppRegistration(name, type, version, new URI(uri), metadataUri != null ? new URI(metadataUri) : null)));
+	}
+
 	@Deprecated
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(value = "force", defaultValue = "false") boolean force,
+			@RequestParam(value = "artefact-validation", defaultValue = "false") boolean artefactValidation) {
 		String version = this.appRegistryService.getResourceVersion(uri);
-		this.register(type, name, version, uri, metadataUri, force);
+		this.register(type, name, version, uri, metadataUri, force, artefactValidation);
 	}
 
 	/**
@@ -409,7 +428,8 @@ public class AppRegistryController {
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
 			@RequestParam(value = "uri", required = false) String uri,
 			@RequestParam(value = "apps", required = false) String apps,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(value = "force", defaultValue = "false") boolean force,
+			@RequestParam(value = "artefact-validation", defaultValue = "false") boolean artefactValidation) {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {
@@ -422,10 +442,40 @@ public class AppRegistryController {
 
 		Collections.sort(registrations);
 		prefetchMetadata(registrations);
+
+		if (artefactValidation) {
+
+			// Filter in all registration that have URIs pointing to non-existing artefacts.
+			List<AppRegistration> nonExistentArtifacts = registrations.stream()
+					.filter(reg -> !this.metadataResolver.isMetadataResourceExists(
+							this.appRegistryService.getAppMetadataResource(reg)))
+					.collect(Collectors.toList());
+
+			if (!CollectionUtils.isEmpty(nonExistentArtifacts)) {
+				// Unregister the incorrect registrations.
+				this.appRegistryService.deleteAll(nonExistentArtifacts);
+
+				// Report back only the failed registrations.
+				List<String> nonExistentArtifactUris = nonExistentArtifacts.stream()
+						.map(this.appRegistryService::getAppMetadataResource)
+						.map(this::resourceToStringUri)
+						.collect(Collectors.toList());
+				throw new NonExistingApplicationArtefactException(nonExistentArtifactUris);
+			}
+		}
+
 		return pagedResourcesAssembler.toModel(new PageImpl<>(registrations, pageable, registrations.size()),
 				this.appRegistryAssembler);
 	}
 
+	private String resourceToStringUri(Resource resource) {
+		try {
+			return resource.getURI().toString();
+		}
+		catch (IOException e) {
+			return "Wrong uri";
+		}
+	}
 	/**
 	 * Trigger early resolution of the metadata resource of registrations that have an
 	 * explicit metadata artifact. This assumes usage of

@@ -251,9 +251,10 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 					"type" }, help = "the type for the registered application") ApplicationType type,
 			@CliOption(mandatory = true, key = { "uri" }, help = "URI for the application artifact") String uri,
 			@CliOption(key = { "metadata-uri" }, help = "Metadata URI for the application artifact") String metadataUri,
-			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force,
+			@CliOption(key = "artefact-validation", help = "checks if the app URI represents an existing artefact", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean artefactValidation) {
 
-		appRegistryOperations().register(name, type, uri, metadataUri, force);
+		appRegistryOperations().register(name, type, uri, metadataUri, force, artefactValidation);
 
 		return String.format(("Successfully registered application '%s:%s'"), type, name);
 	}
@@ -335,14 +336,15 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 	public String importFromResource(
 			@CliOption(mandatory = true, key = { "", "uri" }, help = "URI for the properties file") String uri,
 			@CliOption(key = "local", help = "whether to resolve the URI locally (as opposed to on the server)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean local,
-			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force,
+			@CliOption(key = "artefact-validation", help = "checks if the app URI represents an existing artefact", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean artefactValidation) {
 		if (local) {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
 				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
 				PagedModel<AppRegistrationResource> registered = null;
 				try {
-					registered = appRegistryOperations().registerAll(applications, force);
+					registered = appRegistryOperations().registerAll(applications, force, artefactValidation);
 				}
 				catch (Exception e) {
 					return "Error when registering applications from " + uri + ": " + e.getMessage();
@@ -358,7 +360,7 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 			}
 		}
 		else {
-			PagedModel<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force);
+			PagedModel<AppRegistrationResource> registered = appRegistryOperations().importFromResource(uri, force, artefactValidation);
 			return String.format("Successfully registered %d applications from '%s'",
 					registered.getMetadata().getTotalElements(), uri);
 		}

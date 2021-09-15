@@ -31,6 +31,7 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryException;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
@@ -40,7 +41,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -86,6 +89,22 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
+	public void appDockerResourceExistences() throws IOException {
+		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
+				"apps/no-visible-properties/META-INF/spring-configuration-metadata.json", getClass())
+				.getInputStream());
+		when(containerImageMetadataResolver.getImageLabels("test/test:latest"))
+				.thenReturn(Collections.singletonMap(
+						"org.springframework.cloud.dataflow.spring-configuration-metadata.json",
+						new String(bytes)));
+		when(containerImageMetadataResolver.getImageLabels("test/test-non-existing:latest"))
+				.thenThrow(new ContainerRegistryException("Not existing"));
+
+		assertTrue(resolver.isMetadataResourceExists(new DockerResource("test/test:latest")));
+		assertFalse(resolver.isMetadataResourceExists(new DockerResource("test/test-non-existing:latest")));
+	}
+
+	@Test
 	public void appDockerResourceBrokenFormat() {
 		byte[] bytes = "Invalid metadata json content1".getBytes();
 		Map<String, String> result = Collections.singletonMap(
@@ -95,6 +114,12 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new DockerResource("test/test:latest"));
 		assertThat(properties.size(), is(0));
+	}
+
+	@Test
+	public void appJarResourceExistences() {
+		assertTrue(resolver.isMetadataResourceExists(new ClassPathResource("apps/filter-processor", getClass())));
+		assertFalse(resolver.isMetadataResourceExists(new ClassPathResource("apps/filter-processor-non-existing", getClass())));
 	}
 
 	@Test

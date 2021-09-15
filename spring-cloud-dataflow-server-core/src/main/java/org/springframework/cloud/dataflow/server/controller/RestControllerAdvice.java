@@ -93,14 +93,16 @@ public class RestControllerAdvice {
 	 * Log the exception message at warn level and stack trace as trace level. Return
 	 * response status HttpStatus.CONFLICT
 	 *
-	 * @param e one of the exceptions, {@link AppAlreadyRegisteredException},
+	 * @param e one of the exceptions, {@link NonExistingApplicationArtefactException},
+	 * {@link AppAlreadyRegisteredException},
 	 * {@link DuplicateStreamDefinitionException}, {@link DuplicateTaskException},
 	 * {@link StreamAlreadyDeployedException}, {@link StreamAlreadyDeployingException}, or
 	 * {@link StreamAlreadyDeployingException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
+	@ExceptionHandler({ NonExistingApplicationArtefactException.class,
+			AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
 			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class,
 			UnregisterAppException.class, InvalidCTRLaunchRequestException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)

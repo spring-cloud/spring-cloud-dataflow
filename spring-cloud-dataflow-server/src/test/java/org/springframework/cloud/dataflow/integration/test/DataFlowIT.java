@@ -242,7 +242,7 @@ public class DataFlowIT {
 
 		// Maven app without metadata
 		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
-				"maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true);
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true, false);
 		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
 				.info("maven-app-without-metadata", ApplicationType.sink, false);
 		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
@@ -258,21 +258,21 @@ public class DataFlowIT {
 
 		// Docker app with container image metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
-				"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
+				"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true, false);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
 
 		// Docker app with container image metadata with escape characters.
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,
-				"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
+				"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true, false);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadataWithEscapeChars.getOptions()).hasSize(6);
 
 		// Docker app without metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-without-metadata", ApplicationType.sink,
-				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true);
+				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE", null, true, false);
 		DetailedAppRegistrationResource dockerAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-without-metadata", ApplicationType.sink, false);
 		assertThat(dockerAppWithoutMetadata.getOptions()).hasSize(0);
@@ -280,7 +280,7 @@ public class DataFlowIT {
 		// Docker app with jar metadata
 		dataFlowOperations.appRegistryOperations().register("docker-app-with-jar-metadata", ApplicationType.sink,
 				"docker:springcloudstream/file-sink-kafka:2.1.1.RELEASE",
-				"maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE", true);
+				"maven://org.springframework.cloud.stream.app:file-sink-kafka:jar:metadata:2.1.1.RELEASE", true, false);
 		DetailedAppRegistrationResource dockerAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-jar-metadata", ApplicationType.sink, false);
 		assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
@@ -318,7 +318,7 @@ public class DataFlowIT {
 
 		// Docker app with container image metadata
 		dataFlowOperations.appRegistryOperations().register(appName, ApplicationType.sink,
-				appUrl, null, true);
+				appUrl, null, true, false);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info(appName, ApplicationType.sink, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(3);
@@ -1667,7 +1667,7 @@ public class DataFlowIT {
 				try {
 					appRegistryOperations.register("timestamp", ApplicationType.task,
 							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
-							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE", false);
+							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE", false, false);
 				}
 				catch (DataFlowClientException dfe) {
 					logger.info(dfe.getMessage(), dfe);
@@ -1677,7 +1677,7 @@ public class DataFlowIT {
 				try {
 					appRegistryOperations.register("timestamp", ApplicationType.task,
 							"docker:springcloudtask/timestamp-task:2.1.0.RELEASE",
-							null, false);
+							null, false, false);
 				}
 				catch (DataFlowClientException dfe) {
 					logger.info(dfe.getMessage(), dfe);

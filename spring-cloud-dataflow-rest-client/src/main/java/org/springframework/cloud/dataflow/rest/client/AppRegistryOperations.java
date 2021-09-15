@@ -80,9 +80,10 @@ public interface AppRegistryOperations {
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @param artefactValidation if {@code true}, checks if the (metadata) URI refers a valid artefact.
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
+	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force, boolean artefactValidation);
 
 	/**
 	 * Register an application name, type and version with its Maven coordinates.
@@ -93,10 +94,11 @@ public interface AppRegistryOperations {
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
+	 * @param artefactValidation if {@code true}, checks if the (metadata) URI refers a valid aretefact.
 	 * @return the new app registration
 	 */
 	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
-			String metadataUri, boolean force);
+			String metadataUri, boolean force, boolean artefactValidation);
 
 	/**
 	 * Unregister an application name and type.
@@ -133,9 +135,10 @@ public interface AppRegistryOperations {
 	 *
 	 * @param uri URI for the properties file
 	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 * @param artefactValidation if {@code true}, the existence of the app artifact is validated.
 	 * @return the paged list of new app registrations
 	 */
-	PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force);
+	PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force, boolean artefactValidation);
 
 
 	/**
@@ -143,8 +146,9 @@ public interface AppRegistryOperations {
 	 *
 	 * @param apps the apps as key/value pairs where key is "type.name" and value is a URI
 	 * @param force if {@code true}, overwrites any pre-existing registrations
+	 * @param artefactValidation if {@code true}, the existence of the app artifact is validated.
 	 * @return the paged list of new app registrations
 	 */
-	PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force);
+	PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force, boolean artefactValidation);
 
 }

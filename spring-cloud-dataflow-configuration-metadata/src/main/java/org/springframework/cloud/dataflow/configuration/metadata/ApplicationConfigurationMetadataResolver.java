@@ -62,6 +62,18 @@ public abstract class ApplicationConfigurationMetadataResolver {
 	 */
 	public abstract List<ConfigurationMetadataProperty> listProperties(Resource metadataResource, boolean exhaustive);
 
+	/**
+	 * Verifies if the app metadata resource exists.
+	 * @param app application to check existence for.
+	 * @return Returns true if the app resource exists or false otherwise.
+	 */
+	public abstract boolean isMetadataResourceExists(Resource app);
+
+	/**
+	 * Retrieves port names (if any) from the provided metadata resources
+	 * @param metadataResource Metadata to retrieve the port names from.
+	 * @return Returns list of port names grouped into inbound and outbound groups.
+	 */
 	public abstract Map<String, Set<String>> listPortNames(Resource metadataResource);
 
 	/**

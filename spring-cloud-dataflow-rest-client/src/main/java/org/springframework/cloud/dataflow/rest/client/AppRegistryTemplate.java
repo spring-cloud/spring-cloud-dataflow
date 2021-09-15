@@ -113,13 +113,14 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri,
-			boolean force) {
+			boolean force, boolean artefactValidation) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
 		values.add("uri", uri);
 		if (metadataUri != null) {
 			values.add("metadata-uri", metadataUri);
 		}
 		values.add("force", Boolean.toString(force));
+		values.add("artefact-validation", Boolean.toString(artefactValidation));
 
 		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}", values,
 				AppRegistrationResource.class, type, name);
@@ -127,28 +128,30 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
-			String metadataUri, boolean force) {
+			String metadataUri, boolean force, boolean artefactValidation) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		if (metadataUri != null) {
 			values.add("metadata-uri", metadataUri);
 		}
 		values.add("force", Boolean.toString(force));
+		values.add("artefact-validation", Boolean.toString(artefactValidation));
 
 		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}/{version}", values,
 				AppRegistrationResource.class, type, name, version);
 	}
 
 	@Override
-	public PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force) {
+	public PagedModel<AppRegistrationResource> importFromResource(String uri, boolean force, boolean artefactValidation) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		values.add("force", Boolean.toString(force));
+		values.add("artefact-validation", Boolean.toString(artefactValidation));
 		return restTemplate.postForObject(appsLink.getHref(), values, AppRegistrationResource.Page.class);
 	}
 
 	@Override
-	public PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force) {
+	public PagedModel<AppRegistrationResource> registerAll(Properties apps, boolean force, boolean artefactValidation) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		StringBuffer buffer = new StringBuffer();
 		for (String key : apps.stringPropertyNames()) {
@@ -156,6 +159,7 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 		}
 		values.add("apps", buffer.toString());
 		values.add("force", Boolean.toString(force));
+		values.add("artefact-validation", Boolean.toString(artefactValidation));
 		return restTemplate.postForObject(appsLink.getHref(), values, AppRegistrationResource.Page.class);
 	}
 

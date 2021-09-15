@@ -167,13 +167,7 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	public List<ConfigurationMetadataProperty> listProperties(Resource app, boolean exhaustive) {
 		try {
 			if (app != null) {
-				if (isDockerSchema(app.getURI())) {
-					return resolvePropertiesFromContainerImage(app.getURI());
-				}
-				else {
-					Archive archive = resolveAsArchive(app);
-					return listProperties(archive, exhaustive);
-				}
+				return listPropertiesOrThrowException(app, exhaustive);
 			}
 		}
 		catch (Exception e) {
@@ -182,10 +176,27 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			if (logger.isDebugEnabled()) {
 				logger.debug("(Details) for failed to retrieve properties for resource:" + app, e);
 			}
-			return Collections.emptyList();
 		}
-
 		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean isMetadataResourceExists(Resource app) {
+		if (app == null) {
+			return false;
+		}
+		try {
+			return listPropertiesOrThrowException(app, true) != null;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
+	private List<ConfigurationMetadataProperty> listPropertiesOrThrowException(Resource app, boolean exhaustive) throws Exception {
+		return isDockerSchema(app.getURI()) ?
+				resolvePropertiesFromContainerImage(app.getURI()) :
+				listProperties(resolveAsArchive(app), exhaustive);
 	}
 
 	@Override
