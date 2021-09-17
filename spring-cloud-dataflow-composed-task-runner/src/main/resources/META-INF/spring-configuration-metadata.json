@@ -114,6 +114,12 @@
       "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
     },
     {
+      "name": "transaction-isolation-level",
+      "type": "java.lang.String",
+      "description": "Establish the transaction isolation level for the Composed Task Runner.  Default is ISOLATION_REPEATABLE_READ",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties"
+    },
+    {
       "name": "skip-tls-certificate-verification",
       "type": "java.lang.Boolean",
       "description": "If true skips SSL certificate validation for SCDF server communication.",

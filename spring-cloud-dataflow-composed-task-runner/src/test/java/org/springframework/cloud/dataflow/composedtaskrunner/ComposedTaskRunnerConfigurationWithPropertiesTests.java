@@ -59,6 +59,7 @@ import static org.mockito.Mockito.verify;
 @TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
 		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
+		"transaction-isolation-level=ISOLATION_READ_COMMITTED",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithPropertiesTests {
@@ -99,6 +100,8 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
 		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
 		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
+		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_READ_COMMITTED");
+
 		List<String> args = new ArrayList<>(1);
 		args.add("--baz=boo --foo=bar");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");

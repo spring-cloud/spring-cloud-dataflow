@@ -578,6 +578,11 @@ Set this option to `true` when running multiple instances of the same composed t
 The amount of time, in milliseconds, that the `ComposedTaskRunner` waits between checks of the database to see if a task has completed. (Integer, default: `10000`).
 `ComposedTaskRunner` uses the datastore to determine the status of each child tasks. This interval indicates to `ComposedTaskRunner` how often it should check the status its child tasks.
 
+* `transaction-isolation-level`
+Establish the transaction isolation level for the Composed Task Runner.
+A list of available transaction isolation levels can be found  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/TransactionDefinition.html[here].
+Default is `ISOLATION_REPEATABLE_READ`.
+
 * `max-wait-time`
 The maximum amount of time, in milliseconds, that an individual step can run before the execution of the Composed task is failed (Integer, default: 0).
 Determines the maximum time each child task is allowed to run before the CTR ends with a failure. The default of `0` indicates no timeout.

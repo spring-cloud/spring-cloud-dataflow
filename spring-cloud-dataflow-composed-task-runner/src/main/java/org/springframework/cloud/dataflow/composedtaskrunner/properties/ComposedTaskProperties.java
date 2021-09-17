@@ -199,6 +199,12 @@ public class ComposedTaskProperties {
 	 */
 	private boolean skipTlsCertificateVerification = false;
 
+	/**
+	 * Establish the transaction isolation level for the Composed Task Runner.
+	 * Default is ISOLATION_REPEATABLE_READ.
+	 */
+	private String transactionIsolationLevel = "ISOLATION_REPEATABLE_READ";
+
 	public ComposedTaskProperties() {
 		try {
 			this.dataflowServerUri = new URI("http://localhost:9393");
@@ -406,5 +412,13 @@ public class ComposedTaskProperties {
 
 	public void setUuidInstanceEnabled(boolean uuIdInstanceEnabled) {
 		this.uuidInstanceEnabled = uuIdInstanceEnabled;
+	}
+
+	public String getTransactionIsolationLevel() {
+		return transactionIsolationLevel;
+	}
+
+	public void setTransactionIsolationLevel(String transactionIsolationLevel) {
+		this.transactionIsolationLevel = transactionIsolationLevel;
 	}
 }

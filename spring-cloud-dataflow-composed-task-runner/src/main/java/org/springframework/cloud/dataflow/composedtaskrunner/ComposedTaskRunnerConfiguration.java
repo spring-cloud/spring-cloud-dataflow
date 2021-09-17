@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,22 +45,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Import(org.springframework.cloud.dataflow.composedtaskrunner.StepBeanDefinitionRegistrar.class)
 public class ComposedTaskRunnerConfiguration {
 
-	@Autowired
-	private ComposedTaskProperties properties;
-
 	@Bean
 	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorer taskExplorer){
 		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorer);
 	}
 
 	@Bean
-	public org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory composedTaskJob() {
+	public org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory composedTaskJob(ComposedTaskProperties properties) {
 
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory(this.properties);
+		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory(properties);
 	}
 
 	@Bean
-	public TaskExecutor taskExecutor() {
+	public TaskExecutor taskExecutor(ComposedTaskProperties properties) {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 		taskExecutor.setCorePoolSize(properties.getSplitThreadCorePoolSize());
 		taskExecutor.setMaxPoolSize(properties.getSplitThreadMaxPoolSize());
@@ -75,7 +71,10 @@ public class ComposedTaskRunnerConfiguration {
 	}
 
 	@Bean
-	public BatchConfigurer getComposedBatchConfigurer(BatchProperties properties, DataSource dataSource, TransactionManagerCustomizers transactionManagerCustomizers) {
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedBatchConfigurer(properties, dataSource, transactionManagerCustomizers);
+	public BatchConfigurer getComposedBatchConfigurer(BatchProperties properties,
+			DataSource dataSource, TransactionManagerCustomizers transactionManagerCustomizers,
+			ComposedTaskProperties composedTaskProperties) {
+		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedBatchConfigurer(properties,
+				dataSource, transactionManagerCustomizers, composedTaskProperties);
 	}
 }
