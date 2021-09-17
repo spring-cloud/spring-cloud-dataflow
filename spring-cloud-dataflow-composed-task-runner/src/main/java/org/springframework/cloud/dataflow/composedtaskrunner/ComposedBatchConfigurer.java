@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.boot.autoconfigure.batch.BasicBatchConfigurer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.SqlServerSequenceMaxValueIncrementer;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -42,7 +43,7 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
 import org.springframework.util.StringUtils;
 
 /**
- * A BatchConfigurer for CTR that will establish the transaction isolation lavel to READ_COMMITTED.
+ * A BatchConfigurer for CTR that will establish the transaction isolation level to ISOLATION_REPEATABLE_READ by default.
  *
  * @author Glenn Renfro
  */
@@ -54,6 +55,8 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 
 	private Map<String, DataFieldMaxValueIncrementer> incrementerMap;
 
+	private ComposedTaskProperties composedTaskProperties;
+
 	/**
 	 * Create a new {@link BasicBatchConfigurer} instance.
 	 *
@@ -62,10 +65,12 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 	 * @param transactionManagerCustomizers transaction manager customizers (or
 	 *                                      {@code null})
 	 */
-	protected ComposedBatchConfigurer(BatchProperties properties, DataSource dataSource, TransactionManagerCustomizers transactionManagerCustomizers) {
+	protected ComposedBatchConfigurer(BatchProperties properties, DataSource dataSource,
+			TransactionManagerCustomizers transactionManagerCustomizers, ComposedTaskProperties composedTaskProperties) {
 		super(properties, dataSource, transactionManagerCustomizers);
 		this.incrementerDataSource = dataSource;
 		incrementerMap = new HashMap<>();
+		this.composedTaskProperties = composedTaskProperties;
 	}
 
 	protected JobRepository createJobRepository() {
@@ -85,7 +90,7 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 		factory.setIncrementerFactory(incrementerFactory);
 		factory.setDataSource(this.incrementerDataSource);
 		factory.setTransactionManager(this.getTransactionManager());
-		factory.setIsolationLevelForCreate("ISOLATION_REPEATABLE_READ");
+		factory.setIsolationLevelForCreate(this.composedTaskProperties.getTransactionIsolationLevel());
 		try {
 			factory.afterPropertiesSet();
 			return factory.getObject();

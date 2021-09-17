@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
+import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
@@ -42,6 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -66,6 +68,9 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 	@Autowired
 	private ApplicationContext context;
 
+	@Autowired
+	private ComposedTaskProperties composedTaskProperties;
+
 	@Test
 	@DirtiesContext
 	public void testComposedConfiguration() throws Exception {
@@ -75,6 +80,7 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 		TaskOperations taskOperations = mock(TaskOperations.class);
 		ReflectionTestUtils.setField(ctrStep.getTasklet(), "taskOperations", taskOperations);
 		job.execute(jobExecution);
+		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_REPEATABLE_READ");
 
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(taskOperations).launch("AAA", new HashMap<>(0), new ArrayList<>(0));
