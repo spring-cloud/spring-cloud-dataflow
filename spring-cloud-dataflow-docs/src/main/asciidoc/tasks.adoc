@@ -773,25 +773,6 @@ Launched task 'my-composed-task'
 ----
 ====
 
-===== Launching a Composed Task by using a Custom Composed Task Runner
-
-In some cases, you need to launch a composed task by using a custom version of a composed task runner other than the default application that is shipped out-of-the-box.
-To do this, you need to register the custom version of the composed task runner and then specify the `composedTaskRunnerName` property to point to the custom application at task launch, as follows:
-
-====
-[source,bash,options="nowrap"]
-----
-dataflow:>app register --name best-ctr --type task --uri maven://the.best.ctr.composed-task-runner:1.0.0.RELEASE
-
-dataflow:>task create mycomposedtask --definition "te:timestamp &&  tr:timestamp"
-Created new task 'mycomposedtask'
-
-dataflow:>task launch --name mycomposedtask --composedTaskRunnerName best-ctr
-----
-====
-
-NOTE: The application specified by the  `composedTaskRunnerName` needs to be a task registered in the Application Registry.
-
 ===== Exit Statuses
 
 The following list shows how the exit status is set for each step (task) contained in the composed task following each step execution:
