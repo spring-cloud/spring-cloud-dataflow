@@ -31,6 +31,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -111,7 +112,10 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 						.start(createFlow())
 						.end())
 				.end();
-		if(this.incrementInstanceEnabled) {
+		if(this.incrementInstanceEnabled && !this.composedTaskProperties.isUuidInstanceEnabled()) {
+			builder.incrementer(new RunIdIncrementer());
+		}
+		else if(this.composedTaskProperties.isUuidInstanceEnabled()) {
 			builder.incrementer(new UuidIncrementer());
 		}
 		return builder.build();

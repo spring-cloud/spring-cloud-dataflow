@@ -34,6 +34,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.BeanCreationException;
@@ -72,6 +73,15 @@ public class ComposedRunnerVisitorTests {
 	public void singleTest() {
 		setupContextForGraph("AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
+		assertThat(stepExecutions.size()).isEqualTo(1);
+		StepExecution stepExecution = stepExecutions.iterator().next();
+		assertThat(stepExecution.getStepName()).isEqualTo("AAA_0");
+	}
+
+	@Test
+	public void singleTestForuuIDIncrementer() {
+		setupContextForGraph("AAA", "--uuIdInstanceEnabled=true");
+		Collection<StepExecution> stepExecutions = getStepExecutions(true);
 		assertThat(stepExecutions.size()).isEqualTo(1);
 		StepExecution stepExecution = stepExecutions.iterator().next();
 		assertThat(stepExecution.getStepName()).isEqualTo("AAA_0");
@@ -379,6 +389,10 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	private Collection<StepExecution> getStepExecutions() {
+		return getStepExecutions(false);
+	}
+
+	private Collection<StepExecution> getStepExecutions(boolean isCTR) {
 		JobExplorer jobExplorer = this.applicationContext.getBean(JobExplorer.class);
 		List<JobInstance> jobInstances = jobExplorer.findJobInstancesByJobName("job", 0, 1);
 		assertThat(jobInstances.size()).isEqualTo(1);
@@ -386,6 +400,11 @@ public class ComposedRunnerVisitorTests {
 		List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
 		assertThat(jobExecutions.size()).isEqualTo(1);
 		JobExecution jobExecution = jobExecutions.get(0);
+		if(isCTR) {
+			assertThat(jobExecution.getJobParameters().getParameters().get("ctr.id")).isNotNull();
+		} else {
+			assertThat(jobExecution.getJobParameters().getParameters().get("run.id")).isEqualTo(new JobParameter(1L));
+		}
 		return jobExecution.getStepExecutions();
 	}
 

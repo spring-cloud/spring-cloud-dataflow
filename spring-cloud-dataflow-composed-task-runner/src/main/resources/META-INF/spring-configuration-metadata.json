@@ -58,9 +58,16 @@
     {
       "name": "increment-instance-enabled",
       "type": "java.lang.Boolean",
-      "description": "Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters. Default is false which means a ComposedTaskRunner instance can only be executed once with a given set of parameters, if true it can be re-executed.",
+      "description": "Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters using a incremented id from previous execution. Default is true. ",
       "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
       "defaultValue": true
+    },
+    {
+      "name": "uuid-instance-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Allows a single ComposedTaskRunner instance to be re-executed without changing the parameters using a UUID for each launch. Default is false.  If set to true it overrides increment-instance-enabled property.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": false
     },
     {
       "name": "interval-time-between-checks",

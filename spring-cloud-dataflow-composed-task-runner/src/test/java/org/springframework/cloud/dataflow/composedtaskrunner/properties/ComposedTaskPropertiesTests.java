@@ -62,6 +62,12 @@ public class ComposedTaskPropertiesTests {
 		assertThat(properties.getDataflowServerPassword()).isEqualTo("bar");
 		assertThat(properties.getDataflowServerAccessToken()).isEqualTo("foobar");
 		assertThat(properties.isSkipTlsCertificateVerification()).isTrue();
+		assertThat(properties.isIncrementInstanceEnabled()).isTrue();
+		assertThat(properties.isUuidInstanceEnabled()).isFalse();
+		properties.setUuidInstanceEnabled(true);
+		properties.setIncrementInstanceEnabled(false);
+		assertThat(properties.isIncrementInstanceEnabled()).isFalse();
+		assertThat(properties.isUuidInstanceEnabled()).isTrue();
 	}
 
 	@Test

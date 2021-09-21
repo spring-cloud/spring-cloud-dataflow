@@ -175,11 +175,19 @@ public class ComposedTaskProperties {
 
 	/**
 	 * Allows a single ComposedTaskRunner instance to be re-executed without
-	 * changing the parameters. Default is false which means a
-	 * ComposedTaskRunner instance can only be executed once with a given set
-	 * of parameters, if true it can be re-executed.
+	 * changing the parameters. It does this by applying a {@code run.id} with a sequential
+	 * number based on the {@code run.id} from the previous execution.   Default is true.
 	 */
+	@Deprecated
 	private boolean incrementInstanceEnabled = true;
+
+	/**
+	 * Allows a single ComposedTaskRunner instance to be re-executed without
+	 * changing the parameters. It does this by applying a {@code run.id} with a UUid.
+	 * Default is false. If set to true then this will override incrementInstanceEnabled.
+	 * Set this option to `true` when running multiple instances of the same composed task definition at the same time.
+	 */
+	private boolean uuidInstanceEnabled = false;
 
 	/**
 	 * The platform property that will be used for each task in the workflow when it is launched.
@@ -390,5 +398,13 @@ public class ComposedTaskProperties {
 
 	public void setSkipTlsCertificateVerification(boolean skipTlsCertificateVerification) {
 		this.skipTlsCertificateVerification = skipTlsCertificateVerification;
+	}
+
+	public boolean isUuidInstanceEnabled() {
+		return uuidInstanceEnabled;
+	}
+
+	public void setUuidInstanceEnabled(boolean uuIdInstanceEnabled) {
+		this.uuidInstanceEnabled = uuIdInstanceEnabled;
 	}
 }
