@@ -562,10 +562,17 @@ The `ComposedTaskRunner` task has the following options:
 The command line arguments to be used for each of the tasks. (String, default: <none>).
 
 * `increment-instance-enabled`
-Allows a single `ComposedTaskRunner` instance to be run again without changing the parameters. The default is `false`, which means a `ComposedTaskRunner` instance can be started only once with a given set of parameters. If `true` it can be re-started. (Boolean, default: `false`).
+Allows a single `ComposedTaskRunner` instance to be run again without changing the parameters by adding a incremented number job parameter based on `run.id` from the previous execution. (Boolean, default: `true`).
 ComposedTaskRunner is built by using https://github.com/spring-projects/spring-batch[Spring Batch]. As a result, upon a successful execution, the batch job is considered to be complete.
-To launch the same `ComposedTaskRunner` definition multiple times, you must set the `increment-instance-enabled` property to `true` or change the parameters for the definition for each launch.
+To launch the same `ComposedTaskRunner` definition multiple times, you must set  either `increment-instance-enabled` or `uuid-instance-enabled` property to `true` or change the parameters for the definition for each launch.
 When using this option, it must be applied for all task launches for the desired application, including the first launch.
+
+* `uuid-instance-enabled`
+Allows a single `ComposedTaskRunner` instance to be run again without changing the parameters by adding a UUID to the `ctr.id` job parameter. (Boolean, default: `false`).
+ComposedTaskRunner is built by using https://github.com/spring-projects/spring-batch[Spring Batch]. As a result, upon a successful execution, the batch job is considered to be complete.
+To launch the same `ComposedTaskRunner` definition multiple times, you must set  either `increment-instance-enabled` or `uuid-instance-enabled` property to `true` or change the parameters for the definition for each launch.
+When using this option, it must be applied for all task launches for the desired application, including the first launch. This option when set to true will override the value of `increment-instance-id`.
+Set this option to `true` when running multiple instances of the same composed task definition at the same time.
 
 * `interval-time-between-checks`
 The amount of time, in milliseconds, that the `ComposedTaskRunner` waits between checks of the database to see if a task has completed. (Integer, default: `10000`).
