@@ -91,6 +91,7 @@
 			<plugin>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+				<version>1.0.4-SNAPSHOT</version>
 				<configuration>
 					<storeFilteredMetadata>true</storeFilteredMetadata>
 					<metadataFilter>
