@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,9 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.boot.context.properties.source.ConfigurationProperty;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
@@ -62,9 +64,7 @@ import org.springframework.web.client.RestTemplate;
 public class TaskLauncherTasklet implements Tasklet {
 	final static String IGNORE_EXIT_MESSAGE = "IGNORE_EXIT_MESSAGE";
 
-	final static String IGNORE_EXIT_MESSAGE_PROPERTY = "ignoreExitMessage";
-
-	final static String IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN = "ignore-exit-message";
+	final static String IGNORE_EXIT_MESSAGE_PROPERTY = "ignore-exit-message";
 
 	private ComposedTaskProperties composedTaskProperties;
 
@@ -89,7 +89,6 @@ public class TaskLauncherTasklet implements Tasklet {
 	private TaskOperations taskOperations;
 
 	TaskProperties taskProperties;
-
 
 	public TaskLauncherTasklet(
 			ClientRegistrationRepository clientRegistrations,
@@ -296,53 +295,39 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	private Boolean isIgnoreExitMessage(List<String> args, Map<String, String> properties) {
 		Boolean result = null;
+
 		if (properties != null) {
-			for (String key : properties.keySet()) {
-				if (key.contains(IGNORE_EXIT_MESSAGE_PROPERTY)) {
-					if (properties.get(key).toLowerCase().equals("true")) {
-						result = true;
-						break;
-					}
-				}
-				else if (key.contains(IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN)) {
-					if (properties.get(key).toLowerCase().equals("true")) {
-						result = true;
-						break;
-					}
+			MapConfigurationPropertySource mapConfigurationPropertySource = new MapConfigurationPropertySource();
+			properties.entrySet().forEach(entrySet -> {
+				String key = entrySet.getKey();
+				key = key.substring(key.lastIndexOf(".") + 1);
+				mapConfigurationPropertySource.put(key, entrySet.getValue());
+			});
+			result = isIgnoreMessagePresent(mapConfigurationPropertySource);
+		}
+
+		if (args != null) {
+			MapConfigurationPropertySource mapConfigurationPropertySource = new MapConfigurationPropertySource();
+			for (String arg : args) {
+				int firstEquals = arg.indexOf('=');
+				if (firstEquals != -1) {
+					mapConfigurationPropertySource.put(arg.substring(0, firstEquals), arg.substring(firstEquals + 1).trim());
 				}
 			}
-		}
-		if (args != null) {
-			for (String arg : args) {
-				Boolean commandLineResult = isIgnoreExitMessageSetInCmdLine(arg);
-				if(commandLineResult != null) {
-					result = commandLineResult;
-					break;
-				}
+			Boolean argResult = isIgnoreMessagePresent(mapConfigurationPropertySource);
+			if (argResult != null) {
+				result = argResult;
 			}
 		}
 		return result;
 	}
 
-	private Boolean isIgnoreExitMessageSetInCmdLine(String commandLine) {
+	private Boolean isIgnoreMessagePresent(MapConfigurationPropertySource mapConfigurationPropertySource) {
 		Boolean result = null;
-		String[] parsedCommandLine = StringUtils.delimitedListToStringArray(commandLine, " ");
-		List<String> args = Arrays.asList(parsedCommandLine);
-		for (String arg : args) {
-			if (arg.contains(IGNORE_EXIT_MESSAGE_PROPERTY)
-					|| arg.contains(IGNORE_EXIT_MESSAGE_PROPERTY_HYPHEN)) {
-				int firstEquals = arg.indexOf('=');
-				if (firstEquals != -1) {
-					// todo: should key only be a "flag" as in: put(key, true)?
-					String val = arg.substring(firstEquals + 1).trim();
-					if (val.toLowerCase().equals("true")) {
-						result = true;
-						break;
-					} else {
-						result = false;
-					}
-				}
-			}
+		ConfigurationPropertyName ignoreExitMessage = ConfigurationPropertyName.of(IGNORE_EXIT_MESSAGE_PROPERTY);
+		ConfigurationProperty configurationProperty = mapConfigurationPropertySource.getConfigurationProperty(ignoreExitMessage);
+		if (configurationProperty != null) {
+			result = Boolean.valueOf((String)configurationProperty.getValue());
 		}
 		return result;
 	}
