@@ -88,8 +88,8 @@
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>3.0.2</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
-		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.3</spring-cloud-dataflow-apps-docs-plugin.version>
-		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.3</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.4</spring-cloud-dataflow-apps-docs-plugin.version>
+		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.4</spring-cloud-dataflow-apps-metadata-plugin.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-container-registry</module>
