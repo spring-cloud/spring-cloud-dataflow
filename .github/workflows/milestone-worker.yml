@@ -137,40 +137,13 @@ jobs:
         tag-release-tag: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
         tag-release-tag-prefix: v
 
-    # build image to local repo to get pushed
-    - name: Build Image
-      env:
-        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
-      run: |
-        pack build \
-          --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
-          --env BP_JVM_VERSION=8 springcloud/spring-cloud-skipper-server:$TAG-jdk8
-        pack build \
-          --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:0.1.99-base \
-          --env BP_JVM_VERSION=11 springcloud/spring-cloud-skipper-server:$TAG-jdk11
-        pack build \
-          --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
-          --env BP_JVM_VERSION=16 springcloud/spring-cloud-skipper-server:$TAG-jdk16
-
-    # docker hub login
-    - uses: docker/login-action@v1
+    # build and publish images via composite action
+    - name: Build and Publish Images
+      uses: ./.github/actions/build-images
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    # push image
-    - name: Push image
-      env:
-        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
-      run: |
-        docker push springcloud/spring-cloud-skipper-server:$TAG-jdk8
-        docker push springcloud/spring-cloud-skipper-server:$TAG-jdk11
-        docker tag springcloud/spring-cloud-skipper-server:$TAG-jdk11 springcloud/spring-cloud-skipper-server:$TAG
-        docker push springcloud/spring-cloud-skipper-server:$TAG
-        docker push springcloud/spring-cloud-skipper-server:$TAG-jdk16
+        version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+        dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
