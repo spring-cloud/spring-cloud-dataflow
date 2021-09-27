@@ -12,12 +12,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
-		<version>2.5.4</version>
+		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
+		<version>2.5.5</version>
 		<relativePath />
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-boot.version>2.5.4</spring-boot.version>
+		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
+		<spring-boot.version>2.5.5</spring-boot.version>
 		<spring-cloud.version>2020.0.3</spring-cloud.version>
 		<junit.version>4.13.1</junit.version>
 		<commons-io.version>2.7</commons-io.version>
