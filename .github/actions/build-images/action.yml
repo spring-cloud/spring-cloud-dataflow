@@ -22,7 +22,7 @@ runs:
       TAG: ${{ inputs.version }}
     shell: bash
     run: |
-      for v in 8 11 16
+      for v in 8 11 16 17
       do
         pack build \
           --path spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar \
@@ -43,7 +43,7 @@ runs:
     shell: bash
     run: |
       docker tag springcloud/spring-cloud-skipper-server:$TAG-jdk11 springcloud/spring-cloud-skipper-server:$TAG
-      for v in 8 11 16
+      for v in 8 11 16 17
       do
         docker push springcloud/spring-cloud-skipper-server:$TAG-jdk$v
       done
