@@ -44,7 +44,9 @@ services:
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         /cnb/process/web"
+         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
+         chmod a+x /tmp/wait-for-it.sh &&
+         /tmp/wait-for-it.sh mysql:3306 -- /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -63,7 +65,9 @@ services:
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         /cnb/process/web"
+         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
+         chmod a+x /tmp/wait-for-it.sh &&
+         /tmp/wait-for-it.sh mysql:3306 -- /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
