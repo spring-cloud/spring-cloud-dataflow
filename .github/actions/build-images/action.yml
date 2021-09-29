@@ -22,7 +22,7 @@ runs:
       TAG: ${{ inputs.version }}
     shell: bash
     run: |
-      for v in 8 11 16 17
+      for v in 8 11 17
       do
         pack build \
           --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
@@ -63,7 +63,7 @@ runs:
       docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk11 springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
       docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk11 springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
       docker tag springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk11 springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
-      for v in 8 11 16 17
+      for v in 8 11 17
       do
         docker push springcloud/spring-cloud-dataflow-server:$TAG-jdk$v
         docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk$v
