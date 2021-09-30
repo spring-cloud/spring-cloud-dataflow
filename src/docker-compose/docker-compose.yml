@@ -6,7 +6,7 @@ version: '3'
 # - HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
 #   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
 #   If not set DOCKER_MOUNT_PATH defaults to /home/cnb/scdf on dataflow-server and skipper containers.
-#   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2/repository/ DOCKER_MOUNT_PATH=/root/.m2  docker-compose up
+#   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2 DOCKER_MOUNT_PATH=/home/cnb/.m2  docker-compose up
 # - APPS_PORT_RANGE allows you to override the port range exported by the Skipper server. By default the APPS_PORT_RANGE
 #   must supersede the local deployer's PORTRANGE_LOW and PORTRANGE_HIGH - the ports assigned to the stream apps run inside the Skipper container.
 #   The stream apps tha run in their own docker containers must set [DOCKER_PORTRANGE_LOW, DOCKER_PORTRANGE_HIGH] range that
@@ -18,7 +18,7 @@ version: '3'
 # - 20000-20105:20000-20105 - Port range for all deployed stream applications that run inside the Skipper container (e.g. maven:// registered apps).
 #                             That means you can reach the application's actuator endpoints from your host machine.
 #                             The deployed stream applications that run in their own docker containers (e.g. docker:// registered apps),
-#                             can be reached on the the ports they expose.
+#                             can be reached on the ports they expose.
 services:
   mysql:
     image: mysql:5.7.25
@@ -54,6 +54,7 @@ services:
       - ZOOKEEPER_CLIENT_PORT=2181
 
   dataflow-server:
+    user: root
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.8.2-SNAPSHOT}
     container_name: dataflow-server
     ports:
@@ -65,6 +66,8 @@ services:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper:2181
 
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
+      # Set CLOSECONTEXTENABLED=true to ensure that the CRT launcher is closed.
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
 
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
 
@@ -116,6 +119,7 @@ services:
         echo 'Maven Task apps imported'"
 
   skipper-server:
+    user: root
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.7.2-SNAPSHOT}
     container_name: skipper
     ports:

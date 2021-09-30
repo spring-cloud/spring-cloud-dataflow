@@ -54,6 +54,7 @@ services:
       - ZOOKEEPER_CLIENT_PORT=2181
 
   dataflow-server:
+    user: root
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-@project.version@}
     container_name: dataflow-server
     ports:
@@ -65,6 +66,8 @@ services:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper:2181
 
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
+      # Set CLOSECONTEXTENABLED=true to ensure that the CRT launcher is closed.
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
 
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
 
@@ -116,6 +119,7 @@ services:
         echo 'Maven Task apps imported'"
 
   skipper-server:
+    user: root
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-@spring-cloud-skipper.version@}
     container_name: skipper
     ports:
