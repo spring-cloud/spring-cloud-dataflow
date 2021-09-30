@@ -59,6 +59,13 @@ public class DockerComposeFactoryProperties {
 	public static final String TEST_DOCKER_COMPOSE_DISABLE_EXTENSION = PREFIX + "disable.extension";
 
 	/**
+	 * Buildapck JVM version used for the DataFlow, Skipper, CRT launcher images.
+	 * If empty it defaults to the latest LTS version at the time of release.
+	 * The valid values are: <code>-jdk8</code>, <code>-jdk11</code> and <code>-jdk17</code>.
+	 */
+	public static final String TEST_DOCKER_COMPOSE_BP_JVM_VERSION = PREFIX + "bp.jvm.version.version";
+
+	/**
 	 * Change the DataFlow version to be installed. (e.g. 2.4.0.RELEASE or 2.4.1.BUILD-SNAPSHOT ...)
 	 */
 	public static final String TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN = PREFIX + "dataflow.version";

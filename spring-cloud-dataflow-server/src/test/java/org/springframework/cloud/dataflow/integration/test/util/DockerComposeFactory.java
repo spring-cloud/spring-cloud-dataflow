@@ -95,6 +95,8 @@ public class DockerComposeFactory {
 			.withAdditionalEnvironmentVariable("PLATFORM_TYPE", "local")
 			.withAdditionalEnvironmentVariable("DATAFLOW_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_URI, "http://dataflow-server:9393"))
+			.withAdditionalEnvironmentVariable("BP_JVM_VERSION",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_BP_JVM_VERSION, ""))
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("SKIPPER_URI",

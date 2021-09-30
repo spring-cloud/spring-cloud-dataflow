@@ -54,7 +54,7 @@ services:
       - ZOOKEEPER_CLIENT_PORT=2181
 
   dataflow-server:
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-@project.version@}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-@project.version@}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -111,7 +111,7 @@ services:
         echo 'Maven Task apps imported'"
 
   skipper-server:
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-@spring-cloud-skipper.version@}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-@spring-cloud-skipper.version@}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"
