@@ -989,7 +989,7 @@ public class DataFlowIT {
 				.build()) {
 
 			// task launch id
-			long launchId = task.launch();
+			long launchId = task.launch(Arrays.asList("--spring.cloud.task.closecontext_enabled=false"));
 
 			Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(1);
