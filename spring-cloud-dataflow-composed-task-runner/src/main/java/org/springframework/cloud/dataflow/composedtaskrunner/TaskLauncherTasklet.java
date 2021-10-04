@@ -30,8 +30,8 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.boot.context.properties.source.ConfigurationProperty;
-import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -323,12 +323,12 @@ public class TaskLauncherTasklet implements Tasklet {
 	}
 
 	private Boolean isIgnoreMessagePresent(MapConfigurationPropertySource mapConfigurationPropertySource) {
-		Boolean result = null;
-		ConfigurationPropertyName ignoreExitMessage = ConfigurationPropertyName.of(IGNORE_EXIT_MESSAGE_PROPERTY);
-		ConfigurationProperty configurationProperty = mapConfigurationPropertySource.getConfigurationProperty(ignoreExitMessage);
-		if (configurationProperty != null) {
-			result = Boolean.valueOf((String)configurationProperty.getValue());
+		Binder binder = new Binder(mapConfigurationPropertySource);
+		try {
+			return binder.bind(IGNORE_EXIT_MESSAGE_PROPERTY, Bindable.of(Boolean.class)).get();
+		} catch (Exception e) {
+			// error means we couldn't bind, caller seem to handle null
 		}
-		return result;
+		return null;
 	}
 }
