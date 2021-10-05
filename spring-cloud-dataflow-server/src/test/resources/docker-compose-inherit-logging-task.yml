@@ -1,7 +1,8 @@
 version: '3'
 
-  # Enable inherit-logging for all task applications. The logs from those apps are inlined within the
-  # parent Data Flow logs:
+# Enable inherit-logging for all task applications. The logs from those apps are inlined within the
+# parent Data Flow logs:
+services:
   dataflow-server:
     environment:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_INHERIT_LOGGING=true
