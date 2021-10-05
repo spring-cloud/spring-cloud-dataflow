@@ -109,6 +109,8 @@ public class DockerComposeFactory {
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)))
 			.withAdditionalEnvironmentVariable("DOCKER_DELETE_CONTAINER_ON_EXIT",
 					"" + DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT, true))
+			.withAdditionalEnvironmentVariable("TEST_DOCKER_COMPOSE_APPS_INHERIT_LOGGING",
+					"" + DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_INHERIT_LOGGING, false))
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_USER", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_USER", ""))
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_PASSWORD", ""))
 			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")

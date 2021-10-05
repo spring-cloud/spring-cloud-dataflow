@@ -113,6 +113,12 @@ public class DockerComposeFactoryProperties {
 
 	public static final String TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT = PREFIX + "waiting.for.service.format";
 
+	/**
+	 * When enabled it redirects the streaming and task applications logging to the logs of to the Data Flow
+	 * or Skipper logs instead.
+	 */
+	public static final String TEST_DOCKER_COMPOSE_APPS_INHERIT_LOGGING = PREFIX + "apps.inherit.logging";
+
 	public static boolean getBoolean(String propertyName, boolean defaultValue) {
 		String value = get(propertyName, "" + defaultValue);
 		return Boolean.valueOf(value);
