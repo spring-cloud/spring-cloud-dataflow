@@ -1,0 +1,8 @@
+version: '3'
+
+# Enable inherit-logging for all stream applications. The logs from those apps are inlined within the
+# parent Skipper logs.
+services:
+  skipper-server:
+    environment:
+      - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_INHERIT_LOGGING=true
