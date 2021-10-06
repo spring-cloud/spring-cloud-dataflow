@@ -33,10 +33,15 @@ services:
     environment:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
+      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (the ports reserved to be used
+      # by the stream , maven, apps running inside the Skipper container)! The APPS_PORT_RANGE are set
+      # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
+
       # Override the CTR form maven to docker
       - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
@@ -54,10 +59,11 @@ services:
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
-      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (e.g. the ports used by the stream apps running inside the Skipper container) !
+      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (the ports reserved to be used
+      # by the stream , maven, apps running inside the Skipper container)! The APPS_PORT_RANGE are set
+      # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
