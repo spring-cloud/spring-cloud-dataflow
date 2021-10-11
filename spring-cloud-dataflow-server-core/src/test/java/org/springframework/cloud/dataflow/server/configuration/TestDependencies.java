@@ -558,14 +558,16 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			SchedulerService schedulerService) {
+			SchedulerService schedulerService,
+			TaskConfigurationProperties taskConfigurationProperties) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
-				schedulerService);
+				schedulerService,
+				taskConfigurationProperties);
 	}
 
 	@Bean
