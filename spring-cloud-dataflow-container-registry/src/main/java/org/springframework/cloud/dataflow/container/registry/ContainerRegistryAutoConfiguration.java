@@ -149,7 +149,7 @@ public class ContainerRegistryAutoConfiguration {
 			}
 		}
 
-		logger.info("Final Registry Configurations: " + registryConfigurationMap);
+		logger.debug("Final Registry Configurations: " + registryConfigurationMap);
 
 		return registryConfigurationMap;
 	}
