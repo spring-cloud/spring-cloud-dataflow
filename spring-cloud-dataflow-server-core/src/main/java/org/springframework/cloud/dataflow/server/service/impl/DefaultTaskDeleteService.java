@@ -133,14 +133,14 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
 		if (!StringUtils.hasText(launchId)) {
-			logger.warn(String.format("Did not find External execution ID for taskName = [%s], taskId = [%s].  Nothing to clean up.",
-					taskExecution.getTaskName(), id));
+			logger.warn("Did not find External execution ID for taskName = [{}], taskId = [{}].  Nothing to clean up.",
+					taskExecution.getTaskName(), id);
 			return;
 		}
 		TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(launchId);
 		if (taskDeployment == null) {
-			logger.warn(String.format("Did not find TaskDeployment for taskName = [%s], taskId = [%s].  Nothing to clean up.",
-					taskExecution.getTaskName(), id));
+			logger.warn("Did not find TaskDeployment for taskName = [{}], taskId = [{}].  Nothing to clean up.",
+					taskExecution.getTaskName(), id);
 			return;
 		}
 		Launcher launcher = launcherRepository.findByName(taskDeployment.getPlatformName());
@@ -372,7 +372,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		try {
 			destroyPrimaryTask(taskDefinition.getTaskName());
 		}				catch (ObjectOptimisticLockingFailureException e) {
-			logger.warn(String.format("Attempted delete on task %s that is currently being deleted", taskDefinition.getTaskName()));
+			logger.warn("Attempted delete on task {} that is currently being deleted", taskDefinition.getTaskName());
 		}
 	}
 
@@ -414,11 +414,11 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			Launcher launcher = launcherIterator.next();
 			try {
 				launcher.getTaskLauncher().destroy(taskDefinition.getName());
-				logger.info(String.format("Deleted task app resources for %s in platform %s", taskDefinition.getName(), launcher.getName()));
+				logger.info("Deleted task app resources for {} in platform {}", taskDefinition.getName(), launcher.getName());
 				result = true;
 			}
 			catch (Exception ex) {
-				logger.info(String.format("Attempted delete of app resources for %s but none found on platform %s.", taskDefinition.getName(), launcher.getName()));
+				logger.info("Attempted delete of app resources for {} but none found on platform {}.", taskDefinition.getName(), launcher.getName());
 			}
 		}
 		return result;

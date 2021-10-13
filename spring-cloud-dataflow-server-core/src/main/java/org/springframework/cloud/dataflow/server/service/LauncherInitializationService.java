@@ -60,10 +60,10 @@ public class LauncherInitializationService {
 						launcher.getType());
 				launcher.setOptions(options);
 				this.launcherRepository.save(launcher);
-				logger.info(String.format(
-						"Added '%s' platform account '%s' into Task Launcher repository.",
+				logger.info(
+						"Added '{}' platform account '{}' into Task Launcher repository.",
 						platform.getName(),
-						launcher.getName()));
+						launcher.getName());
 			});
 		});
 	}

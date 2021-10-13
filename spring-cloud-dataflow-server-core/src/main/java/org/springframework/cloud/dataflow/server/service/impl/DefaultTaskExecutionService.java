@@ -824,7 +824,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);
 		taskLauncher.cancel(taskExecution.getExternalExecutionId());
-		logger.info(String.format("Task execution stop request for id %s for platform %s has been submitted", taskExecution.getExecutionId(), platformNameToUse));
+		logger.info("Task execution stop request for id {} for platform {} has been submitted", taskExecution.getExecutionId(), platformNameToUse);
 
 	}
 

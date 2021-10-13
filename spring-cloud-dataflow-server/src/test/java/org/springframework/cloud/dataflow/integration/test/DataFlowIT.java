@@ -226,7 +226,7 @@ public class DataFlowIT {
 	public void aboutTestInfo() {
 		logger.info("Available platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
 				.map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType())).collect(Collectors.joining()));
-		logger.info(String.format("Selected platform: [name: %s, type: %s]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType()));
+		logger.info("Selected platform: [name: {}, type: {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
 		logger.info("Wait until at least 60 apps are registered in SCDF");
 		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
