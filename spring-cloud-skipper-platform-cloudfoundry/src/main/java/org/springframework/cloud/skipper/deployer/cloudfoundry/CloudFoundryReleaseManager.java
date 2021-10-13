@@ -121,7 +121,7 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 						logger.warn("Unable to deploy application. It may have been destroyed before start completed: " + error.getMessage());
 					}
 					else {
-						logger.error(String.format("Failed to deploy %s", applicationName));
+						logger.error("Failed to deploy {}", applicationName);
 					}
 				})
 				.block();

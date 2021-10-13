@@ -196,8 +196,7 @@ public class CloudFoundryManifestApplicationDeployer {
 			appStatus = getStatus(applicationName, release.getPlatformName())
 					.doOnSuccess(v -> logger.info("Successfully computed status [{}] for {}", v,
 							applicationName))
-					.doOnError(e -> logger.error(
-							String.format("Failed to compute status for %s", applicationName)))
+					.doOnError(e -> logger.error("Failed to compute status for {}", applicationName))
 					.block();
 		}
 		catch (Exception timeoutDueToBlock) {
