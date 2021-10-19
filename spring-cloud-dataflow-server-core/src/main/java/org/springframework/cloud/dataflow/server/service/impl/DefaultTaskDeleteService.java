@@ -16,15 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +53,13 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.support.DatabaseType;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -77,6 +84,10 @@ import org.springframework.util.StringUtils;
 public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultTaskDeleteService.class);
+
+	private static final int SQL_SERVER_CHUNK_SIZE = 2098;
+
+	private static final int ORACLE_SERVER_CHUNK_SIZE = 998;
 
 	/**
 	 * Used to read TaskExecutions.
@@ -103,6 +114,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private int taskDeleteChunkSize;
 
+	private DataSource dataSource;
+
 	public DefaultTaskDeleteService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
@@ -111,7 +124,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSource dataSource) {
 		Assert.notNull(taskExplorer, "TaskExplorer must not be null");
 		Assert.notNull(launcherRepository, "LauncherRepository must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -121,6 +135,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
 		Assert.notNull(taskConfigurationProperties, "TaskConfigurationProperties must not be null");
+		Assert.notNull(dataSource, "DataSource must not be null");
+
 		this.taskExplorer = taskExplorer;
 		this.launcherRepository = launcherRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -131,6 +147,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.schedulerService = schedulerService;
 		this.taskDeleteChunkSize = taskConfigurationProperties.getExecutionDeleteChunkSize();
+		this.dataSource = dataSource;
 	}
 
 	@Override
@@ -289,26 +306,26 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted # of Task Executions", taskExecutionIdsWithChildren.size());
 		auditData.put("Deleted Task Execution IDs", StringUtils.collectionToDelimitedString(taskExecutionIdsWithChildren, ", "));
 
-		int numberOfDeletedTaskExecutionParamRows = 0;
-		int numberOfDeletedTaskTaskBatchRelationshipRows = 0;
-		int numberOfDeletedTaskManifestRows = 0;
-		int numberOfDeletedTaskExecutionRows = 0;
+		final AtomicInteger  numberOfDeletedTaskExecutionParamRows = new AtomicInteger(0);
+		final AtomicInteger  numberOfDeletedTaskTaskBatchRelationshipRows =  new AtomicInteger(0);
+		final AtomicInteger  numberOfDeletedTaskManifestRows =  new AtomicInteger(0);
+		final AtomicInteger  numberOfDeletedTaskExecutionRows =  new AtomicInteger(0);
 
-		int taskExecutionIdSize = taskExecutionIdsWithChildren.size();
-		if(this.taskDeleteChunkSize <= 0) {
-			numberOfDeletedTaskExecutionParamRows = this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren);
-			numberOfDeletedTaskTaskBatchRelationshipRows = this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren);
-			numberOfDeletedTaskManifestRows = this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdsWithChildren);
-			numberOfDeletedTaskExecutionRows = this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdsWithChildren);
+		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
+		if(chunkSize <= 0) {
+			numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren));
+			numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren));
+			numberOfDeletedTaskManifestRows.addAndGet(this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdsWithChildren));
+			numberOfDeletedTaskExecutionRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdsWithChildren));
 		}
 		else {
-			for (int groupCount = 0; groupCount < taskExecutionIdSize; groupCount += this.taskDeleteChunkSize) {
-				Set<Long> taskExecutionIdSubset = taskExecutionIdsWithChildren.stream().skip(groupCount).limit(this.taskDeleteChunkSize).collect(Collectors.toSet());
-				numberOfDeletedTaskExecutionParamRows += this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdSubset);
-				numberOfDeletedTaskTaskBatchRelationshipRows += this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdSubset);
-				numberOfDeletedTaskManifestRows += this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdSubset);
-				numberOfDeletedTaskExecutionRows += this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdSubset);
-			}
+			split(taskExecutionIdsWithChildren, chunkSize).stream().forEach( taskExecutionIdSubsetList -> {
+				Set<Long> taskExecutionIdSubset = new HashSet<>(taskExecutionIdSubsetList);
+				numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdSubset));
+				numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdSubset));
+				numberOfDeletedTaskManifestRows.addAndGet(this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdSubset));
+				numberOfDeletedTaskExecutionRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdSubset));
+			});
 		}
 
 		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
@@ -328,6 +345,41 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DELETE,
 				taskExecutionIdsWithChildren.size() + " Task Execution Delete(s)", auditData, null);
+	}
+
+	/**
+	 * Determines the maximum chunk size for a given database type.  If {@code taskDeleteChunkSize} is
+	 * greater than zero this overrides the chunk size for the specific database type.
+	 * If the database type has no fixed number of maximum elements allowed in the {@code IN} clause
+	 * then zero is returned.
+	 * @param dataSource the datasource used by data flow.
+	 * @return the chunk size to be used for deleting task executions.
+	 */
+	private int getTaskExecutionDeleteChunkSize(DataSource dataSource) {
+		int result = this.taskDeleteChunkSize;
+		if(this.taskDeleteChunkSize < 1) {
+			try {
+				DatabaseType databaseType = DatabaseType.fromMetaData(dataSource);
+				String name = databaseType.name();
+				if (name.equals("SQLSERVER")) {
+					result = SQL_SERVER_CHUNK_SIZE;
+				}
+				if (name.startsWith("ORACLE")) {
+					result = ORACLE_SERVER_CHUNK_SIZE;
+				}
+			}
+			catch (MetaDataAccessException mdae) {
+				logger.warn("Unable to retrieve metadata for database when deleting task executions", mdae);
+			}
+		}
+		return result;
+	}
+
+	static <T> Collection<List<T>> split(Collection<T> input, int max) {
+		final AtomicInteger count = new AtomicInteger(0);
+		return input.stream()
+				.collect(Collectors.groupingBy(s -> count.getAndIncrement() / max))
+				.values();
 	}
 
 	@Override

@@ -155,7 +155,8 @@ public class TaskConfiguration {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSource dataSource) {
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
@@ -163,7 +164,8 @@ public class TaskConfiguration {
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
 				this.schedulerService,
-				taskConfigurationProperties);
+				taskConfigurationProperties,
+				dataSource);
 	}
 
 	@Bean

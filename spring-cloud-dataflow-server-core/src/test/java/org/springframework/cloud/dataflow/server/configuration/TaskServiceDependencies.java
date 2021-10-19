@@ -286,7 +286,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			@Autowired(required = false) SchedulerService schedulerService,
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSource dataSource) {
 
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
@@ -295,7 +296,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
 				schedulerService,
-				taskConfigurationProperties);
+				taskConfigurationProperties,
+				dataSource);
 	}
 
 	@Bean
