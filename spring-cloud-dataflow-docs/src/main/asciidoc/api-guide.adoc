@@ -2048,6 +2048,11 @@ IMPORTANT: When deleting data from the persistence store by using the `REMOVE_DA
 task execution IDs that represent parent task executions. When you provide child task executions (executed as part of a composed task),
 a `400` (Bad Request) HTTP status is returned.
 
+NOTE: When deleting large number of task executions some database types limit the number of entries in the `IN` clause (the method Spring Cloud Data Flow uses to delete relationships for task executions).
+Spring Cloud Data Flow supports the chunking of deletes for Sql Server (Maximum 2100 entries) and Oracle DBs (Maximum 1000 entries).
+However, Spring Cloud Data Flow allows users to set their own chunking factor.  To do this set the `spring.cloud.dataflow.task.executionDeleteChunkSize` property to the appropriate chunk size.
+Default is `0` which means Spring Cloud Data Flow will not chunk the task execution deletes (except for Oracle and Sql Server databases).
+
 [[api-guide-resources-task-executions-current-count]]
 ==== Task Execution Current Count
 
