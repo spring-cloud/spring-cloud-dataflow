@@ -1,0 +1,59 @@
+#@ load("mysql.lib.yml", "name")
+#@ load("mysql.lib.yml", "username")
+#@ load("mysql.lib.yml", "password")
+#@ load("mysql.star", "image")
+#@ load("mysql.star", "has_image_pull_secrets")
+#@ load("mysql.star", "image_pull_secrets")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ name()
+  labels:
+    app: #@ name()
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ name()
+  template:
+    metadata:
+      labels:
+        app: #@ name()
+    spec:
+      containers:
+      - image: #@ image()
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mysql-root-password
+              name: #@ name()
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              key: mysql-user
+              name: #@ name()
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: mysql-password
+              name: #@ name()
+        - name: MYSQL_DATABASE
+          value: #@ name()
+        ports:
+        - containerPort: 3306
+          name: #@ name()
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+        args:
+        - "--ignore-db-dir=lost+found"
+      #@ if has_image_pull_secrets():
+      imagePullSecrets: #@ image_pull_secrets()
+      #@ end
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: #@ name()

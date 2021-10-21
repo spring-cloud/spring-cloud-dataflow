@@ -1,0 +1,81 @@
+#@ load("@ytt:data", "data")
+#@ load("skipper.star", "skipper_image")
+#@ load("skipper.star", "skipper_container_env")
+#@ load("skipper.star", "has_image_pull_secrets")
+#@ load("skipper.star", "image_pull_secrets")
+#@ load("binder/binder.star", "rabbitmq_enabled")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skipper
+  annotations:
+    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/skipper"
+    kapp.k14s.io/change-rule: "upsert after upserting scdf.tanzu.vmware.com/db"
+  labels:
+    app: skipper
+spec:
+  selector:
+    matchLabels:
+      app: skipper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: skipper
+    spec:
+      containers:
+      - name: skipper
+        image: #@ skipper_image()
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config
+          mountPath: /workspace/config
+          readOnly: true
+        - name: database
+          mountPath: /etc/secrets/database
+          readOnly: true
+        #@ if rabbitmq_enabled():
+        - name: rabbitmq
+          mountPath: /etc/secrets/rabbitmq
+          readOnly: true
+        #@ end
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 7577
+          initialDelaySeconds: 45
+        readinessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 7577
+          initialDelaySeconds: 45
+        resources:
+          limits:
+            cpu: 1.0
+            memory: 1024Mi
+          requests:
+            cpu: 0.5
+            memory: 640Mi
+        env: #@ skipper_container_env()
+      serviceAccountName: scdf-sa
+      #@ if has_image_pull_secrets():
+      imagePullSecrets: #@ image_pull_secrets()
+      #@ end
+      volumes:
+      - name: config
+        configMap:
+          name: skipper
+          items:
+          - key: application.yaml
+            path: application.yaml
+      - name: database
+        secret:
+          secretName: db-skipper
+      #@ if rabbitmq_enabled():
+      - name: rabbitmq
+        secret:
+          secretName: rabbitmq
+      #@ end

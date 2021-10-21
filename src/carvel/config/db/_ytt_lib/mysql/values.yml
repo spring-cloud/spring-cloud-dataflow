@@ -1,0 +1,10 @@
+#@data/values-schema
+---
+name: mysql
+username: ""
+password: ""
+image:
+  repository: mysql
+  tag: "5.7"
+  digest: ""
+registrySecretRef: ""

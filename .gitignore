@@ -49,3 +49,6 @@ cleanup.sh
 
 # GitHub actions
 .m2
+
+# Carvel
+node_modules

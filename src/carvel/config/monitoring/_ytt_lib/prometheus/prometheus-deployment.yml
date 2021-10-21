@@ -1,0 +1,40 @@
+#@ load("prometheus.lib.yml", "name")
+#@ load("prometheus.lib.yml", "prometheus_image")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: #@ name()
+  name: #@ name()
+spec:
+  selector:
+    matchLabels:
+      app: #@ name()
+  template:
+    metadata:
+      labels:
+        app: #@ name()
+    spec:
+      serviceAccountName: prometheus
+      containers:
+        - name: prometheus
+          image: #@ prometheus_image()
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus/"
+            - "--web.enable-lifecycle"
+          ports:
+            - name: prometheus
+              containerPort: 9090
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus/
+            - name: prometheus-storage-volume
+              mountPath: /prometheus/
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            name: prometheus
+        - name: prometheus-storage-volume
+          emptyDir: {}

@@ -1,0 +1,31 @@
+#@ load("kafka.star", "name")
+#@ load("kafka.star", "zk_name")
+#@ load("kafka.star", "zk_server_name")
+#@ load("kafka.star", "kafka_zk_container_env")
+#@ load("kafka.star", "zk_image")
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: #@ zk_name()
+spec:
+  serviceName: #@ zk_server_name()
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ zk_name()
+  template:
+    metadata:
+      labels:
+        app: #@ zk_name()
+    spec:
+      containers:
+      - name: #@ zk_name()
+        image: #@ zk_image()
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: follower
+        - containerPort: 3888
+          name: leader
+        env: #@ kafka_zk_container_env()

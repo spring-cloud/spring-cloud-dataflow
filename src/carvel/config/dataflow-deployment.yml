@@ -1,0 +1,71 @@
+#@ load("@ytt:data", "data")
+#@ load("dataflow.star", "dataflow_image")
+#@ load("dataflow.star", "ctr_image")
+#@ load("dataflow.star", "dataflow_container_env")
+#@ load("dataflow.star", "has_image_pull_secrets")
+#@ load("dataflow.star", "image_pull_secrets")
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scdf-server
+  annotations:
+    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/server"
+    kapp.k14s.io/change-rule.1: "upsert after upserting scdf.tanzu.vmware.com/db"
+    kapp.k14s.io/change-rule.2: "upsert after upserting scdf.tanzu.vmware.com/skipper"
+  labels:
+    app: scdf-server
+spec:
+  selector:
+    matchLabels:
+      app: scdf-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scdf-server
+    spec:
+      containers:
+      - name: scdf-server
+        image: #@ dataflow_image()
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config
+          mountPath: /workspace/config
+          readOnly: true
+        - name: database
+          mountPath: /etc/secrets/database
+          readOnly: true
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /management/health
+            port: 9393
+          initialDelaySeconds: 45
+        readinessProbe:
+          httpGet:
+            path: /management/info
+            port: 9393
+          initialDelaySeconds: 45
+        resources:
+          limits:
+            cpu: 1.0
+            memory: 2048Mi
+          requests:
+            cpu: 0.5
+            memory: 1024Mi
+        env: #@ dataflow_container_env()
+      serviceAccountName: scdf-sa
+      #@ if has_image_pull_secrets():
+      imagePullSecrets: #@ image_pull_secrets()
+      #@ end
+      volumes:
+      - name: config
+        configMap:
+          name: scdf-server
+          items:
+          - key: application.yaml
+            path: application.yaml
+      - name: database
+        secret:
+          secretName: db-dataflow

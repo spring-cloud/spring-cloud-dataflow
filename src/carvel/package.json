@@ -1,0 +1,40 @@
+{
+  "name": "scdf-carvel-poc",
+  "version": "1.0.0",
+  "description": "Testing concepts of deploying `scdf` via `ytt` templating with `kapp`.",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jvalkeal/scdf-carvel-poc.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jvalkeal/scdf-carvel-poc/issues"
+  },
+  "homepage": "https://github.com/jvalkeal/scdf-carvel-poc#readme",
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/jest-expect-message": "^1.0.3",
+    "@types/lodash": "^4.14.172",
+    "@types/node": "^15.6.0",
+    "jest": "^26.6.3",
+    "jest-circus": "^26.6.3",
+    "jest-expect-message": "^1.0.2",
+    "jest-extended": "^0.11.5",
+    "prettier": "^2.3.0",
+    "ts-jest": "^26.5.6",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@actions/exec": "^1.0.4",
+    "@kubernetes/client-node": "^0.14.3",
+    "lodash": "^4.17.21",
+    "yaml": "^1.10.2"
+  }
+}
