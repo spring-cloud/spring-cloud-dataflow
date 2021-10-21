@@ -1,5 +1,5 @@
 {
-  "name": "scdf-carvel-poc",
+  "name": "scdf-carvel",
   "version": "1.0.0",
   "description": "Testing concepts of deploying `scdf` via `ytt` templating with `kapp`.",
   "main": "index.js",
@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jvalkeal/scdf-carvel-poc.git"
+    "url": "git+https://github.com/spring-cloud/spring-cloud-dataflow.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jvalkeal/scdf-carvel-poc/issues"
+    "url": "https://github.com/spring-cloud/spring-cloud-dataflow/issues"
   },
-  "homepage": "https://github.com/jvalkeal/scdf-carvel-poc#readme",
+  "homepage": "https://github.com/spring-cloud/spring-cloud-dataflow",
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@types/jest-expect-message": "^1.0.3",
