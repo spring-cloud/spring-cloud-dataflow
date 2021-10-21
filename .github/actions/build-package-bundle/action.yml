@@ -1,0 +1,66 @@
+name: Build Package Bundle
+description: Build Package Bundle
+inputs:
+  dataflow-version:
+    description: dataflow version
+    required: true
+  skipper-version:
+    description: skipper version
+    required: true
+  package-bundle-template:
+    description: path to package bundle template
+    required: true
+  imgpkg-lock-template:
+    description: path to imgpkg lock template
+    required: true
+  config:
+    description: path to ytt config files dir
+    required: true
+outputs:
+  bundle-path:
+    description: Location path where bundle was build
+    value: ${{ steps.tanzu-dance.outputs.bundle-path }}
+
+runs:
+  using: "composite"
+  steps:
+  - uses: vmware-tanzu/carvel-setup-action@v1
+  - name: Tanzu Dance
+    id: tanzu-dance
+    env:
+      DATAFLOW_VERSION: ${{ inputs.dataflow-version }}
+      SKIPPER_VERSION: ${{ inputs.skipper-version }}
+      PACKAGE_BUNDLE_TEMPLATE: ${{ inputs.package-bundle-template }}
+      PACKAGE_BUNDLE_GENERATED: ${{ runner.temp }}/generated/packagebundle
+      VENDIR_SRC_IN: ${{ inputs.config }}
+      IMGPKG_LOCK_TEMPLATE: ${{ inputs.imgpkg-lock-template }}
+      IMGPKG_LOCK_GENERATED_IN: ${{ runner.temp }}/generated/imgpkgin
+      IMGPKG_LOCK_GENERATED_OUT: ${{ runner.temp }}/generated/imgpkgout
+    shell: bash
+    run: |
+      echo "::set-output name=bundle-path::$PACKAGE_BUNDLE_GENERATED"
+      ytt \
+        -f $PACKAGE_BUNDLE_TEMPLATE \
+        --output-files $PACKAGE_BUNDLE_GENERATED \
+        --data-value-yaml project.version=$DATAFLOW_VERSION \
+        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
+        --file-mark 'config/values.yml:type=text-template'
+      ytt \
+        -f $IMGPKG_LOCK_TEMPLATE \
+        --output-files $IMGPKG_LOCK_GENERATED_IN \
+        --data-value-yaml project.version=$DATAFLOW_VERSION \
+        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
+        --file-mark '**/*.yml:type=text-template'
+      cp -R $VENDIR_SRC_IN $PACKAGE_BUNDLE_GENERATED/config/upstream
+      vendir sync --chdir $PACKAGE_BUNDLE_GENERATED
+      mkdir -p $IMGPKG_LOCK_GENERATED_OUT
+
+      for DIR in $(ls $IMGPKG_LOCK_GENERATED_IN)
+      do
+        ytt -f $PACKAGE_BUNDLE_GENERATED -f $IMGPKG_LOCK_GENERATED_IN/$DIR > $IMGPKG_LOCK_GENERATED_OUT/$DIR.yml
+      done
+
+      mkdir -p $PACKAGE_BUNDLE_GENERATED/.imgpkg
+      kbld \
+        -f $IMGPKG_LOCK_GENERATED_OUT \
+        --imgpkg-lock-output $PACKAGE_BUNDLE_GENERATED/.imgpkg/images.yml

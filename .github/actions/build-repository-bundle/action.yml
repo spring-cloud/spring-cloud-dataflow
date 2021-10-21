@@ -1,0 +1,55 @@
+name: Build Repository Bundle
+description: Build Repository Bundle
+inputs:
+  version:
+    description: dataflow version
+    required: true
+  repo-bundle-template:
+    description: path to repo bundle template
+    required: true
+  package-bundle-repository:
+    description: repository for package bundles
+    required: true
+outputs:
+  bundle-path:
+    description: Location path where bundle was build
+    value: ${{ steps.tanzu-dance.outputs.bundle-path }}
+
+runs:
+  using: "composite"
+  steps:
+  - uses: vmware-tanzu/carvel-setup-action@v1
+  - name: Tanzu Dance
+    id: tanzu-dance
+    env:
+      VERSION: ${{ inputs.version }}
+      PACKAGE_BUNDLE_REPOSITORY: ${{ inputs.package-bundle-repository }}
+      REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}
+      REPO_BUNDLE_RENDERED: ${{ runner.temp }}/generated/reporendered
+      REPO_BUNDLE_GENERATED: ${{ runner.temp }}/generated/repobundle
+    shell: bash
+    run: |
+      echo "::set-output name=bundle-path::$REPO_BUNDLE_GENERATED"
+
+      mkdir -p $REPO_BUNDLE_GENERATED/packages
+      mkdir -p $REPO_BUNDLE_GENERATED/.imgpkg
+      ytt \
+        -f $REPO_BUNDLE_TEMPLATE \
+        --output-files $REPO_BUNDLE_RENDERED \
+        --data-value-yaml project.version=$VERSION \
+        --data-value-yaml repository=$PACKAGE_BUNDLE_REPOSITORY \
+        --file-mark 'package.yml:type=text-plain' \
+        --file-mark 'metadata.yml:type=text-plain' \
+        --file-mark 'values-schema.yml:type=text-plain' \
+        --file-mark 'values-schema.star:type=text-plain' \
+        --file-mark 'values-schema.star:for-output=true' \
+        --file-mark 'versions.yml:type=text-template'
+
+      ytt \
+        -f $REPO_BUNDLE_RENDERED \
+        --file-mark 'values-schema.yml:type=data' \
+        > $REPO_BUNDLE_GENERATED/packages/packages.yml
+
+      kbld \
+        --file $REPO_BUNDLE_GENERATED/packages \
+        --imgpkg-lock-output $REPO_BUNDLE_GENERATED/.imgpkg/images.yml

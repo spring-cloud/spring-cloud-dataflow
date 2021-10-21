@@ -1,0 +1,27 @@
+(@ load("@ytt:data", "data") @)#@data/values
+---
+scdf:
+  deploy:
+    binder:
+      type: kafka
+    database:
+      type: postgres
+  server:
+    image:
+      tag: (@= data.values.project.version @)
+  ctr:
+    image:
+      tag: (@= data.values.project.version @)
+  skipper:
+    image:
+      tag: (@= data.values.spring.cloud.skipper.version @)
+  feature:
+    monitoring:
+      grafana:
+        enabled: true
+        image:
+          tag: (@= data.values.project.version @)
+      prometheus:
+        enabled: true
+      prometheusRsocketProxy:
+        enabled: true
