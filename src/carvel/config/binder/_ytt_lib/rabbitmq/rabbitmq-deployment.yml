@@ -41,6 +41,8 @@ spec:
         - containerPort: 5672
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
+      #@ else:
+      imagePullSecrets: [{name: reg-creds}]
       #@ end
       volumes:
       - name: rabbitmq-config-volume

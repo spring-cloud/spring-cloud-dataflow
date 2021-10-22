@@ -30,4 +30,6 @@ spec:
         env: #@ kafka_broker_container_env()
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
+      #@ else:
+      imagePullSecrets: [{name: reg-creds}]
       #@ end

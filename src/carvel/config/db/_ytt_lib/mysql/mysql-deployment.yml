@@ -52,6 +52,8 @@ spec:
         - "--ignore-db-dir=lost+found"
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
+      #@ else:
+      imagePullSecrets: [{name: reg-creds}]
       #@ end
       volumes:
       - name: data
