@@ -96,7 +96,7 @@ describe('servers', () => {
     expect(skipperContainer?.image).toBe('springcloud/spring-cloud-skipper-server@fakedigest2');
   });
 
-  it('no additional dataflow server config', async () => {
+  it('should have default server config', async () => {
     const result = await execYtt({
       files: ['config'],
       dataValueYamls: [
@@ -111,9 +111,72 @@ describe('servers', () => {
     expect(result.success).toBeTruthy();
     const yaml = result.stdout;
 
-    const skipperConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
-    const applicationYaml = skipperConfigMap?.data ? skipperConfigMap.data['application.yaml'] : undefined;
-    expect(applicationYaml).toContain('spring');
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const skipperConfigMap = findConfigMap(yaml, SKIPPER_NAME);
+
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const skipperApplicationYaml = skipperConfigMap?.data ? skipperConfigMap.data['application.yaml'] : '';
+
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const skipperDoc = parseYamlDocument(skipperApplicationYaml);
+    const skipperJson = skipperDoc.toJSON();
+
+    const dataflowPlatformLimitsMemory = lodash.get(
+      dataflowJson,
+      'spring.cloud.dataflow.task.platform.kubernetes.accounts.default.limits.memory'
+    ) as string;
+    expect(dataflowPlatformLimitsMemory).toEqual('1024Mi');
+
+    const dataflowPlatformImagePullSecret = lodash.get(
+      dataflowJson,
+      'spring.cloud.dataflow.task.platform.kubernetes.accounts.default.imagePullSecret'
+    ) as string;
+    expect(dataflowPlatformImagePullSecret).toEqual('reg-creds');
+
+    const skipperPlatformLimitsMemory = lodash.get(
+      skipperJson,
+      'spring.cloud.skipper.server.platform.kubernetes.accounts.default.limits.memory'
+    ) as string;
+    expect(skipperPlatformLimitsMemory).toEqual('1024Mi');
+
+    const skipperPlatformImagePullSecret = lodash.get(
+      skipperJson,
+      'spring.cloud.skipper.server.platform.kubernetes.accounts.default.imagePullSecret'
+    ) as string;
+    expect(skipperPlatformImagePullSecret).toEqual('reg-creds');
+  });
+
+  it('should change server config', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.registry.secret.ref=fakeref']
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const skipperConfigMap = findConfigMap(yaml, SKIPPER_NAME);
+
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const skipperApplicationYaml = skipperConfigMap?.data ? skipperConfigMap.data['application.yaml'] : '';
+
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const skipperDoc = parseYamlDocument(skipperApplicationYaml);
+    const skipperJson = skipperDoc.toJSON();
+
+    const dataflowPlatformImagePullSecret = lodash.get(
+      dataflowJson,
+      'spring.cloud.dataflow.task.platform.kubernetes.accounts.default.imagePullSecret'
+    ) as string;
+    expect(dataflowPlatformImagePullSecret).toEqual('fakeref');
+
+    const skipperPlatformImagePullSecret = lodash.get(
+      skipperJson,
+      'spring.cloud.skipper.server.platform.kubernetes.accounts.default.imagePullSecret'
+    ) as string;
+    expect(skipperPlatformImagePullSecret).toEqual('fakeref');
   });
 
   it('should have additional server config', async () => {

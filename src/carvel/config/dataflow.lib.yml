@@ -3,10 +3,17 @@
 #@ load("@ytt:template", "template")
 #@ load("db/db.lib.yml", "dataflow_datasource_config")
 #@ load("monitoring/monitoring.star", "grafana_enabled")
+#@ load("dataflow.star", "has_image_pull_secrets")
+#@ load("dataflow.star", "registry_secret_ref")
 
 #@ def dataflow_platform_config():
 limits:
   memory: 1024Mi
+#@ if has_image_pull_secrets():
+imagePullSecret: #@ registry_secret_ref()
+#@ else:
+imagePullSecret: reg-creds
+#@ end
 #@ end
 
 #@ def base_config():

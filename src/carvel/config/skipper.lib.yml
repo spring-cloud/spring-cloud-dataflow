@@ -2,6 +2,8 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:template", "template")
 #@ load("skipper.star", "env_config")
+#@ load("skipper.star", "has_image_pull_secrets")
+#@ load("skipper.star", "registry_secret_ref")
 #@ load("db/db.lib.yml", "skipper_datasource_config")
 #@ load("monitoring/monitoring.star", "grafana_enabled")
 
@@ -12,6 +14,11 @@ limits:
   cpu: 500m
 readinessProbeDelay: 120
 livenessProbeDelay: 90
+#@ if has_image_pull_secrets():
+imagePullSecret: #@ registry_secret_ref()
+#@ else:
+imagePullSecret: reg-creds
+#@ end
 #@ end
 
 #@ def base_config():
