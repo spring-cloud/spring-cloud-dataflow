@@ -1,0 +1,856 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+[[configuration-options]]
+== Configuration Options
+
+Main point of a _carvel_ is to provide a clear _API_ for consuming and using
+its features. From a user point of view this means that there is a set of
+options user can set which then drives k8s deployment files templating
+and deployment into an environment. This sections documents these options
+user as a consumer can use. Essentially this means that you will set
+options with either plain properties of combine those into fully set of
+yaml document.
+
+*Curated List of Options:*
+
+- <<configuration-options-scdf.registry.secret.ref>>
+- <<configuration-options-scdf.deploy.binder.enabled>>
+- <<configuration-options-scdf.deploy.binder.type>>
+- <<configuration-options-scdf.deploy.binder.rabbit.config>>
+- <<configuration-options-scdf.deploy.binder.rabbit.image.repository>>
+- <<configuration-options-scdf.deploy.binder.rabbit.image.tag>>
+- <<configuration-options-scdf.deploy.binder.rabbit.image.digest>>
+- <<configuration-options-scdf.deploy.binder.kafka.brokerImage.repository>>
+- <<configuration-options-scdf.deploy.binder.kafka.brokerImage.tag>>
+- <<configuration-options-scdf.deploy.binder.kafka.brokerImage.digest>>
+- <<configuration-options-scdf.deploy.binder.kafka.zkImage.repository>>
+- <<configuration-options-scdf.deploy.binder.kafka.zkImage.tag>>
+- <<configuration-options-scdf.deploy.binder.kafka.zkImage.digest>>
+- <<configuration-options-scdf.deploy.database.enabled>>
+- <<configuration-options-scdf.deploy.database.type>>
+- <<configuration-options-scdf.deploy.database.postgres.username>>
+- <<configuration-options-scdf.deploy.database.postgres.password>>
+- <<configuration-options-scdf.deploy.database.postgres.image.repository>>
+- <<configuration-options-scdf.deploy.database.postgres.image.tag>>
+- <<configuration-options-scdf.deploy.database.postgres.image.digest>>
+- <<configuration-options-scdf.deploy.database.mysql.username>>
+- <<configuration-options-scdf.deploy.database.mysql.password>>
+- <<configuration-options-scdf.deploy.database.mysql.image.repository>>
+- <<configuration-options-scdf.deploy.database.mysql.image.tag>>
+- <<configuration-options-scdf.deploy.database.mysql.image.digest>>
+- <<configuration-options-scdf.server.image.repository>>
+- <<configuration-options-scdf.server.image.tag>>
+- <<configuration-options-scdf.server.image.digest>>
+- <<configuration-options-scdf.server.service.type>>
+- <<configuration-options-scdf.server.database.url>>
+- <<configuration-options-scdf.server.database.username>>
+- <<configuration-options-scdf.server.database.password>>
+- <<configuration-options-scdf.server.database.driverClassName>>
+- <<configuration-options-scdf.server.database.testOnBorrow>>
+- <<configuration-options-scdf.server.database.validationQuery>>
+- <<configuration-options-scdf.server.config>>
+- <<configuration-options-scdf.server.metrics.dashboard.url>>
+- <<configuration-options-scdf.ctr.image.repository>>
+- <<configuration-options-scdf.ctr.image.tag>>
+- <<configuration-options-scdf.ctr.image.digest>>
+- <<configuration-options-scdf.skipper.image.repository>>
+- <<configuration-options-scdf.skipper.image.tag>>
+- <<configuration-options-scdf.skipper.image.digest>>
+- <<configuration-options-scdf.skipper.service.type>>
+- <<configuration-options-scdf.skipper.database.url>>
+- <<configuration-options-scdf.skipper.database.username>>
+- <<configuration-options-scdf.skipper.database.password>>
+- <<configuration-options-scdf.skipper.database.driverClassName>>
+- <<configuration-options-scdf.skipper.database.testOnBorrow>>
+- <<configuration-options-scdf.skipper.database.validationQuery>>
+- <<configuration-options-scdf.skipper.config>>
+- <<configuration-options-scdf.binder.kafka.broker.host>>
+- <<configuration-options-scdf.binder.kafka.broker.port>>
+- <<configuration-options-scdf.binder.kafka.zk.host>>
+- <<configuration-options-scdf.binder.kafka.zk.port>>
+- <<configuration-options-scdf.binder.rabbit.host>>
+- <<configuration-options-scdf.binder.rabbit.port>>
+- <<configuration-options-scdf.binder.rabbit.username>>
+- <<configuration-options-scdf.binder.rabbit.password>>
+- <<configuration-options-scdf.feature.monitoring.prometheus.enabled>>
+- <<configuration-options-scdf.feature.monitoring.prometheus.image.repository>>
+- <<configuration-options-scdf.feature.monitoring.prometheus.image.tag>>
+- <<configuration-options-scdf.feature.monitoring.prometheus.image.digest>>
+- <<configuration-options-scdf.feature.monitoring.grafana.enabled>>
+- <<configuration-options-scdf.feature.monitoring.grafana.image.repository>>
+- <<configuration-options-scdf.feature.monitoring.grafana.image.tag>>
+- <<configuration-options-scdf.feature.monitoring.grafana.image.digest>>
+- <<configuration-options-scdf.feature.monitoring.grafana.service.type>>
+- <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.enabled>>
+- <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.repository>>
+- <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.tag>>
+- <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.digest>>
+
+=== Options
+
+[[configuration-options-scdf.registry.secret.ref]]`scdf.registry.secret.ref`::
+  Description:::
+If defined a reference will be added as imagePullSecret to all services.
+On default a carvel secretgen placeholder is added as one Secret resource.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.binder.enabled]]`scdf.deploy.binder.enabled`::
+  Description:::
+Enables binder deployment.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+true
+
+[[configuration-options-scdf.deploy.binder.type]]`scdf.deploy.binder.type`::
+  Description:::
+Defines a binder type if deployment is enabled.
+  Required:::
+No
+  Type:::
+enum(rabbit,kafka)
+   Default Value:::
+rabbit
+
+[[configuration-options-scdf.deploy.binder.rabbit.config]]`scdf.deploy.binder.rabbit.config`::
+  Description:::
+Defines keys and values used in a rabbit's configuration file mounted into a container.
+
+For example:
+[source, yaml]
+----
+scdf:
+  deploy:
+    binder:
+      rabbit:
+        config:
+          key1: value1
+          key2: value2
+----
+
+results `rabbitmq.conf` with:
+[source, text]
+----
+key1 = value1
+key2 = value2
+----
+
+  Required:::
+No
+  Type:::
+Dict
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.binder.rabbit.image.repository]]`scdf.deploy.binder.rabbit.image.repository`::
+  Description:::
+Rabbit binder image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+rabbitmq
+
+[[configuration-options-scdf.deploy.binder.rabbit.image.tag]]`scdf.deploy.binder.rabbit.image.tag`::
+  Description:::
+Rabbit binder image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+3.9.5
+
+[[configuration-options-scdf.deploy.binder.rabbit.image.digest]]`scdf.deploy.binder.rabbit.image.digest`::
+  Description:::
+Rabbit binder image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.binder.rabbit.username]]`scdf.deploy.binder.rabbit.username`::
+  Description:::
+Username for deployed rabbit as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+dataflow
+
+[[configuration-options-scdf.deploy.binder.rabbit.password]]`scdf.deploy.binder.rabbit.password`::
+  Description:::
+Password for deployed rabbit as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+secret
+
+[[configuration-options-scdf.deploy.binder.kafka.brokerImage.repository]]`scdf.deploy.binder.kafka.brokerImage.repository`::
+  Description:::
+Kafka binder broker image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+confluentinc/cp-kafka
+
+[[configuration-options-scdf.deploy.binder.kafka.brokerImage.tag]]`scdf.deploy.binder.kafka.brokerImage.tag`::
+  Description:::
+Kafka binder broker image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+5.5.2
+
+[[configuration-options-scdf.deploy.binder.kafka.brokerImage.digest]]`scdf.deploy.binder.kafka.brokerImage.digest`::
+  Description:::
+Kafka binder broker image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.binder.kafka.zkImage.repository]]`scdf.deploy.binder.kafka.zkImage.repository`::
+  Description:::
+Kafka binder zk image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+confluentinc/cp-zookeeper
+
+[[configuration-options-scdf.deploy.binder.kafka.zkImage.tag]]`scdf.deploy.binder.kafka.zkImage.tag`::
+  Description:::
+Kafka binder zk image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+5.5.2
+
+[[configuration-options-scdf.deploy.binder.kafka.zkImage.digest]]`scdf.deploy.binder.kafka.zkImage.digest`::
+  Description:::
+Kafka binder zk image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.database.enabled]]`scdf.deploy.database.enabled`::
+  Description:::
+Enables database deployment.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+true
+
+[[configuration-options-scdf.deploy.database.type]]`scdf.deploy.database.type`::
+  Description:::
+Defines database type if deployment is enabled, either mysql or postgres.
+  Required:::
+No
+  Type:::
+Enum(mysql,postgres)
+   Default Value:::
+postgres
+
+[[configuration-options-scdf.deploy.database.postgres.username]]`scdf.deploy.database.postgres.username`::
+  Description:::
+Username for deployed database as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+dataflow
+
+[[configuration-options-scdf.deploy.database.postgres.password]]`scdf.deploy.database.postgres.password`::
+  Description:::
+Username for deployed database as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+secret
+
+[[configuration-options-scdf.deploy.database.postgres.image.repository]]`scdf.deploy.database.postgres.image.repository`::
+  Description:::
+Postgres database image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+postgres
+
+[[configuration-options-scdf.deploy.database.postgres.image.tag]]`scdf.deploy.database.postgres.image.tag`::
+  Description:::
+Postgres database image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+10
+
+[[configuration-options-scdf.deploy.database.postgres.image.digest]]`scdf.deploy.database.postgres.image.digest`::
+  Description:::
+Postgres database image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.deploy.database.mysql.username]]`scdf.deploy.database.mysql.username`::
+  Description:::
+Username for deployed database as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+dataflow
+
+[[configuration-options-scdf.deploy.database.mysql.password]]`scdf.deploy.database.mysql.password`::
+  Description:::
+Password for deployed database as base64 encoded value.
+  Required:::
+No
+  Type:::
+String (base64 encoded)
+   Default Value:::
+secret
+
+[[configuration-options-scdf.deploy.database.mysql.image.repository]]`scdf.deploy.database.mysql.image.repository`::
+  Description:::
+Mysql database image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+mysql
+
+[[configuration-options-scdf.deploy.database.mysql.image.tag]]`scdf.deploy.database.mysql.image.tag`::
+  Description:::
+Mysql database image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+5.7
+
+[[configuration-options-scdf.deploy.database.mysql.image.digest]]`scdf.deploy.database.mysql.image.digest`::
+  Description:::
+Mysql database image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+Empty
+
+[[configuration-options-scdf.server.image.repository]]`scdf.server.image.repository`::
+  Description:::
+Server image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+springcloud/spring-cloud-dataflow-server
+
+[[configuration-options-scdf.server.image.tag]]`scdf.server.image.tag`::
+  Description:::
+Server image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.image.digest]]`scdf.server.image.digest`::
+  Description:::
+Server image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.service.type]]`scdf.server.service.type`::
+  Description:::
+Server service type.
+  Required:::
+No
+  Type:::
+Enum(NodePort, LoadBalancer, ClusterIP, ExternalName)
+   Default Value:::
+ClusterIP
+
+[[configuration-options-scdf.server.database.url]]`scdf.server.database.url`::
+  Description:::
+Datasource url setting
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.database.username]]`scdf.server.database.username`::
+  Description:::
+Datasource username setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.database.password]]`scdf.server.database.password`::
+  Description:::
+Datasource password setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.database.driverClassName]]`scdf.server.database.driverClassName`::
+  Description:::
+Datasource driverClassName setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.database.validationQuery]]`scdf.server.database.validationQuery`::
+  Description:::
+Datasource validationQuery setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.database.testOnBorrow]]`scdf.server.database.testOnBorrow`::
+  Description:::
+Datasource testOnBorrow setting.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+True
+
+[[configuration-options-scdf.server.config]]`scdf.server.config`::
+  Description:::
+Raw server config as yml.
+  Required:::
+No
+  Type:::
+String(yml)
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.metrics.dashboard.url]]`scdf.server.metrics.dashboard.url`::
+  Description:::
+Metrics dashboard url for UI.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.ctr.image.repository]]`scdf.ctr.image.repository`::
+  Description:::
+Composed Task Runner image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+springcloud/spring-cloud-dataflow-composed-task-runner
+
+[[configuration-options-scdf.ctr.image.tag]]`scdf.ctr.image.tag`::
+  Description:::
+Composed Task Runner image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.ctr.image.digest]]`scdf.ctr.image.digest`::
+  Description:::
+Composed Task Runner image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.image.repository]]`scdf.skipper.image.repository`::
+  Description:::
+Skipper image repository
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+springcloud/spring-cloud-skipper-server
+
+[[configuration-options-scdf.skipper.image.tag]]`scdf.skipper.image.tag`::
+  Description:::
+Skipper image tag
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.image.digest]]`scdf.skipper.image.digest`::
+  Description:::
+Skipper image digest
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.service.type]]`scdf.server.skipper.type`::
+  Description:::
+Skipper service type.
+  Required:::
+No
+  Type:::
+Enum(NodePort, LoadBalancer, ClusterIP, ExternalName)
+   Default Value:::
+ClusterIP
+
+[[configuration-options-scdf.skipper.database.url]]`scdf.skipper.database.url`::
+  Description:::
+Datasource url setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.database.username]]`scdf.skipper.database.username`::
+  Description:::
+Datasource username setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.database.password]]`scdf.skipper.database.password`::
+  Description:::
+Datasource password setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.database.driverClassName]]`scdf.skipper.database.driverClassName`::
+  Description:::
+Datasource driverClassName setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.database.validationQuery]]`scdf.skipper.database.validationQuery`::
+  Description:::
+Datasource validationQuery setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.database.testOnBorrow]]`scdf.skipper.database.testOnBorrow`::
+  Description:::
+Datasource testOnBorrow setting.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+True
+
+[[configuration-options-scdf.skipper.config]]`scdf.skipper.config`::
+  Description:::
+Raw skipper config as yml.
+  Required:::
+No
+  Type:::
+String(yml)
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.kafka.broker.host]]`scdf.binder.kafka.broker.host`::
+  Description:::
+External kafka broker host.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.kafka.broker.port]]`scdf.binder.kafka.broker.port`::
+  Description:::
+External kafka broker port.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.kafka.zk.host]]`scdf.binder.kafka.zk.host`::
+  Description:::
+External kafka zk host.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.kafka.zk.port]]`scdf.binder.kafka.zk.port`::
+  Description:::
+External kafka zk port.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.rabbit.host]]`scdf.binder.rabbit.host`::
+  Description:::
+External rabbit host.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.rabbit.port]]`scdf.binder.rabbit.port`::
+  Description:::
+External rabbit port.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.rabbit.username]]`scdf.binder.rabbit.username`::
+  Description:::
+External rabbit username.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.binder.rabbit.password]]`scdf.binder.rabbit.password`::
+  Description:::
+External rabbit password.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.feature.monitoring.prometheus.enabled]]`scdf.feature.monitoring.prometheus.enabled`::
+  Description:::
+Enables prometheus feature.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+False
+
+[[configuration-options-scdf.feature.monitoring.prometheus.image.repository]]`scdf.feature.monitoring.prometheus.image.repository`::
+  Description:::
+Prometheus image repository.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+prom/prometheus
+
+[[configuration-options-scdf.feature.monitoring.prometheus.image.tag]]`scdf.feature.monitoring.prometheus.image.tag`::
+  Description:::
+Prometheus image tag.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+v2.12.0
+
+[[configuration-options-scdf.feature.monitoring.prometheus.image.digest]]`scdf.feature.monitoring.prometheus.image.digest`::
+  Description:::
+Prometheus image digest.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+None
+
+[[configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.enabled]]`scdf.feature.monitoring.prometheusRsocketProxy.enabled`::
+  Description:::
+Enables prometheus rsocket proxy feature.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+False
+
+[[configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.repository]]`scdf.feature.monitoring.prometheusRsocketProxy.image.repository`::
+  Description:::
+Prometheus rsocket proxy image repository.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+micrometermetrics/prometheus-rsocket-proxy
+
+[[configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.tag]]`scdf.feature.monitoring.prometheusRsocketProxy.image.tag`::
+  Description:::
+Prometheus rsocket proxy image tag.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+1.0.0
+
+[[configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.digest]]`scdf.feature.monitoring.prometheusRsocketProxy.image.digest`::
+  Description:::
+Prometheus rsocket proxy image digest.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+None
+
+[[configuration-options-scdf.feature.monitoring.grafana.enabled]]`scdf.feature.monitoring.grafana.enabled`::
+  Description:::
+Enables grafana feature.
+  Required:::
+No
+  Type:::
+Boolean
+   Default Value:::
+False
+
+[[configuration-options-scdf.feature.monitoring.grafana.image.repository]]`scdf.feature.monitoring.grafana.image.repository`::
+  Description:::
+Grafana image repository.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+springcloud/spring-cloud-dataflow-grafana-prometheus
+
+[[configuration-options-scdf.feature.monitoring.grafana.image.tag]]`scdf.feature.monitoring.grafana.image.tag`::
+  Description:::
+Grafana image tag.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+None
+
+[[configuration-options-scdf.feature.monitoring.grafana.image.digest]]`scdf.feature.monitoring.grafana.image.digest`::
+  Description:::
+Grafana image digest.
+  Required:::
+No
+  Type:::
+Strig
+   Default Value:::
+None
+
+[[configuration-options-scdf.feature.monitoring.grafana.service.type]]`scdf.feature.monitoring.grafana.service.type`::
+  Description:::
+Grafana service type.
+  Required:::
+No
+  Type:::
+Enum(NodePort, LoadBalancer, ClusterIP, ExternalName)
+   Default Value:::
+ClusterIP

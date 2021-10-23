@@ -1,0 +1,129 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+:servers: link:servers.adoc[Servers]
+:examples: link:examples.adoc[Examples]
+ifndef::env-github[]
+:servers: <<servers>>
+:examples: <<examples>>
+endif::[]
+
+= Spring Cloud Data Flow Carvel Documentation
+
+toc::[]
+
+ifdef::env-github[]
+
+link:configuration-options.adoc[Configuration Options]
+
+link:servers.adoc[Servers]
+
+link:binder.adoc[Binder]
+
+link:database.adoc[Database]
+
+link:examples.adoc[Examples]
+
+endif::[]
+
+Main objectives for a https://carvel.dev[Carvel] integration with dataflow is to provide:
+
+* We want to have exactly one common way to generate _kubernetes_ resources
+** Can generate set of samples automatically
+** Can be used for all other use cases when deploying to _kubernetes_
+* Automatically configure whole environment based on user choices
+* Easy deployment without requiring existing external _binder_ or _database_
+** Can deploy either _rabbit_ or _kafka_ as a binder
+** Can deploy either _mysql_ or _postgres_ as a database
+** Steps away if external _database_ or _binder_ is defined
+* Plain k8s templating using https://carvel.dev/ytt[ytt]
+** Drive templating with template options
+** Work with _kubectl_ without need of _kapp_ or _kapp-controller_
+* Package management using https://carvel.dev/kapp-controller[kapp-controller]
+** Publish packages for dataflow versions
+** Drive package deployment with given package options
+* Integration to _tanzu_ i.e. working with _Tanzu CLI_
+
+[NOTE]
+====
+While templating can deploy _binder_ and _database_ automatially it is not supported
+production configuration and should be taken as a simple install as a trial to get
+things up and running. It's highly advised to use proper deployment of a _binder_
+and a _database_ as automatic deployment and configuration of those are limited.
+====
+
+== Deploy Spring Cloud Data Flow
+
+There are various examples under {examples}.
+
+=== Deployment flavour
+There are different ways to deploy _Dataflow_ into _kubernetes_ cluster:
+
+* _kubectl_ with _ytt_ templating <<deployment-kubectl>>
+* _kapp_ with passed deployed files from _ytt_ templates <<deployment-kapp>>
+* _kapp-controller_ with _carvel_ package with configured options
+  <<deployment-kapp-controller>>
+* _tanzu-cli_ which essentially is _kapp-controller_ but having a concepts
+  of a _management cluster_ maintaining _worker clusters_ <<deployment-tanzu>>
+
+[[deployment-kubectl]]
+==== Deploy via kubectl
+Lowest level deployment as you are essentially passing _kubernetes_ yml files
+generated from _ytt_ templates.
+
+While _kubectl_ gives you a great flexibility to handle deployments, it also
+comes with a price of maintaining created resources manually. Essentially this
+means you need to be aware of what resources are created if those needs
+to be cleared or maintained in a future.
+
+[[deployment-kapp]]
+==== Deploy via kapp
+Essentially much like deploying with _kubectl_ but uses _kapp_ spesific
+annotations to give some sense of how deployments are done on an order.
+
+What is nice with deploying via _kapp_ is that it tracks what has been
+deployed so deleting resources from a cluster is easy. This gives you
+a great benefit comparing to simple _kubectl_ deployment. You still
+go with plain _kubernetes_ yaml files and full control over it.
+
+[[deployment-kapp-controller]]
+==== Deploy via kapp-controller
+Takes use of a _carvel_ package and deploys via controller with given options.
+
+With _kapp-controller_ you introduce a concept of a _carvel package_ and
+_package repository_ which gives even higher level of a deployment into
+a cluster. Essentially you no longer work with low level yaml files but
+work with configuration options which drives templating of a _kubernetes_
+resources. Furthermore when deleting something from a cluster, you're no
+longer deleting _kubernetes_ resources directly, you're deleting a package.
+
+[[deployment-tanzu]]
+==== Deploy via Tanzu CLI
+Essentially like deploying with _kapp-controller_ where _Tanzu CLI_ gives
+higher level of package management. _Tanzu CLI_ imposes some limitations
+how it uses _carvel_ _packages_ and _package repositories_. These limitations
+are mostly around a fack that _CLI_ is always slighty behind integrated
+functionality what rest of a _carver_ framework provides.
+
+[NOTE]
+====
+While _Tanzu CLI_ works with correctly configured _kubernetes_ cluster
+with _kapp_controller_ installed its power comes from a _management cluster_
+managing a _worker cluster_. If you don't want to down this route it
+may be easier to work with lower level deployment options mentioned above.
+====
+
+=== Configure Servers
+More info to configure servers see {servers}.
+
+=== Binder and Database
+Whether you want to use _rabbit_ or a _kafka_ as a binder and _mysql_ or
+a _postgres_ as a database we provided easy deployment which steps away when
+external services are defined.
+
+==== Use Deployed Services
+On default _postgres_ and _rabbit_ are used as a database and a binder.

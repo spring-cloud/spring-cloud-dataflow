@@ -1,0 +1,4 @@
+scdf:
+  server:
+    service:
+      type: LoadBalancer
