@@ -92,6 +92,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -213,6 +214,7 @@ public class DataFlowIT {
 	public void before() {
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
+		resetTimestampVersion();
 	}
 
 	@AfterEach
@@ -975,6 +977,9 @@ public class DataFlowIT {
 	// -----------------------------------------------------------------------
 	public static final int EXIT_CODE_SUCCESS = 0;
 	public static final int EXIT_CODE_ERROR = 1;
+	public static final String TEST_VERSION_NUMBER = "2.1.0.RELEASE";
+	public static final String CURRENT_VERSION_NUMBER = "2.1.1.RELEASE";
+
 
 	private List<String> composedTaskLaunchArguments(String... additionalArguments) {
 		// the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
@@ -1546,8 +1551,12 @@ public class DataFlowIT {
 	}
 
 	private void validateSuccessfulTaskLaunch(Task task, long launchId) {
+		validateSuccessfulTaskLaunch(task, launchId, 1);
+	}
+
+	private void validateSuccessfulTaskLaunch(Task task, long launchId, int sizeExpected) {
 		Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-		assertThat(task.executions().size()).isEqualTo(1);
+		assertThat(task.executions().size()).isEqualTo(sizeExpected);
 		assertThat(task.execution(launchId).isPresent()).isTrue();
 		assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 	}
@@ -1645,53 +1654,298 @@ public class DataFlowIT {
 	}
 
 	@Test
-	public void multipleTaskAppVersionTest() {
+	public void testLaunchOfDefaultThenVersion() {
+//		Scenario: I want to create a task app with 2 versions using default version
+//		Given A task with 2 versions
+//		And I create a task definition
+//		When I launch task definition using default app version
+//		And I launch task definition using version 2 of app
+//		Then Both tasks should succeed
+//		And It launches the specified version
 		logger.info("multiple task app version test");
-		Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"),
-				"upgradeRollbackTaskAppVersionTest: SKIP - SCDF 2.7.x and below!");
+		minimumVersionCheck("testLaunchOfDefaultThenVersion");
 
-		try (Task task = Task.builder(dataFlowOperations)
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		registerNewTimestampVersion();
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+		launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testCreateTaskWithTwoVersionsLaunchDefaultVersion() {
+//		Scenario: I want to create a task app with 2 versions using default version
+//		Given A task with 2 versions
+//		And I create a task definition
+//		When I launch task definition using default app version
+//		Then Task should succeed
+//		And It launches the specified version
+		minimumVersionCheck("testCreateTaskWithTwoVersionsLaunchDefaultVersion");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testLaunchOfNewVersionThenPreviousVersion() {
+//		Scenario: I want to create a task app with 2 versions run new version then default
+//		Given A task with 2 versions
+//		And I create a task definition
+//		And I launch task definition using version 2 of app
+//		When I launch task definition using version 1 of app
+//		Then Task should succeed
+//		And It launches the specified version
+		minimumVersionCheck("testLaunchOfNewVersionThenDefault");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		assertThat(task.execution(launchId).get().getResourceUrl()).contains(TEST_VERSION_NUMBER);
+
+		launchId = task.launch(Collections.singletonMap("version.timestamp", CURRENT_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testWhenNoVersionIsSpecifiedPreviousVersionShouldBeUsed()
+	{
+//		Scenario: When no version is specified previous used version should be used.
+//		Given A task with 2 versions
+//		And I create a task definition
+//		And I launch task definition using version 2 of app
+//		When I launch task definition using no app version
+//		Then Task should succeed
+//		And It launches the version 2 of app
+		minimumVersionCheck("testWhenNoVersionIsSpecifiedPreviousVersionShouldBeUsed");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER, 2);
+	}
+
+	@Test
+	public void testCreateTaskWithOneVersionLaunchInvalidVersion()
+	{
+//		Scenario: I want to create a task app with 1 version run invalid version
+//		Given A task with 1 versions
+//		And I create a task definition
+//		When I launch task definition using version 2 of app
+//		Then Task should fail
+		minimumVersionCheck("testCreateTaskWithOneVersionLaunchInvalidVersion");
+		Task task = createTaskDefinition();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null)).
+				isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	@Test
+	public void testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch() {
+//		Scenario: Invalid version usage should not affect subsequent default launch
+//		Given A task with 1 versions
+//		And I create a task definition
+//		And I launch task definition using version 2 of app
+//		When I launch task definition using default app version
+//		Then Task should succeed
+//		And It launches the specified version
+		minimumVersionCheck("testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch");
+		Task task = createTaskDefinition();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null)).
+				isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 1);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER, 1);
+	}
+
+	@Test
+	public void testDeletePreviouslyUsedVersionShouldFailIfRelaunched() {
+//		Scenario: Deleting a previously used version should fail if relaunched.
+//		Given A task with 2 versions
+//		And I create a task definition
+//		And I launch task definition using version 2 of app
+//		And I unregister version 2 of app
+//		When I launch task definition using version 2 of app
+//		Then Task should fail
+		minimumVersionCheck("testDeletePreviouslyUsedVersionShouldFailIfRelaunched");
+
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		resetTimestampVersion();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null)).
+				isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	@Test
+	public void testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful() {
+//		Scenario: Changing the app default version and running between changes should be successful
+//		Given A task with 2 versions
+//		And I create a task definition
+//		And I launch task definition using default app version
+//		And I set the default to version 2 of the app
+//		When I launch task definition using default app version
+//		Then Task should succeed
+//		And The version for the task execution should be version 2
+		minimumVersionCheck("testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful");
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+
+		registerNewTimestampVersion();
+		setDefaultVersionForTimestamp(TEST_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful() {
+//		Scenario: Rolling back default to previous version and running should be successful
+//		Given A task with 2 versions
+//		And I create a task definition
+//		And I launch task definition using default app version
+//		And I set the default to version 2 of the app
+//		And I launch task definition using default app version
+//		And I set the default to version 1 of the app
+//		When I create a task definition
+//		And I launch task definition using default app version
+//		Then Task should succeed
+//		And The version for the task execution should be version 1
+		minimumVersionCheck("testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+
+		setDefaultVersionForTimestamp(TEST_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+
+		task = createTaskDefinition();
+		setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testUnregisteringAppShouldPreventTaskDefinitionLaunch() {
+//		Scenario: Unregistering app should prevent task definition launch
+//		Given A task with 1 versions
+//		And I create a task definition
+//		And I launch task definition using default app version
+//		And I unregister version 1 of app
+//		When I launch task definition using default app version
+//		Then Task should fail
+		minimumVersionCheck("testUnregisteringAppShouldPreventTaskDefinitionLaunch");
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+		appRegistryOperations.unregister("timestamp", ApplicationType.task, CURRENT_VERSION_NUMBER);
+
+		assertThatThrownBy(() -> task.launch()).
+				isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	private Task createTaskDefinition() {
+		return Task.builder(dataFlowOperations)
 				.name(randomTaskName())
 				.definition("timestamp")
 				.description("Test scenario batch app that will fail on first pass")
-				.build()) {
+				.build() ;
+	}
 
-			String stepName = randomStepName();
-			// task first launch
-			long launchId = task.launch();
-			//Verify task
-			validateSuccessfulTaskLaunch(task, launchId);
-			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
-			DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp", ApplicationType.task, false);
-			if (taskResource.getUri().startsWith("maven:")) {
-				try {
-					appRegistryOperations.register("timestamp", ApplicationType.task,
-							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
-							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE", false);
-				}
-				catch (DataFlowClientException dfe) {
-					logger.info(dfe.getMessage(), dfe);
-				}
-			}
-			else {
-				try {
-					appRegistryOperations.register("timestamp", ApplicationType.task,
-							"docker:springcloudtask/timestamp-task:2.1.0.RELEASE",
-							null, false);
-				}
-				catch (DataFlowClientException dfe) {
-					logger.info(dfe.getMessage(), dfe);
-				}
-			}
+	private void minimumVersionCheck(String testName) {
+		Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"),
+				testName + ": SKIP - SCDF 2.7.x and below!");
+	}
 
-			long launchId2 = task.launch(Collections.singletonMap("version.timestamp", "2.1.0.RELEASE"), null);
-			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
-			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executions().stream().filter(
-					taskExecutionResource -> taskExecutionResource.getResourceUrl().
-							contains("2.1.0.RELEASE")).collect(Collectors.toList()).size()).
-					isEqualTo(1);
+	private void registerNewTimestampVersion() {
+		registerTimestamp(TEST_VERSION_NUMBER);
+	}
+
+	private void registerTimestamp(String versionNumber) {
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+
+		DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp-batch", ApplicationType.task, false);
+		if (taskResource.getUri().startsWith("maven:")) {
+			try {
+				appRegistryOperations.register("timestamp", ApplicationType.task,
+						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber,
+						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber, false);
+			}
+			catch (DataFlowClientException dfe) {
+				logger.info(dfe.getMessage(), dfe);
+			}
 		}
+		else {
+			try {
+				appRegistryOperations.register("timestamp", ApplicationType.task,
+						"docker:springcloudtask/timestamp-task:" + versionNumber,
+						null, false);
+			}
+			catch (DataFlowClientException dfe) {
+				logger.info(dfe.getMessage(), dfe);
+			}
+		}
+	}
+
+	private void setDefaultVersionForTimestamp(String version) {
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+		appRegistryOperations.makeDefault("timestamp", ApplicationType.task, version);
+	}
+
+	private void resetTimestampVersion() {
+		try {
+			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+			try {
+				appRegistryOperations.info("timestamp", ApplicationType.task, false);
+			}
+			catch (DataFlowClientException dfe) {
+				if(dfe.getMessage().equals("The 'task:timestamp' application could not be found.")) {
+					registerTimestamp(CURRENT_VERSION_NUMBER);
+				}
+				else {
+					throw dfe;
+				}
+			}
+			setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
+			appRegistryOperations.unregister("timestamp", ApplicationType.task, TEST_VERSION_NUMBER);
+		}
+		catch (DataFlowClientException dfe) {
+			logger.trace(dfe.getMessage(), dfe);
+		}
+
+	}
+
+	private void validateSpecifiedVersion(Task task, String version) {
+		validateSpecifiedVersion(task, version, 1);
+	}
+
+	private void validateSpecifiedVersion(Task task, String version, int countExpected) {
+		assertThat(task.executions().stream().filter(
+				taskExecutionResource -> taskExecutionResource.getResourceUrl().
+						contains(version)).collect(Collectors.toList()).size()).
+				isEqualTo(countExpected);
 	}
 
 	@Test
