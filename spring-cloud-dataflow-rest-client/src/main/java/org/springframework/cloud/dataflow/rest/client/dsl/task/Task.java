@@ -303,4 +303,34 @@ public class Task implements AutoCloseable {
 	public void close() {
 		destroy();
 	}
+
+	//--------------------------------------------------------------------------------------------------------
+	//                                    TASK EXECUTION CLEANUP
+	//--------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Remove specified task execution for the specified task execution id.
+	 * @param taskExecutionId the id of the task execution to be removed.
+	 */
+	public void cleanupTaskExecution(long taskExecutionId) {
+		this.taskOperations.cleanup(taskExecutionId, true);
+	}
+
+	/**
+	 * Remove all task executions.
+	 */
+	public void cleanupAllTaskExecutions() {
+		this.taskOperations.cleanupAllTaskExecutions(false, null);
+	}
+
+	/**
+	 * Retrieve task executions for child task name associated with this task's instance.
+	 * @param childTaskName to be used to search for the associated task executions.
+	 * @return List of task executions for the given child task.
+	 */
+	public Optional<TaskExecutionResource> composedTaskChildExecution(String childTaskName) {
+		Collection taskExecutions = taskOperations.executionListByTaskName(this.taskName + "-" + childTaskName).getContent();
+		return (taskExecutions.size() == 1) ? Optional.of((TaskExecutionResource) taskExecutions.stream().toArray()[0]): Optional.empty();
+	}
+
 }
