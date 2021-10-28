@@ -43,7 +43,7 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=release \
           --repo-deploy-snapshots=snapshot
-        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
+        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-29x >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
     # build and publish

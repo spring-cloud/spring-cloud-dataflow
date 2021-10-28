@@ -32,7 +32,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-build",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -42,7 +42,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-common",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -52,7 +52,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -62,7 +62,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-local",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -72,7 +72,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-cloudfoundry",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -82,7 +82,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-kubernetes",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -92,7 +92,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-common-security-config",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -102,7 +102,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-skipper",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -112,7 +112,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-ui",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -122,7 +122,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "milestone-worker.yml"
               }
             },
@@ -132,7 +132,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "promote-milestone.yml"
               }
             },
@@ -142,7 +142,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "2.9.x",
                 "workflow": "github-release.yml"
               }
             },
