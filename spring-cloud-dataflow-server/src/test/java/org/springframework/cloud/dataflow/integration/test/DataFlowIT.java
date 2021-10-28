@@ -1867,10 +1867,15 @@ public class DataFlowIT {
 	}
 
 	private Task createTaskDefinition() {
+		return createTaskDefinition("timestamp");
+	}
+
+	private Task createTaskDefinition(String definition) {
+		String taskDefName = randomTaskName();
 		return Task.builder(dataFlowOperations)
-				.name(randomTaskName())
-				.definition("timestamp")
-				.description("Test scenario batch app that will fail on first pass")
+				.name(taskDefName)
+				.definition(definition)
+				.description(String.format("Test task definition %s using for app definition\"%s\"", taskDefName, definition))
 				.build() ;
 	}
 
@@ -2056,6 +2061,220 @@ public class DataFlowIT {
 		this.dataFlowOperations.taskOperations().destroy(task.getTaskName(), true);
 		verifyTaskDefAndTaskExecutionCount(task.getTaskName(), 0, 0);
 	}
+
+	@Test
+	public void testDeleteSingleTaskExecution() {
+//		Scenario: I want to delete a single task execution
+//		Given A task definition exists
+//		And 1 task execution exist
+//		When I delete a task execution
+//		Then It should succeed
+//		And I will not see the task executions
+		minimumVersionCheck("testDeleteSingleTaskExecution");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 1);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			task.cleanupTaskExecution(launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+		}
+	}
+
+	@Test
+	public void testDeleteMultipleTaskExecution() {
+//		Scenario: I want to delete 3 task executions
+//		Given A task definition exists
+//		And 4 task execution exist
+//		When I delete 3 task executions
+//		Then They should succeed
+//		And I will see the remaining task execution
+		minimumVersionCheck("testDeleteMultipleTaskExecution");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 4);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			long retainedLaunchId = launchIds.get(3);
+			launchIds.stream().filter(launchId -> launchId != retainedLaunchId).forEach(
+					launchId -> {
+						task.cleanupTaskExecution(launchId);
+						assertThat(task.execution(launchId).isPresent()).isFalse();
+					}
+			);
+			assertThat(task.execution(retainedLaunchId).isPresent()).isTrue();
+		}
+	}
+
+	@Test
+	public void testDeleteAllTaskExecutionsShouldClearAllTaskExecutions() {
+//		Scenario: Delete all task executions should clear all task executions
+//		Given A task definition exists
+//		And 4 task execution exist
+//		When I delete all task executions
+//		Then It should succeed
+//		And I will not see the task executions
+		minimumVersionCheck("testDeleteAllTaskExecutionsShouldClearAllTaskExecutions");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 4);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			task.cleanupAllTaskExecutions();
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+		}
+	}
+
+	@Test
+	public void testDataFlowUsesLastAvailableTaskExecutionForItsProperties() {
+//		Scenario: Task Launch should use last available task execution for its properties
+//		Given A task definition exists
+//		And 2 task execution exist each having different properties
+//		When I launch task definition using default app version
+//		Then It should succeed
+//		And The task execution will contain the properties from both task executions
+		minimumVersionCheck("testDataFlowUsesLastAvailableTaskExecutionForItsProperties");
+		try (Task task = createTaskDefinition()) {
+			List<Long> firstLaunchIds = createTaskExecutionsForDefinition(task, Collections.singletonMap("app.timestamp.firstkey", "firstvalue"), 1);
+			verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
+
+			long secondLaunchId = task.launch();
+			assertThat(task.execution(secondLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, secondLaunchId, 2);
+			Optional<TaskExecutionResource> taskExecution = task.execution(secondLaunchId);
+			Map<String, String> properties = taskExecution.get().getAppProperties();
+			assertThat(properties.containsKey("firstkey")).isTrue();
+		}
+	}
+
+	@Test
+	public void testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted() {
+//		Scenario: Task Launch should use last available task execution for its properties after deleting previous version
+//		Given A task definition exists
+//		And 2 task execution exist each having different properties
+//		And I delete the last task execution
+//		When I launch task definition using default app version
+//		Then It should succeed
+//		And The task execution will contain the properties from the last available task
+		minimumVersionCheck("testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted");
+		try (Task task = createTaskDefinition()) {
+			List<Long> firstLaunchIds = createTaskExecutionsForDefinition(task, Collections.singletonMap("app.timestamp.firstkey", "firstvalue"), 1);
+			verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
+			long secondLaunchId = task.launch(Collections.singletonMap("app.timestamp.secondkey", "secondvalue"), Collections.emptyList());
+			assertThat(task.execution(secondLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, secondLaunchId, 2);
+			task.cleanupTaskExecution(secondLaunchId);
+			assertThat(task.execution(secondLaunchId).isPresent()).isFalse();
+
+			long thirdLaunchId = task.launch(Collections.singletonMap("app.timestamp.thirdkey", "thirdvalue"), Collections.emptyList());
+			assertThat(task.execution(thirdLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, thirdLaunchId, 2);
+			Optional<TaskExecutionResource> taskExecution = task.execution(thirdLaunchId);
+			Map<String, String> properties = taskExecution.get().getAppProperties();
+			assertThat(properties.containsKey("firstkey")).isTrue();
+			assertThat(properties.containsKey("secondkey")).isFalse();
+			assertThat(properties.containsKey("thirdkey")).isTrue();
+
+		}
+	}
+
+	@Test
+	public void testDeletingComposedTaskExecutionDeletesAllItsChildTaskExecutions() {
+//		Deleting a Composed Task Execution deletes all of its child task executions
+//		Given A composed task definition exists of "AAA && BBB"
+//		And 1 task execution exist
+//		And I delete the last task execution
+//		Then It should succeed
+//		And I will not see the composed task executions
+		minimumVersionCheck("testDeletingComposedTaskExecutionDeletesAllItsChildTaskExecutions");
+		try (Task task = createTaskDefinition("AAA: timestamp && BBB: timestamp")) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 1);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			Optional<TaskExecutionResource> aaaExecution = task.composedTaskChildExecution("AAA");
+			Optional<TaskExecutionResource> bbbExecution = task.composedTaskChildExecution("BBB");
+			assertThat(aaaExecution.isPresent()).isTrue();
+			assertThat(bbbExecution.isPresent()).isTrue();
+			task.cleanupTaskExecution(launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+			aaaExecution = task.composedTaskChildExecution("AAA");
+			bbbExecution = task.composedTaskChildExecution("BBB");
+			assertThat(aaaExecution.isPresent()).isFalse();
+			assertThat(bbbExecution.isPresent()).isFalse();
+		}
+
+	}
+
+	@Test
+	public void testDeletingBatchTaskExecutionDeletesAllOfItsBatchRecords() {
+//		Given A batch task definition exists
+//		And 1 task execution exist
+//		When I delete the last task execution
+//		Then It should succeed
+//		And I will not see the task executions
+//		And I will not see the batch executions
+		minimumVersionCheck("testDeletingBatchTaskExecutionDeletesAllOfItsBatchRecords");
+		try (Task task = createTaskDefinition("timestamp-batch")) {
+			List<Long> launchIds = Collections.singletonList(task.launch(Collections.emptyMap(),
+					Collections.singletonList("testKey="+task.getTaskName())));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			validateSuccessfulTaskLaunch(task, launchIds.get(0), 1);
+
+			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(2);
+			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
+			task.cleanupTaskExecution(launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+			assertThatThrownBy(() ->task.jobStepExecutions(jobExecutionIds.get(0))).
+					isInstanceOf(DataFlowClientException.class).hasMessageContaining("No JobExecution with id=");
+		}
+	}
+
+	@Test
+	public void testRestartingBatchTaskExecutionThatHasBeenDeleted() {
+//		Restarting a Batch Task Execution that has been deleted
+//		Given A batch task definition exists
+//		And 1 task execution exist
+//		And I delete the last task execution
+//		When I restart the batch job
+//		And The batch job will fail
+		minimumVersionCheck("testRestartingBatchTaskExecutionThatHasBeenDeleted");
+		try (Task task = createTaskDefinition("timestamp-batch")) {
+			List<Long> launchIds = Collections.singletonList(task.launch(Collections.emptyMap(),
+					Collections.singletonList("testKey="+task.getTaskName())));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			validateSuccessfulTaskLaunch(task, launchIds.get(0), 1);
+
+			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(2);
+			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
+			task.cleanupTaskExecution(launchIds.get(0));
+			assertThatThrownBy(() ->this.dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0))).
+					isInstanceOf(DataFlowClientException.class).hasMessageContaining("There is no JobExecution with id=");
+		}
+
+	}
+
+	private List<Long> createTaskExecutionsForDefinition(Task task, int executionCount) {
+		return createTaskExecutionsForDefinition(task, Collections.emptyMap(), executionCount);
+	}
+
+	private List<Long> createTaskExecutionsForDefinition(Task task, Map<String, String> properties, int executionCount) {
+		List<Long>launchIds = new ArrayList<>();
+		for(int i = 0; i < executionCount; i++) {
+			launchIds.add(task.launch(properties, Collections.emptyList()));
+			assertThat(task.execution(launchIds.get(i)).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, launchIds.get(i), i + 1);
+		}
+		return launchIds;
+	}
+
+	private void verifyAllSpecifiedTaskExecutions(Task task, List<Long> launchIds, boolean isPresent) {
+		launchIds.stream().forEach(
+				launchId -> {
+					if(isPresent) {
+						assertThat( task.execution(launchId).isPresent()).isTrue();
+					}
+					else {
+						assertThat( task.execution(launchId).isPresent()).isFalse();
+					}
+				}
+		);
+	}
+
 
 	private void verifyTaskDefAndTaskExecutionCount(String taskName, int taskDefCount, int taskExecCount) {
 		assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream().
