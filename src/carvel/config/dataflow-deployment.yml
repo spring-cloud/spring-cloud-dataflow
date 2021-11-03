@@ -4,6 +4,8 @@
 #@ load("dataflow.star", "dataflow_container_env")
 #@ load("dataflow.star", "has_image_pull_secrets")
 #@ load("dataflow.star", "image_pull_secrets")
+#@ load("dataflow.star", "dataflow_liveness_path")
+#@ load("dataflow.star", "dataflow_readiness_path")
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,12 +41,12 @@ spec:
         - containerPort: 80
         livenessProbe:
           httpGet:
-            path: /management/health
+            path: #@ dataflow_liveness_path()
             port: 9393
           initialDelaySeconds: 45
         readinessProbe:
           httpGet:
-            path: /management/info
+            path: #@ dataflow_readiness_path()
             port: 9393
           initialDelaySeconds: 45
         resources:

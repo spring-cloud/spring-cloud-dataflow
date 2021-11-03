@@ -61,3 +61,19 @@ end
 def service_spec_type():
   return data.values.scdf.server.service.type
 end
+
+def context_path():
+  return data.values.scdf.server.contextPath
+end
+
+def has_context_path():
+  return non_empty_string(data.values.scdf.server.contextPath)
+end
+
+def dataflow_liveness_path():
+  return data.values.scdf.server.contextPath + "/management/health"
+end
+
+def dataflow_readiness_path():
+  return data.values.scdf.server.contextPath + "/management/info"
+end

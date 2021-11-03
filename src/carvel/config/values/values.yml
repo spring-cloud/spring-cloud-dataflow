@@ -67,6 +67,7 @@ scdf:
     metrics:
       dashboard:
         url: ""
+    contextPath: ""
     database:
       url: ""
       username: ""

@@ -494,4 +494,46 @@ describe('servers', () => {
     const url = lodash.get(dataflowJson, 'spring.cloud.dataflow.metrics.dashboard.url') as string;
     expect(url).toEqual('http://fakedashboard');
   });
+
+  it('should have default servlet context path', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const url = lodash.get(dataflowJson, 'server.servlet.context-path') as string;
+    expect(url).toBeUndefined();
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/management/health');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/management/info');
+  });
+
+  it('should change server servlet context path', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.server.contextPath=/scdf']
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const url = lodash.get(dataflowJson, 'server.servlet.context-path') as string;
+    expect(url).toBe('/scdf');
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/scdf/management/health');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/scdf/management/info');
+  });
 });

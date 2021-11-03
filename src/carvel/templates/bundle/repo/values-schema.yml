@@ -134,6 +134,9 @@ components:
                         url:
                           type: string
                           description: Metrics dashboard url for UI
+                contextPath:
+                  type: string
+                  description: Server context path, aka server.servlet.context-path
             skipper:
               type: object
               properties:
