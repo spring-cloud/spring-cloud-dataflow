@@ -56,6 +56,7 @@ yaml document.
 - <<configuration-options-scdf.server.database.validationQuery>>
 - <<configuration-options-scdf.server.config>>
 - <<configuration-options-scdf.server.metrics.dashboard.url>>
+- <<configuration-options-scdf.server.contextPath>>
 - <<configuration-options-scdf.ctr.image.repository>>
 - <<configuration-options-scdf.ctr.image.tag>>
 - <<configuration-options-scdf.ctr.image.digest>>
@@ -498,6 +499,16 @@ None
 [[configuration-options-scdf.server.metrics.dashboard.url]]`scdf.server.metrics.dashboard.url`::
   Description:::
 Metrics dashboard url for UI.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+None
+
+[[configuration-options-scdf.server.contextPath]]`scdf.server.contextPath`::
+  Description:::
+Server context path, aka server.servlet.context-path
   Required:::
 No
   Type:::
