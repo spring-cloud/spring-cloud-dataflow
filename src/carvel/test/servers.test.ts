@@ -536,4 +536,62 @@ describe('servers', () => {
     expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/scdf/management/health');
     expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/scdf/management/info');
   });
+
+  it('should have default resources', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const skipperDeployment = findDeployment(yaml, SKIPPER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
+
+    expect(dataflowContainer?.resources?.limits?.cpu).toBe('500m');
+    expect(dataflowContainer?.resources?.limits?.memory).toBe('1024Mi');
+    expect(dataflowContainer?.resources?.requests?.cpu).toBe('500m');
+    expect(dataflowContainer?.resources?.requests?.memory).toBe('1024Mi');
+
+    expect(skipperContainer?.resources?.limits?.cpu).toBe('500m');
+    expect(skipperContainer?.resources?.limits?.memory).toBe('1024Mi');
+    expect(skipperContainer?.resources?.requests?.cpu).toBe('500m');
+    expect(skipperContainer?.resources?.requests?.memory).toBe('1024Mi');
+  });
+
+  it('should change resources', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.server.resources.limits.cpu=600m',
+        'scdf.server.resources.limits.memory=1000Mi',
+        'scdf.server.resources.requests.cpu=600m',
+        'scdf.server.resources.requests.memory=1000Mi',
+        'scdf.skipper.resources.limits.cpu=600m',
+        'scdf.skipper.resources.limits.memory=1000Mi',
+        'scdf.skipper.resources.requests.cpu=600m',
+        'scdf.skipper.resources.requests.memory=1000Mi'
+      ]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const skipperDeployment = findDeployment(yaml, SKIPPER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
+
+    expect(dataflowContainer?.resources?.limits?.cpu).toBe('600m');
+    expect(dataflowContainer?.resources?.limits?.memory).toBe('1000Mi');
+    expect(dataflowContainer?.resources?.requests?.cpu).toBe('600m');
+    expect(dataflowContainer?.resources?.requests?.memory).toBe('1000Mi');
+
+    expect(skipperContainer?.resources?.limits?.cpu).toBe('600m');
+    expect(skipperContainer?.resources?.limits?.memory).toBe('1000Mi');
+    expect(skipperContainer?.resources?.requests?.cpu).toBe('600m');
+    expect(skipperContainer?.resources?.requests?.memory).toBe('1000Mi');
+  });
 });

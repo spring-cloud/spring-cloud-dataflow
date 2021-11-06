@@ -48,6 +48,10 @@ yaml document.
 - <<configuration-options-scdf.server.image.tag>>
 - <<configuration-options-scdf.server.image.digest>>
 - <<configuration-options-scdf.server.service.type>>
+- <<configuration-options-scdf.server.resources.limits.cpu>>
+- <<configuration-options-scdf.server.resources.limits.memory>>
+- <<configuration-options-scdf.server.resources.requests.cpu>>
+- <<configuration-options-scdf.server.resources.requests.memory>>
 - <<configuration-options-scdf.server.database.url>>
 - <<configuration-options-scdf.server.database.username>>
 - <<configuration-options-scdf.server.database.password>>
@@ -64,6 +68,10 @@ yaml document.
 - <<configuration-options-scdf.skipper.image.tag>>
 - <<configuration-options-scdf.skipper.image.digest>>
 - <<configuration-options-scdf.skipper.service.type>>
+- <<configuration-options-scdf.skipper.resources.limits.cpu>>
+- <<configuration-options-scdf.skipper.resources.limits.memory>>
+- <<configuration-options-scdf.skipper.resources.requests.cpu>>
+- <<configuration-options-scdf.skipper.resources.requests.memory>>
 - <<configuration-options-scdf.skipper.database.url>>
 - <<configuration-options-scdf.skipper.database.username>>
 - <<configuration-options-scdf.skipper.database.password>>
@@ -426,6 +434,46 @@ Enum(NodePort, LoadBalancer, ClusterIP, ExternalName)
    Default Value:::
 ClusterIP
 
+[[configuration-options-scdf.server.resources.limits.cpu]]`scdf.server.resources.limits.cpu`::
+  Description:::
+Limits cpu setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+500m
+
+[[configuration-options-scdf.server.resources.limits.memory]]`scdf.server.resources.limits.memory`::
+  Description:::
+Limits memory setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+1024Mi
+
+[[configuration-options-scdf.server.resources.requests.cpu]]`scdf.server.resources.requests.cpu`::
+  Description:::
+Requests cpu setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+500m
+
+[[configuration-options-scdf.server.resources.requests.memory]]`scdf.server.resources.requests.memory`::
+  Description:::
+Requests memory setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+1024Mi
+
 [[configuration-options-scdf.server.database.url]]`scdf.server.database.url`::
   Description:::
 Datasource url setting
@@ -585,6 +633,46 @@ No
 Enum(NodePort, LoadBalancer, ClusterIP, ExternalName)
    Default Value:::
 ClusterIP
+
+[[configuration-options-scdf.skipper.resources.limits.cpu]]`scdf.skipper.resources.limits.cpu`::
+  Description:::
+Limits cpu setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+500m
+
+[[configuration-options-scdf.skipper.resources.limits.memory]]`scdf.skipper.resources.limits.memory`::
+  Description:::
+Limits memory setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+1024Mi
+
+[[configuration-options-scdf.skipper.resources.requests.cpu]]`scdf.skipper.resources.requests.cpu`::
+  Description:::
+Requests cpu setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+500m
+
+[[configuration-options-scdf.skipper.resources.requests.memory]]`scdf.skipper.resources.requests.memory`::
+  Description:::
+Requests memory setting.
+  Required:::
+No
+  Type:::
+String
+   Default Value:::
+1024Mi
 
 [[configuration-options-scdf.skipper.database.url]]`scdf.skipper.database.url`::
   Description:::

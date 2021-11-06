@@ -122,6 +122,27 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
                 config:
                   type: string
                   description: Raw server config as yml
@@ -171,6 +192,27 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
                 config:
                   type: string
                   description: Raw server config as yml

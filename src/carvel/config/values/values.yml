@@ -64,6 +64,13 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     metrics:
       dashboard:
         url: ""
@@ -94,6 +101,13 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1024Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     database:
       url: ""
       username: ""

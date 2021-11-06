@@ -51,11 +51,11 @@ spec:
           initialDelaySeconds: 45
         resources:
           limits:
-            cpu: 1.0
-            memory: 2048Mi
+            cpu: #@ data.values.scdf.server.resources.limits.cpu
+            memory: #@ data.values.scdf.server.resources.limits.memory
           requests:
-            cpu: 0.5
-            memory: 1024Mi
+            cpu: #@ data.values.scdf.server.resources.requests.cpu
+            memory: #@ data.values.scdf.server.resources.requests.memory
         env: #@ dataflow_container_env()
       serviceAccountName: scdf-sa
       #@ if has_image_pull_secrets():
