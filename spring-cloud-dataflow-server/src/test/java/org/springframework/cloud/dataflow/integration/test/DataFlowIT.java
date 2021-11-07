@@ -240,14 +240,14 @@ public class DataFlowIT {
 		// Maven app with metadata
 		DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
 				.info("file", ApplicationType.sink, false);
-		assertThat(mavenAppWithJarMetadata.getOptions()).hasSize(8);
+		assertThat(mavenAppWithJarMetadata.getOptions()).describedAs("mavenAppWithJarMetadata").hasSize(8);
 
 		// Maven app without metadata
 		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
 				"maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true);
 		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
 				.info("maven-app-without-metadata", ApplicationType.sink, false);
-		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
+		assertThat(mavenAppWithoutMetadata.getOptions()).describedAs("mavenAppWithoutMetadata").hasSize(8);
 		// unregister the test apps
 		dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
 	}
