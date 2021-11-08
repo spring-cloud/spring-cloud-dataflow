@@ -154,7 +154,9 @@ public final class DeploymentPropertiesUtils {
 			for (int i = 0; i < candidates.length; i++) {
 				int elementsInQuotesIndex = findEndToken(candidates, i) +1;
 				if (elementsInQuotesIndex > -1) {
-					pairs.add(candidates[i]);
+					if(!candidates[i].equals("")) {
+						pairs.add(candidates[i]);
+					}
 					i++;
 					for (; i < elementsInQuotesIndex; i++) {
 						pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
@@ -174,10 +176,15 @@ public final class DeploymentPropertiesUtils {
 				}
 				else {
 					// we have a key/value pair having '=', or malformed first pair
-					pairs.add(candidates[i]);
+					if(!candidates[i].equals("")) {
+						pairs.add(candidates[i]);
+					}
 				}
 			}
-		}
+			for(int i = 0; i < pairs.size(); i++) {
+				pairs.set(i, StringUtils.trimTrailingWhitespace(pairs.get(i)));
+			}
+ 		}
 		return pairs;
 	}
 
