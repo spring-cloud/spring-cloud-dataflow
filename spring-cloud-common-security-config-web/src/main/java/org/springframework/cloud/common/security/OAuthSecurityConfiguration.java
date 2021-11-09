@@ -216,6 +216,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
 		if (providerRoleMapping != null) {
 			converter.setAuthoritiesMapping(providerRoleMapping.getRoleMappings());
+			converter.setGroupAuthoritiesMapping(providerRoleMapping.getGroupMappings());
 		}
 		return jwtAuthenticationConverter;
 	}

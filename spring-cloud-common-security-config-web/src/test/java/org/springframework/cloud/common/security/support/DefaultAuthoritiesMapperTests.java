@@ -45,28 +45,22 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testMapScopesToAuthoritiesWithNullParameters() throws Exception {
-		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
+		DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
+
 		assertThatThrownBy(() -> {
 			authoritiesMapper.mapScopesToAuthorities(null, null, null);
 		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The scopes argument must not be null.");
-	}
-
-	@Test
-	public void testMapScopesToAuthoritiesWithNullParameters2() throws Exception {
-		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper(Collections.emptyMap(), "");
 		assertThatThrownBy(() -> {
 			authoritiesMapper.mapScopesToAuthorities("myClientId", null, null);
 		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The scopes argument must not be null.");
 	}
 
-
 	@Test
 	public void testThat7AuthoritiesAreReturned() throws Exception {
-		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", false);
+		DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", false);
+		Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet(), null);
 
-		final Set<GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", Collections.emptySet(), null);
 		assertThat(authorities).hasSize(7);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW", "ROLE_DEPLOY", "ROLE_MODIFY",
 						"ROLE_SCHEDULE", "ROLE_DESTROY");
@@ -74,26 +68,24 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testEmptyMapConstructor() throws Exception {
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		final DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", true);
+		DefaultAuthoritiesMapper authoritiesMapper = new DefaultAuthoritiesMapper("uaa", true);
+		Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
 
-		final Collection<? extends GrantedAuthority> authorities = authoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
 		assertThat(authorities).hasSize(3);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
 	public void testMapConstructorWithIncompleteRoleMappings() throws Exception {
-		final ProviderRoleMapping roleMapping = new ProviderRoleMapping();
+		ProviderRoleMapping roleMapping = new ProviderRoleMapping();
 		roleMapping.setMapOauthScopes(true);
 		roleMapping.addRoleMapping("ROLE_MANAGE", "foo-scope-in-oauth");
-
 		assertThatThrownBy(() -> {
 			new DefaultAuthoritiesMapper("uaa", roleMapping);
 		}).isInstanceOf(IllegalArgumentException.class).hasMessageContaining(
@@ -102,23 +94,20 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testThat7MappedAuthoritiesAreReturned() throws Exception {
-
-		final Map<String, String> roleMappings = new HashMap<>();
-
+		Map<String, String> roleMappings = new HashMap<>();
 		roleMappings.put("ROLE_MANAGE", "foo-manage");
 		roleMappings.put("ROLE_VIEW", "bar-view");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
-
 		roleMappings.put("ROLE_MODIFY", "foo-modify");
 		roleMappings.put("ROLE_DEPLOY", "foo-deploy");
 		roleMappings.put("ROLE_DESTROY", "foo-destroy");
 		roleMappings.put("ROLE_SCHEDULE", "foo-schedule");
 
-		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
 		providerRoleMapping.setMapOauthScopes(true);
 		providerRoleMapping.getRoleMappings().putAll(roleMappings);
 
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("foo-manage");
 		scopes.add("bar-view");
 		scopes.add("blubba-create");
@@ -127,12 +116,11 @@ public class DefaultAuthoritiesMapperTests {
 		scopes.add("foo-destroy");
 		scopes.add("foo-schedule");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(7);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
 						"ROLE_SCHEDULE", "ROLE_VIEW");
@@ -140,42 +128,38 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testThat3MappedAuthoritiesAreReturnedForDefaultMapping() throws Exception {
-
-		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
 		providerRoleMapping.setMapOauthScopes(true);
 
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(3);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_MANAGE", "ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
 	public void testThat7MappedAuthoritiesAreReturnedForDefaultMappingWithoutMappingScopes() throws Exception {
-
-		final ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
 		providerRoleMapping.setMapOauthScopes(false);
 
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", false);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", false);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(7);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
 						"ROLE_SCHEDULE", "ROLE_VIEW");
@@ -183,25 +167,22 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testThat2MappedAuthoritiesAreReturnedForDefaultMapping() throws Exception {
-
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.view");
 		scopes.add("dataflow.create");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(2);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_VIEW");
 	}
 
 	@Test
 	public void testThat7AuthoritiesAreReturnedAndOneOAuthScopeCoversMultipleServerRoles() throws Exception {
-		final Map<String, String> roleMappings = new HashMap<>();
-
+		Map<String, String> roleMappings = new HashMap<>();
 		roleMappings.put("ROLE_MANAGE", "foo-manage");
 		roleMappings.put("ROLE_VIEW", "foo-manage");
 		roleMappings.put("ROLE_DEPLOY", "foo-manage");
@@ -210,16 +191,15 @@ public class DefaultAuthoritiesMapperTests {
 		roleMappings.put("ROLE_SCHEDULE", "foo-manage");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
 
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("foo-manage");
 		scopes.add("blubba-create");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(7);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
 						"ROLE_SCHEDULE", "ROLE_VIEW");
@@ -227,8 +207,7 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testThatUriStyleScopeRemovesLeadingPart() throws Exception {
-		final Map<String, String> roleMappings = new HashMap<>();
-
+		Map<String, String> roleMappings = new HashMap<>();
 		roleMappings.put("ROLE_MANAGE", "foo-manage");
 		roleMappings.put("ROLE_VIEW", "foo-manage");
 		roleMappings.put("ROLE_DEPLOY", "foo-manage");
@@ -237,16 +216,15 @@ public class DefaultAuthoritiesMapperTests {
 		roleMappings.put("ROLE_SCHEDULE", "foo-manage");
 		roleMappings.put("ROLE_CREATE", "blubba-create");
 
-		final Set<String> scopes = new HashSet<>();
+		Set<String> scopes = new HashSet<>();
 		scopes.add("api://foobar/foo-manage");
 		scopes.add("blubba-create");
 
-		final DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
-
-		final Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa", scopes, null);
+		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
 
 		assertThat(authorities).hasSize(7);
-
 		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
 				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
 						"ROLE_SCHEDULE", "ROLE_VIEW");

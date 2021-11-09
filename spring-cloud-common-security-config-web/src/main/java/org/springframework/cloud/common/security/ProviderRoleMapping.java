@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,11 @@ public class ProviderRoleMapping {
 
 	private String oauthScopePrefix = "dataflow.";
 	private String rolePrefix = "ROLE_";
-
+	private String groupClaim = "roles";
 	private boolean mapOauthScopes = false;
-
+	private boolean mapGroupClaims = false;
 	private Map<String, String> roleMappings = new HashMap<>(0);
+	private Map<String, String> groupMappings = new HashMap<>(0);
 
 	public ProviderRoleMapping() {
 		super();
@@ -68,6 +69,14 @@ public class ProviderRoleMapping {
 		this.mapOauthScopes = mapOauthScopes;
 	}
 
+	public boolean isMapGroupClaims() {
+		return mapGroupClaims;
+	}
+
+	public void setMapGroupClaims(boolean mapGroupClaims) {
+		this.mapGroupClaims = mapGroupClaims;
+	}
+
 	/**
 	 * When using OAuth2 with enabled {@link #setMapOauthScopes(boolean)}, you can optionally specify a custom
 	 * mapping of OAuth scopes to role names as they exist in the Data Flow application. If not
@@ -89,6 +98,68 @@ public class ProviderRoleMapping {
 		this.roleMappings.put(oauthScope, roleName);
 		return this;
 	}
+
+	public Map<String, String> getGroupMappings() {
+		return groupMappings;
+	}
+
+	public void setGroupMappings(Map<String, String> groupMappings) {
+		this.groupMappings = groupMappings;
+	}
+
+	public String getGroupClaim() {
+		return groupClaim;
+	}
+
+	public void setGroupClaim(String groupClaim) {
+		this.groupClaim = groupClaim;
+	}
+
+	public Map<CoreSecurityRoles, String> convertGroupMappingKeysToCoreSecurityRoles() {
+
+		final Map<CoreSecurityRoles, String> groupMappings = new HashMap<>(0);
+
+		if (CollectionUtils.isEmpty(this.groupMappings)) {
+			for (CoreSecurityRoles roleEnum : CoreSecurityRoles.values()) {
+				final String roleName = this.oauthScopePrefix + roleEnum.getKey();
+				groupMappings.put(roleEnum, roleName);
+			}
+			return groupMappings;
+		}
+
+		final List<CoreSecurityRoles> unmappedRoles = new ArrayList<>(0);
+
+		for (CoreSecurityRoles coreRole : CoreSecurityRoles.values()) {
+
+			final String coreSecurityRoleName;
+			if (this.rolePrefix.length() > 0 && !coreRole.getKey().startsWith(rolePrefix)) {
+				coreSecurityRoleName = rolePrefix + coreRole.getKey();
+			}
+			else {
+				coreSecurityRoleName = coreRole.getKey();
+			}
+
+			final String oauthScope = this.groupMappings.get(coreSecurityRoleName);
+
+			if (oauthScope == null) {
+				unmappedRoles.add(coreRole);
+			}
+			else {
+				groupMappings.put(coreRole, oauthScope);
+			}
+		}
+
+		if (!unmappedRoles.isEmpty()) {
+			throw new IllegalArgumentException(
+				String.format("The following %s %s not mapped: %s.",
+					unmappedRoles.size(),
+					unmappedRoles.size() > 1 ? "roles are" : "role is",
+					StringUtils.collectionToDelimitedString(unmappedRoles, ", ")));
+		}
+
+		return groupMappings;
+	}
+
 	/**
 	 * @return Map containing the {@link CoreSecurityRoles} as key and the associated role name (String) as value.
 	 */

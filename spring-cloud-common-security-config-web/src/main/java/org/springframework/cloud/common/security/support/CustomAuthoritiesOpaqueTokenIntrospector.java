@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,14 @@
  */
 package org.springframework.cloud.common.security.support;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
@@ -34,6 +38,7 @@ import org.springframework.security.oauth2.server.resource.introspection.OpaqueT
  */
 public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntrospector {
 
+	private static final Logger logger = LoggerFactory.getLogger(CustomAuthoritiesOpaqueTokenIntrospector.class);
 	private final OpaqueTokenIntrospector delegate;
 	private DefaultPrincipalExtractor principalExtractor;
 	private AuthoritiesMapper authorityMapper;
@@ -48,7 +53,9 @@ public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntr
 		this.authorityMapper = authorityMapper;
 	}
 
+	@Override
 	public OAuth2AuthenticatedPrincipal introspect(String token) {
+		logger.debug("Introspecting");
 		OAuth2AuthenticatedPrincipal principal = this.delegate.introspect(token);
 		Object principalName = principalExtractor.extractPrincipal(principal.getAttributes());
 		return new DefaultOAuth2AuthenticatedPrincipal(
@@ -59,6 +66,8 @@ public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntr
 		final List<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
 		final Set<String> scopesAsSet = new HashSet<>(scopes);
 		final Set<GrantedAuthority> authorities = this.authorityMapper.mapScopesToAuthorities(null, scopesAsSet, token);
+		final Set<GrantedAuthority> authorities2 = this.authorityMapper.mapClaimsToAuthorities(null, Arrays.asList("groups", "roles"));
+		authorities.addAll(authorities2);
 		return authorities;
 	}
 

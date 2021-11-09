@@ -16,36 +16,51 @@
 
 package org.springframework.cloud.common.security.support;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Extracts the {@link GrantedAuthority}s from scope attributes typically found in a
- * {@link Jwt}.
+ * Extracts the {@link GrantedAuthority}s from scope attributes typically found
+ * in a {@link Jwt}.
+ *
+ * @author Gunnar Hillert
+ * @author Janne Valkealahti
  */
 public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+
+	private final static Logger log = LoggerFactory.getLogger(MappingJwtGrantedAuthoritiesConverter.class);
 	private static final String DEFAULT_AUTHORITY_PREFIX = "SCOPE_";
 
-	private static final Collection<String> WELL_KNOWN_AUTHORITIES_CLAIM_NAMES =
+	private static final Collection<String> WELL_KNOWN_SCOPES_CLAIM_NAMES =
 			Arrays.asList("scope", "scp");
+	private static final Collection<String> WELL_KNOWN_GROUPS_CLAIM_NAMES =
+			Arrays.asList("groups", "roles");
 
 	private String authorityPrefix = DEFAULT_AUTHORITY_PREFIX;
 
 	private String authoritiesClaimName;
+	private String groupAuthoritiesClaimName;
 
-	private Map<String, String> authoritiesMapping = new HashMap<>();
+	private Map<String, String> roleAuthoritiesMapping = new HashMap<>();
+	private Map<String, String> groupAuthoritiesMapping = new HashMap<>();
 
 	/**
 	 * Extract {@link GrantedAuthority}s from the given {@link Jwt}.
@@ -55,18 +70,25 @@ public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jw
 	 */
 	@Override
 	public Collection<GrantedAuthority> convert(Jwt jwt) {
-		return getAuthorities(jwt).stream()
+		log.debug("JWT: {}", jwt.getTokenValue());
+		Set<GrantedAuthority> collect = getAuthorities(jwt).stream()
 			.flatMap(authority -> {
-				if (authoritiesMapping.isEmpty()) {
+				if (roleAuthoritiesMapping.isEmpty() && groupAuthoritiesMapping.isEmpty()) {
 					return Stream.of(authority);
 				}
-				return authoritiesMapping.entrySet().stream()
+				Stream<String> s1 = roleAuthoritiesMapping.entrySet().stream()
 					.filter(entry -> entry.getValue().equals(authority))
 					.map(entry -> entry.getKey()).distinct();
+				Stream<String> s2 = groupAuthoritiesMapping.entrySet().stream()
+					.filter(entry -> entry.getValue().equals(authority))
+					.map(entry -> entry.getKey()).distinct();
+				return Stream.concat(s1, s2);
 			})
 			.distinct()
 			.map(authority -> new SimpleGrantedAuthority(this.authorityPrefix + authority))
 			.collect(Collectors.toSet());
+		log.debug("JWT granted: {}", collect);
+		return collect;
 	}
 
 	/**
@@ -81,8 +103,9 @@ public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jw
 	}
 
 	/**
-	 * Sets the name of token claim to use for mapping {@link GrantedAuthority authorities} by this converter.
-	 * Defaults to {@link JwtGrantedAuthoritiesConverter#WELL_KNOWN_AUTHORITIES_CLAIM_NAMES}.
+	 * Sets the name of token claim to use for mapping {@link GrantedAuthority
+	 * authorities} by this converter. Defaults to
+	 * {@link JwtGrantedAuthoritiesConverter#WELL_KNOWN_SCOPES_CLAIM_NAMES}.
 	 *
 	 * @param authoritiesClaimName The token claim name to map authorities
 	 */
@@ -98,16 +121,48 @@ public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jw
 	 */
 	public void setAuthoritiesMapping(Map<String, String> authoritiesMapping) {
 		Assert.notNull(authoritiesMapping, "authoritiesMapping cannot be null");
-		this.authoritiesMapping = authoritiesMapping;
+		this.roleAuthoritiesMapping = authoritiesMapping;
+	}
+
+	/**
+	 * Sets the name of token claim to use for group mapping {@link GrantedAuthority
+	 * authorities} by this converter. Defaults to
+	 * {@link JwtGrantedAuthoritiesConverter#WELL_KNOWN_GROUPS_CLAIM_NAMES}.
+	 *
+	 * @param groupAuthoritiesClaimName the token claim name to map group
+	 *                                  authorities
+	 */
+	public void setGroupAuthoritiesClaimName(String groupAuthoritiesClaimName) {
+		this.groupAuthoritiesClaimName = groupAuthoritiesClaimName;
+	}
+
+	/**
+	 * Set the group mapping from resolved authorities from jwt into granted
+	 * authorities.
+	 *
+	 * @param groupAuthoritiesMapping
+	 */
+	public void setGroupAuthoritiesMapping(Map<String, String> groupAuthoritiesMapping) {
+		this.groupAuthoritiesMapping = groupAuthoritiesMapping;
 	}
 
 	private String getAuthoritiesClaimName(Jwt jwt) {
-
 		if (this.authoritiesClaimName != null) {
 			return this.authoritiesClaimName;
 		}
+		for (String claimName : WELL_KNOWN_SCOPES_CLAIM_NAMES) {
+			if (jwt.hasClaim(claimName)) {
+				return claimName;
+			}
+		}
+		return null;
+	}
 
-		for (String claimName : WELL_KNOWN_AUTHORITIES_CLAIM_NAMES) {
+	private String getGroupAuthoritiesClaimName(Jwt jwt) {
+		if (this.groupAuthoritiesClaimName != null) {
+			return this.groupAuthoritiesClaimName;
+		}
+		for (String claimName : WELL_KNOWN_GROUPS_CLAIM_NAMES) {
 			if (jwt.hasClaim(claimName)) {
 				return claimName;
 			}
@@ -116,23 +171,31 @@ public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jw
 	}
 
 	private Collection<String> getAuthorities(Jwt jwt) {
-		String claimName = getAuthoritiesClaimName(jwt);
+		String scopeClaimName = getAuthoritiesClaimName(jwt);
+		String groupClaimName = getGroupAuthoritiesClaimName(jwt);
 
-		if (claimName == null) {
-			return Collections.emptyList();
+		List<String> claimAsStringList1 = null;
+		List<String> claimAsStringList2 = null;
+
+		// spring-sec does wrong conversion with arrays
+		if (scopeClaimName != null && !ObjectUtils.isArray(jwt.getClaim(scopeClaimName))) {
+			claimAsStringList1 = jwt.getClaimAsStringList(scopeClaimName);
+		}
+		if (groupClaimName != null && !ObjectUtils.isArray(jwt.getClaim(groupClaimName))) {
+			claimAsStringList2 = jwt.getClaimAsStringList(groupClaimName);
 		}
 
-		Object authorities = jwt.getClaim(claimName);
-		if (authorities instanceof String) {
-			if (StringUtils.hasText((String) authorities)) {
-				return Arrays.asList(((String) authorities).split(" "));
-			} else {
-				return Collections.emptyList();
-			}
-		} else if (authorities instanceof Collection) {
-			return (Collection<String>) authorities;
+		List<String> claimAsStringList = new ArrayList<>();
+		if (claimAsStringList1 != null) {
+			List<String> collect = claimAsStringList1.stream()
+				.flatMap(c -> Arrays.stream(c.split(" ")))
+				.filter(c -> StringUtils.hasText(c))
+				.collect(Collectors.toList());
+			claimAsStringList.addAll(collect);
 		}
-
-		return Collections.emptyList();
+		if (claimAsStringList2 != null) {
+			claimAsStringList.addAll(claimAsStringList2);
+		}
+		return claimAsStringList;
 	}
 }

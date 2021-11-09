@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,13 @@
  */
 package org.springframework.cloud.common.security.support;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -30,11 +36,12 @@ import org.springframework.util.StringUtils;
 /**
  *
  * @author Gunnar Hillert
- * @since 1.3.0
+ * @author Janne Valkealahti
  */
 public class CustomOAuth2OidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
-	final OidcUserService delegate = new OidcUserService();
 
+	private final static Logger log = LoggerFactory.getLogger(CustomOAuth2OidcUserService.class);
+	final OidcUserService delegate = new OidcUserService();
 	final AuthoritiesMapper authorityMapper;
 
 	public CustomOAuth2OidcUserService(AuthoritiesMapper authorityMapper) {
@@ -43,19 +50,38 @@ public class CustomOAuth2OidcUserService implements OAuth2UserService<OidcUserRe
 
 	@Override
 	public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-
+		log.debug("Load user");
 		final OidcUser oidcUser = delegate.loadUser(userRequest);
-
 		final OAuth2AccessToken accessToken = userRequest.getAccessToken();
-		final Set<GrantedAuthority> mappedAuthorities = this.authorityMapper.mapScopesToAuthorities(userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes(), accessToken.getTokenValue());
+		final Set<GrantedAuthority> mappedAuthorities1 = this.authorityMapper.mapScopesToAuthorities(
+				userRequest.getClientRegistration().getRegistrationId(), accessToken.getScopes(),
+				accessToken.getTokenValue());
+
+		List<String> roleClaims = oidcUser.getClaimAsStringList("groups");
+		if (roleClaims == null) {
+			roleClaims = oidcUser.getClaimAsStringList("roles");
+		}
+		if (roleClaims == null) {
+			roleClaims = new ArrayList<>();
+		}
+		log.debug("roleClaims: {}", roleClaims);
+		Set<GrantedAuthority> mappedAuthorities2 = this.authorityMapper
+				.mapClaimsToAuthorities(userRequest.getClientRegistration().getRegistrationId(), roleClaims);
 
 		final String userNameAttributeName = userRequest.getClientRegistration()
 				.getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
+		log.debug("AccessToken: {}", accessToken.getTokenValue());
+
+		HashSet<GrantedAuthority> mappedAuthorities = new HashSet<>(mappedAuthorities1);
+		mappedAuthorities.addAll(mappedAuthorities2);
+
 		final OidcUser oidcUserToReturn;
+		// OidcUser oidcUserToReturn;
 
 		if (StringUtils.hasText(userNameAttributeName)) {
-			oidcUserToReturn = new DefaultOidcUser(mappedAuthorities, userRequest.getIdToken(), oidcUser.getUserInfo(), userNameAttributeName);
+			oidcUserToReturn = new DefaultOidcUser(mappedAuthorities, userRequest.getIdToken(), oidcUser.getUserInfo(),
+					userNameAttributeName);
 		} else {
 			oidcUserToReturn = new DefaultOidcUser(mappedAuthorities, userRequest.getIdToken(), oidcUser.getUserInfo());
 		}

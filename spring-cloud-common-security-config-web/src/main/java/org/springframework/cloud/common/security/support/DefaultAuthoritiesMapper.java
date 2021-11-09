@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.ProviderRoleMapping;
@@ -38,14 +39,12 @@ import org.springframework.util.StringUtils;
  * Default {@link AuthoritiesMapper}.
  *
  * @author Gunnar Hillert
- * @since 1.3.0
+ * @author Janne Valkealahti
  */
 public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DefaultAuthoritiesMapper.class);
-
+	private static final Logger logger = LoggerFactory.getLogger(DefaultAuthoritiesMapper.class);
 	private final Map<String, ProviderRoleMapping> providerRoleMappings;
-
 	private final String defaultProviderId;
 
 	public DefaultAuthoritiesMapper(Map<String, ProviderRoleMapping> providerRoleMappings, String defaultProviderId) {
@@ -124,6 +123,7 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 	 */
 	@Override
 	public Set<GrantedAuthority> mapScopesToAuthorities(String clientIdParam, Set<String> scopes, String token) {
+		logger.debug("Mapping scopes to authorities");
 		final String clientId;
 		if (clientIdParam == null) {
 			clientId = this.defaultProviderId;
@@ -141,11 +141,9 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 
 		final List<String> rolesAsStrings = new ArrayList<>();
 
-		final Set<GrantedAuthority> grantedAuthorities;
+		Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
 		if (roleMapping.isMapOauthScopes()) {
-			grantedAuthorities = new HashSet<>();
-
 			if (!scopes.isEmpty()) {
 				for (Map.Entry<CoreSecurityRoles, String> roleMappingEngtry : roleMapping.convertRoleMappingKeysToCoreSecurityRoles().entrySet()) {
 					final CoreSecurityRoles role = roleMappingEngtry.getKey();
@@ -161,7 +159,7 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 				logger.info("Adding roles: {}.", StringUtils.collectionToCommaDelimitedString(rolesAsStrings));
 			}
 		}
-		else {
+		else if (!roleMapping.isMapGroupClaims()) {
 			grantedAuthorities =
 					roleMapping.convertRoleMappingKeysToCoreSecurityRoles().entrySet().stream().map(mapEntry -> {
 						final CoreSecurityRoles role = mapEntry.getKey();
@@ -170,6 +168,48 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 					}).collect(Collectors.toSet());
 			logger.info("Adding ALL roles: {}.", StringUtils.collectionToCommaDelimitedString(rolesAsStrings));
 		}
+		return grantedAuthorities;
+	}
+
+	@Override
+	public Set<GrantedAuthority> mapClaimsToAuthorities(String clientIdParam, List<String> claims) {
+		logger.debug("Mapping claims to authorities");
+		final String clientId;
+		if (clientIdParam == null) {
+			clientId = this.defaultProviderId;
+		}
+		else {
+			clientId = clientIdParam;
+		}
+
+		final ProviderRoleMapping groupMapping = this.providerRoleMappings.get(clientId);
+		if (groupMapping == null) {
+			throw new IllegalArgumentException("No role mapping found for clientId " + clientId);
+		}
+
+		final List<String> rolesAsStrings = new ArrayList<>();
+		final Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
+
+		if (groupMapping.isMapGroupClaims()) {
+			if (!claims.isEmpty()) {
+				for (Map.Entry<CoreSecurityRoles, String> roleMappingEngtry : groupMapping.convertGroupMappingKeysToCoreSecurityRoles().entrySet()) {
+					final CoreSecurityRoles role = roleMappingEngtry.getKey();
+					final String expectedOAuthScope = roleMappingEngtry.getValue();
+					logger.debug("Checking group mapping {} {}", role, expectedOAuthScope);
+					for (String claim : claims) {
+						logger.debug("Checking against claim {} {}", claim, expectedOAuthScope);
+						if (claim.equalsIgnoreCase(expectedOAuthScope)) {
+							final SimpleGrantedAuthority oauthRoleAuthority = new SimpleGrantedAuthority(groupMapping.getRolePrefix() + role.getKey());
+							rolesAsStrings.add(oauthRoleAuthority.getAuthority());
+							grantedAuthorities.add(oauthRoleAuthority);
+							logger.debug("Adding to granted authorities {}", oauthRoleAuthority);
+						}
+					}
+				}
+				logger.info("Adding groups: {}.", StringUtils.collectionToCommaDelimitedString(rolesAsStrings));
+			}
+		}
+
 		return grantedAuthorities;
 	}
 
@@ -189,5 +229,4 @@ public class DefaultAuthoritiesMapper implements AuthoritiesMapper {
 		})
 		.collect(Collectors.toSet());
 	}
-
 }

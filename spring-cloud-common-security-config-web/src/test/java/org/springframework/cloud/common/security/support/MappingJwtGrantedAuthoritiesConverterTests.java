@@ -202,7 +202,7 @@ public class MappingJwtGrantedAuthoritiesConverterTests {
 
 	@Test
 	public void convertWhenTokenHasNoScopeAndNoScpAttributeThenTranslatesToNoAuthorities() {
-		Jwt jwt = jwt().claim("roles", Arrays.asList("message:read", "message:write")).build();
+		Jwt jwt = jwt().claim("xxx", Arrays.asList("message:read", "message:write")).build();
 
 		MappingJwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new MappingJwtGrantedAuthoritiesConverter();
 		Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
@@ -223,12 +223,12 @@ public class MappingJwtGrantedAuthoritiesConverterTests {
 	@Test
 	public void convertWhenTokenHasCustomClaimNameThenCustomClaimNameAttributeIsTranslatedToAuthorities() {
 		Jwt jwt = jwt()
-				.claim("roles", Arrays.asList("message:read", "message:write"))
+				.claim("xxx", Arrays.asList("message:read", "message:write"))
 				.claim("scope", "missive:read missive:write")
 				.build();
 
 		MappingJwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new MappingJwtGrantedAuthoritiesConverter();
-		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("xxx");
 		Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
 
 		assertThat(authorities).containsExactlyInAnyOrder(
@@ -259,5 +259,13 @@ public class MappingJwtGrantedAuthoritiesConverterTests {
 		Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
 
 		assertThat(authorities).isEmpty();
+	}
+
+	@Test
+	public void convertWhenTokenHasGroupClaims() {
+		Jwt jwt = jwt().claim("groups", Arrays.asList("role1")).build();
+		MappingJwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new MappingJwtGrantedAuthoritiesConverter();
+		Collection<GrantedAuthority> authorities = jwtGrantedAuthoritiesConverter.convert(jwt);
+		assertThat(authorities).containsExactlyInAnyOrder(new SimpleGrantedAuthority("SCOPE_role1"));
 	}
 }
