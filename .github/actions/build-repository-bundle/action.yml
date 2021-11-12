@@ -10,6 +10,9 @@ inputs:
   package-bundle-repository:
     description: repository for package bundles
     required: true
+  package-name:
+    description: package name
+    required: true
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -24,6 +27,7 @@ runs:
     env:
       VERSION: ${{ inputs.version }}
       PACKAGE_BUNDLE_REPOSITORY: ${{ inputs.package-bundle-repository }}
+      PACKAGE_NAME: ${{ inputs.package-name }}
       REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}
       REPO_BUNDLE_RENDERED: ${{ runner.temp }}/generated/reporendered
       REPO_BUNDLE_GENERATED: ${{ runner.temp }}/generated/repobundle
@@ -38,6 +42,7 @@ runs:
         --output-files $REPO_BUNDLE_RENDERED \
         --data-value-yaml project.version=$VERSION \
         --data-value-yaml repository=$PACKAGE_BUNDLE_REPOSITORY \
+        --data-value-yaml package.name=$PACKAGE_NAME \
         --file-mark 'package.yml:type=text-plain' \
         --file-mark 'metadata.yml:type=text-plain' \
         --file-mark 'values-schema.yml:type=text-plain' \

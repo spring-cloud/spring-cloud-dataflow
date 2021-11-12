@@ -7,6 +7,18 @@ inputs:
   skipper-version:
     description: skipper version
     required: true
+  server-version:
+    description: server version
+    required: true
+  server-repository:
+    description: server repository
+    required: true
+  ctr-version:
+    description: ctr version
+    required: true
+  package-name:
+    description: package name
+    required: true
   package-bundle-template:
     description: path to package bundle template
     required: true
@@ -30,6 +42,10 @@ runs:
     env:
       DATAFLOW_VERSION: ${{ inputs.dataflow-version }}
       SKIPPER_VERSION: ${{ inputs.skipper-version }}
+      SERVER_VERSION: ${{ inputs.server-version }}
+      SERVER_REPOSITORY: ${{ inputs.server-repository }}
+      CTR_VERSION: ${{ inputs.ctr-version }}
+      PACKAGE_NAME: ${{ inputs.package-name }}
       PACKAGE_BUNDLE_TEMPLATE: ${{ inputs.package-bundle-template }}
       PACKAGE_BUNDLE_GENERATED: ${{ runner.temp }}/generated/packagebundle
       VENDIR_SRC_IN: ${{ inputs.config }}
@@ -42,14 +58,22 @@ runs:
       ytt \
         -f $PACKAGE_BUNDLE_TEMPLATE \
         --output-files $PACKAGE_BUNDLE_GENERATED \
-        --data-value-yaml project.version=$DATAFLOW_VERSION \
-        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
-        --file-mark 'config/values.yml:type=text-template'
+        --data-value-yaml server.version=$SERVER_VERSION \
+        --data-value-yaml server.repository=$SERVER_REPOSITORY \
+        --data-value-yaml ctr.version=$DATAFLOW_VERSION \
+        --data-value-yaml skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml grafana.version=$DATAFLOW_VERSION \
+        --data-value-yaml package.name=$PACKAGE_NAME \
+        --file-mark 'config/values.yml:type=text-template' \
+        --file-mark '.imgpkg/bundle.yaml:type=text-template'
       ytt \
         -f $IMGPKG_LOCK_TEMPLATE \
         --output-files $IMGPKG_LOCK_GENERATED_IN \
-        --data-value-yaml project.version=$DATAFLOW_VERSION \
-        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml server.version=$SERVER_VERSION \
+        --data-value-yaml server.repository=$SERVER_REPOSITORY \
+        --data-value-yaml ctr.version=$DATAFLOW_VERSION \
+        --data-value-yaml skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml grafana.version=$DATAFLOW_VERSION \
         --file-mark '**/*.yml:type=text-template'
       cp -R $VENDIR_SRC_IN $PACKAGE_BUNDLE_GENERATED/config/upstream
       vendir sync --chdir $PACKAGE_BUNDLE_GENERATED

@@ -64,6 +64,10 @@ jobs:
       with:
         dataflow-version: ${{ env.spring_cloud_dataflow_version }}
         skipper-version: ${{ env.spring_cloud_skipper_version }}
+        server-version: ${{ env.spring_cloud_dataflow_version }}
+        server-repository: springcloud/spring-cloud-dataflow-server
+        ctr-version: ${{ env.spring_cloud_dataflow_version }}
+        package-name: scdf
         package-bundle-template: src/carvel/templates/bundle/package
         imgpkg-lock-template: src/carvel/templates/imgpkg
         config: src/carvel/config
@@ -87,6 +91,7 @@ jobs:
         version: ${{ env.spring_cloud_dataflow_version }}
         repo-bundle-template: src/carvel/templates/bundle/repo
         package-bundle-repository: springcloud/scdf-package
+        package-name: scdf
 
     # Publishes scdf repo bundle
     - name: Publish Repository Bundle
