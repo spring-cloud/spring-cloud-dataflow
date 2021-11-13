@@ -40,6 +40,7 @@ public class ProviderRoleMapping {
 	private boolean mapGroupClaims = false;
 	private Map<String, String> roleMappings = new HashMap<>(0);
 	private Map<String, String> groupMappings = new HashMap<>(0);
+	private String principalClaimName;
 
 	public ProviderRoleMapping() {
 		super();
@@ -113,6 +114,14 @@ public class ProviderRoleMapping {
 
 	public void setGroupClaim(String groupClaim) {
 		this.groupClaim = groupClaim;
+	}
+
+	public String getPrincipalClaimName() {
+		return principalClaimName;
+	}
+
+	public void setPrincipalClaimName(String principalClaimName) {
+		this.principalClaimName = principalClaimName;
 	}
 
 	public Map<CoreSecurityRoles, String> convertGroupMappingKeysToCoreSecurityRoles() {
