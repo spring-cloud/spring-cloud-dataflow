@@ -40,7 +40,7 @@ jobs:
         jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
-          --repo-resolve-releases=libs-release \
+          --repo-resolve-releases=libs-milestone \
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=release \
           --repo-deploy-snapshots=snapshot
