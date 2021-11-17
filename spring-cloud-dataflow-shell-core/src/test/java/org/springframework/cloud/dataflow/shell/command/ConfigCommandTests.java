@@ -125,7 +125,7 @@ public class ConfigCommandTests {
 	@Test
 	public void testApiRevisionMismatch() {
 		RootResource value = new RootResource(-12);
-		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
+		value.add(Link.of("http://localhost:9393/dashboard", "dashboard"));
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 
 		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, null, false, null, null, null);
@@ -140,11 +140,11 @@ public class ConfigCommandTests {
 		when(restTemplate.getForObject(Mockito.any(String.class), Mockito.eq(AboutResource.class))).thenReturn(aboutResource);
 
 		RootResource value = new RootResource(Version.REVISION);
-		value.add(new Link("http://localhost:9393/dashboard", "dashboard"));
-		value.add(new Link("http://localhost:9393/about", "about"));
-		value.add(new Link("http://localhost:9393/apps", "apps"));
-		value.add(new Link("http://localhost:9393/completions/task", "completions/task"));
-		value.add(new Link("http://localhost:9393/completions/stream", "completions/stream"));
+		value.add(Link.of("http://localhost:9393/dashboard", "dashboard"));
+		value.add(Link.of("http://localhost:9393/about", "about"));
+		value.add(Link.of("http://localhost:9393/apps", "apps"));
+		value.add(Link.of("http://localhost:9393/completions/task", "completions/task"));
+		value.add(Link.of("http://localhost:9393/completions/stream", "completions/stream"));
 
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 

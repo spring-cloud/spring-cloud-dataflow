@@ -28,6 +28,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -49,7 +50,7 @@ public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryC
 	private final EntityManager entityManager;
 
 	@Autowired
-	private AppRegistrationRepository appRegistrationRepository;
+	private ObjectProvider<AppRegistrationRepository> appRegistrationRepository;
 
 	public AppRegistrationRepositoryImpl(EntityManager entityManager) {
 		Assert.notNull(entityManager, "Entity manager cannot be null");
@@ -84,7 +85,7 @@ public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryC
 		final List<AppRegistration> resultList = query.getResultList();
 		if (defaultVersion) {
 			resultList.forEach(appRegistration -> {
-				HashSet<String> versions = appRegistrationRepository.findAllByName(appRegistration.getName()).stream()
+				HashSet<String> versions = appRegistrationRepository.getIfAvailable().findAllByName(appRegistration.getName()).stream()
 						.filter(ar -> ar.getType() == appRegistration.getType())
 						.map(AppRegistration::getVersion).collect(Collectors.toCollection(HashSet::new));
 				appRegistration.setVersions(versions);

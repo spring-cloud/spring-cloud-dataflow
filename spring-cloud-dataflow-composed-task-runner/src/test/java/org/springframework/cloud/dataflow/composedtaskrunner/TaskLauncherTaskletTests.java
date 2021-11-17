@@ -236,7 +236,7 @@ public class TaskLauncherTaskletTests {
 	public void testInvalidTaskName() {
 		final String ERROR_MESSAGE =
 				"Could not find task definition named " + TASK_NAME;
-		VndErrors errors = new VndErrors("message", ERROR_MESSAGE, new Link("ref"));
+		VndErrors errors = new VndErrors("message", ERROR_MESSAGE, Link.of("ref"));
 		Mockito.doThrow(new DataFlowClientException(errors))
 				.when(this.taskOperations)
 				.launch(ArgumentMatchers.anyString(),

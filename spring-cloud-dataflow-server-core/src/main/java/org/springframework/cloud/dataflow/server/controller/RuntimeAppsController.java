@@ -113,7 +113,7 @@ public class RuntimeAppsController {
 			for (AppInstanceStatus appInstanceStatus : instanceStatuses) {
 				instanceStatusResources.add(instanceAssembler.toModel(appInstanceStatus));
 			}
-			resource.setInstances(new CollectionModel<>(instanceStatusResources));
+			resource.setInstances(CollectionModel.of(instanceStatusResources));
 			return resource;
 		}
 	}
