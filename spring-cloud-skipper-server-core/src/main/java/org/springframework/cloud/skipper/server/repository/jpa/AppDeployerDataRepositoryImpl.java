@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
@@ -30,15 +31,15 @@ import org.springframework.util.StringUtils;
 public class AppDeployerDataRepositoryImpl implements AppDeployerDataRepositoryCustom {
 
 	@Autowired
-	private AppDeployerDataRepository appDeployerDataRepository;
+	private ObjectProvider<AppDeployerDataRepository> appDeployerDataRepository;
 
 	@Override
 	public AppDeployerData findByReleaseNameAndReleaseVersionRequired(String releaseName, Integer releaseVersion) {
-		AppDeployerData appDeployerData = appDeployerDataRepository.findByReleaseNameAndReleaseVersion(releaseName,
+		AppDeployerData appDeployerData = appDeployerDataRepository.getIfAvailable().findByReleaseNameAndReleaseVersion(releaseName,
 				releaseVersion);
 		if (appDeployerData == null) {
 			List<AppDeployerData> appDeployerDataList = StreamSupport
-					.stream(appDeployerDataRepository.findAll().spliterator(), false)
+					.stream(appDeployerDataRepository.getIfAvailable().findAll().spliterator(), false)
 					.collect(Collectors.toList());
 			String existingDeployerData = StringUtils.collectionToCommaDelimitedString(appDeployerDataList);
 			throw new SkipperException(String.format("No AppDeployerData found for release '%s' version '%s'." +

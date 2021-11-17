@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.repository.jpa;
 
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -32,14 +33,14 @@ import org.springframework.util.StringUtils;
 public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryCustom {
 
 	@Autowired
-	private PackageMetadataRepository packageMetadataRepository;
+	private ObjectProvider<PackageMetadataRepository> packageMetadataRepositoryObjectProvider;
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
 
 	@Override
 	public PackageMetadata findByNameAndVersionByMaxRepoOrder(String packageName, String packageVersion) {
-		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository
+		List<PackageMetadata> packageMetadataList = this.packageMetadataRepositoryObjectProvider.getIfAvailable()
 				.findByNameAndVersionOrderByApiVersionDesc(packageName,
 						packageVersion);
 		if (packageMetadataList.size() == 0) {
@@ -64,7 +65,7 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 
 	@Override
 	public List<PackageMetadata> findByNameRequired(String packageName) {
-		List<PackageMetadata> packageMetadata = this.packageMetadataRepository.findByName(packageName);
+		List<PackageMetadata> packageMetadata = this.packageMetadataRepositoryObjectProvider.getIfAvailable().findByName(packageName);
 		if (packageMetadata.isEmpty()) {
 			throw new SkipperException(String.format("Can not find a package named '%s'", packageName));
 		}
@@ -76,11 +77,11 @@ public class PackageMetadataRepositoryImpl implements PackageMetadataRepositoryC
 		Assert.isTrue(StringUtils.hasText(packageName), "Package name must not be empty");
 		PackageMetadata packageMetadata;
 		if (StringUtils.hasText(packageVersion)) {
-			packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder(packageName,
-					packageVersion);
+			packageMetadata = this.packageMetadataRepositoryObjectProvider.getIfAvailable()
+					.findByNameAndVersionByMaxRepoOrder(packageName, packageVersion);
 		}
 		else {
-			packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
+			packageMetadata = this.packageMetadataRepositoryObjectProvider.getIfAvailable().findFirstByNameOrderByVersionDesc(packageName);
 		}
 		if (packageMetadata == null) {
 			throw new SkipperException(String.format("Can not find package '%s', version '%s'", packageName,

@@ -41,7 +41,7 @@ public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<
 	@Override
 	public EntityModel<T> toModel(T entity) {
 
-		EntityModel<T> resource = new EntityModel<T>(entity);
+		EntityModel<T> resource = EntityModel.of(entity);
 
 		addLinks(resource);
 
@@ -64,7 +64,7 @@ public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<
 			result.add(toModel(entity));
 		}
 
-		CollectionModel<EntityModel<T>> resources = new CollectionModel<>(result);
+		CollectionModel<EntityModel<T>> resources = CollectionModel.of(result);
 
 		addLinks(resources);
 

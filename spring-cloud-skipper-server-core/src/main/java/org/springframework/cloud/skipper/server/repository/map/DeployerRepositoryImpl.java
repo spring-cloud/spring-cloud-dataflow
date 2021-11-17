@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository.map;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -25,11 +26,11 @@ import org.springframework.cloud.skipper.domain.Deployer;
 public class DeployerRepositoryImpl implements DeployerRepositoryCustom {
 
 	@Autowired
-	private DeployerRepository deployerRepository;
+	private ObjectProvider<DeployerRepository> deployerRepository;
 
 	@Override
 	public Deployer findByNameRequired(String name) {
-		Deployer deployer = deployerRepository.findByName(name);
+		Deployer deployer = deployerRepository.getIfAvailable().findByName(name);
 		if (deployer == null) {
 			throw new SkipperException(String.format("No deployer named '%s'", name));
 		}
