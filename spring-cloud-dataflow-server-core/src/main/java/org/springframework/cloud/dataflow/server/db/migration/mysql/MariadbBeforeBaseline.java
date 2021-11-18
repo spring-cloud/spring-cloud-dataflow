@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.db.migration.mysql;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
@@ -27,7 +28,7 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractBaselineCa
  * @author Janne Valkealahti
  *
  */
-public class MysqlBeforeBaseline extends AbstractBaselineCallback {
+public class MariadbBeforeBaseline extends AbstractBaselineCallback {
 
 	public final static String DROP_AUDIT_RECORDS_AUDIT_ACTION_IDX_INDEX =
 			"drop index AUDIT_RECORDS_AUDIT_ACTION_IDX on AUDIT_RECORDS";
@@ -116,7 +117,7 @@ public class MysqlBeforeBaseline extends AbstractBaselineCallback {
 	/**
 	 * Instantiates a new postgres before baseline.
 	 */
-	public MysqlBeforeBaseline() {
+	public MariadbBeforeBaseline() {
 		super(new V1__Initial_Setup());
 	}
 
@@ -140,8 +141,11 @@ public class MysqlBeforeBaseline extends AbstractBaselineCallback {
 
 	@Override
 	public List<SqlCommand> changeUriRegistryTable() {
-		return Arrays.asList(
-				new MysqlMigrateUriRegistrySqlCommand());
+		// Other db types have support migration of app_registration
+		// and hibernate_sequence from dataflow 1.7.x line. As
+		// mariadb is new supported db type(beyond previously using it
+		// as mysql), we should not have a need for these migrations.
+		return Collections.emptyList();
 	}
 
 	@Override
