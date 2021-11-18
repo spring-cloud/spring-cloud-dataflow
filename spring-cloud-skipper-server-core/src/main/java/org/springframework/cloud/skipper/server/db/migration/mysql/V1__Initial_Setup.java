@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,8 @@ import org.springframework.cloud.skipper.server.db.migration.AbstractInitialSetu
 
 public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 
-	public final static String CREATE_HIBERNATE_SEQUENCE_TABLE =
-			"create table if not exists hibernate_sequence (\n" +
-			"    next_val bigint\n" +
-			")";
-
-	public final static String INSERT_HIBERNATE_SEQUENCE_TABLE =
-			"insert into hibernate_sequence (next_val)\n" +
-			"    select * from (select 1 as next_val) as temp\n" +
-			"    where not exists(select * from hibernate_sequence)";
+	public final static String CREATE_HIBERNATE_SEQUENCE =
+			"create sequence if not exists hibernate_sequence start 1 increment 1";
 
 	public final static String CREATE_SKIPPER_APP_DEPLOYER_DATA_TABLE =
 			"create table skipper_app_deployer_data (\n" +
@@ -342,8 +335,7 @@ public class V1__Initial_Setup extends AbstractInitialSetupMigration {
 	@Override
 	public List<SqlCommand> createHibernateSequence() {
 		return Arrays.asList(
-				SqlCommand.from(CREATE_HIBERNATE_SEQUENCE_TABLE),
-				SqlCommand.from(INSERT_HIBERNATE_SEQUENCE_TABLE));
+				SqlCommand.from(CREATE_HIBERNATE_SEQUENCE));
 	}
 
 	@Override
