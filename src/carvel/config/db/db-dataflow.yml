@@ -4,12 +4,12 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:template", "template")
 #@ load("db.lib.yml", "db_overlay")
-#@ load("db.star", "mysql_enabled")
+#@ load("db.star", "mariadb_enabled")
 #@ load("db.star", "postgres_enabled")
 #@ load("db.star", "db_postgres_username")
 #@ load("db.star", "db_postgres_password")
-#@ load("db.star", "db_mysql_username")
-#@ load("db.star", "db_mysql_password")
+#@ load("db.star", "db_mariadb_username")
+#@ load("db.star", "db_mariadb_password")
 
 #@ def db_postgres_values():
 name: db-dataflow
@@ -22,19 +22,19 @@ image:
 registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
-#@ def db_mysql_values():
+#@ def db_mariadb_values():
 name: db-dataflow
-username: #@ db_mysql_username()
-password: #@ db_mysql_password()
+username: #@ db_mariadb_username()
+password: #@ db_mariadb_password()
 image:
-  repository: #@ data.values.scdf.deploy.database.mysql.image.repository
-  tag: #@ data.values.scdf.deploy.database.mysql.image.tag
-  digest: #@ data.values.scdf.deploy.database.mysql.image.digest
+  repository: #@ data.values.scdf.deploy.database.mariadb.image.repository
+  tag: #@ data.values.scdf.deploy.database.mariadb.image.tag
+  digest: #@ data.values.scdf.deploy.database.mariadb.image.digest
 registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
-#@ if mysql_enabled():
---- #@ template.replace(overlay.apply(library.get("mysql").with_data_values(db_mysql_values()).eval(), db_overlay()))
+#@ if mariadb_enabled():
+--- #@ template.replace(overlay.apply(library.get("mariadb").with_data_values(db_mariadb_values()).eval(), db_overlay()))
 #@ end
 
 #@ if postgres_enabled():

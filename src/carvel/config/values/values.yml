@@ -35,7 +35,7 @@ scdf:
     database:
       #! if database deployment is enabled
       enabled: true
-      #! database type, either mysql or postgres (required)
+      #! database type, either mariadb or postgres (required)
       type: postgres
       postgres:
         #! database username (defaults to dataflow)
@@ -46,14 +46,14 @@ scdf:
           repository: postgres
           tag: "10"
           digest: ""
-      mysql:
+      mariadb:
         #! database username (defaults to dataflow)
         username: ZGF0YWZsb3c=
         #! database password (default to secret)
         password: c2VjcmV0
         image:
-          repository: mysql
-          tag: "5.7"
+          repository: mariadb
+          tag: "10.4"
           digest: ""
   server:
     image:

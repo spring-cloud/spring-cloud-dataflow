@@ -39,11 +39,11 @@ yaml document.
 - <<configuration-options-scdf.deploy.database.postgres.image.repository>>
 - <<configuration-options-scdf.deploy.database.postgres.image.tag>>
 - <<configuration-options-scdf.deploy.database.postgres.image.digest>>
-- <<configuration-options-scdf.deploy.database.mysql.username>>
-- <<configuration-options-scdf.deploy.database.mysql.password>>
-- <<configuration-options-scdf.deploy.database.mysql.image.repository>>
-- <<configuration-options-scdf.deploy.database.mysql.image.tag>>
-- <<configuration-options-scdf.deploy.database.mysql.image.digest>>
+- <<configuration-options-scdf.deploy.database.mariadb.username>>
+- <<configuration-options-scdf.deploy.database.mariadb.password>>
+- <<configuration-options-scdf.deploy.database.mariadb.image.repository>>
+- <<configuration-options-scdf.deploy.database.mariadb.image.tag>>
+- <<configuration-options-scdf.deploy.database.mariadb.image.digest>>
 - <<configuration-options-scdf.server.image.repository>>
 - <<configuration-options-scdf.server.image.tag>>
 - <<configuration-options-scdf.server.image.digest>>
@@ -286,11 +286,11 @@ true
 
 [[configuration-options-scdf.deploy.database.type]]`scdf.deploy.database.type`::
   Description:::
-Defines database type if deployment is enabled, either mysql or postgres.
+Defines database type if deployment is enabled, either mariadb or postgres.
   Required:::
 No
   Type:::
-Enum(mysql,postgres)
+Enum(mariadb,postgres)
    Default Value:::
 postgres
 
@@ -344,7 +344,7 @@ String
    Default Value:::
 Empty
 
-[[configuration-options-scdf.deploy.database.mysql.username]]`scdf.deploy.database.mysql.username`::
+[[configuration-options-scdf.deploy.database.mariadb.username]]`scdf.deploy.database.mariadb.username`::
   Description:::
 Username for deployed database as base64 encoded value.
   Required:::
@@ -354,7 +354,7 @@ String (base64 encoded)
    Default Value:::
 dataflow
 
-[[configuration-options-scdf.deploy.database.mysql.password]]`scdf.deploy.database.mysql.password`::
+[[configuration-options-scdf.deploy.database.mariadb.password]]`scdf.deploy.database.mariadb.password`::
   Description:::
 Password for deployed database as base64 encoded value.
   Required:::
@@ -364,19 +364,19 @@ String (base64 encoded)
    Default Value:::
 secret
 
-[[configuration-options-scdf.deploy.database.mysql.image.repository]]`scdf.deploy.database.mysql.image.repository`::
+[[configuration-options-scdf.deploy.database.mariadb.image.repository]]`scdf.deploy.database.mariadb.image.repository`::
   Description:::
-Mysql database image repository
+Mariadb database image repository
   Required:::
 No
   Type:::
 String
    Default Value:::
-mysql
+mariadb
 
-[[configuration-options-scdf.deploy.database.mysql.image.tag]]`scdf.deploy.database.mysql.image.tag`::
+[[configuration-options-scdf.deploy.database.mariadb.image.tag]]`scdf.deploy.database.mariadb.image.tag`::
   Description:::
-Mysql database image tag
+Mariadb database image tag
   Required:::
 No
   Type:::
@@ -384,9 +384,9 @@ String
    Default Value:::
 5.7
 
-[[configuration-options-scdf.deploy.database.mysql.image.digest]]`scdf.deploy.database.mysql.image.digest`::
+[[configuration-options-scdf.deploy.database.mariadb.image.digest]]`scdf.deploy.database.mariadb.image.digest`::
   Description:::
-Mysql database image digest
+Mariadb database image digest
   Required:::
 No
   Type:::

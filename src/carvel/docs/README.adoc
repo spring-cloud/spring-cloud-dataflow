@@ -38,7 +38,7 @@ Main objectives for a https://carvel.dev[Carvel] integration with dataflow is to
 * Automatically configure whole environment based on user choices
 * Easy deployment without requiring existing external _binder_ or _database_
 ** Can deploy either _rabbit_ or _kafka_ as a binder
-** Can deploy either _mysql_ or _postgres_ as a database
+** Can deploy either _mariadb_ or _postgres_ as a database
 ** Steps away if external _database_ or _binder_ is defined
 * Plain k8s templating using https://carvel.dev/ytt[ytt]
 ** Drive templating with template options
@@ -121,7 +121,7 @@ may be easier to work with lower level deployment options mentioned above.
 More info to configure servers see {servers}.
 
 === Binder and Database
-Whether you want to use _rabbit_ or a _kafka_ as a binder and _mysql_ or
+Whether you want to use _rabbit_ or a _kafka_ as a binder and _mariadb_ or
 a _postgres_ as a database we provided easy deployment which steps away when
 external services are defined.
 

@@ -2,7 +2,7 @@ import lodash from 'lodash';
 import { execYtt } from '../src/ytt';
 import { findDeployment, findConfigMap, findSecret, deploymentContainer, parseYamlDocument } from '../src/k8s-helper';
 import {
-  DB_MYSQL_NAME,
+  DB_MARIADB_NAME,
   DB_POSTGRES_NAME,
   DB_SKIPPER_NAME,
   DB_DATAFLOW_NAME,
@@ -60,56 +60,56 @@ describe('databases', () => {
     expect(postgresDataflowContainer?.image).toBe('postgres@fakedigest');
   });
 
-  it('should deploy mysql', async () => {
+  it('should deploy mariadb', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=mysql']
+      dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=mariadb']
     });
     expect(result.success).toBeTruthy();
     const yaml = result.stdout;
 
-    const mysqlSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
-    expect(mysqlSkipperDeployment).toBeTruthy();
-    const mysqlSkipperContainer = deploymentContainer(mysqlSkipperDeployment, DB_MYSQL_NAME);
-    expect(mysqlSkipperContainer?.image).toContain('mysql');
-    const mysqlSkipperSecret = findSecret(yaml, DB_SKIPPER_NAME);
-    expect(mysqlSkipperSecret).toBeTruthy();
-    const mysqlSkipperSecretData = mysqlSkipperSecret?.data || {};
-    expect(mysqlSkipperSecretData['mysql-user']).toBe('ZGF0YWZsb3c=');
-    expect(mysqlSkipperSecretData['mysql-root-password']).toBe('c2VjcmV0');
+    const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
+    expect(mariadbSkipperDeployment).toBeTruthy();
+    const mariadbSkipperContainer = deploymentContainer(mariadbSkipperDeployment, DB_MARIADB_NAME);
+    expect(mariadbSkipperContainer?.image).toContain('mariadb');
+    const mariadbSkipperSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    expect(mariadbSkipperSecret).toBeTruthy();
+    const mariadbSkipperSecretData = mariadbSkipperSecret?.data || {};
+    expect(mariadbSkipperSecretData['mariadb-user']).toBe('ZGF0YWZsb3c=');
+    expect(mariadbSkipperSecretData['mariadb-root-password']).toBe('c2VjcmV0');
 
-    const mysqlDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
-    expect(mysqlDataflowDeployment).toBeTruthy();
-    const mysqlDataflowContainer = deploymentContainer(mysqlDataflowDeployment, DB_MYSQL_NAME);
-    expect(mysqlDataflowContainer?.image).toContain('mysql');
-    const mysqlDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
-    expect(mysqlDataflowSecret).toBeTruthy();
-    const mysqlDataflowSecretData = mysqlDataflowSecret?.data || {};
-    expect(mysqlDataflowSecretData['mysql-user']).toBe('ZGF0YWZsb3c=');
-    expect(mysqlDataflowSecretData['mysql-root-password']).toBe('c2VjcmV0');
+    const mariadbDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
+    expect(mariadbDataflowDeployment).toBeTruthy();
+    const mariadbDataflowContainer = deploymentContainer(mariadbDataflowDeployment, DB_MARIADB_NAME);
+    expect(mariadbDataflowContainer?.image).toContain('mariadb');
+    const mariadbDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
+    expect(mariadbDataflowSecret).toBeTruthy();
+    const mariadbDataflowSecretData = mariadbDataflowSecret?.data || {};
+    expect(mariadbDataflowSecretData['mariadb-user']).toBe('ZGF0YWZsb3c=');
+    expect(mariadbDataflowSecretData['mariadb-root-password']).toBe('c2VjcmV0');
   });
 
-  it('should use mysql digest images', async () => {
+  it('should use mariadb digest images', async () => {
     const result = await execYtt({
       files: ['config'],
       dataValues: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=mysql',
-        'scdf.deploy.database.mysql.image.digest=fakedigest'
+        'scdf.deploy.database.type=mariadb',
+        'scdf.deploy.database.mariadb.image.digest=fakedigest'
       ]
     });
     expect(result.success).toBeTruthy();
     const yaml = result.stdout;
 
-    const mysqlSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
-    expect(mysqlSkipperDeployment).toBeTruthy();
-    const mysqlSkipperContainer = deploymentContainer(mysqlSkipperDeployment, DB_MYSQL_NAME);
-    expect(mysqlSkipperContainer?.image).toBe('mysql@fakedigest');
+    const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
+    expect(mariadbSkipperDeployment).toBeTruthy();
+    const mariadbSkipperContainer = deploymentContainer(mariadbSkipperDeployment, DB_MARIADB_NAME);
+    expect(mariadbSkipperContainer?.image).toBe('mariadb@fakedigest');
 
-    const mysqlDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
-    expect(mysqlDataflowDeployment).toBeTruthy();
-    const mysqlDataflowContainer = deploymentContainer(mysqlDataflowDeployment, DB_MYSQL_NAME);
-    expect(mysqlDataflowContainer?.image).toBe('mysql@fakedigest');
+    const mariadbDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
+    expect(mariadbDataflowDeployment).toBeTruthy();
+    const mariadbDataflowContainer = deploymentContainer(mariadbDataflowDeployment, DB_MARIADB_NAME);
+    expect(mariadbDataflowContainer?.image).toBe('mariadb@fakedigest');
   });
 
   it('should deploy postgres', async () => {
@@ -141,38 +141,38 @@ describe('databases', () => {
     expect(postgresDataflowSecretData['postgres-password']).toBe('c2VjcmV0');
   });
 
-  it('should deploy mysql with custom username and password', async () => {
+  it('should deploy mariadb with custom username and password', async () => {
     const result = await execYtt({
       files: ['config'],
       dataValues: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=mysql',
-        'scdf.deploy.database.mysql.username=user',
-        'scdf.deploy.database.mysql.password=pass'
+        'scdf.deploy.database.type=mariadb',
+        'scdf.deploy.database.mariadb.username=user',
+        'scdf.deploy.database.mariadb.password=pass'
       ]
     });
     expect(result.success).toBeTruthy();
     const yaml = result.stdout;
 
-    const mysqlSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
-    expect(mysqlSkipperDeployment).toBeTruthy();
-    const mysqlSkipperContainer = deploymentContainer(mysqlSkipperDeployment, DB_MYSQL_NAME);
-    expect(mysqlSkipperContainer?.image).toContain('mysql');
-    const mysqlSkipperSecret = findSecret(yaml, DB_SKIPPER_NAME);
-    expect(mysqlSkipperSecret).toBeTruthy();
-    const mysqlSkipperSecretData = mysqlSkipperSecret?.data || {};
-    expect(mysqlSkipperSecretData['mysql-user']).toBe('user');
-    expect(mysqlSkipperSecretData['mysql-root-password']).toBe('pass');
+    const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
+    expect(mariadbSkipperDeployment).toBeTruthy();
+    const mariadbSkipperContainer = deploymentContainer(mariadbSkipperDeployment, DB_MARIADB_NAME);
+    expect(mariadbSkipperContainer?.image).toContain('mariadb');
+    const mariadbSkipperSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    expect(mariadbSkipperSecret).toBeTruthy();
+    const mariadbSkipperSecretData = mariadbSkipperSecret?.data || {};
+    expect(mariadbSkipperSecretData['mariadb-user']).toBe('user');
+    expect(mariadbSkipperSecretData['mariadb-root-password']).toBe('pass');
 
-    const mysqlDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
-    expect(mysqlDataflowDeployment).toBeTruthy();
-    const mysqlDataflowContainer = deploymentContainer(mysqlDataflowDeployment, DB_MYSQL_NAME);
-    expect(mysqlDataflowContainer?.image).toContain('mysql');
-    const mysqlDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
-    expect(mysqlDataflowSecret).toBeTruthy();
-    const mysqlDataflowSecretData = mysqlDataflowSecret?.data || {};
-    expect(mysqlDataflowSecretData['mysql-user']).toBe('user');
-    expect(mysqlDataflowSecretData['mysql-root-password']).toBe('pass');
+    const mariadbDataflowDeployment = findDeployment(yaml, DB_DATAFLOW_NAME);
+    expect(mariadbDataflowDeployment).toBeTruthy();
+    const mariadbDataflowContainer = deploymentContainer(mariadbDataflowDeployment, DB_MARIADB_NAME);
+    expect(mariadbDataflowContainer?.image).toContain('mariadb');
+    const mariadbDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
+    expect(mariadbDataflowSecret).toBeTruthy();
+    const mariadbDataflowSecretData = mariadbDataflowSecret?.data || {};
+    expect(mariadbDataflowSecretData['mariadb-user']).toBe('user');
+    expect(mariadbDataflowSecretData['mariadb-root-password']).toBe('pass');
   });
 
   it('should deploy postgres with custom username and password', async () => {

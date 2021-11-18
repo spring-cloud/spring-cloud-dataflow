@@ -39,7 +39,7 @@ describe('secrets', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=mysql',
+        'scdf.deploy.database.type=mariadb',
         'scdf.deploy.binder.type=kafka'
       ]
     });
@@ -88,7 +88,7 @@ describe('secrets', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=mysql',
+        'scdf.deploy.database.type=mariadb',
         'scdf.deploy.binder.type=kafka',
         'scdf.registry.secret.ref=fakeref'
       ]
