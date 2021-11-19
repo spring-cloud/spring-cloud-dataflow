@@ -5,7 +5,7 @@ scdf:
     binder:
       type: rabbit
     database:
-      type: mysql
+      type: mariadb
   server:
     image:
       repository: (@= data.values.server.repository @)

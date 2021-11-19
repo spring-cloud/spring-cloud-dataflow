@@ -63,9 +63,9 @@ components:
                       type: string
                       default: postgres
                       enum:
-                        - mysql
+                        - mariadb
                         - postgres
-                      description: Defines a database type if deployment is enabled, either mysql or postgres
+                      description: Defines a database type if deployment is enabled, either mariadb or postgres
                     postgres:
                       type: object
                       properties:
@@ -77,7 +77,7 @@ components:
                           type: string
                           default: secret
                           description: Password for deployed database as base64 encoded value
-                    mysql:
+                    mariadb:
                       type: object
                       properties:
                         username:
