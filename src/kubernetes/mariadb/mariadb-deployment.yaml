@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
+  name: mariadb
   labels:
-    app: mysql
+    app: mariadb
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: mariadb
   template:
     metadata:
       labels:
-        app: mysql
+        app: mariadb
     spec:
       containers:
-      - image: mysql:5.7.25
-        name: mysql
+      - image: mariadb:10.4.22
+        name: mariadb
         env:
-          - name: MYSQL_ROOT_PASSWORD
+          - name: MARIADB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: mysql-root-password
-                name: mysql
+                key: mariadb-root-password
+                name: mariadb
         ports:
           - containerPort: 3306
-            name: mysql
+            name: mariadb
         volumeMounts:
           - name: data
-            mountPath: /var/lib/mysql
+            mountPath: /var/lib/mariadb
         args:
           - "--ignore-db-dir=lost+found"
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: mysql
+          claimName: mariadb

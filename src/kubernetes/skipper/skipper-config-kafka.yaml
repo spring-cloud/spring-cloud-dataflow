@@ -21,9 +21,9 @@ data:
                     readinessProbeDelay: 120
                     livenessProbeDelay: 90
       datasource:
-        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/skipper
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root
-        password: ${mysql-root-password}
+        password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"

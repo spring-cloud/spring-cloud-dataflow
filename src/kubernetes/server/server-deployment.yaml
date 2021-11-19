@@ -74,9 +74,9 @@ spec:
         - name: SPRING_APPLICATION_JSON
           value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
       initContainers:
-      - name: init-mysql-wait
+      - name: init-mariadb-wait
         image: busybox
-        command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
+        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       serviceAccountName: scdf-sa
       volumes:
         - name: config
@@ -87,4 +87,4 @@ spec:
               path: application.yaml
         - name: database
           secret:
-            secretName: mysql
+            secretName: mariadb
