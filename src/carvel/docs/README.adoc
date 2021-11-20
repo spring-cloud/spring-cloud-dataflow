@@ -7,9 +7,11 @@ ifdef::env-github[]
 endif::[]
 :servers: link:servers.adoc[Servers]
 :examples: link:examples.adoc[Examples]
+:debug: link:debug.adoc[Debug]
 ifndef::env-github[]
 :servers: <<servers>>
 :examples: <<examples>>
+:debug: <<debug>>
 endif::[]
 
 = Spring Cloud Data Flow Carvel Documentation
