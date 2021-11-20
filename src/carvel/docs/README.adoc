@@ -28,6 +28,8 @@ link:database.adoc[Database]
 
 link:examples.adoc[Examples]
 
+link:debug.adoc[Debug]
+
 endif::[]
 
 Main objectives for a https://carvel.dev[Carvel] integration with dataflow is to provide:
@@ -127,3 +129,6 @@ external services are defined.
 
 ==== Use Deployed Services
 On default _postgres_ and _rabbit_ are used as a database and a binder.
+
+=== Debug Servers
+More info to debug servers see {debug}.
