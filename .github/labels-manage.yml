@@ -144,3 +144,6 @@
 - name: branch/2.7.x
   color: BFDADC
   description: Issue for a branch
+- name: branch/2.8.x
+  color: BFDADC
+  description: Issue for a branch
