@@ -389,6 +389,56 @@ describe('servers', () => {
     );
   });
 
+  it('dataflow should have extra env values', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.server.env=[{"name":"JAVA_TOOL_OPTIONS","value":"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005"}]'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const deployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const container = deploymentContainer(deployment, SCDF_SERVER_NAME);
+    const envs = containerEnvValues(container);
+    expect(envs).toBeTruthy();
+    expect(envs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'JAVA_TOOL_OPTIONS',
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005'
+        })
+      ])
+    );
+  });
+
+  it('skipper should have extra env values', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.skipper.env=[{"name":"JAVA_TOOL_OPTIONS","value":"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5006"}]'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const deployment = findDeployment(yaml, SKIPPER_NAME);
+    const container = deploymentContainer(deployment, SKIPPER_NAME);
+    const envs = containerEnvValues(container);
+    expect(envs).toBeTruthy();
+    expect(envs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'JAVA_TOOL_OPTIONS',
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5006'
+        })
+      ])
+    );
+  });
+
   it('dataflow should have monitoring env values', async () => {
     const result = await execYtt({
       files: ['config'],

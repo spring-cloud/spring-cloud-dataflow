@@ -48,6 +48,9 @@ def skipper_container_env():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST", "value": "prometheus-rsocket-proxy"}])
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
   end
+  for e in data.values.scdf.skipper.env:
+    envs.extend([{"name": e.name, "value": e.value}])
+  end
   return envs
 end
 

@@ -59,6 +59,7 @@ yaml document.
 - <<configuration-options-scdf.server.database.testOnBorrow>>
 - <<configuration-options-scdf.server.database.validationQuery>>
 - <<configuration-options-scdf.server.config>>
+- <<configuration-options-scdf.server.env>>
 - <<configuration-options-scdf.server.metrics.dashboard.url>>
 - <<configuration-options-scdf.server.contextPath>>
 - <<configuration-options-scdf.ctr.image.repository>>
@@ -79,6 +80,7 @@ yaml document.
 - <<configuration-options-scdf.skipper.database.testOnBorrow>>
 - <<configuration-options-scdf.skipper.database.validationQuery>>
 - <<configuration-options-scdf.skipper.config>>
+- <<configuration-options-scdf.skipper.env>>
 - <<configuration-options-scdf.binder.kafka.broker.host>>
 - <<configuration-options-scdf.binder.kafka.broker.port>>
 - <<configuration-options-scdf.binder.kafka.zk.host>>
@@ -544,6 +546,16 @@ String(yml)
    Default Value:::
 None
 
+[[configuration-options-scdf.server.env]]`scdf.server.env`::
+  Description:::
+Extra environment variables for dataflow container.
+  Required:::
+No
+  Type:::
+List({name,value})
+   Default Value:::
+None
+
 [[configuration-options-scdf.server.metrics.dashboard.url]]`scdf.server.metrics.dashboard.url`::
   Description:::
 Metrics dashboard url for UI.
@@ -741,6 +753,16 @@ Raw skipper config as yml.
 No
   Type:::
 String(yml)
+   Default Value:::
+None
+
+[[configuration-options-scdf.skipper.env]]`scdf.skipper.env`::
+  Description:::
+Extra environment variables for skipper container.
+  Required:::
+No
+  Type:::
+List({name,value})
    Default Value:::
 None
 

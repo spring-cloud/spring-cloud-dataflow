@@ -43,6 +43,9 @@ def dataflow_container_env():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
     envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL", "value": "http://localhost:3000"}])
   end
+  for e in data.values.scdf.server.env:
+    envs.extend([{"name": e.name, "value": e.value}])
+  end
   return envs
 end
 

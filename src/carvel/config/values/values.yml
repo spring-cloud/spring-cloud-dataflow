@@ -85,6 +85,9 @@ scdf:
     #! additional dataflow server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   ctr:
     image:
       #! ctr image repository id
@@ -118,6 +121,9 @@ scdf:
     #! additional skipper server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   #! external binder settings, will disable binder deployment
   binder:
     kafka:

@@ -146,6 +146,18 @@ components:
                 config:
                   type: string
                   description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
                 metrics:
                   type: object
                   properties:
@@ -216,6 +228,18 @@ components:
                 config:
                   type: string
                   description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
             ctr:
               type: object
               properties:
