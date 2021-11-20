@@ -204,3 +204,6 @@
 - name: branch/2.8.x
   color: BFDADC
   description: Issue for a branch
+- name: branch/2.9.x
+  color: BFDADC
+  description: Issue for a branch
