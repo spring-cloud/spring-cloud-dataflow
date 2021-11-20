@@ -36,6 +36,14 @@
             "request": "launch",
             "mainClass": "org.springframework.cloud.skipper.shell.ShellApplication",
             "projectName": "spring-cloud-skipper-shell"
+        },
+        {
+            "type": "java",
+            "name": "SKIPPER Debug Attach",
+            "projectName": "spring-cloud-skipper-server",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 6006
         }
     ]
 }
