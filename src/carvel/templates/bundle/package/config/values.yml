@@ -16,3 +16,8 @@ scdf:
   skipper:
     image:
       tag: (@= data.values.skipper.version @)
+  feature:
+    monitoring:
+      grafana:
+        image:
+          tag: (@= data.values.grafana.version @)
