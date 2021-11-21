@@ -103,6 +103,7 @@ yaml document.
 - <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.tag>>
 - <<configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.digest>>
 
+[[options]]
 === Options
 
 [[configuration-options-scdf.registry.secret.ref]]`scdf.registry.secret.ref`::
