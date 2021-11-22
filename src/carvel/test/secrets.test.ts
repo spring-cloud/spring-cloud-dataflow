@@ -58,6 +58,32 @@ describe('secrets', () => {
     expect(secret).toBeTruthy();
   });
 
+  it('should add carvel secretgen on default 3', async () => {
+    // see above test for as this is just same with different setup
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.feature.monitoring.prometheus.enabled=true',
+        'scdf.feature.monitoring.grafana.enabled=true',
+        'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const pods = findPodSpecsWithImagePullSecrets(yaml);
+    expect(pods).toHaveLength(8);
+
+    // all default pull secrets need to ref to reg-creds
+    const refs = pods.flatMap(p => p.imagePullSecrets?.[0].name);
+    expect(refs).toHaveLength(8);
+    expect(refs.every(r => r === 'reg-creds')).toBeTrue();
+
+    const secret = findSecret(yaml, 'reg-creds');
+    expect(secret).toBeTruthy();
+  });
+
   it('should add manual image pull secret if defined 1', async () => {
     const result = await execYtt({
       files: ['config'],
@@ -100,6 +126,30 @@ describe('secrets', () => {
 
     const refs = pods.flatMap(p => p.imagePullSecrets?.[0].name);
     expect(refs).toHaveLength(5);
+    expect(refs.every(r => r === 'fakeref')).toBeTrue();
+
+    const secret = findSecret(yaml, 'reg-creds');
+    expect(secret).toBeFalsy();
+  });
+
+  it('should add manual image pull secret if defined 3', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.feature.monitoring.prometheus.enabled=true',
+        'scdf.feature.monitoring.grafana.enabled=true',
+        'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true',
+        'scdf.registry.secret.ref=fakeref'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+    const pods = findPodSpecsWithImagePullSecrets(yaml);
+    expect(pods).toHaveLength(8);
+
+    const refs = pods.flatMap(p => p.imagePullSecrets?.[0].name);
+    expect(refs).toHaveLength(8);
     expect(refs.every(r => r === 'fakeref')).toBeTrue();
 
     const secret = findSecret(yaml, 'reg-creds');
