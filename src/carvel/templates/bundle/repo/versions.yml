@@ -12,3 +12,4 @@ package_repository:
       version: (@= data.values.project.version @)
       image: (@= data.values.repository @):(@= data.values.project.version @)
       description: Package for SCDF
+      timestamp: (@= data.values.package.timestamp @)

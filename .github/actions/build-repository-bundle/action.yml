@@ -43,6 +43,7 @@ runs:
         --data-value-yaml project.version=$VERSION \
         --data-value-yaml repository=$PACKAGE_BUNDLE_REPOSITORY \
         --data-value-yaml package.name=$PACKAGE_NAME \
+        --data-value-yaml package.timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
         --file-mark 'package.yml:type=text-plain' \
         --file-mark 'metadata.yml:type=text-plain' \
         --file-mark 'values-schema.yml:type=text-plain' \
