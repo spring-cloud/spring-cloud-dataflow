@@ -1,10 +1,4 @@
-create table if not exists hibernate_sequence (
-  next_val bigint
-);
-
-insert into hibernate_sequence (next_val)
-  select * from (select 1 as next_val) as temp
-  where not exists(select * from hibernate_sequence);
+create sequence if not exists hibernate_sequence start 1 increment 1;
 
 create table skipper_app_deployer_data (
   id bigint not null,
