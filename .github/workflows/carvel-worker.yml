@@ -54,7 +54,7 @@ jobs:
         path: ${{ steps.build-package-bundle.outputs.bundle-path }}
         repository: springcloud/scdf-package
         version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}
-        prerelease: SNAPSHOT
+        prerelease: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}
 
     # Builds a repository bundle
     - name: Build Repository Bundle
@@ -74,7 +74,7 @@ jobs:
         path: ${{ steps.build-repository-bundle.outputs.bundle-path }}
         repository: springcloud/scdf-repo
         version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}
-        prerelease: {{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}
+        prerelease: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
