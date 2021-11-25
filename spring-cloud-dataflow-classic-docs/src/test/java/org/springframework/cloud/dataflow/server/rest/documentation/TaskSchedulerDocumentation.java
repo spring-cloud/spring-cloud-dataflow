@@ -67,6 +67,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 				.andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("scheduleName").description("The name for the created schedule"),
+								parameterWithName("platform").description("The name of the platform the task is launched"),
 								parameterWithName("taskDefinitionName")
 										.description("The name of the task definition to be scheduled"),
 								parameterWithName("properties")
