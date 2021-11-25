@@ -61,12 +61,14 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 				post("/tasks/schedules")
 						.param("scheduleName", "myschedule")
 						.param("taskDefinitionName", "mytaskname")
+						.param("platform", "default")
 						.param("properties", "scheduler.cron.expression=00 22 17 ? *")
 						.param("arguments", "--foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("scheduleName").description("The name for the created schedule"),
+								parameterWithName("platform").description("The name of the platform the task is launched"),
 								parameterWithName("taskDefinitionName")
 										.description("The name of the task definition to be scheduled"),
 								parameterWithName("properties")
