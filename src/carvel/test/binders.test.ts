@@ -53,7 +53,7 @@ describe('binders rabbit', () => {
     expect(rabbitVolume?.secret?.secretName).toBe('rabbitmq');
 
     const rabbitVolumeMount = containerVolumeMount(skipperContainer, 'rabbitmq');
-    expect(rabbitVolumeMount?.mountPath).toBe('/etc/secrets/rabbitmq');
+    expect(rabbitVolumeMount?.mountPath).toBe('/workspace/runtime/secrets/rabbitmq');
   });
 
   it('should skip deploy if external settings', async () => {

@@ -33,11 +33,11 @@ spec:
           mountPath: /workspace/config
           readOnly: true
         - name: database
-          mountPath: /etc/secrets/database
+          mountPath: /workspace/runtime/secrets/database
           readOnly: true
         #@ if rabbitmq_enabled():
         - name: rabbitmq
-          mountPath: /etc/secrets/rabbitmq
+          mountPath: /workspace/runtime/secrets/rabbitmq
           readOnly: true
         #@ end
         ports:

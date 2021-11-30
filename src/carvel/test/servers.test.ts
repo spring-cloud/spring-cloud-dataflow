@@ -268,7 +268,7 @@ describe('servers', () => {
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_KUBERNETES_SECRETS_PATHS',
-          value: '/etc/secrets'
+          value: '/workspace/runtime/secrets'
         })
       ])
     );
@@ -374,7 +374,7 @@ describe('servers', () => {
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_KUBERNETES_SECRETS_PATHS',
-          value: '/etc/secrets'
+          value: '/workspace/runtime/secrets'
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_DATAFLOW_SERVER_URI'
