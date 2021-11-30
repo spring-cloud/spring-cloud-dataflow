@@ -337,7 +337,7 @@ describe('servers', () => {
     const container = deploymentContainer(deployment, SCDF_SERVER_NAME);
     const envs = containerEnvValues(container);
     expect(envs).toBeTruthy();
-    expect(envs).toHaveLength(11);
+    expect(envs).toHaveLength(10);
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -381,9 +381,6 @@ describe('servers', () => {
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI'
-        }),
-        expect.objectContaining({
-          name: 'SPRING_APPLICATION_JSON'
         })
       ])
     );
