@@ -65,7 +65,7 @@ spec:
             secretKeyRef:
               name: mariadb
               key: mariadb-root-password
-        command: ['sh', '-c', 'mariadb -h mariadb -u root -e "CREATE DATABASE IF NOT EXISTS skipper;"']
+        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
       volumes:
         - name: config
