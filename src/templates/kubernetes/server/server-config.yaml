@@ -28,7 +28,7 @@ data:
                     limits:
                       memory: 1024Mi
       datasource:
-        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/mysql
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/mariadb
         username: root
         password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
