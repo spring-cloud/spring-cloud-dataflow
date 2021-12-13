@@ -250,7 +250,7 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |<none>
 
 |maximumConcurrentTasks
-|The maximum concurrent tasks allowed for this platform instance.
+|The maximum concurrent tasks allowed for this platform instance
 |20
 
 |podSecurityContext.runAsUser
@@ -258,7 +258,15 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |<none>
 
 |podSecurityContext.fsGroup
-|The numeric group ID to run pod container processes under
+|The numeric group ID for the volumes of the pod
+|<none>
+
+|podSecurityContext.supplementalGroups
+|The numeric group IDs applied to the pod container processes, in addition to the container's primary group ID
+|<none>
+
+|podSecurityContext.seccompProfile
+|The seccomp options to use for the pod containers expressed in YAML format.  e.g. ```{ seccompProfile: { type: 'Localhost', localhostProfile: 'my-profiles/profile-allow.json' }}```
 |<none>
 
 |affinity.nodeAffinity
