@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -113,8 +112,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
 		ApplicationContextAware {
-
-	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -190,7 +187,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 	}
 
 	@Bean
-	public RestTemplate restTemplate(Environment ev) {
+	public static RestTemplate restTemplate() {
 		return DataFlowTemplate.getDefaultDataflowRestTemplate();
 	}
 
