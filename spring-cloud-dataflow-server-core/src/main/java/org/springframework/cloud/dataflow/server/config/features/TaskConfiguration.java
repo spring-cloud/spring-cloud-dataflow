@@ -129,7 +129,7 @@ public class TaskConfiguration {
 	 */
 	@Profile({ "local", "default" })
 	@Bean
-	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties,
+	public static TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties,
 			@Nullable Scheduler localScheduler) {
 		TaskPlatform taskPlatform = new LocalTaskPlatformFactory(localPlatformProperties, localScheduler)
 				.createTaskPlatform();
