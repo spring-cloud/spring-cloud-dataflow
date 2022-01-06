@@ -1,0 +1,4 @@
+spring:
+  main:
+    allow-circular-references: true
+
