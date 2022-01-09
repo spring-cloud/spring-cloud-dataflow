@@ -142,8 +142,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	private final static String K8_PLATFORM = "k8platform";
 
-	private final static String FAKE_PLATFORM = "fakeplatformname";
-
 	@Autowired
 	TaskRepository taskRepository;
 
@@ -215,7 +213,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
-			validateBasicProperties(Collections.emptyMap(), argument, FAKE_PLATFORM, 1L);
+			validateBasicProperties(Collections.emptyMap(), argument, "default", 1L);
 		}
 
 		@Test
@@ -254,8 +252,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		private void validateBasicProperties(Map<String, String> taskDeploymentProperties,
 				ArgumentCaptor<AppDeploymentRequest> argument,
 				String platform, long numberOfRunningTasks) {
-			assertEquals(numberOfRunningTasks, this.taskExecutionService.executeTask(TASK_NAME_ORIG,
-					taskDeploymentProperties, new LinkedList<>()));
+			this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertTrue(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username"));
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId("0");
@@ -268,10 +265,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 	}
 
 	public void setupTest(DataSource dataSource) {
-		this.launcherRepository.save(new Launcher(FAKE_PLATFORM, "local", taskLauncher));
+		this.launcherRepository.save(new Launcher("default", "local", taskLauncher));
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		taskDefinitionRepository.findAll();
 		JdbcTemplate template = new JdbcTemplate(dataSource);
+
+		template.execute("DELETE FROM TASK_TASK_BATCH");
 		template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
 		template.execute("DELETE FROM TASK_EXECUTION;");
 	}
