@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.integration.test.tags.Database;
-import org.springframework.cloud.dataflow.integration.test.tags.DatabaseSlow;
-import org.springframework.cloud.dataflow.integration.test.tags.DataflowAll;
 import org.springframework.cloud.dataflow.integration.test.tags.DataflowMain;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -90,10 +88,7 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 	 * Test full migration flow with defined versions going through from a defined
 	 * expected skipper/dataflow combinations.
 	 */
-	@Test
-	@DataflowAll
-	@DatabaseSlow
-	public void testFullMigrationFlow() {
+	protected void testFullMigrationFlow() {
 		log.info("Running testFullMigrationFlow()");
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());

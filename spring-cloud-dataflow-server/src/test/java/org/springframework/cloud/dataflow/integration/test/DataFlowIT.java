@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * --------------------------------------------------------------------------------------------------------------------
  * For testing streams on remote platforms (k8s and CF). If you configure K8s or CF runtime platforms as explained below,
- * you can have the test feature that uses the local run SCDF/Skipper/MySQL to deploy and run Stream only test to the
+ * you can have the test feature that uses the local run SCDF/Skipper/Mariadb to deploy and run Stream only test to the
  * remote K8s or CF environments. Note that Tasks can only be run locally!
  *
  * Follow the https://dataflow.spring.io/docs/installation/local/docker-customize/#multi-platform-support

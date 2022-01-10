@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
-import org.springframework.cloud.dataflow.integration.test.tags.DatabaseShared;
-import org.springframework.cloud.dataflow.integration.test.tags.Mysql;
+import org.springframework.cloud.dataflow.integration.test.tags.DatabaseSeparate;
+import org.springframework.cloud.dataflow.integration.test.tags.Mariadb;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Database tests for {@code mysql 5.7} using shared db.
+ * Database tests for {@code mariadb 10.3} using separate db's.
  */
-@Mysql
-@DatabaseShared
-@ActiveProfiles({TagNames.PROFILE_DB_SHARED})
-public class MysqlSharedDbIT extends AbstractDatabaseTests {
+@Mariadb
+@DatabaseSeparate
+@ActiveProfiles({TagNames.PROFILE_DB_SEPARATE})
+public class MariadbSeparateDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {
-		return TagNames.MYSQL_5_7;
+		return TagNames.MARIADB_10_3;
 	}
 }
