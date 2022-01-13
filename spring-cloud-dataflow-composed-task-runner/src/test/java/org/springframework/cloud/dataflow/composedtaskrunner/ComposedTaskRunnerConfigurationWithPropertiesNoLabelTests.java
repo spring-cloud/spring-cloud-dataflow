@@ -42,7 +42,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Glenn Renfro
@@ -52,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class})
 @TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
+		"skip-tls-certificate-verification=true",
 		"composed-task-app-properties.app.AAA.format=yyyy",
 		"interval-time-between-checks=1100",
 		"composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
@@ -82,11 +82,11 @@ public class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
 		props.put("app.AAA.format", "yyyy");
 		Map<String, String> composedTaskAppProperties = new HashMap<>(1);
 		composedTaskAppProperties.put("app.AAA.format", "yyyy");
-
-		assertEquals(composedTaskAppProperties, composedTaskProperties.getComposedTaskAppProperties());
-		assertEquals(1010, composedTaskProperties.getMaxWaitTime());
-		assertEquals(1100, composedTaskProperties.getIntervalTimeBetweenChecks());
-		assertEquals("https://bar", composedTaskProperties.getDataflowServerUri().toASCIIString());
+		assertThat(composedTaskProperties.isSkipTlsCertificateVerification()).isTrue();
+		assertThat(composedTaskProperties.getComposedTaskAppProperties()).isEqualTo(composedTaskAppProperties);
+		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
+		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
+		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");

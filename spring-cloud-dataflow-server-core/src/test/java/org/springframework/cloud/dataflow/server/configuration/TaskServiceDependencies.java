@@ -23,7 +23,10 @@ import javax.sql.DataSource;
 
 import org.mockito.Mockito;
 
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -50,6 +53,7 @@ import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -83,6 +87,8 @@ import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationP
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.batch.listener.TaskBatchDao;
+import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -279,7 +285,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			@Autowired(required = false) SchedulerService schedulerService) {
+			@Autowired(required = false) SchedulerService schedulerService,
+			TaskConfigurationProperties taskConfigurationProperties,
+			DataSource dataSource) {
 
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
@@ -287,7 +295,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				dataflowTaskExecutionDao,
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
-				schedulerService);
+				schedulerService,
+				taskConfigurationProperties,
+				dataSource);
 	}
 
 	@Bean
@@ -386,4 +396,25 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
 		return oauth2TokenUtilsService;
 	}
+
+	@Bean
+	public JobRepository jobRepository(DataSource dataSource, PlatformTransactionManager transactionManager) throws Exception{
+		JobRepositoryFactoryBean jobRepositoryFactoryBean = new JobRepositoryFactoryBean();
+		jobRepositoryFactoryBean.setDataSource(dataSource);
+		jobRepositoryFactoryBean.setTransactionManager(transactionManager);
+		return jobRepositoryFactoryBean.getObject();
+	}
+
+	@Bean
+	public TaskBatchDao taskBatchDao(DataSource dataSource) {
+		return new JdbcTaskBatchDao(dataSource);
+	}
+
+	@Bean
+	public JobExecutionDao jobExecutionDao(DataSource dataSource) {
+		JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
+		jdbcSearchableJobExecutionDao.setDataSource(dataSource);
+		return jdbcSearchableJobExecutionDao;
+	}
+
 }

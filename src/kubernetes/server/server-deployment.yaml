@@ -16,11 +16,11 @@ spec:
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.8.0-SNAPSHOT
+        image: springcloud/spring-cloud-dataflow-server:2.10.0-SNAPSHOT
         imagePullPolicy: Always
         volumeMounts:
           - name: config
-            mountPath: /config
+            mountPath: /workspace/config
             readOnly: true
           - name: database
             mountPath: /etc/secrets/database
@@ -58,7 +58,7 @@ spec:
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: 'true'
         - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
-          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.8.0-SNAPSHOT'
+          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.10.0-SNAPSHOT'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
@@ -74,9 +74,9 @@ spec:
         - name: SPRING_APPLICATION_JSON
           value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
       initContainers:
-      - name: init-mysql-wait
+      - name: init-mariadb-wait
         image: busybox
-        command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
+        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       serviceAccountName: scdf-sa
       volumes:
         - name: config
@@ -87,4 +87,4 @@ spec:
               path: application.yaml
         - name: database
           secret:
-            secretName: mysql
+            secretName: mariadb

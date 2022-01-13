@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -37,6 +38,7 @@ import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsSe
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -63,6 +65,8 @@ import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.listener.TaskException;
+import org.springframework.cloud.task.listener.TaskExecutionException;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -143,6 +147,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private TaskConfigurationProperties taskConfigurationProperties;
 
 	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
+	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters " +
+			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+			"or 'abc-123')";
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
@@ -255,7 +264,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
-
+		String platformType = StreamSupport.stream(launcherRepository.findAll().spliterator(), true)
+				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+				.map(Launcher::getType)
+				.findFirst()
+				.orElse("unknown");
+		if (platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE) && !TASK_NAME_PATTERN.matcher(taskName).matches()) {
+			throw new TaskException(String.format("Task name %s is invalid. %s", taskName, TASK_NAME_VALIDATION_MSG));
+		}
 		// Naive local state to prevent parallel launches to break things up
 		if(this.tasksBeingUpgraded.containsKey(taskName)) {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
@@ -265,6 +281,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 		}
 		Launcher launcher = this.launcherRepository.findByName(platformName);
+		if(launcher == null) {
+			throw new IllegalStateException(String.format("No launcher was available for platform %s", platformName));
+		}
 		validateTaskName(taskName, launcher);
 		// Remove since the key for task platform name will not pass validation for app,
 		// deployer, or scheduler prefix.
@@ -304,7 +323,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			List<String> composedTaskArguments = new ArrayList<>();
 			commandLineArgs.forEach(arg -> {
 				if (arg.startsWith("app.")) {
-					composedTaskArguments.add("--composed-task-app-arguments." + arg);
+					String[] split = arg.split("=", 2);
+					if (split.length == 2) {
+						composedTaskArguments.add("--composed-task-app-arguments." + Base64Utils.encode(split[0]) + "=" + split[1]);
+					}
+					else {
+						composedTaskArguments.add("--composed-task-app-arguments." + arg);
+					}
 				}
 				else {
 					composedTaskArguments.add(arg);
@@ -521,8 +546,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		 * Use the TaskLauncher to verify the actual state.
 		 */
 		if (runningTaskExecutions.getTotalElements() > 0) {
+			TaskExecution latestRunningExecution = runningTaskExecutions.toList().get(0);
+			if(latestRunningExecution.getExternalExecutionId() == null) {
+				logger.warn("Task repository shows a running task execution for task {} with no externalExecutionId.",
+						taskName);
+				return;
+			}
+			LaunchState launchState = taskLauncher.status(latestRunningExecution.getExternalExecutionId()).getState();
 
-			LaunchState launchState = taskLauncher.status(runningTaskExecutions.toList().get(0).getExternalExecutionId()).getState();
 			if (launchState.equals(LaunchState.running) || launchState.equals(LaunchState.launching)) {
 				throw new IllegalStateException("Unable to update application due to currently running applications");
 			}
@@ -777,7 +808,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (StringUtils.hasText(platformName)) {
 			platformNameToUse = platformName;
 		} else {
-			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
+			TaskExecution platformTaskExecution = taskExecution;
+			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
+			// If TaskExecution does not have an associated platform see if parent task has the platform information.
+			if(taskDeployment == null) {
+				if(platformTaskExecution.getParentExecutionId() != null) {
+					platformTaskExecution = this.taskExplorer.getTaskExecution(platformTaskExecution.getParentExecutionId());
+					taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
+				}
+				if(taskDeployment == null) {
+					throw new TaskExecutionException(String.format("No platform could be found for task execution id %s", taskExecution.getExecutionId()));
+				}
+			}
 			platformNameToUse = taskDeployment.getPlatformName();
 		}
 		TaskLauncher taskLauncher = findTaskLauncher(platformNameToUse);

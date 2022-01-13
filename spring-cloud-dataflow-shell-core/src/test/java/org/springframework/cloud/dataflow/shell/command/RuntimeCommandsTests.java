@@ -79,7 +79,7 @@ public class RuntimeCommandsTests {
 		instanceStatusResources1.add(instanceStatusResource2);
 		PagedModel.PageMetadata metadata1 = new PagedModel.PageMetadata(instanceStatusResources1.size(), 1,
 				instanceStatusResources1.size(), 1);
-		PagedModel<AppInstanceStatusResource> resources = new PagedModel<>(instanceStatusResources1, metadata1);
+		PagedModel<AppInstanceStatusResource> resources = PagedModel.of(instanceStatusResources1, metadata1);
 		appStatusResource1.setInstances(resources);
 		appStatusResource2 = new AppStatusResource("2", "undeployed");
 		AppInstanceStatusResource instanceStatusResource3 = new AppInstanceStatusResource("30", "undeployed", null);
@@ -89,7 +89,7 @@ public class RuntimeCommandsTests {
 		instanceStatusResources1.add(instanceStatusResource4);
 		PagedModel.PageMetadata metadata3 = new PagedModel.PageMetadata(instanceStatusResources2.size(), 1,
 				instanceStatusResources2.size(), 1);
-		PagedModel<AppInstanceStatusResource> resources2 = new PagedModel<>(instanceStatusResources2,
+		PagedModel<AppInstanceStatusResource> resources2 = PagedModel.of(instanceStatusResources2,
 				metadata3);
 		appStatusResource2.setInstances(resources2);
 		appStatusResource3 = new AppStatusResource("3", "failed");
@@ -100,7 +100,7 @@ public class RuntimeCommandsTests {
 		instanceStatusResources1.add(instanceStatusResource6);
 		PagedModel.PageMetadata metadata4 = new PagedModel.PageMetadata(instanceStatusResources3.size(), 1,
 				instanceStatusResources3.size(), 1);
-		PagedModel<AppInstanceStatusResource> resources3 = new PagedModel<>(instanceStatusResources3,
+		PagedModel<AppInstanceStatusResource> resources3 = PagedModel.of(instanceStatusResources3,
 				metadata4);
 		appStatusResource3.setInstances(resources3);
 	}
@@ -112,7 +112,7 @@ public class RuntimeCommandsTests {
 		data.add(appStatusResource2);
 		data.add(appStatusResource3);
 		PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(data.size(), 1, data.size(), 1);
-		PagedModel<AppStatusResource> result = new PagedModel<>(data, metadata);
+		PagedModel<AppStatusResource> result = PagedModel.of(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "2", "undeployed", "0" },
 				{ "3", "failed", "0" } };
@@ -130,7 +130,7 @@ public class RuntimeCommandsTests {
 		data.add(appStatusResource1);
 		data.add(appStatusResource2);
 		PagedModel.PageMetadata metadata = new PagedModel.PageMetadata(data.size(), 1, data.size(), 1);
-		PagedModel<AppStatusResource> result = new PagedModel<>(data, metadata);
+		PagedModel<AppStatusResource> result = PagedModel.of(data, metadata);
 		when(runtimeOperations.status()).thenReturn(result);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" },
 				{ "2", "undeployed", "0" } };

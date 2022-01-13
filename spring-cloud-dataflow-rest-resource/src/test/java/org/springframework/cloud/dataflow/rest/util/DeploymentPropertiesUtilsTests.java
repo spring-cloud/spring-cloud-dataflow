@@ -29,12 +29,8 @@ import org.junit.Test;
 
 import org.springframework.util.FileCopyUtils;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasKey;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -49,41 +45,41 @@ public class DeploymentPropertiesUtilsTests {
 
 	private static void assertArrays(String[] left, String[] right) {
 		ArrayList<String> params = new ArrayList<>(Arrays.asList(left));
-		assertThat(DeploymentPropertiesUtils.removeQuoting(params), containsInAnyOrder(right));
+		assertThat(DeploymentPropertiesUtils.removeQuoting(params)).contains(right);
 	}
 
 	@Test
 	public void testDeploymentPropertiesParsing() {
 		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
 				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww, scheduler.other.key = baz");
-		assertThat(props, hasEntry("app.foo.bar", "v"));
-		assertThat(props, hasEntry("app.other.key", "value"));
-		assertThat(props, hasEntry("app.foo.wizz", "v2"));
-		assertThat(props, hasEntry("deployer.foo.pot", "fern"));
-		assertThat(props, hasEntry("deployer.other.cow", "meww"));
-		assertThat(props, hasEntry("scheduler.other.key", "baz"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar", "v"));
+		assertThat(props.entrySet()).contains(entry("app.other.key", "value"));
+		assertThat(props.entrySet()).contains(entry("app.foo.wizz", "v2"));
+		assertThat(props.entrySet()).contains(entry("deployer.foo.pot", "fern"));
+		assertThat(props.entrySet()).contains(entry("deployer.other.cow", "meww"));
+		assertThat(props.entrySet()).contains(entry("scheduler.other.key", "baz"));
 
 		props = DeploymentPropertiesUtils.parse("app.f=v");
-		assertThat(props, hasEntry("app.f", "v"));
+		assertThat(props.entrySet()).contains(entry("app.f", "v"));
 
 		props = DeploymentPropertiesUtils.parse("app.foo1=bar1,app.foo2=bar2,app.foo3=bar3,xxx3");
-		assertThat(props, hasEntry("app.foo1", "bar1"));
-		assertThat(props, hasEntry("app.foo2", "bar2"));
-		assertThat(props, hasEntry("app.foo3", "bar3,xxx3"));
+		assertThat(props.entrySet()).contains(entry("app.foo1", "bar1"));
+		assertThat(props.entrySet()).contains(entry("app.foo2", "bar2"));
+		assertThat(props.entrySet()).contains(entry("app.foo3", "bar3,xxx3"));
 
 		props = DeploymentPropertiesUtils.parse("deployer.foo1 = bar1 , app.foo2= bar2,  deployer.foo3  = bar3,xxx3");
-		assertThat(props, hasEntry("deployer.foo1", "bar1"));
-		assertThat(props, hasEntry("app.foo2", "bar2"));
-		assertThat(props, hasEntry("deployer.foo3", "bar3,xxx3"));
+		assertThat(props.entrySet()).contains(entry("deployer.foo1", "bar1"));
+		assertThat(props.entrySet()).contains(entry("app.foo2", "bar2"));
+		assertThat(props.entrySet()).contains(entry("deployer.foo3", "bar3,xxx3"));
 
 		props = DeploymentPropertiesUtils.parse("app.*.count=1");
-		assertThat(props, hasEntry("app.*.count", "1"));
+		assertThat(props.entrySet()).contains(entry("app.*.count", "1"));
 
 		props = DeploymentPropertiesUtils.parse("app.*.my-count=1");
-		assertThat(props, hasEntry("app.*.my-count", "1"));
+		assertThat(props.entrySet()).contains(entry("app.*.my-count", "1"));
 
 		props = DeploymentPropertiesUtils.parse("app.transform.producer.partitionKeyExpression=fakeExpression('xxx')");
-		assertThat(props, hasEntry("app.transform.producer.partitionKeyExpression", "fakeExpression('xxx')"));
+		assertThat(props.entrySet()).contains(entry("app.transform.producer.partitionKeyExpression", "fakeExpression('xxx')"));
 
 		try {
 			DeploymentPropertiesUtils.parse("invalidkeyvalue");
@@ -94,20 +90,20 @@ public class DeploymentPropertiesUtilsTests {
 		}
 
 		props = DeploymentPropertiesUtils.parse("deployer.foo=bar,invalidkeyvalue2");
-		assertThat(props.size(), is(1));
-		assertThat(props, hasEntry("deployer.foo", "bar,invalidkeyvalue2"));
+		assertThat(props.size()).isEqualTo(1);
+		assertThat(props.entrySet()).contains(entry("deployer.foo", "bar,invalidkeyvalue2"));
 
 		props = DeploymentPropertiesUtils.parse("app.foo.bar1=jee1,jee2,jee3,deployer.foo.bar2=jee4,jee5,jee6");
-		assertThat(props, hasEntry("app.foo.bar1", "jee1,jee2,jee3"));
-		assertThat(props, hasEntry("deployer.foo.bar2", "jee4,jee5,jee6"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar1", "jee1,jee2,jee3"));
+		assertThat(props.entrySet()).contains(entry("deployer.foo.bar2", "jee4,jee5,jee6"));
 
 		props = DeploymentPropertiesUtils.parse("app.foo.bar1=xxx=1,app.foo.bar2=xxx=2");
-		assertThat(props, hasEntry("app.foo.bar1", "xxx=1"));
-		assertThat(props, hasEntry("app.foo.bar2", "xxx=2"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar1", "xxx=1"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar2", "xxx=2"));
 
 		props = DeploymentPropertiesUtils.parse("app.foo.bar1=xxx=1,test=value,app.foo.bar2=xxx=2");
-		assertThat(props, hasEntry("app.foo.bar1", "xxx=1,test=value"));
-		assertThat(props, hasEntry("app.foo.bar2", "xxx=2"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar1", "xxx=1,test=value"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar2", "xxx=2"));
 	}
 
 
@@ -133,6 +129,13 @@ public class DeploymentPropertiesUtilsTests {
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b c=d", " ");
 		assertTrue(props.contains("c=d"));
 		assertTrue(props.contains("a=b"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("a=b    c=d   ", " ");
+		System.out.println(">" +props.get(0)+"<");
+		System.out.println(">" +props.get(1)+"<");
+
+		assertTrue(props.contains("a=b"));
+		assertTrue(props.contains("c=d"));
 
 		props = DeploymentPropertiesUtils.parseArgumentList("foo1=bar1 foo2=bar2 foo3=bar3 xxx3", " ");
 		assertTrue(props.contains("foo1=bar1"));
@@ -161,9 +164,9 @@ public class DeploymentPropertiesUtilsTests {
 	public void testLongDeploymentPropertyValues() {
 		Map<String, String> props = DeploymentPropertiesUtils
 				.parse("app.foo.bar=FoooooooooooooooooooooBar,app.foo" + ".bar2=FoooooooooooooooooooooBar");
-		assertThat(props, hasEntry("app.foo.bar", "FoooooooooooooooooooooBar"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar", "FoooooooooooooooooooooBar"));
 		props = DeploymentPropertiesUtils.parse("app.foo.bar=FooooooooooooooooooooooooooooooooooooooooooooooooooooBar");
-		assertThat(props, hasEntry("app.foo.bar", "FooooooooooooooooooooooooooooooooooooooooooooooooooooBar"));
+		assertThat(props.entrySet()).contains(entry("app.foo.bar", "FooooooooooooooooooooooooooooooooooooooooooooooooooooBar"));
 	}
 
 	@Test
@@ -177,10 +180,10 @@ public class DeploymentPropertiesUtilsTests {
 		props.put("deployer.myapp.precedence", "app");
 		Map<String, String> result = DeploymentPropertiesUtils.extractAndQualifyDeployerProperties(props, "myapp");
 
-		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
-		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
-		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
-		assertThat(result, not(hasKey("app.myapp.foo")));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.count", "2"));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.foo", "bar"));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.precedence", "app"));
+		assertThat(result.keySet()).doesNotContain("app.myapp.foo");
 	}
 
 	@Test
@@ -194,10 +197,10 @@ public class DeploymentPropertiesUtilsTests {
 		props.put("deployer.myapp.precedence", "app");
 		Map<String, String> result = DeploymentPropertiesUtils.qualifyDeployerProperties(props, "myapp");
 
-		assertThat(result, hasEntry("spring.cloud.deployer.count", "2"));
-		assertThat(result, hasEntry("spring.cloud.deployer.foo", "bar"));
-		assertThat(result, hasEntry("spring.cloud.deployer.precedence", "app"));
-		assertThat(result, hasKey("app.myapp.foo"));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.count", "2"));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.foo", "bar"));
+		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.precedence", "app"));
+		assertThat(result.keySet()).contains("app.myapp.foo");
 	}
 
 	@Test
@@ -225,11 +228,11 @@ public class DeploymentPropertiesUtilsTests {
 		FileCopyUtils.copy("app.foo1:\n  bar1: spam".getBytes(), file);
 
 		Map<String, String> props = DeploymentPropertiesUtils.parseDeploymentProperties("app.foo2=bar2", file, 0);
-		assertThat(props.size(), is(1));
-		assertThat(props.get("app.foo2"), is("bar2"));
+		assertThat(props.size()).isEqualTo(1);
+		assertThat(props.get("app.foo2")).isEqualTo("bar2");
 
 		props = DeploymentPropertiesUtils.parseDeploymentProperties("foo2=bar2", file, 1);
-		assertThat(props.size(), is(1));
-		assertThat(props.get("app.foo1.bar1"), is("spam"));
+		assertThat(props.size()).isEqualTo(1);
+		assertThat(props.get("app.foo1.bar1")).isEqualTo("spam");
 	}
 }

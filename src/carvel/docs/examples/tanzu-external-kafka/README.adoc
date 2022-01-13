@@ -1,0 +1,65 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+endif::[]
+
+[[examples-tanzu-external-kafka]]
+== Tanzu External Kafka
+In this example you use _Tanzu CLI_ and external kafka broker.
+
+Deploy kafka using external https://strimzi.io/quickstarts[Strimzi]
+
+[source, bash]
+----
+kubectl create namespace kafka
+kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka' -n kafka
+kubectl apply -f https://strimzi.io/examples/latest/kafka/kafka-persistent-single.yaml -n kafka
+----
+
+Setup _Dataflow_ package repo:
+
+[source, bash]
+----
+tanzu package repository add scdf-repo --url springcloud/scdf-repo:2.10.0-SNAPSHOT
+
+tanzu package repository list
+  NAME        REPOSITORY                            STATUS               DETAILS
+  scdf-repo   springcloud/scdf-repo:2.10.0-SNAPSHOT Reconcile succeeded
+
+tanzu package available list
+  NAME                   DISPLAY-NAME  SHORT-DESCRIPTION
+  scdf.tanzu.vmware.com  scdf          Spring Cloud Data Flow
+
+tanzu package available list scdf.tanzu.vmware.com
+  NAME                   VERSION         RELEASED-AT
+  scdf.tanzu.vmware.com  2.10.0-SNAPSHOT
+
+tanzu package available get scdf.tanzu.vmware.com/2.10.0-SNAPSHOT --values-schema
+  KEY                              DEFAULT     TYPE     DESCRIPTION
+  scdf.binder.kafka.broker.host    <nil>       string   External kafka broker host
+  scdf.binder.kafka.broker.port    <nil>       string   External kafka broker port
+  ...
+----
+
+Install:
+
+[source, bash]
+----
+tanzu package install scdf-demo \
+  --package-name scdf.tanzu.vmware.com \
+  --version 2.9.0-SNAPSHOT \
+  --values-file examples/tanzu/minikube-strimzi-kafka.yml
+----
+
+Cleanup:
+
+[source, bash]
+----
+tanzu package installed delete scdf-demo -y
+tanzu package repository delete scdf-snapshot-repo
+----

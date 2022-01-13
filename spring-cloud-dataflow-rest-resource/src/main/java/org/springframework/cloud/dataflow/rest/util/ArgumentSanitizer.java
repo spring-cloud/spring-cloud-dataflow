@@ -80,6 +80,10 @@ public class ArgumentSanitizer {
 	 * @return the argument with a potentially sanitized value
 	 */
 	public String sanitize(String argument) {
+		// Oracle handles an empty string as a null.
+		if(argument == null) {
+			return "";
+		}
 		int indexOfFirstEqual = argument.indexOf("=");
 		if (indexOfFirstEqual == -1) {
 			return argument;

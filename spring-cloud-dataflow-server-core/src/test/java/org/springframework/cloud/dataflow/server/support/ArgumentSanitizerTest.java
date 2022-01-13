@@ -132,6 +132,18 @@ public class ArgumentSanitizerTest {
 		}
 	}
 
+	@Test
+	public void testSanitizeNullArgument() {
+		final List<String> arguments = new ArrayList<>();
+
+		arguments.add(null);
+
+		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
+
+		Assert.assertEquals(1, sanitizedArguments.size());
+		Assert.assertEquals(sanitizedArguments.get(0), "");
+	}
+
 
 	@Test
 	public void testMultipartProperty() {

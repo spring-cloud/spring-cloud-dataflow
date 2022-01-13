@@ -162,7 +162,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 	}
 
 
@@ -174,9 +174,9 @@ public class AuditRecordControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)))
 
-				.andExpect(jsonPath("$.content[*].correlationId", contains("filter", "log", "myStream",
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[*].correlationId", contains("filter", "log", "myStream",
 						"myStream", "myStream", "myStream1", "myStream2", "time", "timestamp")));
 	}
 
@@ -188,9 +188,9 @@ public class AuditRecordControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)))
 
-				.andExpect(jsonPath("$.content[*].correlationId", containsInAnyOrder("timestamp", "time", "filter",
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[*].correlationId", containsInAnyOrder("timestamp", "time", "filter",
 						"myStream2", "myStream1", "myStream", "myStream", "myStream", "log")));
 	}
 
@@ -199,7 +199,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?actions=UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)));
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=STREAM").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
 
 	@Test
@@ -215,7 +215,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=TASK").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andExpect(jsonPath("$._embedded").doesNotExist());
 	}
 
 	@Test
@@ -223,7 +223,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=TASK,STREAM").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
 
 	@Test
@@ -231,7 +231,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)));
 	}
 
 	@Test
@@ -239,7 +239,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(4)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)));
 	}
 
 	@Test
@@ -247,7 +247,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?actions=CREATE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(7)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(7)));
 	}
 
 	@Test
@@ -326,9 +326,9 @@ public class AuditRecordControllerTests {
 				get("/audit-records?operations=APP_REGISTRATION&actions=CREATE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(4)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)))
 
-				.andExpect(jsonPath("$.content[*].correlationId",
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[*].correlationId",
 						containsInAnyOrder("filter", "log", "time", "timestamp")));
 	}
 
@@ -337,7 +337,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 
 		appRegistryService.delete("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
 
@@ -345,10 +345,10 @@ public class AuditRecordControllerTests {
 				get("/audit-records?operations=APP_REGISTRATION&actions=DELETE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(14)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("filter")));
 	}
 
 	@Test
@@ -359,15 +359,15 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(6)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(6)))
 
-				.andExpect(jsonPath("$.content[4].auditRecordId", is(9)))
-				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[4].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].auditRecordId", is(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].auditAction", is("CREATE")))
 
-				.andExpect(jsonPath("$.content[5].auditRecordId", is(10)))
-				.andExpect(jsonPath("$.content[5].correlationId", is("myStream1")))
-				.andExpect(jsonPath("$.content[5].auditAction", is("CREATE")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[5].auditRecordId", is(10)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[5].correlationId", is("myStream1")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[5].auditAction", is("CREATE")));
 	}
 
 	@Test
@@ -378,15 +378,15 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(12)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("UNDEPLOY")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(12)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditAction", is("UNDEPLOY")))
 
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(13)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[1].auditAction", is("DELETE")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditRecordId", is(13)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditAction", is("DELETE")));
 	}
 
 	@Test
@@ -401,11 +401,11 @@ public class AuditRecordControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(11)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream2")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(11)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("myStream2")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditAction", is("CREATE")));
 	}
 
 	@Test
@@ -426,10 +426,10 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)))
-				.andExpect(jsonPath("$.content[4].auditRecordId", is(9)))
-				.andExpect(jsonPath("$.content[4].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[4].auditAction", is("CREATE")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].auditRecordId", is(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].auditAction", is("CREATE")));
 	}
 
 	@Test
@@ -447,7 +447,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(4)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)));
 
 		AppRegistration filter = appRegistryService.find("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
 		appRegistryService.save(filter);
@@ -456,10 +456,10 @@ public class AuditRecordControllerTests {
 				get("/audit-records?operations=APP_REGISTRATION&actions=UPDATE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(14)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("filter")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(14)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("filter")));
 	}
 
 	@Test
@@ -467,7 +467,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
 
     @Test
@@ -475,7 +475,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?page=-5&size=2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)));
 	}
 
 	@Test
@@ -483,7 +483,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?page=0&size=5").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(5)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
 
 
@@ -492,7 +492,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?page=2&size=4").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)));
 	}
 
 	@Test
@@ -500,17 +500,17 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK&actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(12)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("UNDEPLOY")))
-				.andExpect(jsonPath("$.content[0].auditOperation", is("STREAM")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(12)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditAction", is("UNDEPLOY")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditOperation", is("STREAM")))
 
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(13)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[1].auditAction", is("DELETE")))
-				.andExpect(jsonPath("$.content[1].auditOperation", is("STREAM")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditRecordId", is(13)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditAction", is("DELETE")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditOperation", is("STREAM")));
 
 	}
 
@@ -526,17 +526,17 @@ public class AuditRecordControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)))
 
-				.andExpect(jsonPath("$.content[0].auditRecordId", is(9)))
-				.andExpect(jsonPath("$.content[0].correlationId", is("myStream")))
-				.andExpect(jsonPath("$.content[0].auditAction", is("CREATE")))
-				.andExpect(jsonPath("$.content[0].auditOperation", is("STREAM")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditRecordId", is(9)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].correlationId", is("myStream")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[0].auditOperation", is("STREAM")))
 
-				.andExpect(jsonPath("$.content[1].auditRecordId", is(10)))
-				.andExpect(jsonPath("$.content[1].correlationId", is("myStream1")))
-				.andExpect(jsonPath("$.content[1].auditAction", is("CREATE")))
-				.andExpect(jsonPath("$.content[1].auditOperation", is("STREAM")));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditRecordId", is(10)))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].correlationId", is("myStream1")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditAction", is("CREATE")))
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList[1].auditOperation", is("STREAM")));
 	}
 
 	@Test
@@ -544,7 +544,7 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?page=0&size=20").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 	}
 
 	@Test
@@ -552,6 +552,6 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(get("/audit-records?page=55&size=2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*").doesNotExist());
 	}
 }

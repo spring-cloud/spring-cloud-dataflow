@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersIncrementer;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
@@ -52,6 +55,8 @@ import org.springframework.util.Assert;
 public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 
 	private static final String WILD_CARD = "*";
+
+	private static String CTR_KEY = "ctr.id";
 
 	@Autowired
 	private ApplicationContext context;
@@ -107,8 +112,11 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 						.start(createFlow())
 						.end())
 				.end();
-		if(this.incrementInstanceEnabled) {
+		if(this.incrementInstanceEnabled && !this.composedTaskProperties.isUuidInstanceEnabled()) {
 			builder.incrementer(new RunIdIncrementer());
+		}
+		else if(this.composedTaskProperties.isUuidInstanceEnabled()) {
+			builder.incrementer(new UuidIncrementer());
 		}
 		return builder.build();
 	}
@@ -351,5 +359,14 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 		Step currentStep = this.context.getBean(beanName, Step.class);
 
 		return new FlowBuilder<Flow>(beanName).from(currentStep).end();
+	}
+
+	public static class UuidIncrementer implements JobParametersIncrementer {
+
+		@Override
+		public JobParameters getNext(JobParameters parameters) {
+			JobParameters params = (parameters == null) ? new JobParameters() : parameters;
+			return new JobParametersBuilder(params).addString(CTR_KEY, UUID.randomUUID().toString()).toJobParameters();
+		}
 	}
 }

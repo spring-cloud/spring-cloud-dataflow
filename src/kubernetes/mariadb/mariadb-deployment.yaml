@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  labels:
+    app: mariadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - image: mariadb:10.4.22
+        name: mariadb
+        env:
+          - name: MARIADB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: mariadb-root-password
+                name: mariadb
+        ports:
+          - containerPort: 3306
+            name: mariadb
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/mariadb
+        args:
+          - "--ignore-db-dir=lost+found"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: mariadb

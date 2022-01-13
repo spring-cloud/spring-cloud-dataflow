@@ -4,6 +4,17 @@ This document contains info about how labeling works, how it's expected
 get used, etc. There's various automations around labeling and once
 having specific labels it's easier to manage various maintenance tasks.
 
+## Backport
+
+We handle backport via labeling which is always done from an issue
+not PR meaning you need to have a tracking issue for all PR's.
+In an issue add label `for/backport` and `branch/<xxx>` which will
+handle tracking backport issue via gh action workflow.
+
+Trigger is when `branch/<xxx>` is added and at that time label
+`for/backport` needs to be in place. You can add both labels
+at a same time or later change/add `branch/<xxx>` labels.
+
 ## Background
 
 One big issue we're faced with bug fixes is that firstly once a fix is

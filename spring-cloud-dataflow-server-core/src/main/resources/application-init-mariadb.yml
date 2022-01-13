@@ -1,0 +1,12 @@
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    initialization-mode: always
+    schema:
+      - classpath*:/schemas/mariadb/V1-dataflow.sql
+      - classpath*:/schemas/mariadb/V1-skipper.sql
+      - classpath*:/schemas/mariadb/V2-dataflow.sql
+      - classpath*:/schemas/mariadb/V2-dataflow-after.sql
+      - classpath*:/schemas/mariadb/V3-dataflow.sql
+      - classpath*:/schemas/mariadb/V4-dataflow.sql

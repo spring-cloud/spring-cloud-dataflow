@@ -1,0 +1,26 @@
+scdf:
+  server:
+    # for minikube
+    # service:
+    #   type: NodePort
+    # for public cloud
+    # service:
+    #   type: LoadBalancer
+    config:
+      spring:
+        cloud:
+          dataflow:
+            container:
+              registry-configurations:
+                ghcr:
+                  registry-host: ghcr.io
+                  authorization-type: dockeroauth2
+                  # replace to your gh username
+                  user: <username>
+                  # replace to your gh pat having read:packages scope
+                  secret: <pat>
+  # replace with a relocated composed task runner image
+  # ctr:
+  #   image:
+  #     repository: ghcr.io/jvalkeal/airgapped/scdf-repo
+  #     digest: sha256:5237442879b0e2db2fa0118eb923ed6a780b18685318bfb935600f69960207a3

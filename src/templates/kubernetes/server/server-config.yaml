@@ -28,9 +28,9 @@ data:
                     limits:
                       memory: 1024Mi
       datasource:
-        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/mysql
         username: root
-        password: ${mysql-root-password}
+        password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"

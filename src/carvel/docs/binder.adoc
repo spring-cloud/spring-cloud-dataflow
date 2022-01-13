@@ -1,0 +1,38 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:scdf-deploy-binder-enabled: link:configuration-options.adoc#configuration-options-scdf.deploy.binder.enabled[scdf.deploy.binder.enabled]
+:scdf-binder-kafka-broker-host: link:configuration-options.adoc#configuration-options-scdf.binder.kafka.broker.host[scdf.binder.kafka.broker.host]
+:scdf-binder-kafka-broker-port: link:configuration-options.adoc#configuration-options-scdf.binder.kafka.broker.port[scdf.binder.kafka.broker.port]
+:scdf-binder-kafka-zk-host: link:configuration-options.adoc#configuration-options-scdf.binder.kafka.zk.host[scdf.binder.kafka.zk.host]
+:scdf-binder-kafka-zk-port: link:configuration-options.adoc#configuration-options-scdf.binder.kafka.zk.port[scdf.binder.kafka.zk.port]
+:scdf-binder-rabbit-host: link:configuration-options.adoc#configuration-options-scdf.binder.rabbit.host[scdf.binder.rabbit.host]
+:scdf-binder-rabbit-port: link:configuration-options.adoc#configuration-options-scdf.binder.rabbit.port[scdf.binder.rabbit.port]
+endif::[]
+ifndef::env-github[]
+:scdf-deploy-binder-enabled: <<configuration-options-scdf.deploy.binder.enabled>>
+:scdf-binder-kafka-broker-host: <<configuration-options-scdf.binder.kafka.broker.host>>
+:scdf-binder-kafka-broker-port: <<configuration-options-scdf.binder.kafka.broker.port>>
+:scdf-binder-kafka-zk-host: <<configuration-options-scdf.binder.kafka.zk.host>>
+:scdf-binder-kafka-zk-port: <<configuration-options-scdf.binder.kafka.zk.port>>
+:scdf-binder-rabbit-host: <<configuration-options-scdf.binder.rabbit.host>>
+:scdf-binder-rabbit-port: <<configuration-options-scdf.binder.rabbit.port>>
+endif::[]
+
+[[binder]]
+== Binder
+On default a binder is deployed as a service for both skipper and dataflow
+servers. Servers are configured to use these binder services.
+
+=== Configure External Kafka Binder
+Disable binder deployment {scdf-deploy-binder-enabled} and define a custom
+settings for binder under _scdf.binder_. You need to set all options {scdf-binder-kafka-broker-host},
+{scdf-binder-kafka-broker-port}, {scdf-binder-kafka-zk-host} and {scdf-binder-kafka-zk-port}.
+
+=== Configure External Rabbit Binder
+Disable binder deployment {scdf-deploy-binder-enabled} and define a custom
+settings for binder under _scdf.binder_. You need to set all options {scdf-binder-rabbit-host}
+and {scdf-binder-rabbit-port}.

@@ -1,0 +1,81 @@
+name: Promote Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      build-zoo-handler:
+        description: 'Build Zoo Handler Payload'
+        required: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: promote
+    steps:
+    # need repo to push release branch and a tag
+    - uses: actions/checkout@v2
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.46.4
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+    # zoo extract and ensure
+    - name: Extract Zoo Context Properties
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-extract-context-properties: true
+        ensure-env: |
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber
+    # promoting build from staging repo into release
+    - name: Promote Build
+      run: |
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname $BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname $BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber libs-release-local
+        jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname $BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber libs-release-local
+
+    # zoo success
+    - name: Notify Build Success Zoo Handler Controller
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+        dispatch-handler-client-payload-data: >
+          {
+            "event": "promote-succeed"
+          }
+
+    # zoo failure
+    - name: Notify Build Failure Zoo Handler Controller
+      if: ${{ failure() }}
+      uses: jvalkeal/build-zoo-handler@v0.0.4
+      with:
+        dispatch-handler-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        dispatch-handler-client-payload-data: >
+          {
+            "event": "promotion-failed"
+          }

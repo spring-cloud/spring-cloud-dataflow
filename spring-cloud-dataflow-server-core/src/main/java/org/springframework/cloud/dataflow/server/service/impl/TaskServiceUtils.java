@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.RelaxedNames;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
@@ -98,12 +99,15 @@ public class TaskServiceUtils {
 			result = updateProperties(taskNode, subTask, taskDeploymentProperties, result, "deployer");
 			result = updateVersionProperties(taskNode, subTask, taskDeploymentProperties, result);
 			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "app"));
+			taskAppProperties.putAll(getTaskAppProperties(taskNode, subTask, taskDeploymentProperties, "deployer"));
 		}
 		if (result.length() != 0) {
 			taskDeploymentProperties.put("app.composed-task-runner.composed-task-properties", result);
 		}
 		taskAppProperties.entrySet().stream().forEach(e -> {
-			taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties." + e.getKey(), e.getValue());
+			taskDeploymentProperties.put(
+					"app.composed-task-runner.composed-task-app-properties." + Base64Utils.encode(e.getKey()),
+					e.getValue());
 		});
 		return taskDeploymentProperties;
 	}
@@ -257,8 +261,9 @@ public class TaskServiceUtils {
 			String prefix) {
 		String subTaskName = String.format("%s.%s.", prefix,
 				(subTask.getLabel() == null) ? subTask.getName() : subTask.getLabel());
+		String subTaskNameWildcard = String.format("%s.*.", prefix);
 		return taskDeploymentProperties.entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(subTaskName))
+				.filter(kv -> kv.getKey().startsWith(subTaskName) || kv.getKey().startsWith(subTaskNameWildcard))
 				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue()));
 	}
 

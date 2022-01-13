@@ -59,6 +59,13 @@ public class DockerComposeFactoryProperties {
 	public static final String TEST_DOCKER_COMPOSE_DISABLE_EXTENSION = PREFIX + "disable.extension";
 
 	/**
+	 * Buildapck JVM version used for the DataFlow, Skipper, CRT launcher images.
+	 * If empty it defaults to the latest LTS version at the time of release.
+	 * The valid values are: <code>-jdk8</code>, <code>-jdk11</code> and <code>-jdk17</code>.
+	 */
+	public static final String TEST_DOCKER_COMPOSE_BP_JVM_VERSION = PREFIX + "bp.jvm.version.version";
+
+	/**
 	 * Change the DataFlow version to be installed. (e.g. 2.4.0.RELEASE or 2.4.1.BUILD-SNAPSHOT ...)
 	 */
 	public static final String TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN = PREFIX + "dataflow.version";
@@ -67,6 +74,16 @@ public class DockerComposeFactoryProperties {
 	 * Change the Skipper version to be installed. (e.g. 2.3.0.RELEASE or 2.3.0.BUILD-SNAPSHOT ...)
 	 */
 	public static final String TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN = PREFIX + "skipper.version";
+
+	/**
+	 * The DataFlow Server URI. Defaults to http://dataflow-server:9393
+	 */
+	public static final String TEST_DOCKER_COMPOSE_DATAFLOW_URI = PREFIX + "dataflow.uri";
+
+	/**
+	 * The Skipper Server URI. Defaults to http://skipper-server:7577
+	 */
+	public static final String TEST_DOCKER_COMPOSE_SKIPPER_URI = PREFIX + "skipper.uri";
 
 	/**
 	 * Set the app starters bulk install url.
@@ -92,6 +109,9 @@ public class DockerComposeFactoryProperties {
 	 * Set to false to keep the exited Docker containers (applicable only in DooD mode).
 	 */
 	public static final String TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT = PREFIX + "docker.delete.container.on.exit";
+
+
+	public static final String TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT = PREFIX + "waiting.for.service.format";
 
 	public static boolean getBoolean(String propertyName, boolean defaultValue) {
 		String value = get(propertyName, "" + defaultValue);

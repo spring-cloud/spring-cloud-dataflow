@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,8 @@ public abstract class TagNames {
 	public static final String MARIADB_10_4 = "mariadb_10_4";
 	public static final String MARIADB_10_5 = "mariadb_10_5";
 
-	public static final String MYSQL = "mysql";
-	public static final String MYSQL_5_7 = "mysql_5_7";
-	public static final String MYSQL_8_0 = "mysql_8_0";
-
 	public static final String MSSQL = "mssql";
+	public static final String MSSQL_2019_CU10_ubuntu_20_04 = "mssql_2019_CU10_ubuntu_20_04";
 
 	public static final String ORACLE = "oracle";
 

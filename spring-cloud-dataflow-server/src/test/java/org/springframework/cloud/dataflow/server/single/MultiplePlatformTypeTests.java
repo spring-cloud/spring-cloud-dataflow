@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,16 +56,17 @@ import static org.mockito.Mockito.when;
  * @author David Turanski
  **/
 @SpringBootTest(
-	classes = { DataFlowServerApplication.class, MultiplePlatformTypeTests.TestConfig.class },
-	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-	properties = {
-		"spring.cloud.dataflow.features.schedules-enabled=true",
-		"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
-		"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
-		"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
-	})
+		classes = { DataFlowServerApplication.class, MultiplePlatformTypeTests.TestConfig.class },
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = {
+				"spring.main.allow-circular-references=true",
+				"spring.cloud.dataflow.features.schedules-enabled=true",
+				"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.scheduler-url=https://localhost"
+		})
 @RunWith(SpringRunner.class)
 public class MultiplePlatformTypeTests {
 

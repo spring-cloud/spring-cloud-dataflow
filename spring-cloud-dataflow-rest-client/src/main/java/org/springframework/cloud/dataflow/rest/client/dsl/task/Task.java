@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionStatus;
@@ -271,6 +272,13 @@ public class Task implements AutoCloseable {
 	}
 
 	/**
+	 * @return Returns list of {@link StepExecutionResource} belonging to the job.
+	 */
+	public Collection<StepExecutionResource> jobStepExecutions(long jobExecutionId) {
+		return this.jobOperations.stepExecutionList(jobExecutionId).getContent();
+	}
+
+	/**
 	 * @return Returns list of {@link JobInstanceResource} belonging to this task.
 	 */
 	public Collection<JobInstanceResource> jobInstanceResources() {
@@ -295,4 +303,34 @@ public class Task implements AutoCloseable {
 	public void close() {
 		destroy();
 	}
+
+	//--------------------------------------------------------------------------------------------------------
+	//                                    TASK EXECUTION CLEANUP
+	//--------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Remove specified task execution for the specified task execution id.
+	 * @param taskExecutionId the id of the task execution to be removed.
+	 */
+	public void cleanupTaskExecution(long taskExecutionId) {
+		this.taskOperations.cleanup(taskExecutionId, true);
+	}
+
+	/**
+	 * Remove all task executions.
+	 */
+	public void cleanupAllTaskExecutions() {
+		this.taskOperations.cleanupAllTaskExecutions(false, null);
+	}
+
+	/**
+	 * Retrieve task executions for child task name associated with this task's instance.
+	 * @param childTaskName to be used to search for the associated task executions.
+	 * @return List of task executions for the given child task.
+	 */
+	public Optional<TaskExecutionResource> composedTaskChildExecution(String childTaskName) {
+		Collection taskExecutions = taskOperations.executionListByTaskName(this.taskName + "-" + childTaskName).getContent();
+		return (taskExecutions.size() == 1) ? Optional.of((TaskExecutionResource) taskExecutions.stream().toArray()[0]): Optional.empty();
+	}
+
 }

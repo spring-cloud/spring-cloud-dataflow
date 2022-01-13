@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.single.security;
 
+import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
@@ -267,24 +269,30 @@ public class LocalServerSecurityWithOAuth2Tests {
 
 		assertTrue(Boolean.valueOf(oAuthServerResponse));
 
-		localDataflowResource.getMockMvc()
-			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-			.andExpect(status().isUnauthorized());
+		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+			localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isUnauthorized());
+		});
 
 		localDataflowResource.getMockMvc()
 			.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 			.andExpect(status().isFound());
 
-		localDataflowResource.getMockMvc()
-			.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-			.andExpect(status().isUnauthorized());
-
+		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+			localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isUnauthorized());
+		});
 	}
 
 	@Test
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
-		localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
-				.andExpect(status().isUnauthorized());
+		// https://github.com/spring-projects/spring-security/issues/10038
+		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+			localDataflowResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
+					.andExpect(status().isUnauthorized());
+		});
 	}
 
 	@Test

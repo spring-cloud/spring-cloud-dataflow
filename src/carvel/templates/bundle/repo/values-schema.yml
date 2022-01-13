@@ -1,0 +1,359 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Openapi schema for scdf
+components:
+  schemas:
+    scdfPackage:
+      type: object
+      title: scdf values schema
+      description: Schema for carvel package
+      properties:
+        scdf:
+          type: object
+          properties:
+            registry:
+              type: object
+              properties:
+                secret:
+                  type: object
+                  properties:
+                    ref:
+                      type: string
+                      description: If defined a reference will be added as imagePullSecret to all services, otherwise carvel secretgen is added
+            deploy:
+              type: object
+              properties:
+                binder:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                      description: Enables binder deployment
+                    type:
+                      type: string
+                      default: rabbit
+                      enum:
+                        - rabbit
+                        - kafka
+                      description: Defines a binder type if deployment is enabled, either rabbit or kafka
+                    rabbit:
+                      type: object
+                      properties:
+                        config:
+                          type: string
+                          description: Defines keys and values used in a rabbit's configuration file mounted into a container as yml
+                        username:
+                          type: string
+                          default: dataflow
+                          description: Username for deployed rabbit as base64 encoded value
+                        password:
+                          type: string
+                          default: secret
+                          description: Password for deployed rabbit as base64 encoded value
+                database:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                      description: Enables database deployment
+                    type:
+                      type: string
+                      default: postgres
+                      enum:
+                        - mariadb
+                        - postgres
+                      description: Defines a database type if deployment is enabled, either mariadb or postgres
+                    postgres:
+                      type: object
+                      properties:
+                        username:
+                          type: string
+                          default: dataflow
+                          description: Username for deployed database as base64 encoded value
+                        password:
+                          type: string
+                          default: secret
+                          description: Password for deployed database as base64 encoded value
+                    mariadb:
+                      type: object
+                      properties:
+                        username:
+                          type: string
+                          default: dataflow
+                          description: Username for deployed database as base64 encoded value
+                        password:
+                          type: string
+                          default: secret
+                          description: Password for deployed database as base64 encoded value
+            server:
+              type: object
+              properties:
+                database:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      description: Datasource username setting
+                    password:
+                      type: string
+                      description: Datasource password setting
+                    driverClassName:
+                      type: string
+                      description: Datasource driverClassName setting
+                    validationQuery:
+                      type: string
+                      description: Datasource validationQuery setting
+                    testOnBorrow:
+                      type: boolean
+                      default: true
+                      description: Datasource testOnBorrow setting
+                service:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      default: ClusterIP
+                      enum:
+                        - NodePort
+                        - LoadBalancer
+                        - ClusterIP
+                        - ExternalName
+                      description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
+                config:
+                  type: string
+                  description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
+                metrics:
+                  type: object
+                  properties:
+                    dashboard:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                          description: Metrics dashboard url for UI
+                contextPath:
+                  type: string
+                  description: Server context path, aka server.servlet.context-path
+            skipper:
+              type: object
+              properties:
+                database:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      description: Datasource username setting
+                    password:
+                      type: string
+                      description: Datasource password setting
+                    driverClassName:
+                      type: string
+                      description: Datasource driverClassName setting
+                    validationQuery:
+                      type: string
+                      description: Datasource validationQuery setting
+                    testOnBorrow:
+                      type: boolean
+                      default: true
+                      description: Datasource testOnBorrow setting
+                service:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      default: ClusterIP
+                      enum:
+                        - NodePort
+                        - LoadBalancer
+                        - ClusterIP
+                        - ExternalName
+                      description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
+                config:
+                  type: string
+                  description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
+            ctr:
+              type: object
+              properties:
+                image:
+                  type: object
+                  properties:
+                    repository:
+                      type: string
+                      default: springcloud/spring-cloud-dataflow-composed-task-runner
+                      description: Composed Task Runner image repository
+                    tag:
+                      type: string
+                      description: Composed Task Runner image tag
+                    digest:
+                      type: string
+                      description: Composed Task Runner image digest
+            binder:
+              type: object
+              properties:
+                kafka:
+                  type: object
+                  properties:
+                    broker:
+                      type: object
+                      properties:
+                        host:
+                          type: string
+                          description: External kafka broker host
+                        port:
+                          type: string
+                          description: External kafka broker port
+                    zk:
+                      type: object
+                      properties:
+                        host:
+                          type: string
+                          description: External kafka zk host
+                        port:
+                          type: string
+                          description: External kafka zk port
+                rabbit:
+                  type: object
+                  properties:
+                    host:
+                      type: string
+                      description: External rabbit host
+                    port:
+                      type: string
+                      description: External rabbit port
+                    username:
+                      type: string
+                      description: External rabbit username
+                    password:
+                      type: string
+                      description: External rabbit password
+            feature:
+              type: object
+              properties:
+                monitoring:
+                  type: object
+                  properties:
+                    prometheus:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                          description: Enables prometheus feature
+                    prometheusRsocketProxy:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                          description: Enables prometheus rsocket proxy feature
+                    grafana:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                          default: false
+                          description: Enables grafana feature
+                        service:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              default: ClusterIP
+                              enum:
+                                - NodePort
+                                - LoadBalancer
+                                - ClusterIP
+                                - ExternalName
+                              description: Service type
+    scdfYtt:
+      type: object
+      description: Extension to scdfPackage schema adding properties for plain ytt
+      properties:
+        scdf:
+          type: object
+          properties:
+            binder:
+              type: object
+              properties:
+                rabbit:
+                  type: object
+                  properties:
+                    image:
+                      type: object
+                      properties:
+                        repository:
+                          type: string
+                        tag:
+                          type: string
+                        digest:
+                          type: string
+paths: {}

@@ -23,7 +23,7 @@ Generic order to apply ddl files is:
 5. V3-dataflow.sql
 
     V3 dataflow schema.
-    
+
 6. V4-dataflow.sql
 
     V4 dataflow schema.
@@ -50,5 +50,5 @@ with below command would automatically create needed schemas:
       --spring.datasource.driverClassName=org.postgresql.Driver \
       --spring.profiles.active=init-postgresql
 
-Available profiles are `init-postgresql`, `init-mysql`, `init-sqlserver`,
+Available profiles are `init-postgresql`, `init-mariadb`, `init-sqlserver`,
 `init-db2` and `init-oracle`.

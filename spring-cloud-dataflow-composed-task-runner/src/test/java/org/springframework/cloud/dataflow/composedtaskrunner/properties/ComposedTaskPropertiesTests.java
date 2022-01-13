@@ -25,13 +25,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * @author Glenn Renfro
@@ -53,35 +51,49 @@ public class ComposedTaskPropertiesTests {
 		properties.setDataflowServerUsername("foo");
 		properties.setDataflowServerPassword("bar");
 		properties.setDataflowServerAccessToken("foobar");
-		assertEquals("aaa", properties.getComposedTaskProperties());
-		assertEquals("bbb", properties.getComposedTaskArguments());
-		assertEquals(12345, properties.getIntervalTimeBetweenChecks());
-		assertEquals(6789, properties.getMaxWaitTime());
-		assertEquals("http://test", properties.getDataflowServerUri().toString());
-		assertEquals("ddd", properties.getGraph());
-		assertEquals("foo", properties.getDataflowServerUsername());
-		assertEquals("bar", properties.getDataflowServerPassword());
-		assertEquals("foobar", properties.getDataflowServerAccessToken());
+		properties.setSkipTlsCertificateVerification(true);
+		assertThat(properties.getComposedTaskProperties()).isEqualTo("aaa");
+		assertThat(properties.getComposedTaskArguments()).isEqualTo("bbb");
+		assertThat(properties.getIntervalTimeBetweenChecks()).isEqualTo(12345);
+		assertThat(properties.getMaxWaitTime()).isEqualTo(6789);
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://test");
+		assertThat(properties.getGraph()).isEqualTo("ddd");
+		assertThat(properties.getDataflowServerUsername()).isEqualTo("foo");
+		assertThat(properties.getDataflowServerPassword()).isEqualTo("bar");
+		assertThat(properties.getDataflowServerAccessToken()).isEqualTo("foobar");
+		assertThat(properties.isSkipTlsCertificateVerification()).isTrue();
+		assertThat(properties.isIncrementInstanceEnabled()).isTrue();
+		assertThat(properties.isUuidInstanceEnabled()).isFalse();
+		properties.setUuidInstanceEnabled(true);
+		properties.setIncrementInstanceEnabled(false);
+		assertThat(properties.isIncrementInstanceEnabled()).isFalse();
+		assertThat(properties.isUuidInstanceEnabled()).isTrue();
 	}
 
 	@Test
 	public void testDataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertEquals("http://localhost:9393", properties.getDataflowServerUri().toString());
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+	}
+
+	@Test
+	public void testSkipSslVerificationDefaults() {
+		ComposedTaskProperties properties = new ComposedTaskProperties();
+		assertThat(properties.isSkipTlsCertificateVerification()).isFalse();
 	}
 
 	@Test
 	public void testThreadDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT, properties.getSplitThreadCorePoolSize());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT, properties.getSplitThreadKeepAliveSeconds());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT, properties.getSplitThreadMaxPoolSize());
-		assertEquals(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT, properties.getSplitThreadQueueCapacity());
-		assertEquals("http://localhost:9393", properties.getDataflowServerUri().toString());
-		assertFalse(properties.isSplitThreadAllowCoreThreadTimeout());
-		assertFalse(properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
-		assertNull(properties.getDataflowServerUsername());
-		assertNull(properties.getDataflowServerPassword());
+		assertThat(properties.getSplitThreadCorePoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT);
+		assertThat(properties.getSplitThreadKeepAliveSeconds()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT);
+		assertThat(properties.getSplitThreadMaxPoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT);
+		assertThat(properties.getSplitThreadQueueCapacity()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT);
+		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.isSplitThreadAllowCoreThreadTimeout()).isFalse();
+		assertThat(properties.isSplitThreadWaitForTasksToCompleteOnShutdown()).isFalse();
+		assertThat(properties.getDataflowServerUsername()).isNull();
+		assertThat(properties.getDataflowServerPassword()).isNull();
 	}
 
 	@Test
@@ -92,16 +104,20 @@ public class ComposedTaskPropertiesTests {
 					map.put("composed-task-app-arguments.app.AAA", "arg1");
 					map.put("composed-task-app-arguments.app.AAA.1", "arg2");
 					map.put("composed-task-app-arguments.app.AAA.2", "arg3");
+					map.put("composed-task-app-arguments." + Base64Utils.encode("app.*.3"), Base64Utils.encode("arg4"));
+					map.put("composed-task-app-arguments." + Base64Utils.encode("app.*.4"), "arg5");
 					context.getEnvironment().getPropertySources().addLast(new SystemEnvironmentPropertySource(
 						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, map));
 				})
 				.withUserConfiguration(Config1.class)
 				.run((context) -> {
 					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
-					assertThat(properties.getComposedTaskAppArguments()).hasSize(3);
+					assertThat(properties.getComposedTaskAppArguments()).hasSize(5);
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA", "arg1");
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.1", "arg2");
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.2", "arg3");
+					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.3", "arg4");
+					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.4", "arg5");
 				});
 	}
 

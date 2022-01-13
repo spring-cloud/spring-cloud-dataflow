@@ -28,7 +28,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,7 +58,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		TaskExecution taskExecution = getDefaultTaskExecution(0, null);
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(111L);
-		assertEquals(ExitStatus.COMPLETED, this.taskListener.afterStep(this.stepExecution));
+		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(ExitStatus.COMPLETED);
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(111L);
 
-		assertEquals(expectedTaskStatus, this.taskListener.afterStep(this.stepExecution));
+		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(expectedTaskStatus);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(111L);
 
-		assertEquals(expectedTaskStatus, this.taskListener.afterStep(this.stepExecution));
+		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(expectedTaskStatus);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(111L);
 
-		assertEquals(ExitStatus.FAILED, this.taskListener.afterStep(this.stepExecution));
+		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(ExitStatus.FAILED);
 	}
 
 //	@Test(IllegalArgumentException.class)

@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.integration.test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -48,6 +51,7 @@ public class IntegrationTestProperties {
 		private String dataflowVersion;
 		private String skipperVersion;
 		private boolean sharedDatabase;
+		private AdditionalImageProperties additionalImages = new AdditionalImageProperties();
 
 		public String getDataflowVersion() {
 			return dataflowVersion;
@@ -71,6 +75,49 @@ public class IntegrationTestProperties {
 
 		public void setSharedDatabase(boolean sharedDatabase) {
 			this.sharedDatabase = sharedDatabase;
+		}
+
+		public AdditionalImageProperties getAdditionalImages() {
+			return additionalImages;
+		}
+
+		public void setAdditionalImages(AdditionalImageProperties additionalImages) {
+			this.additionalImages = additionalImages;
+		}
+	}
+
+	public static class AdditionalImageProperties {
+
+		private Map<String, ImageProperties> datatabase = new HashMap<>();
+
+		public Map<String, ImageProperties> getDatatabase() {
+			return datatabase;
+		}
+
+		public void setDatatabase(Map<String, ImageProperties> datatabase) {
+			this.datatabase = datatabase;
+		}
+	}
+
+	public static class ImageProperties {
+
+		private String image;
+		private String tag;
+
+		public String getImage() {
+			return image;
+		}
+
+		public void setImage(String image) {
+			this.image = image;
+		}
+
+		public String getTag() {
+			return tag;
+		}
+
+		public void setTag(String tag) {
+			this.tag = tag;
 		}
 	}
 
@@ -104,6 +151,11 @@ public class IntegrationTestProperties {
 		 */
 		private String influxUrl = "http://localhost:8086";
 
+		/**
+		 * Streaming applications are behind HTTPS.
+		 */
+		private boolean applicationOverHttps;
+
 		public String getPlatformName() {
 			return platformName;
 		}
@@ -126,6 +178,14 @@ public class IntegrationTestProperties {
 
 		public void setInfluxUrl(String influxUrl) {
 			this.influxUrl = influxUrl;
+		}
+
+		public boolean isApplicationOverHttps() {
+			return applicationOverHttps;
+		}
+
+		public void setApplicationOverHttps(boolean applicationOverHttps) {
+			this.applicationOverHttps = applicationOverHttps;
 		}
 	}
 }

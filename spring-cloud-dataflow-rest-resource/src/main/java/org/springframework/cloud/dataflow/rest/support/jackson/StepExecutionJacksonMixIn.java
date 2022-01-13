@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,36 @@
 
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 
 /**
- * Jackson MixIn for {@link StepExecution} serialization. This MixIn excludes the
- * {@link JobExecution} from being serialized. This is due to the fact that it would cause
- * a {@link StackOverflowError} due to a circular reference.
+ * Jackson MixIn for {@link StepExecution} de-serialization.
  *
  * @author Gunnar Hillert
  * @since 1.0
  */
+@JsonIgnoreProperties({ "jobExecution" })
 public abstract class StepExecutionJacksonMixIn {
 
-	@JsonIgnore
-	abstract JobExecution getJobExecution();
+	@JsonCreator
+	StepExecutionJacksonMixIn(@JsonProperty("stepName") String stepName) {
+	}
+
+	@JsonProperty(access = Access.READ_ONLY)
+	abstract int getSkipCount();
+
+	@JsonProperty(access = Access.READ_ONLY)
+	abstract String getSummary();
+
+	@JsonProperty(access = Access.READ_ONLY)
+	abstract JobParameters getJobParameters();
+
+	@JsonProperty(access = Access.READ_ONLY)
+	abstract Long getJobExecutionId();
 }

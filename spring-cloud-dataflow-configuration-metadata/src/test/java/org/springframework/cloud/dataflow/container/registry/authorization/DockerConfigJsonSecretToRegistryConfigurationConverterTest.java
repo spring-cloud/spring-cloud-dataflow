@@ -36,10 +36,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,7 +76,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
 		assertThat(result.size(), is(1));
-		assertTrue(result.containsKey("demo.repository.io"));
+		assertThat(result.containsKey("demo.repository.io")).isTrue();
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
@@ -97,7 +97,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
 		assertThat(result.size(), is(1));
-		assertTrue(result.containsKey("demo.repository.io"));
+		assertThat(result.containsKey("demo.repository.io")).isTrue();
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
@@ -122,7 +122,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
 		assertThat(result.size(), is(1));
-		assertTrue(result.containsKey("demo.repository.io"));
+		assertThat(result.containsKey("demo.repository.io")).isTrue();
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 

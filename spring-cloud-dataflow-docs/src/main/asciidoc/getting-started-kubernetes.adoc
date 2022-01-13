@@ -579,7 +579,7 @@ The following example shows how you can individually configure applications:
 ====
 [source,options=nowrap]
 ----
-deployer.<application>.kubernetes.tolerations=[{key: 'mykey' operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
+deployer.<application>.kubernetes.tolerations=[{key: 'mykey', operator: 'Equal', value: 'myvalue', effect: 'NoSchedule'}]
 ----
 ====
 
@@ -907,21 +907,25 @@ Replace the `envVarName`, `configMapName`, and `dataKey` attributes with the app
 
 ==== Pod Security Context
 
-You can confiure the pod security context to run processes under the specified UID (user ID) or GID (group ID).
-This is useful when you want to not run processes under the default `root` UID and GID.
-You can define either the `runAsUser` (UID) or `fsGroup` (GID), and you can configure them to work together.
-See the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information.
+The pod security context specifies security settings for a pod and its containers. The following options are configurable:
+
+* `runAsUser`: The numeric user ID to run pod container processes under
+* `fsGroup`: The numeric group ID for the volumes of the pod
+* `supplementalGroups`: The numeric group IDs applied to the pod container processes, in addition to the container's primary group ID
+* `seccompProfile`: The seccomp options to use for the pod containers
+
+See the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information on each of the above options.
 
 The following example shows how you can individually configure application pods:
 
 ====
 [source,options=nowrap]
 ----
-deployer.<application>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup: 65534}
+deployer.<application>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup: 65534, supplementalGroups: [65534, 65535], seccompProfile: { type: 'RuntimeDefault' }}
 ----
 ====
 
-Replace `<application>` with the name of your application and the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+Replace `<application>` with the name of your application and any attributes with the appropriate values for your container environment.
 
 You can configure the pod security context at the global server level as well.
 
@@ -943,6 +947,10 @@ data:
                     podSecurityContext:
                       runAsUser: 65534
                       fsGroup: 65534
+                      supplementalGroups: [65534,65535]
+                      seccompProfile:
+                        type: Localhost
+                        localhostProfile: my-profiles/profile-allow.json
 ----
 ====
 
@@ -964,10 +972,14 @@ data:
                     podSecurityContext:
                       runAsUser: 65534
                       fsGroup: 65534
+                      supplementalGroups: [65534,65535]
+                      seccompProfile:
+                        type: Localhost
+                        localhostProfile: my-profiles/profile-allow.json
 ----
 ====
 
-Replace the `runAsUser` and/or `fsGroup` attributes with the appropriate values for your container environment.
+Adjust the `podSecurityContext` attributes with the appropriate values for your container environment.
 
 ==== Service Ports
 
@@ -1058,3 +1070,31 @@ deployer.<application>.kubernetes.initContainer={containerName: 'test', imageNam
 ====
 
 Replace `<application>` with the name of your application and set the values of the `initContainer` attributes appropriate for your Init Container.
+
+==== Lifecycle Support
+
+When you deploy applications, you may attach `postStart` and `preStop` https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/[Lifecycle handlers] to execute commands.
+The Kubernetes API supports other types of handlers besides `exec`. This feature may be extended to support additional actions in a future release.
+To configure the Lifecycle handlers as shown in the linked page above,specify each command as a comma-delimited list, using the following property keys:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.lifecycle.postStart.exec.command=/bin/sh,-c,'echo Hello from the postStart handler > /usr/share/message'
+deployer.<application>.kubernetes.lifecycle.preStop.exec.command=/bin/sh,-c,'nginx -s quit; while killall -0 nginx; do sleep 1; done'
+----
+====
+
+==== Additional Containers
+
+When you deploy applications, you may need one or more containers to be deployed along with the main container.
+This would allow you to adapt some deployment patterns such as sidecar, adapter in case of multi container pod setup.
+
+The following example shows how you can configure additional containers for an application:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.additionalContainers=[{name: 'c1', image: 'busybox:latest', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]},{name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]
+----
+====

@@ -23,12 +23,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.task.configuration.TaskConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -47,6 +51,8 @@ import org.springframework.util.Assert;
  * @author Michael Minella
  */
 public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
+
+	private final static Logger log = LoggerFactory.getLogger(ComposedTaskRunnerStepFactory.class);
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
@@ -109,8 +115,9 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 				this.clientRegistrations, this.clientCredentialsTokenResponseClient, taskConfigurer.getTaskExplorer(),
 				this.composedTaskPropertiesFromEnv, this.taskName, taskProperties);
 
-		List<String> argumentsFromAppProperties = this.composedTaskProperties.getComposedTaskAppArguments().entrySet().stream()
-			.filter(e -> e.getKey().startsWith("app." + taskNameId))
+		List<String> argumentsFromAppProperties = Base64Utils
+			.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments()).entrySet().stream()
+			.filter(e -> e.getKey().startsWith("app." + taskNameId) || e.getKey().startsWith("app.*."))
 			.map(e -> e.getValue())
 			.collect(Collectors.toList());
 
@@ -119,14 +126,20 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
 		taskLauncherTasklet.setArguments(argumentsToUse);
 
-		Map<String, String> propertiesFrom = this.composedTaskProperties.getComposedTaskAppProperties().entrySet().stream()
-			.filter(e -> e.getKey().startsWith("app." + taskNameId))
-			.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+		log.debug("decoded composed-task-app-properties {}", composedTaskProperties.getComposedTaskAppProperties());
+
+		Map<String, String> propertiesFrom = Base64Utils
+				.decodeMap(this.composedTaskProperties.getComposedTaskAppProperties()).entrySet().stream()
+				.filter(e -> e.getKey().startsWith("app." + taskNameId)
+						|| e.getKey().startsWith("deployer." + taskNameId) || e.getKey().startsWith("deployer.*"))
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
 		Map<String, String> propertiesToUse = new HashMap<>();
 		propertiesToUse.putAll(this.taskSpecificProps);
 		propertiesToUse.putAll(propertiesFrom);
 
 		taskLauncherTasklet.setProperties(propertiesToUse);
+		log.debug("Properties to use {}", propertiesToUse);
 
 		String stepName = this.taskName;
 

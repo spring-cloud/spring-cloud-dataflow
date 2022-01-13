@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;
@@ -93,7 +94,7 @@ public class DefaultSchedulerServiceTests {
 
 	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
 
-	private static final String SCHEDULER_PREFIX = "spring.cloud.scheduler.";
+	private static final String SCHEDULER_PREFIX = "spring.cloud.deployer.";
 
 	private static final String BASE_SCHEDULE_NAME = "myTaskSchedule";
 
@@ -178,6 +179,16 @@ public class DefaultSchedulerServiceTests {
 				"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
 				this.commandLineArgs, null);
 	}
+
+	@Test(expected = TaskException.class)
+	public void testScheduleWithInvalidTaskNameOnKuberenetesPlatform() {
+		String taskName = "test_a1";
+		taskDefinitionRepository.save(new TaskDefinition(taskName, "demo"));
+		getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
+						"test1", taskName, this.testProperties,
+				this.commandLineArgs, "default");
+	}
+
 
 	@Test
 	public void testScheduleWithCapitalizeNameOnKuberenetesPlatform() {

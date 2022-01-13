@@ -1,0 +1,29 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+endif::[]
+
+[[examples-kapp-default]]
+== Kapp Default
+In this example you will use _ytt_ to template _kubernetes_
+deployment files and push those to cluster with _kapp_.
+
+[source, bash]
+----
+kapp deploy \
+  -y \
+  -a scdf-demo \
+  -f <(ytt -f config -f docs/examples/kapp-default/scdf-values.yml)
+----
+
+[IMPORTANT]
+====
+You need to run this command from a project root or fix
+paths to `config` and `scdf-values.yml` depending on your
+current working directory.
+====

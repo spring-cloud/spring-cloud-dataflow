@@ -1,0 +1,64 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:example-kapp-controller-install: link:../kapp-controller-install[KApp Controller Install]
+:example-secretgen-controller-install: link:../secretgen-controller-install[Secretgen Controller Install]
+endif::[]
+ifndef::env-github[]
+:example-kapp-controller-install: link:../kapp-controller-install[KApp Controller Install]
+:example-secretgen-controller-install: link:../secretgen-controller-install[Secretgen Controller Install]
+endif::[]
+
+[[examples-tanzu-default]]
+== Tanzu Default
+In this sample you're deploying _SCDF_ from an _airgapped_ repository in a
+_ghcr_ where everything is relocated unter a space of a that repository.
+
+Follow instructions in {example-kapp-controller-install} to setup kapp-controller.
+Follow instructions in {example-secretgen-controller-install} to setup secretgen-controller.
+
+Setup `2.10.0-SNAPSHOT` repo:
+
+[source, bash]
+----
+tanzu package repository add scdf-repo \
+  --url springcloud/scdf-repo:2.10.0-SNAPSHOT
+
+tanzu package repository list
+  NAME                REPOSITORY                                     STATUS               DETAILS
+  scdf-repo           springcloud/scdf-repo:2.10.0-SNAPSHOT           Reconcile succeeded
+
+tanzu package available list
+  NAME                   DISPLAY-NAME  SHORT-DESCRIPTION
+  scdf.tanzu.vmware.com  scdf          Spring Cloud Data Flow
+
+tanzu package available list scdf.tanzu.vmware.com
+  NAME                   VERSION         RELEASED-AT
+  scdf.tanzu.vmware.com  2.10.0-SNAPSHOT
+
+tanzu package available get scdf.tanzu.vmware.com/2.10.0-SNAPSHOT --values-schema
+  KEY                              DEFAULT     TYPE     DESCRIPTION
+  scdf.binder.kafka.broker.host    <nil>       string   External kafka broker host
+  scdf.binder.kafka.broker.port    <nil>       string   External kafka broker port
+  ...
+----
+
+Install:
+
+[source, bash]
+----
+tanzu package install scdf-demo \
+  --package-name scdf.tanzu.vmware.com \
+  --version 2.10.0-SNAPSHOT
+----
+
+Cleanup:
+
+[source, bash]
+----
+tanzu package installed delete scdf-demo -y
+tanzu package repository delete scdf-repo -y
+----

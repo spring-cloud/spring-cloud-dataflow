@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 /**
  * @author David Turanski
+ * @author Ilayaperumal Gopinathan
  **/
 public abstract class AbstractPlatformProperties<P> {
 	private Map<String, P> accounts = new LinkedHashMap<>();
@@ -39,6 +40,21 @@ public abstract class AbstractPlatformProperties<P> {
 			throw new IllegalArgumentException("Account " + account + " does not exist");
 		}
 		return properties;
+	}
+
+	/**
+	 * Check if the account name exists in the platform accounts.
+	 *
+	 * @param account the name of the account
+	 * @return boolean value representing the existence of the account with the given name
+	 */
+	public boolean accountExists(String account) {
+		for (String accountKey : this.getAccounts().keySet()) {
+			if (accountKey.equals(account)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

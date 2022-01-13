@@ -22,7 +22,7 @@ jobs:
         maven-version: 3.6.3
     - uses: jfrog/setup-jfrog-cli@v1
       with:
-        version: 1.43.2
+        version: 1.46.4
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Install pack
@@ -31,9 +31,9 @@ jobs:
         pack-version: 0.18.0
 
     # cache maven .m2
-    - uses: actions/cache@v1
+    - uses: actions/cache@v2
       with:
-        path: .m2
+        path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
@@ -43,7 +43,7 @@ jobs:
       run: |
         jfrog rt mvnc \
           --server-id-deploy=repo.spring.io \
-          --repo-deploy-releases=release \
+          --repo-deploy-releases=milestone \
           --repo-deploy-snapshots=snapshot
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
@@ -57,33 +57,24 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog rt mvn "-Dmaven.repo.local=.m2" -U -B clean install
+        jfrog rt mvn clean install \
+          -Pfull \
+          -U -B
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease=$(echo '${parsedVersion.qualifier}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
 
-    # build images to local repo to get pushed
-    - name: Build Image
-      env:
-        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-      run: |
-        pack build \
-          --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
-          --env BP_JVM_VERSION=8 springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-server:$TAG
-        pack build \
-          --path spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner-$TAG.jar \
-          --builder gcr.io/paketo-buildpacks/builder:base \
-          --env BP_JVM_VERSION=8 springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-composed-task-runner:$TAG
-
-    # push images to private repo
-    - name: Push image
-      env:
-        TAG: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-      run: |
-        jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-server:$TAG docker-private-local
-        jfrog rt docker-push springsource-docker-private-local.jfrog.io/spring-cloud-dataflow-composed-task-runner:$TAG docker-private-local
+    # build and publish images via composite action
+    - name: Build and Publish Images
+      uses: ./.github/actions/build-images
+      with:
+        version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+        dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
@@ -106,3 +97,7 @@ jobs:
             "event": "build-failed",
             "message": "spring-cloud-dataflow failed"
           }
+    # clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr

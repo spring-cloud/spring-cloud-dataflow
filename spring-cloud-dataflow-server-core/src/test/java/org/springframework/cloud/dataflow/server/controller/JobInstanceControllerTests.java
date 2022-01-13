@@ -49,6 +49,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -119,18 +120,18 @@ public class JobInstanceControllerTests {
 
 	@Test
 	public void testGetInstancesByName() throws Exception {
-		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_ORIG)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON)).andDo(print())
+				.andExpect(status().isOk()).andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.jobInstanceResourceList", hasSize(1)));
 	}
 
 	@Test
 	public void testGetExecutionsByNameMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.content[0].jobName", is(JOB_NAME_FOOBAR)))
-				.andExpect(jsonPath("$.content[0].jobExecutions[0].executionId", is(4)))
-				.andExpect(jsonPath("$.content[0].jobExecutions[1].executionId", is(3)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(status().isOk()).andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_FOOBAR)))
+				.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobExecutions[0].executionId", is(4)))
+				.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobExecutions[1].executionId", is(3)))
+				.andExpect(jsonPath("$._embedded.jobInstanceResourceList", hasSize(1)));
 	}
 
 	@Test

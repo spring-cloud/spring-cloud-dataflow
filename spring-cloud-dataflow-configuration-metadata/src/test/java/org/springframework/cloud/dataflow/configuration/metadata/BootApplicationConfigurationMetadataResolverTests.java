@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,29 @@ public class BootApplicationConfigurationMetadataResolverTests {
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()), true);
 		assertThat(properties.size(), is(0));
 		assertThat(full.size(), is(2));
+	}
+
+	@Test
+	public void shouldReturnPortMappingProperties() {
+		Map<String, Set<String>> portNames = resolver.listPortNames(new ClassPathResource("apps/filter-processor", getClass()));
+		assertThat(portNames.size(), is(2));
+		assertThat(portNames.get("inbound").size(), is(3));
+		assertThat(portNames.get("inbound"), containsInAnyOrder("in1", "in2", "in3"));
+		assertThat(portNames.get("outbound").size(), is(2));
+		assertThat(portNames.get("outbound"), containsInAnyOrder("out1", "out2"));
+	}
+
+	@Test
+	public void shouldReturnOptionGroupsProperties() {
+		Map<String, Set<String>> optionGroups = resolver.listOptionGroups(new ClassPathResource("apps/filter-processor", getClass()));
+		assertThat(optionGroups.size(), is(4));
+		assertThat(optionGroups.get("g1").size(), is(3));
+		assertThat(optionGroups.get("g1"), containsInAnyOrder("foo1.bar1", "foo1.bar2", "foo1.bar3"));
+		assertThat(optionGroups.get("g2").size(), is(0));
+		assertThat(optionGroups.get("g1.sb1").size(), is(1));
+		assertThat(optionGroups.get("g1.sb1"), containsInAnyOrder("foo2.bar1"));
+		assertThat(optionGroups.get("g1.sb2").size(), is(2));
+		assertThat(optionGroups.get("g1.sb2"), containsInAnyOrder("foo3.bar1", "foo3.bar2"));
 	}
 
 	@Test

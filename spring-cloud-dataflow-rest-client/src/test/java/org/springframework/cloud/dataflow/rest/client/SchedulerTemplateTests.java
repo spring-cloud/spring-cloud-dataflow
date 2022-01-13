@@ -52,8 +52,8 @@ public class SchedulerTemplateTests {
 	@Before
 	public void setup() {
 		rootResource = mock(RootResource.class);
-		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(Optional.of(new Link(SCHEDULES_RELATION)));
-		when(rootResource.getLink(SCHEDULES_RELATION_INSTANCE)).thenReturn(Optional.of(new Link(SCHEDULES_RELATION_INSTANCE)));
+		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(Optional.of(Link.of(SCHEDULES_RELATION)));
+		when(rootResource.getLink(SCHEDULES_RELATION_INSTANCE)).thenReturn(Optional.of(Link.of(SCHEDULES_RELATION_INSTANCE)));
 		restTemplate = mock(RestTemplate.class);
 		template = new SchedulerTemplate(restTemplate, rootResource);
 	}

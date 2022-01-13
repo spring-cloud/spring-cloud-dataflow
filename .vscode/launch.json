@@ -29,6 +29,13 @@
             "mainClass": "org.springframework.cloud.dataflow.server.single.DataFlowServerApplication",
             "projectName": "spring-cloud-dataflow-server",
             "args": "--spring.config.additional-location=src/config/scdf-mysql.yml"
+        },
+        {
+            "type": "java",
+            "name": "SCDF Debug Attach",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005
         }
     ]
 }

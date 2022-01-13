@@ -33,11 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author David Turanski
  **/
 @SpringBootTest(classes = { DataFlowServerApplication.class },
-				webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-				properties =
-					{
-						"spring.cloud.dataflow.features.schedules-enabled=true"
-					})
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = {
+				"spring.main.allow-circular-references=true",
+				"spring.cloud.dataflow.features.schedules-enabled=true"
+		})
 @RunWith(SpringRunner.class)
 public class DefaultSchedulerTests {
 
@@ -49,7 +49,7 @@ public class DefaultSchedulerTests {
 
 	@Test
 	public void shouldBeLocalPrimaryPlatformIfSchedulesEnabled() {
-		for (TaskPlatform taskPlatform: taskPlatforms) {
+		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Local");
 			}

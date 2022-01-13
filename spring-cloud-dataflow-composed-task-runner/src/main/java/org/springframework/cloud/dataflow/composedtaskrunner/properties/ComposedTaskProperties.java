@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * Configuration properties used to setup the ComposedTaskRunner.
@@ -126,11 +127,13 @@ public class ComposedTaskProperties {
 	/**
 	 * Properties for defining task app arguments.
 	 */
+	@NestedConfigurationProperty
 	private Map<String, String> composedTaskAppArguments = new HashMap<>();
 
 	/**
 	 * Properties for defining task app properties.
 	 */
+	@NestedConfigurationProperty
 	private Map<String, String> composedTaskAppProperties = new HashMap<>();
 
 	/**
@@ -172,16 +175,35 @@ public class ComposedTaskProperties {
 
 	/**
 	 * Allows a single ComposedTaskRunner instance to be re-executed without
-	 * changing the parameters. Default is false which means a
-	 * ComposedTaskRunner instance can only be executed once with a given set
-	 * of parameters, if true it can be re-executed.
+	 * changing the parameters. It does this by applying a {@code run.id} with a sequential
+	 * number based on the {@code run.id} from the previous execution.   Default is true.
 	 */
+	@Deprecated
 	private boolean incrementInstanceEnabled = true;
+
+	/**
+	 * Allows a single ComposedTaskRunner instance to be re-executed without
+	 * changing the parameters. It does this by applying a {@code run.id} with a UUid.
+	 * Default is false. If set to true then this will override incrementInstanceEnabled.
+	 * Set this option to `true` when running multiple instances of the same composed task definition at the same time.
+	 */
+	private boolean uuidInstanceEnabled = false;
 
 	/**
 	 * The platform property that will be used for each task in the workflow when it is launched.
 	 */
 	private String platformName;
+
+	/**
+	 * If true skips SSL certificate validation for SCDF server communication.
+	 */
+	private boolean skipTlsCertificateVerification = false;
+
+	/**
+	 * Establish the transaction isolation level for the Composed Task Runner.
+	 * Default is ISOLATION_REPEATABLE_READ.
+	 */
+	private String transactionIsolationLevel = "ISOLATION_REPEATABLE_READ";
 
 	public ComposedTaskProperties() {
 		try {
@@ -374,5 +396,29 @@ public class ComposedTaskProperties {
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
+	}
+
+	public boolean isSkipTlsCertificateVerification() {
+		return skipTlsCertificateVerification;
+	}
+
+	public void setSkipTlsCertificateVerification(boolean skipTlsCertificateVerification) {
+		this.skipTlsCertificateVerification = skipTlsCertificateVerification;
+	}
+
+	public boolean isUuidInstanceEnabled() {
+		return uuidInstanceEnabled;
+	}
+
+	public void setUuidInstanceEnabled(boolean uuIdInstanceEnabled) {
+		this.uuidInstanceEnabled = uuIdInstanceEnabled;
+	}
+
+	public String getTransactionIsolationLevel() {
+		return transactionIsolationLevel;
+	}
+
+	public void setTransactionIsolationLevel(String transactionIsolationLevel) {
+		this.transactionIsolationLevel = transactionIsolationLevel;
 	}
 }

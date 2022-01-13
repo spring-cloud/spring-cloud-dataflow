@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.apache.commons.lang.StringUtils;
-
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.util.StringUtils;
 
 /**
  * REST representation of an app status.
@@ -53,7 +52,7 @@ public class AppStatusResource extends RepresentationModel<AppStatusResource> {
 		if (this.instances != null && this.instances.iterator().hasNext()) {
 			AppInstanceStatusResource instance = this.instances.iterator().next();
 			return (instance != null && instance.getAttributes() != null &&
-					!StringUtils.isEmpty(instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME))) ?
+					StringUtils.hasText(instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME))) ?
 					instance.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME) :
 					NO_INSTANCES;
 		}

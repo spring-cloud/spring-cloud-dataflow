@@ -1,0 +1,42 @@
+#@ load("@ytt:data", "data")
+#@ load("values-schema.star", "schema")
+
+#@ def get_package_spec(package):
+#@ if hasattr(package, 'spec'):
+#@   return package.spec
+#@ end
+#@ return data.values.package_repository.packageSpec
+#@ end
+
+#@ for/end package in data.values.package_repository.packages:
+---
+apiVersion: data.packaging.carvel.dev/v1alpha1
+kind: Package
+metadata:
+  name: #@ str(package.name) + "." + str(package.domain) + "." + str(package.version)
+spec:
+  refName: #@ package.name + "." + str(package.domain)
+  publicName: #@ package.name + "." + str(package.domain)
+  version: #@ package.version
+  description: #@ package.description
+  releasedAt: #@ package.timestamp
+  valuesSchema:
+    openAPIv3: #@ schema()
+  template:
+    spec:
+      syncPeriod: #@ get_package_spec(package).syncPeriod
+      fetch:
+        - imgpkgBundle:
+            image: #@ package.image
+      template:
+        - ytt:
+            ignoreUnknownComments: true
+            paths:
+              - config/
+        - kbld:
+            paths:
+              - .imgpkg/images.yml
+              - "-"
+      deploy:
+        - kapp:
+            rawOptions: #@ ["--wait-timeout=" + str(get_package_spec(package).deploy.kappWaitTimeout)]

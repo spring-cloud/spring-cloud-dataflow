@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
@@ -122,6 +123,7 @@ import org.springframework.cloud.skipper.client.DefaultSkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
+import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -130,7 +132,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.mediatype.MessageResolver;
 import org.springframework.hateoas.mediatype.hal.CurieProvider;
-import org.springframework.hateoas.mediatype.hal.HalConfiguration;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
@@ -261,10 +262,10 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskExecutionController taskExecutionController(TaskExplorer explorer,
 				TaskExecutionService taskExecutionService,
 				TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
-				TaskDeleteService taskDeleteService) {
+				TaskDeleteService taskDeleteService, TaskJobService taskJobService) {
 			return new TaskExecutionController(explorer, taskExecutionService, taskDefinitionRepository,
 					taskExecutionInfoService,
-					taskDeleteService);
+					taskDeleteService, taskJobService);
 		}
 
 		@Bean
@@ -274,8 +275,9 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService) {
-			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService);
+		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
+				TaskExecutionService taskExecutionService, TaskJobService taskJobService, TaskExplorer taskExplorer) {
+			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 		}
 
 		@Bean
@@ -434,7 +436,7 @@ public class DataFlowControllerAutoConfiguration {
 			// TODO (Tzolov) review the manual Hal convertion configuration
 			objectMapper.registerModule(new Jackson2HalModule());
 			objectMapper.setHandlerInstantiator(new Jackson2HalModule.HalHandlerInstantiator(
-					new AnnotationLinkRelationProvider(), CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY, new HalConfiguration()));
+					new AnnotationLinkRelationProvider(), CurieProvider.NONE, MessageResolver.DEFAULTS_ONLY));
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 			RestTemplate restTemplate = restTemplateBuilder
@@ -443,6 +445,14 @@ public class DataFlowControllerAutoConfiguration {
 					.messageConverters(Arrays.asList(new StringHttpMessageConverter(),
 							new MappingJackson2HttpMessageConverter(objectMapper)))
 					.build();
+
+			if (properties.isSkipSslValidation()) {
+				restTemplate.setRequestFactory(HttpClientConfigurer.create()
+						.targetHost(URI.create(properties.getServerUri()))
+						.skipTlsCertificateVerification(true)
+						.buildClientHttpRequestFactory());
+				logger.warn("Skipper Client - Skip SSL Validation is Enabbled!");
+			}
 
 			return new DefaultSkipperClient(properties.getServerUri(), restTemplate);
 		}

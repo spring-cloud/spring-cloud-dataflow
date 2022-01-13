@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +123,17 @@ public class StreamDefinitionServiceUtilsTests {
 		assertEquals(expectedAppSize, this.streamDefinitionService.getAppDefinitions(streamDefinition).size());
 
 		assertEquals(streamDefinition.getDslText(),
+				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
+	}
+
+	@Test
+	public void testStreamDslAppPropertyWithHyphen() {
+		String dslText = "foo --foo='key|value' | bar";
+
+		System.out.println(dslText);
+		StreamDefinition streamDefinition = new StreamDefinition("streamName", dslText);
+
+		assertEquals("foo --foo='key|value' | bar",
 				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}
 

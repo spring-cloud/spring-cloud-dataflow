@@ -1,0 +1,10 @@
+#@data/values-schema
+---
+name: mariadb
+username: ""
+password: ""
+image:
+  repository: mariadb
+  tag: "10.4"
+  digest: ""
+registrySecretRef: ""

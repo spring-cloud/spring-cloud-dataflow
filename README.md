@@ -42,7 +42,7 @@ Familiarize yourself with the Spring Cloud Data Flow [architecture](https://data
 and [feature capabilities](https://dataflow.spring.io/features/).
 
 **Deployer SPI**: A Service Provider Interface (SPI) is defined in the [Spring Cloud Deployer](https://github.com/spring-cloud/spring-cloud-deployer)
-project. The Deployer SPI provides an abstraction layer for deploying the apps for a given streaming or batch data pipeline,
+project. The Deployer SPI provides an abstraction layer for deploying the apps for a given streaming or batch data pipeline
 and managing the application lifecycle.
 
 Spring Cloud Deployer Implementations:
@@ -73,7 +73,7 @@ based on the 1.7.x series of Spring Cloud Data Flow.
  * [OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
  * [Apache Mesos](https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos)
 
-The [Apache YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn) implementation has reached end-of-line
+The [Apache YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn) implementation has reached end-of-life
 status. Let us know at [Gitter](https://gitter.im/spring-cloud/spring-cloud-dataflow) if you are interested in forking
 the project to continue developing and maintaining it.
 
@@ -94,7 +94,7 @@ By default Git will change the line-endings during checkout to `CRLF`. This is, 
 as this may lead to test failures under Windows.
 
 Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e.g. using: `$ git config core.autocrlf false`.
-Fore more information please refer to the [Git documentation, Formatting and Whitespace](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
+For more information please refer to the [Git documentation, Formatting and Whitespace](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
 
 ----
 

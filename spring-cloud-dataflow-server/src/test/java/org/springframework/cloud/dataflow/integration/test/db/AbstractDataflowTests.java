@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,12 +76,11 @@ public abstract class AbstractDataflowTests {
 			);
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
-			ClusterContainer.from(TagNames.MYSQL_5_7, "mysql:5.7", TagNames.MYSQL),
-			ClusterContainer.from(TagNames.MYSQL_8_0, "mysql:8.0", TagNames.MYSQL),
-			ClusterContainer.from(TagNames.MARIADB_10_2, "mariadb:10.5", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_3, "mariadb:10.5", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.5", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB)
+			ClusterContainer.from(TagNames.MARIADB_10_2, "mariadb:10.2", TagNames.MARIADB),
+			ClusterContainer.from(TagNames.MARIADB_10_3, "mariadb:10.3", TagNames.MARIADB),
+			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
+			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
+			ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL)
 			);
 	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
@@ -121,6 +121,10 @@ public abstract class AbstractDataflowTests {
 
 	protected DataflowCluster dataflowCluster;
 
+	protected IntegrationTestProperties getTestProperties() {
+		return testProperties;
+	}
+
 	protected String getDataflowLatestVersion() {
 		return this.testProperties.getDatabase().getDataflowVersion();
 	}
@@ -136,6 +140,11 @@ public abstract class AbstractDataflowTests {
 
 	protected List<ClusterContainer> getDatabaseContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(DATABASE_CONTAINERS);
+		List<ClusterContainer> additional = this.testProperties.getDatabase().getAdditionalImages().getDatatabase()
+				.entrySet().stream()
+				.map(e -> ClusterContainer.from(e.getKey(), e.getValue().getImage(), e.getValue().getTag()))
+				.collect(Collectors.toList());
+		containers.addAll(additional);
 		return containers;
 	}
 

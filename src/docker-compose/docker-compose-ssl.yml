@@ -1,0 +1,54 @@
+version: '3'
+
+# Enables HTTPS for the SCDF and Skipper servers as well as all deployed stream and task applications.
+#
+# Before starting docker-compose you must alter the following URI variables to use the HTTPS instead of HTTP:
+#
+# export SKIPPER_URI=https://skipper-server:7577
+# export DATAFLOW_URI=https://dataflow-server:9393
+#
+# By default this configuration uses a test keystore with self-signed certificate and hardcoded aliases and credentials:
+# https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-samples/master/keystore/scdf-test.p12
+# https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12
+#
+# To customize this behavior use the following variables (directly mapped to Spring Boot's server.ssl.* properties):
+# - SSL_KEY_STORE_TYPE: Type of the key store.
+# - SERVER_SSL_KEY_STORE: Path to the key store that holds the SSL certificate.
+# - SSL_KEY_STORE_PASSWORD: Password used to access the key store.
+# - SSL_KEY_ALIAS: Alias that identifies the key in the key store.
+# - SSL_ENABLED: Whether to enable SSL support
+#
+services:
+
+  dataflow-server:
+    environment:
+      - SERVER_SSL_KEY_STORE_TYPE=${SSL_KEY_STORE_TYPE:-PKCS12}
+      - SERVER_SSL_KEY_STORE=${SSL_KEY_STORE_URI:-https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12}
+      - SERVER_SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD:-scdftest}
+      - SERVER_SSL_KEY_ALIAS=${SSL_KEY_ALIAS:-scdftest}
+      - SERVER_SSL_ENABLED=${SSL_ENABLED:-true}
+
+      - SPRING_CLOUD_SKIPPER_CLIENT_skipSslValidation=true
+
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SERVER_SSL_keyStoreType=${SSL_KEY_STORE_TYPE:-PKCS12}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SERVER_SSL_keyStore=${SSL_KEY_STORE_URI:-https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SERVER_SSL_keyStorePassword=${SSL_KEY_STORE_PASSWORD:-scdftest}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SERVER_SSL_keyAlias=${SSL_KEY_ALIAS:-scdftest}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SERVER_SSL_ENABLED=${SSL_ENABLED:-true}
+
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SERVER_SSL_keyStoreType=${SSL_KEY_STORE_TYPE:-PKCS12}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SERVER_SSL_keyStore=${SSL_KEY_STORE_URI:-https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SERVER_SSL_keyStorePassword=${SSL_KEY_STORE_PASSWORD:-scdftest}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SERVER_SSL_keyAlias=${SSL_KEY_ALIAS:-scdftest}
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SERVER_SSL_ENABLED=${SSL_ENABLED:-true}
+
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_skipTlsCertificateVerification=true
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_dataflowServerUri=https://localhost:9393
+
+  skipper-server:
+    environment:
+      - SERVER_SSL_KEY_STORE_TYPE=${SSL_KEY_STORE_TYPE:-PKCS12}
+      - SERVER_SSL_KEY_STORE=${SSL_KEY_STORE_URI:-https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow-acceptance-tests/master/keystore/scdf-test.p12}
+      - SERVER_SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD:-scdftest}
+      - SERVER_SSL_KEY_ALIAS=${SSL_KEY_ALIAS:-scdftest}
+      - SERVER_SSL_ENABLED=${SSL_ENABLED:-true}

@@ -26,9 +26,6 @@ import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -111,9 +108,6 @@ public class TaskCommands implements CommandMarker {
 
 	@Autowired
 	protected UserInput userInput;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
@@ -265,8 +259,7 @@ public class TaskCommands implements CommandMarker {
 	public String retrieveTaskExecutionLog(
 			@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
 			@CliOption(key = {
-					"platform" }, help = "the platform of the task execution", mandatory = false) String platform)
-	throws JsonProcessingException {
+					"platform" }, help = "the platform of the task execution", mandatory = false) String platform) {
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 		String result;
 		if (platform != null) {
@@ -275,14 +268,15 @@ public class TaskCommands implements CommandMarker {
 		else {
 			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId());
 		}
-		return objectMapper.readValue(result, String.class);
+		return result;
 	}
 
 	@CliCommand(value = DESTROY, help = "Destroy an existing task")
 	public String destroy(
 			@CliOption(key = { "",
 					"name" }, help = "the name of the task to destroy", mandatory = true, optionContext = "existing-task disable-string-converter") String name,
-			@CliOption(key = { "cleanup" }, help = "the boolean flag to set if task executions and related resources need to be cleaned", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean cleanup) {
+			@CliOption(key = {
+					"cleanup" }, help = "the boolean flag to set if task executions and related resources need to be cleaned", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean cleanup) {
 		taskOperations().destroy(name, cleanup);
 		return String.format("Destroyed task '%s'", name);
 	}
@@ -368,15 +362,19 @@ public class TaskCommands implements CommandMarker {
 	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task "
 			+ "execution")
 	public String cleanup(@CliOption(key = { "", "id" }, help = "the task execution id") Long id,
-			@CliOption(key = { "all" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean all,
+			@CliOption(key = {
+					"all" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean all,
 			@CliOption(key = "completed-executions", help = "cleanup only the completed task executions", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean completed,
 			@CliOption(key = "task-name", help = "the name of the task to cleanup") String taskName,
-			@CliOption(key = { "force" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
-		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)), "`taskName`, `id` and `all` options are mutually exclusive.");
+			@CliOption(key = {
+					"force" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)),
+				"`taskName`, `id` and `all` options are mutually exclusive.");
 		if (all) {
 			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, null);
 			if (taskExecutionsCount > 0) {
-				String taskExecutions = (completed) ? taskExecutionsCount + " completed" : taskExecutionsCount.toString();
+				String taskExecutions = (completed) ? taskExecutionsCount + " completed"
+						: taskExecutionsCount.toString();
 				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
@@ -391,7 +389,8 @@ public class TaskCommands implements CommandMarker {
 		else if (StringUtils.hasText(taskName)) {
 			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, taskName);
 			if (taskExecutionsCount > 0) {
-				String taskExecutions = (completed) ? taskExecutionsCount + " completed" : taskExecutionsCount.toString();
+				String taskExecutions = (completed) ? taskExecutionsCount + " completed"
+						: taskExecutionsCount.toString();
 				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
@@ -407,7 +406,7 @@ public class TaskCommands implements CommandMarker {
 			Assert.notNull(id, "Task Execution ID should be set");
 			String warn = "About to delete 1 task execution. Are you sure (y/n)?";
 			if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n")))
-			taskOperations().cleanup(id);
+				taskOperations().cleanup(id);
 			return String.format("Request to clean up resources for task execution %s has been submitted", id);
 		}
 		return "Cleanup process is canceled";

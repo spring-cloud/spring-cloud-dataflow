@@ -69,7 +69,7 @@ public class CompletionControllerTests {
 	public void testNegativeDetailLevelFailureForStreamCompletion() throws Exception {
 		mockMvc.perform(get("/completions/stream").param("start", "abc").param("detailLevel", "-123")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("content[0].message", is("The provided detail level must be greater than zero.")));
+				.andExpect(jsonPath("_embedded.errors[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class CompletionControllerTests {
 	public void testNegativeDetailLevelFailureForTaskCompletion() throws Exception {
 		mockMvc.perform(get("/completions/task").param("start", "abc").param("detailLevel", "-123")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-				.andExpect(jsonPath("content[0].message", is("The provided detail level must be greater than zero.")));
+				.andExpect(jsonPath("_embedded.errors[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test

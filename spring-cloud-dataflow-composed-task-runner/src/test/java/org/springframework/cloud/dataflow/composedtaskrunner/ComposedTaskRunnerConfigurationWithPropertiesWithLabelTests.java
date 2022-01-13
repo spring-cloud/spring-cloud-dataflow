@@ -43,7 +43,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Glenn Renfro
@@ -84,10 +83,10 @@ public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 		Map<String, String> composedTaskAppProperties = new HashMap<>(1);
 		composedTaskAppProperties.put("app.l1.AAA.format", "yyyy");
 
-		assertEquals(composedTaskAppProperties, composedTaskProperties.getComposedTaskAppProperties());
-		assertEquals(1010, composedTaskProperties.getMaxWaitTime());
-		assertEquals(1100, composedTaskProperties.getIntervalTimeBetweenChecks());
-		assertEquals("https://bar", composedTaskProperties.getDataflowServerUri().toASCIIString());
+		assertThat(composedTaskProperties.getComposedTaskAppProperties()).isEqualTo(composedTaskAppProperties);
+		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
+		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
+		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
 		List<String> args = new ArrayList<>(1);
 		args.add("--baz=boo");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -298,44 +298,52 @@ public class AppRegistryControllerTests {
 	@Test
 	public void testListApplications() throws Exception {
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(4)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 	}
 
 	@Test
 	public void testListAppsWithMultiVersions() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-multi-versions.properties"));
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(6)));
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[*]", hasSize(9)));
 		mockMvc.perform(get("/apps?defaultVersion=true").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(4)))
-				.andExpect(jsonPath("$.content[*].versions", containsInAnyOrder(hasSize(1), hasSize(2), hasSize(2), hasSize(1))))
-				.andExpect(jsonPath("$.content[*].versions", containsInAnyOrder(contains("1.0.0.BUILD-SNAPSHOT"), containsInAnyOrder("1.0.0.RELEASE", "1.0.0.BUILD-SNAPSHOT"),
-						contains("1.0.0.BUILD-SNAPSHOT"), containsInAnyOrder("1.0.0.RELEASE","1.0.0.BUILD-SNAPSHOT"))))
-				.andExpect(jsonPath("$.content[*].defaultVersion", contains(true, true, true, true)));
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[*]", hasSize(6)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'time' && @.type == 'source')]", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'time' && @.type == 'source')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'log' && @.type == 'sink')]", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'log' && @.type == 'sink')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'source')]", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'source')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'sink')]", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'sink')].defaultVersion", contains(true)))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'source')].versions[*]",
+						containsInAnyOrder("3.0.1")))
+				.andExpect(jsonPath("$._embedded.appRegistrationResourceList[?(@.name == 'file' && @.type == 'sink')].versions[*]",
+						containsInAnyOrder("3.0.0", "3.0.1")));
 	}
 
 	@Test
 	public void testListApplicationsByType() throws Exception {
 		mockMvc.perform(get("/apps?type=task").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(1)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}
 
 	@Test
 	public void testListApplicationsBySearch() throws Exception {
 		mockMvc.perform(get("/apps?search=timestamp").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(1)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 		mockMvc.perform(get("/apps?search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(2)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
 	}
 
 	@Test
 	public void testListApplicationsByTypeAndSearch() throws Exception {
 		mockMvc.perform(get("/apps?type=task&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(1)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 		mockMvc.perform(get("/apps?type=source&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(1)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 		mockMvc.perform(get("/apps?type=sink&search=time").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(0)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList").doesNotExist());
 	}
 
 	@Test
@@ -348,16 +356,16 @@ public class AppRegistryControllerTests {
 	@Test
 	public void testRegisterAndListApplications() throws Exception {
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(4)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 		mockMvc.perform(post("/apps/processor/blubba").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(5)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(5)));
 	}
 
 	@Test
 	public void testListSingleApplication() throws Exception {
-		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
 				.andExpect(jsonPath("$.options[*]", hasSize(6)));
@@ -403,8 +411,8 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(delete("/apps").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(0)));
+		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList").doesNotExist());
 	}
 
 	@Test
@@ -449,7 +457,7 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isOk());
 
 		mockMvc.perform(get("/apps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(0)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList").doesNotExist());
 	}
 
 	private void setupUnregistrationTestStreams() throws Exception {
@@ -665,17 +673,17 @@ public class AppRegistryControllerTests {
 	public void testListApplicationsByVersion() throws Exception {
 		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(4)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 	}
 
 	@Test
 	public void testListApplicationsByVersionAndSearch() throws Exception {
-		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=time").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(2)));
-		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=timestamp").accept(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
+		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("content", hasSize(1)));
+				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}
 
 }

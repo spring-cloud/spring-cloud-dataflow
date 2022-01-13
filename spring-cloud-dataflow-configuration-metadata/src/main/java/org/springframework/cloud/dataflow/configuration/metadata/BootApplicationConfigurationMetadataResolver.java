@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,10 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String VISIBLE_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata.properties";
 
+	private static final String PORT_MAPPING_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-port-mapping.properties";
+
+	private static final String OPTION_GROUPS_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-option-groups.properties";
+
 	private static final String CONFIGURATION_PROPERTIES_CLASSES = "configuration-properties.classes";
 
 	private static final String CONFIGURATION_PROPERTIES_NAMES = "configuration-properties.names";
@@ -89,6 +93,8 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	private static final String CONFIGURATION_PROPERTIES_INBOUND_PORTS = "configuration-properties.inbound-ports";
 
 	private static final String CONFIGURATION_PROPERTIES_OUTBOUND_PORTS = "configuration-properties.outbound-ports";
+
+	private static final String CONFIGURATION_PROPERTIES_OPTION_GROUPS = "org.springframework.cloud.dataflow.configuration-properties.option-groups";
 
 	private static final String CONTAINER_IMAGE_CONFIGURATION_METADATA_LABEL_NAME = "org.springframework.cloud.dataflow.spring-configuration-metadata.json";
 
@@ -138,8 +144,10 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 					+ " is a deprecated. Please use " + VISIBLE_PROPERTIES + " instead.");
 		}
 
+		Resource[] portMappingResources = resourcePatternResolver.getResources(PORT_MAPPING_PROPERTIES);
+		Resource[] groupingResources = resourcePatternResolver.getResources(OPTION_GROUPS_PROPERTIES);
 		return concatArrays(configurationResources, deprecatedSpringConfigurationResources,
-				deprecatedDataflowConfigurationResources);
+				deprecatedDataflowConfigurationResources, portMappingResources, groupingResources);
 
 	}
 
@@ -190,6 +198,31 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 				else {
 					Archive archive = resolveAsArchive(app);
 					return listPortNames(archive);
+				}
+			}
+		}
+		catch (Exception e) {
+			logger.warn("Failed to retrieve port names for resource {} because of {}",
+					app, ExceptionUtils.getRootCauseMessage(e));
+			if (logger.isDebugEnabled()) {
+				logger.debug("(Details) for failed to retrieve port names for resource:" + app, e);
+			}
+			return Collections.emptyMap();
+		}
+
+		return Collections.emptyMap();
+	}
+
+	@Override
+	public Map<String, Set<String>> listOptionGroups(Resource app) {
+		try {
+			if (app != null) {
+				if (isDockerSchema(app.getURI())) {
+					return resolveOptionGroupsFromContainerImage(app.getURI());
+				}
+				else {
+					Archive archive = resolveAsArchive(app);
+					return listOptionGroups(archive);
 				}
 			}
 		}
@@ -262,6 +295,22 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 		return portsMap;
 	}
 
+	private Map<String, Set<String>> resolveOptionGroupsFromContainerImage(URI imageUri) {
+		String imageName = imageUri.getSchemeSpecificPart();
+		Map<String, String> labels = this.containerImageMetadataResolver.getImageLabels(imageName);
+		if (CollectionUtils.isEmpty(labels)) {
+			return Collections.emptyMap();
+		}
+		Map<String, Set<String>> groupingsMap = new HashMap<>();
+		labels.entrySet().stream()
+			.filter(e -> e.getKey().startsWith(CONFIGURATION_PROPERTIES_OPTION_GROUPS))
+			.forEach(e -> {
+				String gKey = e.getKey().substring(CONFIGURATION_PROPERTIES_OPTION_GROUPS.length() + 1);
+				groupingsMap.put(gKey, new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(e.getValue(), ",", " "))));
+			});
+		return groupingsMap;
+	}
+
 	public List<ConfigurationMetadataProperty> listProperties(Archive archive, boolean exhaustive) {
 		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
 			List<ConfigurationMetadataProperty> result = new ArrayList<>();
@@ -318,7 +367,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			Set<String> inboundPorts = new HashSet<>();
 			Set<String> outboundPorts = new HashSet<>();
 			Map<String, Set<String>> portsMap = new HashMap<>();
-
 			for (Resource resource : visibleConfigurationMetadataResources(moduleClassLoader)) {
 				Properties properties = new Properties();
 				properties.load(resource.getInputStream());
@@ -337,6 +385,28 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 			throw new AppMetadataResolutionException(
 					"Exception trying to list configuration properties for application " + archive,
 					e);
+		}
+	}
+
+	private Map<String, Set<String>> listOptionGroups(Archive archive) {
+		try (URLClassLoader moduleClassLoader = new BootClassLoaderFactory(archive, parent).createClassLoader()) {
+			Map<String, Set<String>> groupingsMap = new HashMap<>();
+			for (Resource resource : visibleConfigurationMetadataResources(moduleClassLoader)) {
+				Properties properties = new Properties();
+				properties.load(resource.getInputStream());
+				for(String key : properties.stringPropertyNames()) {
+					if (key.startsWith(CONFIGURATION_PROPERTIES_OPTION_GROUPS)) {
+						String value = properties.getProperty(key);
+						String gKey = key.substring(CONFIGURATION_PROPERTIES_OPTION_GROUPS.length() + 1);
+						groupingsMap.put(gKey, new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(value, ",", " "))));
+					}
+				}
+			}
+			return groupingsMap;
+		}
+		catch (Exception e) {
+			throw new AppMetadataResolutionException(
+					"Exception trying to list configuration properties option groups for application " + archive, e);
 		}
 	}
 

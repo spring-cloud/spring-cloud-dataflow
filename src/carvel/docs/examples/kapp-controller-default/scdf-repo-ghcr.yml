@@ -1,0 +1,8 @@
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  name: scdf.tanzu.vmware
+spec:
+  fetch:
+    imgpkgBundle:
+      image: springcloud/scdf-repo:2.10.0-SNAPSHOT

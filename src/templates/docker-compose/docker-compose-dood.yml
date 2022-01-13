@@ -29,36 +29,50 @@ version: '3'
 #    docker logs <container id>
 services:
   dataflow-server:
+    user: root
     environment:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
+      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (the ports reserved to be used
+      # by the stream , maven, apps running inside the Skipper container)! The APPS_PORT_RANGE are set
+      # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
+      - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
+
       # Override the CTR form maven to docker
-      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSED_TASK_RUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-@project.version@}
-      - SPRING_CLOUD_DATAFLOW_SERVER_URI=http://dataflow-server:9393
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
+      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-@project.version@}${BP_JVM_VERSION:-}
+      - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
     entrypoint: >
       bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         ./wait-for-it.sh -t 180 skipper-server:7577 -- java -jar /maven/spring-cloud-dataflow-server.jar"
+         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
+         chmod a+x /tmp/wait-for-it.sh &&
+         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
   skipper-server:
+    user: root
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_NETWORK=${COMPOSE_PROJECT_NAME:?COMPOSE_PROJECT_NAME must be set when DooD is enabled}_default
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_DELETE_CONTAINER_ON_EXIT=${DOCKER_DELETE_CONTAINER_ON_EXIT:-true}
-      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (e.g. the ports used by the stream apps running inside the Skipper container) !
+      # The Docker's apps port range must not overlap with the APPS_PORT_RANGE (the ports reserved to be used
+      # by the stream , maven, apps running inside the Skipper container)! The APPS_PORT_RANGE are set
+      # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
-      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_DEPLOYER_SPI_LOCAL=DEBUG
     entrypoint: >
       bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
          mv /tmp/docker/docker /usr/local/bin &&
-         ./wait-for-it.sh mysql:3306 -- java -jar /maven/spring-cloud-skipper-server.jar"
+         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
+         chmod a+x /tmp/wait-for-it.sh &&
+         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -68,14 +82,15 @@ services:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';
-        wget -qO- 'http://dataflow-server:9393/apps/sink/ver-log/3.0.1' --post-data='uri=docker:springcloudstream/log-sink-kafka:3.0.1';
-        wget -qO- 'http://dataflow-server:9393/apps/sink/ver-log/2.1.5.RELEASE' --post-data='uri=docker:springcloudstream/log-sink-kafka:2.1.5.RELEASE';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/3.0.1' --no-check-certificate --post-data='uri=docker:springcloudstream/log-sink-kafka:3.0.1';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/2.1.5.RELEASE' --no-check-certificate --post-data='uri=docker:springcloudstream/log-sink-kafka:2.1.5.RELEASE';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-@project.version@}' --no-check-certificate --post-data='uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-@project.version@}${BP_JVM_VERSION:-}';
         echo 'Docker Stream apps imported'"
 
   app-import-task:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
-        wget -qO- 'http://dataflow-server:9393/apps' --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-docker-latest&force=true}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate  --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-docker-latest&force=true}';
         echo 'Docker Task apps imported'"

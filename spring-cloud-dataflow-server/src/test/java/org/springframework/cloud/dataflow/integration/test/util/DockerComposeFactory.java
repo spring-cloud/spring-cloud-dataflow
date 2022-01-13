@@ -17,7 +17,13 @@
 package org.springframework.cloud.dataflow.integration.test.util;
 
 import java.nio.file.Path;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.Extension;
@@ -69,11 +75,11 @@ public class DockerComposeFactory {
 	 * 'spring-cloud-dataflow/src/docker-compose' folder.
 	 */
 	private static final String[] DEFAULT_DOCKER_COMPOSE_PATHS = {
-			"../src/docker-compose/docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
+			"../src/docker-compose/docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MariaDB
 			"../src/docker-compose/docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
 			//"../src/docker-compose/docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
 			//"../src/docker-compose/docker-compose-wavefront.yml",     // metrics collection/visualization with Wavefront.
-			//"../src/docker-compose/docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
+			//"../src/docker-compose/docker-compose-postgres.yml",     // Replaces local MariaDB database by Postgres.
 			//"../src/docker-compose/docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
 			//"../src/docker-compose/docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
 			//"../src/docker-compose/docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).
@@ -85,20 +91,35 @@ public class DockerComposeFactory {
 	 * Initialize the docker machine with the required environment variables.
 	 */
 	private static DockerMachine dockerMachine = DockerMachine.localMachine()
+			.withAdditionalEnvironmentVariable("COMPOSE_HTTP_TIMEOUT", "300")
 			.withAdditionalEnvironmentVariable("PLATFORM_TYPE", "local")
+			.withAdditionalEnvironmentVariable("DATAFLOW_URI",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_URI, "http://dataflow-server:9393"))
+			.withAdditionalEnvironmentVariable("BP_JVM_VERSION",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_BP_JVM_VERSION, ""))
 			.withAdditionalEnvironmentVariable("DATAFLOW_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, ""))
+			.withAdditionalEnvironmentVariable("SKIPPER_URI",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_URI, "http://skipper-server:7577"))
 			.withAdditionalEnvironmentVariable("SKIPPER_VERSION",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN, ""))
 			.withAdditionalEnvironmentVariable("STREAM_APPS_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)))
 			.withAdditionalEnvironmentVariable("TASK_APPS_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)))
+			.withAdditionalEnvironmentVariable("APPS_PORT_RANGE",
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, "20000-20195:20000-20195"))
 			.withAdditionalEnvironmentVariable("DOCKER_DELETE_CONTAINER_ON_EXIT",
 					"" + DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DOCKER_DELETE_CONTAINER_ON_EXIT, true))
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_USER", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_USER", ""))
 			.withAdditionalEnvironmentVariable("METADATA_DEFAULT_DOCKERHUB_PASSWORD", DockerComposeFactoryProperties.get("METADATA_DEFAULT_DOCKERHUB_PASSWORD", ""))
 			.withAdditionalEnvironmentVariable("COMPOSE_PROJECT_NAME", "scdf")
+			.withAdditionalEnvironmentVariable("CR_AZURE_USER", DockerComposeFactoryProperties.get("CR_AZURE_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_AZURE_PASS", DockerComposeFactoryProperties.get("CR_AZURE_PASS", ""))
+			.withAdditionalEnvironmentVariable("CR_GITHUB_USER", DockerComposeFactoryProperties.get("CR_GITHUB_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_GITHUB_PASS", DockerComposeFactoryProperties.get("CR_GITHUB_PASS", ""))
+			.withAdditionalEnvironmentVariable("CR_HARBOR_USER", DockerComposeFactoryProperties.get("CR_HARBOR_USER", ""))
+			.withAdditionalEnvironmentVariable("CR_HARBOR_PASS", DockerComposeFactoryProperties.get("CR_HARBOR_PASS", ""))
 			.build();
 
 	private static String[] addDockerComposeToPath(String[] dockerComposePaths, String additionalDockerCompose) {
@@ -154,15 +175,38 @@ public class DockerComposeFactory {
 
 		logger.info("Extracted docker compose files = {}", Arrays.toString(dockerComposePaths));
 
+		// For the purpose of waitingForService when using self-signed certificate (inside DockerPort#isHttpRespondingSuccessfully)
+		// we have to disable the ssl-validation!
+		try {
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null,
+					new TrustManager[] {
+							new X509TrustManager() {
+								public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+								public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+								public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+							}
+					},
+					new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		}
+		catch (Exception e) {
+			logger.warn("Failed to configure Skip SSL Verification!");
+		}
+
+		String waitingForServiceFormat =
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT,
+				"http://$HOST:$EXTERNAL_PORT");
+
 		return LegacyDockerComposeExtension.builder()
 				.projectName(ProjectName.fromString("scdf"))
 				.files(DockerComposeFiles.from(dockerComposePaths))
 				.machine(dockerMachine)
 				.saveLogsTo("target/dockerLogs/DockerComposeIT")
 				.waitingForService("dataflow-server", HealthChecks.toRespond2xxOverHttp(9393,
-						(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+						(port) -> port.inFormat(waitingForServiceFormat)), org.joda.time.Duration.standardMinutes(10))
 				.waitingForService("skipper-server", HealthChecks.toRespond2xxOverHttp(7577,
-						(port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")), org.joda.time.Duration.standardMinutes(10))
+						(port) -> port.inFormat(waitingForServiceFormat)), org.joda.time.Duration.standardMinutes(10))
 				// set to false to test with local dataflow and skipper images.
 				.pullOnStartup(DockerComposeFactoryProperties.getBoolean(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PULLONSTARTUP, true))
 				.build();

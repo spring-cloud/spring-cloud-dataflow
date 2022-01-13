@@ -160,7 +160,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -176,7 +176,7 @@ public class RuntimeAppsControllerTests {
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound())
-				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 	}
 
 	@Test
@@ -197,7 +197,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("content[0].logref", is("NoSuchAppException")));
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 
 		info.getStatus().setPlatformStatusAsAppStatusList(
 				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
@@ -205,7 +205,7 @@ public class RuntimeAppsControllerTests {
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
-				.andExpect(jsonPath("content[0].logref", is("NoSuchAppInstanceException")));
+				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppInstanceException")));
 	}
 
 	@Test
@@ -217,9 +217,7 @@ public class RuntimeAppsControllerTests {
 				.andExpect(jsonPath("$.instanceId", is("ticktock4.log-v1-0")))
 				.andExpect(jsonPath("$.state", is("deployed")))
 				.andExpect(jsonPath("$.attributes").value(nullValue()))
-				.andExpect(jsonPath("$.links.*", hasSize(1)))
-				.andExpect(jsonPath("$.links.[0].rel", is("self")))
-				.andExpect(jsonPath("$.links.[0].href",
+				.andExpect(jsonPath("$._links.self.href",
 						is("http://localhost/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0")));
 	}
 
@@ -229,14 +227,14 @@ public class RuntimeAppsControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content[0].deploymentId", is("ticktock3.log-v1")))
-				.andExpect(jsonPath("$.content[1].deploymentId", is("ticktock3.time-v1")))
-				.andExpect(jsonPath("$.content[2].deploymentId", is("ticktock4.log-v1")))
-				.andExpect(jsonPath("$.content[3].deploymentId", is("ticktock4.time-v1")))
-				.andExpect(jsonPath("$.content[0].instances.content[0].instanceId", is("ticktock3.log-v1-0")))
-				.andExpect(jsonPath("$.content[1].instances.content[0].instanceId", is("ticktock3.time-v1-0")))
-				.andExpect(jsonPath("$.content[2].instances.content[0].instanceId", is("ticktock4.log-v1-0")))
-				.andExpect(jsonPath("$.content[3].instances.content[0].instanceId", is("ticktock4.time-v1-0")));
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].deploymentId", is("ticktock3.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock3.time-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[2].deploymentId", is("ticktock4.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[3].deploymentId", is("ticktock4.time-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].instances._embedded.appInstanceStatusResourceList[0].instanceId", is("ticktock3.log-v1-0")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].instances._embedded.appInstanceStatusResourceList[0].instanceId", is("ticktock3.time-v1-0")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[2].instances._embedded.appInstanceStatusResourceList[0].instanceId", is("ticktock4.log-v1-0")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[3].instances._embedded.appInstanceStatusResourceList[0].instanceId", is("ticktock4.time-v1-0")));
 	}
 
 	@Test
@@ -246,32 +244,32 @@ public class RuntimeAppsControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].deploymentId", is("ticktock3.log-v1")))
-				.andExpect(jsonPath("$.content[1].deploymentId", is("ticktock3.time-v1")));
+				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].deploymentId", is("ticktock3.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock3.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=0&size=2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(4)))
-				.andExpect(jsonPath("$.content[0].deploymentId", is("ticktock3.log-v1")))
-				.andExpect(jsonPath("$.content[1].deploymentId", is("ticktock3.time-v1")))
-				.andExpect(jsonPath("$.content[2].deploymentId", is("ticktock4.log-v1")))
-				.andExpect(jsonPath("$.content[3].deploymentId", is("ticktock4.time-v1")));
+				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(4)))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].deploymentId", is("ticktock3.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock3.time-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[2].deploymentId", is("ticktock4.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[3].deploymentId", is("ticktock4.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=1&size=1").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(2)))
-				.andExpect(jsonPath("$.content[0].deploymentId", is("ticktock4.log-v1")))
-				.andExpect(jsonPath("$.content[1].deploymentId", is("ticktock4.time-v1")));
+				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(2)))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].deploymentId", is("ticktock4.log-v1")))
+				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock4.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=1&size=3").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 
-				.andExpect(jsonPath("$.content.*", hasSize(0)));
+				.andExpect(jsonPath("$._embedded.appStatusResourceList.*").doesNotExist());
 	}
 }

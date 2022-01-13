@@ -31,7 +31,7 @@ public abstract class AbstractTaskPlatformFactory<P extends AbstractPlatformProp
 
 	protected final P platformProperties;
 
-	private final String platformType;
+	protected final String platformType;
 
 	protected AbstractTaskPlatformFactory(P platformProperties, String platformType){
 		this.platformProperties = platformProperties;

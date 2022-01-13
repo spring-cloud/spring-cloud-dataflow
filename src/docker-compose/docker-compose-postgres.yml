@@ -1,11 +1,11 @@
 version: '3'
 
-# Reconfigures the default docker-compose.yml to replace MySQL by Postgres
+# Reconfigures the default docker-compose.yml to replace MariaDB by Postgres
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
 services:
 
-  mysql:
-    entrypoint: ["echo", "MySQL service is disabled"]
+  mariadb:
+    entrypoint: ["echo", "MariaDB service is disabled"]
 
   postgres:
     image: postgres:10
@@ -27,7 +27,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-    entrypoint: "./wait-for-it.sh -t 240 postgres:5432 -- java -jar /maven/spring-cloud-dataflow-server.jar"
 
   skipper-server:
     environment:
@@ -35,5 +34,4 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-    entrypoint: "./wait-for-it.sh -t 240 postgres:5432 -- java -jar /maven/spring-cloud-skipper-server.jar"
 

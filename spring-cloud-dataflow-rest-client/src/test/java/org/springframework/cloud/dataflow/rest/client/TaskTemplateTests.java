@@ -90,7 +90,7 @@ public class TaskTemplateTests {
 				this.linksRequested.put(rel, 1L);
 			}
 
-			return Optional.of(new Link("foo", "bar"));
+			return Optional.of(Link.of("foo", "bar"));
 		}
 
 		public boolean isLinkRequested(String linkName) {

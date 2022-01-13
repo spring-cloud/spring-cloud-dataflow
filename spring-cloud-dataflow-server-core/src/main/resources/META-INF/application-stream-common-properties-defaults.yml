@@ -14,7 +14,7 @@ common:
 
   # Properties required for Wavefront Tracing.
   wavefront.application.name: ${spring.cloud.dataflow.stream.name:unknown}
-  wavefront.application.service: ${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
+  wavefront.application.service: ${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
 
 local:
 

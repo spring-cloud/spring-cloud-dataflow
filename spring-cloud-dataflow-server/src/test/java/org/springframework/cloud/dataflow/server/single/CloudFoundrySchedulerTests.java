@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundr
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryPlatformTokenProvider;
 import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundrySchedulerClientProvider;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -59,16 +58,17 @@ import static org.mockito.Mockito.when;
  **/
 @ActiveProfiles("cloud")
 @SpringBootTest(
-	classes = { DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class },
-	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-	properties = {
-	"spring.cloud.dataflow.features.schedules-enabled=true",
-	"VCAP_SERVICES=foo",
-	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
-	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
-	"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
-	"spring.cloud.scheduler.cloudfoundry.scheduler-url=https://localhost"
-	})
+		classes = { DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class },
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = {
+				"spring.main.allow-circular-references=true",
+				"spring.cloud.dataflow.features.schedules-enabled=true",
+				"VCAP_SERVICES=foo",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
+				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
+		})
 @RunWith(SpringRunner.class)
 public class CloudFoundrySchedulerTests {
 
@@ -80,7 +80,7 @@ public class CloudFoundrySchedulerTests {
 
 	@Test
 	public void schedulerServiceCreated() {
-		for (TaskPlatform taskPlatform: taskPlatforms) {
+		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");
 			}
@@ -99,13 +99,13 @@ public class CloudFoundrySchedulerTests {
 		@Primary
 		public CloudFoundryPlatformClientProvider mockCloudFoundryClientProvider() {
 			when(cloudFoundryClient.info())
-				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
+					.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
 			when(cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
 			when(cloudFoundryClient.spaces()).thenReturn(mock(Spaces.class));
 			when(cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
 			when(cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
-				CloudFoundryPlatformClientProvider.class);
+					CloudFoundryPlatformClientProvider.class);
 			when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenAnswer(invocation -> {
 				System.out.println("Returning " + cloudFoundryClient);
 				return cloudFoundryClient;
@@ -135,11 +135,9 @@ public class CloudFoundrySchedulerTests {
 		@Primary
 		public CloudFoundrySchedulerClientProvider mockCloudFoundryShedulerClientProvider() {
 			CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProvider =
-				mock(CloudFoundrySchedulerClientProvider.class);
+					mock(CloudFoundrySchedulerClientProvider.class);
 			when(cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString()))
-				.thenReturn(mock(SchedulerClient.class));
-			when(cloudFoundrySchedulerClientProvider.schedulerProperties()).thenReturn(
-				new CloudFoundrySchedulerProperties());
+					.thenReturn(mock(SchedulerClient.class));
 			return cloudFoundrySchedulerClientProvider;
 		}
 

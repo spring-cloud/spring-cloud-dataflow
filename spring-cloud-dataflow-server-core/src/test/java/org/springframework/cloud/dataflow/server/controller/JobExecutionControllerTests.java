@@ -52,6 +52,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -171,9 +172,9 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$.content", hasSize(9)));
+		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)));
 	}
 
 	@Test
@@ -188,8 +189,8 @@ public class JobExecutionControllerTests {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(
-						jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+						jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
 	}
 
 	@Test
@@ -204,11 +205,11 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FOOBAR)))
-				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[1].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FOOBAR)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(2)));
 	}
 
 	@Test
@@ -217,12 +218,13 @@ public class JobExecutionControllerTests {
 				.param("name", "")
 				.param("status", "FAILED")
 				.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FAILED2)))
-				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[1].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FAILED1)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(2)));
 	}
 
 	@Test
@@ -231,7 +233,7 @@ public class JobExecutionControllerTests {
 				.param("status", "UNKNOWN")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content", hasSize(4)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(4)));
 	}
 
 	@Test
@@ -241,9 +243,9 @@ public class JobExecutionControllerTests {
 				.param("status", "COMPLETED")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_COMPLETED)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
 	}
 
 	@Test
@@ -257,11 +259,11 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/")
 				.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[0].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_STOPPED)))
-				.andExpect(jsonPath("$.content[1].jobExecution.jobInstance.jobName",
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[1].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_STARTED)))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(2)));
 	}
 
 	@Test
@@ -270,8 +272,8 @@ public class JobExecutionControllerTests {
 				.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(
-						jsonPath("$.content[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+						jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
 	}
 
 	private void createDirtyJob() {

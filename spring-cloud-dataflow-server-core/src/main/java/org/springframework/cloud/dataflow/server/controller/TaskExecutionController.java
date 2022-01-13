@@ -24,8 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -39,6 +46,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -85,9 +93,13 @@ public class TaskExecutionController {
 
 	private final TaskExplorer explorer;
 
+	private final TaskJobService taskJobService;
+
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
 	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
+
+	private final Logger logger = LoggerFactory.getLogger(TaskExecutionController.class);
 
 	private static final List<String> allowedSorts = Arrays.asList("TASK_EXECUTION_ID", "START_TIME", "END_TIME",
 			"TASK_NAME", "EXIT_CODE", "EXIT_MESSAGE", "ERROR_MESSAGE", "LAST_UPDATED", "EXTERNAL_EXECUTION_ID",
@@ -103,20 +115,23 @@ public class TaskExecutionController {
 	 * @param taskDefinitionRepository the task definition repository
 	 * @param taskExecutionInfoService the task execution information service
 	 * @param taskDeleteService the task deletion service
+	 * @param taskJobService the task job service
 	 */
 	public TaskExecutionController(TaskExplorer explorer, TaskExecutionService taskExecutionService,
 			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeleteService taskDeleteService) {
+			TaskDeleteService taskDeleteService, TaskJobService taskJobService) {
 		Assert.notNull(explorer, "explorer must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskDefinitionRetriever must not be null");
 		Assert.notNull(taskDeleteService, "taskDeleteService must not be null");
+		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskExecutionService = taskExecutionService;
 		this.explorer = explorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.taskDeleteService = taskDeleteService;
+		this.taskJobService = taskJobService;
 	}
 
 	/**
@@ -194,9 +209,10 @@ public class TaskExecutionController {
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		List<Long> jobExecutionIds = new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
-				new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId())),
-				taskManifest);
+				jobExecutionIds,
+				taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds));
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
@@ -274,9 +290,27 @@ public class TaskExecutionController {
 			taskJobExecutionRels
 					.add(new TaskJobExecutionRel(this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
 							jobExecutionIds,
-							taskManifest));
+							taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds)));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
+	}
+
+	private TaskJobExecution getCtrTaskJobExecution(TaskExecution taskExecution, List<Long> jobExecutionIds) {
+		TaskJobExecution taskJobExecution = null;
+		TaskDefinition taskDefinition = this.taskDefinitionRepository.findByTaskName(taskExecution.getTaskName());
+		if(taskDefinition != null) {
+			TaskParser parser = new TaskParser(taskExecution.getTaskName(), taskDefinition.getDslText(),true, false);
+			if(jobExecutionIds.size() > 0 && parser.parse().isComposed()) {
+				try {
+					taskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0]);
+				}
+				catch(NoSuchJobExecutionException noSuchJobExecutionException) {
+					this.logger.warn(String.format("Job Execution for Task Execution %s could not be found.",
+							taskExecution.getExecutionId()), noSuchJobExecutionException);
+				}
+			}
+		}
+		return taskJobExecution;
 	}
 
 	private static void validatePageable(Pageable pageable) {

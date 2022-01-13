@@ -56,6 +56,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -119,8 +120,8 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("schedule2");
 		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
-				.andExpect(jsonPath("$.content", hasSize(2)));
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(2)));
 	}
 
 	@Test
@@ -142,8 +143,8 @@ public class TaskSchedulerControllerTests {
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
-				.andExpect(content().json("{content:[{\"logref\":\"NoSuchScheduleException\"," +
-						"\"message\":\"Schedule [scheduleNotExisting] doesn't exist\"}]}"));
+				.andExpect(jsonPath("_embedded.errors.[0].message", is("Schedule [scheduleNotExisting] doesn't exist")))
+				.andExpect(jsonPath("_embedded.errors.[0].logref", is("NoSuchScheduleException")));
 	}
 
 	@Test
@@ -158,8 +159,8 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("bar", "schedule2");
 		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content[*].scheduleName", containsInAnyOrder("schedule2")))
-				.andExpect(jsonPath("$.content", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule2")))
+				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(1)));
 	}
 
 	@Test
@@ -194,7 +195,7 @@ public class TaskSchedulerControllerTests {
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals(createdScheduleName, scheduleInfo.getScheduleName());
 		assertEquals(1, scheduleInfo.getScheduleProperties().size());
-		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.deployer.cron.expression"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 
@@ -212,7 +213,7 @@ public class TaskSchedulerControllerTests {
 				"\"spring.datasource.driverClassName\":null," +
 				"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 				"\"spring.cloud.task.name\":\"testDefinition\"}," +
-				"\"deploymentProperties\":{}}", auditRecord.getAuditData());
+				"\"deploymentProperties\":{\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}", auditRecord.getAuditData());
 	}
 
 	@Test
@@ -226,7 +227,7 @@ public class TaskSchedulerControllerTests {
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
 				auditData);
 	}
 
@@ -242,7 +243,7 @@ public class TaskSchedulerControllerTests {
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
 						"\"spring.cloud.task.name\":\"testDefinition\"}," +
 						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\"}}",
+						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
 				auditData);
 	}
 
@@ -259,8 +260,8 @@ public class TaskSchedulerControllerTests {
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals("mySchedule", scheduleInfo.getScheduleName());
-		assertEquals(1, scheduleInfo.getScheduleProperties().size());
-		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.scheduler.cron.expression"));
+		assertEquals(3, scheduleInfo.getScheduleProperties().size());
+		assertEquals("* * * * *", scheduleInfo.getScheduleProperties().get("spring.cloud.deployer.cron.expression"));
 
 		final List<AuditRecord> auditRecords = auditRecordRepository.findAll();
 

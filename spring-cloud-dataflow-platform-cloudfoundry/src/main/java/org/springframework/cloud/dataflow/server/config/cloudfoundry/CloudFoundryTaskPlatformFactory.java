@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLaunc
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundryAppScheduler;
-import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
 import org.springframework.cloud.deployer.spi.util.RuntimeVersionUtils;
 
 /**
@@ -78,8 +77,8 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 
 	@Override
 	public Launcher createLauncher(String account) {
-		ConnectionContext connectionContext = connectionContext(account);
-		TokenProvider tokenProvider = tokenProvider(account);
+		connectionContext(account);
+		tokenProvider(account);
 		CloudFoundryClient cloudFoundryClient = cloudFoundryClient(account);
 		CloudFoundryOperations cloudFoundryOperations = cloudFoundryOperations(cloudFoundryClient, account);
 		CloudFoundryTaskLauncher taskLauncher = new CloudFoundryTaskLauncher(
@@ -99,10 +98,10 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 	private Scheduler scheduler(String account, CloudFoundryTaskLauncher taskLauncher,
 			CloudFoundryOperations cloudFoundryOperations) {
 		Scheduler scheduler = null;
-		if (cloudFoundrySchedulerClientProvider.isPresent() && this.platformProperties.getAccounts().get(account).getScheduler() != null) {
-			Optional<CloudFoundrySchedulerProperties> schedulerProperties = Optional.of(this.platformProperties.getAccounts().get(account).getScheduler());
+		if (cloudFoundrySchedulerClientProvider.isPresent() && this.platformProperties.getAccounts().get(account).getDeployment().getSchedulerUrl() != null) {
+			CloudFoundryDeploymentProperties deploymentProperties = this.platformProperties.getAccounts().get(account).getDeployment();
 			CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProviderLocal = new CloudFoundrySchedulerClientProvider(
-					connectionContextProvider, platformTokenProvider, schedulerProperties);
+					connectionContextProvider, platformTokenProvider, this.platformProperties);
 			SchedulerClient schedulerClient =
 					cloudFoundrySchedulerClientProviderLocal.cloudFoundrySchedulerClient(account);
 			scheduler = new CloudFoundryAppScheduler(
@@ -110,7 +109,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 					cloudFoundryOperations,
 					connectionProperties(account),
 					taskLauncher,
-					schedulerProperties.get());
+					deploymentProperties);
 		}
 		return scheduler;
 	}
@@ -185,7 +184,7 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 
 		private boolean schedulesEnabled;
 
-		private Optional<CloudFoundrySchedulerProperties> schedulerProperties = Optional.empty();
+		private CloudFoundryDeploymentProperties deploymentProperties;
 
 		private CloudFoundryPlatformTokenProvider platformTokenProvider;
 
@@ -205,8 +204,8 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 			return this;
 		}
 
-		public Builder schedulerProperties(Optional<CloudFoundrySchedulerProperties> schedulerProperties) {
-			this.schedulerProperties = schedulerProperties;
+		public Builder schedulerProperties(CloudFoundryDeploymentProperties deploymentProperties) {
+			this.deploymentProperties = deploymentProperties;
 			return this;
 		}
 

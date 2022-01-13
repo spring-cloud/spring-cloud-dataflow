@@ -32,6 +32,8 @@ import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResourc
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -54,7 +56,10 @@ public class RuntimeApplicationHelper {
 
 	private final Version dataflowServerVersion;
 
-	public RuntimeApplicationHelper(DataFlowTemplate dataFlowTemplate, String platformName) {
+	private boolean httpsStreamApplications;
+
+	public RuntimeApplicationHelper(DataFlowTemplate dataFlowTemplate, String platformName, boolean httpsStreamApplications) {
+		this.httpsStreamApplications = httpsStreamApplications;
 		Assert.notNull(dataFlowTemplate, "Valid dataFlowOperations is expected but was: " + dataFlowTemplate);
 		Assert.hasText(platformName, "Empty platform name: " + platformName);
 		logger.debug("platform Name: [" + platformName + "]");
@@ -177,7 +182,7 @@ public class RuntimeApplicationHelper {
 	}
 
 	private String localApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return String.format("http://localhost:%s",
+		return String.format("%s://localhost:%s", httpsStreamApplications ? "https" : "http",
 				instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_PORT)); // Local Platform only
 	}
 
@@ -190,7 +195,11 @@ public class RuntimeApplicationHelper {
 	 * @return Externally accessible app instance URL
 	 */
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return instanceAttributes.get("url");
+		String appInstanceUrl = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
+		if (httpsStreamApplications) {
+			appInstanceUrl = appInstanceUrl.replace("http:", "https:").toLowerCase();
+		}
+		return appInstanceUrl;
 	}
 
 	/**
@@ -250,6 +259,12 @@ public class RuntimeApplicationHelper {
 
 	public void httpPost(String url, String message) {
 		dataFlowTemplate.getRestTemplate().postForObject(url, message, String.class);
+	}
+
+	public void httpPost(String streamName, String appName, String message, HttpHeaders headers) {
+		String url = this.getApplicationInstanceUrl(streamName, appName);
+		HttpEntity<String> entity = new HttpEntity<>(message, headers);
+		dataFlowTemplate.getRestTemplate().postForEntity(url, entity, String.class);
 	}
 
 	public String httpGet(String url) {

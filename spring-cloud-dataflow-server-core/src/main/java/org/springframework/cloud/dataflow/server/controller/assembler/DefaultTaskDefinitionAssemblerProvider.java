@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,30 @@ package org.springframework.cloud.dataflow.server.controller.assembler;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.task.repository.TaskExplorer;
 
 /**
  * Default REST resource assembler that returns the {@link TaskDefinitionResource} type.
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class DefaultTaskDefinitionAssemblerProvider implements TaskDefinitionAssemblerProvider<TaskDefinitionResource> {
 
 	private final TaskExecutionService taskExecutionService;
+	private final TaskExplorer taskExplorer;
+	private final TaskJobService taskJobService;
 
-	public DefaultTaskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService) {
+	public DefaultTaskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService,
+			TaskJobService taskJobService, TaskExplorer taskExplorer) {
 		this.taskExecutionService = taskExecutionService;
+		this.taskJobService = taskJobService;
+		this.taskExplorer = taskExplorer;
 	}
 
 	@Override
 	public DefaultTaskDefinitionAssembler getTaskDefinitionAssembler(boolean enableManifest) {
 		return new DefaultTaskDefinitionAssembler(taskExecutionService, enableManifest,
-				TaskDefinitionResource.class);
+				TaskDefinitionResource.class, taskJobService, taskExplorer);
 	}
 }

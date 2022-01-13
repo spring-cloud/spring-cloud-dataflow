@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -50,6 +52,7 @@ import org.springframework.cloud.dataflow.server.service.SchedulerServicePropert
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
@@ -63,6 +66,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Glenn Renfro
  * @author Chris Schaefer
+ * @author Ilayaperumal Gopinathan
  */
 public class DefaultSchedulerService implements SchedulerService {
 
@@ -80,6 +84,11 @@ public class DefaultSchedulerService implements SchedulerService {
 	private final AuditServiceUtils auditServiceUtils;
 	private final DataSourceProperties dataSourceProperties;
 	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+
+	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
+	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters " +
+			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+			"or 'abc-123')";
 
 	/**
 	 * Constructor for DefaultSchedulerService
@@ -169,6 +178,14 @@ public class DefaultSchedulerService implements SchedulerService {
 	@Override
 	public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskDeploymentProperties,
 			List<String> commandLineArgs, String platformName) {
+		String platformType = StreamSupport.stream(getLaunchers().spliterator(), true)
+				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+				.map(Launcher::getType)
+				.findFirst()
+				.orElse("unknown");
+		if (platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE) && !TASK_NAME_PATTERN.matcher(taskDefinitionName).matches()) {
+			throw new TaskException(String.format("Task name %s is invalid. %s", taskDefinitionName, TASK_NAME_VALIDATION_MSG));
+		}
 		Assert.hasText(taskDefinitionName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided taskDeploymentProperties must not be null.");
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
@@ -225,11 +242,9 @@ public class DefaultSchedulerService implements SchedulerService {
 				appDeploymentProperties, visibleProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
 		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
-
+		deployerDeploymentProperties.putAll(taskDeploymentProperties);
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
-
-		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, taskDeploymentProperties,
-				deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
+		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition, deployerDeploymentProperties, commandLineArgs, scheduleName, getTaskResource(taskDefinitionName));
 		launcher.getScheduler().schedule(scheduleRequest);
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
@@ -418,13 +433,14 @@ public class DefaultSchedulerService implements SchedulerService {
 	 * @param input the scheduler properties
 	 * @return scheduler properties for the task
 	 */
+	@Deprecated
 	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
 		final String prefix = "scheduler.";
 		final int prefixLength = prefix.length();
 
 		return new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
+				.collect(Collectors.toMap(kv -> "spring.cloud.deployer." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
 	}
 

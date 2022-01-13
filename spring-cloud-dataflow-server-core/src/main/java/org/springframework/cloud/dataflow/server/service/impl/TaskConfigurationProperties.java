@@ -52,6 +52,12 @@ public class TaskConfigurationProperties {
 	private boolean autoCreateTaskDefinitions;
 
 	/**
+	 * The number of task executions that will be deleted in a chunk when executing bulk deletes.
+	 * Default is zero which means no chunking.
+	 */
+	private int executionDeleteChunkSize = 0;
+
+	/**
 	 * The properties for showing deployer properties.
 	 */
 	private DeployerProperties deployerProperties = new DeployerProperties();
@@ -174,5 +180,13 @@ public class TaskConfigurationProperties {
 		if (composedTaskRunnerConfigurationProperties != null) {
 			this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
 		}
+	}
+
+	public int getExecutionDeleteChunkSize() {
+		return executionDeleteChunkSize;
+	}
+
+	public void setExecutionDeleteChunkSize(int executionDeleteChunkSize) {
+		this.executionDeleteChunkSize = executionDeleteChunkSize;
 	}
 }
