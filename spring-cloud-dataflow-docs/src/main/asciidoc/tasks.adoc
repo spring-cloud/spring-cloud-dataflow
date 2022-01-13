@@ -967,7 +967,22 @@ image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.
 
 NOTE: In this diagram, the dashed line (transition) connects the `foo` application to the target applications, but a solid line connects the conditional executions between `foo`, `qux`, and  `quux`.
 
+==== Ignoring Exit Message
+If any child task within a split returns an `ExitMessage` other than `COMPLETED` the split
+will have an `ExitStatus` of `FAILED`.  To ignore the  `ExitMessage` of a child task,
+add the `ignoreExitMessage=true` for each app that will return an `ExitMessage`
+within the split.  When using this flag, the `ExitStatus` of the task will be
+`COMPLETED` if the `ExitCode` of the child task is zero.  The split will have an
+`ExitStatus` of `FAILED` if the `ExitCode`s is non zero.  There are 2 ways to
+set the `ignoreExitMessage` flag:
 
+1. Setting the property for each of the apps that need to have their exitMessage
+ignored within the split.  For example a split like `<AAA || BBB>` where `BBB`
+will return an `exitMessage`, you would set the `ignoreExitMessage` property like
+`app.BBB.ignoreExitMessage=true`
+
+2. You can also set it for all apps using the composed-task-arguments property,
+for example: `--composed-task-arguments=--ignoreExitMessage=true`.
 
 [[spring-cloud-data-flow-split-execution]]
 === Split Execution

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,12 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 	/**
 	 * If endTime for task is null then the ExitStatus will be set to  UNKNOWN.
 	 * If an exitMessage is returned by the TaskExecution then the exit status
-	 * returned will be the ExitMessage.  If no exitMessage is set for the task execution and the
-	 * task returns an exitCode ! = to zero an exit status of FAILED is
-	 * returned.  If no exit message is set and the exit code of the task is
-	 * zero then the ExitStatus of COMPLETED is returned.
+	 * returned will be the ExitMessage.  If no exitMessage is set for the task execution or
+	 * {@link TaskLauncherTasklet#IGNORE_EXIT_MESSAGE_PROPERTY} is set to true as a task property
+	 * and the task returns an exitCode != to zero an exit status of FAILED is
+	 * returned.  If no exit message is set or
+	 * {@link TaskLauncherTasklet#IGNORE_EXIT_MESSAGE_PROPERTY} is set to true as a task property
+	 * and the exit code of the task is zero then the ExitStatus of COMPLETED is returned.
 	 * @param stepExecution The stepExecution that kicked of the Task.
 	 * @return ExitStatus of COMPLETED else FAILED.
 	 */
@@ -68,7 +70,8 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 
 		TaskExecution resultExecution = this.taskExplorer.getTaskExecution(executionId);
 
-		if (!StringUtils.isEmpty(resultExecution.getExitMessage())) {
+		if (!stepExecution.getExecutionContext().containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE) &&
+				StringUtils.hasText(resultExecution.getExitMessage())) {
 			result = new ExitStatus(resultExecution.getExitMessage());
 		}
 		else if (resultExecution.getExitCode() != 0) {

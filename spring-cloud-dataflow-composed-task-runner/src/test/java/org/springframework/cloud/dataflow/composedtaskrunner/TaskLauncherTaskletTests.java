@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -316,6 +317,70 @@ public class TaskLauncherTaskletTests {
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown");
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessage() throws Exception {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setArguments(Collections.singletonList("--ignoreExitMessage=true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessageViaProperties() throws Exception {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setProperties(Collections.singletonMap("app.foo." + TaskLauncherTasklet.IGNORE_EXIT_MESSAGE_PROPERTY, "true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessageViaCommandLineOverride() throws Exception {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setArguments(Collections.singletonList("--ignoreExitMessage=false"));
+		taskLauncherTasklet.setProperties(Collections.singletonMap("app.foo." + TaskLauncherTasklet.IGNORE_EXIT_MESSAGE_PROPERTY, "true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		boolean value = chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+		Assertions.assertThat((Boolean)chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isFalse();
 	}
 
 
