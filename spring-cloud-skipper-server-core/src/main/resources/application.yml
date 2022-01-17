@@ -151,6 +151,11 @@ spring:
             - GET /api/release/list              => hasRole('ROLE_VIEW')
             - GET /api/release/list/**           => hasRole('ROLE_VIEW')
 
+            # Scale
+
+            - GET /api/release/scale             => hasRole('ROLE_VIEW')
+            - GET /api/release/scale/**          => hasRole('ROLE_VIEW')
+
             # Packages
 
             - GET /api/package                   => hasRole('ROLE_VIEW')
