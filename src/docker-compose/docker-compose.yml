@@ -55,7 +55,7 @@ services:
 
   dataflow-server:
     user: root
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.9.1-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.9.2}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -105,7 +105,7 @@ services:
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/3.0.1' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:3.0.1';
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/2.1.5.RELEASE' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:2.1.5.RELEASE';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.9.1-SNAPSHOT}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.9.1-SNAPSHOT}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.9.2}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.9.2}';
         echo 'Maven Stream apps imported'"
 
   app-import-task:
@@ -121,7 +121,7 @@ services:
 
   skipper-server:
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.8.1-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.8.2}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"
