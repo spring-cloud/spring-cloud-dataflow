@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
+import org.springframework.cloud.deployer.spi.local.LocalActuatorTemplate;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -30,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SkipperServerPlatformConfiguration {
@@ -46,36 +50,49 @@ public class SkipperServerPlatformConfiguration {
 		return new DeployerInitializationService(deployerRepository, platforms, resolver);
 	}
 
-	@Bean
 	@Profile("local")
-	public Platform localDeployers(LocalPlatformProperties localPlatformProperties) {
-		List<Deployer> deployers = new ArrayList<>();
-		Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
-		if (localDeployerPropertiesMap.isEmpty()) {
-			localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
-		}
-		for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
-				.entrySet()) {
-			LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
-			Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer);
-			deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
-			deployers.add(deployer);
+	@Configuration
+	static class LocalPlatformConfiguration {
+		@Bean
+		public Platform localDeployers(LocalPlatformProperties localPlatformProperties,
+				RestTemplate actuatorRestTemplate) {
+			List<Deployer> deployers = new ArrayList<>();
+			Map<String, LocalDeployerProperties> localDeployerPropertiesMap = localPlatformProperties.getAccounts();
+			if (localDeployerPropertiesMap.isEmpty()) {
+				localDeployerPropertiesMap.put("default", new LocalDeployerProperties());
+			}
+			for (Map.Entry<String, LocalDeployerProperties> entry : localDeployerPropertiesMap
+					.entrySet()) {
+				LocalAppDeployer localAppDeployer = new LocalAppDeployer(entry.getValue());
+				ActuatorOperations actuatorOperations =
+						new LocalActuatorTemplate(actuatorRestTemplate, localAppDeployer,
+								entry.getValue().getAppAdmin());
+				Deployer deployer = new Deployer(entry.getKey(), "local", localAppDeployer, actuatorOperations);
+				deployer.setDescription(prettyPrintLocalDeployerProperties(entry.getValue()));
+				deployers.add(deployer);
+			}
+
+			return new Platform("Local", deployers);
 		}
 
-		return new Platform("Local", deployers);
-	}
-
-	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
-		StringBuilder builder = new StringBuilder();
-		if (localDeployerProperties.getJavaOpts() != null) {
-			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+		@Bean
+		@ConditionalOnMissingBean
+		RestTemplate actuatorRestTemplate() {
+			return new RestTemplate();
 		}
-		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
-		builder.append("EnvVarsToInherit = ["
-				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
-		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
-		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
-		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
-		return builder.toString();
+
+		private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
+			StringBuilder builder = new StringBuilder();
+			if (localDeployerProperties.getJavaOpts() != null) {
+				builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+			}
+			builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
+			builder.append("EnvVarsToInherit = ["
+					+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
+			builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
+			builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
+			builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+			return builder.toString();
+		}
 	}
 }

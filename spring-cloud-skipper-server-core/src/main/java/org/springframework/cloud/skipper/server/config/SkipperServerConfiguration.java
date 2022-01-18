@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRe
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
+import org.springframework.cloud.skipper.server.service.ActuatorService;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -101,6 +102,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Janne Valkealahti
  * @author Gunnar Hillert
  * @author Donovan Muller
+ * @author David Turanski
  */
 @Configuration
 @EnableConfigurationProperties({ SkipperServerProperties.class, VersionInfoProperties.class,
@@ -152,14 +154,21 @@ public class SkipperServerConfiguration implements AsyncConfigurer {
 
 	@Bean
 	public ReleaseController releaseController(ReleaseService releaseService,
-			SkipperStateMachineService skipperStateMachineService) {
-		return new ReleaseController(releaseService, skipperStateMachineService);
+			SkipperStateMachineService skipperStateMachineService,
+			ActuatorService actuatorService) {
+		return new ReleaseController(releaseService, skipperStateMachineService, actuatorService);
 	}
 
 	@Bean
 	public PackageController packageController(PackageService packageService,
 			PackageMetadataService packageMetadataService, SkipperStateMachineService skipperStateMachineService) {
 		return new PackageController(packageService, packageMetadataService, skipperStateMachineService);
+	}
+
+	@Bean
+	ActuatorService actuatorService(ReleaseService releaseService, DeployerRepository deployerRepository,
+			ReleaseRepository releaseRepository) {
+		return new ActuatorService(releaseService, deployerRepository, releaseRepository);
 	}
 
 	@Bean

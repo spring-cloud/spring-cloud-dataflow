@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -42,6 +43,7 @@ import org.springframework.cloud.skipper.domain.UploadRequest;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author David Turanski
  */
 public interface SkipperClient {
 
@@ -98,9 +100,9 @@ public interface SkipperClient {
 
 	/**
 	 * Delete a specific release.
-	 *  @param releaseName the release name
+	 * @param releaseName the release name
 	 * @param deletePackage delete package when deleting the release
-	 * */
+	 */
 	void delete(String releaseName, boolean deletePackage);
 
 	/**
@@ -177,7 +179,6 @@ public interface SkipperClient {
 	 */
 	Map<String, Info> statuses(String... releaseNames);
 
-
 	/**
 	 * Return the deployment state of a last known releases mapped back to release names.
 	 *
@@ -213,7 +214,6 @@ public interface SkipperClient {
 	 */
 	String manifest(String releaseName, int releaseVersion);
 
-
 	/**
 	 * Fetch the logs of the latest release identified by the given name.
 	 *
@@ -222,10 +222,9 @@ public interface SkipperClient {
 	 */
 	LogInfo getLog(String releaseName);
 
-
 	/**
-	 * Fetch the logs of the latest release identified by the given release name
-	 * and a specific application name inside the release.
+	 * Fetch the logs of the latest release identified by the given release name and a
+	 * specific application name inside the release.
 	 *
 	 * @param releaseName the release name
 	 * @param appName the application name
@@ -241,4 +240,25 @@ public interface SkipperClient {
 	 * @return the status info of a release
 	 */
 	Release scale(String releaseName, ScaleRequest scaleRequest);
+
+	/**
+	 * Access an actuator resource for a deployed app instance.
+	 *
+	 * @param releaseName the release name
+	 * @param appName the application name
+	 * @param appId the deployer assigned guid of the app instance
+	 * @param endpoint the relative actuator path, e.g., {@code /info}
+	 * @return the contents as JSON text
+	 */
+	String getFromActuator(String releaseName, String appName, String appId, String endpoint);
+
+	/**
+	 * Post to an actuator resource for a deployed app instance.
+	 *
+	 * @param releaseName the release name
+	 * @param appName the application name (deployment ID)
+	 * @param appId the deployer assigned guid of the app instance
+	 * @param request an {@link ActuatorPostRequest}
+	 */
+	Object postToActuator(String releaseName, String appName, String appId, ActuatorPostRequest request);
 }

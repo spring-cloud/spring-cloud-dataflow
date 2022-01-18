@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -26,6 +27,7 @@ import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.ReleaseUpgradeException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
@@ -40,16 +42,23 @@ import org.springframework.cloud.skipper.server.controller.support.InfoResourceA
 import org.springframework.cloud.skipper.server.controller.support.ManifestResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.ReleaseResourceAssembler;
 import org.springframework.cloud.skipper.server.controller.support.SimpleResourceAssembler;
+import org.springframework.cloud.skipper.server.service.ActuatorService;
 import org.springframework.cloud.skipper.server.service.ReleaseService;
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,31 +73,48 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author David Turanski
  */
 @RestController
 @RequestMapping("/api/release")
 public class ReleaseController {
 
 	private final ReleaseService releaseService;
+
 	private final SkipperStateMachineService skipperStateMachineService;
+
 	private final ReleaseResourceAssembler releaseResourceAssembler = new ReleaseResourceAssembler();
+
 	private final ManifestResourceAssembler manifestResourceAssembler = new ManifestResourceAssembler();
+
 	private final InfoResourceAssembler infoResourceAssembler = new InfoResourceAssembler();
+
+	private final ActuatorService actuatorService;
 
 	@Value("${info.app.name:#{null}}")
 	private String appName;
+
 	@Value("${info.app.version:#{null}}")
 	private String appVersion;
 
 	public ReleaseController(ReleaseService releaseService,
-			SkipperStateMachineService skipperStateMachineService) {
+			SkipperStateMachineService skipperStateMachineService, ActuatorService actuatorService) {
 		this.releaseService = releaseService;
 		this.skipperStateMachineService = skipperStateMachineService;
+		this.actuatorService = actuatorService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public ReleaseControllerLinksResource resourceLinks() {
 		ReleaseControllerLinksResource resource = new ReleaseControllerLinksResource();
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class)
+				.getFromActuator(null, null, null, null, null))
+				.withRel("actuator/name/app/id"));
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class)
+						.postToActuator(null, null, null, null, null))
+				.withRel("actuator/name/app/id"));
+		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class).log(null))
+				.withRel("logs/name"));
 		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class).status(null))
 				.withRel("status/name"));
 		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class).status(null, null))
@@ -232,6 +258,32 @@ public class ReleaseController {
 		List<Release> releaseList = this.releaseService.list(releaseName);
 		CollectionModel<EntityModel<Release>> resources = this.releaseResourceAssembler.toCollectionModel(releaseList);
 		return resources;
+	}
+
+	@GetMapping("/actuator/{name}/{app}/{id}")
+	public ResponseEntity<String> getFromActuator(
+			@PathVariable("name") String releaseName,
+			@PathVariable("app") String appName,
+			@PathVariable("id") String appId,
+			@RequestParam("endpoint") String endpoint,
+			@Nullable @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+		return new ResponseEntity<>(this.actuatorService.getFromActuator(
+				releaseName, appName, appId, endpoint,
+				Optional.ofNullable(auth)), HttpStatus.OK);
+	}
+
+	@PostMapping("/actuator/{name}/{app}/{id}")
+	public ResponseEntity<?> postToActuator(
+			@PathVariable("name") String releaseName,
+			@PathVariable("app") String appName,
+			@PathVariable("id") String appId,
+			@RequestBody ActuatorPostRequest postRequest,
+			@Nullable @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
+
+		return new ResponseEntity<>(
+				this.actuatorService.postToActuator(releaseName, appName, appId, postRequest,
+						Optional.ofNullable(auth)),
+				HttpStatus.OK);
 	}
 
 	@ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Release not found")

@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.domain.deployer.ConfigurationMetadataPropertyEntity;
 import org.springframework.data.annotation.Id;
@@ -44,15 +45,19 @@ public class Deployer {
 	@JsonIgnore
 	private AppDeployer appDeployer;
 
+	@JsonIgnore
+	private ActuatorOperations actuatorOperations;
+
 	private List<ConfigurationMetadataPropertyEntity> options = new ArrayList<>();
 
 	Deployer() {
 	}
 
-	public Deployer(String name, String type, AppDeployer appDeployer) {
+	public Deployer(String name, String type, AppDeployer appDeployer, ActuatorOperations actuatorOperations) {
 		this.name = name;
 		this.type = type;
 		this.appDeployer = appDeployer;
+		this.actuatorOperations = actuatorOperations;
 	}
 
 	public String getId() {
@@ -101,5 +106,13 @@ public class Deployer {
 
 	public void setOptions(List<ConfigurationMetadataPropertyEntity> options) {
 		this.options = options;
+	}
+
+	public ActuatorOperations getActuatorOperations() {
+		return actuatorOperations;
+	}
+
+	public void setActuatorOperations(ActuatorOperations actuatorOperations) {
+		this.actuatorOperations = actuatorOperations;
 	}
 }

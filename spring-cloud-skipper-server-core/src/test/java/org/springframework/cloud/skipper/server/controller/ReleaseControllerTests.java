@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.controller;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
@@ -24,9 +25,11 @@ import javax.servlet.ServletContext;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -38,6 +41,7 @@ import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.server.deployer.DefaultReleaseManager;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
+import org.springframework.cloud.skipper.server.service.ActuatorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -46,6 +50,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,10 +63,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @ActiveProfiles({"repo-test", "local"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReleaseControllerTests extends AbstractControllerTests {
+
+	@MockBean
+	private ActuatorService actuatorService;
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
@@ -304,6 +315,34 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().size()).isEqualTo(2);
 		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().get("key2")).isEqualTo("value2");
 
+	}
+
+	@Test
+	public void getFromAndPostToActuator() throws Exception {
+		install("ticktock", "1.0.0", "myTicker");
+		assertReleaseIsDeployedSuccessfully("myTicker", 1);
+
+		mockMvc
+				.perform(get("/api/release/actuator/myTicker/myTicker.log-v1/myTicker.log-v1-0?endpoint=info"))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(actuatorService, times(1))
+			.getFromActuator("myTicker", "myTicker.log-v1", "myTicker.log-v1-0","info",
+					Optional.empty());
+
+
+		reset(actuatorService);
+		ActuatorPostRequest actuatorPostRequest = ActuatorPostRequest.of("bindings/input",
+				Collections.singletonMap("state", "STOPPED"));
+
+		mockMvc
+				.perform(post("/api/release/actuator/myTicker/myTicker.log-v1/myTicker.log-v1-0")
+						.content(convertObjectToJson(actuatorPostRequest)))
+				.andExpect(status().isOk()).andReturn();
+
+		verify(actuatorService, times(1))
+				.postToActuator("myTicker", "myTicker.log-v1", "myTicker.log-v1-0",
+						actuatorPostRequest, Optional.empty());
 	}
 
 	private class ErrorDispatcher implements RequestBuilder {

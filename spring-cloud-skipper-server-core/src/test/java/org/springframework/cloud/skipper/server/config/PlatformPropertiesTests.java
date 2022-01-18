@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PlatformPropertiesTests.TestConfig.class,
 		properties = "spring.main.allow-bean-definition-overriding=true")
-@ActiveProfiles("platform-properties")
+@ActiveProfiles({"platform-properties", "local"})
 public class PlatformPropertiesTests {
 
 	@Autowired
@@ -62,7 +62,8 @@ public class PlatformPropertiesTests {
 
 	@Configuration
 	@ImportAutoConfiguration(classes = { EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class,
-			StateMachineJpaRepositoriesAutoConfiguration.class, ResourceLoadingAutoConfiguration.class })
+			StateMachineJpaRepositoriesAutoConfiguration.class, ResourceLoadingAutoConfiguration.class,
+			SkipperServerPlatformConfiguration.class })
 	@Import(SkipperServerConfiguration.class)
 	static class TestConfig {
 	}

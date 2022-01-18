@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -62,6 +63,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author David Turanski
  */
 public class DefaultSkipperClient implements SkipperClient {
 
@@ -235,6 +237,43 @@ public class DefaultSkipperClient implements SkipperClient {
 						httpEntity,
 						typeReference,
 						uriVariables);
+		return resourceResponseEntity.getBody();
+	}
+
+	@Override
+	public String getFromActuator(String releaseName, String appName, String appId, String endpoint) {
+
+		Map<String, Object> uriVariables = new HashMap<>();
+		uriVariables.put("releaseName", releaseName);
+		uriVariables.put("appName", appName);
+		uriVariables.put("appId", appId);
+
+		ResponseEntity<String> resourceResponseEntity =
+				restTemplate.exchange(
+						baseUri + "/release/actuator/{releaseName}/{appName}/{appId}?endpoint=" + endpoint,
+						HttpMethod.GET,
+						null,
+						String.class,
+						uriVariables);
+
+		return resourceResponseEntity.getBody();
+	}
+
+	@Override
+	public Object postToActuator(String releaseName, String appName, String appId, ActuatorPostRequest request) {
+		Map<String, Object> uriVariables = new HashMap<>();
+		uriVariables.put("releaseName", releaseName);
+		uriVariables.put("appName", appName);
+		uriVariables.put("appId", appId);
+
+		HttpEntity<ActuatorPostRequest> httpEntity = new HttpEntity<>(request);
+		ResponseEntity<?> resourceResponseEntity =
+				restTemplate.exchange(baseUri + "/release/actuator/{releaseName}/{appName}/{appId}",
+						HttpMethod.POST,
+						httpEntity,
+						Object.class,
+						uriVariables);
+
 		return resourceResponseEntity.getBody();
 	}
 

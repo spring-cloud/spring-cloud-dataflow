@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryActuatorTemplate;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppNameGenerator;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
@@ -53,11 +56,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
+ * @author David Turanski
  */
 @Configuration
 @ConditionalOnBean(EnableSkipperServerConfiguration.Marker.class)
@@ -70,15 +75,21 @@ public class CloudFoundryPlatformAutoConfiguration {
 
 	@Bean
 	public Platform cloudFoundryPlatform(
-			CloudFoundryPlatformProperties cloudFoundryPlatformProperties) {
+			CloudFoundryPlatformProperties cloudFoundryPlatformProperties, RestTemplate actuatorRestTemplate) {
 		List<Deployer> deployers = cloudFoundryPlatformProperties.getAccounts().entrySet().stream().map(
-				e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue())
+				e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue(), actuatorRestTemplate)
 		).collect(Collectors.toList());
 		return new Platform("Cloud Foundry", deployers);
 	}
 
+	@Bean
+	@ConditionalOnMissingBean
+	RestTemplate actuatorRestTemplate() {
+		return new RestTemplate();
+	}
+
 	private Deployer createAndSaveCFAppDeployer(String account,
-			CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties) {
+			CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties, RestTemplate restTemplate) {
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
 				.getDeployment();
 		if (deploymentProperties == null) {
@@ -142,7 +153,10 @@ public class CloudFoundryPlatformAutoConfiguration {
 			CloudFoundryAppDeployer cfAppDeployer = new CloudFoundryAppDeployer(
 					appNameGenerator, deploymentProperties, cloudFoundryOperations,
 					runtimeEnvironmentInfo);
-			Deployer deployer = new Deployer(account, "cloudfoundry", cfAppDeployer);
+			ActuatorOperations actuatorOperations = new CloudFoundryActuatorTemplate(
+					restTemplate, cfAppDeployer, cloudFoundryProperties
+					.getDeployment().getAppAdmin());
+			Deployer deployer = new Deployer(account, "cloudfoundry", cfAppDeployer, actuatorOperations);
 			deployer.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
 					connectionProperties.getOrg(), connectionProperties.getSpace(),
 					connectionProperties.getUrl()));

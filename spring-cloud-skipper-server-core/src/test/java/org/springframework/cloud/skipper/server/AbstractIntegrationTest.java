@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
 import org.springframework.cloud.skipper.domain.Release;
@@ -187,7 +188,8 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 	@Configuration
 	@ImportAutoConfiguration(classes = { JacksonAutoConfiguration.class, EmbeddedDataSourceConfiguration.class,
 			HibernateJpaAutoConfiguration.class, StateMachineJpaRepositoriesAutoConfiguration.class,
-			SkipperServerPlatformConfiguration.class, ResourceLoadingAutoConfiguration.class })
+			SkipperServerPlatformConfiguration.class, ResourceLoadingAutoConfiguration.class,
+			LocalDeployerAutoConfiguration.class})
 	@Import(SkipperServerConfiguration.class)
 	@EnableWebMvc
 	static class TestConfig {

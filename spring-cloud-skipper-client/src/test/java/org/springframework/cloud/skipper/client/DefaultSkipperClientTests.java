@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.client;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +25,7 @@ import org.junit.Test;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
@@ -35,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -209,5 +212,40 @@ public class DefaultSkipperClientTests {
 
 		List<Release> list = skipperClient.list(null);
 		assertThat(list).isEmpty();
+	}
+
+	@Test
+	public void testActuatorGet() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer
+				.expect(requestTo("/release/actuator/tiktok/log/tiktok-log-0?endpoint=/foo/bar"))
+				.andExpect(queryParam("endpoint","/foo/bar"))
+				.andRespond(withSuccess("{\"foo\":\"bar\"}", MediaType.APPLICATION_JSON));
+
+
+		String response = skipperClient.getFromActuator(
+				"tiktok","log", "tiktok-log-0","/foo/bar");
+		assertThat(response).isEqualTo("{\"foo\":\"bar\"}");
+	}
+
+	@Test
+	public void testActuatorPost() {
+		RestTemplate restTemplate = new RestTemplate();
+		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+		ActuatorPostRequest actuatorPostRequest = ActuatorPostRequest.of("/bindings/input",
+				Collections.singletonMap("state","STOPPED"));
+		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+		mockServer
+				.expect(requestTo("/release/actuator/tiktok/log/tiktok-log-0"))
+				.andExpect(content().json(
+						"{\"endpoint\":\"/bindings/input\",\"body\":{\"state\":\"STOPPED\"}}"))
+				.andRespond(withSuccess());
+
+		//Don't care about the response here.
+		skipperClient.postToActuator(
+				"tiktok","log", "tiktok-log-0", actuatorPostRequest);
 	}
 }

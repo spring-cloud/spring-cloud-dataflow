@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.config;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -37,7 +39,7 @@ import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpHeaders;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -47,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
+ * @author David Turanski
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -111,7 +114,6 @@ public class SkipperServerPlatformConfigurationTests {
 	static class TestPlatformAutoConfiguration {
 
 		@Bean
-		@Primary
 		public Platform testPlatform() {
 			return new Platform("Test", Collections.singletonList(
 					new Deployer("test", "test", new AppDeployer() {
@@ -137,6 +139,21 @@ public class SkipperServerPlatformConfigurationTests {
 
 						@Override
 						public String getLog(String id) {
+							return null;
+						}
+					}, new ActuatorOperations() {
+
+						@Override
+						public <T> T getFromActuator(String deploymentId,
+								String guid, String endpoint, Class<T> responseType,
+								Optional<HttpHeaders> requestHeaders) {
+							return null;
+						}
+
+						@Override
+						public <T, R> R postToActuator(String deploymentId, String guid,
+								String endpoint, T body, Class<R> responseType,
+								Optional<HttpHeaders> requestHeaders) {
 							return null;
 						}
 					})));

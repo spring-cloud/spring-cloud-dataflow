@@ -80,6 +80,7 @@ import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRe
 import org.springframework.cloud.skipper.server.repository.jpa.ReleaseRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.cloud.skipper.server.repository.map.DeployerRepository;
+import org.springframework.cloud.skipper.server.service.ActuatorService;
 import org.springframework.cloud.skipper.server.service.PackageMetadataService;
 import org.springframework.cloud.skipper.server.service.PackageService;
 import org.springframework.cloud.skipper.server.service.ReleaseReportService;
@@ -146,14 +147,20 @@ public class ServerDependencies implements AsyncConfigurer {
 
 	@Bean
 	public ReleaseController releaseController(ReleaseService releaseService,
-			SkipperStateMachineService skipperStateMachineService) {
-		return new ReleaseController(releaseService, skipperStateMachineService);
+			SkipperStateMachineService skipperStateMachineService, ActuatorService actuatorService) {
+		return new ReleaseController(releaseService, skipperStateMachineService, actuatorService);
 	}
 
 	@Bean
 	public PackageController packageController(PackageService packageService,
 			PackageMetadataService packageMetadataService, SkipperStateMachineService skipperStateMachineService) {
 		return new PackageController(packageService, packageMetadataService, skipperStateMachineService);
+	}
+
+	@Bean
+	ActuatorService actuatorService(ReleaseService releaseService,
+			DeployerRepository deployerRepository,  ReleaseRepository releaseRepository) {
+		return new ActuatorService(releaseService,  deployerRepository, releaseRepository);
 	}
 
 	@Bean
