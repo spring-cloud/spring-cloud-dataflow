@@ -47,7 +47,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
-                "ref": "2.9.x",
+                "ref": "2.7.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -57,7 +57,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-local",
-                "ref": "2.9.x",
+                "ref": "2.7.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -67,7 +67,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-cloudfoundry",
-                "ref": "2.9.x",
+                "ref": "2.7.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -77,7 +77,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-kubernetes",
-                "ref": "2.9.x",
+                "ref": "2.7.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -87,7 +87,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-common-security-config",
-                "ref": "2.9.x",
+                "ref": "1.7.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -97,7 +97,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-skipper",
-                "ref": "2.9.x",
+                "ref": "2.8.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -107,7 +107,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-ui",
-                "ref": "2.9.x",
+                "ref": "3.2.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
