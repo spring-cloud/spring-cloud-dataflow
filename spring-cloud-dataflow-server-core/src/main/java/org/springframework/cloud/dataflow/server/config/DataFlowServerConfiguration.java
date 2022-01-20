@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.util.Optional;
+
 import javax.persistence.EntityManager;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
@@ -94,8 +96,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
+	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource, BatchProperties properties) {
+		String tablePrefix = Optional.ofNullable(properties.getJdbc().getTablePrefix()).orElse(AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
+		return new JdbcDataflowJobExecutionDao(dataSource, tablePrefix);
 	}
 
 	@Bean

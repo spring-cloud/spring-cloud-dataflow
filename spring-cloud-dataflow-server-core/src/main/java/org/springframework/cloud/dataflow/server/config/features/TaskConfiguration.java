@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -25,6 +26,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
@@ -90,6 +92,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class TaskConfiguration {
 
+	@Autowired
+	BatchProperties batchProperties;
+	
 	@Autowired
 	DataSourceProperties dataSourceProperties;
 
@@ -227,6 +232,7 @@ public class TaskConfiguration {
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setJobExplorer(jobExplorer);
 		factoryBean.setTransactionManager(dataSourceTransactionManager);
+		Optional.ofNullable(batchProperties.getJdbc().getTablePrefix()).ifPresent(factoryBean::setTablePrefix);
 		return factoryBean;
 	}
 
@@ -234,6 +240,7 @@ public class TaskConfiguration {
 	public JobExplorerFactoryBean jobExplorerFactoryBean(DataSource dataSource) {
 		JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
 		jobExplorerFactoryBean.setDataSource(dataSource);
+		Optional.ofNullable(batchProperties.getJdbc().getTablePrefix()).ifPresent(jobExplorerFactoryBean::setTablePrefix);
 		return jobExplorerFactoryBean;
 	}
 
@@ -243,6 +250,7 @@ public class TaskConfiguration {
 		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
+		Optional.ofNullable(batchProperties.getJdbc().getTablePrefix()).ifPresent(repositoryFactoryBean::setTablePrefix);		
 		return repositoryFactoryBean;
 	}
 }
