@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
 
-	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION";
+	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, TASK_TASK_BATCH B WHERE B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID";
 
 	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
 			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=?";
@@ -81,6 +81,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String NAME_AND_STATUS_FILTER = "I.JOB_NAME LIKE ? AND E.STATUS = ?";
 
+	private static final String TASK_EXECUTION_FILTER =
+			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID";
+	
 	private static final String TASK_EXECUTION_ID_FILTER =
 			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
 
@@ -132,7 +135,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		});
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
-		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
+		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_FILTER);
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
