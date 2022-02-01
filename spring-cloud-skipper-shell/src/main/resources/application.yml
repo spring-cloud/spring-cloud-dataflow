@@ -2,7 +2,6 @@ spring:
   application:
     name: spring-cloud-skipper-shell
   main:
-    allow-circular-references: true
     banner-mode: 'off'
 logging:
   level:

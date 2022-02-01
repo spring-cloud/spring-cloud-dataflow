@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,26 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.ResultHandler;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.shell.DefaultShellApplicationRunner;
+import org.springframework.shell.result.ThrowableResultHandler;
 
 /**
- * An {@link ApplicationRunner} implementation that initialises the connection to the
- * Data Flow Server. Has higher precedence than {@link InteractiveModeApplicationRunner}.
+ * An {@link ApplicationRunner} implementation that initialises the connection to the Data Flow Server.
+ *
+ * <p>Has higher precedence than {@link DefaultShellApplicationRunner} so that it runs before any shell runner.
  *
  * @author Eric Bottard
  * @author Janne Valkealahti
+ * @author Chris Bono
  */
-@Order(InteractiveShellApplicationRunner.PRECEDENCE - 10)
+@Order(DefaultShellApplicationRunner.PRECEDENCE - 10)
 public class InitializeConnectionApplicationRunner implements ApplicationRunner {
 
 	private TargetHolder targetHolder;
 
-	private SkipperClientProperties skipperClientProperties;
+	private ThrowableResultHandler resultHandler;
 
-	private ResultHandler<Exception> resultHandler;
+	private SkipperClientProperties skipperClientProperties;
 
 	/**
 	 * Construct a new InitializeConnectionApplicationRunner instance.
@@ -45,7 +47,7 @@ public class InitializeConnectionApplicationRunner implements ApplicationRunner 
 	 * @param skipperClientProperties
 	 */
 	public InitializeConnectionApplicationRunner(TargetHolder targetHolder,
-			ResultHandler<Exception> resultHandler,
+			ThrowableResultHandler resultHandler,
 			SkipperClientProperties skipperClientProperties) {
 		this.targetHolder = targetHolder;
 		this.resultHandler = resultHandler;

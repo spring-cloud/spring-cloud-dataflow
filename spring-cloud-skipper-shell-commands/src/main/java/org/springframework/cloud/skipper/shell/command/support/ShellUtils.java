@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.shell.command.support;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.ApplicationArguments;
 
@@ -39,5 +40,23 @@ public abstract class ShellUtils {
 	 */
 	public static boolean hasHelpOption(ApplicationArguments args) {
 		return !Collections.disjoint(helpArgs, args.getNonOptionArgs()) || !Collections.disjoint(helpArgs, args.getOptionNames());
+	}
+
+	/**
+	 * Gets a filtered list of args to pass to the command shell.
+	 *
+	 * <p>If any {@link #hasHelpOption help arg} is specified returns a single element list containing 'help'. Otherwise
+	 * filters out any skipper client properties.
+	 *
+	 * @param args the application arguments
+	 * @return list of raw source args excluding any skipper client property args
+	 */
+	public static List<String> filteredArgsToShellCommands(ApplicationArguments args) {
+		if (ShellUtils.hasHelpOption(args)) {
+			return Collections.singletonList("help");
+		}
+		return Arrays.stream(args.getSourceArgs())
+				.filter(arg -> !arg.contains("spring.cloud.skipper.client"))
+						.collect(Collectors.toList());
 	}
 }

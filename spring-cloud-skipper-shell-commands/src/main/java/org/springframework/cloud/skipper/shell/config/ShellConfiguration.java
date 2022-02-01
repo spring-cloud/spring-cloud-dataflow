@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,19 @@ package org.springframework.cloud.skipper.shell.config;
 
 import org.jline.reader.LineReader;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.cloud.skipper.client.SkipperClientConfiguration;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.shell.command.support.ConsoleUserInput;
 import org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner;
-import org.springframework.cloud.skipper.shell.command.support.InteractiveModeApplicationRunner;
+import org.springframework.cloud.skipper.shell.command.support.ShellUtils;
 import org.springframework.cloud.skipper.shell.command.support.TargetHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.shell.ResultHandler;
-import org.springframework.shell.Shell;
+import org.springframework.shell.boot.NonInteractiveShellRunnerCustomizer;
+import org.springframework.shell.result.ThrowableResultHandler;
 
 /**
  * Configures the various commands that are part of the default Spring Shell experience.
@@ -42,6 +40,7 @@ import org.springframework.shell.Shell;
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
 @Configuration
 @Import(SkipperClientConfiguration.class)
@@ -53,15 +52,14 @@ public class ShellConfiguration {
 	}
 
 	@Bean
-	public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder,
-																@Qualifier("main") ResultHandler<Exception> resultHandler,
+	public ApplicationRunner initializeConnectionApplicationRunner(TargetHolder targetHolder, ThrowableResultHandler resultHandler,
 																SkipperClientProperties skipperClientProperties) {
 		return new InitializeConnectionApplicationRunner(targetHolder, resultHandler, skipperClientProperties);
 	}
 
 	@Bean
-	public ApplicationRunner applicationRunner(Shell shell, ConfigurableEnvironment environment) {
-		return new InteractiveModeApplicationRunner(shell, environment);
+	public NonInteractiveShellRunnerCustomizer skipperClientArgsFilteringCustomizer() {
+		return (shellRunner) -> shellRunner.setArgsToShellCommand(ShellUtils::filteredArgsToShellCommands);
 	}
 
 	@Bean

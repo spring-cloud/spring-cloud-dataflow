@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.server.local.security;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +37,6 @@ public class SecurityTestUtils {
 		Assert.notNull(username, "The username must not be null.");
 		Assert.notNull(password, "The password must not be null.");
 
-		return "Basic " + new String(Base64.encode((username + ":" + password).getBytes(StandardCharsets.ISO_8859_1)));
+		return "Basic " + new String(Base64.getEncoder().encode((username + ":" + password).getBytes(StandardCharsets.ISO_8859_1)));
 	}
 }

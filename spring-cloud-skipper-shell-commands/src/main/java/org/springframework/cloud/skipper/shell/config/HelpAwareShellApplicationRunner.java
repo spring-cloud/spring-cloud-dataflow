@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,26 @@ import java.io.Reader;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner;
 import org.springframework.cloud.skipper.shell.command.support.ShellUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.shell.jline.InteractiveShellApplicationRunner;
+import org.springframework.shell.DefaultShellApplicationRunner;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * {@link ApplicationRunner} that print a help-text to the console in case
- * the help command-line option was provided and will also exit the application in that case.
+ * {@link ApplicationRunner} that extends the basic help command to include a skipper specific help-text at the top
+ * of the normal help command output.
+ *
+ * <p>Has higher precedence than {@link InitializeConnectionApplicationRunner} so that it runs before that or any
+ * shell runner.
  *
  * @author Gunnar Hillert
+ * @author Chris Bono
  *
- * @see org.springframework.cloud.skipper.shell.command.support.InitializeConnectionApplicationRunner
+ * @see InitializeConnectionApplicationRunner
  */
-@Order(InteractiveShellApplicationRunner.PRECEDENCE - 20)
+@Order(DefaultShellApplicationRunner.PRECEDENCE - 20)
 public class HelpAwareShellApplicationRunner implements ApplicationRunner {
 
 	@Override
