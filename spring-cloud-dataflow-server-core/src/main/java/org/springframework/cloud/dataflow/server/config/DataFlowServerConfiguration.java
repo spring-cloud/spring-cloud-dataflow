@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
+import org.springframework.cloud.dataflow.server.config.web.H2ServerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.db.migration.DataFlowFlywayConfigurationCustomizer;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
@@ -70,7 +71,8 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  */
 @EnableSpringDataWebSupport
 @Configuration
-@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class })
+@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class,
+		H2ServerConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
 

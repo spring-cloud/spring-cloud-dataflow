@@ -41,7 +41,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Gunnar Hillert
  */
-public class DataFlowClientAutoConfigurationAgaintstServerTests {
+public class DataFlowClientAutoConfigurationAgainstServerTests {
 
 	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
 

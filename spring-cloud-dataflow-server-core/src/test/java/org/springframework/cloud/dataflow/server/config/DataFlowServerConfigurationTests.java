@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.container.registry.ContainerRegistrySe
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
+import org.springframework.cloud.dataflow.server.config.web.H2ServerConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -88,7 +89,8 @@ public class DataFlowServerConfigurationTests {
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
 				SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
+				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class,
+				H2ServerConfiguration.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
