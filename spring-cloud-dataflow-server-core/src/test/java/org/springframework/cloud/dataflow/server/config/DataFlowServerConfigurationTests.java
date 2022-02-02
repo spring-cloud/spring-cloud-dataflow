@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,6 @@ import org.springframework.cloud.dataflow.container.registry.ContainerRegistrySe
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
-import org.springframework.cloud.dataflow.server.config.web.H2ServerConfiguration;
-import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
@@ -70,6 +68,7 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Michael Wirth
  */
 public class DataFlowServerConfigurationTests {
 
@@ -87,10 +86,9 @@ public class DataFlowServerConfigurationTests {
 				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
 				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
 				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
+				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
 				SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class,
-				H2ServerConfiguration.class);
+				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
 		environment = new StandardEnvironment();
 		propertySources = environment.getPropertySources();
 	}
