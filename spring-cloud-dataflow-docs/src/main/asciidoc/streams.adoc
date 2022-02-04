@@ -1151,8 +1151,6 @@ This chapter includes the following examples:
 * <<spring-cloud-dataflow-stream-partitions>>
 * <<spring-cloud-dataflow-stream-app-types>>
 
-You can find links to more samples in the "`<<dataflow-samples>>`" chapter.
-
 [[spring-cloud-dataflow-simple-stream]]
 === Simple Stream Processing
 

@@ -197,10 +197,6 @@ spring:
     driver-class-name:org.postgresql.Driver
 ----
 
-[start=4]
-. Alternatively, you can build a custom Spring Cloud Data Flow server with your build files.
-There are examples of a custom server builds in our https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/custom-dataflow-builds[samples repo] if there is a need to add a driver jars.
-
 [[configuration-local-rdbms-schema]]
 ==== Schema Handling
 On default database schema is managed with _Flyway_ which is convenient if it's
@@ -587,28 +583,6 @@ uaac token client get admin -s adminsecret
 uaac user get <username>
 ----
 ====
-
-[[configuration-security-ldap-uaa-example]]
-===== LDAP Security and UAA Example Application
-
-In order to get up and running quickly and to help you understand the security architecture, we
-provide the https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/security-ldap-uaa-example[LDAP Security and UAA Example]
-on GitHub.
-
-[IMPORTANT]
-====
-This is solely a demo/example application and shall not be used in production.
-====
-
-The setup consists of:
-
-* Spring Cloud Data Flow Server
-* Skipper Server
-* CloudFoundry User Account and Authentication (UAA) Server
-* Lightweight Directory Access Protocol (LDAP) Server (provided by https://directory.apache.org/[Apache Directory Server] (ApacheDS))
-
-Ultimately, as part of this example, you will learn how to configure and launch
-a Composed Task using this security setup.
 
 [[configuration-security-spring-security-oauth2-example]]
 ==== Spring Security OAuth2 Resource/Authorization Server Sample

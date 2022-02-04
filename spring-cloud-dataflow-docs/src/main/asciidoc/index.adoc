@@ -71,8 +71,6 @@ include::tasks-monitoring.adoc[]
 
 include::dashboard.adoc[]
 
-include::samples.adoc[]
-
 include::api-guide.adoc[]
 
 include::appendix.adoc[]
