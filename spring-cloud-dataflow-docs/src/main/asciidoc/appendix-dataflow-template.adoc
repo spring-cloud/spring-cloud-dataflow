@@ -180,6 +180,3 @@ To configure _Basic Authentication_, the following setup is required:
 ----
 ====
 
-You can find a sample application as part of the
-https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/master/dataflow-template-example[spring-cloud-dataflow-samples] repository
-on GitHub.
