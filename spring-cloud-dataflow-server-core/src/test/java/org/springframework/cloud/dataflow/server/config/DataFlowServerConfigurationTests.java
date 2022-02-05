@@ -49,8 +49,6 @@ import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
@@ -70,10 +68,6 @@ import static org.mockito.Mockito.mock;
 public class DataFlowServerConfigurationTests {
 
 	private ApplicationContextRunner contextRunner;
-
-	private ConfigurableEnvironment environment;
-
-	private MutablePropertySources propertySources;
 
 	@BeforeEach
 	public void setup() {
@@ -97,8 +91,8 @@ public class DataFlowServerConfigurationTests {
 						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> {
-					assertTrue(context.containsBean("initH2TCPServer"));
-					Server server = context.getBean("initH2TCPServer", Server.class);
+					assertTrue(context.containsBean("h2TcpServer"));
+					Server server = context.getBean("h2TcpServer", Server.class);
 					assertTrue(server.isRunning(false));
 
 					// Verify H2 Service is stopped
@@ -131,7 +125,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	public void testNoServer() {
 		contextRunner.run(context -> {
-			assertFalse(context.containsBean("initH2TCPServer"));
+			assertFalse(context.containsBean("h2TcpServer"));
 		});
 	}
 

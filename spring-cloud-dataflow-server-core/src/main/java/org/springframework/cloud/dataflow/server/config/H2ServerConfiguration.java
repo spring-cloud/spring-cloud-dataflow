@@ -16,6 +16,8 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.h2.tools.Server;
 import org.slf4j.Logger;
@@ -30,8 +32,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Autostart an embedded H2 database server.
@@ -44,56 +44,51 @@ import org.springframework.util.StringUtils;
 @ConditionalOnExpression("'${spring.datasource.url:#{null}}'.startsWith('jdbc:h2:tcp://localhost:')")
 public class H2ServerConfiguration {
 
+	private static final Logger logger = LoggerFactory.getLogger(H2ServerConfiguration.class);
+
+	private static final Pattern JDBC_URL_PATTERN = Pattern.compile("^jdbc:h2:tcp://localhost:(?<port>\\d+)");
+
 	@Bean
-	public H2ServerBeanFactoryPostProcessor h2ServerBeanFactoryPostProcessor(
-			@Value("${spring.datasource.url}") String dataSourceUrl) {
-		return new H2ServerBeanFactoryPostProcessor(dataSourceUrl);
+	public H2ServerBeanFactoryPostProcessor h2ServerBeanFactoryPostProcessor() {
+		return new H2ServerBeanFactoryPostProcessor();
 	}
 
-	static class H2ServerBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+	@Bean
+	public Server h2TcpServer(@Value("${spring.datasource.url}") String dataSourceUrl) {
+		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 
-		private static final Logger logger = LoggerFactory.getLogger(H2ServerBeanFactoryPostProcessor.class);
-
-		final private String dataSourceUrl;
-
-		private Server server;
-
-		H2ServerBeanFactoryPostProcessor(String dataSourceUrl) {
-			this.dataSourceUrl = dataSourceUrl;
+		String port;
+		Matcher matcher = JDBC_URL_PATTERN.matcher(dataSourceUrl);
+		if (matcher.find()) {
+			port = matcher.group("port");
 		}
+		else {
+			throw new IllegalArgumentException(
+					"DataSource URL does not match regex pattern: " + JDBC_URL_PATTERN.pattern());
+		}
+
+		try {
+			Server server = Server.createTcpServer("-ifNotExists", "-tcp",
+					"-tcpAllowOthers", "-tcpPort", port).start();
+			server.setShutdownHandler(server::stop);
+			return server;
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+
+	}
+
+	/**
+	 * A {@link BeanFactoryPostProcessor} whose sole job is to ensure that the H2 server is up and running before any
+	 * datasource initialization is attempted. It does this by requesting the H2Server bean which then in turn starts up
+	 * the server.
+	 */
+	static class H2ServerBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-			if (beanFactory.containsBean("initH2TCPServer")) {
-				logger.warn("H2 Server is already registered.");
-			} else {
-				beanFactory.registerSingleton("initH2TCPServer", initH2TCPServer(dataSourceUrl));
-			}
-		}
-
-		public void close() {
-			if (this.server != null) {
-				this.server.stop();
-				logger.info("Embedded H2 server stopped!");
-			}
-		}
-
-		private Server initH2TCPServer(String dataSourceUrl) {
-			logger.info("Starting H2 Server with URL: " + dataSourceUrl);
-			try {
-				this.server = Server.createTcpServer("-ifNotExists", "-tcp",
-						"-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl)).start();
-			}
-			catch (SQLException e) {
-				throw new IllegalStateException(e);
-			}
-			return server;
-		}
-
-		private String getH2Port(String url) {
-			String[] tokens = StringUtils.tokenizeToStringArray(url, ":");
-			Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
-			return tokens[4].substring(0, tokens[4].indexOf("/"));
+			beanFactory.getBean("h2TcpServer");
 		}
 	}
 }
