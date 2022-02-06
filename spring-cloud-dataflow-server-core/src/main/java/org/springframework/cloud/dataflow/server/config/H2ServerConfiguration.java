@@ -40,7 +40,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Server.class)
-@ConditionalOnProperty(value = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnExpression("'${spring.datasource.url:#{null}}'.startsWith('jdbc:h2:tcp://localhost:')")
 public class H2ServerConfiguration {
 
@@ -53,25 +53,21 @@ public class H2ServerConfiguration {
 		return new H2ServerBeanFactoryPostProcessor();
 	}
 
-	@Bean
+	@Bean(destroyMethod = "stop")
 	public Server h2TcpServer(@Value("${spring.datasource.url}") String dataSourceUrl) {
 		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
 
-		String port;
 		Matcher matcher = JDBC_URL_PATTERN.matcher(dataSourceUrl);
-		if (matcher.find()) {
-			port = matcher.group("port");
-		}
-		else {
+		if (!matcher.find()) {
 			throw new IllegalArgumentException(
-					"DataSource URL does not match regex pattern: " + JDBC_URL_PATTERN.pattern());
+					"DataSource URL '" + dataSourceUrl + "' does not match regex pattern: "
+							+ JDBC_URL_PATTERN.pattern());
 		}
 
+		String port = matcher.group("port");
 		try {
-			Server server = Server.createTcpServer("-ifNotExists", "-tcp",
+			return Server.createTcpServer("-ifNotExists", "-tcp",
 					"-tcpAllowOthers", "-tcpPort", port).start();
-			server.setShutdownHandler(server::stop);
-			return server;
 		}
 		catch (SQLException e) {
 			throw new IllegalStateException(e);

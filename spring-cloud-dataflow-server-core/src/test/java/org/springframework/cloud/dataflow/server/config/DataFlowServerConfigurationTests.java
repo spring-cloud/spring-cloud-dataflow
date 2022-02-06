@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.config;
 import java.net.ConnectException;
 
 import org.h2.tools.Server;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -39,12 +38,10 @@ import org.springframework.cloud.dataflow.server.service.StreamValidationService
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
-import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
@@ -52,7 +49,6 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,20 +63,15 @@ import static org.mockito.Mockito.mock;
  */
 public class DataFlowServerConfigurationTests {
 
-	private ApplicationContextRunner contextRunner;
-
-	@BeforeEach
-	public void setup() {
-		contextRunner = new ApplicationContextRunner()
-				.withAllowBeanDefinitionOverriding(true)
-				.withUserConfiguration(DataFlowServerConfigurationTests.TestConfiguration.class,
-						SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
-						DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
-						DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-						RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
-						SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-						ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
-	}
+	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+			.withAllowBeanDefinitionOverriding(true)
+			.withUserConfiguration(DataFlowServerConfigurationTests.TestConfiguration.class,
+					SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
+					DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
+					DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+					RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
+					SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
+					ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
 
 	/**
 	 * Verify that embedded server starts if h2 url is specified with default properties.
@@ -116,27 +107,6 @@ public class DataFlowServerConfigurationTests {
 					assertNotNull(context.getStartupFailure());
 					assertInstanceOf(BeanCreationException.class, context.getStartupFailure());
 					assertInstanceOf(ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
-				});
-	}
-
-	/**
-	 * Verify that the embedded server is not started if h2 string is not specified.
-	 */
-	@Test
-	public void testNoServer() {
-		contextRunner.run(context -> {
-			assertFalse(context.containsBean("h2TcpServer"));
-		});
-	}
-
-	@Test
-	public void testSkipperConfig() throws Exception {
-		contextRunner.withPropertyValues("spring.cloud.skipper.client.serverUri=https://fakehost:1234/api")
-				.run(context -> {
-					SkipperClient skipperClient = context.getBean(SkipperClient.class);
-					Object baseUri = TestUtils.readField("baseUri", skipperClient);
-					assertNotNull(baseUri);
-					assertEquals("https://fakehost:1234/api", baseUri);
 				});
 	}
 
