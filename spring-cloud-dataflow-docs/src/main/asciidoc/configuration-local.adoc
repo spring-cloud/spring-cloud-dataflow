@@ -32,13 +32,14 @@ The REST `/about` endpoint provides information on the features that have been e
 A relational database is used to store stream and task definitions as well as the state of executed tasks.
 Spring Cloud Data Flow provides schemas for *H2*, *MySQL*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
 
-By default, Spring Cloud Data Flow offers an embedded instance of the *H2* database. The *H2* database is good
-for development purposes but is not recommended for production use.
+By default, Spring Cloud Data Flow offers an embedded instance of the *H2* database (if the H2 JDBC driver jar is found on the classpath).
+The *H2* database is good for development purposes but is not recommended for production use.
 
 NOTE: *H2* database is not supported as an external mode.
 
-The JDBC drivers for *MySQL* (through the MariaDB driver), *PostgreSQL*, *SQL Server*, and embedded *H2* are available without additional configuration.
-If you are using any other database, then you need to put the corresponding JDBC driver jar on the classpath of the server.
+The JDBC drivers for *MySQL* (through the MariaDB driver), *PostgreSQL*, *SQL Server* are available without additional configuration.
+
+If you are using the embedded *H2* or any other database, then you need to put the corresponding JDBC driver jar on the classpath of the server.
 
 The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
 
