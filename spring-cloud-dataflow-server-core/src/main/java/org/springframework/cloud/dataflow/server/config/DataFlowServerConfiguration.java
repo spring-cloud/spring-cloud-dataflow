@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,11 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  * @author Josh Long
  * @author Michael Minella
  * @author Gunnar Hillert
+ * @author Michael Wirth
  */
 @EnableSpringDataWebSupport
 @Configuration
-@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class })
+@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class, H2ServerConfiguration.class })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
 

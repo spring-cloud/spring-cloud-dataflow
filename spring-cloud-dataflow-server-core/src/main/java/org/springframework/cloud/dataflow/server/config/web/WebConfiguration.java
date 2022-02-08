@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config.web;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -28,11 +27,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tags;
-import org.h2.tools.Server;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -49,8 +45,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -63,39 +57,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Mark Pollack
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Michael Wirth
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
 public class WebConfiguration implements ServletContextInitializer, ApplicationListener<ContextClosedEvent> {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebConfiguration.class);
-
 	private static final String REL_PROVIDER_BEAN_NAME = "defaultRelProvider";
 
-	@Value("${spring.datasource.url:#{null}}")
-	private String dataSourceUrl;
-
-	private Server server = null;
 	private LongTaskTimer.Sample longTaskSample;
-
-	public Server initH2TCPServer() {
-		logger.info("Starting H2 Server with URL: " + dataSourceUrl);
-		try {
-			this.server = Server
-					.createTcpServer("-ifNotExists", "-tcp", "-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl))
-					.start();
-		}
-		catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
-		return server;
-	}
-
-	private String getH2Port(String url) {
-		String[] tokens = StringUtils.tokenizeToStringArray(url, ":");
-		Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
-		return tokens[4].substring(0, tokens[4].indexOf("/"));
-	}
 
 	@Override
 	public void onStartup(ServletContext servletContext) {
@@ -103,11 +73,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 				.builder("spring.cloud.dataflow.server").description("Spring Cloud Data Flow duration timer")
 				.tags(Tags.empty()).register(Metrics.globalRegistry);
 		this.longTaskSample = longTaskTimer.start();
-
-		if (StringUtils.hasText(dataSourceUrl) && dataSourceUrl.startsWith("jdbc:h2:tcp://localhost:")) {
-			logger.info("Start Embedded H2");
-			initH2TCPServer();
-		}
 	}
 
 	@Bean
@@ -166,10 +131,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		if (this.longTaskSample != null) {
 			this.longTaskSample.stop();
 			this.longTaskSample = null;
-		}
-		if (this.server != null) {
-			this.server.stop();
-			logger.info("Embedded H2 server stopped!");
 		}
 	}
 }

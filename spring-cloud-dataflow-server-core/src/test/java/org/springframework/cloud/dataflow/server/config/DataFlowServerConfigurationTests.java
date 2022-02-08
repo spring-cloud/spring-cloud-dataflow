@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,9 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import java.net.ConnectException;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.h2.tools.Server;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -32,137 +28,91 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
-import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
-import org.springframework.cloud.dataflow.server.support.TestUtils;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Michael Wirth
  */
 public class DataFlowServerConfigurationTests {
 
-	private AnnotationConfigApplicationContext context;
-
-	private ConfigurableEnvironment environment;
-
-	private MutablePropertySources propertySources;
-
-	@Before
-	public void setup() {
-		context = new AnnotationConfigApplicationContext();
-		context.setId("testDataFlowConfig");
-		context.register(DataFlowServerConfigurationTests.TestConfiguration.class,
-				SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
-				DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
-				DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-				RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class, WebConfiguration.class,
-				SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-				ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
-		environment = new StandardEnvironment();
-		propertySources = environment.getPropertySources();
-	}
-
-	@After
-	public void teardown() {
-		if (context != null) {
-			context.close();
-		}
-	}
+	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+			.withAllowBeanDefinitionOverriding(true)
+			.withUserConfiguration(DataFlowServerConfigurationTests.TestConfiguration.class,
+					SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
+					DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
+					DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+					RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
+					SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
+					ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
 
 	/**
 	 * Verify that embedded server starts if h2 url is specified with default properties.
 	 */
 	@Test
-	@Ignore
 	public void testStartEmbeddedH2Server() {
-		Map<String, Object> myMap = new HashMap<>();
-		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
-		myMap.put("spring.dataflow.embedded.database.enabled", "true");
-		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
-		context.setEnvironment(environment);
+		contextRunner.withPropertyValues(
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.dataflow.embedded.database.enabled=true")
+				.run(context -> {
+					assertTrue(context.containsBean("h2TcpServer"));
+					Server server = context.getBean("h2TcpServer", Server.class);
+					assertTrue(server.isRunning(false));
 
-		context.refresh();
-		assertTrue(context.containsBean("initH2TCPServer"));
+					// Verify H2 Service is stopped
+					context.close();
+					assertFalse(server.isRunning(false));
+				});
 	}
 
 	/**
-	 * Verify that embedded h2 does not start if h2 url is specified with with the
+	 * Verify that embedded h2 does not start if h2 url is specified with the
 	 * spring.dataflow.embedded.database.enabled is set to false.
-	 *
-	 * @throws Throwable if any error occurs and should be handled by the caller.
-	 */
-	@Test(expected = ConnectException.class)
-	public void testDoNotStartEmbeddedH2Server() throws Throwable {
-		Throwable exceptionResult = null;
-		Map<String, Object> myMap = new HashMap<>();
-		myMap.put("spring.datasource.url", "jdbc:h2:tcp://localhost:19092/mem:dataflow");
-		myMap.put("spring.dataflow.embedded.database.enabled", "false");
-		myMap.put("spring.jpa.database", "H2");
-		propertySources.addFirst(new MapPropertySource("EnvironmentTestPropsource", myMap));
-		context.setEnvironment(environment);
-		try {
-			context.refresh();
-		}
-		catch (BeanCreationException exception) {
-			exceptionResult = exception.getRootCause();
-		}
-		assertNotNull(exceptionResult);
-		throw exceptionResult;
-	}
-
-	/**
-	 * Verify that the embedded server is not started if h2 string is not specified.
 	 */
 	@Test
-	public void testNoServer() {
-		context.refresh();
-		assertFalse(context.containsBean("initH2TCPServer"));
-	}
-
-	@Test
-	public void testSkipperConfig() throws Exception {
-		TestPropertyValues.of("spring.cloud.skipper.client.serverUri=https://fakehost:1234/api").applyTo(context);
-		this.context.refresh();
-		SkipperClient skipperClient = context.getBean(SkipperClient.class);
-		Object baseUri = TestUtils.readField("baseUri", skipperClient);
-		assertNotNull(baseUri);
-		assertTrue(baseUri.equals("https://fakehost:1234/api"));
+	public void testDoNotStartEmbeddedH2Server() {
+		contextRunner.withPropertyValues(
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.dataflow.embedded.database.enabled=false",
+						"spring.jpa.database=H2"
+				)
+				.run(context -> {
+					assertNotNull(context.getStartupFailure());
+					assertInstanceOf(BeanCreationException.class, context.getStartupFailure());
+					assertInstanceOf(ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
+				});
 	}
 
 	@EnableDataFlowServer
 	@EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
-	private static class TestConfiguration {
+	static class TestConfiguration {
 
 		@Bean
 		public AppDeployer appDeployer() {
