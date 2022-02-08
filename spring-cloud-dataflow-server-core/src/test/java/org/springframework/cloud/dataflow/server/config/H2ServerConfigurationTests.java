@@ -115,11 +115,11 @@ public class H2ServerConfigurationTests {
 	@Test
 	void serverDoesNotStartWhenPortIsReserved() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:20/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:1/mem:dataflow",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
 						.getFailure().getRootCause().isInstanceOf(BindException.class)
-						.hasMessage("Permission denied (Bind failed)"));
+						.hasMessageStartingWith("Permission denied"));
 	}
 
 	@Test
