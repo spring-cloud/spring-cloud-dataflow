@@ -521,6 +521,42 @@ all 7 Spring Cloud Data Flow roles *ROLE_CREATE*, *ROLE_DEPLOY*, *ROLE_DESTROY*,
 You can assign an OAuth scope to multiple Spring Cloud Data Flow roles, giving you flexible regarding the granularity of your authorization configuration.
 ====
 
+[[configuration-security-group-mapping]]
+===== Group Mappings
+
+Mapping roles from scopes has its own problems as it may not be always possible
+to change those in a given identity provider. If it's possible to define group claims
+in a token returned from an identity provider, these can be used as well to
+map into server roles.
+
+====
+[source,yaml]
+----
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: false
+              map-group-claims: true
+              group-claim: roles
+              group-mappings:
+                ROLE_CREATE: my-group-id
+                ROLE_DEPLOY: my-group-id
+                ROLE_DESTROY: my-group-id
+                ROLE_MANAGE: my-group-id
+                ROLE_MODIFY: my-group-id
+                ROLE_SCHEDULE: my-group-id
+                ROLE_VIEW: my-group-id
+----
+====
+
+Claim defaults to `roles` which you can set using `group-claim` option.
+In above example `my-group-id` would be something what your identity provider
+is placing into a token.
+
 [[configuration-security-ldap-authentication]]
 ==== LDAP Authentication
 
