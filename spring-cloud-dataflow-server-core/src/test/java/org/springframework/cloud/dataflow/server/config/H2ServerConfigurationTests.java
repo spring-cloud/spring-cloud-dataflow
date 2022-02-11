@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import java.net.BindException;
-
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 
@@ -110,16 +108,6 @@ public class H2ServerConfigurationTests {
 				.run(context -> assertThat(context)
 						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Port value out of range: 99999"));
-	}
-
-	@Test
-	void serverDoesNotStartWhenPortIsReserved() {
-		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:1/mem:dataflow",
-						"spring.dataflow.embedded.database.enabled=true")
-				.run(context -> assertThat(context)
-						.getFailure().getRootCause().isInstanceOf(BindException.class)
-						.hasMessageStartingWith("Permission denied"));
 	}
 
 	@Test
