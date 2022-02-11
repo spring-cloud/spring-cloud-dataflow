@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.junit.Assert.fail;
  * @author Janne Valkealahti
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public class DeploymentPropertiesUtilsTests {
 
@@ -131,8 +132,6 @@ public class DeploymentPropertiesUtilsTests {
 		assertTrue(props.contains("a=b"));
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b    c=d   ", " ");
-		System.out.println(">" +props.get(0)+"<");
-		System.out.println(">" +props.get(1)+"<");
 
 		assertTrue(props.contains("a=b"));
 		assertTrue(props.contains("c=d"));
@@ -158,6 +157,44 @@ public class DeploymentPropertiesUtilsTests {
 		assertTrue(props.contains("a=b"));
 		assertTrue(props.contains("c=d"));
 		assertTrue(props.contains("--foo=bar"));
+	}
+
+	@Test
+	public void parseArgumentTestsWithMultipleQuotes() {
+
+		List<String> props = DeploymentPropertiesUtils.parseArgumentList("arg2=\"Argument 2\" arg3=val3", " ");
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=val3"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("arg0=val0 arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
+		assertTrue(props.contains("arg0=val0"));
+		assertTrue(props.contains("arg1=val1"));
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=val3"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
+		assertTrue(props.contains("-arg1=val1"));
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=val3"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3 arg4=\"Argument 4\"", " ");
+		assertTrue(props.contains("-arg1=val1"));
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=val3"));
+		assertTrue(props.contains("arg4=\"Argument 4\""));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
+		assertTrue(props.contains("-arg1=val1"));
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=\"val3\""));
+		assertTrue(props.contains("arg4=\"Argument 4\""));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=\"val1\" arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
+		assertTrue(props.contains("-arg1=\"val1\""));
+		assertTrue(props.contains("arg2=\"Argument 2\""));
+		assertTrue(props.contains("arg3=\"val3\""));
+		assertTrue(props.contains("arg4=\"Argument 4\""));
+
 	}
 
 	@Test
