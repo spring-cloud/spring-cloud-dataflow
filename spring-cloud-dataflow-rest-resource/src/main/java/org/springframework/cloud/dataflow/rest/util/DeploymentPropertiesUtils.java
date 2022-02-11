@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public final class DeploymentPropertiesUtils {
 
@@ -177,7 +178,14 @@ public final class DeploymentPropertiesUtils {
 				else {
 					// we have a key/value pair having '=', or malformed first pair
 					if(!candidates[i].equals("")) {
-						pairs.add(candidates[i]);
+						int endToken = findEndToken(candidates, i);
+						if(endToken > -1) {
+							pairs.add(candidates[i] + " " + candidates[endToken]);
+							i = endToken;
+						}
+						else {
+							pairs.add(candidates[i]);
+						}
 					}
 				}
 			}
