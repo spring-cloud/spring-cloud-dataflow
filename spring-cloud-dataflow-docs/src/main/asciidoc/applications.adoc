@@ -4,3 +4,4 @@
 [partintro]
 --
 A selection of pre-built applications for various data integration and processing scenarios to facilitate learning and experimentation can be found link:https://docs.spring.io/stream-applications/docs/current/reference/html/index.html#applications/[here].
+--
