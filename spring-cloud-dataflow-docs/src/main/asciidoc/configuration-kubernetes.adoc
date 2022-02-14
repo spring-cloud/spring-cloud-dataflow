@@ -348,7 +348,7 @@ The Spring Cloud Data Flow server for Kubernetes uses the https://github.com/fab
 
 You can pass configuration properties to the Data Flow Server by using Kubernetes https://kubernetes.io/docs/tasks/configure-pod-container/configmap/[ConfigMap] and https://kubernetes.io/docs/concepts/configuration/secret/[secrets].
 
-The following example shows one possible configuration, which enables MySQL and sets a memory limit:
+The following example shows one possible configuration, which enables MariaDB and sets a memory limit:
 
 
 [source,yaml]
@@ -372,17 +372,17 @@ data:
                     limits:
                       memory: 1024Mi
       datasource:
-        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/database
         username: root
-        password: ${mysql-root-password}
+        password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
 ----
 
-The preceding example assumes that MySQL is deployed with `mysql` as the service name. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
+The preceding example assumes that MariaDB is deployed with `mariadb` as the service name. Kubernetes publishes the host and port values of these services as environment variables that we can use when configuring the apps we deploy.
 
-We prefer to provide the MySQL connection password in a Secrets file, as the following example shows:
+We prefer to provide the MariaDB connection password in a Secrets file, as the following example shows:
 
 
 [source,yaml]
@@ -390,11 +390,11 @@ We prefer to provide the MySQL connection password in a Secrets file, as the fol
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysql
+  name: mariadb
   labels:
-    app: mysql
+    app: mariadb
 data:
-  mysql-root-password: eW91cnBhc3N3b3Jk
+  mariadb-root-password: eW91cnBhc3N3b3Jk
 ----
 
 
@@ -403,12 +403,12 @@ The password is a base64-encoded value.
 [[configuration-kubernetes-rdbms]]
 === Database Configuration
 
-Spring Cloud Data Flow provides schemas for H2, HSQLDB, MySQL, Oracle, PostgreSQL, DB2, and SQL Server. The appropriate schema is automatically created when the server starts, provided the right database driver and appropriate credentials are in the classpath.
+Spring Cloud Data Flow provides schemas for H2, MariaDB, Oracle, PostgreSQL, DB2, and SQL Server. The appropriate schema is automatically created when the server starts, provided the right database driver and appropriate credentials are in the classpath.
 
-The JDBC drivers for MySQL (via MariaDB driver), HSQLDB, PostgreSQL, and embedded H2 are available out of the box.
+The JDBC drivers for MariaDB, PostgreSQL, SQL Server, and embedded H2 are available out of the box.
 If you use any other database, you need to put the corresponding JDBC driver jar on the classpath of the server.
 
-For instance, if you use MySQL in addition to a password in the secrets file, you could provide the following properties in the ConfigMap:
+For instance, if you use MariaDB in addition to a password in the secrets file, you could provide the following properties in the ConfigMap:
 
 
 [source,yaml]
@@ -417,11 +417,11 @@ data:
   application.yaml: |-
     spring:
       datasource:
-        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/mysql
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/database
         username: root
-        password: ${mysql-root-password}
+        password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
-        url: jdbc:mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/test
+        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/test
         driverClassName: org.mariadb.jdbc.Driver
 ----
 
@@ -439,21 +439,6 @@ data:
         username: root
         password: ${postgres-password}
         driverClassName: org.postgresql.Driver
-----
-
-
-For HSQLDB, you could use the following configuration:
-
-
-[source,yaml]
-----
-data:
-  application.yaml: |-
-    spring:
-      datasource:
-        url: jdbc:hsqldb:hsql://${HSQLDB_SERVICE_HOST}:${HSQLDB_SERVICE_PORT}/database
-        username: sa
-        driverClassName: org.hsqldb.jdbc.JDBCDriver
 ----
 
 The following YAML snippet from a Deployment is an example of mounting a ConfigMap as `application.yaml` under `/config` where Spring Boot will process it plus a Secret mounted under `/etc/secrets` where it will get picked up by the spring-cloud-kubernetes library due to the environment variable `SPRING_CLOUD_KUBERNETES_SECRETS_PATHS` being set to `/etc/secrets`.
@@ -483,8 +468,8 @@ The following YAML snippet from a Deployment is an example of mounting a ConfigM
               path: application.yaml
         - name: database
           secret:
-            secretName: mysql
----- 
+            secretName: mariadb
+----
 
 
 You can find migration scripts for specific database types in the https://github.com/spring-cloud/spring-cloud-task/tree/master/spring-cloud-task-core/src/main/resources/org/springframework/cloud/task/migration[spring-cloud-task] repo.
@@ -504,12 +489,12 @@ kubectl get all,cm,secrets,pvc
 ----
 
 
-You can list all resources used by a specific application or service by using a label to select resources. The following command lists all resources used by the `mysql` service:
+You can list all resources used by a specific application or service by using a label to select resources. The following command lists all resources used by the `mariadb` service:
 
 
 [source,shell]
 ----
-kubectl get all -l app=mysql
+kubectl get all -l app=mariadb
 ----
 
 
@@ -677,15 +662,15 @@ If upgrading from a previous version of SCDF be sure to verify that `spring.data
           default:
             secretKeyRefs:
               - envVarName: "spring.datasource.password"
-                secretName: mysql
-                dataKey: mysql-root-password
+                secretName: mariadb
+                dataKey: mariadb-root-password
               - envVarName: "spring.datasource.username"
-                  secretName: mysql
-                  dataKey: mysql-root-username
+                  secretName: mariadb
+                  dataKey: mariadb-root-username
 ...
 ----
 
-Also verify that the associated secret(dataKey) is also available in secrets.  SCDF provides an example of this for MySql here: `src/kubernetes/mysql/mysql-svc.yaml`.
+Also verify that the associated secret(dataKey) is also available in secrets.  SCDF provides an example of this for MariaDB here: `src/kubernetes/mariadb/mariadb-svc.yaml`.
 
 
 NOTE: Passing of DB credentials via properties by default is to preserve to backwards compatibility.  This will be feature will be removed in future release.

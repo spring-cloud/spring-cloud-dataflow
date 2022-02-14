@@ -149,13 +149,13 @@ are `http` (the default), `port`, and `none`.
 
 You can also set environment variables that specify the HTTP-based health check endpoint and timeout: `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_ENDPOINT` and `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_HEALTH_CHECK_TIMEOUT`, respectively. These default to `/health` (the Spring Boot default location) and `120` seconds.
 
-* You can also specify deployment properties by using the DSL. For instance, if you want to set the allocated memory for the `http` application to 512m and also bind a mysql service to the `jdbc` application, you can run the following commands:
+* You can also specify deployment properties by using the DSL. For instance, if you want to set the allocated memory for the `http` application to 512m and also bind a postgres service to the `jdbc` application, you can run the following commands:
 
 
 [source,bash,subs=attributes]
 ----
-dataflow:> stream create --name mysqlstream --definition "http | jdbc --tableName=names --columns=name"
-dataflow:> stream deploy --name mysqlstream --properties "deployer.http.memory=512, deployer.jdbc.cloudfoundry.services=mysql"
+dataflow:> stream create --name postgresstream --definition "http | jdbc --tableName=names --columns=name"
+dataflow:> stream deploy --name postgresstream --properties "deployer.http.memory=512, deployer.jdbc.cloudfoundry.services=postgres"
 ----
 
 
@@ -206,7 +206,7 @@ spring:
                   memory: 512m
                   disk: 2048m
                   instances: 4
-                  services: rabbit,mysql
+                  services: rabbit,postgres
                   appNamePrefix: dev1
               qa:
                 connection:
@@ -221,7 +221,7 @@ spring:
                   memory: 756m
                   disk: 724m
                   instances: 2
-                  services: rabbitQA,mysqlQA
+                  services: rabbitQA,postgresQA
                   appNamePrefix: qa1
 ----
 
@@ -287,14 +287,14 @@ cf set-env dataflow-server SPRING_APPLICATION_JSON '{"spring.cloud.dataflow.appl
 ----
 
 
-For Spring Cloud Task apps, you can use something similar to the following, if you use a database service instance named `mysql`:
+For Spring Cloud Task apps, you can use something similar to the following, if you use a database service instance named `postgres`:
 
 
 [source,bash,subs=attributes]
 ----
-cf set-env SPRING_DATASOURCE_URL '${vcap.services.mysql.credentials.jdbcUrl}'
-cf set-env SPRING_DATASOURCE_USERNAME '${vcap.services.mysql.credentials.username}'
-cf set-env SPRING_DATASOURCE_PASSWORD '${vcap.services.mysql.credentials.password}'
+cf set-env SPRING_DATASOURCE_URL '${vcap.services.postgres.credentials.jdbcUrl}'
+cf set-env SPRING_DATASOURCE_USERNAME '${vcap.services.postgres.credentials.username}'
+cf set-env SPRING_DATASOURCE_PASSWORD '${vcap.services.postgres.credentials.password}'
 cf set-env SPRING_DATASOURCE_DRIVER_CLASS_NAME 'org.mariadb.jdbc.Driver'
 ----
 
@@ -322,23 +322,23 @@ SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_US
 When deploying streams in Cloud Foundry, you can take advantage of application-specific service bindings, so not all
 services are globally configured for all the apps orchestrated by Spring Cloud Data Flow.
 
-For instance, if you want to provide a `mysql` service binding only for the `jdbc` application in the following stream
+For instance, if you want to provide a `postgres` service binding only for the `jdbc` application in the following stream
 definition, you can pass the service binding as a deployment property:
 
 
 [source,bash,subs=attributes]
 ----
 dataflow:>stream create --name httptojdbc --definition "http | jdbc"
-dataflow:>stream deploy --name httptojdbc --properties "deployer.jdbc.cloudfoundry.services=mysqlService"
+dataflow:>stream deploy --name httptojdbc --properties "deployer.jdbc.cloudfoundry.services=postgresService"
 ----
 
 
-where `mysqlService` is the name of the service specifically bound only to the `jdbc` application and the `http`
+where `postgresService` is the name of the service specifically bound only to the `jdbc` application and the `http`
 application does not get the binding by this method.
 
 
 If you have more than one service to bind, they can be passed as comma-separated items
-(for example: `deployer.jdbc.cloudfoundry.services=mysqlService,someService`).
+(for example: `deployer.jdbc.cloudfoundry.services=postgresService,someService`).
 
 [[configure-service-binding-parameters]]
 === Configuring Service binding parameters
@@ -372,7 +372,7 @@ Since a comma is also used to separate configuration parameters, and to avoid wh
 
 [source]
 ----
-rabbitmq,'nfs_service_instance uid:1000,gid:1000,mount:/var/volume1,readonly:true',mysql,'my-google-bigquery-example role:bigquery.user'
+rabbitmq,'nfs_service_instance uid:1000,gid:1000,mount:/var/volume1,readonly:true',postgres,'my-google-bigquery-example role:bigquery.user'
 ----
 
 [TIP]
@@ -801,10 +801,10 @@ applications:
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: postgres
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
 services:
-- mysql
+- postgres
 - my-config-server
 
 ---
@@ -831,7 +831,7 @@ applications:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DELETE_ROUTES: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, my-config-server
 services:
-- mysql
+- postgres
   my-config-server
 
 ----
@@ -875,12 +875,12 @@ applications:
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_USERNAME: admin
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: ***
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: true
-    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: mysql, config-server
+    SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: postgres, config-server
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
     TRUST_CERTS: <API_ENDPOINT> #this is for the server
     SPRING_CLOUD_DATAFLOW_APPLICATION_PROPERTIES_TASK_TRUST_CERTS: <API_ENDPOINT>   #this propagates to all tasks
 services:
-- mysql
+- postgres
 - my-config-server #this is for the server
 ----
 
@@ -912,7 +912,7 @@ applications:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: <PASSWORD>
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, my-config-server #this is so all stream applications bind to my-config-server
 services:
-- mysql
+- postgres
   my-config-server
 
 ----
@@ -967,7 +967,7 @@ applications:
     SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI: https://<skipper-host-name>/api
     SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_SCHEDULER_URL: https://scheduler.local.pcfdev.io
 services:
-- mysql
+- postgres
 ----
 
 Where the `SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_SCHEDULER_SCHEDULER_URL` has the following format: `scheduler.<Domain-Name>` (for

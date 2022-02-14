@@ -30,45 +30,18 @@ The REST `/about` endpoint provides information on the features that have been e
 === Database
 
 A relational database is used to store stream and task definitions as well as the state of executed tasks.
-Spring Cloud Data Flow provides schemas for *H2*, *MySQL*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
+Spring Cloud Data Flow provides schemas for *H2*, *MariaDB*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
 
 By default, Spring Cloud Data Flow offers an embedded instance of the *H2* database (if the H2 JDBC driver jar is found on the classpath).
 The *H2* database is good for development purposes but is not recommended for production use.
 
 NOTE: *H2* database is not supported as an external mode.
 
-The JDBC drivers for *MySQL* (through the MariaDB driver), *PostgreSQL*, *SQL Server* are available without additional configuration.
+The JDBC drivers for *MariaDB*, *PostgreSQL*, *SQL Server* are available without additional configuration.
 
 If you are using the embedded *H2* or any other database, then you need to put the corresponding JDBC driver jar on the classpath of the server.
 
 The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
-
-==== MySQL
-
-The following example shows how to define a MySQL database connection using MariaDB driver.
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:mysql://localhost:3306/mydb \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-----
-
-MySQL versions up to _5.7_ can be used with a MariaDB driver. Starting from version _8.0_ MySQL's own driver has to be used.
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:mysql://localhost:3306/mydb \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=com.mysql.jdbc.Driver
-----
-
-NOTE: Due to licensing restrictions we're unable to bundle MySQL driver. You need to add it to
-      server's classpath yourself.
 
 ==== MariaDB
 
@@ -77,27 +50,9 @@ The following example shows how to define a MariaDB database connection with com
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:mariadb://localhost:3306/mydb?useMysqlMetadata=true \
+    --spring.datasource.url=jdbc:mariadb://localhost:3306/mydb \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-----
-
-Starting with MariaDB v2.4.1 connector release, it is required to also add `useMysqlMetadata=true`
-to the JDBC URL. This is a required workaround until when MySQL and MariaDB entirely switch as two
-different databases.
-
-MariaDB version _10.3_ introduced a support for real database sequences which is yet another breaking
-change while toolings around these databases fully support MySQL and MariaDB as a separate database
-types. Workaround is to use older hibernate dialect which doesn't try to use sequences.
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:mariadb://localhost:3306/mydb?useMysqlMetadata=true \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDB102Dialect \
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 ----
 
