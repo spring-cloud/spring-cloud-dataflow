@@ -140,6 +140,13 @@ public class DeploymentPropertiesUtilsTests {
 		assertTrue(props.contains("foo1=bar1"));
 		assertTrue(props.contains("foo2=bar2"));
 		assertTrue(props.contains("foo3=bar3 xxx3"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("xxx3", " ");
+		assertTrue(props.contains("xxx3"));
+
+		props = DeploymentPropertiesUtils.parseArgumentList("xxx3 foo=bar", " ");
+		assertTrue(props.contains("xxx3"));
+		assertTrue(props.contains("foo=bar"));
 	}
 
 	@Test

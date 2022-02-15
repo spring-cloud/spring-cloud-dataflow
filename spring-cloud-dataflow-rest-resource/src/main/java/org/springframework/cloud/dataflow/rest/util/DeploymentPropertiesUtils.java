@@ -149,7 +149,7 @@ public final class DeploymentPropertiesUtils {
 	 */
 	public static List<String> parseArgumentList(String s, String delimiter) {
 		ArrayList<String> pairs = new ArrayList<>();
-		if (s != null && s.contains("=")) {
+		if (s != null) {
 			// get raw candidates as simple comma split
 			String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
 			for (int i = 0; i < candidates.length; i++) {
