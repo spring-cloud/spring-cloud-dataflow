@@ -33,10 +33,20 @@ image:
 registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
+#@ def db_external_values():
+name: db-skipper
+username: #@ data.values.scdf.skipper.database.username
+password: #@ data.values.scdf.skipper.database.password
+#@ end
+
 #@ if mariadb_enabled():
 --- #@ template.replace(overlay.apply(library.get("mariadb").with_data_values(db_mariadb_values()).eval(), db_overlay()))
 #@ end
 
 #@ if postgres_enabled():
 --- #@ template.replace(overlay.apply(library.get("postgres").with_data_values(db_postgres_values()).eval(), db_overlay()))
+#@ end
+
+#@ if not mariadb_enabled() and not postgres_enabled():
+--- #@ template.replace(overlay.apply(library.get("external").with_data_values(db_external_values()).eval(), db_overlay()))
 #@ end

@@ -34,7 +34,7 @@ describe('databases', () => {
     expect(postgresDataflowDeployment).toBeTruthy();
     const postgresDataflowContainer = deploymentContainer(postgresDataflowDeployment, DB_POSTGRES_NAME);
     expect(postgresDataflowContainer?.image).toBe('postgres:10');
-    const postgresDataflowSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    const postgresDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
     expect(postgresDataflowSecret).toBeTruthy();
     const postgresDataflowSecretData = postgresDataflowSecret?.data || {};
     expect(postgresDataflowSecretData['postgres-user']).toBe('ZGF0YWZsb3c=');
@@ -134,7 +134,7 @@ describe('databases', () => {
     expect(postgresDataflowDeployment).toBeTruthy();
     const postgresDataflowContainer = deploymentContainer(postgresDataflowDeployment, DB_POSTGRES_NAME);
     expect(postgresDataflowContainer?.image).toContain('postgres');
-    const postgresDataflowSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    const postgresDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
     expect(postgresDataflowSecret).toBeTruthy();
     const postgresDataflowSecretData = postgresDataflowSecret?.data || {};
     expect(postgresDataflowSecretData['postgres-user']).toBe('ZGF0YWZsb3c=');
@@ -202,7 +202,7 @@ describe('databases', () => {
     expect(postgresDataflowDeployment).toBeTruthy();
     const postgresDataflowContainer = deploymentContainer(postgresDataflowDeployment, DB_POSTGRES_NAME);
     expect(postgresDataflowContainer?.image).toContain('postgres');
-    const postgresDataflowSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    const postgresDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
     expect(postgresDataflowSecret).toBeTruthy();
     const postgresDataflowSecretData = postgresDataflowSecret?.data || {};
     expect(postgresDataflowSecretData['postgres-user']).toBe('user');
@@ -216,7 +216,11 @@ describe('databases', () => {
         ...DEFAULT_REQUIRED_DATA_VALUES,
         'scdf.deploy.database.enabled=false',
         'scdf.server.database.url=fakeurl1',
-        'scdf.skipper.database.url=fakeurl2'
+        'scdf.server.database.username=fakeuser1',
+        'scdf.server.database.password=fakepass1',
+        'scdf.skipper.database.url=fakeurl2',
+        'scdf.skipper.database.username=fakeuser2',
+        'scdf.skipper.database.password=fakepass2'
       ]
     });
     expect(result.success, result.stderr).toBeTruthy();
@@ -237,10 +241,30 @@ describe('databases', () => {
     const dataflowJson = dataflowDoc.toJSON();
     const dataflowDatasourceUrl = lodash.get(dataflowJson, 'spring.datasource.url') as string;
     expect(dataflowDatasourceUrl).toBe('fakeurl1');
+    const dataflowDatasourceUsername = lodash.get(dataflowJson, 'spring.datasource.username') as string;
+    expect(dataflowDatasourceUsername).toBe('${external-user}');
+    const dataflowDatasourcePassword = lodash.get(dataflowJson, 'spring.datasource.password') as string;
+    expect(dataflowDatasourcePassword).toBe('${external-password}');
+
+    const postgresDataflowSecret = findSecret(yaml, DB_DATAFLOW_NAME);
+    expect(postgresDataflowSecret).toBeTruthy();
+    const postgresDataflowSecretData = postgresDataflowSecret?.data || {};
+    expect(postgresDataflowSecretData['external-user']).toBe('ZmFrZXVzZXIx');
+    expect(postgresDataflowSecretData['external-password']).toBe('ZmFrZXBhc3Mx');
 
     const skipperDoc = parseYamlDocument(skipperApplicationYaml);
     const skipperJson = skipperDoc.toJSON();
     const skipperDatasourceUrl = lodash.get(skipperJson, 'spring.datasource.url') as string;
     expect(skipperDatasourceUrl).toBe('fakeurl2');
+    const skipperDatasourceUsername = lodash.get(skipperJson, 'spring.datasource.username') as string;
+    expect(skipperDatasourceUsername).toBe('${external-user}');
+    const skipperDatasourcePassword = lodash.get(skipperJson, 'spring.datasource.password') as string;
+    expect(skipperDatasourcePassword).toBe('${external-password}');
+
+    const postgresSkipperSecret = findSecret(yaml, DB_SKIPPER_NAME);
+    expect(postgresSkipperSecret).toBeTruthy();
+    const postgresSkipperSecretData = postgresSkipperSecret?.data || {};
+    expect(postgresSkipperSecretData['external-user']).toBe('ZmFrZXVzZXIy');
+    expect(postgresSkipperSecretData['external-password']).toBe('ZmFrZXBhc3My');
   });
 });

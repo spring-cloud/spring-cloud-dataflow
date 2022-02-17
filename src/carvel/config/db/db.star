@@ -12,10 +12,10 @@ def db_external_dataflow():
     x.setdefault("url", data.values.scdf.server.database.url)
   end
   if len(data.values.scdf.server.database.username) > 0:
-    x.setdefault("username", data.values.scdf.server.database.username)
+    x.setdefault("username", "${external-user}")
   end
   if len(data.values.scdf.server.database.password) > 0:
-    x.setdefault("password", data.values.scdf.server.database.password)
+    x.setdefault("password", "${external-password}")
   end
   if len(data.values.scdf.server.database.driverClassName) > 0:
     x.setdefault("driverClassName", data.values.scdf.server.database.driverClassName)
@@ -37,10 +37,10 @@ def db_external_skipper():
     x.setdefault("url", data.values.scdf.skipper.database.url)
   end
   if len(data.values.scdf.skipper.database.username) > 0:
-    x.setdefault("username", data.values.scdf.skipper.database.username)
+    x.setdefault("username", "${external-user}")
   end
   if len(data.values.scdf.skipper.database.password) > 0:
-    x.setdefault("password", data.values.scdf.skipper.database.password)
+    x.setdefault("password", "${external-password}")
   end
   if len(data.values.scdf.skipper.database.driverClassName) > 0:
     x.setdefault("driverClassName", data.values.scdf.skipper.database.driverClassName)
