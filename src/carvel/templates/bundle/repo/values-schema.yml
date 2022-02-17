@@ -94,6 +94,9 @@ components:
                 database:
                   type: object
                   properties:
+                    url:
+                      type: string
+                      description: Datasource url setting
                     username:
                       type: string
                       description: Datasource username setting
@@ -176,6 +179,9 @@ components:
                 database:
                   type: object
                   properties:
+                    url:
+                      type: string
+                      description: Datasource url setting
                     username:
                       type: string
                       description: Datasource username setting
