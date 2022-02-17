@@ -43,6 +43,8 @@ tanzu package available get scdf.tanzu.vmware.com/2.10.0-SNAPSHOT --values-schem
   KEY                              DEFAULT     TYPE     DESCRIPTION
   scdf.binder.kafka.broker.host    <nil>       string   External kafka broker host
   scdf.binder.kafka.broker.port    <nil>       string   External kafka broker port
+  scdf.binder.kafka.zk.port        <nil>       string   External kafka zk port
+  scdf.binder.kafka.zk.host        <nil>       string   External kafka zk host
   ...
 ----
 
@@ -52,8 +54,8 @@ Install:
 ----
 tanzu package install scdf-demo \
   --package-name scdf.tanzu.vmware.com \
-  --version 2.9.0-SNAPSHOT \
-  --values-file examples/tanzu/minikube-strimzi-kafka.yml
+  --version 2.10.0-SNAPSHOT \
+  --values-file examples/tanzu-external-kafka/minikube-values.yml
 ----
 
 Cleanup:
@@ -61,5 +63,5 @@ Cleanup:
 [source, bash]
 ----
 tanzu package installed delete scdf-demo -y
-tanzu package repository delete scdf-snapshot-repo
+tanzu package repository delete scdf-repo
 ----
