@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.client.AboutOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
@@ -38,17 +40,18 @@ import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoRes
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
 import org.springframework.hateoas.Link;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.shell.CommandLine;
 import org.springframework.shell.table.Table;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,41 +61,35 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
 public class ConfigCommandTests {
 
-	private ConfigCommands configCommands = new ConfigCommands();
+	private ConfigCommands configCommands;
 
-	private DataFlowShell dataFlowShell = new DataFlowShell();
+	private DataFlowShell dataFlowShell;
 
 	@Mock
 	private RestTemplate restTemplate;
+
 
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 
-		final CommandLine commandLine = Mockito.mock(CommandLine.class);
+		dataFlowShell = new DataFlowShell();
 
-		when(commandLine.getArgs()).thenReturn(null);
+		ConsoleUserInput userInput = mock(ConsoleUserInput.class);
+		when(userInput.prompt(anyString(), anyString(), anyBoolean())).thenReturn(null);
 
 		final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 		messageConverters.add(new MappingJackson2HttpMessageConverter());
-
 		when(restTemplate.getMessageConverters()).thenReturn(messageConverters);
 
 		TargetHolder targetHolder = new TargetHolder();
 		targetHolder.setTarget(new Target("http://localhost:9393"));
-		configCommands.setTargetHolder(targetHolder);
-		configCommands.setRestTemplate(restTemplate);
-		configCommands.setDataFlowShell(dataFlowShell);
-		configCommands.setServerUri("http://localhost:9393");
-	}
 
-	public static boolean isWindows() {
-		String osName = System.getProperty("os.name");
-
-		return osName != null && osName.toLowerCase().startsWith("windows");
+		configCommands = new ConfigCommands(dataFlowShell, shellProperties(), userInput, targetHolder, restTemplate, null);
 	}
 
 	@Test
@@ -118,22 +115,23 @@ public class ConfigCommandTests {
 			final Table infoResult = (Table) configCommands.info().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
 					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
-			assertThat(infoResult.render(80), is(expectedOutput));
+			assertThat(infoResult.render(80)).isEqualTo(expectedOutput);
 		}
 	}
 
 	@Test
-	public void testApiRevisionMismatch() {
+	public void testApiRevisionMismatch() throws Exception {
 		RootResource value = new RootResource(-12);
 		value.add(Link.of("http://localhost:9393/dashboard", "dashboard"));
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
 
-		final String targetResult = configCommands.target("http://localhost:9393", null, null, null, null, false, null, null, null);
-		assertThat(targetResult, containsString("Incompatible version of Data Flow server detected"));
+		assertThatThrownBy(() -> configCommands.target("http://localhost:9393", null, null, null, null, false, null, null, null))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("Incompatible version of Data Flow server detected");
 	}
 
 	@Test
-	public void testModeWithSkipperShellAndSkipperServer() {
+	public void testModeWithSkipperShellAndSkipperServer() throws Exception {
 		String expectedTargetMessage = "Successfully targeted http://localhost:9393/";
 		AboutResource aboutResource = new AboutResource();
 
@@ -155,16 +153,28 @@ public class ConfigCommandTests {
 		final String targetResult = configCommands.target(
 				Target.DEFAULT_TARGET,
 				Target.DEFAULT_USERNAME,
-				Target.DEFAULT_SPECIFIED_PASSWORD,
+				Target.DEFAULT_PASSWORD,
 				Target.DEFAULT_CLIENT_REGISTRATION_ID,
 				Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND,
 				true,
 				Target.DEFAULT_PROXY_URI,
 				Target.DEFAULT_PROXY_USERNAME,
-				Target.DEFAULT_PROXY_SPECIFIED_PASSWORD);
+				Target.DEFAULT_PROXY_PASSWORD);
 
-		System.out.println(targetResult);
+		assertThat(targetResult).isEqualTo(expectedTargetMessage);
+	}
 
-		assertThat(targetResult, is(expectedTargetMessage));
+
+	private boolean isWindows() {
+		return System.getProperty("os.name", "null").toLowerCase().startsWith("windows");
+	}
+
+	private DataFlowShellProperties shellProperties() {
+		Binder binder = new Binder(new MapConfigurationPropertySource());
+		try {
+			return binder.bindOrCreate("dataflow", DataFlowShellProperties.class);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

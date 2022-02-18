@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package org.springframework.cloud.dataflow.shell.app;
 
-import org.springframework.boot.Banner;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
-import org.springframework.cloud.dataflow.shell.EnableDataFlowShell;
 
 /**
  * Bootstrap class for spring shell.
@@ -29,13 +26,12 @@ import org.springframework.cloud.dataflow.shell.EnableDataFlowShell;
  * @author Ilayaperumal Gopinathan
  * @author Josh Long
  * @author Janne Valkealahti
+ * @author Chris Bono
  */
-@EnableDataFlowShell
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = DataFlowClientAutoConfiguration.class)
+@SpringBootApplication(exclude = DataFlowClientAutoConfiguration.class)
 public class ShellApplication {
 
-	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder().sources(ShellApplication.class).bannerMode(Banner.Mode.OFF).run(args);
+	public static void main(String[] args) {
+		SpringApplication.run(ShellApplication.class, args);
 	}
 }

@@ -624,7 +624,7 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar         \
   --dataflow.uri=http://localhost:9393                                \   # <1>
   --dataflow.username=my_username                                     \   # <2>
   --dataflow.password=my_password                                     \   # <3>
-  --skip-ssl-validation  true                                         \   # <4>
+  --skip-ssl-validation                                               \   # <4>
 ----
 
 <1> Optional, defaults to http://localhost:9393.
@@ -645,7 +645,7 @@ server-unknown:>dataflow config server                                \
   --uri  http://localhost:9393                                        \   # <1>
   --username myuser                                                   \   # <2>
   --password mysecret                                                 \   # <3>
-  --skip-ssl-validation  true                                         \   # <4>
+  --skip-ssl-validation                                               \   # <4>
 ----
 
 <1> Optional, defaults to http://localhost:9393.

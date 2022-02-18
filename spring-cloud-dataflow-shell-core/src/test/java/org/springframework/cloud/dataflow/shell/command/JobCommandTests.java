@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,15 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Glenn Renfro
+ * @author Chris Bono
  */
 public class JobCommandTests extends AbstractShellIntegrationTest {
 
@@ -94,6 +95,10 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	@AfterClass
 	public static void tearDown() {
+		if (applicationContext == null) {
+			logger.warn("Application context was null (probably due to setup failure) - not performing tearDown");
+			return;
+		}
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
@@ -134,7 +139,8 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 3, "Start Time ");
 		checkCell(table, 0, 4, "Step Execution Count ");
 		checkCell(table, 0, 5, "Definition Status ");
-	}
+
+ 	 	}
 
 	@Test
 	public void testJobExecutionListByName() {
@@ -273,9 +279,9 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 				table.getModel().getValue(row, column));
 	}
 
-	private Table getTable(CommandResult cr) {
-		assertTrue("Command must be successful", cr.isSuccess());
-		return (Table) cr.getResult();
+	private Table getTable(Object result) {
+		assertThat(result).isInstanceOf(Table.class);
+		return (Table) result;
 	}
 
 	private void verifyColumnNumber(Table table, int columnCount) {

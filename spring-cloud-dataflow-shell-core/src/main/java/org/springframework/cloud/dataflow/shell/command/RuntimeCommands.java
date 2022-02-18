@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BorderSpecification;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.CellMatchers;
@@ -44,8 +44,6 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 /**
  * Commands for displaying the runtime state of deployed apps.
@@ -53,30 +51,31 @@ import org.springframework.util.Assert;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
-@Component
-public class RuntimeCommands implements CommandMarker {
+@ShellComponent
+public class RuntimeCommands {
 
 	private static final String LIST_APPS = "runtime apps";
 
 	private final DataFlowShell dataFlowShell;
 
-	@Autowired
 	public RuntimeCommands(DataFlowShell dataFlowShell) {
-		Assert.notNull(dataFlowShell, "DataFlowShell must not be null");
 		this.dataFlowShell = dataFlowShell;
 	}
 
-	@CliAvailabilityIndicator({ LIST_APPS })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.RUNTIME);
+	public Availability availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.RUNTIME)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
 	}
 
-	@CliCommand(value = LIST_APPS, help = "List runtime apps")
+	@ShellMethod(key = LIST_APPS, value = "List runtime apps")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table list(
-			@CliOption(key = "summary", help = "whether to hide app instance details", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean summary,
-			@CliOption(key = { "appId",
-					"appIds" }, help = "app id(s) to display, also supports '<group>.*' pattern") String[] appIds) {
+			@ShellOption(help = "whether to hide app instance details", defaultValue = "false") boolean summary,
+			@ShellOption(value = { "--appId", "--appIds" }, help = "app id(s) to display, also supports '<group>.*' pattern",
+					defaultValue = ShellOption.NULL) String[] appIds) {
 
 		Set<String> filter = null;
 		if (appIds != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.client.StreamOperations;
 import org.springframework.cloud.dataflow.rest.resource.StreamAppStatusResource;
@@ -36,21 +35,22 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
+import org.springframework.cloud.dataflow.shell.completer.StreamNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -64,15 +64,13 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Janne Valkealahti
  * @author Christian Tzolov
+ * @author Chris Bono
  */
-@Component
-public class StreamCommands implements CommandMarker {
+@ShellComponent
+public class StreamCommands {
 
-	private static final String PROPERTIES_OPTION = "properties";
-	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
-
-	protected DataFlowShell dataFlowShell;
-	private UserInput userInput;
+	private DataFlowShell dataFlowShell;
+	private ConsoleUserInput userInput;
 
 	// Create Role
 
@@ -104,54 +102,48 @@ public class StreamCommands implements CommandMarker {
 	private static final String STREAM_PLATFORM_LIST = "stream platform-list";
 	private static final String VALIDATE_STREAM = "stream validate";
 
-	@Autowired
-	public void setDataFlowShell(DataFlowShell dataFlowShell) {
+	public StreamCommands(DataFlowShell dataFlowShell, ConsoleUserInput userInput) {
 		this.dataFlowShell = dataFlowShell;
-	}
-
-	@Autowired
-	public void setUserInput(UserInput userInput) {
 		this.userInput = userInput;
 	}
 
-	@CliAvailabilityIndicator({ CREATE_STREAM })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.STREAM);
+	public Availability availableWithCreateRole() {
+		return availabilityFor(RoleType.CREATE, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ STREAM_DEPLOY, UNDEPLOY_STREAM, UNDEPLOY_STREAM_ALL })
-	public boolean availableWithDeployRole() {
-		return dataFlowShell.hasAccess(RoleType.DEPLOY, OpsType.STREAM);
+	public Availability availableWithDeployRole() {
+		return availabilityFor(RoleType.DEPLOY, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ DESTROY_STREAM, DESTROY_STREAM_ALL })
-	public boolean availableWithDestroyRole() {
-		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.STREAM);
+	public Availability availableWithDestroyRole() {
+		return availabilityFor(RoleType.DESTROY, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ STREAM_ROLLBACK, STREAM_UPDATE, STREAM_SCALE })
-	public boolean availableWithModifyRole() {
-		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.STREAM);
+	public Availability availableWithModifyRole() {
+		return availabilityFor(RoleType.MODIFY, OpsType.STREAM);
 	}
 
-	@CliAvailabilityIndicator({ INFO_STREAM, LIST_STREAM, STREAM_HISTORY, STREAM_MANIFEST_GET, STREAM_PLATFORM_LIST, VALIDATE_STREAM })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM);
+	public Availability availableWithViewRole() {
+		return availabilityFor(RoleType.VIEW, OpsType.STREAM);
 	}
 
-	@CliCommand(value = STREAM_DEPLOY, help = "Deploy a previously created stream using Skipper")
+	private Availability availabilityFor(RoleType roleType, OpsType opsType) {
+		return dataFlowShell.hasAccess(roleType, opsType)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
+	}
+
+	@ShellMethod(key = STREAM_DEPLOY, value = "Deploy a previously created stream using Skipper")
+	@ShellMethodAvailability("availableWithDeployRole")
 	public String deployStream(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the stream to deploy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
-			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this deployment") String deploymentProperties,
-			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
-			@CliOption(key = "packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0", unspecifiedDefaultValue = "1.0.0") String packageVersion,
-			@CliOption(key = "platformName", help = "the name of the target platform to deploy to") String platformName,
-			@CliOption(key = "repoName", help = "the name of the local repository to upload the package to") String repoName)
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to deploy", valueProvider = StreamNameValueProvider.class) String name,
+			@ShellOption(help = "the properties for this deployment", defaultValue = ShellOption.NULL) String deploymentProperties,
+			@ShellOption(value = "--propertiesFile", help = "the properties for this deployment (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
+			@ShellOption(value = "--packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0", defaultValue = "1.0.0") String packageVersion,
+			@ShellOption(value = "--platformName", help = "the name of the target platform to deploy to", defaultValue = ShellOption.NULL) String platformName,
+			@ShellOption(value = "--repoName", help = "the name of the local repository to upload the package to", defaultValue = ShellOption.NULL) String repoName)
 			throws IOException {
-		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, deploymentProperties, PROPERTIES_FILE_OPTION,
+		int which = Assertions.atMostOneOf("--properties", deploymentProperties, "--propertiesFile",
 				propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(deploymentProperties,
 				propertiesFile, which);
@@ -168,21 +160,19 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Deployment request has been sent for stream '%s'", name);
 	}
 
-	@CliCommand(value = STREAM_MANIFEST_GET, help = "Get manifest for the stream deployed using Skipper")
+	@ShellMethod(key = STREAM_MANIFEST_GET, value = "Get manifest for the stream deployed using Skipper")
+	@ShellMethodAvailability("availableWithViewRole")
 	public String getManifest(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
-					+ "disable-string-converter") String name,
-			@CliOption(key = { "releaseVersion" }, help = "the Skipper release version to get the manifest for",
-					unspecifiedDefaultValue = "0") int releaseVersion) {
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream", valueProvider = StreamNameValueProvider.class) String name,
+			@ShellOption(value = "--releaseVersion", help = "the Skipper release version to get the manifest for",
+					defaultValue = "0") int releaseVersion) {
 		return streamOperations().getManifest(name, releaseVersion);
 	}
 
-	@CliCommand(value = STREAM_HISTORY, help = "Get history for the stream deployed using Skipper")
+	@ShellMethod(key = STREAM_HISTORY, value = "Get history for the stream deployed using Skipper")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table history(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the stream", mandatory = true, optionContext = "existing-stream "
-					+ "disable-string-converter") String name) {
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream", valueProvider = StreamNameValueProvider.class) String name) {
 		Collection<Release> releases = streamOperations().history(name);
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("version", "Version");
@@ -197,7 +187,8 @@ public class StreamCommands implements CommandMarker {
 		return tableBuilder.build();
 	}
 
-	@CliCommand(value = STREAM_PLATFORM_LIST, help = "List Skipper platforms")
+	@ShellMethod(key = STREAM_PLATFORM_LIST, value = "List Skipper platforms")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table listPlatforms() {
 		Collection<Deployer> platforms = streamOperations().listPlatforms();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -208,23 +199,18 @@ public class StreamCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
-	@CliCommand(value = STREAM_UPDATE, help = "Update a previously created stream using Skipper")
+	@ShellMethod(key = STREAM_UPDATE, value = "Update a previously created stream using Skipper")
+	@ShellMethodAvailability("availableWithModifyRole")
 	public String updateStream(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the stream to update", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
-			@CliOption(key = {
-					"properties" }, help = "Flattened YAML style properties to update the stream", mandatory = false) String properties,
-			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for the stream update (as a File)", mandatory = false) File propertiesFile,
-			@CliOption(key = "packageVersion", help = "the package version of the package to update when using "
-					+ "Skipper") String packageVersion,
-			@CliOption(key = "repoName", help = "the name of the local repository to upload the package when using "
-					+ "Skipper") String repoName,
-			@CliOption(key = "force", help = "force the update", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force,
-			@CliOption(key = "appNames", help = "the application names to force update", mandatory = false) String appNames)
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream", valueProvider = StreamNameValueProvider.class) String name,
+			@ShellOption(help = "Flattened YAML style properties to update the stream") String properties,
+			@ShellOption(value = "--propertiesFile", help = "the properties for the stream update (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
+			@ShellOption(value = "--packageVersion", help = "the package version of the package to update when using Skipper", defaultValue = ShellOption.NULL) String packageVersion,
+			@ShellOption(value = "--repoName", help = "the name of the local repository to upload the package when using Skipper", defaultValue = ShellOption.NULL) String repoName,
+			@ShellOption(help = "force the update", defaultValue = "false") boolean force,
+			@ShellOption(value = "--appNames", help = "the application names to force update", defaultValue = ShellOption.NULL) String appNames)
 			throws IOException {
-		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
-				propertiesFile);
+		int which = Assertions.atMostOneOf("--properties", properties, "--propertiesFile", propertiesFile);
 		if (StringUtils.hasText(appNames)) {
 			Assert.isTrue(force, "App names can be used only when the stream update is forced.");
 		}
@@ -244,16 +230,13 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Update request has been sent for the stream '%s'", name);
 	}
 
-	@CliCommand(value = STREAM_SCALE, help = "Scale app instances in a stream")
+	@ShellMethod(key = STREAM_SCALE, value = "Scale app instances in a stream")
+	@ShellMethodAvailability("availableWithModifyRole")
 	public String scaleStream(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the stream to scale", mandatory = true, optionContext = "existing-stream disable-string-converter") String name,
-			@CliOption(key = {
-					"applicationName" }, help = "the name/label of the application to scale", mandatory = true) String applicationName,
-			@CliOption(key = {
-					"count" }, help = "desired number of application instances", mandatory = true) Integer count,
-			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this scale") String scaleProperties) throws IOException{
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to scale", valueProvider = StreamNameValueProvider.class) String name,
+			@ShellOption(value = "--applicationName", help = "the name/label of the application to scale") String applicationName,
+			@ShellOption(help = "desired number of application instances") Integer count,
+			@ShellOption(value = "--properties", help = "the properties for this scale", defaultValue =  ShellOption.NULL) String scaleProperties) throws IOException{
 
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(scaleProperties,
 				null, 0);
@@ -261,23 +244,22 @@ public class StreamCommands implements CommandMarker {
 		return String.format("Scale request has been sent for the stream '%s'", name);
 	}
 
-	@CliCommand(value = STREAM_ROLLBACK, help = "Rollback a stream using Skipper")
+	@ShellMethod(key = STREAM_ROLLBACK, value = "Rollback a stream using Skipper")
+	@ShellMethodAvailability("availableWithModifyRole")
 	public String rollbackStreamUsingSkipper(
-			@CliOption(key = { "", "name" }, help = "the name of the stream to rollback", mandatory = true,
-					optionContext = "existing-stream disable-string-converter") String name,
-			@CliOption(key = { "releaseVersion" }, help = "the Skipper release version to rollback to",
-					unspecifiedDefaultValue = "0") int releaseVersion) {
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to rollback", valueProvider = StreamNameValueProvider.class) String name,
+			@ShellOption(value = "--releaseVersion", help = "the Skipper release version to rollback to", defaultValue = "0") int releaseVersion) {
 		this.streamOperations().rollbackStream(name, releaseVersion);
 		return String.format("Rollback request has been sent for the stream '%s'", name);
 	}
 
-	@CliCommand(value = CREATE_STREAM, help = "Create a new stream definition")
+	@ShellMethod(key = CREATE_STREAM, value = "Create a new stream definition")
+	@ShellMethodAvailability("availableWithCreateRole")
 	public String createStream(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the stream") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a stream definition, using the DSL (e.g. "
-					+ "\"http --port=9000 | hdfs\")", optionContext = "disable-string-converter completion-stream") String dsl,
-			@CliOption(mandatory = false, key = {"description"}, help = "a short description about the stream", unspecifiedDefaultValue = "") String description,
-			@CliOption(key = "deploy", help = "whether to deploy the stream immediately", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean deploy) {
+			@ShellOption(value = { "", "--name" }, help = "the name to give to the stream") String name,
+			@ShellOption(value = { "--definition" }, help = "a stream definition, using the DSL (e.g. \"http --port=9000 | hdfs\")") String dsl,
+			@ShellOption(help = "a short description about the stream", defaultValue = "") String description,
+			@ShellOption(help = "whether to deploy the stream immediately", defaultValue = "false") boolean deploy) {
 		streamOperations().createStream(name, dsl, description, deploy);
 		String message = String.format("Created new stream '%s'", name);
 		if (deploy) {
@@ -286,7 +268,8 @@ public class StreamCommands implements CommandMarker {
 		return message;
 	}
 
-	@CliCommand(value = LIST_STREAM, help = "List created streams")
+	@ShellMethod(key = LIST_STREAM, value = "List created streams")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table listStreams() {
 		final PagedModel<StreamDefinitionResource> streams = streamOperations().list();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -298,9 +281,11 @@ public class StreamCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
-	@CliCommand(value = INFO_STREAM, help = "Show information about a specific stream")
-	public List<Object> streamInfo(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to show", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+	@ShellMethod(key = INFO_STREAM, value = "Show information about a specific stream")
+	@ShellMethodAvailability("availableWithViewRole")
+	public List<Object> streamInfo(
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to show",
+					valueProvider = StreamNameValueProvider.class) String name) {
 		List<Object> result = new ArrayList<>();
 		final StreamDeploymentResource stream = streamOperations().info(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -318,16 +303,19 @@ public class StreamCommands implements CommandMarker {
 		return result;
 	}
 
-	@CliCommand(value = UNDEPLOY_STREAM, help = "Un-deploy a previously deployed stream")
-	public String undeployStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to un-deploy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+	@ShellMethod(key = UNDEPLOY_STREAM, value = "Un-deploy a previously deployed stream")
+	@ShellMethodAvailability("availableWithDeployRole")
+	public String undeployStream(
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to un-deploy",
+					valueProvider = StreamNameValueProvider.class) String name) {
 		streamOperations().undeploy(name);
 		return String.format("Un-deployed stream '%s'", name);
 	}
 
-	@CliCommand(value = UNDEPLOY_STREAM_ALL, help = "Un-deploy all previously deployed stream")
+	@ShellMethod(key = UNDEPLOY_STREAM_ALL, value = "Un-deploy all previously deployed stream")
+	@ShellMethodAvailability("availableWithDeployRole")
 	public String undeployAllStreams(
-			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really undeploy all streams?", "n", "y", "n"))) {
 			streamOperations().undeployAll();
 			return String.format("Un-deployed all the streams");
@@ -337,16 +325,19 @@ public class StreamCommands implements CommandMarker {
 		}
 	}
 
-	@CliCommand(value = DESTROY_STREAM, help = "Destroy an existing stream")
-	public String destroyStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to destroy", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) {
+	@ShellMethod(key = DESTROY_STREAM, value = "Destroy an existing stream")
+	@ShellMethodAvailability("availableWithDestroyRole")
+	public String destroyStream(
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to destroy",
+					valueProvider = StreamNameValueProvider.class) String name) {
 		streamOperations().destroy(name);
 		return String.format("Destroyed stream '%s'", name);
 	}
 
-	@CliCommand(value = DESTROY_STREAM_ALL, help = "Destroy all existing streams")
+	@ShellMethod(key = DESTROY_STREAM_ALL, value = "Destroy all existing streams")
+	@ShellMethodAvailability("availableWithDestroyRole")
 	public String destroyAllStreams(
-			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all streams?", "n", "y", "n"))) {
 			streamOperations().destroyAll();
 			return "Destroyed all streams";
@@ -356,9 +347,11 @@ public class StreamCommands implements CommandMarker {
 		}
 	}
 
-	@CliCommand(value = VALIDATE_STREAM, help = "Verify that apps contained in the stream are valid.")
-	public List<Object> validateStream(@CliOption(key = { "",
-			"name" }, help = "the name of the stream to validate", mandatory = true, optionContext = "existing-stream disable-string-converter") String name) throws OperationNotSupportedException {
+	@ShellMethod(key = VALIDATE_STREAM, value = "Verify that apps contained in the stream are valid.")
+	@ShellMethodAvailability("availableWithViewRole")
+	public List<Object> validateStream(
+			@ShellOption(value = { "", "--name" }, help = "the name of the stream to validate",
+					valueProvider = StreamNameValueProvider.class) String name) throws OperationNotSupportedException {
 		List<Object> result = new ArrayList<>();
 		final StreamAppStatusResource stream = streamOperations().validateStreamDefinition(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
