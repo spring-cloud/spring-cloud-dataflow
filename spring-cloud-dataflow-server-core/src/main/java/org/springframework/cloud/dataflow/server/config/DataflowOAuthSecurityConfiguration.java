@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import org.apache.commons.lang3.StringUtils;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.common.security.OAuthSecurityConfiguration;
 import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled;
