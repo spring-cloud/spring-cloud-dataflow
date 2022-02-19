@@ -243,3 +243,8 @@ spring:
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_VIEW')
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
