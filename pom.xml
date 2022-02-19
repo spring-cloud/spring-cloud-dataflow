@@ -90,6 +90,7 @@
 		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.4</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.4</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-container-registry</module>
@@ -244,6 +245,11 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-ecr</artifactId>
 				<version>${aws-java-sdk-ecr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-ui</artifactId>
+				<version>${springdoc-openapi-ui.version}</version>
 			</dependency>
 			<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 			<dependency>
