@@ -16,4 +16,4 @@
 /**
  * Root package for Spring Cloud Data Flow shell application.
  */
-package org.springframework.cloud.dataflow.shell.app;
+package org.springframework.cloud.dataflow.shell;
