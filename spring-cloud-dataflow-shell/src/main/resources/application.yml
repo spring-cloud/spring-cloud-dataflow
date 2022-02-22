@@ -3,12 +3,6 @@ spring:
     name: spring-cloud-dataflow-shell
   main:
     banner-mode: 'off'
-
 logging:
-  level:
-    root: WARN
-    org.springframework.web.client.RestTemplate: ERROR
-    org.springframework.cloud.dataflow.shell: INFO
-
   pattern:
-    console: "%d{yyyy-MM-dd'T'HH:mm:ssZ} %level{5} %thread %c{2}:%L - %m%n"
+    console:
