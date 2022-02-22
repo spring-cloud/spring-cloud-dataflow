@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration
+  org.springframework.cloud.dataflow.shell.config.ShellAutoConfiguration

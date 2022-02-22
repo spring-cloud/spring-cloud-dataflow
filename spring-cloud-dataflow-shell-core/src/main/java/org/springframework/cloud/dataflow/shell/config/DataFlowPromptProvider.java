@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,32 @@
 
 package org.springframework.cloud.dataflow.shell.config;
 
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStyle;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.shell.plugin.PromptProvider;
+import org.springframework.shell.jline.PromptProvider;
 import org.springframework.stereotype.Component;
 
 /**
- * A provider that sets the shell prompt to 'dataflow' if the server is available,
- * 'server-unknown' otherwise.
+ * A provider that sets the shell prompt to 'dataflow' if the server is available, 'server-unknown' otherwise.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class DataFlowPromptProvider implements PromptProvider {
 
 	@Autowired
 	private DataFlowShell shell;
 
 	@Override
-	public String getProviderName() {
-		return "dataflow";
-	}
-
-	@Override
-	public String getPrompt() {
-		if (shell.getDataFlowOperations() == null) {
-			return "server-unknown:>";
+	public AttributedString getPrompt() {
+		if (shell.getDataFlowOperations() != null) {
+			return new AttributedString("dataflow:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 		}
 		else {
-			return "dataflow:>";
+			return new AttributedString("server-unknown:>", AttributedStyle.DEFAULT.foreground(AttributedStyle.RED));
 		}
 	}
 }

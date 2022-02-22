@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import org.springframework.shell.core.CommandResult;
-import org.springframework.shell.core.JLineShellComponent;
+import org.springframework.cloud.dataflow.shell.ShellCommandRunner;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -25,32 +24,33 @@ import org.springframework.shell.core.JLineShellComponent;
  * It should mimic the client side API of JobOperations as much as possible.
  *
  * @author Glenn Renfro
+ * @author Chris Bono
  */
 public class JobCommandTemplate {
 
-	private final JLineShellComponent shell;
+	private final ShellCommandRunner commandRunner;
 
 	/**
 	 * Construct a new JobCommandTemplate, given a spring shell.
 	 *
-	 * @param shell the spring shell to execute commands against.
+	 * @param commandRunner the spring shell to execute commands against.
 	 */
-	public JobCommandTemplate(JLineShellComponent shell) {
-		this.shell = shell;
+	public JobCommandTemplate(ShellCommandRunner commandRunner) {
+		this.commandRunner = commandRunner;
 	}
 
 	/**
 	 * Executes a task execution list.
 	 */
-	public CommandResult jobExecutionList() {
-		return shell.executeCommand("job execution list");
+	public Object jobExecutionList() {
+		return commandRunner.executeCommand("job execution list");
 	}
 
 	/**
 	 * Executes a task execution list.
 	 */
-	public CommandResult jobExecutionListByName(String jobName) {
-		return shell.executeCommand("job execution list --name " + jobName);
+	public Object jobExecutionListByName(String jobName) {
+		return commandRunner.executeCommand("job execution list --name " + jobName);
 	}
 
 	/**
@@ -61,8 +61,8 @@ public class JobCommandTemplate {
 	 * @param id the identifier for the job execution.
 	 * @return the results of the shell command.
 	 */
-	public CommandResult executionDisplay(long id) {
-		return shell.executeCommand("job execution display --id " + id);
+	public Object executionDisplay(long id) {
+		return commandRunner.executeCommand("job execution display --id " + id);
 	}
 
 	/**
@@ -73,8 +73,8 @@ public class JobCommandTemplate {
 	 * @param id the identifier for the job instance.
 	 * @return the results of the shell command.
 	 */
-	public CommandResult instanceDisplay(long id) {
-		return shell.executeCommand("job instance display --id " + id);
+	public Object instanceDisplay(long id) {
+		return commandRunner.executeCommand("job instance display --id " + id);
 	}
 
 	/**
@@ -85,8 +85,8 @@ public class JobCommandTemplate {
 	 * @param id the identifier for the job execution.
 	 * @return the results of the shell command.
 	 */
-	public CommandResult jobStepExecutionList(long id) {
-		return shell.executeCommand("job execution step list --id " + id);
+	public Object jobStepExecutionList(long id) {
+		return commandRunner.executeCommand("job execution step list --id " + id);
 	}
 
 	/**
@@ -99,8 +99,8 @@ public class JobCommandTemplate {
 	 * @param jobExecutionId the id for the job execution.
 	 * @return the results of the shell command.
 	 */
-	public CommandResult jobStepExecutionProgress(long id, long jobExecutionId) {
-		return shell.executeCommand("job execution step progress --id " + id + " --jobExecutionId " + jobExecutionId);
+	public Object jobStepExecutionProgress(long id, long jobExecutionId) {
+		return commandRunner.executeCommand("job execution step progress --id " + id + " --jobExecutionId " + jobExecutionId);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class JobCommandTemplate {
 	 * @param jobExecutionId the id for the job execution.
 	 * @return the results of the shell command.
 	 */
-	public CommandResult jobStepExecutionDisplay(long id, long jobExecutionId) {
-		return shell.executeCommand("job execution step display --id " + id + " --jobExecutionId " + jobExecutionId);
+	public Object jobStepExecutionDisplay(long id, long jobExecutionId) {
+		return commandRunner.executeCommand("job execution step display --id " + id + " --jobExecutionId " + jobExecutionId);
 	}
 }

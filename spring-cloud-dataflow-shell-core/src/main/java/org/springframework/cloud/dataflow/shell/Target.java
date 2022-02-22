@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
  * URI, success/error state, exception messages that may have occurred.
  *
  * @author Gunnar Hillert
+ * @author Chris Bono
  * @since 1.0
  */
 public class Target {
@@ -36,27 +37,21 @@ public class Target {
 
 	public static final int DEFAULT_PORT = 9393;
 
+	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
+
 	public static final String DEFAULT_USERNAME = "";
 
-	public static final String DEFAULT_SPECIFIED_PASSWORD = "";
-
-	public static final String DEFAULT_UNSPECIFIED_PASSWORD = "__NULL__";
+	public static final String DEFAULT_PASSWORD = "";
 
 	public static final String DEFAULT_CLIENT_REGISTRATION_ID = "dataflow-shell";
 
-	public static final String DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION = "true";
-
-	public static final String DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION = "false";
+	public static final String DEFAULT_SKIP_SSL_VALIDATION = "true";
 
 	public static final String DEFAULT_CREDENTIALS_PROVIDER_COMMAND = "";
 
-	public static final String DEFAULT_TARGET = DEFAULT_SCHEME + "://" + DEFAULT_HOST + ":" + DEFAULT_PORT + "/";
-
 	public static final String DEFAULT_PROXY_USERNAME = "";
 
-	public static final String DEFAULT_PROXY_SPECIFIED_PASSWORD = "";
-
-	public static final String DEFAULT_PROXY_UNSPECIFIED_PASSWORD = "__NULL__";
+	public static final String DEFAULT_PROXY_PASSWORD = "";
 
 	public static final String DEFAULT_PROXY_URI = "";
 

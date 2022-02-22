@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
-import org.springframework.stereotype.Component;
 
 /**
  * Job commands for the SCDF Shell.
@@ -46,9 +46,10 @@ import org.springframework.stereotype.Component;
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
-@Component
-public class JobCommands implements CommandMarker {
+@ShellComponent
+public class JobCommands {
 
 	private static final String EXECUTION_DISPLAY = "job execution display";
 
@@ -67,15 +68,16 @@ public class JobCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ EXECUTION_DISPLAY, EXECUTION_LIST, EXECUTION_RESTART, STEP_EXECUTION_LIST,
-			INSTANCE_DISPLAY, STEP_EXECUTION_PROGRESS, STEP_EXECUTION_DISPLAY })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.JOB);
+	public Availability availableWithViewRole() {
+		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.JOB)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
 	}
 
-	@CliCommand(value = EXECUTION_LIST, help = "List created job executions filtered by jobName")
+	@ShellMethod(key = EXECUTION_LIST, value = "List created job executions filtered by jobName")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table executionList(
-			@CliOption(key = { "name" }, help = "the job name to be used as a filter", mandatory = false) String name) {
+			@ShellOption(help = "the job name to be used as a filter", defaultValue = ShellOption.NULL) String name) {
 
 		final PagedModel<JobExecutionThinResource> jobs;
 		if (name == null) {
@@ -103,16 +105,19 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = EXECUTION_RESTART, help = "Restart a failed job by jobExecutionId")
+	@ShellMethod(key = EXECUTION_RESTART, value = "Restart a failed job by jobExecutionId")
+	@ShellMethodAvailability("availableWithViewRole")
 	public String executionRestart(
-			@CliOption(key = { "id" }, help = "the job execution id", mandatory = true) long id) {
+			@ShellOption(help = "the job execution id") long id) {
 		jobOperations().executionRestart(id);
 
 		return String.format("Restart request has been sent for job execution '%s'", id);
 	}
 
-	@CliCommand(value = EXECUTION_DISPLAY, help = "Display the details of a specific job execution")
-	public Table executionDisplay(@CliOption(key = { "id" }, help = "the job execution id", mandatory = true) long id) {
+	@ShellMethod(key = EXECUTION_DISPLAY, value = "Display the details of a specific job execution")
+	@ShellMethodAvailability("availableWithViewRole")
+	public Table executionDisplay(
+			@ShellOption(help = "the job execution id") long id) {
 
 		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id);
 
@@ -158,8 +163,9 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = INSTANCE_DISPLAY, help = "Display the job executions for a specific job instance.")
-	public Table instanceDisplay(@CliOption(key = { "id" }, help = "the job instance id", mandatory = true) long id) {
+	@ShellMethod(key = INSTANCE_DISPLAY, value = "Display the job executions for a specific job instance.")
+	@ShellMethodAvailability("availableWithViewRole")
+	public Table instanceDisplay(@ShellOption(help = "the job instance id") long id) {
 
 		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id);
 
@@ -177,9 +183,9 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_LIST, help = "List step executions filtered by jobExecutionId")
-	public Table stepExecutionList(@CliOption(key = {
-			"id" }, help = "the job execution id to be used as a filter", mandatory = true) long id) {
+	@ShellMethod(key = STEP_EXECUTION_LIST, value = "List step executions filtered by jobExecutionId")
+	@ShellMethodAvailability("availableWithViewRole")
+	public Table stepExecutionList(@ShellOption(help = "the job execution id to be used as a filter") long id) {
 
 		final PagedModel<StepExecutionResource> steps = jobOperations().stepExecutionList(id);
 
@@ -200,10 +206,11 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_PROGRESS, help = "Display the details of a specific step progress")
+	@ShellMethod(key = STEP_EXECUTION_PROGRESS, value = "Display the details of a specific step progress")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table stepProgressDisplay(
-			@CliOption(key = { "id" }, help = "the step execution id", mandatory = true) long id, @CliOption(key = {
-					"jobExecutionId" }, help = "the job execution id", mandatory = true) long jobExecutionId) {
+			@ShellOption(help = "the step execution id") long id,
+			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId) {
 
 		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
 				id);
@@ -222,10 +229,11 @@ public class JobCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = STEP_EXECUTION_DISPLAY, help = "Display the details of a specific step execution")
+	@ShellMethod(key = STEP_EXECUTION_DISPLAY, value = "Display the details of a specific step execution")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table stepExecutionDisplay(
-			@CliOption(key = { "id" }, help = "the step execution id", mandatory = true) long id, @CliOption(key = {
-					"jobExecutionId" }, help = "the job execution id", mandatory = true) long jobExecutionId) {
+			@ShellOption(help = "the step execution id") long id,
+			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId) {
 
 		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
 				id);

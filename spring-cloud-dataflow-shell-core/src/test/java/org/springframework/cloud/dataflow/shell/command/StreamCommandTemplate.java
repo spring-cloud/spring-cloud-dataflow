@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
-import org.springframework.shell.core.CommandResult;
-import org.springframework.shell.core.JLineShellComponent;
+import org.springframework.cloud.dataflow.shell.ShellCommandRunner;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 /**
@@ -41,20 +39,21 @@ import static org.junit.Assert.fail;
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Chris Bono
  */
 public class StreamCommandTemplate {
 
-	private final JLineShellComponent shell;
+	private final ShellCommandRunner commandRunner;
 
 	private List<String> streams = new ArrayList<String>();
 
 	/**
 	 * Construct a new StreamCommandTemplate, given a spring shell.
 	 *
-	 * @param shell the spring shell to execute commands against
+	 * @param commandRunner the spring shell to execute commands against
 	 */
-	public StreamCommandTemplate(JLineShellComponent shell) {
-		this.shell = shell;
+	public StreamCommandTemplate(ShellCommandRunner commandRunner) {
+		this.commandRunner = commandRunner;
 	}
 
 	/**
@@ -89,9 +88,12 @@ public class StreamCommandTemplate {
 	private void doCreate(String streamname, String streamdefinition, boolean deploy, Object... values) {
 		String actualDefinition = String.format(streamdefinition, values);
 		// Shell parser expects quotes to be escaped by \
-		String wholeCommand = String.format("stream create --name \"%s\" --definition \"%s\" --deploy %s", streamname,
-				actualDefinition.replaceAll("\"", "\\\\\""), deploy);
-		CommandResult cr = shell.executeCommand(wholeCommand);
+		String wholeCommand = String.format("stream create --name \"%s\" --definition \"%s\"", streamname,
+				actualDefinition.replaceAll("\"", "\\\\\""));
+		if (deploy) {
+			wholeCommand += " --deploy";
+		}
+		Object result = commandRunner.executeCommand(wholeCommand);
 		// todo: Add deployment and verifier
 		// if (deploy) {
 		// stateVerifier.waitForDeploy(streamname);
@@ -105,7 +107,7 @@ public class StreamCommandTemplate {
 		if (deploy) {
 			deployMsg += "\nDeployment request has been sent";
 		}
-		assertEquals(deployMsg, cr.getResult());
+		assertThat(result).isEqualTo(deployMsg);
 
 		verifyExists(streamname, actualDefinition, deploy);
 	}
@@ -116,10 +118,9 @@ public class StreamCommandTemplate {
 	 * @param streamname name of the stream
 	 */
 	public void deploy(String streamname) {
-		CommandResult cr = shell.executeCommand("stream deploy --name " + streamname);
+		Object result = commandRunner.executeCommand("stream deploy --name " + streamname);
 		// stateVerifier.waitForDeploy(streamname);
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
-		assertEquals("Deployed stream '" + streamname + "'", cr.getResult());
+		assertThat(result).isEqualTo("Deployed stream '" + streamname + "'");
 	}
 
 	/**
@@ -127,10 +128,8 @@ public class StreamCommandTemplate {
 	 *
 	 * @param streamName name of the stream
 	 */
-	public CommandResult validate(String streamName) {
-		CommandResult cr = shell.executeCommand("stream validate --name " + streamName);
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
-		return cr;
+	public Object validate(String streamName) {
+		return commandRunner.executeCommand("stream validate --name " + streamName);
 	}
 
 	/**
@@ -140,10 +139,8 @@ public class StreamCommandTemplate {
 	public void destroyCreatedStreams() {
 		for (int s = streams.size() - 1; s >= 0; s--) {
 			String streamname = streams.get(s);
-			CommandResult cr = shell.executeCommand("stream destroy --name " + streamname);
+			commandRunner.executeCommand("stream destroy --name " + streamname);
 			// stateVerifier.waitForDestroy(streamname);
-			assertTrue("Failure to destroy stream " + streamname + ".  CommandResult = " + cr.toString(),
-					cr.isSuccess());
 		}
 	}
 
@@ -153,9 +150,8 @@ public class StreamCommandTemplate {
 	 * @param stream The stream to destroy
 	 */
 	public void destroyStream(String stream) {
-		CommandResult cr = shell.executeCommand("stream destroy --name " + stream);
+		commandRunner.executeCommand("stream destroy --name " + stream);
 		// stateVerifier.waitForDestroy(stream);
-		assertTrue("Failure to destroy stream " + stream + ".  CommandResult = " + cr.toString(), cr.isSuccess());
 		streams.remove(stream);
 	}
 
@@ -165,10 +161,8 @@ public class StreamCommandTemplate {
 	 * @param streamname name of the stream.
 	 */
 	public void undeploy(String streamname) {
-		CommandResult cr = shell.executeCommand("stream undeploy --name " + streamname);
+		commandRunner.executeCommand("stream undeploy --name " + streamname);
 		// stateVerifier.waitForUndeploy(streamname);
-		assertTrue(cr.isSuccess());
-		assertEquals("Un-deployed stream '" + streamname + "'", cr.getResult());
 	}
 
 	/**
@@ -178,10 +172,9 @@ public class StreamCommandTemplate {
 	 * @param definition definition of the stream
 	 */
 	public void verifyExists(String streamName, String definition, boolean deployed) {
-		CommandResult cr = shell.executeCommand("stream list");
-		assertTrue("Failure.  CommandResult = " + cr.toString(), cr.isSuccess());
-
-		Table table = (org.springframework.shell.table.Table) cr.getResult();
+		Object result = commandRunner.executeCommand("stream list");
+		assertThat(result).isInstanceOf(Table.class);
+		Table table = (Table) result;
 		TableModel model = table.getModel();
 		Collection<String> statuses = deployed
 				? Arrays.asList(DeploymentStateResource.DEPLOYED.getDescription(),

@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.shell;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.shell.SimpleShellCommandLineOptions;
 
 /**
  * Spring Boot {@link ConfigurationProperties} to specify well known Spring Shell
@@ -33,7 +32,7 @@ public class ShellProperties {
 	/**
 	 * The maximum number of lines to store in the command history file.
 	 */
-	private int historySize = SimpleShellCommandLineOptions.DEFAULT_HISTORY_SIZE;
+	private int historySize = 300;
 
 	/**
 	 * The file(s) to read that contains shell commands

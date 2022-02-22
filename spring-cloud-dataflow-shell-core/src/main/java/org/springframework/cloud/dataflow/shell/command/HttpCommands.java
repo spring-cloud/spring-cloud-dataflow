@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
-import org.springframework.shell.support.util.OsUtils;
-import org.springframework.stereotype.Component;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.ResourceAccessException;
@@ -50,9 +48,10 @@ import org.springframework.web.client.RestTemplate;
  * @author Gunnar Hillert
  * @author Eric Bottard
  * @author David Turanski
+ * @author Chris Bono
  */
-@Component
-public class HttpCommands implements CommandMarker {
+@ShellComponent
+public class HttpCommands {
 
 	private static final String DEFAULT_MEDIA_TYPE = MediaType.TEXT_PLAIN_VALUE;
 
@@ -60,21 +59,19 @@ public class HttpCommands implements CommandMarker {
 
 	private static final String GET_HTTPSOURCE = "http get";
 
-	@CliCommand(value = { POST_HTTPSOURCE }, help = "POST data to http endpoint")
+	@ShellMethod(key = POST_HTTPSOURCE, value = "POST data to http endpoint")
 	public String postHttp(
-			@CliOption(mandatory = false, key = { "",
-					"target" }, help = "the location to post to", unspecifiedDefaultValue = "http://localhost:9393") String target,
-			@CliOption(mandatory = false, key = "data", help = "the text payload to post. exclusive with file. "
-					+ "embedded double quotes are not supported if next to a space character") String data,
-			@CliOption(mandatory = false, key = "file", help = "filename to read data from. exclusive with data") File file,
-			@CliOption(mandatory = false, key = "contentType", help = "the content-type to use. file is also read "
-					+ "using the specified charset", unspecifiedDefaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType,
-			@CliOption(mandatory = false, key = { "username" }, help = "the username for calls that require basic "
-					+ "authentication", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = { "password" }, help = "the password for calls that require basic "
-					+ "authentication", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even "
-					+ "self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
+			@ShellOption(value = { "", "--target" }, help = "the location to post to", defaultValue = Target.DEFAULT_TARGET) String target,
+			@ShellOption(help = "the text payload to post. exclusive with file. "
+					+ "embedded double quotes are not supported if next to a space character", defaultValue = ShellOption.NULL) String data,
+			@ShellOption(help = "filename to read data from. exclusive with data", defaultValue = ShellOption.NULL) File file,
+			@ShellOption(value = "--contentType", help = "the content-type to use. file is also read using the specified charset",
+					defaultValue = DEFAULT_MEDIA_TYPE) MediaType mediaType,
+			@ShellOption(help = "the username for calls that require basic "
+					+ "authentication", defaultValue = Target.DEFAULT_USERNAME) String username,
+			@ShellOption(help = "the password for calls that require basic authentication", 
+					defaultValue = Target.DEFAULT_PASSWORD) String password,
+			@ShellOption(help = "accept any SSL certificate (even \"self-signed)\"", defaultValue = "false") boolean skipSslValidation)
 			throws IOException {
 		Assert.isTrue(file != null || data != null, "One of 'file' or 'data' must be set");
 		Assert.isTrue(file == null || data == null, "Only one of 'file' or 'data' must be set");
@@ -96,38 +93,36 @@ public class HttpCommands implements CommandMarker {
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
 			restTemplate.setRequestFactory(HttpClientConfigurer.create(requestURI)
-					.basicAuthCredentials(targetUsername, targetPassword)
+					.basicAuthCredentials(username, password)
 					.skipTlsCertificateVerification(skipSslValidation)
 					.buildClientHttpRequestFactory());
 
 			ResponseEntity<String> response = restTemplate.postForEntity(requestURI, request, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
-				buffer.append(OsUtils.LINE_SEPARATOR)
+				buffer.append(System.lineSeparator())
 						.append(String.format("Error sending data '%s' to '%s'", data, target));
 			}
 			return buffer.toString();
 		}
 		catch (ResourceAccessException e) {
-			return String.format(buffer.toString() + "Failed to access http endpoint %s", target);
+			return String.format(buffer + "Failed to access http endpoint %s", target);
 		}
 		catch (Exception e) {
-			return String.format(buffer.toString() + "Failed to send data to http endpoint %s", target);
+			return String.format(buffer + "Failed to send data to http endpoint %s", target);
 		}
 	}
 
-	@CliCommand(value = { GET_HTTPSOURCE }, help = "Make GET request to http endpoint")
+	@ShellMethod(key = GET_HTTPSOURCE, value = "Make GET request to http endpoint")
 	public String getHttp(
-			@CliOption(mandatory = false, key = { "",
-					"target" }, help = "the URL to make the request to", unspecifiedDefaultValue = "http://localhost:9393") String target,
-			@CliOption(mandatory = false, key = { "username" }, help = "the username for calls that require basic "
-					+ "authentication", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = { "password" }, help = "the password for calls that require basic "
-					+ "authentication", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = "skip-ssl-validation", help = "accept any SSL certificate (even "
-					+ "self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation)
-			throws IOException {
-
+			@ShellOption(value = { "", "--target" }, help = "the URL to make the request to",
+					defaultValue = Target.DEFAULT_TARGET) String target,
+			@ShellOption(help = "the username for calls that require basic "
+					+ "authentication", defaultValue = Target.DEFAULT_USERNAME) String username,
+			@ShellOption(help = "the password for calls that require basic authentication",
+					defaultValue = Target.DEFAULT_PASSWORD) String password,
+			@ShellOption(help = "accept any SSL certificate (even \"self-signed)\"", defaultValue = "false") boolean skipSslValidation) {
+		
 		final StringBuilder buffer = new StringBuilder();
 		URI requestURI = URI.create(target);
 
@@ -137,22 +132,22 @@ public class HttpCommands implements CommandMarker {
 			final RestTemplate restTemplate = createRestTemplate(buffer);
 
 			restTemplate.setRequestFactory(HttpClientConfigurer.create(requestURI)
-					.basicAuthCredentials(targetUsername, targetPassword)
+					.basicAuthCredentials(username, password)
 					.skipTlsCertificateVerification(skipSslValidation)
 					.buildClientHttpRequestFactory());
 
 			ResponseEntity<String> response = restTemplate.getForEntity(requestURI, String.class);
 			outputResponse(response, buffer);
 			if (!response.getStatusCode().is2xxSuccessful()) {
-				buffer.append(OsUtils.LINE_SEPARATOR).append(String.format("Error sending request to '%s'", target));
+				buffer.append(System.lineSeparator()).append(String.format("Error sending request to '%s'", target));
 			}
 			return buffer.toString();
 		}
 		catch (ResourceAccessException e) {
-			return String.format(buffer.toString() + "Failed to access http endpoint %s", target);
+			return String.format(buffer + "Failed to access http endpoint %s", target);
 		}
 		catch (Exception e) {
-			return String.format(buffer.toString() + "Failed to get data from http endpoint %s", target);
+			return String.format(buffer + "Failed to get data from http endpoint %s", target);
 		}
 	}
 
@@ -182,12 +177,12 @@ public class HttpCommands implements CommandMarker {
 		if (mediaType != null) {
 			buffer.append("(").append(mediaType.toString()).append(") ");
 		}
-		buffer.append(requestUri.toString()).append(" ").append(requestData).append(OsUtils.LINE_SEPARATOR);
+		buffer.append(requestUri.toString()).append(" ").append(requestData).append(System.lineSeparator());
 	}
 
 	private void outputResponse(ResponseEntity<String> response, StringBuilder buffer) {
 		buffer.append("> ").append(response.getStatusCode().value()).append(" ").append(response.getStatusCode().name())
-				.append(OsUtils.LINE_SEPARATOR);
+				.append(System.lineSeparator());
 		String maybeJson = response.getBody();
 		if (maybeJson != null) {
 			buffer.append(ShellUtils.prettyPrintIfJson(maybeJson));
@@ -195,7 +190,7 @@ public class HttpCommands implements CommandMarker {
 	}
 
 	private void outputError(HttpStatus status, StringBuilder buffer) {
-		buffer.append("> ").append(status.value()).append(" ").append(status.name()).append(OsUtils.LINE_SEPARATOR);
+		buffer.append("> ").append(status.value()).append(" ").append(status.name()).append(System.lineSeparator());
 	}
 
 }
