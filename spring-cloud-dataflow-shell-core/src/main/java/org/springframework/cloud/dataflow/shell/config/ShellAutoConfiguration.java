@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.shell.config;
 
+import org.jline.terminal.Terminal;
+
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -54,6 +56,11 @@ public class ShellAutoConfiguration {
 	@Bean
 	public RestTemplate restTemplate() {
 		return DataFlowTemplate.getDefaultDataflowRestTemplate();
+	}
+
+	@Bean
+	public TablesResultHandler tablesResultHandler(Terminal terminal) {
+		return new TablesResultHandler(terminal);
 	}
 
 	@Configuration(proxyBeanMethods = false)
