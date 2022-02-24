@@ -73,8 +73,6 @@
 
 		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
-		<spring-shell.version>2.1.0-SNAPSHOT</spring-shell.version>
-
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<semver.version>2.2.0</semver.version>
@@ -194,11 +192,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.shell</groupId>
-				<artifactId>spring-shell-starter</artifactId>
-				<version>${spring-shell.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
