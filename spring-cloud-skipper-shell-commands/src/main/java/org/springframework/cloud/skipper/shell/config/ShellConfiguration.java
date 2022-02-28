@@ -59,7 +59,7 @@ public class ShellConfiguration {
 
 	@Bean
 	public NonInteractiveShellRunnerCustomizer skipperClientArgsFilteringCustomizer() {
-		return (shellRunner) -> shellRunner.setArgsToShellCommand(ShellUtils::filteredArgsToShellCommands);
+		return (shellRunner) -> shellRunner.setCommandsFromInputArgs(ShellUtils::filteredArgsToShellCommands);
 	}
 
 	@Bean
