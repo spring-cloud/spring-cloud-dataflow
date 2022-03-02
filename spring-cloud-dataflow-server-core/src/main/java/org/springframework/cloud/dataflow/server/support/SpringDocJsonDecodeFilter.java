@@ -29,38 +29,46 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.annotation.Order;
+import org.springframework.cloud.dataflow.server.config.SpringDocConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
+/**
+ * Sets up a filter that unescapes the JSON content of the API endpoints of OpenApi and Swagger.
+ * This is similar to the issue mentioned here: https://github.com/springdoc/springdoc-openapi/issues/624
+ * Spring Cloud Data Flow however needs the escaped JSON to show task logs in the UI.
+ *
+ * @author Tobias Soloschenko
+ */
 @Component
-@Order
-public class DataFlowSwaggerApiDocsJsonDecodeFilter implements Filter {
+public class SpringDocJsonDecodeFilter implements Filter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DataFlowSwaggerApiDocsJsonDecodeFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SpringDocJsonDecodeFilter.class);
 
-    @Value("${springdoc.api-docs.path:/v3/api-docs}")
-    private String apiDocsPath;
+    private final SpringDocConfigurationProperties springDocConfigurationProperties;
 
-
-    @Value("${springdoc.swagger-ui.configUrl:/v3/api-docs/swagger-config}")
-    private String swaggerUiConfig;
+    public SpringDocJsonDecodeFilter(SpringDocConfigurationProperties springDocConfigurationProperties){
+        this.springDocConfigurationProperties = springDocConfigurationProperties;
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
-        final ContentCachingResponseWrapper httpServletResponseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
+        String apiDocsPath = springDocConfigurationProperties.getApiDocs().getPath();
+        String swaggerUiConfigUrl = springDocConfigurationProperties.getSwaggerUi().getConfigUrl();
 
-        String apiDocsPathContext = StringUtils.substringBeforeLast(apiDocsPath, "/");
-        String swaggerUiConfigContext = StringUtils.substringBeforeLast(swaggerUiConfig, "/");
-        if (httpServletRequestWrapper.getServletPath().startsWith(apiDocsPathContext) ||
-                httpServletRequestWrapper.getServletPath().startsWith(swaggerUiConfigContext)) {
+        String apiDocsPathContext = apiDocsPath.substring(0, apiDocsPath.lastIndexOf("/"));
+        String swaggerUiConfigContext = swaggerUiConfigUrl.substring(0, swaggerUiConfigUrl.lastIndexOf("/"));
+
+        if (((HttpServletRequest) request).getServletPath().startsWith(apiDocsPathContext)
+                || ((HttpServletRequest) request).getServletPath().startsWith(swaggerUiConfigContext)) {
+
+            final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
+            final ContentCachingResponseWrapper httpServletResponseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
+
             // if api-docs path is requested, use wrapper classes, so that the body gets cached.
             chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
 
@@ -68,12 +76,14 @@ public class DataFlowSwaggerApiDocsJsonDecodeFilter implements Filter {
 
             LOG.debug("Request for Swagger api-docs detected - unescaping json content.");
             String content = new String(httpServletResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-            content = StringUtils.stripStart(content, "\"");
-            content = StringUtils.stripEnd(content, "\"");
+            // Replaces all escaped quotes
+            content = StringEscapeUtils.unescapeJson(content);
+            // Replaces first and last quote
+            content = content.substring(1, content.length() - 1);
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Using decoded JSON for serving api-docs: {}", content);
             }
-            outputStream.write(StringEscapeUtils.unescapeJson(content).getBytes(StandardCharsets.UTF_8));
+            outputStream.write(content.getBytes(StandardCharsets.UTF_8));
         } else {
             // all other scdf related api calls do nothing.
             chain.doFilter(request, response);
