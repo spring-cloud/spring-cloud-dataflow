@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
@@ -98,7 +99,7 @@ public abstract class BaseDocumentation {
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		when(springDataflowServer.getSkipperClient().status(ArgumentMatchers.anyString())).thenReturn(info);
 
-		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class));
+		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class), mock(ActuatorOperations.class));
 		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(Arrays.asList(deployer));
 
 		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new ArrayList<>());

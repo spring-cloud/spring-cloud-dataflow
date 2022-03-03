@@ -624,7 +624,7 @@ public class SkipperStreamDeployerTests {
 		about.setVersionInfo(new VersionInfo());
 		about.getVersionInfo().setServer(new Dependency("d1", "v1", "check", "check2", "url"));
 		when(skipperClient.info()).thenReturn(about);
-		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(new Deployer("d1", "t1", null)));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(new Deployer("d1", "t1", null, null)));
 
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),

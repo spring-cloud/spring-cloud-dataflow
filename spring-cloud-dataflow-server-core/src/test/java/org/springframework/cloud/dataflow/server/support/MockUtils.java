@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
@@ -75,6 +76,8 @@ public class MockUtils {
 			public String getLog(String id) {
 				return null;
 			}
-		});
+
+
+		}, mock(ActuatorOperations.class));
 	}
 }
