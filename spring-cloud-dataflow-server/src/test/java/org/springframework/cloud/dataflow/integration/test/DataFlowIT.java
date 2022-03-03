@@ -2355,21 +2355,16 @@ public class DataFlowIT {
 	}
 
 	private void safeCleanupAllTaskExecutions(Task task) {
-		try {
-			task.cleanupAllTaskExecutions();
-		} catch (DataFlowClientException ex) {
-			if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage().contains("(reason: job does not exist)")) {
-				logger.warn("Unable to cleanup task executions: " + ex.getMessage());
-			}
-			else {
-				throw ex;
-			}
-		}
+		doSafeCleanupTasks(() -> task.cleanupAllTaskExecutions());
 	}
 
 	private void safeCleanupTaskExecution(Task task, long taskExecutionId) {
+		doSafeCleanupTasks(() -> task.cleanupTaskExecution(taskExecutionId));
+	}
+
+	private void doSafeCleanupTasks(Runnable cleanupOperation) {
 		try {
-			task.cleanupTaskExecution(taskExecutionId);
+			cleanupOperation.run();
 		}
 		catch (DataFlowClientException ex) {
 			if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage()
@@ -2381,7 +2376,7 @@ public class DataFlowIT {
 			}
 		}
 	}
-	
+
 	private static String randomTaskName() {
 		return "task-" + randomSuffix();
 	}
