@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.cloud.dataflow.server.service.impl.validation.Default
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeploymentRequest;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -244,7 +245,7 @@ public class DefaultStreamServiceTests {
 
 	@Test
 	public void verifyStreamPlatformList() {
-		Deployer deployer = new Deployer("testDeployer", "testType", null);
+		Deployer deployer = new Deployer("testDeployer", "testType", null, mock(ActuatorOperations.class));
 		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(deployer));
 		Collection<Deployer> deployers = this.defaultStreamService.platformList();
 
@@ -290,8 +291,8 @@ public class DefaultStreamServiceTests {
 	public void testInvalidStreamNameOnKubernetes() {
 		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
 		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
-		Deployer k8sDeployer = new Deployer("k8s1", "kubernetes", null);
-		Deployer cfDeployer = new Deployer("cf1", "cloudfoundry", null);
+		Deployer k8sDeployer = new Deployer("k8s1", "kubernetes", null, mock(ActuatorOperations.class));
+		Deployer cfDeployer = new Deployer("cf1", "cloudfoundry", null, mock(ActuatorOperations.class));
 		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(k8sDeployer, cfDeployer));
 		String[] streamNames = { "$stream", "stream$", "st_ream" };
 		for (String streamName : streamNames) {

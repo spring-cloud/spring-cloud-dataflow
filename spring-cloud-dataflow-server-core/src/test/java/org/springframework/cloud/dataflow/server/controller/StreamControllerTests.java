@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployerUtil;
 import org.springframework.cloud.dataflow.server.support.SkipperPackageUtils;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -147,9 +148,9 @@ public class StreamControllerTests {
 		streamStatusInfo.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		when(skipperClient.status(anyString())).thenReturn(streamStatusInfo);
 
-		Deployer deployerLocal = new Deployer("default", "local", mock(AppDeployer.class));
-		Deployer deployerK8s = new Deployer("k8s", "kubernetes", mock(AppDeployer.class));
-		Deployer deployerCf = new Deployer("pcf", "cloudfoundry", mock(AppDeployer.class));
+		Deployer deployerLocal = new Deployer("default", "local", mock(AppDeployer.class), mock(ActuatorOperations.class));
+		Deployer deployerK8s = new Deployer("k8s", "kubernetes", mock(AppDeployer.class), mock(ActuatorOperations.class));
+		Deployer deployerCf = new Deployer("pcf", "cloudfoundry", mock(AppDeployer.class), mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployerLocal, deployerK8s, deployerCf));
 
 		when(skipperClient.search(anyString(), eq(false))).thenReturn(new ArrayList<PackageMetadata>());

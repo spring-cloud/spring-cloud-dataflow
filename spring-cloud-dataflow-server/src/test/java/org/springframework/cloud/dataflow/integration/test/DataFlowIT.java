@@ -2074,7 +2074,7 @@ public class DataFlowIT {
 		try (Task task = createTaskDefinition()) {
 			List<Long> launchIds = createTaskExecutionsForDefinition(task, 1);
 			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
-			task.cleanupTaskExecution(launchIds.get(0));
+			safeCleanupTaskExecution(task, launchIds.get(0));
 			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
 		}
 	}
@@ -2094,7 +2094,7 @@ public class DataFlowIT {
 			long retainedLaunchId = launchIds.get(3);
 			launchIds.stream().filter(launchId -> launchId != retainedLaunchId).forEach(
 					launchId -> {
-						task.cleanupTaskExecution(launchId);
+						safeCleanupTaskExecution(task, launchId);
 						assertThat(task.execution(launchId).isPresent()).isFalse();
 					}
 			);
@@ -2114,7 +2114,7 @@ public class DataFlowIT {
 		try (Task task = createTaskDefinition()) {
 			List<Long> launchIds = createTaskExecutionsForDefinition(task, 4);
 			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
-			task.cleanupAllTaskExecutions();
+			safeCleanupAllTaskExecutions(task);
 			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
 		}
 	}
@@ -2157,7 +2157,7 @@ public class DataFlowIT {
 			long secondLaunchId = task.launch(Collections.singletonMap("app.timestamp.secondkey", "secondvalue"), Collections.emptyList());
 			assertThat(task.execution(secondLaunchId).isPresent()).isTrue();
 			validateSuccessfulTaskLaunch(task, secondLaunchId, 2);
-			task.cleanupTaskExecution(secondLaunchId);
+			safeCleanupTaskExecution(task, secondLaunchId);
 			assertThat(task.execution(secondLaunchId).isPresent()).isFalse();
 
 			long thirdLaunchId = task.launch(Collections.singletonMap("app.timestamp.thirdkey", "thirdvalue"), Collections.emptyList());
@@ -2188,7 +2188,7 @@ public class DataFlowIT {
 			Optional<TaskExecutionResource> bbbExecution = task.composedTaskChildExecution("BBB");
 			assertThat(aaaExecution.isPresent()).isTrue();
 			assertThat(bbbExecution.isPresent()).isTrue();
-			task.cleanupTaskExecution(launchIds.get(0));
+			safeCleanupTaskExecution(task, launchIds.get(0));
 			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
 			aaaExecution = task.composedTaskChildExecution("AAA");
 			bbbExecution = task.composedTaskChildExecution("BBB");
@@ -2216,7 +2216,7 @@ public class DataFlowIT {
 			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(2);
 			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
-			task.cleanupTaskExecution(launchIds.get(0));
+			safeCleanupTaskExecution(task, launchIds.get(0));
 			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
 			assertThatThrownBy(() ->task.jobStepExecutions(jobExecutionIds.get(0))).
 					isInstanceOf(DataFlowClientException.class).hasMessageContaining("No JobExecution with id=");
@@ -2241,7 +2241,7 @@ public class DataFlowIT {
 			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(2);
 			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
-			task.cleanupTaskExecution(launchIds.get(0));
+			safeCleanupTaskExecution(task, launchIds.get(0));
 			assertThatThrownBy(() ->this.dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0))).
 					isInstanceOf(DataFlowClientException.class).hasMessageContaining("There is no JobExecution with id=");
 		}
@@ -2352,6 +2352,29 @@ public class DataFlowIT {
 	private List<Task> childTasksBySuffix(Task task, String... suffixes) {
 		return java.util.stream.Stream.of(suffixes)
 				.map(suffix -> task.composedTaskChildTaskByLabel(suffix).get()).collect(Collectors.toList());
+	}
+
+	private void safeCleanupAllTaskExecutions(Task task) {
+		doSafeCleanupTasks(() -> task.cleanupAllTaskExecutions());
+	}
+
+	private void safeCleanupTaskExecution(Task task, long taskExecutionId) {
+		doSafeCleanupTasks(() -> task.cleanupTaskExecution(taskExecutionId));
+	}
+
+	private void doSafeCleanupTasks(Runnable cleanupOperation) {
+		try {
+			cleanupOperation.run();
+		}
+		catch (DataFlowClientException ex) {
+			if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage()
+					.contains("(reason: job does not exist)")) {
+				logger.warn("Unable to cleanup task executions: " + ex.getMessage());
+			}
+			else {
+				throw ex;
+			}
+		}
 	}
 
 	private static String randomTaskName() {

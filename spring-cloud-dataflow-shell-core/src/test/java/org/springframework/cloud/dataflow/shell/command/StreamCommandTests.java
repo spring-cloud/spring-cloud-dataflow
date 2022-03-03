@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
@@ -38,6 +39,7 @@ import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -76,7 +78,7 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 		stream().create(streamName, "time | log");
 	}
@@ -93,7 +95,7 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class), mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 
 		//stream().create(streamName, "time | log");
