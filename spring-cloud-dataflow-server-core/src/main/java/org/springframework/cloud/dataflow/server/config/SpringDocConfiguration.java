@@ -28,7 +28,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 /**
  * Makes SpringDoc public available without any authentication required by initializing a {@link WebSecurityCustomizer} and
- * applying all path of SpringDoc to be ignored.
+ * applying all path of SpringDoc to be ignored. Also applies a filter registration bean to unescape JSON content for the
+ * SpringDoc frontend.
  *
  * @author Tobias Soloschenko
  */
@@ -41,17 +42,26 @@ public class SpringDocConfiguration {
 
     private final SwaggerUiConfigProperties swaggerUiConfigProperties;
 
+    /**
+     * Creates the SpringDocConfiguration with the given properties.
+     * 
+     * @param springDocConfigProperties the spring doc config properties
+     * @param swaggerUiConfigProperties the swagger ui config properties
+     */
     public SpringDocConfiguration(SpringDocConfigProperties springDocConfigProperties, SwaggerUiConfigProperties swaggerUiConfigProperties) {
         this.springDocConfigProperties = springDocConfigProperties;
         this.swaggerUiConfigProperties = swaggerUiConfigProperties;
     }
 
+    /**
+     * Creates a web security customizer for the spring security which makes the SpringDoc frontend public available.
+     *
+     * @return a web security customizer with security settings for SpringDoc
+     */
     @Bean
     public WebSecurityCustomizer springDocCustomizer() {
         return (webSecurity -> {
-            String apiDocsPath = springDocConfigProperties.getApiDocs().getPath();
-            String apiDocsPathContext = apiDocsPath.substring(0, apiDocsPath.lastIndexOf("/"));
-
+            String apiDocsPathContext = getApiDocsPathContext();
             webSecurity.ignoring().antMatchers(
                     SWAGGER_UI_CONTEXT,
                     apiDocsPathContext + "/**",
@@ -64,17 +74,45 @@ public class SpringDocConfiguration {
         });
     }
 
+    /**
+     * Creates a filter registration bean which decodes the JSON of ApiDocs and SwaggerUi so that the SpringDoc frontend is able
+     * to read it. Spring Cloud Data Flow however requires the JSON to be escaped and wrapped into quotes, because the
+     * Angular Ui frontend is using it that way.
+     *
+     * @return a filter registration bean which unescapes the content of the JSON endpoints of SpringDoc before it is returned.
+     */
     @Bean
     public FilterRegistrationBean<SpringDocJsonDecodeFilter> jsonDecodeFilterRegistration() {
-        String apiDocsPath = springDocConfigProperties.getApiDocs().getPath();
-        String swaggerUiConfigUrl = swaggerUiConfigProperties.getConfigUrl();
-        String apiDocsPathContext = apiDocsPath.substring(0, apiDocsPath.lastIndexOf("/"));
-        String swaggerUiConfigContext = swaggerUiConfigUrl.substring(0, swaggerUiConfigUrl.lastIndexOf("/"));
+        String apiDocsPathContext = getApiDocsPathContext();
+        String swaggerUiConfigContext = getSwaggerUiConfigContext();
 
         FilterRegistrationBean<SpringDocJsonDecodeFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new SpringDocJsonDecodeFilter());
-        registrationBean.addUrlPatterns(apiDocsPathContext, apiDocsPathContext + "/*", swaggerUiConfigContext, swaggerUiConfigContext + "/*");
+        registrationBean.addUrlPatterns(apiDocsPathContext, apiDocsPathContext + "/*", swaggerUiConfigContext,
+                swaggerUiConfigContext + "/*");
 
         return registrationBean;
+    }
+
+    /**
+     * Gets the SwaggerUi config context. For example the default configuration for the SwaggerUi config is /v3/api-docs/swagger-config
+     * which results in a context of /v3/api-docs.
+     *
+     * @return the SwaggerUi config path context
+     */
+    private String getSwaggerUiConfigContext() {
+        String swaggerUiConfigUrl = swaggerUiConfigProperties.getConfigUrl();
+        return swaggerUiConfigUrl.substring(0, swaggerUiConfigUrl.lastIndexOf("/"));
+    }
+
+    /**
+     * Gets the ApiDocs context path. For example the default configuration for the ApiDocs path is /v3/api-docs
+     * which results in a context of /v3.
+     *
+     * @return the api docs path context
+     */
+    private String getApiDocsPathContext() {
+        String apiDocsPath = springDocConfigProperties.getApiDocs().getPath();
+        return apiDocsPath.substring(0, apiDocsPath.lastIndexOf("/"));
     }
 }
