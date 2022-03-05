@@ -26,8 +26,6 @@ import javax.servlet.ServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springdoc.core.SpringDocConfigProperties;
-import org.springdoc.core.SwaggerUiConfigProperties;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
