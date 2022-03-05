@@ -26,7 +26,8 @@ import javax.servlet.ServletResponse;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.server.config.SpringDocConfigurationProperties;
+import org.springdoc.core.SpringDocConfigProperties;
+import org.springdoc.core.SwaggerUiConfigProperties;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -37,25 +38,19 @@ public class SpringDocJsonDecodeFilterTest {
 
     private SpringDocJsonDecodeFilter springDocJsonDecodeFilter;
 
-    private SpringDocConfigurationProperties springDocConfigurationProperties;
-
     private static final String OPENAPI_JSON_ESCAPED_CONTENT = "\"{\\\"openapi:\\\"3.0.1\\\",\\\"info\\\":{\\\"title\\\":\\\"OpenAPI definition\\\",\\\"version\\\":\\\"v0\\\"}}\"";
 
     private static final String OPENAPI_JSON_UNESCAPED_CONTENT = "{\"openapi:\"3.0.1\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"}}";
 
     @Before
     public void setup() {
-        springDocConfigurationProperties = new SpringDocConfigurationProperties();
-        springDocConfigurationProperties.setApiDocs(new SpringDocConfigurationProperties.ApiDocs());
-        springDocConfigurationProperties.setSwaggerUi(new SpringDocConfigurationProperties.SwaggerUi());
-        springDocJsonDecodeFilter = new SpringDocJsonDecodeFilter(springDocConfigurationProperties);
+        springDocJsonDecodeFilter = new SpringDocJsonDecodeFilter();
     }
 
     @Test
     public void doFilterTest() throws ServletException, IOException {
         MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
         MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
-        mockHttpServletRequest.setServletPath(springDocConfigurationProperties.getApiDocs().getPath());
         MockFilterChain mockFilterChain = new MockFilterChain() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {

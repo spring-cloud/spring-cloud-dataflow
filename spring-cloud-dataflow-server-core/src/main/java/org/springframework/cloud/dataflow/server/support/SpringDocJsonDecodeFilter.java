@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.server.config.SpringDocConfigurationProperties;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
@@ -44,49 +42,30 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
  *
  * @author Tobias Soloschenko
  */
-@Component
 public class SpringDocJsonDecodeFilter implements Filter {
 
     private static final Logger LOG = LoggerFactory.getLogger(SpringDocJsonDecodeFilter.class);
 
-    private final SpringDocConfigurationProperties springDocConfigurationProperties;
-
-    public SpringDocJsonDecodeFilter(SpringDocConfigurationProperties springDocConfigurationProperties){
-        this.springDocConfigurationProperties = springDocConfigurationProperties;
-    }
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String apiDocsPath = springDocConfigurationProperties.getApiDocs().getPath();
-        String swaggerUiConfigUrl = springDocConfigurationProperties.getSwaggerUi().getConfigUrl();
+        final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
+        final ContentCachingResponseWrapper httpServletResponseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
-        String apiDocsPathContext = apiDocsPath.substring(0, apiDocsPath.lastIndexOf("/"));
-        String swaggerUiConfigContext = swaggerUiConfigUrl.substring(0, swaggerUiConfigUrl.lastIndexOf("/"));
+        // if api-docs path is requested, use wrapper classes, so that the body gets cached.
+        chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
 
-        if (((HttpServletRequest) request).getServletPath().startsWith(apiDocsPathContext)
-                || ((HttpServletRequest) request).getServletPath().startsWith(swaggerUiConfigContext)) {
+        ServletOutputStream outputStream = httpServletResponseWrapper.getResponse().getOutputStream();
 
-            final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
-            final ContentCachingResponseWrapper httpServletResponseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
-
-            // if api-docs path is requested, use wrapper classes, so that the body gets cached.
-            chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
-
-            ServletOutputStream outputStream = httpServletResponseWrapper.getResponse().getOutputStream();
-
-            LOG.debug("Request for Swagger api-docs detected - unescaping json content.");
-            String content = new String(httpServletResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-            // Replaces all escaped quotes
-            content = StringEscapeUtils.unescapeJson(content);
-            // Replaces first and last quote
-            content = content.substring(1, content.length() - 1);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Using decoded JSON for serving api-docs: {}", content);
-            }
-            outputStream.write(content.getBytes(StandardCharsets.UTF_8));
-        } else {
-            // all other scdf related api calls do nothing.
-            chain.doFilter(request, response);
+        LOG.debug("Request for Swagger api-docs detected - unescaping json content.");
+        String content = new String(httpServletResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+        // Replaces all escaped quotes
+        content = StringEscapeUtils.unescapeJson(content);
+        // Replaces first and last quote
+        content = content.substring(1, content.length() - 1);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Using decoded JSON for serving api-docs: {}", content);
         }
+        outputStream.write(content.getBytes(StandardCharsets.UTF_8));
+
     }
 }
