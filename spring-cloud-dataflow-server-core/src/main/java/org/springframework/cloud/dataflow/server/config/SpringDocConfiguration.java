@@ -21,7 +21,6 @@ import org.springdoc.core.SwaggerUiConfigProperties;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.dataflow.server.support.SpringDocJsonDecodeFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -44,7 +43,7 @@ public class SpringDocConfiguration {
 
     /**
      * Creates the SpringDocConfiguration with the given properties.
-     * 
+     *
      * @param springDocConfigProperties the spring doc config properties
      * @param swaggerUiConfigProperties the swagger ui config properties
      */
