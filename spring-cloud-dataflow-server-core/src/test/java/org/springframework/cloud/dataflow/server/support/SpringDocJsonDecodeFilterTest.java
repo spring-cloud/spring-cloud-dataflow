@@ -53,7 +53,7 @@ public class SpringDocJsonDecodeFilterTest {
             }
         };
         new SpringDocJsonDecodeFilter().doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
-        assertThat(OPENAPI_JSON_UNESCAPED_CONTENT).isEqualTo(mockHttpServletResponse.getContentAsString());
+        assertThat(mockHttpServletResponse.getContentAsString()).isEqualTo(OPENAPI_JSON_UNESCAPED_CONTENT);
     }
 
 }

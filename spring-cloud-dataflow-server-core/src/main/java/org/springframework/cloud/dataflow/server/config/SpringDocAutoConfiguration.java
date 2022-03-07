@@ -60,8 +60,7 @@ public class SpringDocAutoConfiguration {
      *
      * @return a web security customizer with security settings for SpringDoc
      */
-    @Bean
-    @Qualifier("springDocWebSecurityCustomizer")
+    @Bean("springDocWebSecurityCustomizer")
     public WebSecurityCustomizer springDocCustomizer() {
         return (webSecurity -> webSecurity.ignoring().antMatchers(
                 SWAGGER_UI_CONTEXT,
@@ -82,7 +81,6 @@ public class SpringDocAutoConfiguration {
      * @return a filter registration bean which unescapes the content of the JSON endpoints of SpringDoc before it is returned.
      */
     @Bean
-    @Qualifier("springDocJsonDecodeFilterRegistration")
     public FilterRegistrationBean<SpringDocJsonDecodeFilter> springDocJsonDecodeFilterRegistration() {
         String apiDocsPathContext = getApiDocsPathContext();
         String swaggerUiConfigContext = getSwaggerUiConfigContext();
