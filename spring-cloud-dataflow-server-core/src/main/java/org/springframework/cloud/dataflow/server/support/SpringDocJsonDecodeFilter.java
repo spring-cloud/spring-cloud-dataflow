@@ -51,7 +51,6 @@ public class SpringDocJsonDecodeFilter implements Filter {
         final HttpServletRequestWrapper httpServletRequestWrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
         final ContentCachingResponseWrapper httpServletResponseWrapper = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
-        // if api-docs path is requested, use wrapper classes, so that the body gets cached.
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
 
         ServletOutputStream outputStream = httpServletResponseWrapper.getResponse().getOutputStream();

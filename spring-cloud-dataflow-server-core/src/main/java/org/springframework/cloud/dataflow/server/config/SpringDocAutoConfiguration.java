@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.server.config;
 import org.springdoc.core.SpringDocConfigProperties;
 import org.springdoc.core.SwaggerUiConfigProperties;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.dataflow.server.support.SpringDocJsonDecodeFilter;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +35,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @author Tobias Soloschenko
  */
 @Configuration(proxyBeanMethods = false)
-public class SpringDocConfiguration {
+@ConditionalOnBean({ SpringDocConfigProperties.class, SwaggerUiConfigProperties.class })
+public class SpringDocAutoConfiguration {
 
     public static final String SWAGGER_UI_CONTEXT = "/swagger-ui/**";
 
@@ -47,7 +50,7 @@ public class SpringDocConfiguration {
      * @param springDocConfigProperties the spring doc config properties
      * @param swaggerUiConfigProperties the swagger ui config properties
      */
-    public SpringDocConfiguration(SpringDocConfigProperties springDocConfigProperties, SwaggerUiConfigProperties swaggerUiConfigProperties) {
+    public SpringDocAutoConfiguration(SpringDocConfigProperties springDocConfigProperties, SwaggerUiConfigProperties swaggerUiConfigProperties) {
         this.springDocConfigProperties = springDocConfigProperties;
         this.swaggerUiConfigProperties = swaggerUiConfigProperties;
     }
@@ -58,30 +61,29 @@ public class SpringDocConfiguration {
      * @return a web security customizer with security settings for SpringDoc
      */
     @Bean
+    @Qualifier("springDocWebSecurityCustomizer")
     public WebSecurityCustomizer springDocCustomizer() {
-        return (webSecurity -> {
-            String apiDocsPathContext = getApiDocsPathContext();
-            webSecurity.ignoring().antMatchers(
-                    SWAGGER_UI_CONTEXT,
-                    apiDocsPathContext + "/**",
-                    swaggerUiConfigProperties.getPath(),
-                    swaggerUiConfigProperties.getConfigUrl(),
-                    swaggerUiConfigProperties.getValidatorUrl(),
-                    swaggerUiConfigProperties.getOauth2RedirectUrl(),
-                    springDocConfigProperties.getWebjars().getPrefix(),
-                    springDocConfigProperties.getWebjars().getPrefix() + "/**");
-        });
+        return (webSecurity -> webSecurity.ignoring().antMatchers(
+                SWAGGER_UI_CONTEXT,
+                getApiDocsPathContext() + "/**",
+                swaggerUiConfigProperties.getPath(),
+                swaggerUiConfigProperties.getConfigUrl(),
+                swaggerUiConfigProperties.getValidatorUrl(),
+                swaggerUiConfigProperties.getOauth2RedirectUrl(),
+                springDocConfigProperties.getWebjars().getPrefix(),
+                springDocConfigProperties.getWebjars().getPrefix() + "/**"));
     }
 
     /**
-     * Creates a filter registration bean which decodes the JSON of ApiDocs and SwaggerUi so that the SpringDoc frontend is able
+     * Applies {@link SpringDocJsonDecodeFilter} to the filter chain which decodes the JSON of ApiDocs and SwaggerUi so that the SpringDoc frontend is able
      * to read it. Spring Cloud Data Flow however requires the JSON to be escaped and wrapped into quotes, because the
      * Angular Ui frontend is using it that way.
      *
      * @return a filter registration bean which unescapes the content of the JSON endpoints of SpringDoc before it is returned.
      */
     @Bean
-    public FilterRegistrationBean<SpringDocJsonDecodeFilter> jsonDecodeFilterRegistration() {
+    @Qualifier("springDocJsonDecodeFilterRegistration")
+    public FilterRegistrationBean<SpringDocJsonDecodeFilter> springDocJsonDecodeFilterRegistration() {
         String apiDocsPathContext = getApiDocsPathContext();
         String swaggerUiConfigContext = getSwaggerUiConfigContext();
 

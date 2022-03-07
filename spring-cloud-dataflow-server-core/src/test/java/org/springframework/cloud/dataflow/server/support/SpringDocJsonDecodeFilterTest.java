@@ -23,27 +23,23 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * This is a test for {@link SpringDocJsonDecodeFilter} to check if the json content is decoded correctly.
+ * @author Tobias Soloschenko
+ */
 public class SpringDocJsonDecodeFilterTest {
-
-    private SpringDocJsonDecodeFilter springDocJsonDecodeFilter;
 
     private static final String OPENAPI_JSON_ESCAPED_CONTENT = "\"{\\\"openapi:\\\"3.0.1\\\",\\\"info\\\":{\\\"title\\\":\\\"OpenAPI definition\\\",\\\"version\\\":\\\"v0\\\"}}\"";
 
     private static final String OPENAPI_JSON_UNESCAPED_CONTENT = "{\"openapi:\"3.0.1\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"}}";
-
-    @Before
-    public void setup() {
-        springDocJsonDecodeFilter = new SpringDocJsonDecodeFilter();
-    }
 
     @Test
     public void doFilterTest() throws ServletException, IOException {
@@ -56,8 +52,8 @@ public class SpringDocJsonDecodeFilterTest {
                 super.doFilter(request, response);
             }
         };
-        springDocJsonDecodeFilter.doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
-        assertEquals(OPENAPI_JSON_UNESCAPED_CONTENT, mockHttpServletResponse.getContentAsString());
+        new SpringDocJsonDecodeFilter().doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
+        assertThat(OPENAPI_JSON_UNESCAPED_CONTENT).isEqualTo(mockHttpServletResponse.getContentAsString());
     }
 
 }
