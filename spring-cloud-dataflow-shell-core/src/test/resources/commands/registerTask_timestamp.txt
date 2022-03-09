@@ -1,1 +1,1 @@
-app register --type task --force --name timestamp --uri maven://org.springframework.cloud.task.app:task-timestamp:1.0.0.BUILD-SNAPSHOT
+app register --type task --force --name timestamp --uri maven://org.springframework.cloud.task.app:task-timestamp:3.2.0
