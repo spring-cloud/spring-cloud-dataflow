@@ -860,8 +860,7 @@ public class StreamControllerTests {
 		assertThat(logSpec.getApplicationProperties().get("level")).isNull();
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
-		assertThat(timeSpec.getApplicationProperties().get("trigger.fixed-delay")).isEqualTo("2");
-		assertThat(timeSpec.getApplicationProperties().get("fixed-delay")).isNull();
+		assertThat(timeSpec.getApplicationProperties().get("fixed-delay")).isEqualTo("2");
 	}
 
 	@Test
@@ -894,7 +893,7 @@ public class StreamControllerTests {
 		assertThat(logSpec.getDeploymentProperties().get(AppDeployer.INDEXED_PROPERTY_KEY)).isEqualTo("true");
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
-		assertThat(timeSpec.getApplicationProperties().get("trigger.fixed-delay")).isEqualTo("4");
+		assertThat(timeSpec.getApplicationProperties().get("fixed-delay")).isEqualTo("4");
 	}
 
 	@Test
@@ -925,7 +924,7 @@ public class StreamControllerTests {
 		assertThat(logSpec.getApplicationProperties().get("log.level")).isEqualTo("ERROR");
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
-		assertThat(timeSpec.getApplicationProperties().get("trigger.fixed-delay")).isEqualTo("4");
+		assertThat(timeSpec.getApplicationProperties().get("fixed-delay")).isEqualTo("4");
 	}
 
 	@Test
