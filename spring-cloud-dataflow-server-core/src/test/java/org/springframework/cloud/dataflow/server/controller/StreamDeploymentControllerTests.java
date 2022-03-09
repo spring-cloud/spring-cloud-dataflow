@@ -171,8 +171,8 @@ public class StreamDeploymentControllerTests {
 		streamDeploymentProperties.put("time", deploymentProperties1);
 		streamDeploymentProperties.put("log", deploymentProperties2);
 		Map<String, String> appVersions = new HashMap<>();
-		appVersions.put("time", "1.0.0.BUILD-SNAPSHOT");
-		appVersions.put("log", "1.0.0.BUILD-SNAPSHOT");
+		appVersions.put("time", "3.2.0");
+		appVersions.put("log", "3.2.0");
 		StreamDefinition streamDefinition = new StreamDefinition("testStream1", "time | log");
 		StreamDeployment streamDeployment = new StreamDeployment(streamDefinition.getName(),
 				new JSONObject(streamDeploymentProperties).toString());
