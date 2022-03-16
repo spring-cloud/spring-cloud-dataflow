@@ -25,4 +25,5 @@ jobs:
           -Dgroups=oauth \
           -Pfailsafe \
           --batch-mode \
-          integration-test
+          integration-test \
+          verify

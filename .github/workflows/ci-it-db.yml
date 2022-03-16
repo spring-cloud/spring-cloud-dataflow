@@ -30,4 +30,5 @@ jobs:
           -Dgroups=${{ matrix.group }} \
           -Pfailsafe \
           --batch-mode \
-          integration-test
+          integration-test \
+          verify
