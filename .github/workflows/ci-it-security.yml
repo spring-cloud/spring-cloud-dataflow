@@ -17,7 +17,7 @@ jobs:
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.6.2
-    - name: Run Db IT
+    - name: Run Security IT
       run: |
         mvn \
           -s .settings.xml \
