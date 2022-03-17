@@ -36,7 +36,7 @@ public class ArgumentSanitizerTests {
 				TestResourceUtils.qualifiedResource(getClass(), "nopassword.yaml").getInputStream(),
 				Charset.defaultCharset());
 		String result = ArgumentSanitizer.sanitizeYml(initialYaml);
-		assertThat(result).isEqualTo(initialYaml);
+		assertThat(result.replace("\r\n", "\n")).isEqualTo(initialYaml.replace("\r\n", "\n"));
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class ArgumentSanitizerTests {
 				TestResourceUtils.qualifiedResource(getClass(), "passwordredacted.yaml").getInputStream(),
 				Charset.defaultCharset());
 		String result = ArgumentSanitizer.sanitizeYml(initialYaml);
-		assertThat(result).isEqualTo(redactedYaml);
+		assertThat(result.replace("\r\n", "\n")).isEqualTo(redactedYaml.replace("\r\n", "\n"));
 	}
 
 	@Test
@@ -60,6 +60,6 @@ public class ArgumentSanitizerTests {
 				TestResourceUtils.qualifiedResource(getClass(), "configpasswordredacted.yaml").getInputStream(),
 				Charset.defaultCharset());
 		String result = ArgumentSanitizer.sanitizeYml(initialYaml);
-		assertThat(result).isEqualTo(redactedYaml);
+		assertThat(result.replace("\r\n", "\n")).isEqualTo(redactedYaml.replace("\r\n", "\n"));
 	}
 }
