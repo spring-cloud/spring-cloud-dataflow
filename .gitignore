@@ -38,6 +38,11 @@ spring-*/src/main/java/META-INF/MANIFEST.MF
 *.iws
 .idea/*
 rebel.xml
+!/.idea/codeStyles/codeStyleConfig.xml
+!/.idea/inspectionProfiles/profiles_settings.xml
+!/.idea/checkstyle-idea.xml
+!/.idea/misc.xml
+!/.idea/vcs.xml
 
 # Visual Studio Code
 .vscode/*
@@ -45,3 +50,7 @@ rebel.xml
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Log files from testing
+*.log
+

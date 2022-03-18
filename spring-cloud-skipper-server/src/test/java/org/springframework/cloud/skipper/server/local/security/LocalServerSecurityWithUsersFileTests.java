@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.server.local.security;
 
 import java.util.Arrays;
@@ -48,6 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests for security configuration backed by a file-based user list.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @RunWith(Parameterized.class)
 public class LocalServerSecurityWithUsersFileTests {
@@ -57,15 +59,15 @@ public class LocalServerSecurityWithUsersFileTests {
 	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
 
 	private final static LocalSkipperResource localSkipperResource = new LocalSkipperResource(
-			new String[]{
-				"classpath:/",
-				"classpath:/org/springframework/cloud/skipper/server/local/security/"
+			new String[] {
+					"optional:classpath:/",
+					"optional:classpath:/org/springframework/cloud/skipper/server/local/security/"
 			},
-			new String[]{
-				"application",
-				"oauthConfig"
+			new String[] {
+					"application",
+					"oauthConfig"
 			}
-		);
+	);
 
 	@ClassRule
 	public static TestRule skipperAndOAuth2Server = RuleChain.outerRule(oAuth2ServerResource)
@@ -103,166 +105,166 @@ public class LocalServerSecurityWithUsersFileTests {
 
 				/* AboutController */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/about", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/about", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/about", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/about", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/about", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/about", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/about", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/about", null, null},
 
 				/* Deployers */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/deployers", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/deployers", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/deployers", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/deployers", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/deployers", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/deployers", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/deployers", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/deployers", null, null},
 
 				/* Releases */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/releases", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/releases", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/releases", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/releases", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/releases", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/releases", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/releases", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/releases", null, null},
 
 				/* Status */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/status/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/release/status/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/status/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/status/does_not_exist", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/status/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.NOT_FOUND, "/api/release/status/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/status/does_not_exist", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/status/does_not_exist", null, null},
 
 				/* Manifest */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/manifest/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/release/manifest/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/manifest/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/manifest/does_not_exist", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/manifest/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.NOT_FOUND, "/api/release/manifest/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/manifest/does_not_exist", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/manifest/does_not_exist", null, null},
 
 				/* Logs */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/logs/does_not_exist", manageOnlyUser, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/logs/does_not_exist", manageOnlyUser, null},
 				// { HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/release/logs/does_not_exist", viewOnlyUser, null }, // GH-906
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/logs/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/logs/does_not_exist", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/logs/does_not_exist", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/logs/does_not_exist", null, null},
 
 				/* Upgrade */
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/upgrade", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/upgrade", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST,    "/api/release/upgrade", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/upgrade", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/upgrade", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/upgrade", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.BAD_REQUEST, "/api/release/upgrade", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/upgrade", null, null},
 
 				/* Rollback */
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/rollback", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/rollback", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST,    "/api/release/rollback", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/rollback", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/rollback", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/rollback", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.BAD_REQUEST, "/api/release/rollback", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/rollback", null, null},
 
 				/* Rollback with Name */
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/rollback/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/release/rollback/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.NOT_FOUND,    "/api/release/rollback/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/rollback/does_not_exist", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/rollback/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/release/rollback/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.NOT_FOUND, "/api/release/rollback/does_not_exist", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/release/rollback/does_not_exist", null, null},
 
 				/* Delete */
 
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/release/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/release/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/api/release/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/release/does_not_exist", null, null },
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/release/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/release/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.NOT_FOUND, "/api/release/does_not_exist", createOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/release/does_not_exist", null, null},
 
 				/* Delete with Package*/
 
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/release/does_not_exist/package", manageOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/release/does_not_exist/package", viewOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.NOT_FOUND,    "/api/release/does_not_exist/package", createOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/release/does_not_exist/package", null, null },
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/release/does_not_exist/package", manageOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/release/does_not_exist/package", viewOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.NOT_FOUND, "/api/release/does_not_exist/package", createOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/release/does_not_exist/package", null, null},
 
 				/* History */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/history/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/release/history/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/history/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/history/does_not_exist", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/history/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.NOT_FOUND, "/api/release/history/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/history/does_not_exist", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/history/does_not_exist", null, null},
 
 				/* List */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/list", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/release/list", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/list", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/list", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/list", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/release/list", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/list", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/list", null, null},
 
 				/* List by Release Name */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/list/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/release/list/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/release/list/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/list/does_not_exist", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/list/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/release/list/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/release/list/does_not_exist", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/release/list/does_not_exist", null, null},
 
 				/* Package */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/package", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/package", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/package", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/package", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/package", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/package", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/package", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/package", null, null},
 
 				/* Upload */
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/upload", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/upload", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/api/package/upload", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/upload", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/upload", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/upload", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.BAD_REQUEST, "/api/package/upload", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/upload", null, null},
 
 				/* Install */
 
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/install", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/install", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/api/package/install", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/install", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/install", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/install", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.BAD_REQUEST, "/api/package/install", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/install", null, null},
 
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/install/123", manageOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.FORBIDDEN,    "/api/package/install/123", viewOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.BAD_REQUEST,  "/api/package/install/123", createOnlyUser, null },
-				{ HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/install/123", null, null },
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/install/123", manageOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.FORBIDDEN, "/api/package/install/123", viewOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.BAD_REQUEST, "/api/package/install/123", createOnlyUser, null},
+				{HttpMethod.POST, HttpStatus.UNAUTHORIZED, "/api/package/install/123", null, null},
 
 				/* Delete */
 
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/package/does_not_exist", manageOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.FORBIDDEN,    "/api/package/does_not_exist", viewOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.CONFLICT,     "/api/package/does_not_exist", createOnlyUser, null },
-				{ HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/package/does_not_exist", null, null },
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/package/does_not_exist", manageOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.FORBIDDEN, "/api/package/does_not_exist", viewOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.CONFLICT, "/api/package/does_not_exist", createOnlyUser, null},
+				{HttpMethod.DELETE, HttpStatus.UNAUTHORIZED, "/api/package/does_not_exist", null, null},
 
 				/* PackageMetaData */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/packageMetadata", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/packageMetadata", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/packageMetadata", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/packageMetadata", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/packageMetadata", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/packageMetadata", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/packageMetadata", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/packageMetadata", null, null},
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/packageMetadata/123", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/packageMetadata/123", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/packageMetadata/123", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/packageMetadata/123", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/packageMetadata/123", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.NOT_FOUND, "/api/packageMetadata/123", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/packageMetadata/123", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/packageMetadata/123", null, null},
 
 				/* Repositories */
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/repositories", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.OK,           "/api/repositories", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/repositories", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/repositories", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/repositories", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.OK, "/api/repositories", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/repositories", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/repositories", null, null},
 
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/repositories/123", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.NOT_FOUND,    "/api/repositories/123", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/api/repositories/123", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/repositories/123", null, null },
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/repositories/123", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.NOT_FOUND, "/api/repositories/123", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/api/repositories/123", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/api/repositories/123", null, null},
 
 				/* Boot Endpoints */
 
-				{ HttpMethod.GET, HttpStatus.OK,           "/actuator", manageOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/actuator", viewOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.FORBIDDEN,    "/actuator", createOnlyUser, null },
-				{ HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/actuator", null, null },
+				{HttpMethod.GET, HttpStatus.OK, "/actuator", manageOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/actuator", viewOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.FORBIDDEN, "/actuator", createOnlyUser, null},
+				{HttpMethod.GET, HttpStatus.UNAUTHORIZED, "/actuator", null, null},
 
 		});
 	}
@@ -295,7 +297,7 @@ public class LocalServerSecurityWithUsersFileTests {
 
 		if (this.userCredentials != null) {
 			rb.header("Authorization",
-				SecurityTestUtils.basicAuthorizationHeader(this.userCredentials.getUsername(), this.userCredentials.getPassword()));
+					SecurityTestUtils.basicAuthorizationHeader(this.userCredentials.getUsername(), this.userCredentials.getPassword()));
 		}
 
 		if (!CollectionUtils.isEmpty(urlParameters)) {
@@ -339,7 +341,8 @@ public class LocalServerSecurityWithUsersFileTests {
 		}
 
 		try {
-			localSkipperResource.getMockMvc().perform(rb).andDo(print()).andExpect(statusResultMatcher);
+			localSkipperResource.getMockMvc().perform(rb).andDo(print())
+					.andExpect(statusResultMatcher);
 		}
 		catch (AssertionError e) {
 			throw new AssertionError(String.format(

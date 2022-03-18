@@ -172,6 +172,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+			<version>${spring-cloud-common-security-config.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.jackson</groupId>
@@ -226,6 +227,15 @@
 				</includes>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<failIfNoTests>true</failIfNoTests>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<profiles>
@@ -237,6 +247,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<failIfNoTests>true</failIfNoTests>
 							<skipTests>false</skipTests>
 							<includes>
 								<include>**/*Documentation.java</include>
@@ -255,6 +266,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<failIfNoTests>true</failIfNoTests>
 							<skipTests>false</skipTests>
 							<includes>
 								<include>**/*Documentation.java</include>
@@ -265,5 +277,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>

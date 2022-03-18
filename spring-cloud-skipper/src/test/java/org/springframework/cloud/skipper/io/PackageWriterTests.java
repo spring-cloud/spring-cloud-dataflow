@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.io;
 
 import java.io.File;
@@ -26,12 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.ZipEntry;
 
 import org.junit.Test;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.zeroturnaround.zip.ZipEntryCallback;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.cloud.skipper.TestResourceUtils;
@@ -47,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 public class PackageWriterTests {
 
@@ -61,21 +61,18 @@ public class PackageWriterTests {
 		assertThat(zipFile).exists();
 		assertThat(zipFile.getName()).isEqualTo("myapp-1.0.0.zip");
 		final AtomicInteger processedEntries = new AtomicInteger(3);
-		ZipUtil.iterate(zipFile, new ZipEntryCallback() {
-			@Override
-			public void process(InputStream inputStream, ZipEntry zipEntry) throws IOException {
-				if (zipEntry.getName().equals("myapp-1.0.0/package.yml")) {
-					assertExpectedContents(inputStream, "package.yml");
-					processedEntries.decrementAndGet();
-				}
-				if (zipEntry.getName().equals("myapp-1.0.0/values.yml")) {
-					assertExpectedContents(inputStream, "values.yml");
-					processedEntries.decrementAndGet();
-				}
-				if (zipEntry.getName().equals("myapp-1.0.0/templates/myapp.yml")) {
-					assertExpectedContents(inputStream, "generic-template.yml");
-					processedEntries.decrementAndGet();
-				}
+		ZipUtil.iterate(zipFile, (inputStream, zipEntry) -> {
+			if (zipEntry.getName().equals("myapp-1.0.0/package.yml")) {
+				assertExpectedContents(inputStream, "package.yml");
+				processedEntries.decrementAndGet();
+			}
+			if (zipEntry.getName().equals("myapp-1.0.0/values.yml")) {
+				assertExpectedContents(inputStream, "values.yml");
+				processedEntries.decrementAndGet();
+			}
+			if (zipEntry.getName().equals("myapp-1.0.0/templates/myapp.yml")) {
+				assertExpectedContents(inputStream, "generic-template.yml");
+				processedEntries.decrementAndGet();
 			}
 		});
 		// make sure we asserted all fields
@@ -88,7 +85,7 @@ public class PackageWriterTests {
 				TestResourceUtils.qualifiedResource(getClass(), resourceSuffix)
 						.getInputStream(),
 				Charset.defaultCharset());
-		assertThat(zipEntryAsString.replace("\r\n", "\n")).isEqualTo(expectedYaml.replace("\r\n", "\n"));
+		assertThat(removeCr(zipEntryAsString)).isEqualTo(removeCr(expectedYaml));
 	}
 
 	private Package createSimplePackage() throws IOException {
@@ -124,5 +121,9 @@ public class PackageWriterTests {
 		pkg.setTemplates(templateList);
 
 		return pkg;
+	}
+
+	private static String removeCr(final String input) {
+		return input != null ? input.replace("\r\n", "\n") : null;
 	}
 }

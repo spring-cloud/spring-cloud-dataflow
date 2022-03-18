@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.server.service;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ import org.springframework.cloud.skipper.io.PackageReader;
 import org.springframework.cloud.skipper.server.TestResourceUtils;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
 import org.springframework.cloud.skipper.server.util.ConfigValueUtils;
+import org.springframework.cloud.skipper.server.util.LineUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
@@ -47,10 +49,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ConfigValueUtilsTests.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
@@ -85,7 +86,7 @@ public class ConfigValueUtilsTests {
 		String expectedYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "merged.yaml").getInputStream(),
 				Charset.defaultCharset());
-		assertThat(mergedYaml.replace("\r\n", "\n")).isEqualTo(expectedYaml.replace("\r\n", "\n"));
+		LineUtil.assertEqualRemoveCr(mergedYaml, expectedYaml);
 	}
 
 	@Configuration

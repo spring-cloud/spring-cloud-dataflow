@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.server.local.security;
 
 import java.util.Collection;
@@ -35,12 +36,11 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class LocalSkipperResource extends ExternalResource {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(LocalSkipperResource.class);
-
-	private SpringApplication app;
 
 	private MockMvc mockMvc;
 
@@ -68,27 +68,27 @@ public class LocalSkipperResource extends ExternalResource {
 
 		final SpringApplicationBuilder builder = new SpringApplicationBuilder(LocalTestSkipperServer.class);
 
-		builder.properties("spring.main.allow-bean-definition-overriding:true");
+		builder.properties("spring.main.allow-bean-definition-overriding=true");
 
 		if (this.configLocations  != null && this.configLocations.length > 0) {
 			builder.properties(
-				String.format("spring.config.additional-location:%s", StringUtils.arrayToCommaDelimitedString(this.configLocations))
+				String.format("spring.config.additional-location=%s", StringUtils.arrayToCommaDelimitedString(this.configLocations))
 			);
 		}
 
 		if (this.configNames  != null && this.configNames.length > 0) {
 			builder.properties(
-				String.format("spring.config.name:%s", StringUtils.arrayToCommaDelimitedString(this.configNames))
+				String.format("spring.config.name=%s", StringUtils.arrayToCommaDelimitedString(this.configNames))
 			);
 		}
 
-		this.app = builder.build();
+		SpringApplication app = builder.build();
 
 		configurableApplicationContext = app.run(this.args);
 
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup((WebApplicationContext) configurableApplicationContext)
-				.addFilters(filters.toArray(new Filter[filters.size()])).build();
+				.addFilters(filters.toArray(new Filter[0])).build();
 		skipperPort = configurableApplicationContext.getEnvironment().resolvePlaceholders("${server.port}");
 		LOGGER.info("Skipper Server is UP on port {}!", skipperPort);
 	}

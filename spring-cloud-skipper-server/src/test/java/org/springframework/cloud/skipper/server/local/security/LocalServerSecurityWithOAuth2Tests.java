@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -34,53 +35,56 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class LocalServerSecurityWithOAuth2Tests {
 
 	private final static OAuth2ServerResource oAuth2ServerResource = new OAuth2ServerResource();
 
 	private final static LocalSkipperResource localSkipperResource = new LocalSkipperResource(
-			new String[]{
-				"classpath:/",
-				"classpath:/org/springframework/cloud/skipper/server/local/security/"
+			new String[] {
+					"optional:classpath:/",
+					"optional:classpath:/org/springframework/cloud/skipper/server/local/security/"
 			},
-			new String[]{
-				"application",
-				"oauthConfig"
-			}
-		);
+			new String[] {"application", "oauthConfig"});
 
 	@ClassRule
-	public static TestRule springSkipperAndOauthServer = RuleChain.outerRule(oAuth2ServerResource)
-			.around(localSkipperResource);
+	public static TestRule springSkipperAndOauthServer = RuleChain
+			.outerRule(oAuth2ServerResource).around(localSkipperResource);
 
 	@Test
 	public void testAccessRootUrlWithoutCredentials() throws Exception {
-		localSkipperResource.getMockMvc().perform(get("/")).andDo(print()).andExpect(status().isUnauthorized());
+		localSkipperResource.getMockMvc().perform(get("/")).andDo(print())
+				.andExpect(status().isUnauthorized());
 	}
 
 	@Test
 	public void testAccessApiUrlWithBasicAuthCredentials() throws Exception {
-		localSkipperResource.getWebApplicationContext().getEnvironment().getPropertySources();
+		localSkipperResource.getWebApplicationContext().getEnvironment()
+				.getPropertySources();
 		localSkipperResource.getMockMvc()
-				.perform(get("/api").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10"))).andDo(print())
-				.andExpect(status().isOk());
+				.perform(get("/api").header("Authorization",
+						SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
+				.andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
 	public void testAccessRootUrlWithBasicAuthCredentials() throws Exception {
-		localSkipperResource.getWebApplicationContext().getEnvironment().getPropertySources();
+		localSkipperResource.getWebApplicationContext().getEnvironment()
+				.getPropertySources();
 		localSkipperResource.getMockMvc()
-				.perform(get("/")
-				.header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
-				.andDo(print())
-				.andExpect(status().is3xxRedirection());
+				.perform(get("/").header("Authorization",
+						SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
+				.andDo(print()).andExpect(status().is3xxRedirection());
 	}
 
 	@Test
-	public void testAccessRootUrlWithBasicAuthCredentialsWrongPassword() throws Exception {
+	public void testAccessRootUrlWithBasicAuthCredentialsWrongPassword()
+			throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "wrong-password")))
+				.perform(get("/").header("Authorization",
+						SecurityTestUtils.basicAuthorizationHeader("user",
+								"wrong-password")))
 				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
@@ -91,24 +95,30 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
-	public void testAccessToActuatorEndpointWithBasicAuthCredentialsWrongPassword() throws Exception {
+	public void testAccessToActuatorEndpointWithBasicAuthCredentialsWrongPassword()
+			throws Exception {
 		localSkipperResource.getMockMvc()
 				.perform(get("/actuator/env").header("Authorization",
-					SecurityTestUtils.basicAuthorizationHeader("user", "wrong-password")))
+						SecurityTestUtils.basicAuthorizationHeader("user",
+								"wrong-password")))
 				.andDo(print()).andExpect(status().isUnauthorized());
 	}
 
 	@Test
-	public void testThatAccessToActuatorEndpointWithBasicAuthCredentialsSucceeds() throws Exception {
+	public void testThatAccessToActuatorEndpointWithBasicAuthCredentialsSucceeds()
+			throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/actuator/env").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
+				.perform(get("/actuator/env").header("Authorization",
+						SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
 				.andDo(print()).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testThatAccessToActuatorEndpointRootWithBasicAuthCredentialsSucceeds() throws Exception {
+	public void testThatAccessToActuatorEndpointRootWithBasicAuthCredentialsSucceeds()
+			throws Exception {
 		localSkipperResource.getMockMvc()
-				.perform(get("/actuator").header("Authorization", SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
+				.perform(get("/actuator").header("Authorization",
+						SecurityTestUtils.basicAuthorizationHeader("user", "secret10")))
 				.andDo(print()).andExpect(status().isOk());
 	}
 
@@ -119,15 +129,18 @@ public class LocalServerSecurityWithOAuth2Tests {
 		resourceDetails.setClientId("myclient");
 		resourceDetails.setClientSecret("mysecret");
 		resourceDetails.setGrantType("client_credentials");
-		resourceDetails
-				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+		resourceDetails.setAccessTokenUri("http://localhost:"
+				+ oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
 
-		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(
+				resourceDetails);
 		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
 
 		final String accessTokenAsString = accessToken.getValue();
 
-		localSkipperResource.getMockMvc().perform(get("/api").header("Authorization", "bearer " + accessTokenAsString))
+		localSkipperResource.getMockMvc()
+				.perform(get("/api").header("Authorization",
+						"bearer " + accessTokenAsString))
 				.andDo(print()).andExpect(status().isOk());
 	}
 
@@ -138,25 +151,29 @@ public class LocalServerSecurityWithOAuth2Tests {
 		resourceDetails.setClientId("myclient");
 		resourceDetails.setClientSecret("mysecret");
 		resourceDetails.setGrantType("client_credentials");
-		resourceDetails
-				.setAccessTokenUri("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
+		resourceDetails.setAccessTokenUri("http://localhost:"
+				+ oAuth2ServerResource.getOauth2ServerPort() + "/oauth/token");
 
-		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(resourceDetails);
+		final OAuth2RestTemplate oAuth2RestTemplate = new OAuth2RestTemplate(
+				resourceDetails);
 		final OAuth2AccessToken accessToken = oAuth2RestTemplate.getAccessToken();
 
 		final String accessTokenAsString = accessToken.getValue();
 
 		localSkipperResource.getMockMvc()
-				.perform(get("/api/about").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.versionInfo.server.name", is("Spring Cloud Skipper Server")))
+				.perform(get("/api/about").header("Authorization",
+						"bearer " + accessTokenAsString))
+				.andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.versionInfo.server.name",
+						is("Spring Cloud Skipper Server")))
 				.andExpect(jsonPath("$.versionInfo.server.version", notNullValue()));
 	}
 
-	@Test
+	@Test(expected = AuthenticationServiceException.class)
 	public void testAccessRootUrlWithWrongOAuth2AccessToken() throws Exception {
-		localSkipperResource.getMockMvc().perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
-				.andExpect(status().isUnauthorized());
+		localSkipperResource.getMockMvc()
+				.perform(get("/").header("Authorization", "bearer 123456")).andDo(print())
+				.andExpect(status().isBadRequest());
 	}
 
 }
