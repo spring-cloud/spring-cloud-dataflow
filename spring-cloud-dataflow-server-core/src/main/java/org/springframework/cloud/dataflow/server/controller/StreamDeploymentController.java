@@ -115,7 +115,7 @@ public class StreamDeploymentController {
 			@PathVariable("count") Integer count,
 			@RequestBody(required = false) Map<String, String> properties) {
 
-		logger.info(String.format("Scale stream: %s, apps: %s instances to %s", streamName, appName, count));
+		logger.info("Scale stream: {}, apps: {} instances to {}", streamName, appName, count);
 		this.streamService.scaleApplicationInstances(streamName, appName, count, properties);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}

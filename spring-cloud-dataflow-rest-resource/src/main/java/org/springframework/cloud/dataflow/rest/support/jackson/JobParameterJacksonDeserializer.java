@@ -72,8 +72,8 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("jobParameter - value: %s (type: %s, isIdentifying: %s)",
-					jobParameter.getValue(), jobParameter.getType().name(), jobParameter.isIdentifying()));
+			logger.debug("jobParameter - value: {} (type: {}, isIdentifying: {})",
+					jobParameter.getValue(), jobParameter.getType().name(), jobParameter.isIdentifying());
 		}
 
 		return jobParameter;

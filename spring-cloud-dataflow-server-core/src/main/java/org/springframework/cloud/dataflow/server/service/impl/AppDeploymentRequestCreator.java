@@ -194,8 +194,8 @@ public class AppDeploymentRequestCreator {
 				isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties, upstreamAppSupportsPartition);
 			}
 
-			logger.info(String.format("Creating resource with [%s] for application [%s]",
-					appRegistration.getUri().toString(), currentApp.getName()));
+			logger.info("Creating resource with [{}] for application [{}]",
+					appRegistration.getUri().toString(), currentApp.getName());
 			Resource appResource = this.appRegistry.getAppResource(appRegistration);
 			Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 
