@@ -116,7 +116,7 @@ public class ContainerRegistryService {
 			return  (List<String>) manifest.getBody().get(TAGS_FIELD);
 		}
 		catch (Exception e) {
-			logger.error(String.format("Exception getting tag information for the %s from %s", repositoryName, registryName));
+			logger.error("Exception getting tag information for the {} from {}", repositoryName, registryName);
 		}
 		return null;
 	}
@@ -152,7 +152,7 @@ public class ContainerRegistryService {
 			return manifest.getBody();
 		}
 		catch (Exception e) {
-			logger.error(String.format("Exception getting repositories from %s", registryName));
+			logger.error("Exception getting repositories from {}", registryName);
 		}
 		return null;
 	}

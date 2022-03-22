@@ -478,7 +478,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 				this.skipperClient.delete(streamName, true);
 			}
 			catch (ReleaseNotFoundException e) {
-				logger.info(String.format("Release not found for %s. Deleting the package %s", streamName, streamName));
+				logger.info("Release not found for {}. Deleting the package {}", streamName, streamName);
 				this.skipperClient.packageDelete(streamName);
 			}
 		}

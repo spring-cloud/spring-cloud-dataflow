@@ -83,8 +83,8 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 					composedTaskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0]);
 				}
 				catch(NoSuchJobExecutionException noSuchJobExecutionException) {
-					logger.warn(String.format("Job Execution for Task Execution %s could not be found.",
-							taskExecution.getExecutionId()), noSuchJobExecutionException);
+					logger.warn("Job Execution for Task Execution {} could not be found.",
+							taskExecution.getExecutionId());
 				}
 			}
 		}
