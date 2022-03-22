@@ -33,6 +33,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 /**
@@ -60,7 +61,9 @@ public class SpringDocJsonDecodeFilter implements Filter {
         // Replaces all escaped quotes
         content = StringEscapeUtils.unescapeJson(content);
         // Replaces first and last quote
-        content = content.substring(1, content.length() - 1);
+		if (StringUtils.hasText(content)) {
+			content = content.substring(1, content.length() - 1);
+		}
         if (LOG.isTraceEnabled()) {
             LOG.trace("Using decoded JSON for serving api-docs: {}", content);
         }
