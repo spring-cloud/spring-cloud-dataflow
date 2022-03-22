@@ -108,6 +108,11 @@ public class RootController {
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppInstanceController.class).list(null, null, null)).withRel("runtime/apps/{appId}/instances"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppInstanceController.class).display(null, null)).withRel("runtime/apps/{appId}/instances/{instanceId}"));
 
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppInstanceController.class)
+					.getFromActuator(null, null, null)).withRel("runtime/apps/{appId}/instances/{instanceId}/actuator"));
+			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(RuntimeAppInstanceController.class)
+					.postToActuator(null, null, null)).withRel("runtime/apps/{appId}/instances/{instanceId}/actuator"));
+
 			root.add(WebMvcLinkBuilder.linkTo(StreamDeploymentController.class).withRel("streams/deployments"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).info(null, false)).withRel("streams/deployments/{name}{?reuse-deployment-properties}"));
 			root.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(StreamDeploymentController.class).deploy(null, null)).withRel("streams/deployments/{name}"));

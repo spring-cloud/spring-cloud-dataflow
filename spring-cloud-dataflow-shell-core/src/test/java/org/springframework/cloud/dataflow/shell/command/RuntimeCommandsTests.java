@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -36,14 +38,16 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.table.TableModel;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link RuntimeCommands}.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
 public class RuntimeCommandsTests {
 
@@ -67,7 +71,7 @@ public class RuntimeCommandsTests {
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);
 		DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);
-		this.runtimeCommands = new RuntimeCommands(dataFlowShell);
+		this.runtimeCommands = new RuntimeCommands(dataFlowShell, new ObjectMapper());
 		appStatusResource1 = new AppStatusResource("1", "deployed");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("key1", "value1");
@@ -119,7 +123,7 @@ public class RuntimeCommandsTests {
 		TableModel model = runtimeCommands.list(true, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				assertThat(String.valueOf(model.getValue(row + 1, col))).isEqualTo(expected[row][col]);
 			}
 		}
 	}
@@ -137,7 +141,7 @@ public class RuntimeCommandsTests {
 		TableModel model = runtimeCommands.list(false, null).getModel();
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				assertThat(String.valueOf(model.getValue(row + 1, col))).isEqualTo(expected[row][col]);
 			}
 		}
 	}
@@ -147,11 +151,90 @@ public class RuntimeCommandsTests {
 		when(runtimeOperations.status("1")).thenReturn(appStatusResource1);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" } };
 		TableModel model = runtimeCommands.list(false, new String[] { "1" }).getModel();
-		assertTrue(model.getRowCount() == 4);
+		assertThat(model.getRowCount()).isEqualTo(4);
 		for (int row = 0; row < expected.length; row++) {
 			for (int col = 0; col < expected[row].length; col++) {
-				assertThat(String.valueOf(model.getValue(row + 1, col)), Matchers.is(expected[row][col]));
+				assertThat(String.valueOf(model.getValue(row + 1, col))).isEqualTo(expected[row][col]);
 			}
+		}
+	}
+
+	@Test
+	public void testActuatorGet() {
+		String json = "{ \"name\": \"foo\" }";
+		when(runtimeOperations.getFromActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info")).thenReturn(json);
+		assertThat(runtimeCommands.getFromActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info")).isEqualTo(json);
+	}
+
+	@Test
+	public void testActuatorPostWithoutData() {
+		runtimeCommands.postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", null);
+		verify(runtimeOperations).postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", Collections.emptyMap());
+	}
+
+	@Test
+	public void testActuatorPostWithData() throws Exception {
+		SummaryInfo summaryInfo = new SummaryInfo();
+		summaryInfo.setName("highLevel");
+		summaryInfo.getDetails().add(new DetailInfo("line1 details"));
+		summaryInfo.getDetails().add(new DetailInfo("line2 details"));
+		ObjectMapper objectMapper = new ObjectMapper();
+		String dataJsonStr = objectMapper.writeValueAsString(summaryInfo);
+
+		Map<String, Object> expectedDataMap = new HashMap<>();
+		expectedDataMap.put("name", "highLevel");
+		expectedDataMap.put("details", Arrays.asList(
+				Collections.singletonMap("description", "line1 details"),
+				Collections.singletonMap("description", "line2 details")));
+
+		runtimeCommands.postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", dataJsonStr);
+
+		verify(runtimeOperations).postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", expectedDataMap);
+	}
+
+	@Test
+	public void testActuatorPostWithInvalidData() {
+		assertThatThrownBy(() -> runtimeCommands.postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0",
+				"info", "{invalidJsonStr}")).isInstanceOf(RuntimeException.class).hasMessageContaining("Unable to parse 'data' into map:");
+	}
+
+	static class SummaryInfo {
+		private String name;
+		private List<DetailInfo> details = new ArrayList<>();
+
+		public SummaryInfo() {
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public List<DetailInfo> getDetails() {
+			return details;
+		}
+
+		public void setDetails(List<DetailInfo> details) {
+			this.details = details;
+		}
+	}
+
+	static class DetailInfo {
+		private String description;
+
+		public DetailInfo(String description) {
+			this.description = description;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
 		}
 	}
 
