@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server:2.8.0-SNAPSHOT
+        image: springcloud/spring-cloud-skipper-server:2.9.0-SNAPSHOT
         imagePullPolicy: Always
         volumeMounts:
           - name: config
@@ -54,18 +54,18 @@ spec:
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
           value: /etc/secrets
       initContainers:
-      - name: init-mysql-wait
+      - name: init-mariadb-wait
         image: busybox
-        command: ['sh', '-c', 'until nc -w3 -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
-      - name: init-mysql-database
-        image: mysql:5.6
+        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
+      - name: init-mariadb-database
+        image: mariadb:10.4.22
         env:
-        - name: MYSQL_PWD
+        - name: MARIADB_PWD
           valueFrom:
             secretKeyRef:
-              name: mysql
-              key: mysql-root-password
-        command: ['sh', '-c', 'mysql -h mysql -u root -e "CREATE DATABASE IF NOT EXISTS skipper;"']
+              name: mariadb
+              key: mariadb-root-password
+        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
       volumes:
         - name: config
@@ -76,4 +76,4 @@ spec:
               path: application.yaml
         - name: database
           secret:
-            secretName: mysql
+            secretName: mariadb

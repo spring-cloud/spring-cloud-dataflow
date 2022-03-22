@@ -5,7 +5,7 @@ Data Flow Options:
   --dataflow.credentials-provider-command=<COMMAND> Executes an external command which must return an
                                                     OAuth Bearer Token (Access Token prefixed with 'Bearer '),
                                                     e.g. 'Bearer 12345'), [no default].
-  --dataflow.skip-ssl-validation=<true|false>       Accept any SSL certificate (even self-signed) [default: no].
+  --dataflow.skip-ssl-validation			        Accept any SSL certificate (even self-signed) [default: false].
   --dataflow.proxy.uri=<PROXY-URI>                  Address of an optional proxy server to use [no default].
   --dataflow.proxy.username=<PROXY-USERNAME>        Username of the proxy server (if required by proxy server) [no default].
   --dataflow.proxy.password=<PROXY-PASSWORD>        Password of the proxy server (if required by proxy server) [no default].

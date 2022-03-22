@@ -1,0 +1,13 @@
+(@ load("@ytt:data", "data") @)
+#@ load("@ytt:overlay", "overlay")
+---
+#@overlay/match missing_ok=True
+apiVersion: apps/v1
+#@overlay/match missing_ok=True
+kind: Deployment
+#@overlay/match missing_ok=True
+spec:
+  spec:
+    containers:
+    - name: fakectr
+      image: springcloud/spring-cloud-dataflow-composed-task-runner:(@= data.values.ctr.version @)

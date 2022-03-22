@@ -277,12 +277,12 @@ public class StreamDslTests {
 
 
 		AppStatusResource appStatusResource = new AppStatusResource("deploymentId", "deployed");
-		appStatusResource.setInstances(new CollectionModel(Arrays.asList(new AppInstanceStatusResource("instanceId", "deployed",
+		appStatusResource.setInstances(CollectionModel.of(Arrays.asList(new AppInstanceStatusResource("instanceId", "deployed",
 				Collections.singletonMap(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, "log")))));
-		streamStatusResource.setApplications(new CollectionModel<>(Arrays.asList(appStatusResource)));
+		streamStatusResource.setApplications(CollectionModel.of(Arrays.asList(appStatusResource)));
 
 		when(runtimeOperations.streamStatus(ticktockDefinition.getName()))
-				.thenReturn(new PagedModel(Arrays.asList(streamStatusResource), null));
+				.thenReturn(PagedModel.of(Arrays.asList(streamStatusResource), (PagedModel.PageMetadata) null));
 
 		Stream stream = Stream.builder(client).name(ticktockDefinition.getName()).description("demo stream")
 				.definition(ticktockDefinition.getDslText()).create()

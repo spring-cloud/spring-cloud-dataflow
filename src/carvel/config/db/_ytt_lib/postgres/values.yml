@@ -1,0 +1,10 @@
+#@data/values-schema
+---
+name: postgres
+username: ""
+password: ""
+image:
+  repository: postgres
+  tag: "10"
+  digest: ""
+registrySecretRef: ""

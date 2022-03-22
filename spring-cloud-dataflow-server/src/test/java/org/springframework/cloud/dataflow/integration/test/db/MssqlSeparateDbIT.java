@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
+import org.junit.jupiter.api.Test;
+
 import org.springframework.cloud.dataflow.integration.test.tags.DatabaseSeparate;
+import org.springframework.cloud.dataflow.integration.test.tags.DatabaseSlow;
+import org.springframework.cloud.dataflow.integration.test.tags.DataflowAll;
 import org.springframework.cloud.dataflow.integration.test.tags.Mssql;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,5 +36,12 @@ public class MssqlSeparateDbIT extends AbstractDatabaseTests {
 	@Override
 	protected String getDatabaseTag() {
 		return TagNames.MSSQL_2019_CU10_ubuntu_20_04;
+	}
+
+	@Test
+	@DataflowAll
+	@DatabaseSlow
+	public void testFullMigrationFlow() {
+		super.testFullMigrationFlow();
 	}
 }

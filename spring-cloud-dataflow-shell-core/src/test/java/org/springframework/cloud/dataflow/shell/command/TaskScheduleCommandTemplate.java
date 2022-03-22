@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.mockito.Mockito;
@@ -31,13 +32,13 @@ import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskSchedule;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.shell.ShellCommandRunner;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.context.ApplicationContext;
-import org.springframework.shell.core.CommandResult;
-import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.table.Table;
+import org.springframework.util.StringUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,15 +48,16 @@ import static org.mockito.Mockito.when;
  * It should mimic the client side API of SchedulerOperations as much as possible.
  *
  * @author Daniel Serleg
+ * @author Chris Bono
  */
 public class TaskScheduleCommandTemplate {
 
 	private SchedulerService schedule;
 
-	private JLineShellComponent dataFlowShell;
+	private ShellCommandRunner commandRunner;
 
-	public TaskScheduleCommandTemplate(JLineShellComponent dataFlowShell, ApplicationContext applicationContext) {
-		this.dataFlowShell = dataFlowShell;
+	public TaskScheduleCommandTemplate(ShellCommandRunner commandRunner, ApplicationContext applicationContext) {
+		this.commandRunner = commandRunner;
 
 		ConfigurableListableBeanFactory beanFactory = ((AnnotationConfigServletWebServerApplicationContext) applicationContext)
 				.getBeanFactory();
@@ -67,43 +69,53 @@ public class TaskScheduleCommandTemplate {
 		listableBeanFactory.registerBeanDefinition("taskSchedulerController", builder.getBeanDefinition());
 	}
 
-	public void create(String name, String definition, String expression, String properties, String args) {
+	public void create(String name, String definition, String expression, String properties, String args) throws IOException {
 		String wholeCommand = String.format(
-				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --properties \"%s\" --arguments \"%s\"",
-				name, definition, expression, properties, args);
-		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
-		verify(schedule).schedule(name, definition, Collections.singletonMap(TaskSchedule.CRON_EXPRESSION_KEY, expression),
-				Collections.emptyList(), null);
-		assertEquals("Created schedule '" + name + "'", cr.getResult());
+				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\"", name, definition, expression);
+		if (StringUtils.hasText(properties)) {
+			wholeCommand += String.format(" --properties \"%s\"", properties);
+		}
+		if (StringUtils.hasText(args)) {
+			wholeCommand += String.format(" --arguments \"%s\"", args);
+		}
+		Object result = commandRunner.executeCommand(wholeCommand);
+
+		Map<String, String> expectedProperties = DeploymentPropertiesUtils.parseDeploymentProperties(properties, null, 0);
+		expectedProperties.put(TaskSchedule.CRON_EXPRESSION_KEY, expression);
+
+		List<String> expectedArgs = args != null ? Arrays.asList(args) : Collections.emptyList();
+
+		verify(schedule).schedule(name, definition, expectedProperties, expectedArgs, null);
+		assertThat(result.toString()).isEqualTo(String.format("Created schedule '%s'", name));
 	}
 
 	public void createWithPropertiesFile(String name, String definition, String expression, String propertiesFile, String args) throws IOException {
 		String wholeCommand = String.format(
 				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --propertiesFile \"%s\" --arguments \"%s\"",
 				name, definition, expression, propertiesFile, args);
-		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
+		Object result = commandRunner.executeCommand(wholeCommand);
 
 		Map<String, String> expectedProperties = DeploymentPropertiesUtils.parseDeploymentProperties("", new File(propertiesFile), 1);
 		expectedProperties.put(TaskSchedule.CRON_EXPRESSION_KEY, expression);
 
-		verify(schedule).schedule(name, definition, expectedProperties, Collections.emptyList(), null);
-		assertEquals("Created schedule '" + name + "'", cr.getResult());
+		List<String> expectedArgs = args != null ? Arrays.asList(args) : Collections.emptyList();
+
+		verify(schedule).schedule(name, definition, expectedProperties, expectedArgs, null);
+		assertThat(result.toString()).isEqualTo(String.format("Created schedule '%s'", name));
 	}
 
 	public void createWithPropertiesAndPropertiesFile(String name, String definition, String expression, String properties, String propertiesFile, String args) {
 		String wholeCommand = String.format(
 				"task schedule create --name \"%s\" --definitionName \"%s\" --expression \"%s\" --properties \"%s\"  --propertiesFile \"%s\" --arguments \"%s\"",
 				name, definition, expression, properties, propertiesFile, args);
-		dataFlowShell.executeCommand(wholeCommand);
+		commandRunner.executeCommand(wholeCommand);
 	}
 
-
-
 	public void unschedule(String name) {
-		String wholeCommand = String.format("task schedule destroy --name \"%s\"", name);
-		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
+		assertThat(commandRunner.executeCommand(String.format("task schedule destroy --name \"%s\"", name)))
+				.extracting(Object::toString)
+				.isEqualTo(String.format("Deleted task schedule '%s'", name));
 		verify(schedule).unschedule(name, null);
-		assertEquals("Deleted task schedule '" + name + "'", cr.getResult());
 	}
 
 	public void list() {
@@ -115,10 +127,10 @@ public class TaskScheduleCommandTemplate {
 		when(schedule.listForPlatform(null)).thenReturn(Arrays.asList(scheduleInfo));
 
 		String wholeCommand = "task schedule list";
-		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
+		Object result = commandRunner.executeCommand(wholeCommand);
 
-		Table table = (Table) cr.getResult();
-		assertEquals("schedName", table.getModel().getValue(1, 0));
+		Table table = (Table) result;
+		assertThat(table.getModel().getValue(1, 0)).isEqualTo("schedName");
 	}
 
 	public void listByTaskDefinition(String definitionName) {
@@ -130,9 +142,9 @@ public class TaskScheduleCommandTemplate {
 		when(schedule.list(definitionName, null)).thenReturn(Arrays.asList(scheduleInfo));
 
 		String wholeCommand = String.format("task schedule list --definitionName %s", definitionName);
-		CommandResult cr = dataFlowShell.executeCommand(wholeCommand);
+		Object result = commandRunner.executeCommand(wholeCommand);
 
-		Table table = (Table) cr.getResult();
-		assertEquals("schedName", table.getModel().getValue(1, 0));
+		Table table = (Table) result;
+		assertThat(table.getModel().getValue(1, 0)).isEqualTo("schedName");
 	}
 }

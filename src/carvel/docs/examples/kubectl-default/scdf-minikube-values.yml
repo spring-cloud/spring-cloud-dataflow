@@ -1,0 +1,18 @@
+#@data/values
+---
+scdf:
+  deploy:
+    database:
+      type: mariadb
+  server:
+    image:
+      tag: 2.10.0-SNAPSHOT
+    service:
+      type:
+        NodePort
+  skipper:
+    image:
+      tag: 2.9.0-SNAPSHOT
+  ctr:
+    image:
+      tag: 2.10.0-SNAPSHOT

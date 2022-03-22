@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,16 +39,20 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.util.ResourceUtils;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link org.springframework.cloud.dataflow.shell.ShellCommandLineRunner}.
+ * Integration tests that verify launching a shell application instance against a running Dataflow server instance.
+ *
+ * <p>These tests extend the {@link AbstractShellIntegrationTest} so that each test has a running DataFlow
+ * Server and then also launches the shell as a separate application that points to the already running Dataflow server.
  *
  * @author Furer Alexander
+ * @author Chris Bono
  */
 public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
@@ -64,36 +67,30 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
 	@Test
 	public void testSingleFileCommand() {
-
 		String commandFiles = toAbsolutePaths("commands/registerTask_timestamp.txt");
-		assertTrue(runShell(commandFiles));
-
+		assertThat(runShell(commandFiles)).isTrue();
 		assertAppExists("timestamp", ApplicationType.task);
-
 	}
 
 	@Test
 	public void testMultiFileCommandOrderPreserved() {
 		String commandFiles = toAbsolutePaths(
 				"commands/stream_all_delete.txt,commands/registerTask_timestamp.txt,commands/unregisterTask_timestamp.txt,commands/registerSink_log.txt,commands/unregisterSink_log.txt");
-		assertTrue(runShell(commandFiles));
-
-		assertThat("Registry should be empty", AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class).findAll(),
-				Matchers.empty());
+		assertThat(runShell(commandFiles)).isTrue();
+		assertThat(AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class).findAll()).isEmpty();
 	}
 
 	@Test
 	public void testMultiFileCommand() {
 		String commandFiles = toAbsolutePaths("commands/registerTask_timestamp.txt,commands/registerSink_log.txt");
-		assertTrue(runShell(commandFiles));
-
+		assertThat(runShell(commandFiles)).isTrue();
 		assertAppExists("timestamp", ApplicationType.task);
 		assertAppExists("log", ApplicationType.sink);
 	}
 
 	private void assertAppExists(String name, ApplicationType type) {
 		AppRegistryService registry = AbstractShellIntegrationTest.applicationContext.getBean(AppRegistryService.class);
-		assertTrue(String.format("'%s' application should be registered", name), registry.appExist(name, type));
+		assertThat(registry.appExist(name, type)).isTrue();
 	}
 
 	/**
@@ -115,7 +112,11 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 	}
 
 	/**
-	 * Runs shell with given command files, waits 1 min for  completion
+	 * Runs shell with given command files, waits 1 min for completion.
+	 *
+	 * <p>NOTE: this starts up another application context for running the shell against the Dataflow Server that was
+	 * started by the parent {@link AbstractShellIntegrationTest}.
+	 *
 	 * @param commandFiles
 	 */
 	private boolean runShell(String commandFiles) {
@@ -128,13 +129,13 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 					.run(
 							"--spring.shell.command-file=" + commandFiles,
 							"--spring.cloud.config.enabled=false",
+							"--spring.main.allow-circular-references=true",
 							"--spring.autoconfigure.exclude=" + Stream.of(SessionAutoConfiguration.class,
 									DataSourceAutoConfiguration.class,
 									HibernateJpaAutoConfiguration.class)
 									.map(Class::getName)
 									.collect(Collectors.joining(",")),
 							"--dataflow.uri=" + dataFlowUri
-
 					);
 		});
 
@@ -142,14 +143,8 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 			completed.get(60, TimeUnit.SECONDS);
 			return true;
 		}
-		catch (Throwable e) {
-			// return false;
-			// TODO: BOOT2 we're getting app run error. Might be something to do with reordering of events when boot runs an app.
-			//       There's checks for app run result so for now just return true.
-			//       o.s.b.SpringApplication:845 - Application run failed
-			//       java.lang.IllegalStateException: org.springframework.context.annotation.AnnotationConfigApplicationContext@377f9cb6 has been closed already
-			//
-			return true;
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 		finally {
 			executorService.shutdownNow();
@@ -157,8 +152,17 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
 	}
 
-	@EnableDataFlowShell
-	@Configuration
+	/**
+	 * The test application that is used for running the shell.
+	 *
+	 * <p>NOTE: To prevent the other {@link TestConfig test application} used by the parent {@link AbstractShellIntegrationTest}
+	 * from being auto-configured when this application is run, a component scan is used that excludes that configuration
+	 * class. Otherwise, we would have 2 full-blown Dataflow servers up and running.
+	 */
+	@ComponentScan(
+			basePackages = "org.springframework.cloud.dataflow.shell",
+			excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = TestConfig.class)
+	)
 	@EnableAutoConfiguration(exclude = DataFlowClientAutoConfiguration.class)
 	public static class ShellApp {
 	}

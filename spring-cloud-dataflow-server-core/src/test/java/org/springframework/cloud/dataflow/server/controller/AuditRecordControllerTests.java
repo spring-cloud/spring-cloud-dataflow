@@ -339,7 +339,7 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 
-		appRegistryService.delete("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
+		appRegistryService.delete("filter", ApplicationType.processor, "3.2.0");
 
 		mockMvc.perform(
 				get("/audit-records?operations=APP_REGISTRATION&actions=DELETE").accept(MediaType.APPLICATION_JSON))
@@ -449,7 +449,7 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)));
 
-		AppRegistration filter = appRegistryService.find("filter", ApplicationType.processor, "1.0.0.BUILD-SNAPSHOT");
+		AppRegistration filter = appRegistryService.find("filter", ApplicationType.processor, "3.2.0");
 		appRegistryService.save(filter);
 
 		mockMvc.perform(

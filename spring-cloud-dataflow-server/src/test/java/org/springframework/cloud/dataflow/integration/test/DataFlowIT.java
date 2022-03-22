@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,82 +92,93 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * DataFlow smoke tests that by default uses docker-compose files to install the Data Flow local platform:
- *  - https://dataflow.spring.io/docs/installation/local/docker/
- *  - https://dataflow.spring.io/docs/installation/local/docker-customize/
- * The Palantir DockerMachine and DockerComposeExtension are used to programmatically deploy the docker-compose files.
+ * DataFlow smoke tests that by default uses docker-compose files to install the Data Flow
+ * local platform: - https://dataflow.spring.io/docs/installation/local/docker/ -
+ * https://dataflow.spring.io/docs/installation/local/docker-customize/ The Palantir
+ * DockerMachine and DockerComposeExtension are used to programmatically deploy the
+ * docker-compose files.
  *
- * The {@link DockerComposeFactoryProperties} properties and variables are used to configure the {@link DockerComposeFactory}.
+ * The {@link DockerComposeFactoryProperties} properties and variables are used to
+ * configure the {@link DockerComposeFactory}.
  *
- * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to configure the list of docker-compose files
- * used for the test. It accepts a comma separated list of docker-compose yaml file names. It supports local files names
- * as well  http:/https:, classpath: or specific file: locations. Consult the {@link ResourceExtractor} for further
- * information.
+ * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PATHS} property allow to
+ * configure the list of docker-compose files used for the test. It accepts a comma
+ * separated list of docker-compose yaml file names. It supports local files names as well
+ * http:/https:, classpath: or specific file: locations. Consult the
+ * {@link ResourceExtractor} for further information.
  *
  * The {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN},
  * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_SKIPPER_VERSIONN},
  * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_STREAM_APPS_URI},
- * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI}
- * properties specify the dataflow/skipper versions as well as the version of the Apps and Tasks used.
+ * {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_TASK_APPS_URI} properties
+ * specify the dataflow/skipper versions as well as the version of the Apps and Tasks
+ * used.
  *
- * Set the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to false to use the local docker images instead
- * of pulling latest on from the Docker Hub.
+ * Set the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_PULLONSTARTUP} to
+ * false to use the local docker images instead of pulling latest on from the Docker Hub.
  *
- * Logs for all docker containers (expect deployed apps) are saved under target/dockerLogs/DockerComposeIT.
+ * Logs for all docker containers (expect deployed apps) are saved under
+ * target/dockerLogs/DockerComposeIT.
  *
- * The Data Flow REST API (https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide),
+ * The Data Flow REST API
+ * (https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide),
  * Java REST Clients (such as DataFlowTemplate, RuntimeOperations, TaskOperations) and the
- * Java DSL (https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/) are used by the tests to interact with
- * the Data Flow environment.
+ * Java DSL (https://dataflow.spring.io/docs/feature-guides/streams/java-dsl/) are used by
+ * the tests to interact with the Data Flow environment.
  *
- * When the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION} is set to true the
- * Docker Compose installation is skipped. In this case the {@link IntegrationTestProperties#getPlatform#getConnection} should be
- * used to connect the IT tests to an external pre-configured SCDF server.
+ * When the {@link DockerComposeFactoryProperties#TEST_DOCKER_COMPOSE_DISABLE_EXTENSION}
+ * is set to true the Docker Compose installation is skipped. In this case the
+ * {@link IntegrationTestProperties#getPlatform#getConnection} should be used to connect
+ * the IT tests to an external pre-configured SCDF server.
  *
- * For example to run the following test suite against SCDF Kubernetes cluster deployed on GKE:
- * <code>
+ * For example to run the following test suite against SCDF Kubernetes cluster deployed on
+ * GKE: <code>
  *    ./mvnw clean install -pl spring-cloud-dataflow-server -Dtest=foo -DfailIfNoTests=false \
  *        -Dtest.docker.compose.disable.extension=true \
  *        -Dspring.cloud.dataflow.client.server-uri=https://scdf-server.gke.io \
  *        -Pfailsafe
  * </code>
  *
- * The {@link Awaitility} is DSL utility that allows to timeout block the test execution until certain stream or application
- * state is reached or certain log content appears.
+ * The {@link Awaitility} is DSL utility that allows to timeout block the test execution
+ * until certain stream or application state is reached or certain log content appears.
  *
- * The {@link RuntimeApplicationHelper} help to retrieve the application attributes and log files across the Local,
- * CF and K8s platforms.
+ * The {@link RuntimeApplicationHelper} help to retrieve the application attributes and
+ * log files across the Local, CF and K8s platforms.
  *
- * NOTE: if you manually interrupt the test execution before it has completed of failed, it is likely that some docker
- * containers will be left hanging. Use 'docker rm $(docker ps -a -q) -f' to remove all docker containers. To clean all
- * Spring app on K8s platform use 'kubectl delete all,cm -l role=spring-app'
+ * NOTE: if you manually interrupt the test execution before it has completed of failed,
+ * it is likely that some docker containers will be left hanging. Use 'docker rm $(docker
+ * ps -a -q) -f' to remove all docker containers. To clean all Spring app on K8s platform
+ * use 'kubectl delete all,cm -l role=spring-app'
  *
  * --------------------------------------------------------------------------------------------------------------------
- * For testing streams on remote platforms (k8s and CF). If you configure K8s or CF runtime platforms as explained below,
- * you can have the test feature that uses the local run SCDF/Skipper/MySQL to deploy and run Stream only test to the
- * remote K8s or CF environments. Note that Tasks can only be run locally!
+ * For testing streams on remote platforms (k8s and CF). If you configure K8s or CF
+ * runtime platforms as explained below, you can have the test feature that uses the local
+ * run SCDF/Skipper/Mariadb to deploy and run Stream only test to the remote K8s or CF
+ * environments. Note that Tasks can only be run locally!
  *
- * Follow the https://dataflow.spring.io/docs/installation/local/docker-customize/#multi-platform-support
- * multi-platform instructions to prepare docker-compose-k8s.yml and docker-compose-cf.yml files.
+ * Follow the
+ * https://dataflow.spring.io/docs/installation/local/docker-customize/#multi-platform-support
+ * multi-platform instructions to prepare docker-compose-k8s.yml and docker-compose-cf.yml
+ * files.
  *
- * Stream tests on Kubernetes (k8s) platform:
- * - Add the docker-compose-k8s.yml to the DOCKER_COMPOSE_PATHS list.
- * - Start Kafka message broker on the k8s cluster. Follow the kubectl DataFlow instructions:
- *   https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
- * - Set the TEST_PLATFORM_NAME to 'k8s'.
- * - In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Kafka/Docker apps (e.g
- *   https://dataflow.spring.io/rabbitmq-maven-latest).
+ * Stream tests on Kubernetes (k8s) platform: - Add the docker-compose-k8s.yml to the
+ * DOCKER_COMPOSE_PATHS list. - Start Kafka message broker on the k8s cluster. Follow the
+ * kubectl DataFlow instructions:
+ * https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
+ * - Set the TEST_PLATFORM_NAME to 'k8s'. - In the DockerMachine configuration set the
+ * STREAM_APPS_URI variable to link loading Kafka/Docker apps (e.g
+ * https://dataflow.spring.io/rabbitmq-maven-latest).
  *
- * Stream tests on CloudFoundry (CF) platform:
- * - Add the docker-compose-cf.yml to the DOCKER_COMPOSE_PATHS list.
- * - On the CF platform start a RabbitMQ service called 'rabbit'.
- * - Set the TEST_PLATFORM_NAME to 'cf'.
- * - In the DockerMachine configuration set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps. (e.g.
- *   https://dataflow.spring.io/rabbitmq-maven-latest)
+ * Stream tests on CloudFoundry (CF) platform: - Add the docker-compose-cf.yml to the
+ * DOCKER_COMPOSE_PATHS list. - On the CF platform start a RabbitMQ service called
+ * 'rabbit'. - Set the TEST_PLATFORM_NAME to 'cf'. - In the DockerMachine configuration
+ * set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps. (e.g.
+ * https://dataflow.spring.io/rabbitmq-maven-latest)
  *
  * @author Christian Tzolov
  */
@@ -193,18 +204,18 @@ public class DataFlowIT {
 	protected RuntimeApplicationHelper runtimeApps;
 
 	/**
-	 * Folder that collects the external docker-compose YAML files such as coming from external classpath,
-	 * http/https or file locations.
-	 * Note: Needs to be static, because as a part of the dockerCompose extension it is shared with all tests.
-	 * TODO: Explore if the temp-folder can be created and destroyed internally inside the dockerCompose extension.
+	 * Folder that collects the external docker-compose YAML files such as coming from
+	 * external classpath, http/https or file locations. Note: Needs to be static, because as
+	 * a part of the dockerCompose extension it is shared with all tests. TODO: Explore if the
+	 * temp-folder can be created and destroyed internally inside the dockerCompose extension.
 	 */
 	@TempDir
 	static Path tempDockerComposeYamlFolder;
 
 	/**
-	 * A JUnit 5 extension to bring up Docker containers defined in docker-compose-xxx.yml files before running tests.
-	 * You can set either test.docker.compose.disable.extension property of DISABLE_DOCKER_COMPOSE_EXTENSION variable to
-	 * disable the extension.
+	 * A JUnit 5 extension to bring up Docker containers defined in docker-compose-xxx.yml
+	 * files before running tests. You can set either test.docker.compose.disable.extension
+	 * property of DISABLE_DOCKER_COMPOSE_EXTENSION variable to disable the extension.
 	 */
 	@RegisterExtension
 	public static Extension dockerCompose = DockerComposeFactory.startDockerCompose(tempDockerComposeYamlFolder);
@@ -213,22 +224,42 @@ public class DataFlowIT {
 	public void before() {
 		Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
 		Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
+		resetTimestampVersion();
 	}
 
 	@AfterEach
 	public void after() {
-		dataFlowOperations.streamOperations().destroyAll();
-		dataFlowOperations.taskOperations().destroyAll();
+		try {
+			dataFlowOperations.streamOperations().destroyAll();
+			logger.info("Destroyed all streams");
+		}
+		catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		finally {
+			try {
+				dataFlowOperations.taskOperations().list().forEach(taskDefinitionResource -> {
+					logger.info("Destroying task {} and execution history", taskDefinitionResource.getName());
+					dataFlowOperations.taskOperations().destroy(taskDefinitionResource.getName(), true);
+				});
+				logger.info("Destroyed all tasks and execution history");
+			}
+			catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+
 	}
 
 	@Test
 	@Order(Integer.MIN_VALUE)
 	public void aboutTestInfo() {
-		logger.info("Available platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()
+		logger.info("Available platforms: " + dataFlowOperations.streamOperations().listPlatforms().stream()                
 				.map(d -> String.format("[name: %s, type: %s]", d.getName(), d.getType())).collect(Collectors.joining()));
 		logger.info("Selected platform: [name: {}, type: {}]", runtimeApps.getPlatformName(), runtimeApps.getPlatformType());
 		logger.info("Wait until at least 60 apps are registered in SCDF");
-		Awaitility.await().until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
+		Awaitility.await()
+				.until(() -> dataFlowOperations.appRegistryOperations().list().getMetadata().getTotalElements() >= 60L);
 	}
 
 	@Test
@@ -238,14 +269,14 @@ public class DataFlowIT {
 		// Maven app with metadata
 		DetailedAppRegistrationResource mavenAppWithJarMetadata = dataFlowOperations.appRegistryOperations()
 				.info("file", ApplicationType.sink, false);
-		assertThat(mavenAppWithJarMetadata.getOptions()).hasSize(8);
+		assertThat(mavenAppWithJarMetadata.getOptions()).describedAs("mavenAppWithJarMetadata").hasSize(8);
 
 		// Maven app without metadata
 		dataFlowOperations.appRegistryOperations().register("maven-app-without-metadata", ApplicationType.sink,
 				"maven://org.springframework.cloud.stream.app:file-sink-kafka:3.0.1", null, true);
 		DetailedAppRegistrationResource mavenAppWithoutMetadata = dataFlowOperations.appRegistryOperations()
 				.info("maven-app-without-metadata", ApplicationType.sink, false);
-		assertThat(mavenAppWithoutMetadata.getOptions()).hasSize(8);
+		assertThat(mavenAppWithoutMetadata.getOptions()).describedAs("mavenAppWithoutMetadata").hasSize(8);
 		// unregister the test apps
 		dataFlowOperations.appRegistryOperations().unregister("maven-app-without-metadata", ApplicationType.sink);
 	}
@@ -255,18 +286,20 @@ public class DataFlowIT {
 	public void applicationMetadataDockerTests() {
 		logger.info("application-metadata-docker-test");
 
-
 		// Docker app with container image metadata
-		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata", ApplicationType.source,
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata",
+				ApplicationType.source,
 				"docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
 		DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
 				.info("docker-app-with-container-metadata", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
 
 		// Docker app with container image metadata with escape characters.
-		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars", ApplicationType.source,
+		dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars",
+				ApplicationType.source,
 				"docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
-		DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations.appRegistryOperations()
+		DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations
+				.appRegistryOperations()
 				.info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);
 		assertThat(dockerAppWithContainerMetadataWithEscapeChars.getOptions()).hasSize(6);
 
@@ -286,8 +319,10 @@ public class DataFlowIT {
 		assertThat(dockerAppWithJarMetadata.getOptions()).hasSize(8);
 
 		// unregister the test apps
-		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata", ApplicationType.source);
-		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata-escape-chars", ApplicationType.source);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata",
+				ApplicationType.source);
+		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-container-metadata-escape-chars",
+				ApplicationType.source);
 		dataFlowOperations.appRegistryOperations().unregister("docker-app-without-metadata", ApplicationType.sink);
 		dataFlowOperations.appRegistryOperations().unregister("docker-app-with-jar-metadata", ApplicationType.sink);
 	}
@@ -328,7 +363,7 @@ public class DataFlowIT {
 	}
 
 	// -----------------------------------------------------------------------
-	//                          PLATFORM  TESTS
+	// PLATFORM TESTS
 	// -----------------------------------------------------------------------
 	@Test
 	public void featureInfo() {
@@ -347,22 +382,27 @@ public class DataFlowIT {
 	}
 
 	// -----------------------------------------------------------------------
-	//                            STREAM  TESTS
+	// STREAM TESTS
 	// -----------------------------------------------------------------------
 	/**
-	 * Target Data FLow platform to use for the testing: https://dataflow.spring.io/docs/concepts/architecture/#platforms
+	 * Target Data FLow platform to use for the testing:
+	 * https://dataflow.spring.io/docs/concepts/architecture/#platforms
 	 *
-	 * By default the Local (e.g. platformName=default) Data Flow environment is used for testing. If you have
-	 * provisioned docker-compose file to add remote access ot CF or K8s environments you can use the target
-	 * platform/account name instead.
+	 * By default the Local (e.g. platformName=default) Data Flow environment is used for
+	 * testing. If you have provisioned docker-compose file to add remote access ot CF or K8s
+	 * environments you can use the target platform/account name instead.
 	 */
 	private static final String SPRING_CLOUD_DATAFLOW_SKIPPER_PLATFORM_NAME = "spring.cloud.dataflow.skipper.platformName";
 
 	// Stream lifecycle states
 	public static final String DEPLOYED = "deployed";
+
 	public static final String DELETED = "deleted";
+
 	public static final String UNDEPLOYED = "undeployed";
+
 	public static final String DEPLOYING = "deploying";
+
 	public static final String PARTIAL = "partial";
 
 	@Test
@@ -402,7 +442,8 @@ public class DataFlowIT {
 				.put("deployer.log.count", "2")
 				.put("app.splitter.producer.partitionKeyExpression", "payload")
 				.put("app.log.spring.cloud.stream.kafka.bindings.input.consumer.autoRebalanceEnabled", "false")
-				.put("app.log.logging.pattern.level", "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
+				.put("app.log.logging.pattern.level",
+						"WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
 				.build())) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
@@ -415,9 +456,10 @@ public class DataFlowIT {
 
 				return (logs.size() == 2) && logs.stream()
 						// partition order is undetermined
-						.map(log -> (log.contains("WOODCHUCK-0")) ?
-								asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains) :
-								asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could").stream().allMatch(log::contains))
+						.map(log -> (log.contains("WOODCHUCK-0"))
+								? asList("WOODCHUCK-0", "How", "chuck").stream().allMatch(log::contains)
+								: asList("WOODCHUCK-1", "much", "wood", "would", "if", "a", "woodchuck", "could")
+										.stream().allMatch(log::contains))
 						.reduce(Boolean::logicalAnd)
 						.orElse(false);
 			});
@@ -431,12 +473,13 @@ public class DataFlowIT {
 		final String VERSION_2_1_5 = "2.1.5.RELEASE";
 		final String VERSION_3_0_1 = "3.0.1";
 
-		Assumptions.assumeTrue(!runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)
+		Assumptions.assumeTrue(
+				!runtimeApps.getPlatformType().equals(RuntimeApplicationHelper.CLOUDFOUNDRY_PLATFORM_TYPE)
 						|| runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"),
 				"stream-app-cross-version-test: SKIP - CloudFoundry 2.6 and below!");
 
 		Assumptions.assumeTrue(runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_3_0_1)
-						&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_2_1_5),
+				&& runtimeApps.isAppRegistered("ver-log", ApplicationType.sink, VERSION_2_1_5),
 				"stream-app-cross-version-test: SKIP - required ver-log apps not registered!");
 
 		logger.info("stream-app-cross-version-test: DEPLOY");
@@ -517,7 +560,7 @@ public class DataFlowIT {
 			Map<StreamApplication, Map<String, String>> streamApps = stream.runtimeApps();
 			assertThat(streamApps.size()).isEqualTo(2);
 			for (Map<String, String> instanceMap : streamApps.values()) {
-				assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); //every apps should have 2 instances.
+				assertThat(instanceMap.size()).isEqualTo(numberOfInstancePerApp); // every apps should have 2 instances.
 			}
 		});
 	}
@@ -766,17 +809,20 @@ public class DataFlowIT {
 		if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT")) {
 			logger.info(skipOnIncompatibleDataFlowVersion);
 		}
-		Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"), skipOnIncompatibleDataFlowVersion);
+		Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"),
+				skipOnIncompatibleDataFlowVersion);
 
-		String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no " + dataflowTaskLauncherAppName + " app registered!";
-		boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName, ApplicationType.sink);
+		String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no "
+				+ dataflowTaskLauncherAppName + " app registered!";
+		boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName,
+				ApplicationType.sink);
 		if (!isDataflowTaskLauncherAppRegistered) {
 			logger.info(skipOnMissingAppRegistration);
 		}
 		Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipOnMissingAppRegistration);
 
-		DetailedAppRegistrationResource dataflowTaskLauncherRegistration =
-				dataFlowOperations.appRegistryOperations().info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
+		DetailedAppRegistrationResource dataflowTaskLauncherRegistration = dataFlowOperations.appRegistryOperations()
+				.info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
 
 		logger.info(dataflowTaskLauncherAppName + "-sink-test: "
 				+ dataflowTaskLauncherAppName + " [" + dataflowTaskLauncherRegistration.getVersion()
@@ -789,7 +835,8 @@ public class DataFlowIT {
 				.description("Test timestamp task")
 				.build()) {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
-					.definition("http | " + dataflowTaskLauncherAppName + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
+					.definition("http | " + dataflowTaskLauncherAppName
+							+ " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
 							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
 					.create()
 					.deploy(testDeploymentProperties())) {
@@ -803,11 +850,12 @@ public class DataFlowIT {
 				runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
 
 				AtomicLong launchId = new AtomicLong();
-				Awaitility.await().until(() -> task.executions().stream().filter(t ->
-								t.getTaskName().equals(taskName) && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
-						.findFirst()
-						.map(t -> launchId.getAndSet(t.getExecutionId())).isPresent()
-				);
+				Awaitility.await()
+						.until(() -> task.executions().stream()
+								.filter(t -> t.getTaskName().equals(taskName)
+										&& t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
+								.findFirst()
+								.map(t -> launchId.getAndSet(t.getExecutionId())).isPresent());
 				long id = launchId.get();
 				assertThat(task.executions().size()).isEqualTo(1);
 				assertThat(task.execution(id).isPresent()).isTrue();
@@ -817,7 +865,7 @@ public class DataFlowIT {
 	}
 
 	// -----------------------------------------------------------------------
-	//                       STREAM  METRICS TESTS
+	// STREAM METRICS TESTS
 	// -----------------------------------------------------------------------
 	@Test
 	public void analyticsCounterInflux() {
@@ -839,15 +887,16 @@ public class DataFlowIT {
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("httpAnalyticsInflux")
-				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
+				.definition(
+						"http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
 				.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			String message1 = "Test message 1"; // length 14
-			String message2 = "Test message 2 with extension";  // length 29
-			String message3 = "Test message 2 with double extension";  // length 36
+			String message2 = "Test message 2 with extension"; // length 29
+			String message3 = "Test message 2 with double extension"; // length 36
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
 			runtimeApps.httpPost(httpAppUrl, message1);
@@ -855,16 +904,21 @@ public class DataFlowIT {
 			runtimeApps.httpPost(httpAppUrl, message3);
 
 			// Wait for ~1 min for Micrometer to send first metrics to Influx.
-			Awaitility.await().until(() -> !JsonPath.parse(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
-					.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
+			Awaitility.await()
+					.until(() -> !JsonPath
+							.parse(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl()
+									+ "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\""))
+							.read("$.results[0][?(@.series)].length()").toString().equals("[]"));
 
-			//http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
-			//http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
+			// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%22count%22%20FROM%20%22spring_integration_send%22
+			// http://localhost:8086/query?db=myinfluxdb&q=SHOW%20MEASUREMENTS
 
 			// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20value%20FROM%20%22message_my_http_counter%22%20GROUP%20BY%20%2A%20ORDER%20BY%20ASC%20LIMIT%201
 
 			// http://localhost:8086/query?q=SHOW%20DATABASES
-			JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
+			JsonAssertions
+					.assertThatJson(runtimeApps.httpGet(
+							testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?q=SHOW DATABASES"))
 					.inPath("$.results[0].series[0].values[1][0]")
 					.isEqualTo("myinfluxdb");
 
@@ -872,10 +926,14 @@ public class DataFlowIT {
 					.map(s -> String.format("\"%s\"", s.length())).collect(Collectors.toList());
 
 			// http://localhost:8086/query?db=myinfluxdb&q=SELECT%20%2A%20FROM%20%22my_http_counter%22
-			String myHttpCounter = runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl() + "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
-			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]").isIn(messageLengths);
-			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]").isIn(messageLengths);
-			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]").isIn(messageLengths);
+			String myHttpCounter = runtimeApps.httpGet(testProperties.getPlatform().getConnection().getInfluxUrl()
+					+ "/query?db=myinfluxdb&q=SELECT * FROM \"my_http_analytics\"");
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[0][7]")
+					.isIn(messageLengths);
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[1][7]")
+					.isIn(messageLengths);
+			JsonAssertions.assertThatJson(myHttpCounter).inPath("$.results[0].series[0].values[2][7]")
+					.isIn(messageLengths);
 		}
 	}
 
@@ -899,15 +957,16 @@ public class DataFlowIT {
 
 		try (Stream stream = Stream.builder(dataFlowOperations)
 				.name("httpAnalyticsPrometheus")
-				.definition("http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
+				.definition(
+						"http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
 				.create()
 				.deploy(testDeploymentProperties("http"))) {
 
 			Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
 			String message1 = "Test message 1"; // length 14
-			String message2 = "Test message 2 with extension";  // length 29
-			String message3 = "Test message 2 with double extension";  // length 36
+			String message2 = "Test message 2 with extension"; // length 29
+			String message3 = "Test message 2 with double extension"; // length 36
 
 			String httpAppUrl = runtimeApps.getApplicationInstanceUrl(stream.getName(), "http");
 			runtimeApps.httpPost(httpAppUrl, message1);
@@ -916,18 +975,23 @@ public class DataFlowIT {
 
 			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 			Awaitility.await().until(() -> (int) JsonPath.parse(
-							runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+					runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl()
+							+ "/api/v1/query?query=my_http_analytics_total"))
 					.read("$.data.result.length()") > 0);
 
-			JsonAssertions.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=my_http_analytics_total"))
+			JsonAssertions
+					.assertThatJson(runtimeApps.httpGet(testProperties.getPlatform().getConnection().getPrometheusUrl()
+							+ "/api/v1/query?query=my_http_analytics_total"))
 					.isEqualTo(resourceToString("classpath:/my_http_analytics_total.json"));
 		}
 	}
 
 	/**
-	 * For the purpose of testing, disable security, expose the all actuators, and configure logfiles.
-	 * @param externallyAccessibleApps names of the stream applications that need to be accessible by the test code.
-	 *          Such as http app to post, messages or apps that need to allow access to the actuator/logfile.
+	 * For the purpose of testing, disable security, expose the all actuators, and configure
+	 * logfiles.
+	 * @param externallyAccessibleApps names of the stream applications that need to be
+	 *     accessible by the test code. Such as http app to post, messages or apps that need
+	 *     to allow access to the actuator/logfile.
 	 * @return Deployment properties required for the deployment of all test pipelines.
 	 */
 	protected Map<String, String> testDeploymentProperties(String... externallyAccessibleApps) {
@@ -943,7 +1007,11 @@ public class DataFlowIT {
 		if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
 			propertiesBuilder.put("app.*.server.port", "8080");
 			for (String appName : externallyAccessibleApps) {
-				propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires LoadBalancer support on the platform
+				propertiesBuilder.put("deployer." + appName + ".kubernetes.createLoadBalancer", "true"); // requires
+																											// LoadBalancer
+																											// support
+																											// on the
+																											// platform
 			}
 		}
 
@@ -951,11 +1019,13 @@ public class DataFlowIT {
 	}
 
 	public static String resourceToString(String resourcePath) throws IOException {
-		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(), StandardCharsets.UTF_8);
+		return StreamUtils.copyToString(new DefaultResourceLoader().getResource(resourcePath).getInputStream(),
+				StandardCharsets.UTF_8);
 	}
 
 	protected boolean prometheusPresent() {
-		return runtimeApps.isServicePresent(testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=up");
+		return runtimeApps.isServicePresent(
+				testProperties.getPlatform().getConnection().getPrometheusUrl() + "/api/v1/query?query=up");
 	}
 
 	protected boolean influxPresent() {
@@ -971,10 +1041,15 @@ public class DataFlowIT {
 	}
 
 	// -----------------------------------------------------------------------
-	//                               TASK TESTS
+	// TASK TESTS
 	// -----------------------------------------------------------------------
 	public static final int EXIT_CODE_SUCCESS = 0;
+
 	public static final int EXIT_CODE_ERROR = 1;
+
+	public static final String TEST_VERSION_NUMBER = "2.1.0.RELEASE";
+
+	public static final String CURRENT_VERSION_NUMBER = "2.1.1.RELEASE";
 
 	private List<String> composedTaskLaunchArguments(String... additionalArguments) {
 		// the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
@@ -1061,12 +1136,15 @@ public class DataFlowIT {
 			// All
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
 
-			URI qplUri = UriComponentsBuilder.fromHttpUrl(testProperties.getPlatform().getConnection().getPrometheusUrl()
-					+ String.format("/api/v1/query?query=system_cpu_usage{service=\"task-application\",application=\"%s-%s\"}",
-					task.getTaskName(), launchId)).build().toUri();
+			URI qplUri = UriComponentsBuilder.fromHttpUrl(testProperties.getPlatform().getConnection()
+					.getPrometheusUrl()
+					+ String.format(
+							"/api/v1/query?query=system_cpu_usage{service=\"task-application\",application=\"%s-%s\"}",
+							task.getTaskName(), launchId))
+					.build().toUri();
 
-			Supplier<String> pqlTaskMetricsQuery = () ->
-					dataFlowOperations.getRestTemplate().exchange(qplUri, HttpMethod.GET, null, String.class).getBody();
+			Supplier<String> pqlTaskMetricsQuery = () -> dataFlowOperations.getRestTemplate()
+					.exchange(qplUri, HttpMethod.GET, null, String.class).getBody();
 
 			// Wait for ~1 min for Micrometer to send first metrics to Prometheus.
 			Awaitility.await().until(() -> (int) JsonPath.parse(pqlTaskMetricsQuery.get())
@@ -1098,7 +1176,8 @@ public class DataFlowIT {
 
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
@@ -1114,7 +1193,8 @@ public class DataFlowIT {
 
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(taskBuilder.allTasks().size()).isEqualTo(3);
@@ -1146,7 +1226,8 @@ public class DataFlowIT {
 
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId1).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
@@ -1162,7 +1243,8 @@ public class DataFlowIT {
 
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
@@ -1199,7 +1281,8 @@ public class DataFlowIT {
 			// Child tasks successfully completed
 			task.composedTaskChildTasks().forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			// Attempt a job restart
@@ -1207,8 +1290,10 @@ public class DataFlowIT {
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
 
-			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
-			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			// There is an Error deserialization issue related to backward compatibility with SCDF
+			// 2.6.x
+			// The Exception thrown by the 2.6.x servers can not be deserialized by the
+			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
 				Exception exception = assertThrows(DataFlowClientException.class, () -> {
 					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
@@ -1226,7 +1311,7 @@ public class DataFlowIT {
 				"scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false && timestamp",
 				TaskExecutionStatus.ERROR,
 				emptyList(), // successful
-				asList("scenario"),  // failed
+				asList("scenario"), // failed
 				asList("timestamp")); // not-run
 	}
 
@@ -1249,11 +1334,12 @@ public class DataFlowIT {
 	@Test
 	public void ctrSequentialTransitionAndSplitWithScenarioFailed() {
 		logger.info("composed-task-SequentialTransitionAndSplitWithScenarioFailed-test");
-		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Sequential Transition And Split With Scenario Failed Test",
+		mixedSuccessfulFailedAndUnknownExecutions(
+				"ComposedTask Sequential Transition And Split With Scenario Failed Test",
 				"t1: timestamp && scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
 				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t3"), // successful
-				asList("scenario"),  // failed
+				asList("scenario"), // failed
 				asList("t4", "t5", "t6")); // not-run
 	}
 
@@ -1264,7 +1350,7 @@ public class DataFlowIT {
 				"t1: timestamp && t2: scenario 'FAILED'->t3: timestamp && <t4: timestamp || t5: timestamp> && t6: timestamp",
 				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t2", "t4", "t5", "t6"), // successful
-				emptyList(),  // failed
+				emptyList(), // failed
 				asList("t3")); // not-run
 	}
 
@@ -1280,10 +1366,12 @@ public class DataFlowIT {
 	public void testEmbeddedFailedGraph() {
 		logger.info("composed-task-EmbeddedFailedGraph-test");
 		mixedSuccessfulFailedAndUnknownExecutions("ComposedTask Embedded Failed Graph Test",
-				String.format("a: timestamp && b:scenario  --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp", randomJobName()),
+				String.format(
+						"a: timestamp && b:scenario  --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && c:timestamp",
+						randomJobName()),
 				TaskExecutionStatus.ERROR,
 				asList("a"), // successful
-				asList("b"),  // failed
+				asList("b"), // failed
 				asList("c")); // not-run
 	}
 
@@ -1310,7 +1398,7 @@ public class DataFlowIT {
 				"t1: timestamp && b:scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp && t3: timestamp && t4: timestamp && <t5:timestamp || t6: timestamp> && t7: timestamp",
 				TaskExecutionStatus.COMPLETE,
 				asList("t1", "t2"), // successful
-				asList("b"),  // failed
+				asList("b"), // failed
 				asList("t3", "t4", "t5", "t6", "t7")); // not-run
 	}
 
@@ -1329,7 +1417,9 @@ public class DataFlowIT {
 		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
 		try (Task task = taskBuilder
 				.name(randomTaskName())
-				.definition(String.format("t1: timestamp && <t2: timestamp ||b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: timestamp> && t4: timestamp", randomJobName()))
+				.definition(String.format(
+						"t1: timestamp && <t2: timestamp ||b:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true || t3: timestamp> && t4: timestamp",
+						randomJobName()))
 				.description("sequentialAndFailedSplitTest")
 				.build()) {
 
@@ -1354,13 +1444,15 @@ public class DataFlowIT {
 			// Successful
 			childTasksBySuffix(task, "t1", "t2", "t3").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			// Failed tasks
 			childTasksBySuffix(task, "b").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.isEqualTo(EXIT_CODE_ERROR);
 			});
 
 			// Not run tasks
@@ -1377,7 +1469,8 @@ public class DataFlowIT {
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
 			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
 
-			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
+			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max()
+					.getAsLong();
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
@@ -1387,12 +1480,14 @@ public class DataFlowIT {
 
 			childTasksBySuffix(task, "b").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			childTasksBySuffix(task, "t4").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
@@ -1407,7 +1502,7 @@ public class DataFlowIT {
 				"b: scenario --io.spring.fail-task=true --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
 				TaskExecutionStatus.COMPLETE,
 				asList("t1"), // successful
-				asList("b"),  // failed
+				asList("b"), // failed
 				asList("t2")); // not-run
 	}
 
@@ -1418,7 +1513,7 @@ public class DataFlowIT {
 				"b: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp * ->t2: timestamp",
 				TaskExecutionStatus.COMPLETE,
 				asList("b", "t2"), // successful
-				emptyList(),  // failed
+				emptyList(), // failed
 				asList("t1")); // not-run
 	}
 
@@ -1429,7 +1524,7 @@ public class DataFlowIT {
 				"b1: scenario  --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false 'FAILED' -> t2: timestamp * ->t3: timestamp ",
 				TaskExecutionStatus.COMPLETE,
 				asList("b1", "b2", "t3"), // successful
-				emptyList(),  // failed
+				emptyList(), // failed
 				asList("t1", "t2")); // not-run
 	}
 
@@ -1440,7 +1535,7 @@ public class DataFlowIT {
 				"b1: scenario --io.spring.launch-batch-job=false 'FAILED' -> t1: timestamp  && b2: scenario --io.spring.launch-batch-job=false * ->t3: timestamp ",
 				TaskExecutionStatus.COMPLETE,
 				asList("b1", "b2", "t3"), // successful
-				emptyList(),  // failed
+				emptyList(), // failed
 				asList("t1")); // not-run
 	}
 
@@ -1451,7 +1546,9 @@ public class DataFlowIT {
 		TaskBuilder taskBuilder = Task.builder(dataFlowOperations);
 		try (Task task = taskBuilder
 				.name(randomTaskName())
-				.definition(String.format("b1:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && t1:timestamp", randomJobName()))
+				.definition(String.format(
+						"b1:scenario --io.spring.fail-batch=true --io.spring.jobName=%s --spring.cloud.task.batch.fail-on-job-failure=true && t1:timestamp",
+						randomJobName()))
 				.description("failedCTRRetryTest")
 				.build()) {
 
@@ -1476,7 +1573,8 @@ public class DataFlowIT {
 			// Failed tasks
 			childTasksBySuffix(task, "b1").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.isEqualTo(EXIT_CODE_ERROR);
 			});
 
 			// Not run tasks
@@ -1493,7 +1591,8 @@ public class DataFlowIT {
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
 			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
 
-			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max().getAsLong();
+			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max()
+					.getAsLong();
 
 			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
 
@@ -1502,12 +1601,14 @@ public class DataFlowIT {
 
 			childTasksBySuffix(task, "b1").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(2);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			childTasksBySuffix(task, "t1").forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executionByParentExecutionId(launchId2).get().getExitCode())
+						.isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			assertThat(task.jobExecutionResources().size()).isEqualTo(2);
@@ -1518,7 +1619,7 @@ public class DataFlowIT {
 
 	@Test
 	public void basicBatchSuccessTest() {
-		//Verify Batch runs successfully
+		// Verify Batch runs successfully
 		logger.info("basic-batch-success-test");
 		try (Task task = Task.builder(dataFlowOperations)
 				.name(randomTaskName())
@@ -1530,10 +1631,10 @@ public class DataFlowIT {
 			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
 			// task first launch
 			long launchId = task.launch(args);
-			//Verify task
+			// Verify task
 			validateSuccessfulTaskLaunch(task, launchId);
 
-			//Verify that steps can be retrieved
+			// Verify that steps can be retrieved
 			verifySuccessfulJobAndStepScenario(task, stepName);
 		}
 	}
@@ -1546,8 +1647,12 @@ public class DataFlowIT {
 	}
 
 	private void validateSuccessfulTaskLaunch(Task task, long launchId) {
+		validateSuccessfulTaskLaunch(task, launchId, 1);
+	}
+
+	private void validateSuccessfulTaskLaunch(Task task, long launchId, int sizeExpected) {
 		Awaitility.await().until(() -> task.executionStatus(launchId) == TaskExecutionStatus.COMPLETE);
-		assertThat(task.executions().size()).isEqualTo(1);
+		assertThat(task.executions().size()).isEqualTo(sizeExpected);
 		assertThat(task.execution(launchId).isPresent()).isTrue();
 		assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
 	}
@@ -1556,10 +1661,9 @@ public class DataFlowIT {
 		assertThat(task.executions().size()).isEqualTo(1);
 		List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 		assertThat(jobExecutionIds.size()).isEqualTo(1);
-		//Verify that steps can be retrieved
+		// Verify that steps can be retrieved
 		task.jobExecutionResources().stream().filter(
-						jobExecution -> jobExecution.getName().equals(task.getTaskName())).
-				forEach(jobExecutionResource -> {
+				jobExecution -> jobExecution.getName().equals(task.getTaskName())).forEach(jobExecutionResource -> {
 					assertThat(jobExecutionResource.getStepExecutionCount()).isEqualTo(1);
 					task.jobStepExecutions(jobExecutionResource.getExecutionId()).forEach(stepExecutionResource -> {
 						assertThat(stepExecutionResource.getStepExecution().getStepName()).isEqualTo(stepName);
@@ -1573,7 +1677,7 @@ public class DataFlowIT {
 
 	@Test
 	public void basicBatchSuccessRestartTest() {
-		//Verify that batch restart on success fails
+		// Verify that batch restart on success fails
 		try (Task task = Task.builder(dataFlowOperations)
 				.name(randomTaskName())
 				.definition("scenario")
@@ -1584,15 +1688,17 @@ public class DataFlowIT {
 			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
 			// task first launch
 			long launchId = task.launch(args);
-			//Verify task and Job
+			// Verify task and Job
 			validateSuccessfulTaskLaunch(task, launchId);
 			verifySuccessfulJobAndStepScenario(task, stepName);
 
 			// Attempt a job restart
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 
-			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
-			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			// There is an Error deserialization issue related to backward compatibility with SCDF
+			// 2.6.x
+			// The Exception thrown by the 2.6.x servers can not be deserialized by the
+			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
 				Exception exception = assertThrows(DataFlowClientException.class, () -> {
 					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
@@ -1617,27 +1723,30 @@ public class DataFlowIT {
 			args.add("--io.spring.failBatch=true");
 			// task first launch
 			long launchId = task.launch(args);
-			//Verify task
+			// Verify task
 			validateSuccessfulTaskLaunch(task, launchId);
 
-			//Verify that batch app that fails can be restarted
+			// Verify that batch app that fails can be restarted
 
 			// Attempt a job restart
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
-			//There is an Error deserialization issue related to backward compatibility with SCDF 2.6.x
-			//The Exception thrown by the 2.6.x servers can not be deserialized by the VndErrorResponseErrorHandler in 2.8+ clients.
+			// There is an Error deserialization issue related to backward compatibility with SCDF
+			// 2.6.x
+			// The Exception thrown by the 2.6.x servers can not be deserialized by the
+			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
 				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
 				// Wait for job to start
 				Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
 				// Wait for task for the job to complete
-				Awaitility.await().until(() -> task.executions().stream().findFirst().get().getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
+				Awaitility.await().until(() -> task.executions().stream().findFirst().get()
+						.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE);
 				assertThat(task.jobExecutionResources().size()).isEqualTo(2);
-				List<JobExecutionResource> jobExecutionResources = task.jobInstanceResources().stream().
-						findFirst().get().getJobExecutions().stream().collect(Collectors.toList());
+				List<JobExecutionResource> jobExecutionResources = task.jobInstanceResources().stream().findFirst()
+						.get().getJobExecutions().stream().collect(Collectors.toList());
 				List<BatchStatus> batchStatuses = new ArrayList<>();
-				jobExecutionResources.stream().forEach(jobExecutionResource ->
-						batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
+				jobExecutionResources.stream().forEach(
+						jobExecutionResource -> batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
 				assertThat(batchStatuses).contains(BatchStatus.FAILED);
 				assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
 			});
@@ -1645,53 +1754,303 @@ public class DataFlowIT {
 	}
 
 	@Test
-	public void multipleTaskAppVersionTest() {
+	public void testLaunchOfDefaultThenVersion() {
+		// Scenario: I want to create a task app with 2 versions using default version
+		// Given A task with 2 versions
+		// And I create a task definition
+		// When I launch task definition using default app version
+		// And I launch task definition using version 2 of app
+		// Then Both tasks should succeed
+		// And It launches the specified version
 		logger.info("multiple task app version test");
+		minimumVersionCheck("testLaunchOfDefaultThenVersion");
+
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		registerNewTimestampVersion();
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+		launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testCreateTaskWithTwoVersionsLaunchDefaultVersion() {
+		// Scenario: I want to create a task app with 2 versions using default version
+		// Given A task with 2 versions
+		// And I create a task definition
+		// When I launch task definition using default app version
+		// Then Task should succeed
+		// And It launches the specified version
+		minimumVersionCheck("testCreateTaskWithTwoVersionsLaunchDefaultVersion");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testLaunchOfNewVersionThenPreviousVersion() {
+		// Scenario: I want to create a task app with 2 versions run new version then default
+		// Given A task with 2 versions
+		// And I create a task definition
+		// And I launch task definition using version 2 of app
+		// When I launch task definition using version 1 of app
+		// Then Task should succeed
+		// And It launches the specified version
+		minimumVersionCheck("testLaunchOfNewVersionThenDefault");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		assertThat(task.execution(launchId).get().getResourceUrl()).contains(TEST_VERSION_NUMBER);
+
+		launchId = task.launch(Collections.singletonMap("version.timestamp", CURRENT_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testWhenNoVersionIsSpecifiedPreviousVersionShouldBeUsed() {
+		// Scenario: When no version is specified previous used version should be used.
+		// Given A task with 2 versions
+		// And I create a task definition
+		// And I launch task definition using version 2 of app
+		// When I launch task definition using no app version
+		// Then Task should succeed
+		// And It launches the version 2 of app
+		minimumVersionCheck("testWhenNoVersionIsSpecifiedPreviousVersionShouldBeUsed");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER, 2);
+	}
+
+	@Test
+	public void testCreateTaskWithOneVersionLaunchInvalidVersion() {
+		// Scenario: I want to create a task app with 1 version run invalid version
+		// Given A task with 1 versions
+		// And I create a task definition
+		// When I launch task definition using version 2 of app
+		// Then Task should fail
+		minimumVersionCheck("testCreateTaskWithOneVersionLaunchInvalidVersion");
+		Task task = createTaskDefinition();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null))
+				.isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	@Test
+	public void testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch() {
+		// Scenario: Invalid version usage should not affect subsequent default launch
+		// Given A task with 1 versions
+		// And I create a task definition
+		// And I launch task definition using version 2 of app
+		// When I launch task definition using default app version
+		// Then Task should succeed
+		// And It launches the specified version
+		minimumVersionCheck("testInvalidVersionUsageShouldNotAffectSubsequentDefaultLaunch");
+		Task task = createTaskDefinition();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null))
+				.isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 1);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER, 1);
+	}
+
+	@Test
+	public void testDeletePreviouslyUsedVersionShouldFailIfRelaunched() {
+		// Scenario: Deleting a previously used version should fail if relaunched.
+		// Given A task with 2 versions
+		// And I create a task definition
+		// And I launch task definition using version 2 of app
+		// And I unregister version 2 of app
+		// When I launch task definition using version 2 of app
+		// Then Task should fail
+		minimumVersionCheck("testDeletePreviouslyUsedVersionShouldFailIfRelaunched");
+
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null);
+		validateSuccessfulTaskLaunch(task, launchId);
+		resetTimestampVersion();
+		assertThatThrownBy(() -> task.launch(Collections.singletonMap("version.timestamp", TEST_VERSION_NUMBER), null))
+				.isInstanceOf(DataFlowClientException.class).hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	@Test
+	public void testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful() {
+		// Scenario: Changing the app default version and running between changes should be
+		// successful
+		// Given A task with 2 versions
+		// And I create a task definition
+		// And I launch task definition using default app version
+		// And I set the default to version 2 of the app
+		// When I launch task definition using default app version
+		// Then Task should succeed
+		// And The version for the task execution should be version 2
+		minimumVersionCheck("testChangingTheAppDefaultVersionRunningBetweenChangesShouldBeSuccessful");
+		Task task = createTaskDefinition();
+
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+
+		registerNewTimestampVersion();
+		setDefaultVersionForTimestamp(TEST_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful() {
+		// Scenario: Rolling back default to previous version and running should be successful
+		// Given A task with 2 versions
+		// And I create a task definition
+		// And I launch task definition using default app version
+		// And I set the default to version 2 of the app
+		// And I launch task definition using default app version
+		// And I set the default to version 1 of the app
+		// When I create a task definition
+		// And I launch task definition using default app version
+		// Then Task should succeed
+		// And The version for the task execution should be version 1
+		minimumVersionCheck("testRollingBackDefaultToPreviousVersionAndRunningShouldBeSuccessful");
+		registerNewTimestampVersion();
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+
+		setDefaultVersionForTimestamp(TEST_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId, 2);
+		validateSpecifiedVersion(task, TEST_VERSION_NUMBER);
+
+		task = createTaskDefinition();
+		setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
+		launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+	}
+
+	@Test
+	public void testUnregisteringAppShouldPreventTaskDefinitionLaunch() {
+		// Scenario: Unregistering app should prevent task definition launch
+		// Given A task with 1 versions
+		// And I create a task definition
+		// And I launch task definition using default app version
+		// And I unregister version 1 of app
+		// When I launch task definition using default app version
+		// Then Task should fail
+		minimumVersionCheck("testUnregisteringAppShouldPreventTaskDefinitionLaunch");
+		Task task = createTaskDefinition();
+		long launchId = task.launch();
+		validateSuccessfulTaskLaunch(task, launchId);
+		validateSpecifiedVersion(task, CURRENT_VERSION_NUMBER);
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+		appRegistryOperations.unregister("timestamp", ApplicationType.task, CURRENT_VERSION_NUMBER);
+
+		assertThatThrownBy(() -> task.launch()).isInstanceOf(DataFlowClientException.class)
+				.hasMessageContaining("Unknown task app: timestamp");
+	}
+
+	private Task createTaskDefinition() {
+		return createTaskDefinition("timestamp");
+	}
+
+	private Task createTaskDefinition(String definition) {
+		String taskDefName = randomTaskName();
+		return Task.builder(dataFlowOperations)
+				.name(taskDefName)
+				.definition(definition)
+				.description(String.format("Test task definition %s using for app definition\"%s\"", taskDefName,
+						definition))
+				.build();
+	}
+
+	private void minimumVersionCheck(String testName) {
 		Assumptions.assumeTrue(!runtimeApps.dataflowServerVersionLowerThan("2.8.0"),
-				"upgradeRollbackTaskAppVersionTest: SKIP - SCDF 2.7.x and below!");
+				testName + ": SKIP - SCDF 2.7.x and below!");
+	}
 
-		try (Task task = Task.builder(dataFlowOperations)
-				.name(randomTaskName())
-				.definition("timestamp")
-				.description("Test scenario batch app that will fail on first pass")
-				.build()) {
+	private void registerNewTimestampVersion() {
+		registerTimestamp(TEST_VERSION_NUMBER);
+	}
 
-			String stepName = randomStepName();
-			// task first launch
-			long launchId = task.launch();
-			//Verify task
-			validateSuccessfulTaskLaunch(task, launchId);
-			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
-			DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp", ApplicationType.task, false);
-			if (taskResource.getUri().startsWith("maven:")) {
-				try {
-					appRegistryOperations.register("timestamp", ApplicationType.task,
-							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE",
-							"maven://org.springframework.cloud.task.app:timestamp-task:2.1.0.RELEASE", false);
-				}
-				catch (DataFlowClientException dfe) {
-					logger.info(dfe.getMessage(), dfe);
-				}
+	private void registerTimestamp(String versionNumber) {
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+
+		DetailedAppRegistrationResource taskResource = appRegistryOperations.info("timestamp-batch",
+				ApplicationType.task, false);
+		if (taskResource.getUri().startsWith("maven:")) {
+			try {
+				appRegistryOperations.register("timestamp", ApplicationType.task,
+						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber,
+						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber, false);
 			}
-			else {
-				try {
-					appRegistryOperations.register("timestamp", ApplicationType.task,
-							"docker:springcloudtask/timestamp-task:2.1.0.RELEASE",
-							null, false);
-				}
-				catch (DataFlowClientException dfe) {
-					logger.info(dfe.getMessage(), dfe);
-				}
+			catch (DataFlowClientException dfe) {
+				logger.info(dfe.getMessage(), dfe);
 			}
-
-			long launchId2 = task.launch(Collections.singletonMap("version.timestamp", "2.1.0.RELEASE"), null);
-			Awaitility.await().until(() -> task.executionStatus(launchId2) == TaskExecutionStatus.COMPLETE);
-			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executions().stream().filter(
-					taskExecutionResource -> taskExecutionResource.getResourceUrl().
-							contains("2.1.0.RELEASE")).collect(Collectors.toList()).size()).
-					isEqualTo(1);
 		}
+		else {
+			try {
+				appRegistryOperations.register("timestamp", ApplicationType.task,
+						"docker:springcloudtask/timestamp-task:" + versionNumber,
+						null, false);
+			}
+			catch (DataFlowClientException dfe) {
+				logger.info(dfe.getMessage(), dfe);
+			}
+		}
+	}
+
+	private void setDefaultVersionForTimestamp(String version) {
+		AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+		appRegistryOperations.makeDefault("timestamp", ApplicationType.task, version);
+	}
+
+	private void resetTimestampVersion() {
+		try {
+			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+			try {
+				appRegistryOperations.info("timestamp", ApplicationType.task, false);
+			}
+			catch (DataFlowClientException dfe) {
+				if (dfe.getMessage().equals("The 'task:timestamp' application could not be found.")) {
+					registerTimestamp(CURRENT_VERSION_NUMBER);
+				}
+				else {
+					throw dfe;
+				}
+			}
+			setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
+			appRegistryOperations.unregister("timestamp", ApplicationType.task, TEST_VERSION_NUMBER);
+		}
+		catch (DataFlowClientException dfe) {
+			logger.trace(dfe.getMessage(), dfe);
+		}
+
+	}
+
+	private void validateSpecifiedVersion(Task task, String version) {
+		validateSpecifiedVersion(task, version, 1);
+	}
+
+	private void validateSpecifiedVersion(Task task, String version, int countExpected) {
+		assertThat(task.executions().stream().filter(
+				taskExecutionResource -> taskExecutionResource.getResourceUrl().contains(version))
+				.collect(Collectors.toList()).size()).isEqualTo(countExpected);
 	}
 
 	@Test
@@ -1709,14 +2068,15 @@ public class DataFlowIT {
 			List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
 			// task first launch
 			long launchId = task.launch(Collections.singletonMap(testPropertyKey, testPropertyValue), args);
-			//Verify task
+			// Verify task
 			validateSuccessfulTaskLaunch(task, launchId);
 			long launchId1 = task.launch(args);
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executions().stream().filter(taskExecutionResource ->
-							taskExecutionResource.getDeploymentProperties().containsKey(testPropertyKey)).
-					collect(Collectors.toList()).size()).isEqualTo(2);
+			assertThat(task
+					.executions().stream().filter(taskExecutionResource -> taskExecutionResource
+							.getDeploymentProperties().containsKey(testPropertyKey))
+					.collect(Collectors.toList()).size()).isEqualTo(2);
 
 		}
 	}
@@ -1736,8 +2096,8 @@ public class DataFlowIT {
 
 	@Test
 	public void taskLaunchWithArguments() {
-		//Launch task with args and verify that they are being used.
-		//Verify Batch runs successfully
+		// Launch task with args and verify that they are being used.
+		// Verify Batch runs successfully
 		logger.info("basic-batch-success-test");
 		final String argument = "--timestamp.format=YYYY";
 		try (Task task = Task.builder(dataFlowOperations)
@@ -1752,15 +2112,14 @@ public class DataFlowIT {
 			args.add(argument);
 			// task first launch
 			long launchId = task.launch(args);
-			//Verify  first launch
+			// Verify first launch
 			validateSuccessfulTaskLaunch(task, launchId);
-			//relaunch task with no args and it should not re-use old.
+			// relaunch task with no args and it should not re-use old.
 			long launchId1 = task.launch(baseArgs);
 			Awaitility.await().until(() -> task.executionStatus(launchId1) == TaskExecutionStatus.COMPLETE);
 			assertThat(task.executions().size()).isEqualTo(2);
-			assertThat(task.executions().stream().filter(execution ->
-							execution.getArguments().contains(argument)).
-					collect(Collectors.toList()).size()).isEqualTo(1);
+			assertThat(task.executions().stream().filter(execution -> execution.getArguments().contains(argument))
+					.collect(Collectors.toList()).size()).isEqualTo(1);
 		}
 
 	}
@@ -1796,17 +2155,236 @@ public class DataFlowIT {
 		List<String> args = createNewJobandStepScenario(task.getTaskName(), stepName);
 		// task first launch
 		long launchId = task.launch(args);
-		//Verify task
+		// Verify task
 		validateSuccessfulTaskLaunch(task, launchId);
-		//verify task definition is gone and executions are removed
+		// verify task definition is gone and executions are removed
 		this.dataFlowOperations.taskOperations().destroy(task.getTaskName(), true);
 		verifyTaskDefAndTaskExecutionCount(task.getTaskName(), 0, 0);
 	}
 
+	@Test
+	public void testDeleteSingleTaskExecution() {
+		// Scenario: I want to delete a single task execution
+		// Given A task definition exists
+		// And 1 task execution exist
+		// When I delete a task execution
+		// Then It should succeed
+		// And I will not see the task executions
+		minimumVersionCheck("testDeleteSingleTaskExecution");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 1);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			safeCleanupTaskExecution(task, launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+		}
+	}
+
+	@Test
+	public void testDeleteMultipleTaskExecution() {
+		// Scenario: I want to delete 3 task executions
+		// Given A task definition exists
+		// And 4 task execution exist
+		// When I delete 3 task executions
+		// Then They should succeed
+		// And I will see the remaining task execution
+		minimumVersionCheck("testDeleteMultipleTaskExecution");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 4);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			long retainedLaunchId = launchIds.get(3);
+			launchIds.stream().filter(launchId -> launchId != retainedLaunchId).forEach(
+					launchId -> {
+						safeCleanupTaskExecution(task, launchId);
+						assertThat(task.execution(launchId).isPresent()).isFalse();
+					});
+			assertThat(task.execution(retainedLaunchId).isPresent()).isTrue();
+		}
+	}
+
+	@Test
+	public void testDeleteAllTaskExecutionsShouldClearAllTaskExecutions() {
+		// Scenario: Delete all task executions should clear all task executions
+		// Given A task definition exists
+		// And 4 task execution exist
+		// When I delete all task executions
+		// Then It should succeed
+		// And I will not see the task executions
+		minimumVersionCheck("testDeleteAllTaskExecutionsShouldClearAllTaskExecutions");
+		try (Task task = createTaskDefinition()) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 4);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			safeCleanupAllTaskExecutions(task);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+		}
+	}
+
+	@Test
+	public void testDataFlowUsesLastAvailableTaskExecutionForItsProperties() {
+		// Scenario: Task Launch should use last available task execution for its properties
+		// Given A task definition exists
+		// And 2 task execution exist each having different properties
+		// When I launch task definition using default app version
+		// Then It should succeed
+		// And The task execution will contain the properties from both task executions
+		minimumVersionCheck("testDataFlowUsesLastAvailableTaskExecutionForItsProperties");
+		try (Task task = createTaskDefinition()) {
+			List<Long> firstLaunchIds = createTaskExecutionsForDefinition(task,
+					Collections.singletonMap("app.timestamp.firstkey", "firstvalue"), 1);
+			verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
+
+			long secondLaunchId = task.launch();
+			assertThat(task.execution(secondLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, secondLaunchId, 2);
+			Optional<TaskExecutionResource> taskExecution = task.execution(secondLaunchId);
+			Map<String, String> properties = taskExecution.get().getAppProperties();
+			assertThat(properties.containsKey("firstkey")).isTrue();
+		}
+	}
+
+	@Test
+	public void testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted() {
+		// Scenario: Task Launch should use last available task execution for its properties after
+		// deleting previous version
+		// Given A task definition exists
+		// And 2 task execution exist each having different properties
+		// And I delete the last task execution
+		// When I launch task definition using default app version
+		// Then It should succeed
+		// And The task execution will contain the properties from the last available task
+		minimumVersionCheck("testDataFlowUsesAllPropertiesRegardlessIfPreviousExecutionWasDeleted");
+		try (Task task = createTaskDefinition()) {
+			List<Long> firstLaunchIds = createTaskExecutionsForDefinition(task,
+					Collections.singletonMap("app.timestamp.firstkey", "firstvalue"), 1);
+			verifyAllSpecifiedTaskExecutions(task, firstLaunchIds, true);
+			long secondLaunchId = task.launch(Collections.singletonMap("app.timestamp.secondkey", "secondvalue"),
+					Collections.emptyList());
+			assertThat(task.execution(secondLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, secondLaunchId, 2);
+			safeCleanupTaskExecution(task, secondLaunchId);
+			assertThat(task.execution(secondLaunchId).isPresent()).isFalse();
+
+			long thirdLaunchId = task.launch(Collections.singletonMap("app.timestamp.thirdkey", "thirdvalue"),
+					Collections.emptyList());
+			assertThat(task.execution(thirdLaunchId).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, thirdLaunchId, 2);
+			Optional<TaskExecutionResource> taskExecution = task.execution(thirdLaunchId);
+			Map<String, String> properties = taskExecution.get().getAppProperties();
+			assertThat(properties.containsKey("firstkey")).isTrue();
+			assertThat(properties.containsKey("secondkey")).isFalse();
+			assertThat(properties.containsKey("thirdkey")).isTrue();
+
+		}
+	}
+
+	@Test
+	public void testDeletingComposedTaskExecutionDeletesAllItsChildTaskExecutions() {
+		// Deleting a Composed Task Execution deletes all of its child task executions
+		// Given A composed task definition exists of "AAA && BBB"
+		// And 1 task execution exist
+		// And I delete the last task execution
+		// Then It should succeed
+		// And I will not see the composed task executions
+		minimumVersionCheck("testDeletingComposedTaskExecutionDeletesAllItsChildTaskExecutions");
+		try (Task task = createTaskDefinition("AAA: timestamp && BBB: timestamp")) {
+			List<Long> launchIds = createTaskExecutionsForDefinition(task, 1);
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			Optional<TaskExecutionResource> aaaExecution = task.composedTaskChildExecution("AAA");
+			Optional<TaskExecutionResource> bbbExecution = task.composedTaskChildExecution("BBB");
+			assertThat(aaaExecution.isPresent()).isTrue();
+			assertThat(bbbExecution.isPresent()).isTrue();
+			safeCleanupTaskExecution(task, launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+			aaaExecution = task.composedTaskChildExecution("AAA");
+			bbbExecution = task.composedTaskChildExecution("BBB");
+			assertThat(aaaExecution.isPresent()).isFalse();
+			assertThat(bbbExecution.isPresent()).isFalse();
+		}
+
+	}
+
+	@Test
+	public void testDeletingBatchTaskExecutionDeletesAllOfItsBatchRecords() {
+		// Given A batch task definition exists
+		// And 1 task execution exist
+		// When I delete the last task execution
+		// Then It should succeed
+		// And I will not see the task executions
+		// And I will not see the batch executions
+		minimumVersionCheck("testDeletingBatchTaskExecutionDeletesAllOfItsBatchRecords");
+		try (Task task = createTaskDefinition("timestamp-batch")) {
+			List<Long> launchIds = Collections.singletonList(task.launch(Collections.emptyMap(),
+					Collections.singletonList("testKey=" + task.getTaskName())));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			validateSuccessfulTaskLaunch(task, launchIds.get(0), 1);
+
+			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(2);
+			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
+			safeCleanupTaskExecution(task, launchIds.get(0));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
+			assertThatThrownBy(() -> task.jobStepExecutions(jobExecutionIds.get(0)))
+					.isInstanceOf(DataFlowClientException.class).hasMessageContaining("No JobExecution with id=");
+		}
+	}
+
+	@Test
+	public void testRestartingBatchTaskExecutionThatHasBeenDeleted() {
+		// Restarting a Batch Task Execution that has been deleted
+		// Given A batch task definition exists
+		// And 1 task execution exist
+		// And I delete the last task execution
+		// When I restart the batch job
+		// And The batch job will fail
+		minimumVersionCheck("testRestartingBatchTaskExecutionThatHasBeenDeleted");
+		try (Task task = createTaskDefinition("timestamp-batch")) {
+			List<Long> launchIds = Collections.singletonList(task.launch(Collections.emptyMap(),
+					Collections.singletonList("testKey=" + task.getTaskName())));
+			verifyAllSpecifiedTaskExecutions(task, launchIds, true);
+			validateSuccessfulTaskLaunch(task, launchIds.get(0), 1);
+
+			List<Long> jobExecutionIds = task.execution(launchIds.get(0)).get().getJobExecutionIds();
+			assertThat(jobExecutionIds.size()).isEqualTo(2);
+			assertThat(task.jobStepExecutions(jobExecutionIds.get(0)).equals(1));
+			safeCleanupTaskExecution(task, launchIds.get(0));
+			assertThatThrownBy(() -> this.dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0)))
+					.isInstanceOf(DataFlowClientException.class)
+					.hasMessageContaining("There is no JobExecution with id=");
+		}
+
+	}
+
+	private List<Long> createTaskExecutionsForDefinition(Task task, int executionCount) {
+		return createTaskExecutionsForDefinition(task, Collections.emptyMap(), executionCount);
+	}
+
+	private List<Long> createTaskExecutionsForDefinition(Task task, Map<String, String> properties,
+			int executionCount) {
+		List<Long> launchIds = new ArrayList<>();
+		for (int i = 0; i < executionCount; i++) {
+			launchIds.add(task.launch(properties, Collections.emptyList()));
+			assertThat(task.execution(launchIds.get(i)).isPresent()).isTrue();
+			validateSuccessfulTaskLaunch(task, launchIds.get(i), i + 1);
+		}
+		return launchIds;
+	}
+
+	private void verifyAllSpecifiedTaskExecutions(Task task, List<Long> launchIds, boolean isPresent) {
+		launchIds.stream().forEach(
+				launchId -> {
+					if (isPresent) {
+						assertThat(task.execution(launchId).isPresent()).isTrue();
+					}
+					else {
+						assertThat(task.execution(launchId).isPresent()).isFalse();
+					}
+				});
+	}
+
 	private void verifyTaskDefAndTaskExecutionCount(String taskName, int taskDefCount, int taskExecCount) {
-		assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream().
-				filter(taskExecution -> taskExecution.getTaskName() != null && taskExecution.getTaskName().equals(taskName)).
-				collect(Collectors.toList()).size()).isEqualTo(taskExecCount);
+		assertThat(dataFlowOperations.taskOperations().executionList().getContent().stream()
+				.filter(taskExecution -> taskExecution.getTaskName() != null
+						&& taskExecution.getTaskName().equals(taskName))
+				.collect(Collectors.toList()).size()).isEqualTo(taskExecCount);
 		assertThat(dataFlowOperations.taskOperations().list().getContent().size()).isEqualTo(taskDefCount);
 	}
 
@@ -1832,6 +2410,7 @@ public class DataFlowIT {
 
 			assertThat(task.composedTaskChildTasks().size()).isEqualTo(allTasks.size());
 			assertThat(task.composedTaskChildTasks().stream().map(Task::getTaskName).collect(Collectors.toList()))
+					.as("verify composedTaskChildTasks is the same as all tasks")
 					.hasSameElementsAs(fullTaskNames(task, allTasks.toArray(new String[0])));
 
 			long launchId = task.launch(composedTaskLaunchArguments());
@@ -1844,20 +2423,28 @@ public class DataFlowIT {
 			}
 
 			// Parent Task
-			assertThat(task.executions().size()).isEqualTo(1);
-			assertThat(task.execution(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
-			task.executions().forEach(execution -> assertThat(execution.getExitCode()).isEqualTo(EXIT_CODE_SUCCESS));
+			assertThat(task.executions().size())
+					.as("verify exactly one execution")
+					.isEqualTo(1);
+			assertThat(task.execution(launchId).get().getExitCode())
+					.as("verify successful execution of parent task")
+					.isEqualTo(EXIT_CODE_SUCCESS);
+			task.executions().forEach(execution -> assertThat(execution.getExitCode())
+					.as("verify successful execution of parent task").isEqualTo(EXIT_CODE_SUCCESS));
 
 			// Successful tasks
 			childTasksBySuffix(task, successfulTasks.toArray(new String[0])).forEach(childTask -> {
-				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+				assertThat(childTask.executions().size())
+						.as("verify each child task ran once").isEqualTo(1);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.as("verify each child task has a successful parent").isEqualTo(EXIT_CODE_SUCCESS);
 			});
 
 			// Failed tasks
 			childTasksBySuffix(task, failedTasks.toArray(new String[0])).forEach(childTask -> {
 				assertThat(childTask.executions().size()).isEqualTo(1);
-				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode()).isEqualTo(EXIT_CODE_ERROR);
+				assertThat(childTask.executionByParentExecutionId(launchId).get().getExitCode())
+						.isEqualTo(EXIT_CODE_ERROR);
 			});
 
 			// Not run tasks
@@ -1879,6 +2466,29 @@ public class DataFlowIT {
 	private List<Task> childTasksBySuffix(Task task, String... suffixes) {
 		return java.util.stream.Stream.of(suffixes)
 				.map(suffix -> task.composedTaskChildTaskByLabel(suffix).get()).collect(Collectors.toList());
+	}
+
+	private void safeCleanupAllTaskExecutions(Task task) {
+		doSafeCleanupTasks(() -> task.cleanupAllTaskExecutions());
+	}
+
+	private void safeCleanupTaskExecution(Task task, long taskExecutionId) {
+		doSafeCleanupTasks(() -> task.cleanupTaskExecution(taskExecutionId));
+	}
+
+	private void doSafeCleanupTasks(Runnable cleanupOperation) {
+		try {
+			cleanupOperation.run();
+		}
+		catch (DataFlowClientException ex) {
+			if (ex.getMessage().contains("(reason: pod does not exist)") || ex.getMessage()
+					.contains("(reason: job does not exist)")) {
+				logger.warn("Unable to cleanup task executions: " + ex.getMessage());
+			}
+			else {
+				throw ex;
+			}
+		}
 	}
 
 	private static String randomTaskName() {

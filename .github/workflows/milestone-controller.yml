@@ -133,6 +133,16 @@ jobs:
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
                 "ref": "main",
+                "workflow": "carvel-worker.yml"
+              }
+            },
+            {
+              "if": "data.event == 'carvel-succeed' && data.repo == 'spring-cloud-dataflow' && data.owner == 'spring-cloud'",
+              "action": "workflow_dispatch",
+              "workflow_dispatch": {
+                "owner": "spring-cloud",
+                "repo": "spring-cloud-dataflow",
+                "ref": "main",
                 "workflow": "promote-milestone.yml"
               }
             },
@@ -165,6 +175,13 @@ jobs:
               "action": "fail",
               "fail": {
                 "message": "something went wrong in build train"
+              }
+            },
+            {
+              "if": "data.event == 'carvel-failed'",
+              "action": "fail",
+              "fail": {
+                "message": "hi, something went wrong with carvel"
               }
             }
           ]

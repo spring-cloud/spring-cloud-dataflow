@@ -1,11 +1,11 @@
 version: '3'
 
-# Reconfigures the default docker-compose.yml to replace MySQL by Postgres
+# Reconfigures the default docker-compose.yml to replace MariaDB by Postgres
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
 services:
 
-  mysql:
-    entrypoint: ["echo", "MySQL service is disabled"]
+  mariadb:
+    entrypoint: ["echo", "MariaDB service is disabled"]
 
   postgres:
     image: postgres:10

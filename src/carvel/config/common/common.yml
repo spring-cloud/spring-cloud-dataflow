@@ -1,0 +1,14 @@
+#@ load("common.star", "has_image_pull_secrets")
+
+#@ if not has_image_pull_secrets():
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    secretgen.carvel.dev/image-pull-secret: ""
+  name: reg-creds
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30K
+#@ end

@@ -1,8 +1,8 @@
-# $ docker run --name test-mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=spring -e MYSQL_USER=spring -e MYSQL_PASSWORD=spring -e MYSQL_DATABASE=dataflow mysql:5.6
-# $ docker run --name test-mysql -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=spring -e MYSQL_USER=spring -e MYSQL_PASSWORD=spring -e MYSQL_DATABASE=dataflow mysql:5.7
-# $ docker stop test-mysql
-# $ docker rm test-mysql
-# $ docker exec -it test-mysql mysql -h127.0.0.1 -P3306 -uspring -pspring dataflow
+# $ docker run --name test-mariadb -d -p 3306:3306 -e MARIADB_ROOT_PASSWORD=spring -e MARIADB_USER=spring -e MARIADB_PASSWORD=spring -e MARIADB_DATABASE=dataflow mariadb:10.4.22
+# $ docker run --name test-mariadb -d -p 3306:3306 -e MARIADB_ROOT_PASSWORD=spring -e MARIADB_USER=spring -e MARIADB_PASSWORD=spring -e MARIADB_DATABASE=dataflow mariadb:10.4.22
+# $ docker stop test-mariadb
+# $ docker rm test-mariadb
+# $ docker exec -it test-mariadb mariadb -h127.0.0.1 -P3306 -uspring -pspring dataflow
 spring:
   datasource:
     url: jdbc:mariadb://localhost:3306/dataflow

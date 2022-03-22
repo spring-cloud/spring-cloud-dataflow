@@ -1,0 +1,33 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+ifndef::env-github[]
+endif::[]
+
+[[examples-secretgen-controller-install]]
+== Secretgen Controller Install
+
+Install `secretgen-controller`:
+
+Deploy controller:
+[source, bash]
+----
+kapp deploy \
+  -a sg \
+  -y \
+  -f https://github.com/vmware-tanzu/carvel-secretgen-controller/releases/latest/download/release.yml
+----
+
+Deploy secrets:
+[source, bash]
+----
+kubectl create namespace secrets-ns
+kapp deploy \
+  -a sg-secrets
+  -y \
+  -f sg-dockerhub.yml
+----

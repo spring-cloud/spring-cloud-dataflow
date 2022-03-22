@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +28,25 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.table.Table;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Mark Fisher
  * @author Glenn Renfro
+ * @author Chris Bono
  */
 public class StreamCommandTests extends AbstractShellIntegrationTest {
 
@@ -76,7 +78,7 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 		stream().create(streamName, "time | log");
 	}
@@ -93,15 +95,15 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
 		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer);
+		Deployer deployer = new Deployer("testDeployer", "testType", mock(AppDeployer.class), mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 
 		//stream().create(streamName, "time | log");
 		stream().createDontDeploy(streamName, "time | log");
 
-		CommandResult cr = stream().validate(streamName);
-		assertTrue("task validate status command must be successful", cr.isSuccess());
-		List results = (List) cr.getResult();
+		Object result = stream().validate(streamName);
+		assertThat(result).isInstanceOf(List.class);
+		List results = (List) result;
 		Table table = (Table)results.get(0);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: Stream Name", "Stream Name", table.getModel().getValue(0, 0));

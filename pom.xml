@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>2.9.0-SNAPSHOT</version>
+	<version>2.10.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.9.0-SNAPSHOT</version>
+		<version>2.10.0-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 	<licenses>
@@ -56,24 +56,22 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>3.2.0-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>3.3.0-SNAPSHOT</spring-cloud-dataflow-ui.version>
 
-		<spring-cloud-dataflow-common.version>2.9.0-SNAPSHOT</spring-cloud-dataflow-common.version>
-		<spring-cloud-deployer.version>2.7.0-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.7.0-SNAPSHOT</spring-cloud-deployer-local.version>
-		<spring-cloud-deployer-cloudfoundry.version>2.7.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.7.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-dataflow-common.version>2.10.0-SNAPSHOT</spring-cloud-dataflow-common.version>
+		<spring-cloud-deployer.version>2.8.0-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.8.0-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.8.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.8.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.8.0-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.9.0-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.3.4</spring-cloud-task.version>
+		<spring-cloud-task.version>2.4.1</spring-cloud-task.version>
 
 		<!-- Only used for tests -->
 		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
-		<spring-cloud-common-security-config.version>1.7.0-SNAPSHOT</spring-cloud-common-security-config.version>
-
-		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
+		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
@@ -90,6 +88,7 @@
 		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.4</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.4</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-container-registry</module>
@@ -149,7 +148,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>2.9.0-SNAPSHOT</version>
+				<version>2.10.0-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -196,11 +195,6 @@
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.shell</groupId>
-				<artifactId>spring-shell</artifactId>
-				<version>${spring-shell.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${spring-cloud-common-security-config.version}</version>
@@ -244,6 +238,11 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-ecr</artifactId>
 				<version>${aws-java-sdk-ecr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-ui</artifactId>
+				<version>${springdoc-openapi-ui.version}</version>
 			</dependency>
 			<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 			<dependency>
@@ -426,7 +425,7 @@
 					<name>Spring Milestones</name>
 					<url>https://repo.spring.io/libs-milestone-local</url>
 					<snapshots>
-						<enabled>false</enabled>
+						<enabled>true</enabled>
 					</snapshots>
 				</repository>
 				<repository>

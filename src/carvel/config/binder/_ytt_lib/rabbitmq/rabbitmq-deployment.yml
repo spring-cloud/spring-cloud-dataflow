@@ -1,0 +1,53 @@
+#@ load("rabbitmq.lib.yml", "name")
+#@ load("rabbitmq.lib.yml", "config_name")
+#@ load("rabbitmq.star", "image")
+#@ load("rabbitmq.star", "has_image_pull_secrets")
+#@ load("rabbitmq.star", "image_pull_secrets")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ name()
+  labels:
+    app: #@ name()
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ name()
+  template:
+    metadata:
+      labels:
+        app: #@ name()
+    spec:
+      containers:
+      - image: #@ image()
+        name: #@ name()
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-user
+              name: #@ name()
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              key: rabbitmq-password
+              name: #@ name()
+        volumeMounts:
+        - name: rabbitmq-config-volume
+          mountPath: /etc/rabbitmq
+        ports:
+        - containerPort: 5672
+      #@ if has_image_pull_secrets():
+      imagePullSecrets: #@ image_pull_secrets()
+      #@ else:
+      imagePullSecrets: [{name: reg-creds}]
+      #@ end
+      volumes:
+      - name: rabbitmq-config-volume
+        configMap:
+          name: #@ config_name()
+          items:
+          - key: rabbitmq.conf
+            path: rabbitmq.conf

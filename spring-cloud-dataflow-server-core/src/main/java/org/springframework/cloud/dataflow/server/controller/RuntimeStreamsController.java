@@ -157,7 +157,7 @@ public class RuntimeStreamsController {
 					}
 				}
 			}
-			streamStatusResource.setApplications(new CollectionModel<>(appStatusResources));
+			streamStatusResource.setApplications(CollectionModel.of(appStatusResources));
 			return streamStatusResource;
 		}
 

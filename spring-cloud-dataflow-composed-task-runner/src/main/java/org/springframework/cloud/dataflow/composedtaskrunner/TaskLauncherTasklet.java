@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
@@ -59,6 +62,9 @@ import org.springframework.web.client.RestTemplate;
  * @author Glenn Renfro
  */
 public class TaskLauncherTasklet implements Tasklet {
+	final static String IGNORE_EXIT_MESSAGE = "IGNORE_EXIT_MESSAGE";
+
+	final static String IGNORE_EXIT_MESSAGE_PROPERTY = "ignore-exit-message";
 
 	private ComposedTaskProperties composedTaskProperties;
 
@@ -83,7 +89,6 @@ public class TaskLauncherTasklet implements Tasklet {
 	private TaskOperations taskOperations;
 
 	TaskProperties taskProperties;
-
 
 	public TaskLauncherTasklet(
 			ClientRegistrationRepository clientRegistrations,
@@ -161,15 +166,21 @@ public class TaskLauncherTasklet implements Tasklet {
 				}
 				args = cleansedArgs;
 			}
-			if(this.taskProperties.getExecutionid() != null) {
-				args.add("--spring.cloud.task.parent-execution-id=" + this.taskProperties.getExecutionid());
+			String parentTaskExecutionId = getParentTaskExecutionId(contribution);
+			if(parentTaskExecutionId != null) {
+				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
 			}
+
 			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
 			this.executionId = taskOperations.launch(tmpTaskName,
 					this.properties, args);
 
+			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
+			if (ignoreExitMessage != null) {
+				stepExecutionContext.put(IGNORE_EXIT_MESSAGE, ignoreExitMessage);
+			}
 			stepExecutionContext.put("task-execution-id", executionId);
 			stepExecutionContext.put("task-arguments", args);
 		}
@@ -203,6 +214,17 @@ public class TaskLauncherTasklet implements Tasklet {
 			}
 		}
 		return RepeatStatus.CONTINUABLE;
+	}
+
+	public String getParentTaskExecutionId(StepContribution stepContribution) {
+		Long result = null;
+		if (this.taskProperties.getExecutionid() != null) {
+			result = this.taskProperties.getExecutionid();
+		}
+		else if (stepContribution != null) {
+			result = this.taskExplorer.getTaskExecutionIdByJobExecutionId(stepContribution.getStepExecution().getJobExecutionId());
+		}
+		return result != null ? String.valueOf(result) : null;
 	}
 
 	public TaskOperations taskOperations() {
@@ -282,5 +304,44 @@ public class TaskLauncherTasklet implements Tasklet {
 		if (!StringUtils.hasText(password) && StringUtils.hasText(userName)) {
 			throw new IllegalArgumentException("A username may be specified only together with a password");
 		}
+	}
+
+	private Boolean isIgnoreExitMessage(List<String> args, Map<String, String> properties) {
+		Boolean result = null;
+
+		if (properties != null) {
+			MapConfigurationPropertySource mapConfigurationPropertySource = new MapConfigurationPropertySource();
+			properties.entrySet().forEach(entrySet -> {
+				String key = entrySet.getKey();
+				key = key.substring(key.lastIndexOf(".") + 1);
+				mapConfigurationPropertySource.put(key, entrySet.getValue());
+			});
+			result = isIgnoreMessagePresent(mapConfigurationPropertySource);
+		}
+
+		if (args != null) {
+			MapConfigurationPropertySource mapConfigurationPropertySource = new MapConfigurationPropertySource();
+			for (String arg : args) {
+				int firstEquals = arg.indexOf('=');
+				if (firstEquals != -1) {
+					mapConfigurationPropertySource.put(arg.substring(0, firstEquals), arg.substring(firstEquals + 1).trim());
+				}
+			}
+			Boolean argResult = isIgnoreMessagePresent(mapConfigurationPropertySource);
+			if (argResult != null) {
+				result = argResult;
+			}
+		}
+		return result;
+	}
+
+	private Boolean isIgnoreMessagePresent(MapConfigurationPropertySource mapConfigurationPropertySource) {
+		Binder binder = new Binder(mapConfigurationPropertySource);
+		try {
+			return binder.bind(IGNORE_EXIT_MESSAGE_PROPERTY, Bindable.of(Boolean.class)).get();
+		} catch (Exception e) {
+			// error means we couldn't bind, caller seem to handle null
+		}
+		return null;
 	}
 }

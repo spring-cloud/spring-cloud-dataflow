@@ -1,0 +1,15 @@
+(@ load("@ytt:data", "data") @)#@data/values
+---
+package_repository:
+  packageSpec:
+    syncPeriod: 5m
+    deploy:
+      kappWaitTimeout: 5m
+  packageName: (@= data.values.package.name @).tanzu.vmware.com
+  packages:
+    - name: (@= data.values.package.name @)
+      domain: tanzu.vmware.com
+      version: (@= data.values.project.version @)
+      image: (@= data.values.repository @):(@= data.values.project.version @)
+      description: Package for SCDF
+      timestamp: (@= data.values.package.timestamp @)

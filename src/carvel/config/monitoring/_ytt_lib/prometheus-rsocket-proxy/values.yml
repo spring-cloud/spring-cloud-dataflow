@@ -1,0 +1,8 @@
+#@data/values-schema
+---
+name: prometheus-rsocket-proxy
+image:
+  repository: micrometermetrics/prometheus-rsocket-proxy
+  tag: 1.0.0
+  digest: ""
+registrySecretRef: ""

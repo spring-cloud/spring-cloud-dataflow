@@ -1,0 +1,15 @@
+#@ load("postgres.lib.yml", "name")
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: #@ name()
+  annotations:
+    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/db"
+  labels:
+    app: #@ name()
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: #@ name()

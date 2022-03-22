@@ -123,6 +123,22 @@ definitions fails in the split then DDD and EEE will not fire.  For example if
 BBB fails then AAA and CCC will be marked successful and BBB will be marked a
 failure and DDD and EEE will not be launched.
 
+If any child task within a split returns an `ExitMessage` other than `COMPLETED` the split
+will have an `ExitStatus` of `FAILED`.  To ignore the  `ExitMessage` of a child task,
+add the `ignoreExitMessage=true` for each app that will return an `ExitMessage`
+within the split.  When using this flag, the `ExitStatus` of the task will be
+`COMPLETED` if the `ExitCode` of the child task is zero.  The split will have an
+`ExitStatus` of `FAILED` if the `ExitCode`s is non zero.  There are 2 ways to
+set the `ignoreExitMessage` flag:
+
+1. Setting the property for each of the apps that need to have their exitMessage
+ignored within the split.  For example a split like `<AAA || BBB>` where `BBB`
+will return an `exitMessage`, you would set the `ignoreExitMessage` property like
+`app.BBB.ignoreExitMessage=true`
+
+2. You can also set it for all apps using the composed-task-arguments property,
+for example: `--composed-task-arguments=--ignoreExitMessage=true`.
+
 == Configuration
 
 See the https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#spring-cloud-dataflow-composed-tasks[Configuring Composed Task Runner] in the Spring Cloud Data Flow reference guide.

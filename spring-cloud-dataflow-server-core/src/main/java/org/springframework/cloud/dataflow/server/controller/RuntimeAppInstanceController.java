@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,30 +26,33 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Mark Pollack
+ * @author Chris Bono
  */
 @RestController
 @RequestMapping("/runtime/apps/{appId}/instances")
 @ExposesResourceFor(AppInstanceStatusResource.class)
 public class RuntimeAppInstanceController {
 
-	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER = new Comparator<AppInstanceStatus>() {
-		@Override
-		public int compare(AppInstanceStatus i1, AppInstanceStatus i2) {
-			return i1.getId().compareTo(i2.getId());
-		}
-	};
+	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER =
+			(Comparator<AppInstanceStatus>) (i1, i2) -> i1.getId().compareTo(i2.getId());
 
 	private final StreamDeployer streamDeployer;
 
@@ -85,6 +88,23 @@ public class RuntimeAppInstanceController {
 			throw new NoSuchAppInstanceException(instanceId);
 		}
 		return new RuntimeAppInstanceController.InstanceAssembler(status).toModel(appInstanceStatus);
+	}
+
+	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.GET)
+	public ResponseEntity<String> getFromActuator(
+			@PathVariable String appId,
+			@PathVariable String instanceId,
+			@RequestParam String endpoint) {
+		return ResponseEntity.ok(streamDeployer.getFromActuator(appId, instanceId, endpoint));
+	}
+
+	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.POST)
+	public ResponseEntity<Void> postToActuator(
+			@PathVariable String appId,
+			@PathVariable String instanceId,
+			@RequestBody ActuatorPostRequest actuatorPostRequest) {
+		streamDeployer.postToActuator(appId, instanceId, actuatorPostRequest);
+		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	static class InstanceAssembler

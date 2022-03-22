@@ -2048,6 +2048,11 @@ IMPORTANT: When deleting data from the persistence store by using the `REMOVE_DA
 task execution IDs that represent parent task executions. When you provide child task executions (executed as part of a composed task),
 a `400` (Bad Request) HTTP status is returned.
 
+NOTE: When deleting large number of task executions some database types limit the number of entries in the `IN` clause (the method Spring Cloud Data Flow uses to delete relationships for task executions).
+Spring Cloud Data Flow supports the chunking of deletes for Sql Server (Maximum 2100 entries) and Oracle DBs (Maximum 1000 entries).
+However, Spring Cloud Data Flow allows users to set their own chunking factor.  To do this set the `spring.cloud.dataflow.task.executionDeleteChunkSize` property to the appropriate chunk size.
+Default is `0` which means Spring Cloud Data Flow will not chunk the task execution deletes (except for Oracle and Sql Server databases).
+
 [[api-guide-resources-task-executions-current-count]]
 ==== Task Execution Current Count
 
@@ -2957,3 +2962,34 @@ include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.ado
 ===== Response Structure
 
 include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
+
+[[api-guide-openapi]]
+== OpenAPI
+
+The https://springdoc.org/#Introduction[Springdoc] library is integrated with the server in an opt-in fashion. Once enabled, it provides OpenAPI3 documentation and a Swagger UI.
+
+To enable, set the following properties in your `application.yml` prior to launching the server:
+```yaml
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+```
+The properties can also be set on the command line:
+```shell
+-Dspringdoc.api-docs.enabled=true -Dspringdoc.swagger-ui.enabled=true
+```
+or as environment variables:
+```shell
+SPRINGDOC_APIDOCS_ENABLED=true
+SPRINGDOC_SWAGGERUI_ENABLED=true
+```
+
+Once enabled, the OpenAPI3 docs and Swagger UI are available at the `/v3/api-docs` and `/swagger-ui/index.html` URIs, respectively (eg. http://localhost:9393/v3/api-docs).
+
+TIP: The Swagger UI will be initially be blank. Type in "/v3/api-docs/" in the "Explore" bar and click "Explore".
+
+TIP: If you try out the API's in the Swagger UI and get errors related to `"No property string found for type"` try replacing the **pageable** parameter with `{ }` or removing its `"sort"` attribute.
+
+There are a plethora of available https://springdoc.org/#properties[OpenAPI] and https://springdoc.org/#swagger-ui-properties[Swagger UI] properties to configure the feature.

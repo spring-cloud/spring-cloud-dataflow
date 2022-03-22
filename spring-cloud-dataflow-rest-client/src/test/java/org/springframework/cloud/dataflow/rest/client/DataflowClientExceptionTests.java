@@ -45,15 +45,15 @@ public class DataflowClientExceptionTests {
 
 	@Test
 	public void testCreationOfDataflowClientExceptionWithSingleError() {
-		final VndErrors errors = new VndErrors("foo", "bar message", new Link("somewhere"));
+		final VndErrors errors = new VndErrors("foo", "bar message", Link.of("somewhere"));
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
 		assertEquals("bar message", dataFlowClientException.getMessage());
 	}
 
 	@Test
 	public void testCreationOfDataflowClientExceptionWithMultipleErrors() {
-		final VndError vndError1 = new VndError("foo logref", "foo message", new Link("foo link"));
-		final VndError vndError2 = new VndError("bar logref", "bar message", new Link("bar link"));
+		final VndError vndError1 = new VndError("foo logref", "foo message", Link.of("foo link"));
+		final VndError vndError2 = new VndError("bar logref", "bar message", Link.of("bar link"));
 
 		final VndErrors errors = new VndErrors(vndError1, vndError2);
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);

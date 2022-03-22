@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.UnexpectedJobExecutionException;
@@ -47,6 +49,7 @@ import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecuti
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -143,7 +146,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testInvalidTaskOperations() throws Exception{
+	public void testInvalidTaskOperations() {
 		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(null, null,
 				this.taskExplorer, this.composedTaskProperties,
 				TASK_NAME, new TaskProperties());
@@ -157,15 +160,13 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletWithTaskExecutionId() throws Exception{
-		TaskLauncherTasklet taskLauncherTasklet = prepTaskLauncherTests();
-
+	public void testTaskLauncherTaskletWithTaskExecutionId() {
 		TaskProperties taskProperties = new TaskProperties();
 		taskProperties.setExecutionid(88L);
 		mockReturnValForTaskExecution(2L);
 		ChunkContext chunkContext = chunkContext();
 		createCompleteTaskExecution(0);
-		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
 		taskLauncherTasklet.setArguments(null);
 		execute(taskLauncherTasklet, null, chunkContext);
 		assertThat(chunkContext.getStepContext()
@@ -178,9 +179,31 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() throws Exception{
+	public void testTaskLauncherTaskletWithoutTaskExecutionId() {
+		TaskProperties taskProperties = new TaskProperties();
+		mockReturnValForTaskExecution(2L);
+		ChunkContext chunkContext = chunkContext();
+		JobExecution jobExecution = new JobExecution(0L, new JobParameters());
 
-		TaskLauncherTasklet taskLauncherTasklet = prepTaskLauncherTests();
+		createAndStartCompleteTaskExecution(0, jobExecution);
+
+		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		taskLauncherTasklet.setArguments(null);
+		StepExecution stepExecution = new StepExecution("stepName", jobExecution, 0L);
+		StepContribution contribution = new StepContribution(stepExecution);
+		execute(taskLauncherTasklet, contribution, chunkContext);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(((List) chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() {
+
 		TaskProperties taskProperties = new TaskProperties();
 		taskProperties.setExecutionid(88L);
 		mockReturnValForTaskExecution(2L);
@@ -191,7 +214,7 @@ public class TaskLauncherTaskletTests {
 		((List)chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).add("--spring.cloud.task.parent-execution-id=84");
-		taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
 		taskLauncherTasklet.setArguments(null);
 		execute(taskLauncherTasklet, null, chunkContext);
 		assertThat(chunkContext.getStepContext()
@@ -200,22 +223,6 @@ public class TaskLauncherTaskletTests {
 		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
-	}
-
-	private TaskLauncherTasklet prepTaskLauncherTests() throws Exception{
-		createCompleteTaskExecution(0);
-		TaskLauncherTasklet taskLauncherTasklet =
-				getTaskExecutionTasklet();
-		ChunkContext chunkContext = chunkContext();
-		mockReturnValForTaskExecution(1L);
-		execute(taskLauncherTasklet, null, chunkContext);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-execution-id")).isEqualTo(1L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).isNull();
-		return taskLauncherTasklet;
 	}
 
 	@Test
@@ -236,7 +243,7 @@ public class TaskLauncherTaskletTests {
 	public void testInvalidTaskName() {
 		final String ERROR_MESSAGE =
 				"Could not find task definition named " + TASK_NAME;
-		VndErrors errors = new VndErrors("message", ERROR_MESSAGE, new Link("ref"));
+		VndErrors errors = new VndErrors("message", ERROR_MESSAGE, Link.of("ref"));
 		Mockito.doThrow(new DataFlowClientException(errors))
 				.when(this.taskOperations)
 				.launch(ArgumentMatchers.anyString(),
@@ -278,7 +285,7 @@ public class TaskLauncherTaskletTests {
 	}
 
 	private RepeatStatus execute(TaskLauncherTasklet taskLauncherTasklet, StepContribution contribution,
-			ChunkContext chunkContext)  throws Exception{
+			ChunkContext chunkContext) {
 		RepeatStatus status = taskLauncherTasklet.execute(contribution, chunkContext);
 		if (!status.isContinuable()) {
 			throw new IllegalStateException("Expected continuable status for the first execution.");
@@ -289,8 +296,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletNullResult() throws Exception {
-		boolean isException = false;
+	public void testTaskLauncherTaskletNullResult() {
 		mockReturnValForTaskExecution(1L);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
@@ -318,6 +324,70 @@ public class TaskLauncherTaskletTests {
 		fail("Expected an IllegalArgumentException to be thrown");
 	}
 
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessage() {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setArguments(Collections.singletonList("--ignoreExitMessage=true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessageViaProperties() {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setProperties(Collections.singletonMap("app.foo." + TaskLauncherTasklet.IGNORE_EXIT_MESSAGE_PROPERTY, "true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletIgnoreExitMessageViaCommandLineOverride() {
+		createCompleteTaskExecution(0);
+
+		TaskLauncherTasklet taskLauncherTasklet =
+				getTaskExecutionTasklet();
+		taskLauncherTasklet.setArguments(Collections.singletonList("--ignoreExitMessage=false"));
+		taskLauncherTasklet.setProperties(Collections.singletonMap("app.foo." + TaskLauncherTasklet.IGNORE_EXIT_MESSAGE_PROPERTY, "true"));
+		ChunkContext chunkContext = chunkContext();
+		mockReturnValForTaskExecution(1L);
+		execute(taskLauncherTasklet, null, chunkContext);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("task-execution-id")).isEqualTo(1L);
+		boolean value = chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);
+		Assertions.assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
+		Assertions.assertThat((Boolean)chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isFalse();
+	}
+
 
 	@Test
 	public void testTaskOperationsConfiguredWithMissingUsername() {
@@ -336,9 +406,16 @@ public class TaskLauncherTaskletTests {
 		}
 		fail("Expected an IllegalArgumentException to be thrown");
 	}
-
 	private void createCompleteTaskExecution(int exitCode) {
 		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
+		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
+				exitCode, new Date(), "");
+	}
+
+	private void createAndStartCompleteTaskExecution(int exitCode, JobExecution jobExecution) {
+		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
+		JdbcTaskBatchDao taskBatchDao = new JdbcTaskBatchDao(this.dataSource);
+		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
 				exitCode, new Date(), "");
 	}

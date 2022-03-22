@@ -20,13 +20,12 @@ version: '3'
 #                             The deployed stream applications that run in their own docker containers (e.g. docker:// registered apps),
 #                             can be reached on the ports they expose.
 services:
-  mysql:
-    image: mysql:5.7.25
-    container_name: dataflow-mysql
+  mariadb:
+    image: mariadb:10.4.22
+    container_name: dataflow-mariadb
     environment:
-      MYSQL_DATABASE: dataflow
-      MYSQL_USER: root
-      MYSQL_ROOT_PASSWORD: rootpw
+      MARIADB_DATABASE: dataflow
+      MARIADB_ROOT_PASSWORD: rootpw
     expose:
       - 3306
 
@@ -55,7 +54,7 @@ services:
 
   dataflow-server:
     user: root
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.10.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -71,7 +70,7 @@ services:
 
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
 
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -89,7 +88,7 @@ services:
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
          chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mysql:3306 -- /cnb/process/web"
+         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
@@ -105,7 +104,7 @@ services:
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/3.0.1' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:3.0.1';
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/2.1.5.RELEASE' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:2.1.5.RELEASE';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.9.0-SNAPSHOT}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.9.0-SNAPSHOT}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.10.0-SNAPSHOT}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.10.0-SNAPSHOT}';
         echo 'Maven Stream apps imported'"
 
   app-import-task:
@@ -121,7 +120,7 @@ services:
 
   skipper-server:
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.8.0-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"
@@ -129,7 +128,7 @@ services:
     environment:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20190
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -139,7 +138,7 @@ services:
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
          chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mysql:3306 -- /cnb/process/web"
+         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}

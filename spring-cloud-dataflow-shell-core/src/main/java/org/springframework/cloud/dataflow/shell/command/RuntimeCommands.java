@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,27 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.cloud.dataflow.rest.client.RuntimeOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BorderSpecification;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.CellMatchers;
@@ -44,8 +50,7 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Commands for displaying the runtime state of deployed apps.
@@ -53,30 +58,72 @@ import org.springframework.util.Assert;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
-@Component
-public class RuntimeCommands implements CommandMarker {
+@ShellComponent
+public class RuntimeCommands {
 
 	private static final String LIST_APPS = "runtime apps";
 
+	private static final String APP_ACTUATOR_GET = "runtime actuator get";
+
+	private static final String APP_ACTUATOR_POST = "runtime actuator post";
+
 	private final DataFlowShell dataFlowShell;
 
-	@Autowired
-	public RuntimeCommands(DataFlowShell dataFlowShell) {
-		Assert.notNull(dataFlowShell, "DataFlowShell must not be null");
+	private final ObjectMapper objectMapper;
+
+	public RuntimeCommands(DataFlowShell dataFlowShell, ObjectMapper objectMapper) {
 		this.dataFlowShell = dataFlowShell;
+		this.objectMapper = objectMapper;
 	}
 
-	@CliAvailabilityIndicator({ LIST_APPS })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.RUNTIME);
+	public Availability availableWithViewRole() { return availabilityFor(RoleType.VIEW, OpsType.RUNTIME); }
+
+	public Availability availableWithModifyRole() {
+		return availabilityFor(RoleType.MODIFY, OpsType.RUNTIME);
 	}
 
-	@CliCommand(value = LIST_APPS, help = "List runtime apps")
+	private Availability availabilityFor(RoleType roleType, OpsType opsType) {
+		return dataFlowShell.hasAccess(roleType, opsType)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
+	}
+
+	@ShellMethod(key = APP_ACTUATOR_GET, value = "Invoke actuator GET endpoint on app instance")
+	@ShellMethodAvailability("availableWithViewRole")
+	public String getFromActuator(
+			@ShellOption(value = "--appId", help = "app id of the app instance") String appId,
+			@ShellOption(value = "--instanceId", help = "instance id of the app instance") String instanceId,
+			@ShellOption(help = "endpoint to invoke") String endpoint) {
+		return runtimeOperations().getFromActuator(appId, instanceId, endpoint);
+	}
+
+	@ShellMethod(key = APP_ACTUATOR_POST, value = "Invoke actuator POST endpoint on app instance")
+	@ShellMethodAvailability("availableWithModifyRole")
+	public Object postToActuator(
+			@ShellOption(value = "--appId", help = "app id of the app instance") String appId,
+			@ShellOption(value = "--instanceId", help = "instance id of the app instance") String instanceId,
+			@ShellOption(help = "endpoint to invoke") String endpoint,
+			@ShellOption(help = "optional data to include in the request body in the form of a JSON string representing a Map<String, Object>",
+					defaultValue = ShellOption.NULL) String data) {
+		Map<String, Object> body = Collections.emptyMap();
+		if (StringUtils.hasText(data)) {
+			try {
+				body = objectMapper.readValue(data, new TypeReference<HashMap<String, Object>>() { });
+			} catch (JacksonException ex) {
+				throw new RuntimeException("Unable to parse 'data' into map: " + ex.getMessage(), ex);
+			}
+		}
+		return runtimeOperations().postToActuator(appId, instanceId, endpoint, body);
+	}
+
+	@ShellMethod(key = LIST_APPS, value = "List runtime apps")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table list(
-			@CliOption(key = "summary", help = "whether to hide app instance details", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean summary,
-			@CliOption(key = { "appId",
-					"appIds" }, help = "app id(s) to display, also supports '<group>.*' pattern") String[] appIds) {
+			@ShellOption(help = "whether to hide app instance details", defaultValue = "false") boolean summary,
+			@ShellOption(value = { "--appId", "--appIds" }, help = "app id(s) to display, also supports '<group>.*' pattern",
+					defaultValue = ShellOption.NULL) String[] appIds) {
 
 		Set<String> filter = null;
 		if (appIds != null) {

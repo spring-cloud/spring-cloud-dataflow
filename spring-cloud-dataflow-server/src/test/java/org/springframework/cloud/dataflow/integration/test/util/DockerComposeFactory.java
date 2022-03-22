@@ -75,11 +75,11 @@ public class DockerComposeFactory {
 	 * 'spring-cloud-dataflow/src/docker-compose' folder.
 	 */
 	private static final String[] DEFAULT_DOCKER_COMPOSE_PATHS = {
-			"../src/docker-compose/docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MySQL
+			"../src/docker-compose/docker-compose.yml", // Configures DataFlow, Skipper, Kafka/Zookeeper and MariaDB
 			"../src/docker-compose/docker-compose-prometheus.yml" //,   // metrics collection/visualization with Prometheus and Grafana.
 			//"../src/docker-compose/docker-compose-influxdb.yml",     // metrics collection/visualization with InfluxDB and Grafana.
 			//"../src/docker-compose/docker-compose-wavefront.yml",     // metrics collection/visualization with Wavefront.
-			//"../src/docker-compose/docker-compose-postgres.yml",     // Replaces local MySQL database by Postgres.
+			//"../src/docker-compose/docker-compose-postgres.yml",     // Replaces local MariaDB database by Postgres.
 			//"../src/docker-compose/docker-compose-rabbitmq.yml",     // Replaces local Kafka message broker by RabbitMQ.
 			//"../src/docker-compose/docker-compose-k8s.yml",          // Adds K8s target platform (called k8s).
 			//"../src/docker-compose/docker-compose-cf.yml"            // Adds CloudFoundry target platform (called cf).

@@ -48,9 +48,11 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
+import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.server.controller.NoSuchAppException;
+import org.springframework.cloud.dataflow.server.controller.NoSuchAppInstanceException;
 import org.springframework.cloud.dataflow.server.controller.support.InvalidStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -63,6 +65,7 @@ import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.ConfigValues;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Info;
@@ -100,6 +103,7 @@ import org.springframework.util.StringUtils;
  * @author Soby Chacko
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Chris Bono
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -603,6 +607,34 @@ public class SkipperStreamDeployer implements StreamDeployer {
 	@Override
 	public List<String> getStreams() {
 		return this.skipperClient.list("").stream().map(Release::getName).collect(Collectors.toList());
+	}
+
+	@Override
+	public String getFromActuator(String appId, String instanceId, String endpoint) {
+		String releaseName = determineReleaseName(appId, instanceId);
+		return skipperClient.getFromActuator(releaseName, appId, instanceId, endpoint);
+	}
+
+	@Override
+	public Object postToActuator(String appId, String instanceId, ActuatorPostRequest actuatorPostRequest) {
+		String releaseName = determineReleaseName(appId, instanceId);
+		return skipperClient.postToActuator(releaseName, appId, instanceId, actuatorPostRequest);
+	}
+
+	private String determineReleaseName(String appId, String instanceId) {
+		AppStatus status = this.getAppStatus(appId);
+		if (status.getState().equals(DeploymentState.unknown)) {
+			throw new NoSuchAppException(appId);
+		}
+		AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
+		if (appInstanceStatus == null) {
+			throw new NoSuchAppInstanceException(instanceId);
+		}
+		String releaseName = appInstanceStatus.getAttributes().get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME);
+		if (releaseName == null) {
+			throw new RuntimeException(String.format("Could not determine release name for %s / %s", appId, instanceId));
+		}
+		return releaseName;
 	}
 
 	private List<AppStatus> skipperStatus(String streamName) {

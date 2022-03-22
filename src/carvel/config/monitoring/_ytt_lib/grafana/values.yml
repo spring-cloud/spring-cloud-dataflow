@@ -1,0 +1,11 @@
+#@data/values-schema
+---
+name: grafana
+image:
+  repository: springcloud/spring-cloud-dataflow-grafana-prometheus
+  tag: ""
+  digest: ""
+service:
+  spec:
+    type: NodePort
+registrySecretRef: ""

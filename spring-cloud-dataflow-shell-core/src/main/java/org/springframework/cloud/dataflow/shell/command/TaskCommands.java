@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,18 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.completer.TaskNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,9 +61,10 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author David Turanski
  * @author Mike Baranski
+ * @author Chris Bono
  */
-@Component
-public class TaskCommands implements CommandMarker {
+@ShellComponent
+public class TaskCommands {
 
 	private static final String PROPERTIES_OPTION = "properties";
 
@@ -111,34 +113,35 @@ public class TaskCommands implements CommandMarker {
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
-
-	@CliAvailabilityIndicator({ CREATE })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
+	
+	public Availability availableWithViewRole() {
+		return availabilityFor(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ LAUNCH })
-	public boolean availableWithDeployRole() {
-		return dataFlowShell.hasAccess(RoleType.DEPLOY, OpsType.TASK);
+	public Availability availableWithCreateRole() {
+		return availabilityFor(RoleType.CREATE, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ STOP })
-	public boolean availableWithUnDeployRole() {
-		return dataFlowShell.hasAccess(RoleType.DEPLOY, OpsType.TASK);
+	public Availability availableWithDeployRole() {
+		return availabilityFor(RoleType.DEPLOY, OpsType.TASK);
+	}
+	
+	public Availability availableWithUnDeployRole() {
+		return availabilityFor(RoleType.DEPLOY, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ DESTROY, DESTROY_TASK_ALL, TASK_EXECUTION_CLEANUP })
-	public boolean availableWithDestroyRole() {
-		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.TASK);
+	public Availability availableWithDestroyRole() {
+		return availabilityFor(RoleType.DESTROY, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ EXECUTION_LIST, LIST, PLATFORM_LIST, TASK_EXECUTION_CURRENT, TASK_EXECUTION_STATUS,
-			VALIDATE })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
+	private Availability availabilityFor(RoleType roleType, OpsType opsType) {
+		return dataFlowShell.hasAccess(roleType, opsType)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
 	}
-
-	@CliCommand(value = LIST, help = "List created tasks")
+	
+	@ShellMethod(key = LIST, value = "List created tasks")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table list() {
 		final PagedModel<TaskDefinitionResource> tasks = taskOperations().list();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -150,7 +153,8 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = PLATFORM_LIST, help = "List platform accounts for tasks")
+	@ShellMethod(key = PLATFORM_LIST, value = "List platform accounts for tasks")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table listPlatforms() {
 		final PagedModel<LauncherResource> platforms = taskOperations().listPlatforms();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -161,10 +165,9 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = VALIDATE, help = "Validate apps contained in task definitions")
+	@ShellMethod(key = VALIDATE, value = "Validate apps contained in task definitions")
 	public List<Object> validate(
-			@CliOption(key = { "", "name" }, help = "the task definition name", mandatory = true) String name)
-			throws OperationNotSupportedException {
+			@ShellOption(value = { "", "--name" }, help = "the task definition name") String name) throws OperationNotSupportedException {
 		final TaskAppStatusResource task = taskOperations().validateTaskDefinition(name);
 		List<Object> result = new ArrayList<>();
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -195,30 +198,25 @@ public class TaskCommands implements CommandMarker {
 		result.add(builder.build());
 		return result;
 	}
-
-	@CliCommand(value = CREATE, help = "Create a new task definition")
+	
+	@ShellMethod(key = CREATE, value = "Create a new task definition")
+	@ShellMethodAvailability("availableWithCreateRole")
 	public String create(
-			@CliOption(mandatory = true, key = { "", "name" }, help = "the name to give to the task") String name,
-			@CliOption(mandatory = true, key = { "definition" }, help = "a task definition, using the DSL (e.g. "
-					+ "\"timestamp --format=YYYY\")", optionContext = "disable-string-converter completion-task") String dsl,
-			@CliOption(mandatory = false, key = {
-					"description" }, help = "a sort description about the task", unspecifiedDefaultValue = "") String description) {
+			@ShellOption(value = { "", "--name" }, help = "the name to give to the task") String name,
+			@ShellOption(value = "--definition", help = "a task definition, using the DSL (e.g. \"timestamp --format=YYYY\")") String dsl,
+			@ShellOption(help = "a sort description about the task", defaultValue = "") String description) {
 		this.taskOperations().create(name, dsl, description);
 		return String.format("Created new task '%s'", name);
 	}
 
-	@CliCommand(value = LAUNCH, help = "Launch a previously created task")
+	@ShellMethod(key = LAUNCH, value = "Launch a previously created task")
+	@ShellMethodAvailability("availableWithDeployRole")
 	public String launch(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the task to launch", mandatory = true, optionContext = "existing-task disable-string-converter") String name,
-			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "the properties for this launch") String properties,
-			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this launch (as a File)") File propertiesFile,
-			@CliOption(key = {
-					ARGUMENTS_OPTION }, help = "the commandline arguments for this launch") String arguments,
-			@CliOption(key = {
-					PLATFORM_OPTION }, help = "the platform name to use for this launch") String platformName)
+			@ShellOption(value = { "", "--name" }, help = "the name of the task to launch") String name,
+			@ShellOption(help = "the properties for this launch", defaultValue = ShellOption.NULL) String properties,
+			@ShellOption(value = "--propertiesFile", help = "the properties for this launch (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
+			@ShellOption(help = "the commandline arguments for this launch", defaultValue = ShellOption.NULL) String arguments,
+			@ShellOption(value = "--platformName", help = "the platform name to use for this launch", defaultValue = ShellOption.NULL) String platformName)
 			throws IOException {
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION, propertiesFile);
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parseDeploymentProperties(properties,
@@ -235,11 +233,12 @@ public class TaskCommands implements CommandMarker {
 		long taskExecutionId = taskOperations().launch(name, propertiesToUse, argumentsToUse);
 		return String.format("Launched task '%s' with execution id %d", name, taskExecutionId);
 	}
-
-	@CliCommand(value = STOP, help = "Stop executing tasks")
-	public String stop(@CliOption(key = { "", "ids" }, help = "the task execution id", mandatory = true) String ids,
-			@CliOption(key = {
-					PLATFORM_OPTION }, help = "the name of the platform where the task is executing") String platform) {
+	
+	@ShellMethod(key = STOP, value = "Stop executing tasks")
+	@ShellMethodAvailability("availableWithUnDeployRole")
+	public String stop(
+			@ShellOption(value = { "", "--ids" }, help = "the task execution id") String ids,
+			@ShellOption(value = "--platformName", help = "the name of the platform where the task is executing", defaultValue = ShellOption.NULL) String platform) {
 
 		String message = null;
 		if (StringUtils.hasText(platform)) {
@@ -255,11 +254,10 @@ public class TaskCommands implements CommandMarker {
 		return message;
 	}
 
-	@CliCommand(value = LOG, help = "Retrieve task execution log")
+	@ShellMethod(key = LOG, value = "Retrieve task execution log")
 	public String retrieveTaskExecutionLog(
-			@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id,
-			@CliOption(key = {
-					"platform" }, help = "the platform of the task execution", mandatory = false) String platform) {
+			@ShellOption(value = { "", "--id" }, help = "the task execution id") long id,
+			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform) {
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 		String result;
 		if (platform != null) {
@@ -271,31 +269,30 @@ public class TaskCommands implements CommandMarker {
 		return result;
 	}
 
-	@CliCommand(value = DESTROY, help = "Destroy an existing task")
+	@ShellMethod(key = DESTROY, value = "Destroy an existing task")
+	@ShellMethodAvailability("availableWithDestroyRole")
 	public String destroy(
-			@CliOption(key = { "",
-					"name" }, help = "the name of the task to destroy", mandatory = true, optionContext = "existing-task disable-string-converter") String name,
-			@CliOption(key = {
-					"cleanup" }, help = "the boolean flag to set if task executions and related resources need to be cleaned", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean cleanup) {
+			@ShellOption(value = { "", "--name" }, help = "the name of the task to destroy", valueProvider = TaskNameValueProvider.class) String name,
+			@ShellOption(help = "the boolean flag to set if task executions and related resources should NOT also be cleaned up", defaultValue = "false") boolean cleanup) {
 		taskOperations().destroy(name, cleanup);
 		return String.format("Destroyed task '%s'", name);
 	}
 
-	@CliCommand(value = DESTROY_TASK_ALL, help = "Destroy all existing tasks")
+	@ShellMethod(key = DESTROY_TASK_ALL, value = "Destroy all existing tasks")
+	@ShellMethodAvailability("availableWithDestroyRole")
 	public String destroyAll(
-			@CliOption(key = "force", help = "bypass confirmation prompt", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all tasks?", "n", "y", "n"))) {
 			taskOperations().destroyAll();
 			return String.format("All tasks destroyed");
 		}
-		else {
-			return "";
-		}
+		return "";
 	}
 
-	@CliCommand(value = EXECUTION_LIST, help = "List created task executions filtered by taskName")
+	@ShellMethod(key = EXECUTION_LIST, value = "List created task executions filtered by taskName")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table executionListByName(
-			@CliOption(key = "name", help = "the task name to be used as a filter", optionContext = "existing-task disable-string-converter") String name) {
+			@ShellOption(value = { "", "--name" }, help = "the task name to be used as a filter", valueProvider = TaskNameValueProvider.class, defaultValue = ShellOption.NULL) String name) {
 
 		final PagedModel<TaskExecutionResource> tasks;
 		if (name == null) {
@@ -314,8 +311,9 @@ public class TaskCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_STATUS, help = "Display the details of a specific task execution")
-	public Table display(@CliOption(key = { "", "id" }, help = "the task execution id", mandatory = true) long id) {
+	@ShellMethod(key = TASK_EXECUTION_STATUS, value = "Display the details of a specific task execution")
+	@ShellMethodAvailability("availableWithViewRole")
+	public Table display(@ShellOption(value = { "", "--id" }, help = "the task execution id") long id) {
 
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 
@@ -345,7 +343,8 @@ public class TaskCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_CURRENT, help = "Display count of currently executin tasks and related information")
+	@ShellMethod(key = TASK_EXECUTION_CURRENT, value = "Display count of currently executin tasks and related information")
+	@ShellMethodAvailability("availableWithViewRole")
 	public Table currentExecutions() {
 		Collection<CurrentTaskExecutionsResource> taskExecutionsResources = taskOperations().currentTaskExecutions();
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
@@ -359,47 +358,48 @@ public class TaskCommands implements CommandMarker {
 		return builder.build();
 	}
 
-	@CliCommand(value = TASK_EXECUTION_CLEANUP, help = "Clean up any platform specific resources linked to a task "
+	@ShellMethod(key = TASK_EXECUTION_CLEANUP, value = "Clean up any platform specific resources linked to a task "
 			+ "execution")
-	public String cleanup(@CliOption(key = { "", "id" }, help = "the task execution id") Long id,
-			@CliOption(key = {
-					"all" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean all,
-			@CliOption(key = "completed-executions", help = "cleanup only the completed task executions", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean completed,
-			@CliOption(key = "task-name", help = "the name of the task to cleanup") String taskName,
-			@CliOption(key = {
-					"force" }, help = "all task execution IDs", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean force) {
+	@ShellMethodAvailability("availableWithDestroyRole")
+	public String cleanup(
+			@ShellOption(value = { "", "--id" }, help = "the task execution id", defaultValue = ShellOption.NULL) Long id,
+			@ShellOption(help = "all task execution IDs", defaultValue = "false") boolean all,
+			@ShellOption(help = "include non-completed task executions", defaultValue = "false") boolean includeNonCompleted,
+			@ShellOption(value = "--task-name", help = "the name of the task to cleanup", defaultValue = ShellOption.NULL) String taskName,
+			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)),
 				"`taskName`, `id` and `all` options are mutually exclusive.");
+		boolean completedOnly = !includeNonCompleted;
 		if (all) {
-			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, null);
+			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completedOnly, null);
 			if (taskExecutionsCount > 0) {
-				String taskExecutions = (completed) ? taskExecutionsCount + " completed"
+				String taskExecutions = (completedOnly) ? taskExecutionsCount + " completed"
 						: taskExecutionsCount.toString();
 				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
-					taskOperations().cleanupAllTaskExecutions(completed, null);
+					taskOperations().cleanupAllTaskExecutions(completedOnly, null);
 					return String.format("Request to clean up resources for task executions has been submitted");
 				}
 			}
 			else {
-				return String.format("No %stask executions available for deletion.", (completed) ? "completed " : "");
+				return String.format("No %stask executions available for deletion.", (completedOnly) ? "completed " : "");
 			}
 		}
 		else if (StringUtils.hasText(taskName)) {
-			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completed, taskName);
+			Integer taskExecutionsCount = this.taskOperations().getAllTaskExecutionsCount(completedOnly, taskName);
 			if (taskExecutionsCount > 0) {
-				String taskExecutions = (completed) ? taskExecutionsCount + " completed"
+				String taskExecutions = (completedOnly) ? taskExecutionsCount + " completed"
 						: taskExecutionsCount.toString();
 				String warn = String.format("About to delete %s task executions and related records", taskExecutions);
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
-					taskOperations().cleanupAllTaskExecutions(completed, taskName);
+					taskOperations().cleanupAllTaskExecutions(completedOnly, taskName);
 					return String.format("Request to clean up resources for task executions has been submitted");
 				}
 			}
 			else {
-				return String.format("No %stask executions available for deletion.", (completed) ? "completed " : "");
+				return String.format("No %stask executions available for deletion.", (completedOnly) ? "completed " : "");
 			}
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,21 @@
 
 package org.springframework.cloud.dataflow.shell.converter;
 
-import java.util.List;
-
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.MediaType;
-import org.springframework.shell.core.Completion;
-import org.springframework.shell.core.Converter;
-import org.springframework.shell.core.MethodTarget;
 import org.springframework.stereotype.Component;
 
 /**
  * Knows how to parse String representations of {@link MediaType}.
  *
  * @author Eric Bottard
+ * @author Chris Bono
  */
 @Component
-public class MediaTypeConverter implements Converter<MediaType> {
+public class MediaTypeConverter implements Converter<String, MediaType> {
 
 	@Override
-	public boolean supports(Class<?> type, String optionContext) {
-		return MediaType.class.isAssignableFrom(type);
-	}
-
-	@Override
-	public MediaType convertFromText(String value, Class<?> targetType, String optionContext) {
+	public MediaType convert(String value) {
 		return MediaType.parseMediaType(value);
 	}
-
-	@Override
-	public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData,
-			String optionContext, MethodTarget target) {
-		return false;
-	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ public class DataflowCluster implements Startable {
 	private final int DATAFLOW_PORT = 9393;
 	private final int SKIPPER_PORT = 7577;
 	private final int POSTGRES_PORT = 5432;
-	private final int MYSQL_PORT = 3306;
 	private final int MSSQL_PORT = 1433;
 	private final int MARIADB_PORT = 3306;
 	private final int UAA_PORT = 8099;
@@ -276,16 +275,6 @@ public class DataflowCluster implements Startable {
 				databaseContainer.withNetworkAliases(databaseAlias);
 				databaseContainer.withNetwork(network);
 				return databaseContainer;
-			} else if (clusterContainer.tag.startsWith(TagNames.MYSQL)) {
-				MySQLMariaDriverContainer<?> databaseContainer = new MySQLMariaDriverContainer<>(
-						clusterContainer.image);
-				databaseContainer.withExposedPorts(MYSQL_PORT);
-				databaseContainer.withDatabaseName("dataflow");
-				databaseContainer.withUsername("spring");
-				databaseContainer.withPassword("spring");
-				databaseContainer.withNetworkAliases(databaseAlias);
-				databaseContainer.withNetwork(network);
-				return databaseContainer;
 			} else if (clusterContainer.tag.startsWith(TagNames.MARIADB)) {
 				MariaDBContainer<?> databaseContainer = new MariaDBContainer<>(clusterContainer.image);
 				databaseContainer.withExposedPorts(MARIADB_PORT);
@@ -333,10 +322,6 @@ public class DataflowCluster implements Startable {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
 				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
-			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MYSQL)) {
-				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MYSQL_PORT));
-				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
 			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MARIADB)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MARIADB_PORT));
@@ -394,10 +379,6 @@ public class DataflowCluster implements Startable {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
 				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
-			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MYSQL)) {
-				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MYSQL_PORT));
-				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
 			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MARIADB)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT));

@@ -1,0 +1,62 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:example-tanzu-external-kafka: link:examples/tanzu-external-kafka[Tanzu External Kafka]
+:example-kapp-controller-default: link:examples/kapp-controller-default[Kapp Controller Default]
+:example-kapp-controller-install: link:examples/kapp-controller-install[Kapp Controller Install]
+:example-secretgen-controller-install: link:examples/secretgen-controller-install[Secretgen Controller Install]
+:example-kapp-default: link:examples/kapp-default[Kapp Default]
+:example-kubectl-default: link:examples/kubectl-default[Kubectl Default]
+:example-tanzu-default: link:examples/tanzu-default[Tanzu Default]
+:example-tanzu-cloud-default: link:examples/tanzu-cloud-default[Tanzu Cloud Default]
+endif::[]
+ifndef::env-github[]
+endif::[]
+
+[[examples]]
+= Examples
+
+toc::[]
+
+ifdef::env-github[]
+{example-kapp-controller-install}
+
+{example-secretgen-controller-install}
+
+{example-kapp-controller-default}
+
+{example-kapp-default}
+
+{example-kubectl-default}
+
+{example-tanzu-external-kafka}
+
+{example-tanzu-default}
+
+{example-tanzu-cloud-default}
+endif::[]
+
+Various examples for different use cases.
+
+ifndef::env-github[]
+
+include::examples/kapp-controller-install/README.adoc[]
+
+include::examples/secretgen-controller-install/README.adoc[]
+
+include::examples/kapp-controller-default/README.adoc[]
+
+include::examples/kapp-default/README.adoc[]
+
+include::examples/kubectl-default/README.adoc[]
+
+include::examples/tanzu-external-kafka/README.adoc[]
+
+include::examples/tanzu-default/README.adoc[]
+
+include::examples/tanzu-cloud-default/README.adoc[]
+
+endif::[]

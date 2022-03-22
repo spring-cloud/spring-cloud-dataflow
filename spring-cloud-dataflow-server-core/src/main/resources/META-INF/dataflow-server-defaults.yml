@@ -243,3 +243,16 @@ spring:
             # Tools
 
             - POST   /tools/**                       => hasRole('ROLE_VIEW')
+
+# Defaults for Springdoc (taken from https://springdoc.org/properties.html)
+springdoc:
+  api-docs:
+    enabled: false
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    config-url: /v3/api-docs/swagger-config
+    validator-url: https://validator.swagger.io/validator
+    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html

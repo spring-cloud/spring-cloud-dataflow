@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 public final class DeploymentPropertiesUtils {
 
@@ -154,7 +155,9 @@ public final class DeploymentPropertiesUtils {
 			for (int i = 0; i < candidates.length; i++) {
 				int elementsInQuotesIndex = findEndToken(candidates, i) +1;
 				if (elementsInQuotesIndex > -1) {
-					pairs.add(candidates[i]);
+					if(!candidates[i].equals("")) {
+						pairs.add(candidates[i]);
+					}
 					i++;
 					for (; i < elementsInQuotesIndex; i++) {
 						pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
@@ -174,10 +177,22 @@ public final class DeploymentPropertiesUtils {
 				}
 				else {
 					// we have a key/value pair having '=', or malformed first pair
-					pairs.add(candidates[i]);
+					if(!candidates[i].equals("")) {
+						int endToken = findEndToken(candidates, i);
+						if(endToken > -1) {
+							pairs.add(candidates[i] + " " + candidates[endToken]);
+							i = endToken;
+						}
+						else {
+							pairs.add(candidates[i]);
+						}
+					}
 				}
 			}
-		}
+			for(int i = 0; i < pairs.size(); i++) {
+				pairs.set(i, StringUtils.trimTrailingWhitespace(pairs.get(i)));
+			}
+ 		}
 		return pairs;
 	}
 
