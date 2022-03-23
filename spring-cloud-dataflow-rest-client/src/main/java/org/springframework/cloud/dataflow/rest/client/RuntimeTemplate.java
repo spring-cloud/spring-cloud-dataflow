@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
@@ -60,12 +61,20 @@ public class RuntimeTemplate implements RuntimeOperations {
 
 	RuntimeTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
 		this.restTemplate = restTemplate;
-		this.appStatusesUriTemplate = resources.getLink("runtime/apps").get();
-		this.appStatusUriTemplate = resources.getLink("runtime/apps/{appId}").get();
-		this.appActuatorUriTemplate = resources.getLink("runtime/apps/{appId}/instances/{instanceId}/actuator").get();
-		this.streamStatusUriTemplate = resources.getLink("runtime/streams/{streamNames}").get();
+		this.appStatusesUriTemplate = getLink("runtime/apps", resources, true);
+		this.appStatusUriTemplate = getLink("runtime/apps/{appId}", resources, true);
+		this.streamStatusUriTemplate = getLink("runtime/streams/{streamNames}", resources, true);
+		this.appActuatorUriTemplate = getLink("runtime/apps/{appId}/instances/{instanceId}/actuator", resources, false);
 	}
 
+	private Link getLink(String relationPath, RepresentationModel<?> resources, boolean required) {
+		Optional<Link> link = resources.getLink(relationPath);
+		if (required && !link.isPresent()) {
+			throw new RuntimeException("Unable to retrieve URI template for " + relationPath);
+		}
+		return link.orElse(null);
+	}
+	
 	@Override
 	public PagedModel<AppStatusResource> status() {
 		String uriTemplate = this.appStatusesUriTemplate.expand().getHref();

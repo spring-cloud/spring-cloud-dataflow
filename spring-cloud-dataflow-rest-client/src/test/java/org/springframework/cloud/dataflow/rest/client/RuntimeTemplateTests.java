@@ -28,6 +28,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -43,6 +45,8 @@ class RuntimeTemplateTests {
 	private RuntimeTemplate runtimeTemplate;
 
 	private RestTemplate restTemplate;
+
+	private RepresentationModel<?> resources;
 
 	private final String appId = "flipflop3.log-v1";
 
@@ -62,7 +66,7 @@ class RuntimeTemplateTests {
 		when(actuatorLink.expand(appId, instanceId, endpoint)).thenReturn(actuatorGetLink);
 		when(actuatorLink.expand(appId, instanceId)).thenReturn(actuatorPostLink);
 
-		RepresentationModel<?> resources = mock(RepresentationModel.class);
+		resources = mock(RepresentationModel.class);
 		when(resources.getLink("runtime/apps")).thenReturn(Optional.of(mock(Link.class)));
 		when(resources.getLink("runtime/apps/{appId}")).thenReturn(Optional.of(mock(Link.class)));
 		when(resources.getLink("runtime/apps/{appId}/instances/{instanceId}/actuator")).thenReturn(Optional.of(actuatorLink));
@@ -107,5 +111,36 @@ class RuntimeTemplateTests {
 		expectedPostRequest.setEndpoint(endpoint);
 		runtimeTemplate.postToActuator(appId, instanceId, endpoint, null);
 		verify(restTemplate).postForObject(eq("actuator-post-link"), eq(expectedPostRequest), eq(Object.class));
+	}
+
+	@Test
+	void appStatusesUriTemplateIsRequired() {
+		when(resources.getLink("runtime/apps")).thenReturn(Optional.empty());
+		assertThatThrownBy(() -> new RuntimeTemplate(restTemplate, resources))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Unable to retrieve URI template for runtime/apps");
+	}
+
+	@Test
+	void appStatusUriTemplateIsRequired() {
+		when(resources.getLink("runtime/apps/{appId}")).thenReturn(Optional.empty());
+		assertThatThrownBy(() -> new RuntimeTemplate(restTemplate, resources))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Unable to retrieve URI template for runtime/apps/{appId}");
+	}
+
+	@Test
+	void streamStatusUriTemplateIsRequired() {
+		when(resources.getLink("runtime/streams/{streamNames}")).thenReturn(Optional.empty());
+		assertThatThrownBy(() -> new RuntimeTemplate(restTemplate, resources))
+				.isInstanceOf(RuntimeException.class)
+				.hasMessageContaining("Unable to retrieve URI template for runtime/streams/{streamNames}");
+	}
+
+	@Test
+	void actuatorUriTemplateIsNotRequiredForBackwardsCompatibility() {
+		when(resources.getLink("runtime/apps/{appId}/instances/{instanceId}/actuator")).thenReturn(Optional.empty());
+		RuntimeTemplate runtimeTemplate = new RuntimeTemplate(restTemplate, resources);
+		assertThat(runtimeTemplate).hasFieldOrPropertyWithValue("appActuatorUriTemplate", null);
 	}
 }
