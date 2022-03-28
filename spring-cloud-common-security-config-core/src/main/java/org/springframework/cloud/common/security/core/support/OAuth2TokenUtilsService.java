@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
  * required other Spring Security services.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  *
  */
 public interface OAuth2TokenUtilsService {
@@ -37,13 +38,13 @@ public interface OAuth2TokenUtilsService {
 
 	/**
 	 *
-	 * @return
+	 * @return A client for the token.
 	 */
 	OAuth2AuthorizedClient getAuthorizedClient(OAuth2AuthenticationToken auth2AuthenticationToken);
 
 	/**
 	 *
-	 * @param auth2AuthorizedClient
+	 * @param auth2AuthorizedClient Remove a client
 	 */
 	void removeAuthorizedClient(OAuth2AuthorizedClient auth2AuthorizedClient);
 

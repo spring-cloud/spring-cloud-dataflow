@@ -43,3 +43,5 @@ rebel.xml
 
 # GitHub actions
 .m2
+!/.idea/checkstyle-idea.xml
+!/.idea/codeStyles/*
