@@ -37,7 +37,7 @@ import org.springframework.context.event.EventListener;
 @ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 @Configuration(proxyBeanMethods = false)
 public class CloudFoundryDataFlowServerConfiguration {
-	private CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties;
+	private CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties = new CloudFoundryServerConfigurationProperties();
 	@Bean
 	@ConfigurationProperties(prefix = CloudFoundryConnectionProperties.CLOUDFOUNDRY_PROPERTIES + ".task")
 	public CloudFoundryDeploymentProperties taskDeploymentProperties() {
@@ -46,7 +46,6 @@ public class CloudFoundryDataFlowServerConfiguration {
 
 	@Bean
 	public CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties() {
-		cloudFoundryServerConfigurationProperties = new CloudFoundryServerConfigurationProperties();
 		return cloudFoundryServerConfigurationProperties;
 	}
 
