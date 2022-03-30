@@ -41,7 +41,6 @@ server:
 spring:
   main:
     banner-mode: "off"
-    allow-circular-references: false
   data:
     rest:
       base-path: /api
