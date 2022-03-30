@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.SocketUtils;
  * Bootstraps an embedded OAuth2 server using {@link OAuth2TestServerApplication}.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class OAuth2ServerResource extends ExternalResource {
 
@@ -64,14 +65,14 @@ public class OAuth2ServerResource extends ExternalResource {
 
 		final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
 		if (!resource.exists()) {
-		  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
+			throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
 		}
 
 		this.application = new SpringApplicationBuilder(OAuth2TestServerApplication.class).build()
 				.run("--spring.cloud.common.security.enabled=false",
-					"--spring.cloud.kubernetes.enabled=false",
-					"--spring.main.allow-circular-references=true",
-					"--spring.config.location=" + configurationLocation);
+						"--spring.cloud.kubernetes.enabled=false",
+						"--spring.main.allow-circular-references=false",
+						"--spring.config.location=" + configurationLocation);
 		logger.info("OAuth Server is UP!");
 	}
 

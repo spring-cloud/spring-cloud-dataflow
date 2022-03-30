@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @RunWith(Enclosed.class)
 public class SchedulerPerPlatformTest {
@@ -83,8 +84,9 @@ public class SchedulerPerPlatformTest {
 	public static class CloudFoundrySchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test
-		public void testCloudFoundryScheudlerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
+		public void testCloudFoundrySchedulerEnabled() {
+			assertFalse("K8s should be disabled", context.getEnvironment()
+					.containsProperty("kubernetes_service_host"));
 			assertTrue("CF should be enabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
 		}

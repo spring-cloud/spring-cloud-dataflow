@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.single.security.support.oauth2testserver;
 
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -49,6 +51,7 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
  */
 @Configuration
 @EnableAuthorizationServer
+@Import(AuthServerConfig.BaseClientDetailsConfig.class)
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
 	@Autowired
@@ -123,7 +126,6 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 						}
 					}
 					((DefaultOAuth2AccessToken) accessToken).setScope(scopes);
-
 				}
 				return accessToken;
 			}
@@ -135,9 +137,12 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		return new InMemoryTokenStore();
 	}
 
-	@Bean
-	@ConfigurationProperties(prefix = "security.oauth2.client")
-	public BaseClientDetails oauth2ClientDetails() {
-		return new BaseClientDetails();
+	@Configuration(proxyBeanMethods = false)
+	public static class BaseClientDetailsConfig {
+		@Bean
+		@ConfigurationProperties(prefix = "security.oauth2.client")
+		public BaseClientDetails oauth2ClientDetails() {
+			return new BaseClientDetails();
+		}
 	}
 }

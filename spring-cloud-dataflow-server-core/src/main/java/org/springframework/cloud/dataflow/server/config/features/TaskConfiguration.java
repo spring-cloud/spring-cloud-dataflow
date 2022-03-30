@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.List;
@@ -65,6 +66,7 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
@@ -80,21 +82,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author Gunnar Hillert
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Corneil du Plessis
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnTasksEnabled
 @EnableConfigurationProperties({ TaskConfigurationProperties.class, CommonApplicationProperties.class,
 		DockerValidatorProperties.class, LocalPlatformProperties.class, ComposedTaskRunnerConfigurationProperties.class
 })
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
+@Import(TaskConfiguration.TaskDeleteServiceConfig.class)
 public class TaskConfiguration {
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
-
-	@Autowired(required = false)
-	SchedulerService schedulerService;
 
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
@@ -149,26 +150,6 @@ public class TaskConfiguration {
 	}
 
 	@Bean
-	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository, TaskDeploymentRepository taskDeploymentRepository,
-			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			TaskConfigurationProperties taskConfigurationProperties,
-			DataSource dataSource) {
-		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
-				taskDeploymentRepository,
-				auditRecordService,
-				dataflowTaskExecutionDao,
-				dataflowJobExecutionDao,
-				dataflowTaskExecutionMetadataDao,
-				this.schedulerService,
-				taskConfigurationProperties,
-				dataSource);
-	}
-
-	@Bean
 	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
 			AuditRecordService auditRecordService, AppRegistryService registry) {
 		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
@@ -185,35 +166,6 @@ public class TaskConfiguration {
 			ApplicationConfigurationMetadataResolver metadataResolver) {
 		return new TaskAppDeploymentRequestCreator(commonApplicationProperties,
 				metadataResolver, dataflowServerUri);
-	}
-
-	@Bean
-	public TaskExecutionService taskService(LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService,
-			TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository,
-			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			TaskExplorer taskExplorer,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService) {
-		DefaultTaskExecutionService defaultTaskExecutionService =  new DefaultTaskExecutionService(
-				launcherRepository, auditRecordService, taskRepository,
-				taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
-				taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
-				dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService,
-				this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties);
-		defaultTaskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
-		return defaultTaskExecutionService;
-	}
-
-	@Bean
-	public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService, LauncherRepository launcherRepository) {
-		return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService, launcherRepository);
 	}
 
 	@Bean
@@ -244,5 +196,67 @@ public class TaskConfiguration {
 		repositoryFactoryBean.setDataSource(dataSource);
 		repositoryFactoryBean.setTransactionManager(platformTransactionManager);
 		return repositoryFactoryBean;
+	}
+	@Configuration
+	public static class TaskExecutionServiceConfig {
+		@Bean
+		public TaskExecutionService taskService(
+				TaskConfigurationProperties taskConfigurationProperties,
+				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
+				LauncherRepository launcherRepository,
+				AuditRecordService auditRecordService,
+				TaskRepository taskRepository,
+				TaskExecutionInfoService taskExecutionInfoService,
+				TaskDeploymentRepository taskDeploymentRepository,
+				TaskExecutionCreationService taskExecutionRepositoryService,
+				TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+				TaskExplorer taskExplorer,
+				DataflowTaskExecutionDao dataflowTaskExecutionDao,
+				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+				@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
+				TaskSaveService taskSaveService
+		) {
+			DefaultTaskExecutionService defaultTaskExecutionService = new DefaultTaskExecutionService(
+					launcherRepository, auditRecordService, taskRepository,
+					taskExecutionInfoService, taskDeploymentRepository, taskExecutionRepositoryService,
+					taskAppDeploymentRequestCreator, taskExplorer, dataflowTaskExecutionDao,
+					dataflowTaskExecutionMetadataDao, oauth2TokenUtilsService, taskSaveService,
+					taskConfigurationProperties, composedTaskRunnerConfigurationProperties);
+			defaultTaskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
+			return defaultTaskExecutionService;
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	public static class TaskJobServiceConfig {
+		@Bean
+		public TaskJobService taskJobExecutionRepository(JobService service, TaskExplorer taskExplorer,
+				TaskDefinitionRepository taskDefinitionRepository, TaskExecutionService taskExecutionService, LauncherRepository launcherRepository) {
+			return new DefaultTaskJobService(service, taskExplorer, taskDefinitionRepository, taskExecutionService, launcherRepository);
+		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	public static class TaskDeleteServiceConfig {
+		@Bean
+		public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
+				TaskDefinitionRepository taskDefinitionRepository, TaskDeploymentRepository taskDeploymentRepository,
+				AuditRecordService auditRecordService,
+				DataflowTaskExecutionDao dataflowTaskExecutionDao,
+				DataflowJobExecutionDao dataflowJobExecutionDao,
+				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+				TaskConfigurationProperties taskConfigurationProperties,
+				DataSource dataSource,
+				@Autowired(required = false) SchedulerService schedulerService) {
+			return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
+					taskDeploymentRepository,
+					auditRecordService,
+					dataflowTaskExecutionDao,
+					dataflowJobExecutionDao,
+					dataflowTaskExecutionMetadataDao,
+					schedulerService,
+					taskConfigurationProperties,
+					dataSource);
+		}
 	}
 }

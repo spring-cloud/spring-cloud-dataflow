@@ -312,20 +312,22 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		final AtomicInteger  numberOfDeletedTaskExecutionRows =  new AtomicInteger(0);
 
 		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
-		if(chunkSize <= 0) {
+		if (chunkSize <= 0) {
 			numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren));
 			numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren));
 			numberOfDeletedTaskManifestRows.addAndGet(this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdsWithChildren));
 			numberOfDeletedTaskExecutionRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdsWithChildren));
 		}
 		else {
-			split(taskExecutionIdsWithChildren, chunkSize).stream().forEach( taskExecutionIdSubsetList -> {
-				Set<Long> taskExecutionIdSubset = new HashSet<>(taskExecutionIdSubsetList);
-				numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdSubset));
-				numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdSubset));
-				numberOfDeletedTaskManifestRows.addAndGet(this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdSubset));
-				numberOfDeletedTaskExecutionRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdSubset));
-			});
+			split(taskExecutionIdsWithChildren, chunkSize)
+					.stream()
+					.forEach(taskExecutionIdSubsetList -> {
+						Set<Long> taskExecutionIdSubset = new HashSet<>(taskExecutionIdSubsetList);
+						numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdSubset));
+						numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdSubset));
+						numberOfDeletedTaskManifestRows.addAndGet(this.dataflowTaskExecutionMetadataDao.deleteManifestsByTaskExecutionIds(taskExecutionIdSubset));
+						numberOfDeletedTaskExecutionRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionsByTaskExecutionIds(taskExecutionIdSubset));
+					});
 		}
 
 		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
@@ -357,7 +359,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	 */
 	private int getTaskExecutionDeleteChunkSize(DataSource dataSource) {
 		int result = this.taskDeleteChunkSize;
-		if(this.taskDeleteChunkSize < 1) {
+		if (this.taskDeleteChunkSize < 1) {
 			try {
 				DatabaseType databaseType = DatabaseType.fromMetaData(dataSource);
 				String name = databaseType.name();
@@ -447,7 +449,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		// destroy normal task or composed parent task
 		try {
 			destroyPrimaryTask(taskDefinition.getTaskName());
-		}				catch (ObjectOptimisticLockingFailureException e) {
+		}
+		catch (ObjectOptimisticLockingFailureException e) {
 			logger.warn("Attempted delete on task {} that is currently being deleted", taskDefinition.getTaskName());
 		}
 	}
@@ -475,7 +478,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			}
 		}
 		else {
-			if(!findAndDeleteTaskResourcesAcrossPlatforms(taskDefinition)) {
+			if (!findAndDeleteTaskResourcesAcrossPlatforms(taskDefinition)) {
 				logger.info("TaskLauncher.destroy not invoked for task " +
 						taskDefinition.getTaskName() + ". Did not find a previously launched task to destroy.");
 			}
@@ -486,7 +489,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		boolean result = false;
 		Iterable<Launcher> launchers = launcherRepository.findAll();
 		Iterator<Launcher> launcherIterator = launchers.iterator();
-		while(launcherIterator.hasNext()) {
+		while (launcherIterator.hasNext()) {
 			Launcher launcher = launcherIterator.next();
 			try {
 				launcher.getTaskLauncher().destroy(taskDefinition.getName());
