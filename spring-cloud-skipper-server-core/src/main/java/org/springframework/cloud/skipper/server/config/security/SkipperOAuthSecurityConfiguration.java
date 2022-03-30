@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.server.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +35,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Conditional(OnOAuth2SecurityEnabled.class)
 public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
 
@@ -54,41 +56,48 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 
 		if (opaqueTokenIntrospector != null) {
 			BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(
-					providerManager(), basicAuthenticationEntryPoint);
+					getProviderManager(),
+					basicAuthenticationEntryPoint
+			);
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		this.authorizationProperties.getAuthenticatedPaths().add(dashboard("/**"));
-		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(""));
+		getAuthorizationProperties().getAuthenticatedPaths()
+				.add(dashboard(getAuthorizationProperties(), "/**"));
+		getAuthorizationProperties().getAuthenticatedPaths()
+				.add(dashboard(getAuthorizationProperties(), ""));
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+						.antMatchers(getAuthorizationProperties().getPermitAllPaths()
+								.toArray(new String[0]))
 						.permitAll()
-		.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
-		.authenticated();
+						.antMatchers(getAuthorizationProperties().getAuthenticatedPaths()
+								.toArray(new String[0]))
+						.authenticated();
 
-		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
+		security = SecurityConfigUtils.configureSimpleSecurity(security, getAuthorizationProperties());
 		security.anyRequest().denyAll();
 
 		http.httpBasic().and()
 				.logout()
-				.logoutSuccessUrl(dashboard("/logout-success-oauth.html"))
+				.logoutSuccessUrl(dashboard(getAuthorizationProperties(), "/logout-success-oauth.html"))
 				.and().csrf().disable()
 				.exceptionHandling()
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/api/**"))
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/actuator/**"));
 
-		if (opaqueTokenIntrospector != null) {
+		if (getOpaqueTokenIntrospector() != null) {
 			http.oauth2ResourceServer()
-				.opaqueToken()
-					.introspector(opaqueTokenIntrospector());
-		} else if (oAuth2ResourceServerProperties.getJwt().getJwkSetUri() != null) {
+					.opaqueToken()
+					.introspector(getOpaqueTokenIntrospector());
+		}
+		else if (getoAuth2ResourceServerProperties().getJwt().getJwkSetUri() != null) {
 			http.oauth2ResourceServer()
-				.jwt()
+					.jwt()
 					.jwtAuthenticationConverter(grantedAuthoritiesExtractor());
 		}
 
-		this.securityStateBean.setAuthenticationEnabled(true);
+		getSecurityStateBean().setAuthenticationEnabled(true);
 	}
 }
