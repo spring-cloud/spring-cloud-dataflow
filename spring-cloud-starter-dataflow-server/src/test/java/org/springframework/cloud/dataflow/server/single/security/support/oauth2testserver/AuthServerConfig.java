@@ -50,7 +50,7 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
  * @author Corneil du Plessis
  *
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAuthorizationServer
 @Import(AuthServerConfig.BaseClientDetailsConfig.class)
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
