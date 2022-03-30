@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.single.security;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
@@ -244,6 +245,7 @@ public class LocalServerSecurityWithOAuth2Tests {
 	}
 
 	@Test
+	@Ignore("Until we migrate from Spring Security OAuth")
 	public void testAccessSecurityInfoUrlWithOAuth2AccessToken2TimesAndLogout() throws Exception {
 
 		final ClientCredentialsResourceDetails resourceDetails = new ClientCredentialsResourceDetails();

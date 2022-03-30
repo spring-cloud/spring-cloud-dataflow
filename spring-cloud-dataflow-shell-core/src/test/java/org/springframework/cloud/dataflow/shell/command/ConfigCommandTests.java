@@ -62,6 +62,7 @@ import static org.mockito.Mockito.when;
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class ConfigCommandTests {
 
@@ -107,15 +108,18 @@ public class ConfigCommandTests {
 			aboutResource.getVersionInfo().getCore().setVersion("1.2.3.BUILD-SNAPSHOT");
 			aboutResource.getSecurityInfo().setAuthenticationEnabled(true);
 			aboutResource.getRuntimeEnvironment().getAppDeployer().setJavaVersion("1.8");
-			aboutResource.getRuntimeEnvironment().getAppDeployer().getPlatformSpecificInfo().put("Some", "Stuff");
+			aboutResource.getRuntimeEnvironment().getAppDeployer()
+					.getPlatformSpecificInfo().put("Some", "Stuff");
 			List<RuntimeEnvironmentDetails> taskLaunchers = new ArrayList<>();
 			taskLaunchers.add(new RuntimeEnvironmentDetails());
 			aboutResource.getRuntimeEnvironment().setTaskLaunchers(taskLaunchers);
-			aboutResource.getRuntimeEnvironment().getTaskLaunchers().get(0).setDeployerSpiVersion("6.4");
+			aboutResource.getRuntimeEnvironment().getTaskLaunchers().get(0)
+					.setDeployerSpiVersion("6.4");
 			final Table infoResult = (Table) configCommands.info().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
 					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
-			assertThat(infoResult.render(80)).isEqualTo(expectedOutput);
+			assertThat(infoResult.render(80)
+					.replace("\r\n", "\n")).isEqualTo(expectedOutput.replace("\r\n", "\n"));
 		}
 	}
 
@@ -173,7 +177,8 @@ public class ConfigCommandTests {
 		Binder binder = new Binder(new MapConfigurationPropertySource());
 		try {
 			return binder.bindOrCreate("dataflow", DataFlowShellProperties.class);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
