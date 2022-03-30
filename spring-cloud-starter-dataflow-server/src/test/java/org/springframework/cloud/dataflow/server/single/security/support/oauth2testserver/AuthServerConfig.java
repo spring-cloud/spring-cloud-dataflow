@@ -47,6 +47,7 @@ import org.springframework.security.oauth2.provider.token.store.InMemoryTokenSto
 /**
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  *
  */
 @Configuration
