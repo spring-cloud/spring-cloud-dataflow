@@ -46,7 +46,7 @@ public class CloudFoundryDataFlowServerConfiguration {
 
 	@Bean
 	public CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties() {
-		CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties = new CloudFoundryServerConfigurationProperties();
+		cloudFoundryServerConfigurationProperties = new CloudFoundryServerConfigurationProperties();
 		return cloudFoundryServerConfigurationProperties;
 	}
 
