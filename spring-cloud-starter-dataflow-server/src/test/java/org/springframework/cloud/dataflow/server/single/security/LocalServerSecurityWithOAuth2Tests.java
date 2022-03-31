@@ -25,14 +25,13 @@ import org.junit.rules.TestRule;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.http.AccessTokenRequiredException;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.cloud.dataflow.server.single.security.SecurityTestUtils.basicAuthorizationHeader;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -260,37 +259,30 @@ public class LocalServerSecurityWithOAuth2Tests {
 		final String accessTokenAsString = accessToken.getValue();
 
 		localDataflowResource.getMockMvc()
-				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString))
-				.andDo(print())
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.authenticated", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.authenticationEnabled", is(Boolean.TRUE)))
 				.andExpect(jsonPath("$.roles", hasSize(7)));
 
-		assertThrows(
-				"Expected AccessTokenRequiredException",
-				AccessTokenRequiredException.class, () -> {
-					oAuth2RestTemplate.getForObject("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/revoke_token", Boolean.class);
-				}
-		);
+		boolean oAuthServerResponse = oAuth2RestTemplate.getForObject("http://localhost:" + oAuth2ServerResource.getOauth2ServerPort() + "/revoke_token", Boolean.class);
 
+		assertTrue(Boolean.valueOf(oAuthServerResponse));
 
-		localDataflowResource.getMockMvc()
-				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString))
-				.andDo(print())
-				.andExpect(status().isUnauthorized());
-
-
-		localDataflowResource.getMockMvc()
-				.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString))
-				.andDo(print())
-				.andExpect(status().isFound());
-
-		assertThrows("Expected AuthenticationServiceException", AuthenticationServiceException.class, () -> {
+		Assert.assertThrows(AuthenticationServiceException.class, () -> {
 			localDataflowResource.getMockMvc()
-					.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString))
-					.andDo(print())
-					.andExpect(status().isUnauthorized());
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isUnauthorized());
+		});
+
+		localDataflowResource.getMockMvc()
+			.perform(get("/logout").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+			.andExpect(status().isFound());
+
+		Assert.assertThrows(AuthenticationServiceException.class, () -> {
+			localDataflowResource.getMockMvc()
+				.perform(get("/security/info").header("Authorization", "bearer " + accessTokenAsString)).andDo(print())
+				.andExpect(status().isUnauthorized());
 		});
 	}
 
