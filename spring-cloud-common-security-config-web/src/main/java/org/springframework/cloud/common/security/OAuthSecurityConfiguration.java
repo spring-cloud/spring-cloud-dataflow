@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +124,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 })
 public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
+	private static final Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
 
 	@Autowired
 	protected OAuth2ClientProperties oauth2ClientProperties;
@@ -160,21 +161,21 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return authorizationProperties;
 	}
 
-	public OpaqueTokenIntrospector getOpaqueTokenIntrospector() {
-		return opaqueTokenIntrospector;
-	}
-
-	public ProviderManager getProviderManager() {
-		return providerManager;
-	}
-
 	public void setAuthorizationProperties(AuthorizationProperties authorizationProperties) {
 		this.authorizationProperties = authorizationProperties;
+	}
+
+	public OpaqueTokenIntrospector getOpaqueTokenIntrospector() {
+		return opaqueTokenIntrospector;
 	}
 
 	@Autowired(required = false)
 	public void setOpaqueTokenIntrospector(OpaqueTokenIntrospector opaqueTokenIntrospector) {
 		this.opaqueTokenIntrospector = opaqueTokenIntrospector;
+	}
+
+	public ProviderManager getProviderManager() {
+		return providerManager;
 	}
 
 	@Autowired(required = false)
@@ -273,23 +274,6 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return authorizationProperties.getDashboardUrl() + path;
 	}
 
-	private static String calculateDefaultProviderId(AuthorizationProperties authorizationProperties, OAuth2ClientProperties oauth2ClientProperties) {
-		if (authorizationProperties.getDefaultProviderId() != null) {
-			return authorizationProperties.getDefaultProviderId();
-		}
-		else if (oauth2ClientProperties.getRegistration().size() == 1) {
-			return oauth2ClientProperties.getRegistration().entrySet().iterator().next()
-					.getKey();
-		}
-		else if (oauth2ClientProperties.getRegistration().size() > 1
-				&& !StringUtils.hasText(authorizationProperties.getDefaultProviderId())) {
-			throw new IllegalStateException("defaultProviderId must be set if more than 1 Registration is provided.");
-		}
-		else {
-			throw new IllegalStateException("Unable to retrieve default provider id.");
-		}
-	}
-
 	protected Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
 		String providerId = calculateDefaultProviderId(authorizationProperties, oauth2ClientProperties);
 		ProviderRoleMapping providerRoleMapping = authorizationProperties.getProviderRoleMappings()
@@ -311,6 +295,23 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		return jwtAuthenticationConverter;
 	}
 
+	private static String calculateDefaultProviderId(AuthorizationProperties authorizationProperties, OAuth2ClientProperties oauth2ClientProperties) {
+		if (authorizationProperties.getDefaultProviderId() != null) {
+			return authorizationProperties.getDefaultProviderId();
+		}
+		else if (oauth2ClientProperties.getRegistration().size() == 1) {
+			return oauth2ClientProperties.getRegistration().entrySet().iterator().next()
+					.getKey();
+		}
+		else if (oauth2ClientProperties.getRegistration().size() > 1
+				&& !StringUtils.hasText(authorizationProperties.getDefaultProviderId())) {
+			throw new IllegalStateException("defaultProviderId must be set if more than 1 Registration is provided.");
+		}
+		else {
+			throw new IllegalStateException("Unable to retrieve default provider id.");
+		}
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected static class OpaqueTokenIntrospectorConfig {
@@ -327,7 +328,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class OidcUserServiceConfig {
-		@Bean(name = "oidcUserService")
+		@Bean
 		protected OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(AuthoritiesMapper authoritiesMapper) {
 			return new CustomOAuth2OidcUserService(authoritiesMapper);
 		}
@@ -335,7 +336,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class PlainOauth2UserServiceConfig {
-		@Bean(name = "plainOauth2UserService")
+		@Bean
 		protected OAuth2UserService<OAuth2UserRequest, OAuth2User> plainOauth2UserService(AuthoritiesMapper authoritiesMapper) {
 			return new CustomPlainOAuth2UserService(authoritiesMapper);
 		}
