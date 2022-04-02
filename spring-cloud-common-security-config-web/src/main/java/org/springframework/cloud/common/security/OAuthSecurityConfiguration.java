@@ -290,7 +290,6 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		}
 	}
 
-
 	protected Converter<Jwt, AbstractAuthenticationToken> grantedAuthoritiesExtractor() {
 		String providerId = calculateDefaultProviderId(authorizationProperties, oauth2ClientProperties);
 		ProviderRoleMapping providerRoleMapping = authorizationProperties.getProviderRoleMappings()
@@ -315,64 +314,39 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected static class OpaqueTokenIntrospectorConfig {
-		private final OAuth2ResourceServerProperties oAuth2ResourceServerProperties;
-		private final AuthoritiesMapper authoritiesMapper;
-
-		public OpaqueTokenIntrospectorConfig(OAuth2ResourceServerProperties oAuth2ResourceServerProperties, AuthoritiesMapper authoritiesMapper) {
-			this.oAuth2ResourceServerProperties = oAuth2ResourceServerProperties;
-			this.authoritiesMapper = authoritiesMapper;
-		}
-
 		@Bean
-		protected OpaqueTokenIntrospector opaqueTokenIntrospector() {
+		protected OpaqueTokenIntrospector opaqueTokenIntrospector(OAuth2ResourceServerProperties oAuth2ResourceServerProperties,
+				AuthoritiesMapper authoritiesMapper) {
 			return new CustomAuthoritiesOpaqueTokenIntrospector(
-					this.oAuth2ResourceServerProperties.getOpaquetoken()
-							.getIntrospectionUri(),
-					this.oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
-					this.oAuth2ResourceServerProperties.getOpaquetoken()
-							.getClientSecret(),
+					oAuth2ResourceServerProperties.getOpaquetoken().getIntrospectionUri(),
+					oAuth2ResourceServerProperties.getOpaquetoken().getClientId(),
+					oAuth2ResourceServerProperties.getOpaquetoken().getClientSecret(),
 					authoritiesMapper);
 		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class OidcUserServiceConfig {
-		private final AuthoritiesMapper authoritiesMapper;
-
-		public OidcUserServiceConfig(AuthoritiesMapper authoritiesMapper) {
-			this.authoritiesMapper = authoritiesMapper;
-		}
-
-
 		@Bean(name = "oidcUserService")
-		public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+		protected OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService(AuthoritiesMapper authoritiesMapper) {
 			return new CustomOAuth2OidcUserService(authoritiesMapper);
 		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class PlainOauth2UserServiceConfig {
-		private final AuthoritiesMapper authoritiesMapper;
-
-		public PlainOauth2UserServiceConfig(AuthoritiesMapper authoritiesMapper) {
-			this.authoritiesMapper = authoritiesMapper;
-		}
-
 		@Bean(name = "plainOauth2UserService")
-		protected OAuth2UserService<OAuth2UserRequest, OAuth2User> plainOauth2UserService() {
+		protected OAuth2UserService<OAuth2UserRequest, OAuth2User> plainOauth2UserService(AuthoritiesMapper authoritiesMapper) {
 			return new CustomPlainOAuth2UserService(authoritiesMapper);
 		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class OAuth2AuthorizedClientManagerConfig {
-
 		@Bean
-		public OAuth2AuthorizedClientManager authorizedClientManager(
+		protected OAuth2AuthorizedClientManager authorizedClientManager(
 				ClientRegistrationRepository clientRegistrationRepository,
-				OAuth2AuthorizedClientRepository authorizedClientRepository
-		) {
-
+				OAuth2AuthorizedClientRepository authorizedClientRepository) {
 			OAuth2AuthorizedClientProvider authorizedClientProvider =
 					OAuth2AuthorizedClientProviderBuilder.builder()
 							.authorizationCode()
@@ -380,12 +354,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 							.clientCredentials()
 							.password()
 							.build();
-
-			DefaultOAuth2AuthorizedClientManager authorizedClientManager =
-					new DefaultOAuth2AuthorizedClientManager(
-							clientRegistrationRepository, authorizedClientRepository);
+			DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
+					clientRegistrationRepository, authorizedClientRepository);
 			authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
-
 			return authorizedClientManager;
 		}
 	}
@@ -393,7 +364,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Configuration(proxyBeanMethods = false)
 	protected static class WebClientConfig {
 		@Bean
-		WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
+		protected WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
 			ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
 					new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
 			oauth2Client.setDefaultOAuth2AuthorizedClient(true);
@@ -405,22 +376,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class AuthoritiesMapperConfig {
-
-		private final AuthorizationProperties authorizationProperties;
-		private final OAuth2ClientProperties oAuth2ClientProperties;
-
-		public AuthoritiesMapperConfig(
-				AuthorizationProperties authorizationProperties,
-				OAuth2ClientProperties oAuth2ClientProperties
-		) {
-			this.authorizationProperties = authorizationProperties;
-			this.oAuth2ClientProperties = oAuth2ClientProperties;
-		}
-
 		@Bean
-		public AuthoritiesMapper authorityMapper() {
+		protected AuthoritiesMapper authorityMapper(AuthorizationProperties authorizationProperties,
+				OAuth2ClientProperties oAuth2ClientProperties) {
 			AuthoritiesMapper authorityMapper;
-
 			if (!StringUtils.hasText(authorizationProperties.getExternalAuthoritiesUrl())) {
 				authorityMapper = new DefaultAuthoritiesMapper(
 						authorizationProperties.getProviderRoleMappings(),
@@ -436,17 +395,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class LogoutSuccessHandlerConfig {
-		private final AuthorizationProperties authorizationProperties;
-		private final OAuth2TokenUtilsService oauth2TokenUtilsService;
-
-		public LogoutSuccessHandlerConfig(AuthorizationProperties authorizationProperties, OAuth2TokenUtilsService oauth2TokenUtilsService) {
-			this.authorizationProperties = authorizationProperties;
-			this.oauth2TokenUtilsService = oauth2TokenUtilsService;
-		}
-
 		@Bean
-		LogoutSuccessHandler logoutSuccessHandler() {
-			final AccessTokenClearingLogoutSuccessHandler logoutSuccessHandler =
+		protected LogoutSuccessHandler logoutSuccessHandler(AuthorizationProperties authorizationProperties,
+				OAuth2TokenUtilsService oauth2TokenUtilsService) {
+			AccessTokenClearingLogoutSuccessHandler logoutSuccessHandler =
 					new AccessTokenClearingLogoutSuccessHandler(oauth2TokenUtilsService);
 			logoutSuccessHandler.setDefaultTargetUrl(dashboard(authorizationProperties, "/logout-success-oauth.html"));
 			return logoutSuccessHandler;
@@ -456,10 +408,6 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnProperty(prefix = "spring.security.oauth2.resourceserver.opaquetoken", value = "introspection-uri")
 	protected static class AuthenticationProviderConfig {
-		private final OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient;
-		private final ClientRegistrationRepository clientRegistrationRepository;
-		private final AuthorizationProperties authorizationProperties;
-		private final OAuth2ClientProperties oauth2ClientProperties;
 
 		protected OpaqueTokenIntrospector opaqueTokenIntrospector;
 
@@ -468,18 +416,15 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			this.opaqueTokenIntrospector = opaqueTokenIntrospector;
 		}
 
-		public AuthenticationProviderConfig(OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient, ClientRegistrationRepository clientRegistrationRepository, AuthorizationProperties authorizationProperties, OAuth2ClientProperties oauth2ClientProperties) {
-			this.oAuth2PasswordTokenResponseClient = oAuth2PasswordTokenResponseClient;
-			this.clientRegistrationRepository = clientRegistrationRepository;
-			this.authorizationProperties = authorizationProperties;
-			this.oauth2ClientProperties = oauth2ClientProperties;
-		}
-
 		@Bean
-		protected AuthenticationProvider authenticationProvider() {
+		protected AuthenticationProvider authenticationProvider(
+				OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient,
+				ClientRegistrationRepository clientRegistrationRepository,
+				AuthorizationProperties authorizationProperties,
+				OAuth2ClientProperties oauth2ClientProperties) {
 			return new ManualOAuthAuthenticationProvider(
-					this.oAuth2PasswordTokenResponseClient,
-					this.clientRegistrationRepository,
+					oAuth2PasswordTokenResponseClient,
+					clientRegistrationRepository,
 					this.opaqueTokenIntrospector,
 					calculateDefaultProviderId(authorizationProperties, oauth2ClientProperties));
 
@@ -491,12 +436,12 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	protected static class ProviderManagerConfig {
 		private AuthenticationProvider authenticationProvider;
 
-		public AuthenticationProvider getAuthenticationProvider() {
+		protected AuthenticationProvider getAuthenticationProvider() {
 			return authenticationProvider;
 		}
 
 		@Autowired(required = false)
-		public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+		protected void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
 			this.authenticationProvider = authenticationProvider;
 		}
 
@@ -510,16 +455,9 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Configuration(proxyBeanMethods = false)
 	protected static class OAuth2TokenUtilsServiceConfig {
-
-		private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
-
-		public OAuth2TokenUtilsServiceConfig(OAuth2AuthorizedClientService oauth2AuthorizedClientService) {
-			this.oauth2AuthorizedClientService = oauth2AuthorizedClientService;
-		}
-
 		@Bean
-		protected OAuth2TokenUtilsService oauth2TokenUtilsService() {
-			return new DefaultOAuth2TokenUtilsService(this.oauth2AuthorizedClientService);
+		protected OAuth2TokenUtilsService oauth2TokenUtilsService(OAuth2AuthorizedClientService oauth2AuthorizedClientService) {
+			return new DefaultOAuth2TokenUtilsService(oauth2AuthorizedClientService);
 		}
 	}
 
@@ -533,29 +471,24 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		}
 	}
 
-
-	protected static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
-
-		@Override
-		public List<MediaType> resolveMediaTypes(NativeWebRequest request)
-				throws HttpMediaTypeNotAcceptableException {
-			final List<MediaType> supportedMediaTypes = super.resolveMediaTypes(request);
-
-			final String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-			if (userAgent != null && userAgent.contains("Mozilla/5.0")
-					&& !supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
-
-				return Collections.singletonList(MediaType.TEXT_HTML);
-			}
-			return Collections.singletonList(MediaType.APPLICATION_JSON);
-		}
-	}
-
 	@Configuration(proxyBeanMethods = false)
 	protected static class OAuth2AccessTokenResponseClientConfig {
 		@Bean
 		OAuth2AccessTokenResponseClient<OAuth2PasswordGrantRequest> oAuth2PasswordTokenResponseClient() {
 			return new DefaultPasswordTokenResponseClient();
+		}
+	}
+
+	protected static class BrowserDetectingContentNegotiationStrategy extends HeaderContentNegotiationStrategy {
+		@Override
+		public List<MediaType> resolveMediaTypes(NativeWebRequest request) throws HttpMediaTypeNotAcceptableException {
+			final List<MediaType> supportedMediaTypes = super.resolveMediaTypes(request);
+			final String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
+			if (userAgent != null && userAgent.contains("Mozilla/5.0")
+					&& !supportedMediaTypes.contains(MediaType.APPLICATION_JSON)) {
+				return Collections.singletonList(MediaType.TEXT_HTML);
+			}
+			return Collections.singletonList(MediaType.APPLICATION_JSON);
 		}
 	}
 }
