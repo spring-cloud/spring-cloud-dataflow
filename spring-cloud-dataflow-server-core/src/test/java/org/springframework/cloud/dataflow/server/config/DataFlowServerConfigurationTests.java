@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.net.ConnectException;
+
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 
@@ -104,7 +106,7 @@ public class DataFlowServerConfigurationTests {
 				.run(context -> {
 					assertNotNull(context.getStartupFailure());
 					assertInstanceOf(BeanCreationException.class, context.getStartupFailure());
-					assertInstanceOf(java.net.ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
+					assertInstanceOf(ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
 				});
 	}
 

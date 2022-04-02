@@ -62,7 +62,6 @@ import static org.mockito.Mockito.when;
 		classes = { DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class },
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		properties = {
-				"spring.main.allow-circular-references=false",
 				"spring.cloud.dataflow.features.schedules-enabled=true",
 				"VCAP_SERVICES=foo",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",

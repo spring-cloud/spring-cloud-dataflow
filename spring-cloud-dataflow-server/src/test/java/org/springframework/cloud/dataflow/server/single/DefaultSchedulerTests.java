@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = { DataFlowServerApplication.class },
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		properties = {
-				"spring.main.allow-circular-references=false",
 				"spring.cloud.dataflow.features.schedules-enabled=true"
 		})
 @RunWith(SpringRunner.class)

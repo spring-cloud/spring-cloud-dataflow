@@ -43,14 +43,13 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.InMemoryTokenStore;
 
-
 /**
  *
  * @author Gunnar Hillert
  * @author Corneil du Plessis
- *
+ * @author Chris Bono
  */
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @EnableAuthorizationServer
 @Import(AuthServerConfig.BaseClientDetailsConfig.class)
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
@@ -108,28 +107,24 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		super.configure(endpoints);
 		endpoints.authenticationManager(authenticationManagerBean);
 		endpoints.tokenStore(tokenStore());
-		endpoints.tokenEnhancer(new TokenEnhancer() {
+		endpoints.tokenEnhancer((accessToken, authentication) -> {
+			if (authentication.getPrincipal() instanceof User) {
+				final User user = (User) authentication.getPrincipal();
 
-			@Override
-			public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
-				if (authentication.getPrincipal() instanceof User) {
-					final User user = (User) authentication.getPrincipal();
+				final Set<String> scopes = new HashSet<String>();
+				for (GrantedAuthority authority : user.getAuthorities()) {
+					final String role = authority.getAuthority();
 
-					final Set<String> scopes = new HashSet<String>();
-					for (GrantedAuthority authority : user.getAuthorities()) {
-						final String role = authority.getAuthority();
-
-						if (role.startsWith("ROLE_")) {
-							scopes.add(role.substring(5).toLowerCase());
-						}
-						else {
-							scopes.add(role.toLowerCase());
-						}
+					if (role.startsWith("ROLE_")) {
+						scopes.add(role.substring(5).toLowerCase());
 					}
-					((DefaultOAuth2AccessToken) accessToken).setScope(scopes);
+					else {
+						scopes.add(role.toLowerCase());
+					}
 				}
-				return accessToken;
+				((DefaultOAuth2AccessToken) accessToken).setScope(scopes);
 			}
+			return accessToken;
 		});
 	}
 
@@ -138,7 +133,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 		return new InMemoryTokenStore();
 	}
 
-	@Configuration(proxyBeanMethods = false)
+	@Configuration
 	public static class BaseClientDetailsConfig {
 		@Bean
 		@ConfigurationProperties(prefix = "security.oauth2.client")

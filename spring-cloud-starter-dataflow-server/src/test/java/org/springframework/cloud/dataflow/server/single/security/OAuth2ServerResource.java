@@ -71,7 +71,6 @@ public class OAuth2ServerResource extends ExternalResource {
 		this.application = new SpringApplicationBuilder(OAuth2TestServerApplication.class).build()
 				.run("--spring.cloud.common.security.enabled=false",
 						"--spring.cloud.kubernetes.enabled=false",
-						"--spring.main.allow-circular-references=false",
 						"--spring.config.location=" + configurationLocation);
 		logger.info("OAuth Server is UP!");
 	}
