@@ -60,7 +60,6 @@ import static org.mockito.Mockito.when;
 		classes = { DataFlowServerApplication.class, MultiplePlatformTypeTests.TestConfig.class },
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		properties = {
-				"spring.main.allow-circular-references=false",
 				"spring.cloud.dataflow.features.schedules-enabled=true",
 				"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",

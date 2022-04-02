@@ -130,7 +130,6 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 					.run(
 							"--spring.shell.command-file=" + commandFiles,
 							"--spring.cloud.config.enabled=false",
-							"--spring.main.allow-circular-references=false",
 							"--spring.autoconfigure.exclude=" + Stream.of(SessionAutoConfiguration.class,
 									DataSourceAutoConfiguration.class,
 									HibernateJpaAutoConfiguration.class)
