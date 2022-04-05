@@ -68,9 +68,6 @@
 
 		<spring-cloud-task.version>2.4.1</spring-cloud-task.version>
 
-		<!-- Only used for tests -->
-		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
-
 		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
@@ -213,11 +210,6 @@
 				<groupId>io.codearte.props2yaml</groupId>
 				<artifactId>props2yaml</artifactId>
 				<version>${codearte-props2yml.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security.oauth</groupId>
-				<artifactId>spring-security-oauth2</artifactId>
-				<version>${spring-security-oauth2.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
