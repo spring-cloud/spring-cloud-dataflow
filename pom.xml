@@ -42,8 +42,6 @@
 		<spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
 		<java-semver.version>0.9.0</java-semver.version>
 		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
-		<!-- For test server -->
-		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
 
 		<jsonpath.version>2.4.0</jsonpath.version>
 		<equalverifier.version>2.4.1</equalverifier.version>
@@ -216,11 +214,6 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${jmockit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security.oauth</groupId>
-				<artifactId>spring-security-oauth2</artifactId>
-				<version>${spring-security-oauth2.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
