@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Optional;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  *
  */
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
@@ -41,8 +43,8 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 		final boolean authenticationEnabled = securityStateBean.isAuthenticationEnabled();
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (!(authentication instanceof AnonymousAuthenticationToken)) {
-				return Optional.of(authentication.getName());
+			if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+				return Optional.ofNullable(authentication.getName());
 			}
 		}
 		return Optional.ofNullable(null);
