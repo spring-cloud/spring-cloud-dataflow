@@ -17,8 +17,7 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,34 +33,31 @@ import org.springframework.security.oauth2.server.resource.introspection.OAuth2I
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware
+ * Unit tests for {@link SpringSecurityAuditorAware}.
+ *
  * @author Corneil du Plessis
  */
-public class SpringSecurityAuditorAwareTests {
-	/**
-	 * Test the fix for the case where the authentication doesn't contain a name but isn't anonymous it resulted in an NPE.
-	 */
+class SpringSecurityAuditorAwareTests {
+
 	@Test
-	public void testNullPointerOnUnnamedPrincipal() {
+	void authenticatedWithUnnamedPrincipal() {
 		// given
-		HashMap<String, Object> attributes = new HashMap<>();
-		attributes.put("attr1", "value1");
-		final OAuth2IntrospectionAuthenticatedPrincipal principal = new OAuth2IntrospectionAuthenticatedPrincipal(
-				attributes,
+		OAuth2IntrospectionAuthenticatedPrincipal principal = new OAuth2IntrospectionAuthenticatedPrincipal(
+				Collections.singletonMap("attr1", "value1"),
 				AuthorityUtils.NO_AUTHORITIES
 		);
-		final OAuth2AccessToken token = new OAuth2AccessToken(
+		OAuth2AccessToken token = new OAuth2AccessToken(
 				OAuth2AccessToken.TokenType.BEARER,
 				"test",
 				Instant.now(),
 				Instant.now().plusSeconds(3600)
 		);
-		final BearerTokenAuthentication authentication = new BearerTokenAuthentication(
+		BearerTokenAuthentication authentication = new BearerTokenAuthentication(
 				principal,
 				token,
 				AuthorityUtils.NO_AUTHORITIES
 		);
-		final SecurityStateBean securityStateBean = new SecurityStateBean();
+		SecurityStateBean securityStateBean = new SecurityStateBean();
 		securityStateBean.setAuthenticationEnabled(true);
 		SecurityContextHolder.setContext(new SecurityContext() {
 			@Override
@@ -76,7 +72,6 @@ public class SpringSecurityAuditorAwareTests {
 		SpringSecurityAuditorAware auditorAware = new SpringSecurityAuditorAware(securityStateBean);
 		// then
 		assertThat(principal.getName()).isNull();
-		Optional<String> auditor = auditorAware.getCurrentAuditor();
-		assertThat(auditor.isPresent()).isFalse();
+		assertThat(auditorAware.getCurrentAuditor()).isNotPresent();
 	}
 }
