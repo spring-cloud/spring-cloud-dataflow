@@ -4,20 +4,18 @@ Spring Cloud Data Flow provides tools to create complex topologies for streaming
 
 Spring Cloud Data Flow supports a range of data processing use cases, from ETL to import/export, event streaming, and predictive analytics.
 
-## Features
+The recently launched brand new https://dataflow.spring.io/getting-started/[Spring Cloud Data Flow Microsite] is the best place to get started.
+
+== Features
 
 The Spring Cloud Data Flow server uses https://github.com/spring-cloud/spring-cloud-deployer/[Spring Cloud Deployer], to deploy data pipelines made of Spring Cloud Stream or Spring Cloud Task applications onto modern platforms such as Cloud Foundry and Kubernetes.
 
 A selection of pre-built https://cloud.spring.io/spring-cloud-stream-app-starters/[stream] and https://cloud.spring.io/spring-cloud-task-app-starters/[task/batch] starter apps for various data integration and processing scenarios facilitate learning and experimentation.
 
-https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#custom-applications[Custom] stream and task applications, targeting different middleware or data services, can be built using the familiar Spring Boot style programming model.
+https://dataflow.spring.io/docs/stream-developer-guides/[Custom] stream and task applications, targeting different middleware or data services, can be built using the familiar Spring Boot style programming model.
 
 A simple https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#_stream_dsl[stream pipeline DSL] makes it easy to specify which apps to deploy and how to connect outputs and inputs. The https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#_composed_tasks_dsl[composed task DSL] is useful for when a series of task apps require to be run as a directed graph.
 
-The https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#dashboard-introduction[dashboard] offers a graphical editor for building data pipelines interactively, as well as views of deployable apps and monitoring them with metrics using https://www.wavefront.com[Wavefront], https://prometheus.io[Prometheus], https://www.influxdata.com[Influx DB], or other monitoring systems.
+The https://dataflow.spring.io/docs/concepts/tooling/#dashboard[dashboard] offers a graphical editor for building data pipelines interactively, as well as views of deployable apps and monitoring them with metrics using https://www.wavefront.com[Wavefront], https://prometheus.io[Prometheus], https://www.influxdata.com[Influx DB], or other monitoring systems.
 
 The Spring Cloud Data Flow server exposes a https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide-resources[REST API] for composing and deploying data pipelines. A separate https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#shell[shell] makes it easy to work with the API from the command line.
-
-## Getting Started
-
-The recently launched brand new https://dataflow.spring.io/getting-started/[Spring Cloud Data Flow Microsite] is the best place to get started.
