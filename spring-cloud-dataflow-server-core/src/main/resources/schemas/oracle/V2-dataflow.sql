@@ -11,6 +11,6 @@ CREATE TABLE task_execution_metadata (
   primary key (id),
   CONSTRAINT TASK_METADATA_FK FOREIGN KEY (task_execution_id)
   REFERENCES TASK_EXECUTION(TASK_EXECUTION_ID)
-);
+) segment creation immediate;
 
 CREATE SEQUENCE task_execution_metadata_seq START WITH 0 MINVALUE 0 MAXVALUE 9223372036854775807 NOCACHE NOCYCLE;
