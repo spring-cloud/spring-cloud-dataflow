@@ -69,6 +69,7 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
@@ -202,6 +203,9 @@ public class DataFlowIT {
 
 	@Autowired
 	protected RuntimeApplicationHelper runtimeApps;
+
+	@Autowired
+	protected DataFlowClientProperties dataFlowClientProperties;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as coming from
@@ -839,8 +843,7 @@ public class DataFlowIT {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
 					.definition("http | " + dataflowTaskLauncherAppName
 							+ " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
-							"--spring.cloud.dataflow.client.serverUri=" + testProperties.getPlatform()
-							.getConnection().getDataflowServerUri())
+							"--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
 					.create()
 					.deploy(testDeploymentProperties())) {
 
