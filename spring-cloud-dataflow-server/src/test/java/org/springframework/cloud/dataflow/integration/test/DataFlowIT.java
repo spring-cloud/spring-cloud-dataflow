@@ -839,7 +839,8 @@ public class DataFlowIT {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
 					.definition("http | " + dataflowTaskLauncherAppName
 							+ " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
-							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
+							"--spring.cloud.dataflow.client.serverUri=" + testProperties.getPlatform()
+							.getConnection().getDataflowServerUri())
 					.create()
 					.deploy(testDeploymentProperties())) {
 

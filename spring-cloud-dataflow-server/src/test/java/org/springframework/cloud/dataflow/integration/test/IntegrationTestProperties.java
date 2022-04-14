@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Christian Tzolov
+ * @author David Turanski
  */
 @ConfigurationProperties(prefix = "test")
 public class IntegrationTestProperties {
@@ -152,6 +153,11 @@ public class IntegrationTestProperties {
 		private String influxUrl = "http://localhost:8086";
 
 		/**
+		 * Dataflow server URI
+		 */
+		private String dataflowServerUri = "http://localhost:9393";
+
+		/**
 		 * Streaming applications are behind HTTPS.
 		 */
 		private boolean applicationOverHttps;
@@ -186,6 +192,14 @@ public class IntegrationTestProperties {
 
 		public void setApplicationOverHttps(boolean applicationOverHttps) {
 			this.applicationOverHttps = applicationOverHttps;
+		}
+
+		String getDataflowServerUri() {
+			return dataflowServerUri;
+		}
+
+		void setDataflowServerUri(String dataflowServerUri) {
+			this.dataflowServerUri = dataflowServerUri;
 		}
 	}
 }
