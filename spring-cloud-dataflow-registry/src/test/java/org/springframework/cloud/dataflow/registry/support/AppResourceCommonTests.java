@@ -30,7 +30,6 @@ import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -87,14 +86,14 @@ public class AppResourceCommonTests {
 	public void testDefaultResource() {
 		String classpathUri = "classpath:AppRegistryTests-importAll.properties";
 		Resource resource = appResourceCommon.getResource(classpathUri);
-		assertTrue(resource instanceof ClassPathResource);
+		assertThat(resource instanceof ClassPathResource).isTrue();
 	}
 
 	@Test
 	public void testDockerUriString() throws Exception {
 		String dockerUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		Resource resource = appResourceCommon.getResource(dockerUri);
-		assertTrue(resource instanceof DockerResource);
+		assertThat(resource instanceof DockerResource).isTrue();
 		assertThat(resource.getURI().toString().equals(dockerUri));
 	}
 
@@ -110,7 +109,7 @@ public class AppResourceCommonTests {
 	public void testMetadataUriHttpApp() throws Exception {
 		String appUri = "https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/file-sink-rabbit/1.2.0.RELEASE/file-sink-rabbit-1.2.0.RELEASE.jar";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
-		assertTrue(metadataResource instanceof UrlResource);
+		assertThat(metadataResource instanceof UrlResource).isTrue();
 		assertThat(metadataResource.getURI().toString().equals(appUri));
 	}
 
@@ -119,7 +118,7 @@ public class AppResourceCommonTests {
 		String appUri = "docker:springcloudstream/log-sink-rabbit:1.2.0.RELEASE";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
 		assertThat(metadataResource).isNotNull();
-		assertTrue(metadataResource instanceof DockerResource);
+		assertThat(metadataResource instanceof DockerResource).isTrue();
 	}
 
 	@Test

@@ -26,8 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test for DockerImage parsing methods Code from https://github.com/vmware/admiral
  */
@@ -124,11 +123,11 @@ public class DockerImageTests {
 	public void testDockerImageParsing() {
 
 		DockerImage dockerImage = DockerImage.fromImageName(fullImageName);
-		assertEquals(description + ": host", expectedHost, dockerImage.getHost());
-		assertEquals(description + ": namespace", expectedNamespace, dockerImage.getNamespace());
-		assertEquals(description + ": repository", expectedRepo, dockerImage.getRepository());
-		assertEquals(description + ": namespace and repo", expectedNamespaceAndRepo,
-				dockerImage.getNamespaceAndRepo());
-		assertEquals(description + ": tag", expectedTag, dockerImage.getTag());
+		assertThat(expectedHost, dockerImage.getHost()).isEqualTo(description + ": host");
+		assertThat(expectedNamespace, dockerImage.getNamespace()).isEqualTo(description + ": namespace");
+		assertThat(expectedRepo, dockerImage.getRepository()).isEqualTo(description + ": repository");
+		assertThat(expectedNamespaceAndRepo,
+				dockerImage.getNamespaceAndRepo()).isEqualTo(description + ": namespace and repo");
+		assertThat(expectedTag, dockerImage.getTag()).isEqualTo(description + ": tag");
 	}
 }
