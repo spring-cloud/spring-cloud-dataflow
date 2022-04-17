@@ -147,9 +147,6 @@ public class DefaultAuthoritiesMapperTests {
 
 	@Test
 	public void testThat7MappedAuthoritiesAreReturnedForDefaultMappingWithoutMappingScopes() throws Exception {
-		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
-		providerRoleMapping.setMapOauthScopes(false);
-
 		Set<String> scopes = new HashSet<>();
 		scopes.add("dataflow.manage");
 		scopes.add("dataflow.view");
@@ -222,6 +219,41 @@ public class DefaultAuthoritiesMapperTests {
 
 		DefaultAuthoritiesMapper defaultAuthoritiesExtractor = new DefaultAuthoritiesMapper("uaa", true, roleMappings);
 		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesExtractor.mapScopesToAuthorities("uaa",
+				scopes, null);
+
+		assertThat(authorities).hasSize(7);
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_CREATE", "ROLE_DEPLOY", "ROLE_DESTROY", "ROLE_MANAGE", "ROLE_MODIFY",
+						"ROLE_SCHEDULE", "ROLE_VIEW");
+	}
+
+	@Test
+	public void testThatUriStyleScopeParsingCanBeDisabled() throws Exception {
+		Map<String, String> roleMappings = new HashMap<>();
+		roleMappings.put("ROLE_MANAGE", "/ROLE/2000803042");
+		roleMappings.put("ROLE_VIEW", "/ROLE/2000803036");
+		roleMappings.put("ROLE_DEPLOY", "/ROLE/2000803039");
+		roleMappings.put("ROLE_DESTROY", "/ROLE/20008030340");
+		roleMappings.put("ROLE_MODIFY", "/ROLE/2000803037");
+		roleMappings.put("ROLE_SCHEDULE", "/ROLE/2000803038");
+		roleMappings.put("ROLE_CREATE", "/ROLE/2000803041");
+
+		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		providerRoleMapping.setMapOauthScopes(true);
+		providerRoleMapping.setParseOauthScopePathParts(false);
+		providerRoleMapping.getRoleMappings().putAll(roleMappings);
+
+		Set<String> scopes = new HashSet<>();
+		scopes.add("/ROLE/2000803042");
+		scopes.add("/ROLE/2000803036");
+		scopes.add("/ROLE/2000803039");
+		scopes.add("/ROLE/20008030340");
+		scopes.add("/ROLE/2000803037");
+		scopes.add("/ROLE/2000803038");
+		scopes.add("/ROLE/2000803041");
+
+		DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa",
 				scopes, null);
 
 		assertThat(authorities).hasSize(7);

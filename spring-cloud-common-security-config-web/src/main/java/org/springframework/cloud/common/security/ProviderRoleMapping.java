@@ -37,6 +37,7 @@ public class ProviderRoleMapping {
 	private String rolePrefix = "ROLE_";
 	private String groupClaim = "roles";
 	private boolean mapOauthScopes = false;
+	private boolean parseOauthScopePathParts = true;
 	private boolean mapGroupClaims = false;
 	private Map<String, String> roleMappings = new HashMap<>(0);
 	private Map<String, String> groupMappings = new HashMap<>(0);
@@ -54,6 +55,21 @@ public class ProviderRoleMapping {
 		Assert.notNull(roleMappings, "roleMappings must not be null.");
 		this.mapOauthScopes = mapOauthScopes;
 		this.roleMappings = roleMappings;
+	}
+
+	public boolean isParseOauthScopePathParts() {
+		return parseOauthScopePathParts;
+	}
+
+	/**
+	 * Sets whether or not to treat OAuth scopes as URIs during the role mapping.
+	 * When set to {@code true} the OAuth scope will be treated as a URI and the leading part will be ignored (eg. 'api://dataflow-server/dataflow.create' will result in 'dataflow.create').
+     * When set to {@code false} the OAuth scope will be used as-is. This is useful in cases where the scope is not a URI and contains '/' leading characters.
+	 *
+	 * @param parseOauthScopePathParts whether or not to treat OAuth scopes as URIs during the role mapping
+	 */
+	public void setParseOauthScopePathParts(boolean parseOauthScopePathParts) {
+		this.parseOauthScopePathParts = parseOauthScopePathParts;
 	}
 
 	public boolean isMapOauthScopes() {
