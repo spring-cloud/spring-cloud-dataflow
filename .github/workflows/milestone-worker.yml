@@ -24,10 +24,6 @@ jobs:
         version: 1.46.4
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-    - name: Install pack
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        pack-version: 0.18.0
     - uses: actions/cache@v2
       with:
         path: ~/.m2/repository
