@@ -12,10 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install pack
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        pack-version: 0.18.0
     # cache maven repo
     - uses: actions/cache@v2
       with:
