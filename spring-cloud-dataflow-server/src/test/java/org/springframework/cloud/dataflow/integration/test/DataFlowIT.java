@@ -1053,9 +1053,9 @@ public class DataFlowIT {
 
 	public static final int EXIT_CODE_ERROR = 1;
 
-	public static final String TEST_VERSION_NUMBER = "2.1.0.RELEASE";
+	public static final String TEST_VERSION_NUMBER = "2.0.2";
 
-	public static final String CURRENT_VERSION_NUMBER = "2.1.1.RELEASE";
+	public static final String CURRENT_VERSION_NUMBER = "2.0.1";
 
 	private List<String> composedTaskLaunchArguments(String... additionalArguments) {
 		// the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
