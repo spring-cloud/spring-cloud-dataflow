@@ -247,6 +247,8 @@ $ java -jar spring-cloud-dataflow-shell.jar \
 ----
 ====
 
+NOTE: A Public Client requires *App Roles* with the value set the same as the internal permissions `[dataflow.create, dataflow.deploy, dataflow.destroy, dataflow.manage, dataflow.modify, dataflow.schedule, dataflow.view]` to ensure they are added to the access token.
+
 Starting a public shell and (optionally) pass credentials as options:
 
 ====
