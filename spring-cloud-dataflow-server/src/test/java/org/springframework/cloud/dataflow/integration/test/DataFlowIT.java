@@ -69,6 +69,7 @@ import org.springframework.cloud.dataflow.integration.test.util.RuntimeApplicati
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBuilder;
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
@@ -202,6 +203,9 @@ public class DataFlowIT {
 
 	@Autowired
 	protected RuntimeApplicationHelper runtimeApps;
+
+	@Autowired
+	protected DataFlowClientProperties dataFlowClientProperties;
 
 	/**
 	 * Folder that collects the external docker-compose YAML files such as coming from
@@ -839,7 +843,7 @@ public class DataFlowIT {
 			try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
 					.definition("http | " + dataflowTaskLauncherAppName
 							+ " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
-							"--spring.cloud.dataflow.client.serverUri=http://dataflow-server:9393")
+							"--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
 					.create()
 					.deploy(testDeploymentProperties())) {
 
@@ -1049,9 +1053,9 @@ public class DataFlowIT {
 
 	public static final int EXIT_CODE_ERROR = 1;
 
-	public static final String TEST_VERSION_NUMBER = "2.1.0.RELEASE";
+	public static final String TEST_VERSION_NUMBER = "2.0.2";
 
-	public static final String CURRENT_VERSION_NUMBER = "2.1.1.RELEASE";
+	public static final String CURRENT_VERSION_NUMBER = "2.0.1";
 
 	private List<String> composedTaskLaunchArguments(String... additionalArguments) {
 		// the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
