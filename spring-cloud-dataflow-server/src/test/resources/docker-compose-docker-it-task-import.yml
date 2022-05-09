@@ -4,7 +4,7 @@ version: '3'
 services:
 
   ci-app-import-task:
-    image: springcloud/baseimage:1.0.0
+    image: springcloud/baseimage:1.0.1
     container_name: dataflow-app-import-task-ci
     depends_on:
       - dataflow-server

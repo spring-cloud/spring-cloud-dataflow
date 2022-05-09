@@ -2029,8 +2029,9 @@ public class DataFlowIT {
 	private void resetTimestampVersion() {
 		try {
 			AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
+			DetailedAppRegistrationResource registrationResource = null;
 			try {
-				appRegistryOperations.info("timestamp", ApplicationType.task, false);
+				registrationResource = appRegistryOperations.info("timestamp", ApplicationType.task, true);
 			}
 			catch (DataFlowClientException dfe) {
 				if (dfe.getMessage().equals("The 'task:timestamp' application could not be found.")) {
@@ -2041,10 +2042,12 @@ public class DataFlowIT {
 				}
 			}
 			setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
-			appRegistryOperations.unregister("timestamp", ApplicationType.task, TEST_VERSION_NUMBER);
+			if(registrationResource != null && !registrationResource.getVersions().contains(TEST_VERSION_NUMBER)) {
+				appRegistryOperations.unregister("timestamp", ApplicationType.task, TEST_VERSION_NUMBER);
+			}
 		}
 		catch (DataFlowClientException dfe) {
-			logger.trace(dfe.getMessage(), dfe);
+			logger.error(dfe.getMessage(), dfe);
 		}
 
 	}
