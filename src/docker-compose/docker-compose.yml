@@ -83,8 +83,9 @@ services:
     depends_on:
       - kafka-broker
       - skipper-server
+      - mariadb
     entrypoint: >
-      bin/sh -c "
+      /bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
          chmod a+x /tmp/wait-for-it.sh &&
@@ -94,7 +95,7 @@ services:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
 
   app-import-stream:
-    image: springcloud/baseimage:1.0.0
+    image: springcloud/baseimage:1.0.1
     container_name: dataflow-app-import-stream
     depends_on:
       - dataflow-server
@@ -108,7 +109,7 @@ services:
         echo 'Maven Stream apps imported'"
 
   app-import-task:
-    image: springcloud/baseimage:1.0.0
+    image: springcloud/baseimage:1.0.1
     container_name: dataflow-app-import-task
     depends_on:
       - dataflow-server
@@ -122,6 +123,8 @@ services:
     user: root
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
+    depends_on:
+      - mariadb
     ports:
       - "7577:7577"
       - ${APPS_PORT_RANGE:-20000-20195:20000-20195}
@@ -134,7 +137,7 @@ services:
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
     entrypoint: >
-      bin/sh -c "
+      /bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
          chmod a+x /tmp/wait-for-it.sh &&

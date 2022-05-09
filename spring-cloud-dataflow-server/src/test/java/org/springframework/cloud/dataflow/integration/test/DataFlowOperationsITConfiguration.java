@@ -36,7 +36,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
@@ -58,10 +60,11 @@ public class DataFlowOperationsITConfiguration {
 
 	@Bean
 	public RestTemplate restTemplate(DataFlowClientProperties dataFlowClientProperties) throws URISyntaxException {
-		RestTemplate restTemplate = new RestTemplate(HttpClientConfigurer
+		ClientHttpRequestFactory requestFactory = HttpClientConfigurer
 				.create(new URI(dataFlowClientProperties.getServerUri()))
 				.skipTlsCertificateVerification(dataFlowClientProperties.isSkipSslValidation())
-				.buildClientHttpRequestFactory());
+				.buildClientHttpRequestFactory();
+		RestTemplate restTemplate = new RestTemplate(new BufferingClientHttpRequestFactory(requestFactory));
 
 		restTemplate.setInterceptors(Arrays.asList(new AcceptCharsetInterceptor(), new LoggingInterceptor()));
 
