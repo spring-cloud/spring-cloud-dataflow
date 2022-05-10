@@ -2002,8 +2002,8 @@ public class DataFlowIT {
 		if (taskResource.getUri().startsWith("maven:")) {
 			try {
 				appRegistryOperations.register("timestamp", ApplicationType.task,
-						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber,
-						"maven://org.springframework.cloud.task.app:timestamp-task:" + versionNumber, false);
+						"maven://spring.io:timestamp-task:" + versionNumber,
+						"maven://spring.io:timestamp-task:" + versionNumber, false);
 			}
 			catch (DataFlowClientException dfe) {
 				logger.info(dfe.getMessage(), dfe);
