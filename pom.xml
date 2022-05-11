@@ -24,7 +24,7 @@
 		<docs.main>${project.artifactId}</docs.main>
 		<spring-cloud-dataflow-build.version>2.10.0-SNAPSHOT</spring-cloud-dataflow-build.version>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.6.6</spring-boot.version>
+		<spring-boot.version>2.7.0-RC1</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
