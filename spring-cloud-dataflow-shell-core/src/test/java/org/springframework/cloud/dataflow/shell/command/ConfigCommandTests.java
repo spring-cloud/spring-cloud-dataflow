@@ -39,6 +39,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
 import org.springframework.hateoas.Link;
@@ -115,7 +116,8 @@ public class ConfigCommandTests {
 			aboutResource.getRuntimeEnvironment().setTaskLaunchers(taskLaunchers);
 			aboutResource.getRuntimeEnvironment().getTaskLaunchers().get(0)
 					.setDeployerSpiVersion("6.4");
-			final Table infoResult = (Table) configCommands.info().get(0);
+			TablesInfo tablesInfo = configCommands.info();
+			final Table infoResult = tablesInfo.getTables().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
 					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
 			assertThat(infoResult.render(80)

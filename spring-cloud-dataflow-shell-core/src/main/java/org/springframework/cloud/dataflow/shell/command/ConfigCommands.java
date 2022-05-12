@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetCredentials;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -243,14 +244,14 @@ public class ConfigCommands {
 
 	@ShellMethod(key = "dataflow config info" ,  value = "Show the Dataflow server being used")
 	@SuppressWarnings("unchecked")
-	public List<Object> info() {
+	public TablesInfo info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {
 			throw new DataFlowServerException(this.targetHolder.getTarget().getTargetResultMessage());
 		}
 		AboutResource about = this.shell.getDataFlowOperations().aboutOperation().get();
 
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		int rowIndex = 0;
 		List<Integer> rowsWithThinSeparators = new ArrayList<>();
 
@@ -340,14 +341,14 @@ public class ConfigCommands {
 				.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
 
 
-		result.add(builder.build());
+		result.addTable(builder.build());
 
 		if (Target.TargetStatus.ERROR.equals(target.getStatus())) {
 			StringWriter stringWriter = new StringWriter();
 			stringWriter.write("\nAn exception occurred during targeting:\n");
 			target.getTargetException().printStackTrace(new PrintWriter(stringWriter));
 
-			result.add(stringWriter.toString());
+			result.addFooter(stringWriter.toString());
 		}
 		return result;
 	}

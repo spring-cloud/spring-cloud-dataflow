@@ -36,6 +36,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.completer.TaskNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
@@ -113,7 +114,7 @@ public class TaskCommands {
 
 	@Autowired
 	private DataFlowShell dataFlowShell;
-	
+
 	public Availability availableWithViewRole() {
 		return availabilityFor(RoleType.VIEW, OpsType.TASK);
 	}
@@ -125,7 +126,7 @@ public class TaskCommands {
 	public Availability availableWithDeployRole() {
 		return availabilityFor(RoleType.DEPLOY, OpsType.TASK);
 	}
-	
+
 	public Availability availableWithUnDeployRole() {
 		return availabilityFor(RoleType.DEPLOY, OpsType.TASK);
 	}
@@ -139,7 +140,7 @@ public class TaskCommands {
 				? Availability.available()
 				: Availability.unavailable("you do not have permissions");
 	}
-	
+
 	@ShellMethod(key = LIST, value = "List created tasks")
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table list() {
@@ -166,16 +167,16 @@ public class TaskCommands {
 	}
 
 	@ShellMethod(key = VALIDATE, value = "Validate apps contained in task definitions")
-	public List<Object> validate(
+	public TablesInfo validate(
 			@ShellOption(value = { "", "--name" }, help = "the task definition name") String name) throws OperationNotSupportedException {
 		final TaskAppStatusResource task = taskOperations().validateTaskDefinition(name);
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Task Name").addValue("Task Definition");
 		modelBuilder.addRow().addValue(task.getAppName())
 				.addValue(task.getDsl());
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
-		result.add(builder.build());
+		result.addTable(builder.build());
 
 		modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("App Name").addValue("Validation Status");
@@ -190,15 +191,15 @@ public class TaskCommands {
 		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 
 		if (isValidStream) {
-			result.add(String.format("\n%s is a valid task.", task.getAppName()));
+			result.addFooter(String.format("\n%s is a valid task.", task.getAppName()));
 		}
 		else {
-			result.add(String.format("\n%s is an invalid task.", task.getAppName()));
+			result.addFooter(String.format("\n%s is an invalid task.", task.getAppName()));
 		}
-		result.add(builder.build());
+		result.addTable(builder.build());
 		return result;
 	}
-	
+
 	@ShellMethod(key = CREATE, value = "Create a new task definition")
 	@ShellMethodAvailability("availableWithCreateRole")
 	public String create(
@@ -233,7 +234,7 @@ public class TaskCommands {
 		long taskExecutionId = taskOperations().launch(name, propertiesToUse, argumentsToUse);
 		return String.format("Launched task '%s' with execution id %d", name, taskExecutionId);
 	}
-	
+
 	@ShellMethod(key = STOP, value = "Stop executing tasks")
 	@ShellMethodAvailability("availableWithUnDeployRole")
 	public String stop(

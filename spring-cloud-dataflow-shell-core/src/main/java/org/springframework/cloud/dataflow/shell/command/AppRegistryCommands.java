@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.completer.ApplicationNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
@@ -119,31 +120,31 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 
 	@ShellMethod(key = APPLICATION_INFO, value = "Get information about an application")
 	@ShellMethodAvailability("availableWithViewRole")
-	public List<Object> info(
-			@ShellOption(value = { "", "--name" }, help = "name of the application to query", valueProvider = ApplicationNameValueProvider.class) String name,
+	public TablesInfo info(
+			@ShellOption(value = { "--name" }, help = "name of the application to query", valueProvider = ApplicationNameValueProvider.class) String name,
 			@ShellOption(help = "type of the application to query") ApplicationType type,
 			@ShellOption(help = "the version for the registered application", defaultValue = ShellOption.NULL) String version,
 			@ShellOption(help = "return all metadata, including common Spring Boot properties", defaultValue = "false") boolean exhaustive) {
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		try {
 			DetailedAppRegistrationResource info = StringUtils.hasText(version) ?
 					appRegistryOperations().info(name, type, version, exhaustive) :
 					appRegistryOperations().info(name, type, exhaustive);
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
-				result.add(String.format("Information about %s application '%s':", type, name));
+				result.addHeader(String.format("Information about %s application '%s':", type, name));
 				if (info.getVersion() != null) {
-					result.add(String.format("Version: '%s':", info.getVersion()));
+					result.addHeader(String.format("Version: '%s':", info.getVersion()));
 				}
 				if (info.getDefaultVersion()) {
-					result.add(String.format("Default application version: '%s':", info.getDefaultVersion()));
+					result.addHeader(String.format("Default application version: '%s':", info.getDefaultVersion()));
 				}
-				result.add(String.format("Resource URI: %s", info.getUri()));
+				result.addHeader(String.format("Resource URI: %s", info.getUri()));
 				if (info.getShortDescription() != null) {
-					result.add(info.getShortDescription());
+					result.addHeader(info.getShortDescription());
 				}
 				if (options == null) {
-					result.add("Application options metadata is not available");
+					result.addHeader("Application options metadata is not available");
 				}
 				else {
 					TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -157,15 +158,15 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 					}
 					TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
 							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
-					result.add(builder.build());
+					result.addTable(builder.build());
 				}
 			}
 			else {
-				result.add(String.format("Application info is not available for %s:%s", type, name));
+				result.addHeader(String.format("Application info is not available for %s:%s", type, name));
 			}
 		}
 		catch (Exception e) {
-			result.add(String.format("Application info is not available for %s:%s", type, name));
+			result.addHeader(String.format("Application info is not available for %s:%s", type, name));
 		}
 		return result;
 	}
