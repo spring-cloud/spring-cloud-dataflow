@@ -59,8 +59,8 @@ public class ShellAutoConfiguration {
 	}
 
 	@Bean
-	public TablesResultHandler tablesResultHandler(Terminal terminal) {
-		return new TablesResultHandler(terminal);
+	public TablesInfoResultHandler tablesInfoResultHandler(Terminal terminal) {
+		return new TablesInfoResultHandler(terminal);
 	}
 
 	@Configuration(proxyBeanMethods = false)

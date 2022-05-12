@@ -66,7 +66,7 @@
 
 		<spring-cloud-skipper.version>2.9.0-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.4.1</spring-cloud-task.version>
+		<spring-cloud-task.version>2.4.2</spring-cloud-task.version>
 
 		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
 

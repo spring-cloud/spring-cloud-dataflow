@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.naming.OperationNotSupportedException;
@@ -35,6 +34,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.completer.StreamNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -283,10 +283,10 @@ public class StreamCommands {
 
 	@ShellMethod(key = INFO_STREAM, value = "Show information about a specific stream")
 	@ShellMethodAvailability("availableWithViewRole")
-	public List<Object> streamInfo(
+	public TablesInfo streamInfo(
 			@ShellOption(value = { "", "--name" }, help = "the name of the stream to show",
 					valueProvider = StreamNameValueProvider.class) String name) {
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		final StreamDeploymentResource stream = streamOperations().info(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition").addValue("Description").addValue("Status");
@@ -295,10 +295,10 @@ public class StreamCommands {
 				.addValue(stream.getDescription())
 				.addValue(stream.getStatus());
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
-		result.add(builder.build());
+		result.addTable(builder.build());
 		if (StringUtils.hasText(stream.getDeploymentProperties())) {
 			//TODO: rename Deployment properties for Skipper as it includes apps' info (app:version) as well
-			result.add(String.format("Stream Deployment properties: %s", ShellUtils.prettyPrintIfJson(stream.getDeploymentProperties())));
+			result.addFooter(String.format("Stream Deployment properties: %s", ShellUtils.prettyPrintIfJson(stream.getDeploymentProperties())));
 		}
 		return result;
 	}
@@ -349,17 +349,17 @@ public class StreamCommands {
 
 	@ShellMethod(key = VALIDATE_STREAM, value = "Verify that apps contained in the stream are valid.")
 	@ShellMethodAvailability("availableWithViewRole")
-	public List<Object> validateStream(
+	public TablesInfo validateStream(
 			@ShellOption(value = { "", "--name" }, help = "the name of the stream to validate",
 					valueProvider = StreamNameValueProvider.class) String name) throws OperationNotSupportedException {
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		final StreamAppStatusResource stream = streamOperations().validateStreamDefinition(name);
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Stream Name").addValue("Stream Definition");
 		modelBuilder.addRow().addValue(stream.getAppName())
 				.addValue(stream.getDsl());
 		TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
-		result.add(builder.build());
+		result.addTable(builder.build());
 
 		modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("App Name").addValue("Validation Status");
@@ -374,12 +374,12 @@ public class StreamCommands {
 		builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()));
 
 		if (isValidStream) {
-			result.add(String.format("\n%s is a valid stream.", stream.getAppName()));
+			result.addFooter(String.format("\n%s is a valid stream.", stream.getAppName()));
 		}
 		else {
-			result.add(String.format("\n%s is an invalid stream.", stream.getAppName()));
+			result.addFooter(String.format("\n%s is an invalid stream.", stream.getAppName()));
 		}
-		result.add(builder.build());
+		result.addTable(builder.build());
 		return result;
 	}
 

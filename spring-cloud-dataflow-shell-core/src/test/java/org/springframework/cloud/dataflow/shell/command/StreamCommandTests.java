@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.skipper.domain.Deployer;
@@ -102,9 +102,9 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		stream().createDontDeploy(streamName, "time | log");
 
 		Object result = stream().validate(streamName);
-		assertThat(result).isInstanceOf(List.class);
-		List results = (List) result;
-		Table table = (Table)results.get(0);
+		assertThat(result).isInstanceOf(TablesInfo.class);
+		TablesInfo results = (TablesInfo) result;
+		Table table = results.getTables().get(0);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: Stream Name", "Stream Name", table.getModel().getValue(0, 0));
 		assertEquals("First Row Second Value should be: Stream Definition", "Stream Definition", table.getModel().getValue(0, 1));
@@ -112,9 +112,9 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 		assertEquals("Second Row Second Value should be: time | log", "time | log", table.getModel().getValue(1, 1));
 
 		String message = String.format("\n%s is a valid stream.", streamName);
-		assertEquals(String.format("Notification should be: %s",message ), message, results.get(1));
+		assertEquals(String.format("Notification should be: %s",message ), message, results.getFooters().get(0));
 
-		table = (Table)results.get(2);
+		table = results.getTables().get(1);
 		assertEquals("Number of columns returned was not expected", 2, table.getModel().getColumnCount());
 		assertEquals("First Row First Value should be: App Name", "App Name", table.getModel().getValue(0, 0));
 		assertEquals("First Row Second Value should be: Validation Status", "Validation Status", table.getModel().getValue(0, 1));

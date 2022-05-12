@@ -15,28 +15,33 @@
  */
 package org.springframework.cloud.dataflow.shell.config;
 
-import java.util.List;
-
 import org.jline.terminal.Terminal;
 
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.shell.result.TerminalAwareResultHandler;
 import org.springframework.shell.table.Table;
 
 /**
- * Result handler which output's multiple tables.
+ * Result handler for {@link TablesInfo}.
  *
  * @author Janne Valkealahti
  */
-public class TablesResultHandler extends TerminalAwareResultHandler<List<Table>> {
+public class TablesInfoResultHandler extends TerminalAwareResultHandler<TablesInfo> {
 
-	public TablesResultHandler(Terminal terminal) {
+	public TablesInfoResultHandler(Terminal terminal) {
 		super(terminal);
 	}
 
 	@Override
-	protected void doHandleResult(List<Table> tables) {
-		for (Table table : tables) {
+	protected void doHandleResult(TablesInfo result) {
+		for (String header : result.getHeaders()) {
+			terminal.writer().println(header);
+		}
+		for (Table table : result.getTables()) {
 			terminal.writer().println(table.render(terminal.getWidth()));
+		}
+		for (String footer : result.getFooters()) {
+			terminal.writer().println(footer);
 		}
 	}
 }

@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -33,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.table.Table;
@@ -332,8 +332,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().create(taskName, "timestamp");
 
 		Object result = task().taskValidate(taskName);
-		List results = (List) result;
-		Table table = (Table) results.get(0);
+		TablesInfo results = (TablesInfo) result;
+		Table table = results.getTables().get(0);
 		assertThat(table.getModel().getColumnCount()).isEqualTo(2);
 
 		verifyTableValue(table, 0, 0, "Task Name");
@@ -342,9 +342,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 1, 1, "timestamp");
 
 		String message = String.format("\n%s is a valid task.", taskName);
-		assertThat(message).isEqualTo(results.get(1));
+		assertThat(message).isEqualTo(results.getFooters().get(0));
 
-		table = (Table) results.get(2);
+		table = results.getTables().get(1);
 		assertThat(table.getModel().getColumnCount()).isEqualTo(2);
 
 		verifyTableValue(table, 0, 0, "App Name");
