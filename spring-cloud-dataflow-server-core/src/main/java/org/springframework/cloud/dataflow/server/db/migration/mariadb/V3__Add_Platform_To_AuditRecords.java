@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration.mysql;
+package org.springframework.cloud.dataflow.server.db.migration.mariadb;
 
 import java.util.Arrays;
 
@@ -24,21 +24,21 @@ import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.common.flyway.SqlCommandsRunner;
 
 /**
- * This migration class adds index for STEP_NAME on BATCH_STEP_EXECUTION.
+ * This migration class adds platformName column to audit_records.
  *
- * @author Glenn Renfro
+ * @author Daniel Serleg
  *
- * @since 2.7
+ * @since 2.4
  */
-public class V4__Add_Step_Name_Indexes extends BaseJavaMigration {
+public class V3__Add_Platform_To_AuditRecords extends BaseJavaMigration {
 
-	public final static String ADD_INDEX_TO_BATCH_STEP_EXECUTION = "create index STEP_NAME_IDX on BATCH_STEP_EXECUTION (STEP_NAME)";
+	public final static String ALTER_AUDIT_RECORDS_TABLE_PLATFORM = "alter table audit_records add platform_name varchar(255)";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 
 	@Override
 	public void migrate(Context context) throws Exception {
 		runner.execute(context.getConnection(), Arrays.asList(
-				SqlCommand.from(ADD_INDEX_TO_BATCH_STEP_EXECUTION)));
+				SqlCommand.from(ALTER_AUDIT_RECORDS_TABLE_PLATFORM)));
 	}
 }
