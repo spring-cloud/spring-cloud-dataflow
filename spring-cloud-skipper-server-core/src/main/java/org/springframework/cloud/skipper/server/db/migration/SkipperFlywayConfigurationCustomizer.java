@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
 import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.cloud.skipper.server.db.migration.db2.Db2BeforeBaseline;
-import org.springframework.cloud.skipper.server.db.migration.mysql.MariadbBeforeBaseline;
+import org.springframework.cloud.skipper.server.db.migration.mariadb.MariadbBeforeBaseline;
 import org.springframework.cloud.skipper.server.db.migration.oracle.OracleBeforeBaseline;
 import org.springframework.cloud.skipper.server.db.migration.postgresql.PostgresBeforeBaseline;
 import org.springframework.cloud.skipper.server.db.migration.sqlserver.MsSqlBeforeBaseline;
