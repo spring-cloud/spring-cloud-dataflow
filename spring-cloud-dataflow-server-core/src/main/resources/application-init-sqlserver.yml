@@ -1,12 +1,13 @@
 spring:
   flyway:
     enabled: false
-  datasource:
-    initialization-mode: always
-    schema:
-      - classpath*:/schemas/sqlserver/V1-dataflow.sql
-      - classpath*:/schemas/sqlserver/V1-skipper.sql
-      - classpath*:/schemas/sqlserver/V2-dataflow.sql
-      - classpath*:/schemas/sqlserver/V2-dataflow-after.sql
-      - classpath*:/schemas/sqlserver/V3-dataflow.sql
-      - classpath*:/schemas/sqlserver/V4-dataflow.sql
+  sql:
+    init:
+      mode: always
+      schema-locations:
+        - classpath*:/schemas/sqlserver/V1-dataflow.sql
+        - classpath*:/schemas/sqlserver/V1-skipper.sql
+        - classpath*:/schemas/sqlserver/V2-dataflow.sql
+        - classpath*:/schemas/sqlserver/V2-dataflow-after.sql
+        - classpath*:/schemas/sqlserver/V3-dataflow.sql
+        - classpath*:/schemas/sqlserver/V4-dataflow.sql

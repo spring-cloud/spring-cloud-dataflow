@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomiz
 import org.springframework.boot.jdbc.DatabaseDriver;
 import org.springframework.cloud.dataflow.server.db.migration.db2.Db2BeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.mariadb.MariadbBeforeBaseline;
+import org.springframework.cloud.dataflow.server.db.migration.mysql.MysqlBeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.oracle.OracleBeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.postgresql.PostgresBeforeBaseline;
 import org.springframework.cloud.dataflow.server.db.migration.sqlserver.MsSqlBeforeBaseline;
@@ -34,7 +35,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
  * active db vendor.
  *
  * @author Janne Valkealahti
- *
+ * @author Chris Bono
  */
 public class DataFlowFlywayConfigurationCustomizer implements FlywayConfigurationCustomizer {
 
@@ -49,6 +50,9 @@ public class DataFlowFlywayConfigurationCustomizer implements FlywayConfiguratio
 		}
 		else if (databaseDriver == DatabaseDriver.MARIADB) {
 			configuration.callbacks(new MariadbBeforeBaseline());
+		}
+		else if (databaseDriver == DatabaseDriver.MYSQL) {
+			configuration.callbacks(new MysqlBeforeBaseline());
 		}
 		else if (databaseDriver == DatabaseDriver.SQLSERVER) {
 			configuration.callbacks(new MsSqlBeforeBaseline());
