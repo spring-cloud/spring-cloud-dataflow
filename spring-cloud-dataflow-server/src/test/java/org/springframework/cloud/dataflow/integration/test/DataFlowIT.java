@@ -74,8 +74,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.DeploymentPropertiesBu
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamDefinition;
-import org.springframework.cloud.dataflow.rest.client.dsl.task.Task
-        ;
+import org.springframework.cloud.dataflow.rest.client.dsl.task.Task;
 import org.springframework.cloud.dataflow.rest.client.dsl.task.TaskBuilder;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
@@ -92,8 +91,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.xml.crypto.Data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
