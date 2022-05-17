@@ -122,8 +122,6 @@ services:
     user: root
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
-    depends_on:
-      - mariadb
     ports:
       - "7577:7577"
       - ${APPS_PORT_RANGE:-20000-20195:20000-20195}
