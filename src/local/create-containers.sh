@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+./mvnw clean install -Pspring
 TAG=2.10.0-SNAPSHOT
 v=11
 pack build \
