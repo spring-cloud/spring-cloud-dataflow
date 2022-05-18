@@ -601,7 +601,7 @@ public class DataFlowIT {
                     .put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
                     .put("app.*.management.endpoints.web.exposure.include", "*")
                     .build());
-
+            // TODO failfast with error message.
             Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -1055,8 +1055,6 @@ public class DataFlowIT {
     public static final String TEST_VERSION_NUMBER = "2.0.2";
 
     public static final String CURRENT_VERSION_NUMBER = "2.0.1";
-    public static final String containerPrefix = "docker:springcloudtask/";
-    public static final String mavenPrefix = "maven://io.spring:";
 
     private List<String> composedTaskLaunchArguments(String... additionalArguments) {
         // the dataflow-server-use-user-access-token=true argument is required COMPOSED tasks in
@@ -1996,7 +1994,7 @@ public class DataFlowIT {
     }
 
     private void registerTimestamp(String versionNumber) {
-        registerTask("testtimestamp", versionNumber, "timestamp-task");
+        registerTask("testtimestamp", "maven://io.spring:timestamp-task", versionNumber);
     }
 
     private void setDefaultVersionForTimestamp(String version) {
@@ -2005,8 +2003,8 @@ public class DataFlowIT {
     }
 
     private void registerTasks() {
-        registerTask("testtimestamp", CURRENT_VERSION_NUMBER, "timestamp-task");
-        registerTask("testtimestamp-batch", CURRENT_VERSION_NUMBER, "timestamp-batch-task");
+        registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
+        registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER);
     }
 
     private void assertTaskRegistration(String name) {
@@ -2019,13 +2017,10 @@ public class DataFlowIT {
         }
     }
 
-    private void registerTask(String name, String version, String artefact) {
+    private void registerTask(String name, String artefact, String version) {
         AppRegistryOperations appRegistryOperations = this.dataFlowOperations.appRegistryOperations();
         try {
-            String platformType = System.getProperty("PLATFORM_TYPE", RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE);
-            String prefix = platformType.equals(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)
-                                ? containerPrefix : mavenPrefix;
-            String uri = prefix + artefact + ":" + version;
+            String uri = artefact + ":" + version;
             appRegistryOperations.register(name, ApplicationType.task, uri, null, false);
             logger.info("registerTask:{}:{}", name, uri);
         } catch (DataFlowClientException x) {
@@ -2040,7 +2035,7 @@ public class DataFlowIT {
         } catch (DataFlowClientException x) {
             logger.debug("resetTimestampVersion:Expected:" + x);
         }
-        registerTask("testtimestamp", CURRENT_VERSION_NUMBER, "timestamp-task");
+        registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
         setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
     }
 
