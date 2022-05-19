@@ -90,6 +90,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -227,8 +228,8 @@ public class DataFlowIT {
 
     @BeforeEach
     public void before() {
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
+        Awaitility.setDefaultPollInterval(Duration.ofSeconds(3));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
         registerTasks();
         resetTimestampVersion();
     }
@@ -423,7 +424,9 @@ public class DataFlowIT {
             assertThat(stream.getStatus()).is(
                     condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
 
@@ -452,7 +455,9 @@ public class DataFlowIT {
                         "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
                 .build())) {
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
             runtimeApps.httpPost(stream.getName(), "http", message);
@@ -502,7 +507,9 @@ public class DataFlowIT {
                         .put("version.ver-log", VERSION_3_0_1)
                         .build())) {
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             // Helper supplier to retrieve the ver-log version from the stream's current manifest.
             Supplier<String> currentVerLogVersion = () -> new SpringCloudDeployerApplicationManifestReader()
@@ -528,7 +535,9 @@ public class DataFlowIT {
             logger.info("stream-app-cross-version-test: UPDATE");
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX));
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_2_1_5);
@@ -538,7 +547,9 @@ public class DataFlowIT {
             logger.info("stream-app-cross-version-test: ROLLBACK");
 
             stream.rollback(0);
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX));
             assertThat(currentVerLogVersion.get()).isEqualTo(VERSION_3_0_1);
@@ -581,8 +592,9 @@ public class DataFlowIT {
                         .putAll(testDeploymentProperties())
                         .put("deployer.*.count", "" + appInstanceCount)
                         .build())) {
-
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
 
@@ -601,8 +613,10 @@ public class DataFlowIT {
                     .put("app.log.log.expression", "'Updated TICKTOCK - TIMESTAMP: '.concat(payload)")
                     .put("app.*.management.endpoints.web.exposure.include", "*")
                     .build());
-            // TODO failfast with error message.
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
 
@@ -617,7 +631,9 @@ public class DataFlowIT {
             logger.info("stream-lifecycle-test: ROLLBACK");
             stream.rollback(0);
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
 
@@ -647,6 +663,37 @@ public class DataFlowIT {
         assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(0L);
     }
 
+    private boolean hasDeploymentError(Stream stream) {
+        String log = stream.logs();
+        String status = stream.getStatus();
+        if (status.equals(DELETED) || log.contains("ERROR")) {
+            logger.error("checkDeployment:" + stream.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, "ERROR")));
+            return true;
+        } else {
+            if (StringUtils.hasText(log)) {
+                logger.debug("checkDeployment:{}:{}:{}", stream.getName(), status, expand(log));
+            }
+            return false;
+        }
+    }
+
+    private String expand(String log) {
+        return log.replace("\\t", "\t").replace("\\n", "\n").replace("\\r", "\r");
+    }
+
+    private String linesBeforeAfter(String log, String match) {
+        int matchIndex = log.indexOf(match);
+        if (matchIndex > 0) {
+            String target = log.substring(matchIndex > 320 ? matchIndex - 320 : matchIndex);
+            int start = target.indexOf('\n');
+            if (start < 0) {
+                start = 0;
+            }
+            return target.substring(start);
+        }
+        return log;
+    }
+
     @Test
     public void streamScaling() {
         logger.info("stream-scaling-test");
@@ -656,7 +703,9 @@ public class DataFlowIT {
                 .create()
                 .deploy(testDeploymentProperties())) {
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             final StreamApplication time = app("time");
             final StreamApplication log = app("log");
@@ -669,7 +718,9 @@ public class DataFlowIT {
             // Scale up log
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
             Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
 
             assertThat(stream.getStatus()).isEqualTo(DEPLOYED);
@@ -695,8 +746,12 @@ public class DataFlowIT {
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
 
-            Awaitility.await().until(() -> logStream.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> httpStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(logStream))
+                    .until(() -> logStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(httpStream))
+                    .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
 
@@ -721,8 +776,12 @@ public class DataFlowIT {
                         .create()
                         .deploy(testDeploymentProperties())) {
 
-            Awaitility.await().until(() -> httpLogStream.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> tapStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(httpLogStream))
+                    .until(() -> httpLogStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(tapStream))
+                    .until(() -> tapStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
 
@@ -752,9 +811,15 @@ public class DataFlowIT {
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
 
-            Awaitility.await().until(() -> logStream.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> httpStreamTwo.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(logStream))
+                    .until(() -> logStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(httpStreamOne))
+                    .until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(httpStreamTwo))
+                    .until(() -> httpStreamTwo.getStatus().equals(DEPLOYED));
 
             String messageOne = "Unique Test message: " + new Random().nextInt();
 
@@ -792,9 +857,15 @@ public class DataFlowIT {
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
 
-            Awaitility.await().until(() -> fooLogStream.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> barLogStream.getStatus().equals(DEPLOYED));
-            Awaitility.await().until(() -> httpStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(fooLogStream))
+                    .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(barLogStream))
+                    .until(() -> barLogStream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(httpStream))
+                    .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
             runtimeApps.httpPost(httpAppUrl, "abcd");
@@ -807,63 +878,70 @@ public class DataFlowIT {
 
     @Test
     public void dataflowTaskLauncherSink() {
+        String platformType = System.getProperty("PLATFORM_TYPE", "local");
+        if(platformType.equals("local")) {
+            logger.warn("Skipping since it doesn't work local");
+        } else {
+            String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
 
-        String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
+            String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test: SKIP - Dataflow version:"
+                    + runtimeApps.getDataflowServerVersion() + " is older than 2.9.0-SNAPSHOT!";
+            if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT")) {
+                logger.warn(skipOnIncompatibleDataFlowVersion);
+            }
+            Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"),
+                    skipOnIncompatibleDataFlowVersion);
 
-        String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test: SKIP - Dataflow version:"
-                + runtimeApps.getDataflowServerVersion() + " is older than 2.9.0-SNAPSHOT!";
-        if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT")) {
-            logger.info(skipOnIncompatibleDataFlowVersion);
-        }
-        Assumptions.assumeTrue(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.0-SNAPSHOT"),
-                skipOnIncompatibleDataFlowVersion);
+            String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no "
+                    + dataflowTaskLauncherAppName + " app registered!";
+            boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName,
+                    ApplicationType.sink);
+            if (!isDataflowTaskLauncherAppRegistered) {
+                logger.info(skipOnMissingAppRegistration);
+            }
+            Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipOnMissingAppRegistration);
 
-        String skipOnMissingAppRegistration = dataflowTaskLauncherAppName + "-sink-test: SKIP - no "
-                + dataflowTaskLauncherAppName + " app registered!";
-        boolean isDataflowTaskLauncherAppRegistered = runtimeApps.isAppRegistered(dataflowTaskLauncherAppName,
-                ApplicationType.sink);
-        if (!isDataflowTaskLauncherAppRegistered) {
-            logger.info(skipOnMissingAppRegistration);
-        }
-        Assumptions.assumeTrue(isDataflowTaskLauncherAppRegistered, skipOnMissingAppRegistration);
+            DetailedAppRegistrationResource dataflowTaskLauncherRegistration = dataFlowOperations.appRegistryOperations()
+                    .info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
 
-        DetailedAppRegistrationResource dataflowTaskLauncherRegistration = dataFlowOperations.appRegistryOperations()
-                .info(dataflowTaskLauncherAppName, ApplicationType.sink, false);
+            logger.info("{}-sink-test: {} [{}], DataFlow [{}]", dataflowTaskLauncherAppName, dataflowTaskLauncherAppName, dataflowTaskLauncherRegistration.getVersion(), runtimeApps.getDataflowServerVersion());
 
-        logger.info("{}-sink-test: {} [{}], DataFlow [{}]", dataflowTaskLauncherAppName, dataflowTaskLauncherAppName, dataflowTaskLauncherRegistration.getVersion(), runtimeApps.getDataflowServerVersion());
+            String taskName = randomTaskName();
+            try (Task task = Task.builder(dataFlowOperations)
+                    .name(taskName)
+                    .definition("testtimestamp")
+                    .description("Test timestamp task")
+                    .build()) {
+                logger.info("dataflowTaskLauncherSink:deploying:{}", dataflowTaskLauncherAppName);
+                try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
+                        .definition("http | " + dataflowTaskLauncherAppName
+                                + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
+                                "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
+                        .create()
+                        .deploy(testDeploymentProperties())) {
 
-        String taskName = randomTaskName();
-        try (Task task = Task.builder(dataFlowOperations)
-                .name(taskName)
-                .definition("testtimestamp")
-                .description("Test timestamp task")
-                .build()) {
-            try (Stream stream = Stream.builder(dataFlowOperations).name("tasklauncher-test")
-                    .definition("http | " + dataflowTaskLauncherAppName
-                            + " --trigger.initialDelay=100 --trigger.maxPeriod=1000 " +
-                            "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
-                    .create()
-                    .deploy(testDeploymentProperties())) {
+                    Awaitility.await()
+                            .failFast(() -> hasDeploymentError(stream))
+                            .until(() -> stream.getStatus().equals(DEPLOYED));
 
-                Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+                    runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
 
-                runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
-
-                AtomicLong launchId = new AtomicLong();
-                Awaitility.await()
-                        .until(() -> task.executions().stream()
-                                .filter(t -> t.getTaskName().equals(taskName)
-                                        && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
-                                .findFirst()
-                                .map(t -> launchId.getAndSet(t.getExecutionId())).isPresent());
-                long id = launchId.get();
-                assertThat(task.executions().size()).isEqualTo(1);
-                assertThat(task.execution(id).isPresent()).isTrue();
-                assertThat(task.execution(id).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+                    AtomicLong launchId = new AtomicLong();
+                    Awaitility.await()
+                            .until(() -> task.executions().stream()
+                                    .filter(t -> t.getTaskName().equals(taskName)
+                                            && t.getTaskExecutionStatus() == TaskExecutionStatus.COMPLETE)
+                                    .findFirst()
+                                    .map(t -> launchId.getAndSet(t.getExecutionId())).isPresent());
+                    long id = launchId.get();
+                    assertThat(task.executions().size()).isEqualTo(1);
+                    assertThat(task.execution(id).isPresent()).isTrue();
+                    assertThat(task.execution(id).get().getExitCode()).isEqualTo(EXIT_CODE_SUCCESS);
+                }
             }
         }
     }
@@ -896,7 +974,9 @@ public class DataFlowIT {
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
             String message2 = "Test message 2 with extension"; // length 29
@@ -966,7 +1046,9 @@ public class DataFlowIT {
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
 
-            Awaitility.await().until(() -> stream.getStatus().equals(DEPLOYED));
+            Awaitility.await()
+                    .failFast(() -> hasDeploymentError(stream))
+                    .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
             String message2 = "Test message 2 with extension"; // length 29
