@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.integration.test.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.util.StringUtils;
 
