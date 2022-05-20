@@ -425,7 +425,7 @@ public class DataFlowIT {
                     condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
@@ -456,7 +456,7 @@ public class DataFlowIT {
                 .build())) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
@@ -508,7 +508,7 @@ public class DataFlowIT {
                         .build())) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             // Helper supplier to retrieve the ver-log version from the stream's current manifest.
@@ -536,7 +536,7 @@ public class DataFlowIT {
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX));
@@ -548,7 +548,7 @@ public class DataFlowIT {
 
             stream.rollback(0);
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX));
@@ -593,7 +593,7 @@ public class DataFlowIT {
                         .put("deployer.*.count", "" + appInstanceCount)
                         .build())) {
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -615,7 +615,7 @@ public class DataFlowIT {
                     .build());
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -632,7 +632,7 @@ public class DataFlowIT {
             stream.rollback(0);
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -663,10 +663,10 @@ public class DataFlowIT {
         assertThat(dataFlowOperations.streamOperations().list().getMetadata().getTotalElements()).isEqualTo(0L);
     }
 
-    private boolean hasDeploymentError(Stream stream) {
+    protected boolean hasErrorInLog(Stream stream) {
         String log = stream.logs();
         String status = stream.getStatus();
-        if (status.equals(DELETED) || log.contains("ERROR")) {
+        if (log.contains("ERROR")) {
             logger.error("checkDeployment:" + stream.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, "ERROR")));
             return true;
         } else {
@@ -704,7 +704,7 @@ public class DataFlowIT {
                 .deploy(testDeploymentProperties())) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             final StreamApplication time = app("time");
@@ -719,7 +719,7 @@ public class DataFlowIT {
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
             Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
 
@@ -747,10 +747,10 @@ public class DataFlowIT {
                         .deploy(testDeploymentProperties("http"))) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(logStream))
+                    .failFast(() -> hasErrorInLog(logStream))
                     .until(() -> logStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(httpStream))
+                    .failFast(() -> hasErrorInLog(httpStream))
                     .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
@@ -777,10 +777,10 @@ public class DataFlowIT {
                         .deploy(testDeploymentProperties())) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(httpLogStream))
+                    .failFast(() -> hasErrorInLog(httpLogStream))
                     .until(() -> httpLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(tapStream))
+                    .failFast(() -> hasErrorInLog(tapStream))
                     .until(() -> tapStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
@@ -812,13 +812,13 @@ public class DataFlowIT {
                         .deploy(testDeploymentProperties("http"))) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(logStream))
+                    .failFast(() -> hasErrorInLog(logStream))
                     .until(() -> logStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(httpStreamOne))
+                    .failFast(() -> hasErrorInLog(httpStreamOne))
                     .until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(httpStreamTwo))
+                    .failFast(() -> hasErrorInLog(httpStreamTwo))
                     .until(() -> httpStreamTwo.getStatus().equals(DEPLOYED));
 
             String messageOne = "Unique Test message: " + new Random().nextInt();
@@ -858,13 +858,13 @@ public class DataFlowIT {
                         .deploy(testDeploymentProperties("http"))) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(fooLogStream))
+                    .failFast(() -> hasErrorInLog(fooLogStream))
                     .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(barLogStream))
+                    .failFast(() -> hasErrorInLog(barLogStream))
                     .until(() -> barLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(httpStream))
+                    .failFast(() -> hasErrorInLog(httpStream))
                     .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
@@ -921,7 +921,7 @@ public class DataFlowIT {
                         .deploy(testDeploymentProperties())) {
 
                     Awaitility.await()
-                            .failFast(() -> hasDeploymentError(stream))
+                            .failFast(() -> hasErrorInLog(stream))
                             .until(() -> stream.getStatus().equals(DEPLOYED));
 
                     HttpHeaders headers = new HttpHeaders();
@@ -975,7 +975,7 @@ public class DataFlowIT {
                 .deploy(testDeploymentProperties("http"))) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
@@ -1047,7 +1047,7 @@ public class DataFlowIT {
                 .deploy(testDeploymentProperties("http"))) {
 
             Awaitility.await()
-                    .failFast(() -> hasDeploymentError(stream))
+                    .failFast(() -> hasErrorInLog(stream))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
