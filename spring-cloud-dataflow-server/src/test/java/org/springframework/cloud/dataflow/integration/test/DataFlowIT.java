@@ -228,8 +228,8 @@ public class DataFlowIT {
 
     @BeforeEach
     public void before() {
-        Awaitility.setDefaultPollInterval(Duration.ofSeconds(3));
-        Awaitility.setDefaultTimeout(Duration.ofMinutes(5));
+        Awaitility.setDefaultPollInterval(Duration.ofSeconds(5));
+        Awaitility.setDefaultTimeout(Duration.ofMinutes(15));
         registerTasks();
         resetTimestampVersion();
     }
