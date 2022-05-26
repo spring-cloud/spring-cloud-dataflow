@@ -847,8 +847,7 @@ public class DataFlowIT {
 
     @Test
     public void dataflowTaskLauncherSink() {
-        String platformType = System.getProperty("PLATFORM_TYPE", "local");
-        if(platformType.equals("local")) {
+        if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.LOCAL_PLATFORM_TYPE)) {
             logger.warn("Skipping since it doesn't work local");
         } else {
             String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
@@ -2045,7 +2044,11 @@ public class DataFlowIT {
     }
 
     private void registerTimestamp(String versionNumber) {
-        registerTask("testtimestamp", "maven://io.spring:timestamp-task", versionNumber);
+        if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", versionNumber);
+        } else {
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", versionNumber);
+        }
     }
 
     private void setDefaultVersionForTimestamp(String version) {
@@ -2054,8 +2057,13 @@ public class DataFlowIT {
     }
 
     private void registerTasks() {
-        registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
-        registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER);
+        if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp-batch", "docker:springcloudtask/timestamp-batch-task", CURRENT_VERSION_NUMBER);
+        } else {
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
+            registerTask("testtimestamp-batch", "maven://io.spring:timestamp-batch-task", CURRENT_VERSION_NUMBER);
+        }
     }
 
     private void assertTaskRegistration(String name) {
@@ -2086,7 +2094,11 @@ public class DataFlowIT {
         } catch (DataFlowClientException x) {
             logger.debug("resetTimestampVersion:Expected:" + x);
         }
-        registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
+        if (this.runtimeApps.getPlatformType().equalsIgnoreCase(RuntimeApplicationHelper.KUBERNETES_PLATFORM_TYPE)) {
+            registerTask("testtimestamp", "docker:springcloudtask/timestamp-task", CURRENT_VERSION_NUMBER);
+        } else {
+            registerTask("testtimestamp", "maven://io.spring:timestamp-task", CURRENT_VERSION_NUMBER);
+        }
         setDefaultVersionForTimestamp(CURRENT_VERSION_NUMBER);
     }
 
