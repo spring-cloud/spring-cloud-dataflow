@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -81,6 +82,7 @@ import org.springframework.util.StringUtils;
  * @author David Turanski
  * @author Daniel Serleg
  * @author Corneil du Plessis
+ * @author Joe O'Brien
  */
 public class DefaultTaskDeleteService implements TaskDeleteService {
 
@@ -262,44 +264,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted Job Execution IDs", StringUtils.collectionToDelimitedString(jobExecutionIds, ", "));
 
 		if (!jobExecutionIds.isEmpty()) {
-			final Set<Long> stepExecutionIds = dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIds);
-
-			final int numberOfDeletedBatchStepExecutionContextRows;
-			if (!stepExecutionIds.isEmpty()) {
-				numberOfDeletedBatchStepExecutionContextRows = dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds);
-			}
-			else {
-				numberOfDeletedBatchStepExecutionContextRows = 0;
-			}
-
-			final int numberOfDeletedBatchStepExecutionRows = dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionContextRows = dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionParamRows = dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecutionIds(jobExecutionIds);
-			final int numberOfDeletedBatchJobExecutionRows = dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecutionIds(jobExecutionIds);
-			final int numberOfDeletedUnusedBatchJobInstanceRows = dataflowJobExecutionDao.deleteUnusedBatchJobInstances();
-
-			logger.info("Deleted the following Batch Job Execution related data for {} Job Executions.\n" +
-					"Batch Step Execution Context Rows: {}\n" +
-					"Batch Step Executions Rows:        {}\n" +
-					"Batch Job Execution Context Rows:  {}\n" +
-					"Batch Job Execution Param Rows:    {}\n" +
-					"Batch Job Execution Rows:          {}\n" +
-					"Batch Job Instance Rows:           {}.",
-					jobExecutionIds.size(),
-					numberOfDeletedBatchStepExecutionContextRows,
-					numberOfDeletedBatchStepExecutionRows,
-					numberOfDeletedBatchJobExecutionContextRows,
-					numberOfDeletedBatchJobExecutionParamRows,
-					numberOfDeletedBatchJobExecutionRows,
-					numberOfDeletedUnusedBatchJobInstanceRows
-					);
-
-			auditData.put("Batch Step Execution Context", numberOfDeletedBatchStepExecutionContextRows);
-			auditData.put("Batch Step Executions", numberOfDeletedBatchStepExecutionRows);
-			auditData.put("Batch Job Execution Context Rows", numberOfDeletedBatchJobExecutionContextRows);
-			auditData.put("Batch Job Execution Params", numberOfDeletedBatchJobExecutionParamRows);
-			auditData.put("Batch Job Executions", numberOfDeletedBatchJobExecutionRows);
-			auditData.put("Batch Job Instance Rows", numberOfDeletedUnusedBatchJobInstanceRows);
+			deleteRelatedJobAndStepExecutions(jobExecutionIds, auditData);
 		}
 
 		// Delete Task Related Data
@@ -348,6 +313,111 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditRecordService.populateAndSaveAuditRecordUsingMapData(
 				AuditOperationType.TASK, AuditActionType.DELETE,
 				taskExecutionIdsWithChildren.size() + " Task Execution Delete(s)", auditData, null);
+	}
+	
+	private void deleteRelatedJobAndStepExecutions(Set<Long> jobExecutionIds,
+			Map<String, Object> auditData) {
+
+		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
+
+		final Set<Long> stepExecutionIds = findStepExecutionIds(jobExecutionIds, chunkSize);
+
+		final AtomicInteger numberOfDeletedBatchStepExecutionContextRows = new AtomicInteger(0);
+		if (!stepExecutionIds.isEmpty()) {
+			deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds, chunkSize, numberOfDeletedBatchStepExecutionContextRows);
+		}
+
+		deleteStepAndJobExecutionsByJobExecutionId(jobExecutionIds, chunkSize, auditData, numberOfDeletedBatchStepExecutionContextRows);
+	
+	}
+	
+	private Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds, int chunkSize) {
+		final Set<Long> stepExecutionIds = ConcurrentHashMap.newKeySet();
+
+		if (chunkSize <= 0) {
+			stepExecutionIds.addAll(dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIds));
+		}
+		else {
+			split(jobExecutionIds, chunkSize)
+					.stream()
+					.forEach(jobExecutionIdSubsetList -> {
+						Set<Long> jobExecutionIdSubset = new HashSet<>(jobExecutionIdSubsetList);
+						stepExecutionIds.addAll(dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIdSubset));
+					});
+		}
+		
+		return stepExecutionIds;
+	}
+	
+	private void deleteBatchStepExecutionContextByStepExecutionIds(Set<Long> stepExecutionIds, int chunkSize, AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
+		if (chunkSize <= 0) {
+			numberOfDeletedBatchStepExecutionContextRows
+					.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds));
+
+		}
+		else {
+			split(stepExecutionIds, chunkSize)
+					.stream()
+					.forEach(stepExecutionIdSubsetList -> {
+						Set<Long> stepExecutionIdSubset = new HashSet<>(stepExecutionIdSubsetList);
+						numberOfDeletedBatchStepExecutionContextRows.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIdSubset));
+					});
+		}
+	}
+	
+	private void deleteStepAndJobExecutionsByJobExecutionId(Set<Long> jobExecutionIds, int chunkSize, Map<String, Object> auditData, AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
+		
+		final AtomicInteger numberOfDeletedBatchStepExecutionRows = new AtomicInteger(0);
+		final AtomicInteger numberOfDeletedBatchJobExecutionContextRows = new AtomicInteger(
+				0);
+		final AtomicInteger numberOfDeletedBatchJobExecutionParamRows = new AtomicInteger(
+				0);
+		final AtomicInteger numberOfDeletedBatchJobExecutionRows = new AtomicInteger(0);
+		
+		if (chunkSize <= 0) {
+			numberOfDeletedBatchStepExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIds));
+			numberOfDeletedBatchJobExecutionContextRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIds));
+			numberOfDeletedBatchJobExecutionParamRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecutionIds(jobExecutionIds));
+			numberOfDeletedBatchJobExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecutionIds(jobExecutionIds));
+		}
+		else {					
+			split(jobExecutionIds, chunkSize)
+					.stream()
+					.forEach(jobExecutionIdSubsetList -> {Set<Long> jobExecutionIdSubset = new HashSet<>(jobExecutionIdSubsetList);
+						numberOfDeletedBatchStepExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIdSubset));
+						numberOfDeletedBatchJobExecutionContextRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIdSubset));
+						numberOfDeletedBatchJobExecutionParamRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionParamsByJobExecutionIds(jobExecutionIdSubset));
+						numberOfDeletedBatchJobExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecutionIds(jobExecutionIdSubset));
+					});
+		}
+		
+		final int numberOfDeletedUnusedBatchJobInstanceRows = dataflowJobExecutionDao.deleteUnusedBatchJobInstances();
+
+		logger.info(
+				"Deleted the following Batch Job Execution related data for {} Job Executions.\n"
+						+ "Batch Step Execution Context Rows: {}\n"
+						+ "Batch Step Executions Rows:        {}\n"
+						+ "Batch Job Execution Context Rows:  {}\n"
+						+ "Batch Job Execution Param Rows:    {}\n"
+						+ "Batch Job Execution Rows:          {}\n"
+						+ "Batch Job Instance Rows:           {}.",
+				jobExecutionIds.size(), numberOfDeletedBatchStepExecutionContextRows,
+				numberOfDeletedBatchStepExecutionRows,
+				numberOfDeletedBatchJobExecutionContextRows,
+				numberOfDeletedBatchJobExecutionParamRows,
+				numberOfDeletedBatchJobExecutionRows,
+				numberOfDeletedUnusedBatchJobInstanceRows);
+
+		auditData.put("Batch Step Execution Context",
+				numberOfDeletedBatchStepExecutionContextRows);
+		auditData.put("Batch Step Executions", numberOfDeletedBatchStepExecutionRows);
+		auditData.put("Batch Job Execution Context Rows",
+				numberOfDeletedBatchJobExecutionContextRows);
+		auditData.put("Batch Job Execution Params",
+				numberOfDeletedBatchJobExecutionParamRows);
+		auditData.put("Batch Job Executions", numberOfDeletedBatchJobExecutionRows);
+		auditData.put("Batch Job Instance Rows",
+				numberOfDeletedUnusedBatchJobInstanceRows);
 	}
 
 	/**
