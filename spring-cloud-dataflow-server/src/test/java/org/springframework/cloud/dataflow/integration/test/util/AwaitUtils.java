@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 
@@ -65,14 +66,17 @@ public class AwaitUtils {
             if (atCurrentEnd) {
                 String log = extractLog();
                 offset = log.length();
+                Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
             }
         }
 
 
         public String logs() {
             String log = extractLog();
-            String result = log.substring(offset);
+            Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
+            String result = log.length() < offset ? log.substring(offset) : log;
             offset = log.length();
+            Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
             return result;
         }
 
@@ -84,7 +88,7 @@ public class AwaitUtils {
             } else {
                 log = stream.logs();
             }
-            return log;
+            return log == null ? "" : log;
         }
 
         public String getStatus() {
