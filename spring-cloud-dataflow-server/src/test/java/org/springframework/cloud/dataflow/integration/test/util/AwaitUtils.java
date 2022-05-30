@@ -21,41 +21,126 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
+import org.springframework.cloud.dataflow.rest.client.dsl.StreamApplication;
 import org.springframework.util.StringUtils;
 
 
 /**
  * Provide helpers for using Awaitility.
+ *
  * @author Corneil du Plessis
  */
 public class AwaitUtils {
+    /**
+     * StreamLog will maintain the offset to the end of the log so that subsequent calls will retrieve the remainder.
+     */
+    public static class StreamLog {
+        Stream stream;
+        int offset = 0;
+        String appName;
+
+        public StreamLog(Stream stream) {
+            this.stream = stream;
+            setupOffset(false);
+        }
+
+        public StreamLog(Stream stream, String appName) {
+            this.stream = stream;
+            this.appName = appName;
+            setupOffset(false);
+        }
+        public StreamLog(Stream stream, boolean atCurrentEnd) {
+            this.stream = stream;
+            setupOffset(atCurrentEnd);
+        }
+
+        public StreamLog(Stream stream, String appName, boolean atCurrentEnd) {
+            this.stream = stream;
+            this.appName = appName;
+            setupOffset(atCurrentEnd);
+        }
+
+        private void setupOffset(boolean atCurrentEnd) {
+            offset = 0;
+            if (atCurrentEnd) {
+                String log = extractLog();
+                offset = log.length();
+            }
+        }
+
+
+        public String logs() {
+            String log = extractLog();
+            String result = log.substring(offset);
+            offset = log.length();
+            return result;
+        }
+
+        private String extractLog() {
+            String log;
+            if (StringUtils.hasText(appName)) {
+                StreamApplication application = new StreamApplication(appName);
+                log = stream.logs(application);
+            } else {
+                log = stream.logs();
+            }
+            return log;
+        }
+
+        public String getStatus() {
+            return stream.getStatus();
+        }
+
+        public String getName() {
+            return stream.getName();
+        }
+    }
+
+    public static StreamLog logOffset(Stream stream) {
+        return new StreamLog(stream);
+    }
+
+    public static StreamLog logOffset(Stream stream, boolean atCurrentEnd) {
+        return new StreamLog(stream, atCurrentEnd);
+    }
+
+    public static StreamLog logOffset(Stream stream, String app) {
+        return new StreamLog(stream, app);
+    }
+
+    public static StreamLog logOffset(Stream stream, String app, boolean atCurrentEnd) {
+        return new StreamLog(stream, app, atCurrentEnd);
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(AwaitUtils.class);
 
-    public static boolean hasErrorInLog(Stream stream) {
-        return hasInLog(stream," ERROR ");
+    public static boolean hasErrorInLog(StreamLog offset) {
+        return hasInLog(offset, " ERROR ");
     }
-    public static boolean hasInLog(Stream stream, String value) {
-        String log = stream.logs();
-        String status = stream.getStatus();
+
+    public static boolean hasInLog(StreamLog offset, String value) {
+        String log = offset.logs();
+        String status = offset.getStatus();
         if (log.contains(value)) {
-            logger.error("hasInLog:" + value + ":" + stream.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, value)));
+            logger.error("hasInLog:" + value + ":" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, value)));
             return true;
         } else {
             if (StringUtils.hasText(log)) {
-                logger.debug("hasInLog:{}:{}:{}:{}", value, stream.getName(), status, expand(log));
+                logger.debug("hasInLog:{}:{}:{}:{}", value, offset.getName(), status, expand(log));
             }
             return false;
         }
     }
-    public static boolean hasRegexInLog(Stream stream, String regex) {
-        String log = stream.logs();
-        String status = stream.getStatus();
+
+    public static boolean hasRegexInLog(StreamLog offset, String regex) {
+        String log = offset.logs();
+        String status = offset.getStatus();
         if (Pattern.matches(regex, log)) {
-            logger.error("hasRegexInLog:" + stream.getName() + ":" + status + ":" + expand(linesBeforeAfterRegex(log, regex)));
+            logger.error("hasRegexInLog:" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfterRegex(log, regex)));
             return true;
         } else {
             if (StringUtils.hasText(log)) {
-                logger.debug("hasRegexInLog:{}:{}:{}", stream.getName(), status, expand(log));
+                logger.debug("hasRegexInLog:{}:{}:{}", offset.getName(), status, expand(log));
             }
             return false;
         }
@@ -77,9 +162,10 @@ public class AwaitUtils {
         }
         return log;
     }
+
     public static String linesBeforeAfterRegex(String log, String regex) {
         Pattern pattern = Pattern.compile(regex);
-        String [] sections = pattern.split(log);
+        String[] sections = pattern.split(log);
         int matchIndex = log.indexOf(sections.length > 1 ? sections[1] : sections[0]);
         if (matchIndex > 0) {
             String target = log.substring(matchIndex > 320 ? matchIndex - 320 : matchIndex);
