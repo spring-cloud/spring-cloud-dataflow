@@ -83,7 +83,6 @@ services:
     depends_on:
       - kafka-broker
       - skipper-server
-      - mariadb
     entrypoint: >
       /bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&

@@ -17,7 +17,7 @@ spec:
       containers:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:@project.version@
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
             mountPath: /workspace/config
