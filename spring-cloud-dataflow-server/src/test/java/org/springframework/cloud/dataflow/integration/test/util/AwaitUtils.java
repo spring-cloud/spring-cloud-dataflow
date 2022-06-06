@@ -74,7 +74,7 @@ public class AwaitUtils {
         public String logs() {
             String log = extractLog();
             Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
-            String result = log.length() < offset ? log.substring(offset) : log;
+            String result = log.length() > offset ? log.substring(offset) : log;
             offset = log.length();
             Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
             return result;
