@@ -117,7 +117,7 @@ public class AppDeploymentRequestCreator {
 
 			AppDeploymentRequest request = new AppDeploymentRequest(appDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
-
+			logger.debug("createUpdateRequests:request:{}", request);
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
@@ -219,8 +219,7 @@ public class AppDeploymentRequestCreator {
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
 
-			logger.debug("Created AppDeploymentRequest = " + request.toString() + " AppDefinition = "
-					+ request.getDefinition().toString());
+			logger.debug("Created AppDeploymentRequest = {}, AppDefinition = {}", request, request.getDefinition());
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
@@ -262,6 +261,7 @@ public class AppDeploymentRequestCreator {
 		String appPrefix = String.format("app.%s.", appDefinition.getName());
 		parseAndPopulateProperties(streamDeploymentProperties, appDeploymentProperties, producerPropertyPrefix,
 				consumerPropertyPrefix, appPrefix);
+		logger.debug("extractAppProperties:{}", appDeploymentProperties);
 		return appDeploymentProperties;
 	}
 

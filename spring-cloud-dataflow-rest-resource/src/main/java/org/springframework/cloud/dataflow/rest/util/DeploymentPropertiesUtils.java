@@ -33,10 +33,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StringUtils;
+
 
 /**
  * Provides utility methods for formatting and parsing deployment properties.
@@ -50,7 +53,7 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  */
 public final class DeploymentPropertiesUtils {
-
+	private static final Logger logger = LoggerFactory.getLogger(DeploymentPropertiesUtils.class);
 	/**
 	 * Pattern used for parsing a String of command-line arguments.
 	 */
@@ -86,6 +89,7 @@ public final class DeploymentPropertiesUtils {
 		for (String pair : pairs) {
 			addKeyValuePairAsProperty(pair, deploymentProperties);
 		}
+		logger.debug("parse:{}={}", s, deploymentProperties);
 		return deploymentProperties;
 	}
 
@@ -330,7 +334,7 @@ public final class DeploymentPropertiesUtils {
 								? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
 								: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
 						(fromWildcard, fromApp) -> fromApp));
-
+		logger.debug("extractAndQualifyDeployerProperties:{}", result);
 		return result;
 	}
 
@@ -364,6 +368,7 @@ public final class DeploymentPropertiesUtils {
 						(fromWildcard, fromApp) -> fromApp));
 
 		resultDeployer.putAll(resultApp);
+		logger.debug("qualifyDeployerProperties:{}", resultDeployer);
 		return resultDeployer;
 	}
 
