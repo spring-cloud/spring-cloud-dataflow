@@ -140,10 +140,9 @@ public class DefaultReleaseManager implements ReleaseManager {
 					String.valueOf(release.getVersion()));
 			try {
 				String deploymentId = appDeployer.deploy(appDeploymentRequest);
-				appNameDeploymentIdMap
-						.put(springCloudDeployerApplicationManifest.getApplicationName(), deploymentId);
-			}
-			catch (Exception e) {
+				String applicationName = springCloudDeployerApplicationManifest.getApplicationName();
+				appNameDeploymentIdMap.put(applicationName, deploymentId);
+			} catch (Exception e) {
 				// Update Status in DB
 				Status status = new Status();
 				status.setStatusCode(StatusCode.FAILED);
@@ -174,6 +173,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 	}
 
 	private void saveAppDeployerData(Release release, Map<String, String> appNameDeploymentIdMap) {
+		logger.debug("saveAppDeployerData:{}:{}", release.getName(), appNameDeploymentIdMap);
 		AppDeployerData appDeployerData = new AppDeployerData();
 		appDeployerData.setReleaseName(release.getName());
 		appDeployerData.setReleaseVersion(release.getVersion());
@@ -505,6 +505,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 		for (Map.Entry<String, String> deploymentIdEntry: logApps.entrySet()) {
 			logMap.put(deploymentIdEntry.getValue(), appDeployer.getLog(deploymentIdEntry.getValue()));
 		}
+		logger.debug("getLog:{}:{}:{}", release.getName(), appName, logMap);
 		return new LogInfo(logMap);
 	}
 

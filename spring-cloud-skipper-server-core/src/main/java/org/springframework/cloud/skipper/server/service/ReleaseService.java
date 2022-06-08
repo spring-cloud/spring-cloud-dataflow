@@ -56,7 +56,7 @@ import org.springframework.util.StringUtils;
 /**
  * Service responsible for the lifecycle of packages and releases, install/delete a
  * package, upgrade/rollback a release, and get status on a release.
- *
+ * <p>
  * It handles the validation of requests, retrieval of metadata and release information,
  * as well as merging of yaml files in a template. Delegates to a {@link ReleaseManager}
  *
@@ -82,11 +82,11 @@ public class ReleaseService {
 	private PackageMetadataService packageMetadataService;
 
 	public ReleaseService(PackageMetadataRepository packageMetadataRepository,
-			ReleaseRepository releaseRepository,
-			PackageService packageService,
-			ReleaseManagerFactory releaseManagerFactory,
-			DeployerRepository deployerRepository,
-			PackageMetadataService packageMetadataService) {
+						  ReleaseRepository releaseRepository,
+						  PackageService packageService,
+						  ReleaseManagerFactory releaseManagerFactory,
+						  DeployerRepository deployerRepository,
+						  PackageMetadataService packageMetadataService) {
 		this.packageMetadataRepository = packageMetadataRepository;
 		this.releaseRepository = releaseRepository;
 		this.packageService = packageService;
@@ -98,9 +98,10 @@ public class ReleaseService {
 	/**
 	 * Downloads the package metadata and package zip file specified by the given Id and
 	 * deploys the package on the target platform.
-	 * @param id of the package
+	 *
+	 * @param id                of the package
 	 * @param installProperties contains the name of the release, the platfrom to install to,
-	 * and configuration values to replace in the package template.
+	 *                          and configuration values to replace in the package template.
 	 * @return the Release object associated with this deployment
 	 * @throws SkipperException if the package to install can not be found.
 	 */
@@ -133,12 +134,10 @@ public class ReleaseService {
 			List<PackageMetadata> packageMetadataList = this.packageMetadataRepository.findByNameRequired(packageName);
 			if (packageMetadataList.size() == 1) {
 				packageMetadata = packageMetadataList.get(0);
-			}
-			else {
+			} else {
 				packageMetadata = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc(packageName);
 			}
-		}
-		else {
+		} else {
 			packageMetadata = this.packageMetadataRepository.findByNameAndOptionalVersionRequired(packageName,
 					packageVersion);
 		}
@@ -196,11 +195,13 @@ public class ReleaseService {
 		String kind = ManifestUtils.resolveKind(release.getManifest().getData());
 		ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
 		Release releaseToReturn = releaseManager.install(release);
+		logger.info("install:{}:{}:{}", release.getName(), release.getPlatformName(), release.getInfo());
 		return releaseToReturn;
 	}
 
 	/**
 	 * Delete the release.
+	 *
 	 * @param releaseName the name of the release
 	 * @return the state of the release after requesting a deletion
 	 */
@@ -213,7 +214,8 @@ public class ReleaseService {
 	 * If the deleteReleasePackage is true deletes the release along with the package it was created from. The
 	 * transactions succeeds only if there are no other deployed release from the same package but the releaseName.
 	 * If the deleteReleasePackage is false it behaves as {@link #delete(String)}
-	 * @param releaseName the name of the release to be deleted
+	 *
+	 * @param releaseName          the name of the release to be deleted
 	 * @param deleteReleasePackage if true tries to delete the package of the releaseName release
 	 * @return the state of the release after requesting a deletion
 	 */
@@ -251,16 +253,16 @@ public class ReleaseService {
 	@Transactional
 	public Mono<Map<String, Info>> statusReactive(String[] releaseNames) {
 		return Flux.fromArray(releaseNames)
-			.flatMap(releaseName -> {
-				Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
-				return Mono.justOrEmpty(release);
-			})
-			.flatMap(release -> {
-				String kind = ManifestUtils.resolveKind(release.getManifest().getData());
-				ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
-				return releaseManager.statusReactive(release);
-			})
-			.collectMap(release -> release.getName(), release -> release.getInfo());
+				.flatMap(releaseName -> {
+					Release release = this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName);
+					return Mono.justOrEmpty(release);
+				})
+				.flatMap(release -> {
+					String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+					ReleaseManager releaseManager = this.releaseManagerFactory.getReleaseManager(kind);
+					return releaseManager.statusReactive(release);
+				})
+				.collectMap(release -> release.getName(), release -> release.getInfo());
 	}
 
 	/**
@@ -272,23 +274,24 @@ public class ReleaseService {
 	@Transactional
 	public Mono<Map<String, Map<String, DeploymentState>>> states(String[] releaseNames) {
 		return Flux.fromArray(releaseNames)
-			.flatMap(releaseName -> Mono.justOrEmpty(this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName)))
-			.collectMultimap(release -> {
-				String kind = ManifestUtils.resolveKind(release.getManifest().getData());
-				return this.releaseManagerFactory.getReleaseManager(kind);
-			}, release -> release)
-			.flatMap(m -> {
-				return Flux.fromIterable(m.entrySet())
-					.flatMap(e -> e.getKey().deploymentState(new ArrayList<>(e.getValue())))
-					.reduce((to, from) -> {
-						to.putAll(from);
-						return to;
-					});
-			});
+				.flatMap(releaseName -> Mono.justOrEmpty(this.releaseRepository.findTopByNameOrderByVersionDesc(releaseName)))
+				.collectMultimap(release -> {
+					String kind = ManifestUtils.resolveKind(release.getManifest().getData());
+					return this.releaseManagerFactory.getReleaseManager(kind);
+				}, release -> release)
+				.flatMap(m -> {
+					return Flux.fromIterable(m.entrySet())
+							.flatMap(e -> e.getKey().deploymentState(new ArrayList<>(e.getValue())))
+							.reduce((to, from) -> {
+								to.putAll(from);
+								return to;
+							});
+				});
 	}
 
 	/**
 	 * Return the current status of the release
+	 *
 	 * @param releaseName the name of the release
 	 * @return The latest state of the release as stored in the database
 	 */
@@ -307,8 +310,9 @@ public class ReleaseService {
 
 	/**
 	 * Return the current status of the release given the release and version.
+	 *
 	 * @param releaseName name of the release
-	 * @param version release version
+	 * @param version     release version
 	 * @return The latest state of the release as stored in the database
 	 */
 	@Transactional
@@ -345,6 +349,7 @@ public class ReleaseService {
 
 	/**
 	 * Return the manifest, the final set of instructions to deploy for a given release.
+	 *
 	 * @param releaseName the name of the release
 	 * @return the release manifest
 	 */
@@ -360,8 +365,9 @@ public class ReleaseService {
 	/**
 	 * Return the manifest, the final set of instructions to deploy for a given release, given
 	 * the name and version.
+	 *
 	 * @param releaseName the name of the release
-	 * @param version the release version
+	 * @param version     the release version
 	 * @return the release manifest
 	 */
 	@Transactional
@@ -387,7 +393,7 @@ public class ReleaseService {
 	}
 
 	protected Release createInitialRelease(InstallProperties installProperties, Package packageToInstall,
-			int releaseVersion) {
+										   int releaseVersion) {
 		Release release = new Release();
 		release.setName(installProperties.getReleaseName());
 		release.setPlatformName(installProperties.getPlatformName());
@@ -402,6 +408,7 @@ public class ReleaseService {
 
 	/**
 	 * Do up front checks before deploying
+	 *
 	 * @param release the initial release object this data provided by the end user.
 	 */
 	protected void validateInitialRelease(Release release) {
@@ -411,7 +418,7 @@ public class ReleaseService {
 	/**
 	 * List the history of versions for a given release.
 	 *
-	 * @param releaseName the release name of the release to search for
+	 * @param releaseName  the release name of the release to search for
 	 * @param maxRevisions the maximum number of revisions to get
 	 * @return the list of all releases by the given name and revisions max.
 	 */
