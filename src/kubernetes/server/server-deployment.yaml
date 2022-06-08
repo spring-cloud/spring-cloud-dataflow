@@ -17,7 +17,7 @@ spec:
       containers:
       - name: scdf-server
         image: springcloud/spring-cloud-dataflow-server:2.10.0-SNAPSHOT
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
             mountPath: /workspace/config
@@ -75,7 +75,8 @@ spec:
           value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
       initContainers:
       - name: init-mariadb-wait
-        image: busybox
+        image: busybox:1
+        imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       serviceAccountName: scdf-sa
       volumes:

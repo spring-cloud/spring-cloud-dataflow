@@ -17,7 +17,7 @@ spec:
       containers:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:2.9.0-SNAPSHOT
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
             mountPath: /workspace/config
@@ -55,7 +55,8 @@ spec:
           value: /etc/secrets
       initContainers:
       - name: init-mariadb-wait
-        image: busybox
+        image: busybox:1
+        imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       - name: init-mariadb-database
         image: mariadb:10.4.22
