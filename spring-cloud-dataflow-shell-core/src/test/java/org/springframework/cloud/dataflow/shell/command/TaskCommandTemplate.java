@@ -89,7 +89,7 @@ public class TaskCommandTemplate {
 	public long launch(String taskName) {
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
-		Object result = commandRunner.executeCommand("task launch " + taskName);
+		Object result = commandRunner.executeCommand("task launch --name " + taskName);
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
 		Table idResultTable = resultAsTable(idResult);
 
@@ -108,7 +108,7 @@ public class TaskCommandTemplate {
 	public long launchWithAlternateCTR(String taskName, String ctrAppName) {
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
-		Object result = commandRunner.executeCommand(String.format("task launch %s --composedTaskRunnerName %s", taskName, ctrAppName));
+		Object result = commandRunner.executeCommand(String.format("task launch --name %s --composedTaskRunnerName %s", taskName, ctrAppName));
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
 		Table idResultTable = resultAsTable(idResult);
 
@@ -152,7 +152,7 @@ public class TaskCommandTemplate {
 	private long launchTaskExecutionForLog(String taskName) throws Exception{
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
-		Object result = commandRunner.executeCommand(String.format("task launch %s", taskName));
+		Object result = commandRunner.executeCommand(String.format("task launch --name %s", taskName));
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
 		Table taskExecutionResult = resultAsTable(idResult);
 
@@ -231,7 +231,7 @@ public class TaskCommandTemplate {
 	 * Validates the task definition.
 	 */
 	public Object taskValidate(String taskDefinitionName) {
-		return commandRunner.executeCommand("task validate " + taskDefinitionName);
+		return commandRunner.executeCommand("task validate --name " + taskDefinitionName);
 	}
 
 	/**
@@ -245,7 +245,7 @@ public class TaskCommandTemplate {
 	private void doCreate(String taskName, String taskDefinition, Object... values) {
 		String actualDefinition = String.format(taskDefinition, values);
 		// Shell parser expects quotes to be escaped by \
-		String wholeCommand = String.format("task create %s --definition \"%s\"", taskName,
+		String wholeCommand = String.format("task create --name \"%s\" --definition \"%s\"", taskName,
 				actualDefinition.replaceAll("\"", "\\\\\""));
 		Object result = commandRunner.executeCommand(wholeCommand);
 
