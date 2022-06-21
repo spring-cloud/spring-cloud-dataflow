@@ -8,10 +8,6 @@ data:
   application.yaml: |-
     spring:
       cloud:
-        deployer:
-          kubernetes:
-            createLoadBalancer: true
-            imagePullPolicy: IfNotPresent
         skipper:
           server:
             platform:
@@ -21,9 +17,8 @@ data:
                     environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka-broker:9092,SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
                     limits:
                       memory: 1024Mi
-                      cpu: 500m
-                    readinessProbeDelay: 120
-                    livenessProbeDelay: 90
+                      cpu: 500m                    
+                    startupProbeFailures: 30
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root

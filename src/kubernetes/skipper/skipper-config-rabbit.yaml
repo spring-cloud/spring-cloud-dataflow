@@ -8,10 +8,6 @@ data:
   application.yaml: |-
     spring:
       cloud:
-        deployer:
-          kubernetes:
-            createLoadBalancer: true
-            imagePullPolicy: IfNotPresent
         skipper:
           server:
             platform:
