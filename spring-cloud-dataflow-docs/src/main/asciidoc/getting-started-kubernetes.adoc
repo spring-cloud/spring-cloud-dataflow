@@ -115,18 +115,28 @@ anotherhost:9093'`
 This overrides the JVM memory setting for the desired `<application>` (replace `<application>` with the name of your application).
 
 [[getting-started-kubernetes-probes]]
-==== Liveness and Readiness Probes
+==== Liveness, Readiness and Startup Probes
 
-The `liveness` and `readiness` probes use paths called `/health` and `/info`, respectively. They use a `delay` of `10` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. The liveness and readiness probes are applied only to streams.
+The `liveness` and `readiness` probes use paths called `/health` and `/info`, respectively. They use a `delay` of `1` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. The liveness and readiness probes are applied only to streams.
 
-The following example changes the `liveness` probe (replace `<application>` with the name of your application) by setting deployer properties:
+The `startup` probe will use the `/health` path and a delay of 30 and period for 3 with a failure threshold of 20 times before the container restarts the application.
+
+The following example changes the `liveness` and `startup` probes (replace `<application>` with the name of your application) by setting deployer properties:
 
 ====
 [source]
 ----
 deployer.<application>.kubernetes.livenessProbePath=/health
-deployer.<application>.kubernetes.livenessProbeDelay=120
-deployer.<application>.kubernetes.livenessProbePeriod=20
+deployer.<application>.kubernetes.livenessProbeDelay=1
+deployer.<application>.kubernetes.livenessProbePeriod=60
+deployer.<application>.kubernetes.livenessProbeSuccess=1
+deployer.<application>.kubernetes.livenessProbeFailure=3
+deployer.<application>.kubernetes.startupHttpProbePath=/health
+deployer.<application>.kubernetes.startupProbedelay=20
+deployer.<application>.kubernetes.startupProbeSuccess=1
+deployer.<application>.kubernetes.startupProbeFailure=30
+deployer.<application>.kubernetes.startupProbePeriod=5
+deployer.<application>.kubernetes.startupProbeTimeout=3
 ----
 ====
 
@@ -145,9 +155,17 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    livenessProbePath: /health
-                    livenessProbeDelay: 120
-                    livenessProbePeriod: 20
+                    livenessHttpProbePath: /health
+                    livenessProbeDelay: 1
+                    livenessProbePeriod: 60
+                    livenessProbeSuccess: 1
+                    livenessProbeFailure: 3
+                    startupHttpProbePath: /health
+                    startupProbeDelay: 20
+                    startupProbeSuccess: 1
+                    startupProbeFailure: 30
+                    startupProbePeriod: 5
+                    startupProbeTimeout: 3
 ----
 ====
 
@@ -160,6 +178,7 @@ By default, port 8080 is used as the probe port. You can change the defaults for
 ----
 deployer.<application>.kubernetes.readinessProbePort=7000
 deployer.<application>.kubernetes.livenessProbePort=7000
+deployer.<application>.kubernetes.startupProbePort=7000
 ----
 ====
 
@@ -180,6 +199,7 @@ data:
                   default:
                     readinessProbePort: 7000
                     livenessProbePort: 7000
+                    startupProbePort: 7000
 ----
 ====
 
@@ -187,11 +207,12 @@ data:
 =====
 By default, the `liveness` and `readiness` probe paths use Spring Boot 2.x+ actuator endpoints. To use Spring Boot 1.x actuator endpoint paths, you must adjust the `liveness` and `readiness` values, as the following example shows (replace `<application>` with the name of your application):
 
+The `startup` probe path will default to the management path `/info` but may be modified as needed.
+
 ====
 [source]
 ----
-deployer.<application>.kubernetes.livenessProbePath=/health
-deployer.<application>.kubernetes.readinessProbePath=/info
+deployer.<application>.kubernetes.startupProbePath=/api
 ----
 ====
 
