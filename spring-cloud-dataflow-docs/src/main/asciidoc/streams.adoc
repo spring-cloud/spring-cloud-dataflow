@@ -428,7 +428,7 @@ and Spring Boot 2.1.x:
 
 |Apache Kafka + Docker
 |https://dataflow.spring.io/kafka-docker-latest
-|https://dataflow.spring.io/Einstein-BUILD-SNAPSHOT-stream-applications-kafka-docker
+|https://dataflow.spring.io/Einsteizn-BUILD-SNAPSHOT-stream-applications-kafka-docker
 |======================
 
 

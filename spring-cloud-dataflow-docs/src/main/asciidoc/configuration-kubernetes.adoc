@@ -69,6 +69,26 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |Port that app container has to respond on for liveness check.
 |<none>
 
+|startupProbeDelay
+|Delay in seconds when the Kubernetes startup check of the app container should start checking its health status.
+|30
+
+|startupProbePeriod
+|Period in seconds for performing the Kubernetes startup check of the app container.
+|3
+
+|startupProbeFailure
+|Number of probe failures allowed for the startup probe before the pod is restarted.
+|20
+
+|startupHttpProbePath
+|Path that app container has to respond to for startup check.
+|<none>
+
+|startupProbePort
+|Port that app container has to respond on for startup check.
+|<none>
+
 |readinessProbeDelay
 |Delay in seconds when the readiness check of the app container should start checking if the module is fully up and running.
 |10
