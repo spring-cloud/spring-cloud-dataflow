@@ -126,7 +126,12 @@ public class AwaitUtils {
         String log = offset.logs();
         String status = offset.getStatus();
         if (log.contains(value)) {
-            logger.error("hasInLog:" + value + ":" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, value)));
+            String msg = "hasInLog:" + value + ":" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfter(log, value));
+            if(value.contains("ERROR")) {
+                logger.error(msg);
+            } else {
+                logger.info(msg);
+            }
             return true;
         } else {
             if (StringUtils.hasText(log)) {
@@ -140,7 +145,7 @@ public class AwaitUtils {
         String log = offset.logs();
         String status = offset.getStatus();
         if (Pattern.matches(regex, log)) {
-            logger.error("hasRegexInLog:" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfterRegex(log, regex)));
+            logger.info("hasRegexInLog:" + offset.getName() + ":" + status + ":" + expand(linesBeforeAfterRegex(log, regex)));
             return true;
         } else {
             if (StringUtils.hasText(log)) {
