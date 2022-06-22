@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.audit.service;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
+import org.springframework.cloud.dataflow.core.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
@@ -38,6 +40,7 @@ import org.springframework.util.Assert;
  *
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author Corneil du Plessis
  */
 public class DefaultAuditRecordService implements AuditRecordService {
 
@@ -83,7 +86,17 @@ public class DefaultAuditRecordService implements AuditRecordService {
 			String correlationId, Map<String, Object> data, String platformName) {
 		String dataAsString;
 		try {
-			dataAsString = objectMapper.writeValueAsString(data);
+			ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+			Map<String, Object> sanitizedData = new HashMap<>();
+			for(Map.Entry<String, Object> entry : data.entrySet()) {
+				if(entry.getValue() instanceof String) {
+					sanitizedData.put(entry.getKey(), sanitizer.sanitize(entry.getKey(), (String) entry.getValue()));
+				} else {
+					sanitizedData.put(entry.getKey(), entry.getValue());
+				}
+			}
+
+			dataAsString = objectMapper.writeValueAsString(sanitizedData);
 		}
 		catch (JsonProcessingException e) {
 			logger.error("Error serializing audit record data.  Data = " + data);
