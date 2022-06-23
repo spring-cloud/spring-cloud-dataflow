@@ -22,10 +22,16 @@ runs:
       TAG: ${{ inputs.version }}
     shell: bash
     run: |
+      
+      mkdir spring-cloud-dataflow-server/target/tmp
+      cp spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar spring-cloud-dataflow-server/target/tmp
+      unzip -o spring-cloud-dataflow-server/target/tmp/spring-cloud-dataflow-server-$TAG.jar -d spring-cloud-dataflow-server/target/tmp
+      rm spring-cloud-dataflow-server/target/tmp/spring-cloud-dataflow-server-$TAG.jar  
+      
       for v in 8 11 17
       do
         pack build \
-          --path spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$TAG.jar \
+          --path spring-cloud-dataflow-server/target/tmp \
           --builder gcr.io/paketo-buildpacks/builder:base \
           --env BP_JVM_VERSION=$v springcloud/spring-cloud-dataflow-server:$TAG-jdk$v
         pack build \
@@ -46,6 +52,8 @@ runs:
           --env BP_JVM_VERSION=$v springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk$v
       done
 
+      rm -rf spring-cloud-dataflow-server/target/tmp/
+      
   # docker hub login
   - uses: docker/login-action@v1
     with:
