@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +29,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,38 +37,42 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TestDependencies.class })
+@SpringBootTest(classes = {TestDependencies.class})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class RootControllerTests {
+    private MockMvc mockMvc;
 
-	private MockMvc mockMvc;
+    @Autowired
+    private WebApplicationContext wac;
 
-	@Autowired
-	private WebApplicationContext wac;
+    @Before
+    public void setupMocks() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
+    }
 
-	@Before
-	public void setupMocks() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
-				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-	}
+    @Test
+    public void testRootControllerResponse() throws Exception {
+        String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-	@Test
-	public void testRootControllerResponse() throws Exception {
-		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-		String expectedResult = StreamUtils.copyToString(
-				new DefaultResourceLoader().getResource("classpath:/root-controller-result.json").getInputStream(),
-				StandardCharsets.UTF_8);
-
-		Assert.assertEquals(expectedResult.replace("\n", ""), mvcResult);
-	}
+        Resource resource = new DefaultResourceLoader().getResource("classpath:/root-controller-result.json");
+        String expectedResult = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+        ObjectMapper mapper = new ObjectMapper();
+        assertEquals(mapper.readTree(expectedResult), mapper.readTree(mvcResult));
+    }
 }

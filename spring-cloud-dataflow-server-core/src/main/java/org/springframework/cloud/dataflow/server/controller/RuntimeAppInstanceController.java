@@ -20,7 +20,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
@@ -33,99 +37,160 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Mark Pollack
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/runtime/apps/{appId}/instances")
 @ExposesResourceFor(AppInstanceStatusResource.class)
 public class RuntimeAppInstanceController {
+    private final static Logger logger = LoggerFactory.getLogger(RuntimeAppInstanceController.class);
 
-	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER =
-			(Comparator<AppInstanceStatus>) (i1, i2) -> i1.getId().compareTo(i2.getId());
+    private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER =
+            (Comparator<AppInstanceStatus>) (i1, i2) -> i1.getId().compareTo(i2.getId());
 
-	private final StreamDeployer streamDeployer;
+    private final StreamDeployer streamDeployer;
 
-	/**
-	 * Construct a new RuntimeAppInstanceController
-	 * @param streamDeployer the stream deployer to use
-	 */
-	public RuntimeAppInstanceController(StreamDeployer streamDeployer) {
-		this.streamDeployer = streamDeployer;
-	}
+    private final RestTemplate restTemplate;
 
-	@RequestMapping
-	public PagedModel<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
-			PagedResourcesAssembler<AppInstanceStatus> assembler) {
-		AppStatus status = streamDeployer.getAppStatus(appId);
-		if (status.getState().equals(DeploymentState.unknown)) {
-			throw new NoSuchAppException(appId);
-		}
-		List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
-		Collections.sort(appInstanceStatuses, RuntimeAppInstanceController.INSTANCE_SORTER);
-		return assembler.toModel(new PageImpl<>(appInstanceStatuses, pageable,
-				appInstanceStatuses.size()), new RuntimeAppInstanceController.InstanceAssembler(status));
-	}
+    /**
+     * Construct a new RuntimeAppInstanceController
+     *
+     * @param streamDeployer the stream deployer to use
+     * @param restTemplate   the rest template to use
+     */
+    public RuntimeAppInstanceController(StreamDeployer streamDeployer) {
+        this.streamDeployer = streamDeployer;
+        this.restTemplate = new RestTemplate();
+    }
 
-	@RequestMapping("/{instanceId}")
-	public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
-		AppStatus status = streamDeployer.getAppStatus(appId);
-		if (status.getState().equals(DeploymentState.unknown)) {
-			throw new NoSuchAppException(appId);
-		}
-		AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
-		if (appInstanceStatus == null) {
-			throw new NoSuchAppInstanceException(instanceId);
-		}
-		return new RuntimeAppInstanceController.InstanceAssembler(status).toModel(appInstanceStatus);
-	}
+    @RequestMapping
+    public PagedModel<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
+                                                      PagedResourcesAssembler<AppInstanceStatus> assembler) {
+        logger.debug("list:{}:page={}, size={}", appId, pageable.getPageNumber(), pageable.getPageSize());
+        AppStatus status = streamDeployer.getAppStatus(appId);
+        if (status.getState().equals(DeploymentState.unknown)) {
+            throw new NoSuchAppException(appId);
+        }
+        List<AppInstanceStatus> appInstanceStatuses = new ArrayList<>(status.getInstances().values());
+        Collections.sort(appInstanceStatuses, RuntimeAppInstanceController.INSTANCE_SORTER);
+        return assembler.toModel(new PageImpl<>(appInstanceStatuses, pageable,
+                appInstanceStatuses.size()), new RuntimeAppInstanceController.InstanceAssembler(status));
+    }
 
-	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.GET)
-	public ResponseEntity<String> getFromActuator(
-			@PathVariable String appId,
-			@PathVariable String instanceId,
-			@RequestParam String endpoint) {
-		return ResponseEntity.ok(streamDeployer.getFromActuator(appId, instanceId, endpoint));
-	}
+    @RequestMapping("/{instanceId}")
+    public AppInstanceStatusResource display(@PathVariable String appId, @PathVariable String instanceId) {
+        logger.debug("display:{}:{}", appId, instanceId);
+        AppStatus status = streamDeployer.getAppStatus(appId);
+        if (status.getState().equals(DeploymentState.unknown)) {
+            throw new NoSuchAppException(appId);
+        }
+        AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
+        if (appInstanceStatus == null) {
+            throw new NoSuchAppInstanceException(instanceId);
+        }
+        return new RuntimeAppInstanceController.InstanceAssembler(status).toModel(appInstanceStatus);
+    }
 
-	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.POST)
-	public ResponseEntity<Void> postToActuator(
-			@PathVariable String appId,
-			@PathVariable String instanceId,
-			@RequestBody ActuatorPostRequest actuatorPostRequest) {
-		streamDeployer.postToActuator(appId, instanceId, actuatorPostRequest);
-		return new ResponseEntity<>(HttpStatus.CREATED);
-	}
+    @RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.GET)
+    public ResponseEntity<String> getFromActuator(
+            @PathVariable String appId,
+            @PathVariable String instanceId,
+            @RequestParam String endpoint) {
+        logger.debug("getFromActuator:{}:{}:{}", appId, instanceId, endpoint);
+        return ResponseEntity.ok(streamDeployer.getFromActuator(appId, instanceId, endpoint));
+    }
 
-	static class InstanceAssembler
-			extends RepresentationModelAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
+    @RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.POST)
+    public ResponseEntity<Void> postToActuator(
+            @PathVariable String appId,
+            @PathVariable String instanceId,
+            @RequestBody ActuatorPostRequest actuatorPostRequest) {
+        logger.debug("postToActuator:{}:{}:{}:{}", appId, instanceId, actuatorPostRequest.getEndpoint(), actuatorPostRequest.getBody());
+        streamDeployer.postToActuator(appId, instanceId, actuatorPostRequest);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 
-		private final AppStatus owningApp;
+    @RequestMapping(value = "/{instanceId}/post", method = RequestMethod.POST)
+    public ResponseEntity<String> postToUrl(
+            @PathVariable String appId,
+            @PathVariable String instanceId,
+            @RequestBody String data,
+            @RequestHeader HttpHeaders headers) {
+        logger.debug("postToUrl:{}:{}:{}:{}", appId, instanceId, data, headers);
+        AppStatus status = streamDeployer.getAppStatus(appId);
+        if (status.getState().equals(DeploymentState.unknown)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("appId not found:" + appId);
+        }
+        AppInstanceStatus appInstanceStatus = status.getInstances().get(instanceId);
+        if (appInstanceStatus == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("instanceId not found:" + instanceId);
+        }
+        String url = appInstanceStatus.getAttributes().get("url");
+        if (!StringUtils.hasText(url)) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body("url not found on resource");
+        }
+        // TODO determine if some headers need to be removed or added
+        HttpEntity<String> entity = new HttpEntity<>(data, headers);
+        logger.debug("postToUrl:{}:{}:{}:{}:{}", appId, instanceId, url, data, headers);
+        ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
 
-		InstanceAssembler(AppStatus owningApp) {
-			super(RuntimeAppInstanceController.class, AppInstanceStatusResource.class);
-			this.owningApp = owningApp;
-		}
+    static class InstanceAssembler
+            extends RepresentationModelAssemblerSupport<AppInstanceStatus, AppInstanceStatusResource> {
 
-		@Override
-		public AppInstanceStatusResource toModel(AppInstanceStatus entity) {
-			return createModelWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
-		}
+        private final AppStatus owningApp;
 
-		@Override
-		protected AppInstanceStatusResource instantiateModel(AppInstanceStatus entity) {
-			return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(),
-					entity.getAttributes());
-		}
-	}
+        InstanceAssembler(AppStatus owningApp) {
+            super(RuntimeAppInstanceController.class, AppInstanceStatusResource.class);
+            this.owningApp = owningApp;
+        }
+
+        @Override
+        public AppInstanceStatusResource toModel(AppInstanceStatus entity) {
+            AppInstanceStatusResource resource = createModelWithId("/" + entity.getId(), entity, owningApp.getDeploymentId());
+            if (logger.isDebugEnabled()) {
+                ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+                logger.debug("toModel:{}:{}", resource.getInstanceId(), sanitizer.sanitizeProperties(resource.getAttributes()));
+            }
+            if (resource.getAttributes() != null && resource.getAttributes().containsKey("url")) {
+                resource.add(linkTo(
+                        methodOn(RuntimeAppInstanceController.class).postToUrl(
+                                resource.getAttributes().get("spring.deployment.id"),
+                                resource.getInstanceId(),
+                                null,
+                                null)
+                ).withRel("post"));
+                logger.debug("toModel:resource={}", resource.getLinks());
+            }
+            return resource;
+        }
+
+        @Override
+        protected AppInstanceStatusResource instantiateModel(AppInstanceStatus entity) {
+            return new AppInstanceStatusResource(entity.getId(), ControllerUtils.mapState(entity.getState()).getKey(),
+                    entity.getAttributes());
+        }
+    }
 }

@@ -25,6 +25,10 @@ import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -34,77 +38,99 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Fisher
  * @author Christian Tzolov
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class RuntimeTemplate implements RuntimeOperations {
 
-	private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-	/**
-	 * Uri template for accessing status of all apps.
-	 */
-	private final Link appStatusesUriTemplate;
+    /**
+     * Uri template for accessing status of all apps.
+     */
+    private final Link appStatusesUriTemplate;
 
-	/**
-	 * Uri template for accessing status of a single app.
-	 */
-	private final Link appStatusUriTemplate;
+    /**
+     * Uri template for accessing status of a single app.
+     */
+    private final Link appStatusUriTemplate;
 
-	/**
-	 * Uri template for accessing actuator endpoint on a single app.
-	 */
-	private final Link appActuatorUriTemplate;
+    /**
+     * Uri template for accessing actuator endpoint on a single app.
+     */
+    private final Link appActuatorUriTemplate;
 
-	/**
-	 * Uri template for accessing runtime status of selected streams, their apps and instances.
-	 */
-	private final Link streamStatusUriTemplate;
+    /**
+     * Uri template for posting to app instance with url attribute.
+     */
+    private final Link appUrlPostUriTemplate;
 
-	RuntimeTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
-		this.restTemplate = restTemplate;
-		this.appStatusesUriTemplate = getLink("runtime/apps", resources, true);
-		this.appStatusUriTemplate = getLink("runtime/apps/{appId}", resources, true);
-		this.streamStatusUriTemplate = getLink("runtime/streams/{streamNames}", resources, true);
-		this.appActuatorUriTemplate = getLink("runtime/apps/{appId}/instances/{instanceId}/actuator", resources, false);
-	}
+    /**
+     * Uri template for accessing runtime status of selected streams, their apps and instances.
+     */
+    private final Link streamStatusUriTemplate;
 
-	private Link getLink(String relationPath, RepresentationModel<?> resources, boolean required) {
-		Optional<Link> link = resources.getLink(relationPath);
-		if (required && !link.isPresent()) {
-			throw new RuntimeException("Unable to retrieve URI template for " + relationPath);
-		}
-		return link.orElse(null);
-	}
-	
-	@Override
-	public PagedModel<AppStatusResource> status() {
-		String uriTemplate = this.appStatusesUriTemplate.expand().getHref();
-		uriTemplate = uriTemplate + "?size=2000";
-		return this.restTemplate.getForObject(uriTemplate, AppStatusResource.Page.class);
-	}
+    RuntimeTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
+        this.restTemplate = restTemplate;
+        this.appStatusesUriTemplate = getLink("runtime/apps", resources, true);
+        this.appStatusUriTemplate = getLink("runtime/apps/{appId}", resources, true);
+        this.streamStatusUriTemplate = getLink("runtime/streams/{streamNames}", resources, true);
+        this.appActuatorUriTemplate = getLink("runtime/apps/{appId}/instances/{instanceId}/actuator", resources, false);
+        this.appUrlPostUriTemplate = getLink("runtime/apps/{appId}/instances/{instanceId}/post", resources, false);
+    }
 
-	@Override
-	public AppStatusResource status(String deploymentId) {
-		return this.restTemplate.getForObject(appStatusUriTemplate.expand(deploymentId).getHref(), AppStatusResource.class);
-	}
+    private Link getLink(String relationPath, RepresentationModel<?> resources, boolean required) {
+        Optional<Link> link = resources.getLink(relationPath);
+        if (required && !link.isPresent()) {
+            throw new RuntimeException("Unable to retrieve URI template for " + relationPath);
+        }
+        return link.orElse(null);
+    }
 
-	@Override
-	public PagedModel<StreamStatusResource> streamStatus(String... streamNames) {
-		return this.restTemplate.getForObject(streamStatusUriTemplate.expand(streamNames).getHref(),
-				StreamStatusResource.Page.class);
-	}
+    @Override
+    public PagedModel<AppStatusResource> status() {
+        String uriTemplate = this.appStatusesUriTemplate.expand().getHref();
+        uriTemplate = uriTemplate + "?size=2000";
+        return this.restTemplate.getForObject(uriTemplate, AppStatusResource.Page.class);
+    }
 
-	@Override
-	public String getFromActuator(String appId, String instanceId, String endpoint) {
-		String uri = appActuatorUriTemplate.expand(appId, instanceId, endpoint).getHref();
-		return this.restTemplate.getForObject(uri, String.class);
-	}
+    @Override
+    public AppStatusResource status(String deploymentId) {
+        return this.restTemplate.getForObject(appStatusUriTemplate.expand(deploymentId).getHref(), AppStatusResource.class);
+    }
 
-	@Override
-	public Object postToActuator(String appId, String instanceId, String endpoint, Map<String, Object> body) {
-		String uri = appActuatorUriTemplate.expand(appId, instanceId).getHref();
-		ActuatorPostRequest actuatorPostRequest = new ActuatorPostRequest();
-		actuatorPostRequest.setEndpoint(endpoint);
-		actuatorPostRequest.setBody(body);
-		return this.restTemplate.postForObject(uri, actuatorPostRequest, Object.class);
-	}
+    @Override
+    public PagedModel<StreamStatusResource> streamStatus(String... streamNames) {
+        return this.restTemplate.getForObject(streamStatusUriTemplate.expand(streamNames).getHref(), StreamStatusResource.Page.class);
+    }
+
+    @Override
+    public String getFromActuator(String appId, String instanceId, String endpoint) {
+        String uri = appActuatorUriTemplate.expand(appId, instanceId, endpoint).getHref();
+        return this.restTemplate.getForObject(uri, String.class);
+    }
+
+    @Override
+    public Object postToActuator(String appId, String instanceId, String endpoint, Map<String, Object> body) {
+        String uri = appActuatorUriTemplate.expand(appId, instanceId).getHref();
+        ActuatorPostRequest actuatorPostRequest = new ActuatorPostRequest();
+        actuatorPostRequest.setEndpoint(endpoint);
+        actuatorPostRequest.setBody(body);
+        return this.restTemplate.postForObject(uri, actuatorPostRequest, Object.class);
+    }
+
+    @Override
+    public void postToUrl(String appId, String instanceId, String data) {
+        Assert.notNull(appUrlPostUriTemplate, "expected appUrlPostUriTemplate");
+        String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
+        HttpEntity<String> entity = new HttpEntity<>(data);
+        this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+    }
+
+    @Override
+    public void postToUrl(String appId, String instanceId, String data, HttpHeaders headers) {
+        Assert.notNull(appUrlPostUriTemplate, "expected appUrlPostUriTemplate");
+        String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
+        HttpEntity<String> entity = new HttpEntity<>(data, headers);
+        this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+    }
 }
