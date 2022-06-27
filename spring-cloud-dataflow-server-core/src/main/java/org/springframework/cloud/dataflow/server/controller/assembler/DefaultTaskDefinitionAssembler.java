@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 /**
  * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
  * {@link TaskDefinition}s to {@link TaskDefinitionResource}s.
+ *
+ * @author Ilayaperumal Gopinathan
+ * @author Evgeniy Bezdomnikov
+ * @author Glenn Renfro
+ * @author Chris Bono
  */
 public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> extends
 		RepresentationModelAssemblerSupport<TaskExecutionAwareTaskDefinition, R> {
@@ -73,10 +78,13 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 
 		TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
 		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
-		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
-		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		TaskManifest taskManifest = null;
+		if (manifest) {
+			taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		}
 		TaskJobExecution composedTaskJobExecution = null;
-		if(taskExecution != null && taskDefinitionResource.isComposed()) {
+		if (taskExecution != null && taskDefinitionResource.isComposed()) {
 			Set<Long> jobExecutionIds = this.taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId());
 			if(jobExecutionIds != null && jobExecutionIds.size() > 0) {
 				try {
