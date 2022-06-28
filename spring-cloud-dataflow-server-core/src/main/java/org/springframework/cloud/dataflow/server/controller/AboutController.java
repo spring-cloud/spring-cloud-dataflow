@@ -45,7 +45,6 @@ import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +61,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 /**
  * REST controller that provides meta information regarding the dataflow server and its
@@ -221,7 +222,7 @@ public class AboutController {
 			aboutResource.setMonitoringDashboardInfo(monitoringDashboardInfo);
 		}
 
-		aboutResource.add(WebMvcLinkBuilder.linkTo(AboutController.class).withSelfRel());
+		aboutResource.add(linkTo(AboutController.class).withSelfRel());
 
 		return aboutResource;
 	}

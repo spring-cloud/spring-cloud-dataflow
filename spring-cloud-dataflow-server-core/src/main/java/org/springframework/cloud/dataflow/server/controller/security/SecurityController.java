@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.hateoas.server.ExposesResourceFor;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 /**
  * Provides security-related meta information. Provides one REST endpoint at present time
@@ -69,7 +70,7 @@ public class SecurityController {
 
 		final SecurityInfoResource securityInfo = new SecurityInfoResource();
 		securityInfo.setAuthenticationEnabled(authenticationEnabled);
-		securityInfo.add(WebMvcLinkBuilder.linkTo(SecurityController.class).withSelfRel());
+		securityInfo.add(linkTo(SecurityController.class).withSelfRel());
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
