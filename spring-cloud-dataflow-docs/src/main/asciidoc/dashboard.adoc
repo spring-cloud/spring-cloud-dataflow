@@ -459,7 +459,29 @@ When that happens, check the server log files for further details.
 [[dashboard-job-executions-steps-progress]]
 === Step Execution History
 
-Under *Step Execution History*, you can also view various metrics associated with the selected step, such as duration, read counts, write counts, and others.
+Under *Step Execution History*, you can also view various metrics associated with the selected step, such as duration, read counts, write counts, and others across all of its executions.
+For each metric there are 5 attributes that are available for each metric:
+
+* Count - The number of step executions that the metric could have participated.  It is not a count for the number of times the event occurred during each step execution.
+* Min - Shows the minimum value for this metric across all the step executions.
+* Max - Shows the maximum value for this metric across all the step executions.
+* Mean - Shows the mean value for this metric across all the step executions.
+* Max - Shows the standard deviation for this metric across all the step executions.
+
+NOTE: Counts (commit count for example) for a specific step execution, can be obtained by retrieving the job execution detail.
+
+The Step Execution contains the following metrics:
+
+* Commit Count - Attributes for the number of commits of all the executions for the given step.
+* Duration - Attributes for the duration of all the executions for the given step.
+* Duration Per Read - Attributes for the duration per read of all the executions for the given step.
+* FilterCount - Attributes for the number of filters of all the executions for the given step.
+* Process Skip Count - Attributes for the process skips of all the executions for the given step.
+* Read Count - Attributes for the number of reads of all the executions for the given step.
+* Read Skip Count - Attributes for the number of read skips of all the executions for the given step.
+* Rollback Count - Attributes for the number of rollbacks of all the executions for the given step.
+* Write Count - Attributes for the number of writes of all the executions for the given step.
+* Write Skip Count - Attributes for the number of skips of all the executions for the given step.
 
 endif::omit-tasks-docs[]
 
