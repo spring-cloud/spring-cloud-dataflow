@@ -905,7 +905,8 @@ public class DataFlowIT {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-                    runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
+                    byte[] data = ("{\"name\" : \"" + taskName + "\"}").getBytes(StandardCharsets.UTF_8);
+                    runtimeApps.httpPost(stream.getName(), "http", data, headers);
 
                     AtomicLong launchId = new AtomicLong();
                     Awaitility.await()
