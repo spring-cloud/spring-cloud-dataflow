@@ -17,9 +17,14 @@ data:
                     environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
                     limits:
                       memory: 1024Mi
-                      cpu: 500m
-                    readinessProbeDelay: 120
-                    livenessProbeDelay: 90
+                      cpu: 1.0
+                    readinessProbeDelay: 1
+                    readinessProbeTimeout: 5
+                    livenessProbeDelay: 1
+                    livenessProbeTimeout: 2
+                    startupProbeDelay: 20
+                    startupProbeTimeout: 5
+                    startupProbeFailure: 50
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root
