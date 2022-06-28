@@ -104,6 +104,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("runtime/apps/{appId}/instances").description("Provides the status for app instances"),
 				linkWithRel("runtime/apps/{appId}/instances/{instanceId}").description("Provides the status for specific app instance"),
 				linkWithRel("runtime/apps/{appId}/instances/{instanceId}/actuator").description("EXPERIMENTAL: Allows invoking Actuator endpoint on specific app instance"),
+				linkWithRel("runtime/apps/{appId}/instances/{instanceId}/post").description("EXPERIMENTAL: Allows POST on http sink"),
 
 				linkWithRel("tasks/definitions").description("Provides the task definition resource"),
 				linkWithRel("tasks/definitions/definition").description("Provides details for a specific task definition"),
@@ -154,6 +155,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.runtime/apps/{appId}/instances.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/apps/{appId}/instances is templated"),
 						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}.href").description("Link to the runtime/apps/{appId}/instances/{instanceId}"),
 						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/apps/{appId}/instances/{instanceId} is templated"),
+						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}/post.href").description("Link to the runtime/apps/{appId}/instances/{instanceId}/post"),
+						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}/post.templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/apps/{appId}/instances/{instanceId}/post is templated"),
 
 						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}/actuator[].href").description("Link to the runtime/apps/{appId}/instances/{instanceId}/actuator"),
 						fieldWithPath("_links.runtime/apps/{appId}/instances/{instanceId}/actuator[].templated").type(JsonFieldType.BOOLEAN).optional().description("Link runtime/apps/{appId}/instances/{instanceId}/actuator is templated"),
