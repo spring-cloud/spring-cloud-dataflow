@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
+import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -40,6 +41,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -278,7 +280,10 @@ public class RuntimeApplicationHelper {
 
 
     public void httpPost(String url, String message) {
-        dataFlowTemplate.getRestTemplate().postForObject(url, message, String.class);
+        ResponseEntity<String> response = dataFlowTemplate.getRestTemplate().postForEntity(url, message, String.class);
+        if(!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Exception posting:" + response.getStatusCode()+":" + response.getBody());
+        }
     }
 
     public void httpPost(String streamName, String appName, byte[] message, HttpHeaders headers) {
@@ -319,11 +324,22 @@ public class RuntimeApplicationHelper {
 				String url = instance.getAttributes().get("url");
 				if(StringUtils.hasText(url)) {
 					HttpEntity<byte[]> httpEntity = new HttpEntity<>(message, headers);
-					this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
+					ResponseEntity<String> response = this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
+                    if(!response.getStatusCode().is2xxSuccessful()) {
+                        throw new RuntimeException("POST:exception:" + response.getStatusCode() + ":" + response.getBody());
+                    }
 				} else {
 					throw new RuntimeException("Cannot find url for " + streamName + ":" + appName);
 				}
-			}
+			} else {
+                if(x instanceof DataFlowClientException) {
+                    throw (DataFlowClientException) x;
+                } else if(x instanceof RuntimeException) {
+                    throw (RuntimeException) x;
+                } else {
+                    throw new RuntimeException(x.getMessage(), x);
+                }
+            }
 		}
     }
 
