@@ -28,6 +28,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
@@ -131,6 +132,9 @@ public class RuntimeTemplate implements RuntimeOperations {
 		Assert.notNull(appUrlPostUriTemplate, "post endpoint not found");
 		String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
 		HttpEntity<byte[]> entity = new HttpEntity<>(data, headers);
-		this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+		ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
+		if(!response.getStatusCode().is2xxSuccessful()) {
+			throw new RuntimeException("POST:exception:" + response.getStatusCode() + ":" + response.getBody());
+		}
 	}
 }
