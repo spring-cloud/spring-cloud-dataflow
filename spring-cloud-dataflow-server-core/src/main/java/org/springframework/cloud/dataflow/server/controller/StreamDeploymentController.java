@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +31,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -142,7 +145,19 @@ public class StreamDeploymentController {
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName) {
-		return this.streamService.history(releaseName);
+		ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+		return this.streamService.history(releaseName)
+			.stream()
+			.map(release -> {
+				if (release.getConfigValues() != null && StringUtils.hasText(release.getConfigValues().getRaw())) {
+					try {
+						release.getConfigValues().setRaw(sanitizer.sanitizeJsonOrYamlString(release.getConfigValues().getRaw()));
+					} catch (JsonProcessingException e) {
+						logger.error("history:exception:" + e, e);
+					}
+				}
+				return release;
+			}).collect(Collectors.toList());
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
