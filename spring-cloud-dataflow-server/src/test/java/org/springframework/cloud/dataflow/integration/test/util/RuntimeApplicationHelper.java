@@ -36,11 +36,13 @@ import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.cloud.skipper.domain.Deployer;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class to retrieve runtime information form DataFlow server.
@@ -309,7 +311,20 @@ public class RuntimeApplicationHelper {
             logger.error("Cannot find instance of " + streamName + appName + ":" + streamStatusResource);
             throw new RuntimeException("Cannot find instance of " + streamName + ":" + appName);
         }
-        this.dataFlowTemplate.runtimeOperations().postToUrl(app.getDeploymentId(), instance.getInstanceId(), message, headers);
+		try {
+			this.dataFlowTemplate.runtimeOperations().postToUrl(app.getDeploymentId(), instance.getInstanceId(), message, headers);
+		} catch (Throwable x) {
+			if (x.toString().contains("post endpoint not found")) {
+				logger.warn("Try with url only:" + x);
+				String url = instance.getAttributes().get("url");
+				if(StringUtils.hasText(url)) {
+					HttpEntity<byte[]> httpEntity = new HttpEntity<>(message, headers);
+					this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
+				} else {
+					throw new RuntimeException("Cannot find url for " + streamName + ":" + appName);
+				}
+			}
+		}
     }
 
     public String httpGet(String url) {
