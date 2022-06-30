@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -64,6 +65,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @ExposesResourceFor(AppInstanceStatusResource.class)
 public class RuntimeAppInstanceController {
 	private final static Logger logger = LoggerFactory.getLogger(RuntimeAppInstanceController.class);
+
 	private static final Comparator<? super AppInstanceStatus> INSTANCE_SORTER =
 			(Comparator<AppInstanceStatus>) (i1, i2) -> i1.getId().compareTo(i2.getId());
 
@@ -73,6 +75,7 @@ public class RuntimeAppInstanceController {
 
 	/**
 	 * Construct a new RuntimeAppInstanceController
+	 *
 	 * @param streamDeployer the stream deployer to use
 	 */
 	public RuntimeAppInstanceController(StreamDeployer streamDeployer) {
@@ -82,7 +85,7 @@ public class RuntimeAppInstanceController {
 
 	@RequestMapping
 	public PagedModel<AppInstanceStatusResource> list(Pageable pageable, @PathVariable String appId,
-			PagedResourcesAssembler<AppInstanceStatus> assembler) {
+													  PagedResourcesAssembler<AppInstanceStatus> assembler) {
 		AppStatus status = streamDeployer.getAppStatus(appId);
 		if (status.getState().equals(DeploymentState.unknown)) {
 			throw new NoSuchAppException(appId);
@@ -125,11 +128,11 @@ public class RuntimeAppInstanceController {
 
 	@RequestMapping(value = "/{instanceId}/post", method = RequestMethod.POST)
 	public ResponseEntity<String> postToUrl(
-		@PathVariable String appId,
-		@PathVariable String instanceId,
-		@RequestBody String data,
-		@RequestHeader HttpHeaders headers) {
-		if(logger.isDebugEnabled()) {
+			@PathVariable String appId,
+			@PathVariable String instanceId,
+			@RequestBody String data,
+			@RequestHeader HttpHeaders headers) {
+		if (logger.isDebugEnabled()) {
 			ArgumentSanitizer sanitizer = new ArgumentSanitizer();
 			logger.debug("postToUrl:{}:{}:{}:{}", appId, instanceId, data, sanitizer.sanitizeHeaders(headers));
 		}
@@ -147,12 +150,29 @@ public class RuntimeAppInstanceController {
 		}
 		// TODO determine if some headers need to be removed or added
 		HttpEntity<String> entity = new HttpEntity<>(data, headers);
-		if(logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 			ArgumentSanitizer sanitizer = new ArgumentSanitizer();
 			logger.debug("postToUrl:{}:{}:{}:{}:{}", appId, instanceId, url, data, sanitizer.sanitizeHeaders(headers));
 		}
+		waitForUrl(url, Duration.ofSeconds(30));
 		ResponseEntity<String> response = this.restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 		return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+	}
+
+	private void waitForUrl(String uri, Duration timeout) {
+		// Check
+		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
+		do {
+			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
+			if (response.getStatusCode().is2xxSuccessful()) {
+				break;
+			}
+			try {
+				Thread.sleep(2000L);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		} while (waitUntilMillis <= System.currentTimeMillis());
 	}
 
 	static class InstanceAssembler
@@ -174,11 +194,11 @@ public class RuntimeAppInstanceController {
 			}
 			if (resource.getAttributes() != null && resource.getAttributes().containsKey("url")) {
 				resource.add(linkTo(
-					methodOn(RuntimeAppInstanceController.class).postToUrl(
-					 	owningApp.getDeploymentId(),
-						resource.getInstanceId(),
-						null,
-						null)
+						methodOn(RuntimeAppInstanceController.class).postToUrl(
+								owningApp.getDeploymentId(),
+								resource.getInstanceId(),
+								null,
+								null)
 				).withRel("post"));
 				logger.debug("toModel:resource={}", resource.getLinks());
 			}
