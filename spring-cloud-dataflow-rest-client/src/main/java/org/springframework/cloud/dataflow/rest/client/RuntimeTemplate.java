@@ -131,11 +131,27 @@ public class RuntimeTemplate implements RuntimeOperations {
 	public void postToUrl(String appId, String instanceId, byte[] data, HttpHeaders headers) {
 		Assert.notNull(appUrlPostUriTemplate, "post endpoint not found");
 		String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
+		waitForUrl(uri, 30_000L);
 		HttpEntity<byte[]> entity = new HttpEntity<>(data, headers);
 		ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
-
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			throw new RuntimeException("POST:exception:" + response.getStatusCode() + ":" + response.getBody());
 		}
+	}
+
+	private void waitForUrl(String uri, long timeout) {
+		// Check
+		final long startTime = System.currentTimeMillis();
+		do {
+			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
+			if (response.getStatusCode().is2xxSuccessful()) {
+				break;
+			}
+			try {
+				Thread.sleep(2000L);
+			} catch (InterruptedException e) {
+				// do nothing
+			}
+		} while (startTime + timeout < System.currentTimeMillis());
 	}
 }

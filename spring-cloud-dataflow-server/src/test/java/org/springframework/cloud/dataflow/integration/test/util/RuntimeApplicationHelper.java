@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
-import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
@@ -314,7 +314,7 @@ public class RuntimeApplicationHelper {
 		}
 
 		if (instance == null) {
-			logger.error("Cannot find instance of " + streamName + appName + ":" + streamStatusResource);
+			logger.error("Cannot find instance of " + streamName + ":" + appName);
 			throw new RuntimeException("Cannot find instance of " + streamName + ":" + appName);
 		}
 		try {
@@ -322,23 +322,13 @@ public class RuntimeApplicationHelper {
 		} catch (Throwable x) {
 			if (x.toString().contains("post endpoint not found")) {
 				logger.warn("Try with url only:" + x);
-				String url = instance.getAttributes().get("url");
-				if (StringUtils.hasText(url)) {
+				final String url = instance.getAttributes().get("url");
+				if(StringUtils.hasText(url)) {
+					Awaitility.await("Url available").atMost(1, TimeUnit.MINUTES).until(() -> isUrlAccessible(url));
 					HttpEntity<byte[]> httpEntity = new HttpEntity<>(message, headers);
-					ResponseEntity<String> response = this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
-					if (!response.getStatusCode().is2xxSuccessful()) {
-						throw new RuntimeException("POST:exception:" + response.getStatusCode() + ":" + response.getBody());
-					}
+					this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
 				} else {
-					throw new RuntimeException("Cannot find url for " + streamName + ":" + appName);
-				}
-			} else {
-				if (x instanceof DataFlowClientException) {
-					throw (DataFlowClientException) x;
-				} else if (x instanceof RuntimeException) {
-					throw (RuntimeException) x;
-				} else {
-					throw new RuntimeException(x.getMessage(), x);
+					throw new RuntimeException("Cannot find url for " + streamStatusResource.getName() + ":" + app.getName());
 				}
 			}
 		}

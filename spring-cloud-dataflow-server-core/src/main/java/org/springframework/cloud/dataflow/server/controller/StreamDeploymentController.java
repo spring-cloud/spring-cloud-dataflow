@@ -83,6 +83,8 @@ public class StreamDeploymentController {
 	 */
 	private final StreamDefinitionRepository repository;
 
+	private final ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+
 	/**
 	 * Construct a new UpdatableStreamDeploymentController, given a
 	 * {@link StreamDeploymentController} and {@link StreamService}
@@ -145,19 +147,21 @@ public class StreamDeploymentController {
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName) {
-		ArgumentSanitizer sanitizer = new ArgumentSanitizer();
 		return this.streamService.history(releaseName)
 			.stream()
-			.map(release -> {
-				if (release.getConfigValues() != null && StringUtils.hasText(release.getConfigValues().getRaw())) {
-					try {
-						release.getConfigValues().setRaw(sanitizer.sanitizeJsonOrYamlString(release.getConfigValues().getRaw()));
-					} catch (JsonProcessingException e) {
-						logger.error("history:exception:" + e, e);
-					}
-				}
-				return release;
-			}).collect(Collectors.toList());
+			.map(this::sanitizeRelease)
+			.collect(Collectors.toList());
+	}
+
+	private Release sanitizeRelease(Release release) {
+		if (release.getConfigValues() != null && StringUtils.hasText(release.getConfigValues().getRaw())) {
+			try {
+				release.getConfigValues().setRaw(sanitizer.sanitizeJsonOrYamlString(release.getConfigValues().getRaw()));
+			} catch (JsonProcessingException e) {
+				logger.warn("sanitizeRelease:exception:" + e, e);
+			}
+		}
+		return release;
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)

@@ -58,7 +58,9 @@ public class ArgumentSanitizer {
 
     private static final String[] KEYS_TO_SANITIZE = {"username", "password", "secret", "key", "token", ".*credentials.*",
         "vcap_services", "url"};
-
+	private final static TypeReference<Map<String, Object>> mapTypeReference = new TypeReference<Map<String, Object>>() {};
+	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+	private final ObjectMapper jsonMapper = new ObjectMapper();
     private Pattern[] keysToSanitize;
 
     public ArgumentSanitizer() {
@@ -243,10 +245,11 @@ public class ArgumentSanitizer {
 	 * @throws JsonProcessingException
 	 */
 	public String sanitizeJsonString(String input) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> data = mapper.readValue(input, new TypeReference<Map<String, Object>>() {
-		});
-		return mapper.writeValueAsString(sanitizeMap(data));
+		if(input == null) {
+			return null;
+		}
+		Map<String, Object> data = jsonMapper.readValue(input, mapTypeReference);
+		return jsonMapper.writeValueAsString(sanitizeMap(data));
 	}
 
 	/**
@@ -257,9 +260,11 @@ public class ArgumentSanitizer {
 	 * @throws JsonProcessingException
 	 */
 	public String sanitizeYamlString(String input) throws JsonProcessingException {
-		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-		Map<String, Object> data = mapper.readValue(input, new TypeReference<Map<String, Object>>() {});
-		return mapper.writeValueAsString(sanitizeMap(data));
+		if(input == null) {
+			return null;
+		}
+		Map<String, Object> data = yamlMapper.readValue(input, mapTypeReference);
+		return yamlMapper.writeValueAsString(sanitizeMap(data));
 	}
 	/**
 	 * Will determine the type of data and treat as JSON or YAML to sanitize sensitive values.
@@ -269,7 +274,9 @@ public class ArgumentSanitizer {
 	 * @throws JsonProcessingException
 	 */
 	public String sanitizeJsonOrYamlString(String input) throws JsonProcessingException {
-
+		if(input == null) {
+			return null;
+		}
 		try { // Try parsing as JSON
 			return sanitizeJsonString(input);
 		} catch (Throwable x) {
@@ -282,6 +289,9 @@ public class ArgumentSanitizer {
 		}
 		if (input.contains("\n")) {
 			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "\n"))), "\n");
+		}
+		if(input.contains("--")) {
+			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "--"))), "--");
 		}
 		return sanitize(input);
 	}
