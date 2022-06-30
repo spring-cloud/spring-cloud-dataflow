@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
@@ -97,16 +98,16 @@ public class RuntimeTemplate implements RuntimeOperations {
 	@Override
 	public AppStatusResource status(String deploymentId) {
 		return this.restTemplate.getForObject(
-			appStatusUriTemplate.expand(deploymentId).getHref(),
-			AppStatusResource.class
+				appStatusUriTemplate.expand(deploymentId).getHref(),
+				AppStatusResource.class
 		);
 	}
 
 	@Override
 	public PagedModel<StreamStatusResource> streamStatus(String... streamNames) {
 		return this.restTemplate.getForObject(
-			streamStatusUriTemplate.expand(streamNames).getHref(),
-			StreamStatusResource.Page.class
+				streamStatusUriTemplate.expand(streamNames).getHref(),
+				StreamStatusResource.Page.class
 		);
 	}
 
@@ -131,7 +132,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 	public void postToUrl(String appId, String instanceId, byte[] data, HttpHeaders headers) {
 		Assert.notNull(appUrlPostUriTemplate, "post endpoint not found");
 		String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
-		waitForUrl(uri, 30_000L);
+		waitForUrl(uri, Duration.ofSeconds(30));
 		HttpEntity<byte[]> entity = new HttpEntity<>(data, headers);
 		ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
 		if (!response.getStatusCode().is2xxSuccessful()) {
@@ -139,9 +140,9 @@ public class RuntimeTemplate implements RuntimeOperations {
 		}
 	}
 
-	private void waitForUrl(String uri, long timeout) {
+	private void waitForUrl(String uri, Duration timeout) {
 		// Check
-		final long startTime = System.currentTimeMillis();
+		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
 			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
 			if (response.getStatusCode().is2xxSuccessful()) {
@@ -150,8 +151,8 @@ public class RuntimeTemplate implements RuntimeOperations {
 			try {
 				Thread.sleep(2000L);
 			} catch (InterruptedException e) {
-				// do nothing
+				Thread.currentThread().interrupt();
 			}
-		} while (startTime + timeout < System.currentTimeMillis());
+		} while (waitUntilMillis <= System.currentTimeMillis());
 	}
 }
