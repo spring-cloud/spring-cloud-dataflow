@@ -17,11 +17,19 @@
 package org.springframework.cloud.dataflow.rest.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -39,8 +47,10 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class ArgumentSanitizer {
+	private final static Logger logger = LoggerFactory.getLogger(ArgumentSanitizer.class);
 
     private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
 
@@ -204,4 +214,75 @@ public class ArgumentSanitizer {
         }
         return result;
     }
+	/**
+	 * Will replace sensitive string value in the Map with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return the sanitized map.
+	 */
+	public Map<String, Object> sanitizeMap(Map<String, Object> input) {
+		Map<String, Object> result = new HashMap<>();
+		for (Map.Entry<String, Object> entry : input.entrySet()) {
+			if (entry.getValue() instanceof String) {
+				result.put(entry.getKey(), sanitize(entry.getKey(), (String) entry.getValue()));
+			} else if (entry.getValue() instanceof Map) {
+				Map<String, Object> map = (Map<String, Object>) entry.getValue();
+				result.put(entry.getKey(), sanitizeMap(map));
+			} else {
+				result.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Will replace the sensitive string fields with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return The sanitized JSON string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeJsonString(String input) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		Map<String, Object> data = mapper.readValue(input, new TypeReference<Map<String, Object>>() {
+		});
+		return mapper.writeValueAsString(sanitizeMap(data));
+	}
+
+	/**
+	 * Will replace the sensitive string fields with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return The sanitized YAML string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeYamlString(String input) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+		Map<String, Object> data = mapper.readValue(input, new TypeReference<Map<String, Object>>() {});
+		return mapper.writeValueAsString(sanitizeMap(data));
+	}
+	/**
+	 * Will determine the type of data and treat as JSON or YAML to sanitize sensitive values.
+	 *
+	 * @param input to be sanitized
+	 * @return the sanitized string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeJsonOrYamlString(String input) throws JsonProcessingException {
+
+		try { // Try parsing as JSON
+			return sanitizeJsonString(input);
+		} catch (Throwable x) {
+			logger.debug("Cannot parse as JSON:" + x);
+		}
+		try {
+			return sanitizeYamlString(input);
+		} catch (Throwable x) {
+			logger.debug("Cannot parse as YAML:" + x);
+		}
+		if (input.contains("\n")) {
+			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "\n"))), "\n");
+		}
+		return sanitize(input);
+	}
 }
