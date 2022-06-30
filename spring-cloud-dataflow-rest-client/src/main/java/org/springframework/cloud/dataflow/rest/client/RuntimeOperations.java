@@ -53,9 +53,9 @@ public interface RuntimeOperations {
 	/**
 	 * Access an HTTP GET exposed actuator resource for a deployed app instance.
 	 *
-	 * @param appId the application id
+	 * @param appId      the application id
 	 * @param instanceId the application instance id
-	 * @param endpoint the relative actuator path, e.g., {@code /info}
+	 * @param endpoint   the relative actuator path, e.g., {@code /info}
 	 * @return the contents as JSON text
 	 */
 	String getFromActuator(String appId, String instanceId, String endpoint);
@@ -63,10 +63,10 @@ public interface RuntimeOperations {
 	/**
 	 * Access an HTTP POST exposed actuator resource for a deployed app instance.
 	 *
-	 * @param appId the application id
+	 * @param appId      the application id
 	 * @param instanceId the application instance id
-	 * @param endpoint the relative actuator path, e.g., {@code /info}
-	 * @param data map representing the data to post on request body
+	 * @param endpoint   the relative actuator path, e.g., {@code /info}
+	 * @param data       map representing the data to post on request body
 	 */
 	Object postToActuator(String appId, String instanceId, String endpoint, Map<String, Object> data);
 
@@ -77,7 +77,7 @@ public interface RuntimeOperations {
 	 * @param instanceId the application instance id
 	 * @param data       data to send to url. The mimetype should be in the Content-Type header if important.
 	 * @param headers    post request headers.
-	 * This method will return an exception
+	 *                   This method will return an exception
 	 */
 	void postToUrl(String appId, String instanceId, byte[] data, HttpHeaders headers);
 }
