@@ -54,6 +54,7 @@ import org.springframework.util.StringUtils;
  */
 public class RuntimeApplicationHelper {
 
+
 	public static final String LOCAL_PLATFORM_TYPE = "local";
 
 	public static final String KUBERNETES_PLATFORM_TYPE = "kubernetes";
