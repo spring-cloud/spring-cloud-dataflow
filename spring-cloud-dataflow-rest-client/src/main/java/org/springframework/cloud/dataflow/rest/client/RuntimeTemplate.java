@@ -86,7 +86,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 		}
 		return link.orElse(null);
 	}
-	
+
 	@Override
 	public PagedModel<AppStatusResource> status() {
 		String uriTemplate = this.appStatusesUriTemplate.expand().getHref();
@@ -133,7 +133,8 @@ public class RuntimeTemplate implements RuntimeOperations {
 		String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
 		HttpEntity<byte[]> entity = new HttpEntity<>(data, headers);
 		ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);
-		if(!response.getStatusCode().is2xxSuccessful()) {
+
+		if (!response.getStatusCode().is2xxSuccessful()) {
 			throw new RuntimeException("POST:exception:" + response.getStatusCode() + ":" + response.getBody());
 		}
 	}
