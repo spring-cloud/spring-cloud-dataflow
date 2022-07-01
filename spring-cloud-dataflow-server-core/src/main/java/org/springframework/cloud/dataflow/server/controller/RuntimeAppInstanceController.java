@@ -164,7 +164,7 @@ public class RuntimeAppInstanceController {
 		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
 			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
-			if (response.getStatusCode().is2xxSuccessful()) {
+			if (!response.getStatusCode().is4xxClientError()) {
 				break;
 			}
 			try {
