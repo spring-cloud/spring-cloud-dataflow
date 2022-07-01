@@ -81,11 +81,11 @@ public class RuntimeApplicationHelper {
 		this.dataFlowTemplate = dataFlowTemplate;
 		this.platformName = platformName;
 		this.platformType = dataFlowTemplate.streamOperations().listPlatforms().stream()
-			.filter(p -> p.getName().equalsIgnoreCase(platformName))
-			.map(Deployer::getType).findFirst().get();
+				.filter(p -> p.getName().equalsIgnoreCase(platformName))
+				.map(Deployer::getType).findFirst().get();
 
 		dataflowServerVersion = Version.valueOf(dataFlowTemplate.aboutOperation().get()
-			.getVersionInfo().getCore().getVersion());
+				.getVersionInfo().getCore().getVersion());
 
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
 	}
@@ -135,9 +135,9 @@ public class RuntimeApplicationHelper {
 	 */
 	public Map<String, Map<String, String>> getApplicationInstances(String streamName, String appName) {
 		return this.appInstanceAttributes().values().stream()
-			.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
-			.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
-			.collect(Collectors.toMap(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID), v -> v));
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+				.collect(Collectors.toMap(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID), v -> v));
 	}
 
 	/**
@@ -152,14 +152,14 @@ public class RuntimeApplicationHelper {
 		// For K8s platforms the availability of the app's external URI is not dependent on the application state but
 		// on the availability of the configured Load Balancer. So we need to wait until valid URI is returned.
 		Awaitility.await().until(() -> getApplicationInstances(streamName, appName).values().stream()
-			.allMatch(instanceAttributes -> isUrlAccessible(getApplicationInstanceUrl(instanceAttributes) + "/actuator/info")));
+				.allMatch(instanceAttributes -> isUrlAccessible(getApplicationInstanceUrl(instanceAttributes) + "/actuator/info")));
 
 		return this.appInstanceAttributes().values().stream()
-			.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
-			.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
-			.collect(Collectors.toMap(
-				v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID),
-				v -> getAppInstanceLogContent(getApplicationInstanceUrl(v))));
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_RELEASE_NAME).equals(streamName))
+				.filter(v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME).equals(appName))
+				.collect(Collectors.toMap(
+						v -> v.get(StreamRuntimePropertyKeys.ATTRIBUTE_GUID),
+						v -> getAppInstanceLogContent(getApplicationInstanceUrl(v))));
 	}
 
 	/**
@@ -171,7 +171,7 @@ public class RuntimeApplicationHelper {
 	 */
 	public String getApplicationInstanceUrl(String streamName, String appName) {
 		return getApplicationInstanceUrl(getApplicationInstances(streamName, appName)
-			.values().iterator().next());
+				.values().iterator().next());
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class RuntimeApplicationHelper {
 
 	private String localApplicationInstanceUrl(Map<String, String> instanceAttributes) {
 		return String.format("%s://localhost:%s", httpsStreamApplications ? "https" : "http",
-			instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_PORT)); // Local Platform only
+				instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_PORT)); // Local Platform only
 	}
 
 	private String cloudFoundryApplicationInstanceUrl(Map<String, String> instanceAttributes) {
@@ -291,25 +291,25 @@ public class RuntimeApplicationHelper {
 		AppInstanceStatusResource instance = null;
 		AppStatusResource app = null;
 		StreamStatusResource streamStatusResource = this.dataFlowTemplate.runtimeOperations()
-			.streamStatus(streamName)
-			.getContent()
-			.stream()
-			.filter(stream -> stream.getName().equals(streamName))
-			.findFirst()
-			.orElse(null);
-		if (streamStatusResource != null) {
-			app = streamStatusResource.getApplications()
+				.streamStatus(streamName)
 				.getContent()
 				.stream()
-				.filter(appStatusResource -> appStatusResource.getName().equals(appName))
+				.filter(stream -> stream.getName().equals(streamName))
 				.findFirst()
 				.orElse(null);
-			if (app != null) {
-				instance = app.getInstances()
+		if (streamStatusResource != null) {
+			app = streamStatusResource.getApplications()
 					.getContent()
 					.stream()
+					.filter(appStatusResource -> appStatusResource.getName().equals(appName))
 					.findFirst()
 					.orElse(null);
+			if (app != null) {
+				instance = app.getInstances()
+						.getContent()
+						.stream()
+						.findFirst()
+						.orElse(null);
 			}
 		}
 
@@ -318,18 +318,22 @@ public class RuntimeApplicationHelper {
 			throw new RuntimeException("Cannot find instance of " + streamName + ":" + appName);
 		}
 		try {
+			logger.debug("postToUrl:{}:{}:{}:{}", app.getDeploymentId(), instance.getInstanceId(), message, headers);
 			this.dataFlowTemplate.runtimeOperations().postToUrl(app.getDeploymentId(), instance.getInstanceId(), message, headers);
 		} catch (Throwable x) {
 			if (x.toString().contains("post endpoint not found")) {
 				logger.warn("Try with url only:" + x);
 				final String url = instance.getAttributes().get("url");
-				if(StringUtils.hasText(url)) {
-					Awaitility.await("Url available").atMost(1, TimeUnit.MINUTES).until(() -> isUrlAccessible(url));
+				if (StringUtils.hasText(url)) {
+					Awaitility.await(url + " available").atMost(1, TimeUnit.MINUTES).until(() -> isUrlAccessible(url));
 					HttpEntity<byte[]> httpEntity = new HttpEntity<>(message, headers);
 					this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
 				} else {
 					throw new RuntimeException("Cannot find url for " + streamStatusResource.getName() + ":" + app.getName());
 				}
+			} else {
+				logger.error("postToUrl:" + streamName + ":" + appName + ":" + x, x);
+				throw x;
 			}
 		}
 	}
@@ -349,7 +353,7 @@ public class RuntimeApplicationHelper {
 	public boolean isAppRegistered(String name, ApplicationType type, String version) {
 		try {
 			DetailedAppRegistrationResource registration =
-				dataFlowTemplate.appRegistryOperations().info(name, type, version, false);
+					dataFlowTemplate.appRegistryOperations().info(name, type, version, false);
 			return registration != null;
 		} catch (Exception e) {
 			return false;
@@ -359,7 +363,7 @@ public class RuntimeApplicationHelper {
 	public boolean isAppRegistered(String name, ApplicationType type) {
 		try {
 			DetailedAppRegistrationResource registration =
-				dataFlowTemplate.appRegistryOperations().info(name, type, false);
+					dataFlowTemplate.appRegistryOperations().info(name, type, false);
 			return registration != null;
 		} catch (Exception e) {
 			return false;
