@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -79,6 +81,8 @@ public class StreamDeploymentController {
 	 * The repository this controller will use for stream CRUD operations.
 	 */
 	private final StreamDefinitionRepository repository;
+
+	private final ArgumentSanitizer sanitizer = new ArgumentSanitizer();
 
 	/**
 	 * Construct a new UpdatableStreamDeploymentController, given a
@@ -142,7 +146,17 @@ public class StreamDeploymentController {
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName) {
-		return this.streamService.history(releaseName);
+		return this.streamService.history(releaseName)
+			.stream()
+			.map(this::sanitizeRelease)
+			.collect(Collectors.toList());
+	}
+
+	private Release sanitizeRelease(Release release) {
+		if (release.getConfigValues() != null && StringUtils.hasText(release.getConfigValues().getRaw())) {
+			release.getConfigValues().setRaw(sanitizer.sanitizeJsonOrYamlString(release.getConfigValues().getRaw()));
+		}
+		return release;
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
