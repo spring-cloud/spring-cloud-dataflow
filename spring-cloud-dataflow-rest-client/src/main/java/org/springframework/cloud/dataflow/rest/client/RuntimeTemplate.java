@@ -20,6 +20,9 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
@@ -43,6 +46,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Corneil du Plessis
  */
 public class RuntimeTemplate implements RuntimeOperations {
+	private static final Logger logger = LoggerFactory.getLogger(RuntimeTemplate.class);
 
 	private final RestTemplate restTemplate;
 
@@ -144,9 +148,18 @@ public class RuntimeTemplate implements RuntimeOperations {
 		// Check
 		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
-			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
-			if (!response.getStatusCode().is4xxClientError()) {
-				break;
+			try {
+				ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
+				if (!response.getStatusCode().is4xxClientError()) {
+					break;
+				}
+			} catch (Throwable x) {
+				final String message = x.getMessage();
+				if (message.contains("Request method 'GET' not supported") || message.contains("500")) {
+					break;
+				} else {
+					logger.trace("waitForUrl:exception:" + x);
+				}
 			}
 			try {
 				Thread.sleep(2000L);

@@ -163,9 +163,18 @@ public class RuntimeAppInstanceController {
 		// Check
 		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
-			ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
-			if (!response.getStatusCode().is4xxClientError()) {
-				break;
+			try {
+				ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
+				if (!response.getStatusCode().is4xxClientError()) {
+					break;
+				}
+			} catch (Throwable x) {
+				final String message = x.getMessage();
+				if (message.contains("Request method 'GET' not supported") || message.contains("500")) {
+					break;
+				} else {
+					logger.trace("waitForUrl:exception:" + x);
+				}
 			}
 			try {
 				Thread.sleep(2000L);
