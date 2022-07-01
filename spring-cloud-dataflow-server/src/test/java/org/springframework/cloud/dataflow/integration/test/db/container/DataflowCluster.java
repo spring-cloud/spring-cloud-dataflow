@@ -295,6 +295,7 @@ public class DataflowCluster implements Startable {
 				databaseContainer.withExposedPorts(MSSQL_PORT);
 				databaseContainer.withNetworkAliases(databaseAlias);
 				databaseContainer.withNetwork(network);
+				databaseContainer.withUrlParam("encrypt", "false");
 				return databaseContainer;
 			} else if (clusterContainer.tag.startsWith(TagNames.ORACLE)) {
 				OracleContainer databaseContainer = new CustomOracleContainer(clusterContainer.image);
