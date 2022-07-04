@@ -155,6 +155,10 @@ public class RuntimeTemplate implements RuntimeOperations {
 				}
 			} catch (Throwable x) {
 				final String message = x.getMessage();
+				if(message.contains("UnknownHostException")) {
+					logger.trace("waitForUrl:retry:exception:" + x);
+					continue;
+				}
 				if (message.contains("Request method 'GET' not supported") || message.contains("500")) {
 					break;
 				} else {
