@@ -76,7 +76,7 @@ The following example shows how to define a SQL Server database connection with 
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url='jdbc:sqlserver://localhost:1433;databaseName=mydb' \
+    --spring.datasource.url='jdbc:sqlserver://localhost:1433;databaseName=mydb&encrypt=false' \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
     --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
