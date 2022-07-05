@@ -16,8 +16,8 @@ data:
                   default:
                     environmentVariables: 'SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
                     limits:
-                      memory: 1024Mi
-                      cpu: 1.0
+                      memory: 2g
+                      cpu: 2.0
                     readinessProbeDelay: 1
                     readinessProbeTimeout: 5
                     livenessProbeDelay: 1
