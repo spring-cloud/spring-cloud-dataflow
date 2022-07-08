@@ -24,7 +24,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.AppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamStatusResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
@@ -38,7 +37,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -139,28 +137,13 @@ public class RuntimeTemplate implements RuntimeOperations {
 
 	@Override
 	public void postToUrl(String appId, String instanceId, byte[] data, HttpHeaders headers) {
-		AppStatusResource appStatusResource = status(appId);
-		Assert.notNull(appStatusResource, "status not found:" + appId);
-		AppInstanceStatusResource instance = appStatusResource.getInstances()
-				.getContent()
-				.stream()
-				.filter(appInstanceStatusResource -> appInstanceStatusResource.getInstanceId().equals(instanceId))
-				.findFirst().orElse(null);
-		Assert.notNull(instance, "instance not found:" + instanceId);
-
-		String ip = instance.getAttributes().get("pod.ip");
-		if(!StringUtils.hasText(ip)) {
-			ip = instance.getAttributes().get("host.ip");
-		}
-		String port = instance.getAttributes().get("service.external.port");
-		if(!StringUtils.hasText(port)) {
-			port = "8080";
-		}
-		String uri = String.format("http://%s:%s", ip, port);
+		Assert.notNull(appUrlPostUriTemplate, "post endpoint not found");
+		String uri = appUrlPostUriTemplate.expand(appId, instanceId).getHref();
+		waitForUrl(uri, Duration.ofSeconds(30));
 		HttpEntity<byte[]> entity = new HttpEntity<>(data, headers);
 		if (logger.isDebugEnabled()) {
 			ArgumentSanitizer sanitizer = new ArgumentSanitizer();
-			logger.debug("postToUrl:{}:{}:{}:{}:{}", appId, instanceId, uri, data, sanitizer.sanitizeHeaders(headers));
+			logger.debug("postToUrl:{}:{}:{}:{}", appId, instanceId, uri, sanitizer.sanitizeHeaders(headers));
 		}
 		waitForUrl(uri, Duration.ofSeconds(30));
 		ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.POST, entity, String.class);

@@ -310,6 +310,7 @@ public class RuntimeApplicationHelper {
 				instance = app.getInstances()
 						.getContent()
 						.stream()
+						.filter(appInstanceStatusResource -> "deployed".equals(appInstanceStatusResource.getState()))
 						.findFirst()
 						.orElse(null);
 			}
@@ -320,7 +321,7 @@ public class RuntimeApplicationHelper {
 			throw new RuntimeException("Cannot find instance of " + streamName + ":" + appName);
 		}
 		try {
-			logger.debug("postToUrl:{}:{}:{}:{}", app.getDeploymentId(), instance.getInstanceId(), message, headers);
+			logger.debug("postToUrl:{}:{}:{}", app.getDeploymentId(), instance.getInstanceId(), headers);
 			this.dataFlowTemplate.runtimeOperations().postToUrl(app.getDeploymentId(), instance.getInstanceId(), message, headers);
 		} catch (Throwable x) {
 			if (x.toString().contains("post endpoint not found")) {
