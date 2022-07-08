@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -144,7 +146,7 @@ public class RuntimeAppInstanceController {
 		if (appInstanceStatus == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("instanceId not found:" + instanceId);
 		}
-		String url = appInstanceStatus.getAttributes().get("url");
+		String url = String.format("http://%s:%s", appInstanceStatus.getAttributes().get("pod.ip"), appInstanceStatus.getAttributes().get("service.external.port"));
 		if (!StringUtils.hasText(url)) {
 			return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body("url not found on resource");
 		}
@@ -164,16 +166,20 @@ public class RuntimeAppInstanceController {
 		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
 			try {
-				ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
-				if (!response.getStatusCode().is4xxClientError()) {
+				Set<HttpMethod> allowed = this.restTemplate.optionsForAllow(uri);
+				if (!CollectionUtils.isEmpty(allowed)) {
 					break;
 				}
 			} catch (Throwable x) {
+				logger.trace("waitForUrl:exception:" + x);
 				final String message = x.getMessage();
-				if (message.contains("Request method 'GET' not supported") || message.contains("500")) {
+				if(message.contains("UnknownHostException")) {
+					logger.trace("waitForUrl:retry:exception:" + x);
+					continue;
+				}
+				if (message.contains("500")) {
+					logger.trace("waitForUrl:accepted:exception:" + x);
 					break;
-				} else {
-					logger.trace("waitForUrl:exception:" + x);
 				}
 			}
 			try {
