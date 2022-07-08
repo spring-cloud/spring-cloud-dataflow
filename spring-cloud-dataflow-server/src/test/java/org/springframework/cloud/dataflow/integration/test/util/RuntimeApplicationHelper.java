@@ -247,7 +247,7 @@ public class RuntimeApplicationHelper {
 				dataFlowTemplate.getRestTemplate().getForObject(serviceUrl, String.class);
 				return true;
 			} catch (Exception e) {
-				//do nothing
+				logger.trace("isServicePresent:"+ serviceUrl + ":exception:" + e);
 			}
 		}
 		return false;
@@ -258,7 +258,9 @@ public class RuntimeApplicationHelper {
 			try {
 				Set<HttpMethod> optionsForAllow = dataFlowTemplate.getRestTemplate().optionsForAllow(serviceUrl);
 				return !CollectionUtils.isEmpty(optionsForAllow);
-			} catch (Exception e) {/* do nothing */}
+			} catch (Exception e) {
+				logger.trace("isUrlAccessible:"+ serviceUrl + ":exception:" + e);
+			}
 		}
 		return false;
 	}
@@ -356,6 +358,7 @@ public class RuntimeApplicationHelper {
 					dataFlowTemplate.appRegistryOperations().info(name, type, version, false);
 			return registration != null;
 		} catch (Exception e) {
+			logger.trace("isAppRegistered:" + name + ":" + type + ":" + version + ":exception:" + e);
 			return false;
 		}
 	}
@@ -366,6 +369,7 @@ public class RuntimeApplicationHelper {
 					dataFlowTemplate.appRegistryOperations().info(name, type, false);
 			return registration != null;
 		} catch (Exception e) {
+			logger.trace("isAppRegistered:" + name + ":" + type + ":exception:" + e);
 			return false;
 		}
 	}

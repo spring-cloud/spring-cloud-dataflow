@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -149,8 +151,8 @@ public class RuntimeTemplate implements RuntimeOperations {
 		final long waitUntilMillis = System.currentTimeMillis() + timeout.toMillis();
 		do {
 			try {
-				ResponseEntity<String> response = this.restTemplate.getForEntity(uri, String.class);
-				if (!response.getStatusCode().is4xxClientError()) {
+				Set<HttpMethod> allowed = this.restTemplate.optionsForAllow(uri);
+				if (!CollectionUtils.isEmpty(allowed)) {
 					break;
 				}
 			} catch (Throwable x) {
@@ -159,7 +161,7 @@ public class RuntimeTemplate implements RuntimeOperations {
 					logger.trace("waitForUrl:retry:exception:" + x);
 					continue;
 				}
-				if (message.contains("Request method 'GET' not supported") || message.contains("500")) {
+				if (message.contains("500")) {
 					break;
 				} else {
 					logger.trace("waitForUrl:exception:" + x);
