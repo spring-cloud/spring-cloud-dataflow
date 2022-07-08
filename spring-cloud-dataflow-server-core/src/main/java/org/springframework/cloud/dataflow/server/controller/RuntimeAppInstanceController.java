@@ -146,7 +146,11 @@ public class RuntimeAppInstanceController {
 		if (appInstanceStatus == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("instanceId not found:" + instanceId);
 		}
-		String url = String.format("http://%s:%s", appInstanceStatus.getAttributes().get("pod.ip"), appInstanceStatus.getAttributes().get("service.external.port"));
+		String port = appInstanceStatus.getAttributes().get("service.external.port");
+		if(!StringUtils.hasText(port)) {
+			port = "8080";
+		}
+		String url = String.format("http://%s:%s", appInstanceStatus.getAttributes().get("pod.ip"), port);
 		if (!StringUtils.hasText(url)) {
 			return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body("url not found on resource");
 		}
