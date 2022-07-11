@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.core.StreamRuntimePropertyKeys;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.AppInstanceStatusResource;
@@ -332,7 +333,10 @@ public class RuntimeApplicationHelper {
 					HttpEntity<byte[]> httpEntity = new HttpEntity<>(message, headers);
 					this.dataFlowTemplate.getRestTemplate().exchange(url, HttpMethod.POST, httpEntity, String.class);
 				} else {
-					throw new RuntimeException("Cannot find url for " + streamStatusResource.getName() + ":" + app.getName());
+					String error = "Cannot find url for " + streamStatusResource.getName() + ":" + app.getName();
+					ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+					logger.error(error + ":" + sanitizer.sanitizeProperties(instance.getAttributes()));
+					throw new RuntimeException(error);
 				}
 			} else {
 				logger.error("postToUrl:" + streamName + ":" + appName + ":" + x, x);
