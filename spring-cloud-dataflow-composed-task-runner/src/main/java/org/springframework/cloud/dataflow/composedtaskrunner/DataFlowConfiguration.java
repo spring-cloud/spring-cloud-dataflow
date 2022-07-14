@@ -48,6 +48,7 @@ public class DataFlowConfiguration {
 				.clientId(properties.getOauth2ClientCredentialsClientId())
 				.clientSecret(properties.getOauth2ClientCredentialsClientSecret())
 				.scope(properties.getOauth2ClientCredentialsScopes())
+				.clientAuthenticationMethod(properties.getOauth2ClientCredentialsClientAuthenticationMethod())
 				.build();
 		return new InMemoryClientRegistrationRepository(clientRegistration);
 	}
