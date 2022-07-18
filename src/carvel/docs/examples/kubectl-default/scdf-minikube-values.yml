@@ -3,7 +3,7 @@
 scdf:
   server:
     image:
-      tag: 2.9.1-SNAPSHOT
+      tag: 2.9.5-SNAPSHOT
     service:
       type:
         NodePort
@@ -12,4 +12,4 @@ scdf:
       tag: 2.8.1-SNAPSHOT
   ctr:
     image:
-      tag: 2.9.1-SNAPSHOT
+      tag: 2.9.5-SNAPSHOT
