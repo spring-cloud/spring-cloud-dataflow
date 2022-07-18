@@ -1,0 +1,20 @@
+#@ load("@ytt:data", "data")
+
+#@ def name(): return data.values.name
+#@ def username(): return data.values.username
+#@ def password(): return data.values.password
+
+#@ def skipper_datasource():
+url: jdbc:postgresql://${DB-SKIPPER_SERVICE_HOST}:${DB-SKIPPER_SERVICE_PORT}/db-skipper
+username: ${postgres-user}
+password: ${postgres-password}
+driverClassName: org.postgresql.Driver
+#@ end
+---
+#@ def dataflow_datasource():
+url: jdbc:postgresql://${DB-DATAFLOW_SERVICE_HOST}:${DB-DATAFLOW_SERVICE_PORT}/db-dataflow
+username: ${postgres-user}
+password: ${postgres-password}
+driverClassName: org.postgresql.Driver
+#@ end
+---

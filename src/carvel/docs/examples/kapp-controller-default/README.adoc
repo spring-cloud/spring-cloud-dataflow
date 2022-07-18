@@ -1,0 +1,53 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:example-kapp-controller-install: link:../kapp-controller-install[KApp Controller Install]
+endif::[]
+ifndef::env-github[]
+:example-kapp-controller-install: link:../kapp-controller-install[KApp Controller Install]
+endif::[]
+
+[[examples-kapp-controller-default]]
+== KApp Controller Default
+
+Follow instructions in {example-kapp-controller-install}.
+
+Deploy repository:
+
+[source, bash]
+----
+kapp deploy -y -a scdf-repo -f scdf-repo-ghcr.yml
+
+kubectl get packagerepositories
+NAME                          AGE     DESCRIPTION
+scdf-snapshot.tanzu.vmware    2m35s   Reconcile succeeded
+
+kubectl get packages
+NAME                                   PACKAGEMETADATA NAME    VERSION          AGE
+scdf.tanzu.vmware.com.2.8.5 SNAPSHOT   scdf.tanzu.vmware.com   2.8.5-SNAPSHOT   2m23s
+----
+
+NOTE: Above package and package repos are defined within public repos on a
+VMWare space so you don't get trouble with rate limiting(which would be
+a case with dockerhub).
+
+Install `2.8.5-SNAPSHOT` with `postgres` and `rabbit`:
+
+[source, bash]
+----
+kapp deploy \
+  -a scdf-demo \
+  -f scdf-values.yml \
+  -y
+
+kubectl get packageinstalls
+NAME        PACKAGE NAME            PACKAGE VERSION   DESCRIPTION   AGE
+scdf-demo   scdf.tanzu.vmware.com   2.8.5-SNAPSHOT    Reconciling   12s
+
+kubectl get packageinstalls
+NAME        PACKAGE NAME            PACKAGE VERSION   DESCRIPTION           AGE
+scdf-demo   scdf.tanzu.vmware.com   2.8.5-SNAPSHOT    Reconcile succeeded   88s
+----

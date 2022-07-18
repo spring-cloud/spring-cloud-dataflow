@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+#@ load("dataflow.lib.yml", "dataflow_config")
+#@ load("@ytt:yaml", "yaml")
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+data:
+  application.yaml: #@ yaml.encode(dataflow_config())

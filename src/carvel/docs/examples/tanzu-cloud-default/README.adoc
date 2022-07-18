@@ -1,0 +1,33 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:example-tanzu-default: link:../tanzu-default[Tanzu Default]
+endif::[]
+ifndef::env-github[]
+:example-tanzu-default: link:../tanzu-default[Tanzu Default]
+endif::[]
+
+[[examples-tanzu-cloud-default]]
+== Tanzu Cloud Default
+In this sample you're deploying _SCDF_ from an _airgapped_ into a _cloud_ environment
+using repository in a _ghcr_ where everything is relocated under a space of a that
+repository. If you look `scdf-values.yml` it simply uses defaults and defines
+_Dataflow_ server service type as `LoadBalancer` which is probably something
+you need if wanting to access server publicly.
+
+Setup repo `2.8.5-SNAPSHOT` repo:
+
+[source, bash]
+----
+tanzu package install scdf-demo \
+  --package-name scdf.tanzu.vmware.com \
+  --version 2.8.5-SNAPSHOT \
+  --values-file scdf-values.yml
+----
+
+Only difference to {example-tanzu-default} is that _Dataflow_ server
+service type is defind to be a `LoadBalancer` which exposes it
+from a cloud service.

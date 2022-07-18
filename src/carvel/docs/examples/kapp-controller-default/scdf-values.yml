@@ -1,0 +1,23 @@
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageInstall
+metadata:
+  name: scdf-demo
+spec:
+  serviceAccountName: default-ns-sa
+  packageRef:
+    refName: scdf.tanzu.vmware.com
+    versionSelection:
+      constraints: 2.8.5-SNAPSHOT
+      prereleases: {}
+  values:
+  - secretRef:
+      name: scdf-demo-values
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: scdf-demo-values
+stringData:
+  values.yml: |
+    ---

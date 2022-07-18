@@ -1,0 +1,9 @@
+apiVersion: imgpkg.carvel.dev/v1alpha1
+kind: Bundle
+metadata:
+  name: scdf
+authors:
+- name: Janne Valkealahti
+  email: janne.valkealahti@gmail.com
+websites:
+- url: https://spring.io/projects/spring-cloud-dataflow

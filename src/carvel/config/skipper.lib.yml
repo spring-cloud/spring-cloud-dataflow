@@ -1,0 +1,63 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("skipper.star", "env_config")
+#@ load("skipper.star", "has_image_pull_secrets")
+#@ load("skipper.star", "registry_secret_ref")
+#@ load("db/db.lib.yml", "skipper_datasource_config")
+#@ load("monitoring/monitoring.star", "grafana_enabled")
+
+#@ def skipper_platform_config():
+environmentVariables: #@ env_config()
+limits:
+  memory: 1024Mi
+  cpu: 500m
+readinessProbeDelay: 120
+livenessProbeDelay: 90
+#@ if has_image_pull_secrets():
+imagePullSecret: #@ registry_secret_ref()
+#@ else:
+imagePullSecret: reg-creds
+#@ end
+#@ end
+
+#@ def base_config():
+config:
+  spring:
+    cloud:
+      skipper:
+        server:
+          platform:
+            kubernetes:
+              accounts:
+                default: #@ skipper_platform_config()
+    datasource: #@ skipper_datasource_config()
+#@ end
+
+#@ def user_config():
+#@ if data.values.scdf.skipper.config:
+#@overlay/match-child-defaults missing_ok=True
+config: #@ data.values.scdf.skipper.config
+#@ end
+#@ end
+
+#@ def monitoring_config():
+#@ if grafana_enabled():
+#@overlay/match-child-defaults missing_ok=True
+config:
+  management:
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+          rsocket:
+            enabled: true
+            host: prometheus-rsocket-proxy
+            port: 7001
+#@ end
+#@ end
+
+
+#@ def skipper_config():
+--- #@ template.replace([overlay.apply(base_config(), monitoring_config(), user_config())["config"]])
+#@ end
