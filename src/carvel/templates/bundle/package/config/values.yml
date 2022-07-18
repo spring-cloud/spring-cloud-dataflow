@@ -1,0 +1,17 @@
+(@ load("@ytt:data", "data") @)#@data/values
+---
+scdf:
+  deploy:
+    binder:
+      type: rabbit
+    database:
+      type: mysql
+  server:
+    image:
+      tag: (@= data.values.project.version @)
+  ctr:
+    image:
+      tag: (@= data.values.project.version @)
+  skipper:
+    image:
+      tag: (@= data.values.spring.cloud.skipper.version @)

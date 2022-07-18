@@ -1,0 +1,12 @@
+#@data/values-schema
+---
+name: rabbitmq
+#@schema/type any=True
+config:
+image:
+  repository: rabbitmq
+  tag: 3.9.5
+  digest: ""
+username: ""
+password: ""
+registrySecretRef: ""

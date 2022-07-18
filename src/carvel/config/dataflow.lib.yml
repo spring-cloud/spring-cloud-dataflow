@@ -1,0 +1,65 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("db/db.lib.yml", "dataflow_datasource_config")
+#@ load("monitoring/monitoring.star", "grafana_enabled")
+#@ load("dataflow.star", "has_image_pull_secrets")
+#@ load("dataflow.star", "registry_secret_ref")
+
+#@ def dataflow_platform_config():
+limits:
+  memory: 1024Mi
+#@ if has_image_pull_secrets():
+imagePullSecret: #@ registry_secret_ref()
+#@ else:
+imagePullSecret: reg-creds
+#@ end
+#@ end
+
+#@ def base_config():
+config:
+  spring:
+    cloud:
+      dataflow:
+        task:
+          platform:
+            kubernetes:
+              accounts:
+                default: #@ dataflow_platform_config()
+    datasource: #@ dataflow_datasource_config()
+#@ end
+
+#@ def user_config():
+#@ if data.values.scdf.server.config:
+#@overlay/match-child-defaults missing_ok=True
+config: #@ data.values.scdf.server.config
+#@ end
+#@ end
+
+#@ def monitoring_config():
+#@ if grafana_enabled():
+#@overlay/match-child-defaults missing_ok=True
+config:
+  management:
+    metrics:
+      export:
+        prometheus:
+          enabled: true
+          rsocket:
+            enabled: true
+            host: prometheus-rsocket-proxy
+            port: 7001
+#@ if len(data.values.scdf.server.metrics.dashboard.url) > 0:
+  spring:
+    cloud:
+      dataflow:
+        metrics:
+          dashboard:
+            url: #@ data.values.scdf.server.metrics.dashboard.url
+#@ end
+#@ end
+#@ end
+
+#@ def dataflow_config():
+--- #@ template.replace([overlay.apply(base_config(), monitoring_config(), user_config())["config"]])
+#@ end

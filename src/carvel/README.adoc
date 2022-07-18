@@ -1,0 +1,39 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:docs: link:docs/README.adoc[Docs]
+endif::[]
+ifndef::env-github[]
+:docs: <<docs>>
+endif::[]
+
+= Spring Cloud Data Flow Carvel
+Contains _Carvel_ templating, package and package repository management.
+
+See main <<docs>>.
+
+== Development
+This module contains _NPM_ code simply for running templating test
+via it.
+
+Order to develop this moduly install _NPM_ environment and then
+run tests:
+[source, bash]
+----
+npm test
+----
+
+Run format before commit:
+[source, bash]
+----
+npm run format
+----
+
+You can run format check:
+[source, bash]
+----
+npm run format-check
+----

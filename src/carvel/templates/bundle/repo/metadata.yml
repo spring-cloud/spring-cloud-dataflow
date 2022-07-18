@@ -1,0 +1,15 @@
+#@ load("@ytt:data", "data")
+apiVersion: data.packaging.carvel.dev/v1alpha1
+kind: PackageMetadata
+metadata:
+  name: #@ data.values.package_repository.packageName
+  namespace: scdf
+spec:
+  displayName: "scdf"
+  longDescription: "Spring Cloud Data Flow"
+  shortDescription: "Spring Cloud Data Flow"
+  providerName: VMware
+  maintainers:
+  - name: Janne Valkealahti
+  categories:
+    - "dataflow"

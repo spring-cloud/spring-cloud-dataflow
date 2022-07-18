@@ -1,0 +1,11 @@
+#@ load("@ytt:data", "data")
+#@ load("skipper.lib.yml", "skipper_config")
+#@ load("@ytt:yaml", "yaml")
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skipper
+  labels:
+    app: skipper
+data:
+  application.yaml: #@ yaml.encode(skipper_config())

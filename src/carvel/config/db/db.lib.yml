@@ -1,0 +1,38 @@
+#@ load("@ytt:library", "library")
+#@ load("db.star", "db_external_dataflow")
+#@ load("db.star", "db_external_skipper")
+#@ load("db.star", "db_deploy_enabled")
+#@ load("db.star", "mysql_enabled")
+#@ load("db.star", "postgres_enabled")
+
+#@ def skipper_datasource_config():
+#@   if db_deploy_enabled():
+#@    if mysql_enabled():
+#@       fun = library.get("mysql").with_data_values({}).export("skipper_datasource")
+#@       return fun()
+#@    elif postgres_enabled():
+#@       fun = library.get("postgres").with_data_values({}).export("skipper_datasource")
+#@       return fun()
+#@    end
+#@   else:
+#@     return db_external_skipper()
+#@   end
+#@ end
+
+#@ def dataflow_datasource_config():
+#@   if db_deploy_enabled():
+#@    if mysql_enabled():
+#@       fun = library.get("mysql").with_data_values({}).export("dataflow_datasource")
+#@       return fun()
+#@    elif postgres_enabled():
+#@       fun = library.get("postgres").with_data_values({}).export("dataflow_datasource")
+#@       return fun()
+#@    end
+#@   else:
+#@     return db_external_dataflow()
+#@   end
+#@ end
+
+---
+#@ def db_overlay():
+#@ end

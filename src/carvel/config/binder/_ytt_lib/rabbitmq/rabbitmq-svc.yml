@@ -1,0 +1,12 @@
+#@ load("rabbitmq.lib.yml", "name")
+apiVersion: v1
+kind: Service
+metadata:
+  name: #@ name()
+  labels:
+    app: #@ name()
+spec:
+  ports:
+  - port: 5672
+  selector:
+    app: #@ name()

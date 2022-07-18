@@ -1,0 +1,24 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:scdf-deploy-database-enabled: link:configuration-options.adoc#configuration-options-scdf.deploy.database.enabled[scdf.deploy.database.enabled]
+:scdf-server-database-url: link:configuration-options.adoc#configuration-options-scdf.server.database.url[scdf.server.database.url]
+:scdf-skipper-database-url: link:configuration-options.adoc#configuration-options-scdf.skipper.database.url[scdf.skipper.database.url]
+endif::[]
+ifndef::env-github[]
+:scdf-deploy-database-enabled: <<configuration-options-scdf.deploy.database.enabled>>
+:scdf-server-database-url: <<configuration-options-scdf.server.database.url>>
+:scdf-skipper-database-url: <<configuration-options-scdf.skipper.database.url>>
+endif::[]
+
+[[database]]
+== Database
+On default a database is deployed as a service for both skipper and dataflow
+servers. Servers are configured to use these database services.
+
+=== Configure External Database
+Disable database deployment {scdf-deploy-database-enabled} and define a custom
+datasource for server {scdf-server-database-url} and skipper {scdf-skipper-database-url}.

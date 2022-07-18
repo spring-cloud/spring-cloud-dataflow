@@ -1,0 +1,78 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:scdf-server-config: link:configuration-options.adoc#configuration-options-scdf.server.config[scdf.server.config]
+:scdf-skipper-config: link:configuration-options.adoc#configuration-options-scdf.skipper.config[scdf.skipper.config]
+endif::[]
+ifndef::env-github[]
+:scdf-server-config: <<configuration-options-scdf.server.config>>
+:scdf-skipper-config: <<configuration-options-scdf.skipper.config>>
+endif::[]
+
+[[servers]]
+== Servers
+Both <<servers-dataflow>> and <<servers-skipper>> servers contain a same
+set of base configuration options in a different key space to drive
+needed settings to configure server settings.
+
+[[servers-dataflow]]
+=== Dataflow
+
+==== Server Config
+Define additional server config using {scdf-server-config}.
+
+[source, yaml]
+----
+scdf:
+  server:
+    config:
+      foo: bar
+----
+
+Essentially this is reflected into container `/workspace/config/application.yml` which is injected into boot application using `spring-cloud-kubernetes`:
+[source, yaml]
+----
+foo: bar
+----
+
+==== Composed Task Runner Config
+On default _CTR_ image location points to a docker hub with same version
+as a dataflow server. With _airgapped_ environment you need to change it:
+
+[source, yaml]
+----
+scdf:
+  ctr:
+    image:
+      repository: <my.docker.repo/my-relocated-image>
+      tag: <tag>
+      digest: <digest>
+----
+
+[NOTE]
+====
+Use either `tag` or `digest` as `digest` takes a precedence if defined.
+====
+
+[[servers-skipper]]
+=== Skipper
+
+==== Server Config
+Define additional server config using {scdf-skipper-config}.
+
+[source, yaml]
+----
+scdf:
+  server:
+    config:
+      foo: bar
+----
+
+Essentially this is reflected into container `/workspace/config/application.yml` which is injected into boot application using `spring-cloud-kubernetes`:
+[source, yaml]
+----
+foo: bar
+----

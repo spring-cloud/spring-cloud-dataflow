@@ -1,0 +1,42 @@
+#! Conditionally create configs for dataflow db by choosing different db types
+#@ load("@ytt:data", "data")
+#@ load("@ytt:library", "library")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("db.lib.yml", "db_overlay")
+#@ load("db.star", "mysql_enabled")
+#@ load("db.star", "postgres_enabled")
+#@ load("db.star", "db_postgres_username")
+#@ load("db.star", "db_postgres_password")
+#@ load("db.star", "db_mysql_username")
+#@ load("db.star", "db_mysql_password")
+
+#@ def db_postgres_values():
+name: db-dataflow
+username: #@ db_postgres_username()
+password: #@ db_postgres_password()
+image:
+  repository: #@ data.values.scdf.deploy.database.postgres.image.repository
+  tag: #@ data.values.scdf.deploy.database.postgres.image.tag
+  digest: #@ data.values.scdf.deploy.database.postgres.image.digest
+registrySecretRef: #@ data.values.scdf.registry.secret.ref
+#@ end
+
+#@ def db_mysql_values():
+name: db-dataflow
+username: #@ db_mysql_username()
+password: #@ db_mysql_password()
+image:
+  repository: #@ data.values.scdf.deploy.database.mysql.image.repository
+  tag: #@ data.values.scdf.deploy.database.mysql.image.tag
+  digest: #@ data.values.scdf.deploy.database.mysql.image.digest
+registrySecretRef: #@ data.values.scdf.registry.secret.ref
+#@ end
+
+#@ if mysql_enabled():
+--- #@ template.replace(overlay.apply(library.get("mysql").with_data_values(db_mysql_values()).eval(), db_overlay()))
+#@ end
+
+#@ if postgres_enabled():
+--- #@ template.replace(overlay.apply(library.get("postgres").with_data_values(db_postgres_values()).eval(), db_overlay()))
+#@ end

@@ -1,0 +1,19 @@
+= Random Notes
+Just notes useful for development and checking things out.
+
+== Checking Bundles
+What's inside package and package repository bundles.
+
+[source, bash]
+----
+imgpkg pull -b springcloud/scdf-repo:2.8.5-SNAPSHOT -o scdf-repo-snapshot
+imgpkg pull -b springcloud/scdf-package:2.8.5-SNAPSHOT -o scdf-package-snapshot
+----
+
+== Some debug notes
+Hook _multitool_ to get tools into cluster to check various things:
+
+[source, bash]
+----
+kubectl create deployment multitool --image=praqma/network-multitool
+----

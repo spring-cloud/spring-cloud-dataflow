@@ -1,0 +1,8 @@
+#@ load("@ytt:template", "template")
+#@ load("@ytt:overlay", "overlay")
+#@ load("monitoring/monitoring.lib.yml", "monitoring_config")
+#@ load("monitoring/monitoring.star", "monitoring_enabled")
+
+#@ if monitoring_enabled():
+--- #@ template.replace(overlay.apply(monitoring_config()))
+#@ end
