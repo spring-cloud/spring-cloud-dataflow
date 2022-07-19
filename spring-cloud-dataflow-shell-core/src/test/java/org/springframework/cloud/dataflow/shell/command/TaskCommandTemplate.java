@@ -115,7 +115,7 @@ public class TaskCommandTemplate {
 	public String getTaskExecutionLog(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
 		// TODO  investigate race condition, getting null results for execution log.
-		Thread.sleep(5000);
+		Thread.sleep(15000);
 		CommandResult cr = shell.executeCommand("task execution log --id " + id);
 
 		assertTrue("Task execution log = " + cr.toString(), cr.toString().contains("Starting"));
@@ -156,10 +156,10 @@ public class TaskCommandTemplate {
 
 	private void waitForDBToBePopulated(long id) throws Exception {
 		for (int waitTime = 0; waitTime <= MAX_WAIT_TIME; waitTime += WAIT_INTERVAL) {
-			Thread.sleep(WAIT_INTERVAL);
 			if (isEndTime(id)) {
 				break;
 			}
+			Thread.sleep(WAIT_INTERVAL);
 		}
 	}
 
