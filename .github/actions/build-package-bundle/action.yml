@@ -62,6 +62,7 @@ runs:
         --data-value-yaml server.version=$SERVER_VERSION \
         --data-value-yaml server.repository=$SERVER_REPOSITORY \
         --data-value-yaml ctr.version=$DATAFLOW_VERSION \
+        --data-value-yaml dataflow.version=$DATAFLOW_VERSION \
         --data-value-yaml skipper.version=$SKIPPER_VERSION \
         --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
         --data-value-yaml grafana.version=$DATAFLOW_VERSION \
@@ -75,6 +76,7 @@ runs:
         --data-value-yaml server.version=$SERVER_VERSION \
         --data-value-yaml server.repository=$SERVER_REPOSITORY \
         --data-value-yaml ctr.version=$DATAFLOW_VERSION \
+        --data-value-yaml dataflow.version=$DATAFLOW_VERSION \
         --data-value-yaml skipper.version=$SKIPPER_VERSION \
         --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
         --data-value-yaml grafana.version=$DATAFLOW_VERSION \
