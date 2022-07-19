@@ -58,9 +58,15 @@ runs:
       ytt \
         -f $PACKAGE_BUNDLE_TEMPLATE \
         --output-files $PACKAGE_BUNDLE_GENERATED \
-        --data-value-yaml project.version=$DATAFLOW_VERSION \
-        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
-        --file-mark 'config/values.yml:type=text-template'
+        --data-value-yaml project.version=$SERVER_VERSION \
+        --data-value-yaml server.version=$SERVER_VERSION \
+        --data-value-yaml server.repository=$SERVER_REPOSITORY \
+        --data-value-yaml ctr.version=$DATAFLOW_VERSION \
+        --data-value-yaml skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml grafana.version=$DATAFLOW_VERSION \
+        --data-value-yaml package.name=$PACKAGE_NAME \
+        --file-mark 'config/values.yml:type=text-template' \
+        --file-mark '.imgpkg/bundle.yaml:type=text-template'
       ytt \
         -f $IMGPKG_LOCK_TEMPLATE \
         --output-files $IMGPKG_LOCK_GENERATED_IN \
