@@ -10,6 +10,9 @@ jobs:
   build:
     if: github.repository_owner == 'spring-cloud'
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: true
     steps:
     - uses: actions/checkout@v2
     # cache maven repo
