@@ -107,7 +107,7 @@ spring:
             checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
       task:
         composedtaskrunner:
-          uri: "maven://org.springframework.cloud:spring-cloud-dataflow-composed-task-runner:@project.version@"
+          uri: "maven://org.springframework.cloud:spring-cloud-dataflow-composed-task-runner:@dataflow.version@"
         deployer-properties:
           group-excludes:
             - spring.cloud.deployer.kubernetes.fabric8
