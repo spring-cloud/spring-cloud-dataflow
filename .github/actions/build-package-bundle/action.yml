@@ -63,6 +63,7 @@ runs:
         --data-value-yaml server.repository=$SERVER_REPOSITORY \
         --data-value-yaml ctr.version=$DATAFLOW_VERSION \
         --data-value-yaml skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
         --data-value-yaml grafana.version=$DATAFLOW_VERSION \
         --data-value-yaml package.name=$PACKAGE_NAME \
         --file-mark 'config/values.yml:type=text-template' \
@@ -75,6 +76,7 @@ runs:
         --data-value-yaml server.repository=$SERVER_REPOSITORY \
         --data-value-yaml ctr.version=$DATAFLOW_VERSION \
         --data-value-yaml skipper.version=$SKIPPER_VERSION \
+        --data-value-yaml spring.cloud.skipper.version=$SKIPPER_VERSION \
         --data-value-yaml grafana.version=$DATAFLOW_VERSION \
         --file-mark '**/*.yml:type=text-template'
       cp -R $VENDIR_SRC_IN $PACKAGE_BUNDLE_GENERATED/config/upstream
