@@ -125,12 +125,7 @@ public class ComposedTaskPropertiesTests {
 	@Test
 	public void testAssignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
 		this.contextRunner
-				.withInitializer(context -> {
-					Map<String, Object> map = new HashMap<>();
-					map.put("oauth2ClientCredentialsClientAuthenticationMethod", "POST");
-					context.getEnvironment().getPropertySources().addLast(new SystemEnvironmentPropertySource(
-							StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, map));
-				})
+				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=POST")
 				.withUserConfiguration(Config1.class).run((context) -> {
 					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
 					assertThat(properties.getOauth2ClientCredentialsClientAuthenticationMethod())
