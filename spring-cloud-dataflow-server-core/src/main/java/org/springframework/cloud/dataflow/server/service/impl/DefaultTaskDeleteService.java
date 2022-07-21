@@ -320,6 +320,18 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
 
+		final Set<Long> stepExecutionIds = findStepExecutionIds(jobExecutionIds, chunkSize);
+
+		final AtomicInteger numberOfDeletedBatchStepExecutionContextRows = new AtomicInteger(0);
+		if (!stepExecutionIds.isEmpty()) {
+			deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds, chunkSize, numberOfDeletedBatchStepExecutionContextRows);
+		}
+
+		deleteStepAndJobExecutionsByJobExecutionId(jobExecutionIds, chunkSize, auditData, numberOfDeletedBatchStepExecutionContextRows);
+	
+	}
+	
+	private Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds, int chunkSize) {
 		final Set<Long> stepExecutionIds = ConcurrentHashMap.newKeySet();
 
 		if (chunkSize <= 0) {
@@ -333,32 +345,35 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 						stepExecutionIds.addAll(dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIdSubset));
 					});
 		}
+		
+		return stepExecutionIds;
+	}
+	
+	private void deleteBatchStepExecutionContextByStepExecutionIds(Set<Long> stepExecutionIds, int chunkSize, AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
+		if (chunkSize <= 0) {
+			numberOfDeletedBatchStepExecutionContextRows
+					.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds));
 
-		final AtomicInteger numberOfDeletedBatchStepExecutionContextRows = new AtomicInteger(
-				0);
-		if (!stepExecutionIds.isEmpty()) {
-			if (chunkSize <= 0) {
-				numberOfDeletedBatchStepExecutionContextRows
-						.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds));
-
-			}
-			else {
-				split(stepExecutionIds, chunkSize)
-						.stream()
-						.forEach(stepExecutionIdSubsetList -> {
-							Set<Long> stepExecutionIdSubset = new HashSet<>(stepExecutionIdSubsetList);
-							numberOfDeletedBatchStepExecutionContextRows.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIdSubset));
-						});
-			}
 		}
-
+		else {
+			split(stepExecutionIds, chunkSize)
+					.stream()
+					.forEach(stepExecutionIdSubsetList -> {
+						Set<Long> stepExecutionIdSubset = new HashSet<>(stepExecutionIdSubsetList);
+						numberOfDeletedBatchStepExecutionContextRows.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIdSubset));
+					});
+		}
+	}
+	
+	private void deleteStepAndJobExecutionsByJobExecutionId(Set<Long> jobExecutionIds, int chunkSize, Map<String, Object> auditData, AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
+		
 		final AtomicInteger numberOfDeletedBatchStepExecutionRows = new AtomicInteger(0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionContextRows = new AtomicInteger(
 				0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionParamRows = new AtomicInteger(
 				0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionRows = new AtomicInteger(0);
-
+		
 		if (chunkSize <= 0) {
 			numberOfDeletedBatchStepExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchStepExecutionsByJobExecutionIds(jobExecutionIds));
 			numberOfDeletedBatchJobExecutionContextRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionContextByJobExecutionIds(jobExecutionIds));
@@ -375,7 +390,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 						numberOfDeletedBatchJobExecutionRows.addAndGet(this.dataflowJobExecutionDao.deleteBatchJobExecutionByJobExecutionIds(jobExecutionIdSubset));
 					});
 		}
-
+		
 		final int numberOfDeletedUnusedBatchJobInstanceRows = dataflowJobExecutionDao.deleteUnusedBatchJobInstances();
 
 		logger.info(
