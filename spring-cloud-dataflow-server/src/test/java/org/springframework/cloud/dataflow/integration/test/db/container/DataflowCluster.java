@@ -295,6 +295,7 @@ public class DataflowCluster implements Startable {
 				databaseContainer.withExposedPorts(MSSQL_PORT);
 				databaseContainer.withNetworkAliases(databaseAlias);
 				databaseContainer.withNetwork(network);
+				databaseContainer.withUrlParam("encrypt", "false");
 				return databaseContainer;
 			} else if (clusterContainer.tag.startsWith(TagNames.ORACLE)) {
 				OracleContainer databaseContainer = new CustomOracleContainer(clusterContainer.image);
@@ -339,30 +340,26 @@ public class DataflowCluster implements Startable {
 		SkipperContainer<?> skipperContainer = new SkipperContainer<>(clusterContainer.image);
 		skipperContainer.withExposedPorts(SKIPPER_PORT);
 		if (databaseContainer != null) {
-			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
+			skipperContainer.withEnv("SPRING_CLOUD_CONFIG_ENABLED", "false");
+			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
+			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
+			skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", databaseContainer.getDriverClassName());
 			if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:postgresql://%s:%s/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
-				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
+						String.format("jdbc:postgresql://%s:%d/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
 			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MARIADB)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:mariadb://%s:%s/dataflow", skipperDatabaseAlias, MARIADB_PORT));
-				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
+						String.format("jdbc:mariadb://%s:%d/dataflow", skipperDatabaseAlias, MARIADB_PORT));
 			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MSSQL)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:sqlserver://%s:%s", skipperDatabaseAlias, MSSQL_PORT));
+						String.format("jdbc:sqlserver://%s:%d;encrypt=false", skipperDatabaseAlias, MSSQL_PORT));
 				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-				skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
-				skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
 			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.ORACLE)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:oracle:thin:spring/spring@%s:%s/ORCLPDB1", skipperDatabaseAlias, ORACLE_PORT));
-				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "oracle.jdbc.OracleDriver");
+						String.format("jdbc:oracle:thin:spring/spring@%s:%d/ORCLPDB1", skipperDatabaseAlias, ORACLE_PORT));
 			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.DB2)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:db2://%s:%s/spring", skipperDatabaseAlias, DB2_PORT));
-				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.ibm.db2.jcc.DB2Driver");
+						String.format("jdbc:db2://%s:%d/spring", skipperDatabaseAlias, DB2_PORT));
 			}
 		}
 
@@ -404,30 +401,25 @@ public class DataflowCluster implements Startable {
 		DataflowContainer<?> dataflowContainer = new DataflowContainer<>(clusterContainer.image);
 		dataflowContainer.withExposedPorts(DATAFLOW_PORT);
 		if (databaseContainer != null) {
-			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", "spring");
-			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", "spring");
+			dataflowContainer.withEnv("SPRING_CLOUD_CONFIG_ENABLED", "false");
+			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
+			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
+			dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", databaseContainer.getDriverClassName());
 			if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
-				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.postgresql.Driver");
 			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MARIADB)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT));
-				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "org.mariadb.jdbc.Driver");
 			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MSSQL)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
-						String.format("jdbc:sqlserver://%s:%s", dataflowDatabaseAlias, MSSQL_PORT));
-				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-				dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
-				dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
+						String.format("jdbc:sqlserver://%s:%s;encrypt=false", dataflowDatabaseAlias, MSSQL_PORT));
 			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.ORACLE)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:oracle:thin:spring/spring@%s:%s/ORCLPDB1", dataflowDatabaseAlias, ORACLE_PORT));
-				dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "oracle.jdbc.OracleDriver");
 			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.DB2)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:db2://%s:%s/spring", dataflowDatabaseAlias, DB2_PORT));
-						dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.ibm.db2.jcc.DB2Driver");
 			}
 		}
 		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",

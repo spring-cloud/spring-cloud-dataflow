@@ -17,11 +17,19 @@
 package org.springframework.cloud.dataflow.rest.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -29,6 +37,7 @@ import org.springframework.cloud.dataflow.core.DefinitionUtils;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.core.dsl.graph.Graph;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -38,15 +47,24 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class ArgumentSanitizer {
+	private final static Logger logger = LoggerFactory.getLogger(ArgumentSanitizer.class);
 
-	private static final String[] REGEX_PARTS = { "*", "$", "^", "+" };
+	private static final String[] REGEX_PARTS = {"*", "$", "^", "+"};
 
 	private static final String REDACTION_STRING = "******";
 
-	private static final String[] KEYS_TO_SANITIZE = { "username", "password", "secret", "key", "token", ".*credentials.*",
-			"vcap_services", "url" };
+	private static final String[] KEYS_TO_SANITIZE = {"username", "password", "secret", "key", "token", ".*credentials.*",
+			"vcap_services", "url"};
+
+	private final static TypeReference<Map<String, Object>> mapTypeReference = new TypeReference<Map<String, Object>>() {
+	};
+
+	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
+	private final ObjectMapper jsonMapper = new ObjectMapper();
 
 	private Pattern[] keysToSanitize;
 
@@ -81,7 +99,7 @@ public class ArgumentSanitizer {
 	 */
 	public String sanitize(String argument) {
 		// Oracle handles an empty string as a null.
-		if(argument == null) {
+		if (argument == null) {
 			return "";
 		}
 		int indexOfFirstEqual = argument.indexOf("=");
@@ -99,7 +117,7 @@ public class ArgumentSanitizer {
 	/**
 	 * Replaces a potential secure value with "******".
 	 *
-	 * @param key to check for sensitive words.
+	 * @param key   to check for sensitive words.
 	 * @param value the argument to cleanse.
 	 * @return the argument with a potentially sanitized value
 	 */
@@ -122,13 +140,12 @@ public class ArgumentSanitizer {
 	 * @return the sanitized job parameters
 	 */
 	public JobParameters sanitizeJobParameters(JobParameters jobParameters) {
-		Map<String,JobParameter> newJobParameters = new HashMap<>();
-		jobParameters.getParameters().forEach( (key, jobParameter) -> {
+		Map<String, JobParameter> newJobParameters = new HashMap<>();
+		jobParameters.getParameters().forEach((key, jobParameter) -> {
 			String updatedKey = !jobParameter.isIdentifying() ? "-" + key : key;
 			if (jobParameter.getType().equals(JobParameter.ParameterType.STRING)) {
 				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString())));
-			}
-			else {
+			} else {
 				newJobParameters.put(updatedKey, jobParameter);
 			}
 		});
@@ -142,7 +159,7 @@ public class ArgumentSanitizer {
 	 * @return Task definition text that has sensitive data redacted.
 	 */
 	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
-		if(StringUtils.isEmpty(taskDefinition.getDslText())) {
+		if (StringUtils.isEmpty(taskDefinition.getDslText())) {
 			return taskDefinition.getDslText();
 		}
 		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
@@ -161,13 +178,14 @@ public class ArgumentSanitizer {
 	/**
 	 * For all sensitive properties (e.g. key names containing words like password, secret,
 	 * key, token) replace the value with '*****' string
+	 *
 	 * @param properties to be sanitized
 	 * @return sanitized properties
 	 */
 	public Map<String, String> sanitizeProperties(Map<String, String> properties) {
 		if (!CollectionUtils.isEmpty(properties)) {
 			final Map<String, String> sanitizedProperties = new LinkedHashMap<>(properties.size());
-			for (Map.Entry<String, String > property : properties.entrySet()) {
+			for (Map.Entry<String, String> property : properties.entrySet()) {
 				sanitizedProperties.put(property.getKey(), this.sanitize(property.getKey(), property.getValue()));
 			}
 			return sanitizedProperties;
@@ -178,6 +196,7 @@ public class ArgumentSanitizer {
 	/**
 	 * For all sensitive arguments (e.g. key names containing words like password, secret,
 	 * key, token) replace the value with '*****' string
+	 *
 	 * @param arguments to be sanitized
 	 * @return sanitized arguments
 	 */
@@ -190,5 +209,97 @@ public class ArgumentSanitizer {
 			return sanitizedArguments;
 		}
 		return arguments;
+	}
+
+	public HttpHeaders sanitizeHeaders(HttpHeaders headers) {
+		HttpHeaders result = new HttpHeaders();
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			List<String> values = entry.getValue();
+			for (String value : values) {
+				result.add(entry.getKey(), sanitize(entry.getKey(), value));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Will replace sensitive string value in the Map with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return the sanitized map.
+	 */
+	public Map<String, Object> sanitizeMap(Map<String, Object> input) {
+		Map<String, Object> result = new HashMap<>();
+		for (Map.Entry<String, Object> entry : input.entrySet()) {
+			if (entry.getValue() instanceof String) {
+				result.put(entry.getKey(), sanitize(entry.getKey(), (String) entry.getValue()));
+			} else if (entry.getValue() instanceof Map) {
+				Map<String, Object> map = (Map<String, Object>) entry.getValue();
+				result.put(entry.getKey(), sanitizeMap(map));
+			} else {
+				result.put(entry.getKey(), entry.getValue());
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Will replace the sensitive string fields with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return The sanitized JSON string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeJsonString(String input) throws JsonProcessingException {
+		if (input == null) {
+			return null;
+		}
+		Map<String, Object> data = jsonMapper.readValue(input, mapTypeReference);
+		return jsonMapper.writeValueAsString(sanitizeMap(data));
+	}
+
+	/**
+	 * Will replace the sensitive string fields with '*****'
+	 *
+	 * @param input to be sanitized
+	 * @return The sanitized YAML string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeYamlString(String input) throws JsonProcessingException {
+		if (input == null) {
+			return null;
+		}
+		Map<String, Object> data = yamlMapper.readValue(input, mapTypeReference);
+		return yamlMapper.writeValueAsString(sanitizeMap(data));
+	}
+
+	/**
+	 * Will determine the type of data and treat as JSON or YAML to sanitize sensitive values.
+	 *
+	 * @param input to be sanitized
+	 * @return the sanitized string
+	 * @throws JsonProcessingException
+	 */
+	public String sanitizeJsonOrYamlString(String input) {
+		if (input == null) {
+			return null;
+		}
+		try { // Try parsing as JSON
+			return sanitizeJsonString(input);
+		} catch (Throwable x) {
+			logger.trace("Cannot parse as JSON:" + x);
+		}
+		try {
+			return sanitizeYamlString(input);
+		} catch (Throwable x) {
+			logger.trace("Cannot parse as YAML:" + x);
+		}
+		if (input.contains("\n")) {
+			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "\n"))), "\n");
+		}
+		if (input.contains("--")) {
+			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "--"))), "--");
+		}
+		return sanitize(input);
 	}
 }

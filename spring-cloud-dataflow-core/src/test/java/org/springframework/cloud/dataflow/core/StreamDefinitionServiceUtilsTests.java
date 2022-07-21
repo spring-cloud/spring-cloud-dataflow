@@ -213,13 +213,13 @@ public class StreamDefinitionServiceUtilsTests {
 		streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
 				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
 				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
-				"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+				"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****' | " +
 				"cust-processor | router --default-output-channel=out");
 
 		assertEquals("jdbc-mssql --cron='/10 * * * * *' " +
 						"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
-						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+						"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
 				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 
@@ -231,13 +231,13 @@ public class StreamDefinitionServiceUtilsTests {
 		StreamDefinition streamDefinition = new StreamDefinition("stream2", "jdbc-mssql --cron='/10 * * * * *' " +
 				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
 				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
-				"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+				"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****' | " +
 				"cust-processor | router --default-output-channel=out");
 
 		assertEquals("jdbc-mssql --cron='/10 * * * * *' " +
 						"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
 						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
-						"--url='jdbc:sqlserver://db:1433;databaseName=Spring' --username='*****' | " +
+						"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****' | " +
 						"cust-processor | router --default-output-channel=out",
 				this.streamDefinitionService.constructDsl(streamDefinition.getDslText(), this.streamDefinitionService.getAppDefinitions(streamDefinition)));
 	}

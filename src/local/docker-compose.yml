@@ -1,0 +1,71 @@
+version: '3'
+## This compose file only starts database and messaging so that dataflow can be executed locally.
+# Configuration environment variables:
+# - SKIPPER_VERSION specify what Skipper image versions to use.
+# - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-register.
+# - HOST_MOUNT_PATH and DOCKER_MOUNT_PATH are used to set the host and docker mount folders.
+#   If not set HOST_MOUNT_PATH defaults to the local host folder where the docker compose is being started.
+#   If not set DOCKER_MOUNT_PATH defaults to /home/cnb/scdf on dataflow-server and skipper containers.
+#   Example to mount the local Maven repository: HOST_MOUNT_PATH=~/.m2 DOCKER_MOUNT_PATH=/home/cnb/.m2  docker-compose up
+# - APPS_PORT_RANGE allows you to override the port range exported by the Skipper server. By default the APPS_PORT_RANGE
+#   must supersede the local deployer's PORTRANGE_LOW and PORTRANGE_HIGH - the ports assigned to the stream apps run inside the Skipper container.
+#   The stream apps tha run in their own docker containers must set [DOCKER_PORTRANGE_LOW, DOCKER_PORTRANGE_HIGH] range that
+#   doesn't overlap with the APPS_PORT_RANGE.
+#
+# Exposed container ports:
+# - 7577:7577               - Skipper server port (http://localhost:7577/api)
+# - 20000-20105:20000-20105 - Port range for all deployed stream applications that run inside the Skipper container (e.g. maven:// registered apps).
+#                             That means you can reach the application's actuator endpoints from your host machine.
+#                             The deployed stream applications that run in their own docker containers (e.g. docker:// registered apps),
+#                             can be reached on the ports they expose.
+services:
+  mariadb:
+    image: mariadb:10.4.22
+    container_name: dataflow-mariadb
+    environment:
+      MARIADB_DATABASE: 'dataflow'
+      MARIADB_USER: 'spring'
+      MARIADB_PASSWORD: 'spring'
+      MARIADB_ROOT_PASSWORD: 'spring'
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+
+  rabbitmq:
+    image: rabbitmq:3.7
+    container_name: dataflow-rabbitmq
+    ports:
+      - "5672:5672"
+    expose:
+      - '5672'
+
+  skipper-server:
+    depends_on:
+      - rabbitmq
+      - mariadb
+    profiles:
+      - skipper
+    user: root
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.0-SNAPSHOT}${BP_JVM_VERSION:-}
+    container_name: skipper
+    ports:
+      - "7577:7577"
+      - ${APPS_PORT_RANGE:-20000-20195:20000-20195}
+    environment:
+      SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW: 20000
+      SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH: 20190
+      SPRING_DATASOURCE_URL: 'jdbc:mariadb://mariadb:3306/dataflow'
+      SPRING_DATASOURCE_USERNAME: 'spring'
+      SPRING_DATASOURCE_PASSWORD: 'spring'
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'org.mariadb.jdbc.Driver'
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER: 'DEBUG'
+    entrypoint: >
+      /bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
+         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
+         chmod a+x /tmp/wait-for-it.sh &&
+         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
+    restart: always
+    volumes:
+      - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}

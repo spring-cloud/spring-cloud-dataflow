@@ -420,19 +420,19 @@ public class DataFlowIT {
                 .definition("http | transform --expression=payload.toUpperCase() | log")
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             assertThat(stream.getStatus()).is(
                     condition(status -> status.equals(DEPLOYING) || status.equals(PARTIAL)));
 
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
 
             runtimeApps.httpPost(stream.getName(), "http", message);
-
-            Awaitility.await().until(() -> stream.logs(app("log")).contains(message.toUpperCase()));
+            final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
+            Awaitility.await().until(() -> logOffset.logs().contains(message.toUpperCase()));
         }
     }
 
@@ -454,9 +454,9 @@ public class DataFlowIT {
                 .put("app.log.logging.pattern.level",
                         "WOODCHUCK-${INSTANCE_INDEX:${CF_INSTANCE_INDEX:${spring.cloud.stream.instanceIndex:666}}} %5p")
                 .build())) {
-
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message = "How much wood would a woodchuck chuck if a woodchuck could chuck wood";
@@ -507,8 +507,9 @@ public class DataFlowIT {
                         .put("version.ver-log", VERSION_3_0_1)
                         .build())) {
 
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             // Helper supplier to retrieve the ver-log version from the stream's current manifest.
@@ -536,7 +537,7 @@ public class DataFlowIT {
 
             stream.update(new DeploymentPropertiesBuilder().put("version.ver-log", VERSION_2_1_5).build());
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 2-%s ", RANDOM_SUFFIX));
@@ -548,7 +549,7 @@ public class DataFlowIT {
 
             stream.rollback(0);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             awaitSendAndReceiveTestMessage.accept(String.format("TEST MESSAGE 3-%s ", RANDOM_SUFFIX));
@@ -592,8 +593,9 @@ public class DataFlowIT {
                         .putAll(testDeploymentProperties())
                         .put("deployer.*.count", "" + appInstanceCount)
                         .build())) {
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
@@ -615,13 +617,13 @@ public class DataFlowIT {
                     .build());
 
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
-
+            AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
             Awaitility.await().until(
-                    () -> stream.logs(app("log")).contains("Updated TICKTOCK - TIMESTAMP:"));
+                    () -> logOffset.logs().contains("Updated TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(2);
             Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
@@ -632,13 +634,13 @@ public class DataFlowIT {
             stream.rollback(0);
 
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             streamAssertions.accept(stream);
 
             Awaitility.await().until(
-                    () -> stream.logs(app("log")).contains("TICKTOCK - TIMESTAMP:"));
+                    () -> logOffset.logs().contains("TICKTOCK - TIMESTAMP:"));
 
             assertThat(stream.history().size()).isEqualTo(3);
             Awaitility.await().until(() -> stream.history().get(1).equals(DELETED));
@@ -671,9 +673,9 @@ public class DataFlowIT {
                 .definition("time | log --log.expression='TICKTOCK - TIMESTAMP: '.concat(payload)")
                 .create()
                 .deploy(testDeploymentProperties())) {
-
+            final AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             final StreamApplication time = app("time");
@@ -688,7 +690,7 @@ public class DataFlowIT {
             stream.scaleApplicationInstances(log, 2, Collections.emptyMap());
 
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
             Awaitility.await().until(() -> stream.runtimeApps().get(log).size() == 2);
 
@@ -714,19 +716,20 @@ public class DataFlowIT {
                         .definition("http > :LOG-DESTINATION")
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog logSinkOffset = AwaitUtils.logOffset(logStream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(logStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(logSinkOffset))
                     .until(() -> logStream.getStatus().equals(DEPLOYED));
+            AwaitUtils.StreamLog httpSourceOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(httpStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(httpSourceOffset))
                     .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
 
             runtimeApps.httpPost(httpStream.getName(), "http", message);
-
-            Awaitility.await().until(() -> logStream.logs(app("log")).contains(message));
+            AwaitUtils.StreamLog logSinkLogOffset = AwaitUtils.logOffset(logStream, "log");
+            Awaitility.await().until(() -> logSinkLogOffset.logs().contains(message));
         }
     }
 
@@ -744,12 +747,13 @@ public class DataFlowIT {
                         .definition(":taphttp.http > log")
                         .create()
                         .deploy(testDeploymentProperties())) {
-
+            AwaitUtils.StreamLog httpLogOffset = AwaitUtils.logOffset(httpLogStream);
+            AwaitUtils.StreamLog tapLogOffset = AwaitUtils.logOffset(tapStream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(httpLogStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(httpLogOffset))
                     .until(() -> httpLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(tapStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(tapLogOffset))
                     .until(() -> tapStream.getStatus().equals(DEPLOYED));
 
             String message = "Unique Test message: " + new Random().nextInt();
@@ -779,15 +783,17 @@ public class DataFlowIT {
                         .definition("http > :MANY-TO-ONE-DESTINATION")
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(logStream);
+            AwaitUtils.StreamLog httpOffsetOne = AwaitUtils.logOffset(httpStreamOne);
+            AwaitUtils.StreamLog httpOffsetTwo = AwaitUtils.logOffset(httpStreamTwo);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(logStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(logOffset))
                     .until(() -> logStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(httpStreamOne))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetOne))
                     .until(() -> httpStreamOne.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(httpStreamTwo))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(httpOffsetTwo))
                     .until(() -> httpStreamTwo.getStatus().equals(DEPLOYED));
 
             String messageOne = "Unique Test message: " + new Random().nextInt();
@@ -825,23 +831,26 @@ public class DataFlowIT {
                         .definition("http | router --expression=payload.contains('a')?'foo':'bar'")
                         .create()
                         .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog fooOffset = AwaitUtils.logOffset(fooLogStream);
+            AwaitUtils.StreamLog barOffset = AwaitUtils.logOffset(barLogStream);
+            AwaitUtils.StreamLog httpOffset = AwaitUtils.logOffset(httpStream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(fooLogStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(fooOffset))
                     .until(() -> fooLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(barLogStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(barOffset))
                     .until(() -> barLogStream.getStatus().equals(DEPLOYED));
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(httpStream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(httpOffset))
                     .until(() -> httpStream.getStatus().equals(DEPLOYED));
 
             String httpAppUrl = runtimeApps.getApplicationInstanceUrl(httpStream.getName(), "http");
             runtimeApps.httpPost(httpAppUrl, "abcd");
             runtimeApps.httpPost(httpAppUrl, "defg");
-
-            Awaitility.await().until(() -> fooLogStream.logs(app("log")).contains("abcd-foo"));
-            Awaitility.await().until(() -> barLogStream.logs(app("log")).contains("defg-bar"));
+            AwaitUtils.StreamLog fooLogOffset = AwaitUtils.logOffset(fooLogStream, "log");
+            AwaitUtils.StreamLog barLogOffset = AwaitUtils.logOffset(barLogStream, "log");
+            Awaitility.await().until(() -> fooLogOffset.logs().contains("abcd-foo"));
+            Awaitility.await().until(() -> barLogOffset.logs().contains("defg-bar"));
         }
     }
 
@@ -887,16 +896,17 @@ public class DataFlowIT {
                                 "--spring.cloud.dataflow.client.serverUri=" + dataFlowClientProperties.getServerUri())
                         .create()
                         .deploy(testDeploymentProperties())) {
-
+                    AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
                     Awaitility.await()
-                            .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                            .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                             .until(() -> stream.getStatus().equals(DEPLOYED));
 
                     HttpHeaders headers = new HttpHeaders();
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 
-                    runtimeApps.httpPost(stream.getName(), "http", "{\"name\" : \"" + taskName + "\"}", headers);
+                    byte[] data = ("{\"name\" : \"" + taskName + "\"}").getBytes(StandardCharsets.UTF_8);
+                    runtimeApps.httpPost(stream.getName(), "http", data, headers);
 
                     AtomicLong launchId = new AtomicLong();
                     Awaitility.await()
@@ -941,9 +951,9 @@ public class DataFlowIT {
                         "http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14
@@ -1013,9 +1023,9 @@ public class DataFlowIT {
                         "http | analytics --analytics.name=my_http_analytics --analytics.tag.expression.msgSize=payload.length()")
                 .create()
                 .deploy(testDeploymentProperties("http"))) {
-
+            AwaitUtils.StreamLog offset = AwaitUtils.logOffset(stream);
             Awaitility.await()
-                    .failFast(() -> AwaitUtils.hasErrorInLog(stream))
+                    .failFast(() -> AwaitUtils.hasErrorInLog(offset))
                     .until(() -> stream.getStatus().equals(DEPLOYED));
 
             String message1 = "Test message 1"; // length 14

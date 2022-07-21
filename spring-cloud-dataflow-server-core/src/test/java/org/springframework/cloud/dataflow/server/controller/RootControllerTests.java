@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +29,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,6 +37,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,13 +63,16 @@ public class RootControllerTests {
 
 	@Test
 	public void testRootControllerResponse() throws Exception {
-		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-		String expectedResult = StreamUtils.copyToString(
-				new DefaultResourceLoader().getResource("classpath:/root-controller-result.json").getInputStream(),
-				StandardCharsets.UTF_8);
-
-		Assert.assertEquals(expectedResult.replace("\n", ""), mvcResult);
+		Resource resource = new DefaultResourceLoader().getResource("classpath:/root-controller-result.json");
+		String expectedResult = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
+		ObjectMapper mapper = new ObjectMapper();
+		assertEquals(mapper.readTree(expectedResult), mapper.readTree(mvcResult));
 	}
 }
