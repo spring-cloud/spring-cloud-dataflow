@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 /**
  * Configuration properties used to setup the ComposedTaskRunner.
@@ -99,6 +100,12 @@ public class ComposedTaskProperties {
 	 */
 	private String oauth2ClientCredentialsClientSecret;
 
+	/**
+	 * The OAuth2 Client Authentication Method (Used for client credentials grant to
+	 * specify how {@link #oauth2ClientCredentialsClientId} and {@link #oauth2ClientCredentialsClientSecret} are
+	 * going to be sent).
+	 */
+	private ClientAuthenticationMethod oauth2ClientCredentialsClientAuthenticationMethod;
 	/**
 	 * Token URI for the OAuth2 provider (Used for the client credentials grant).
 	 */
@@ -372,6 +379,14 @@ public class ComposedTaskProperties {
 
 	public void setOauth2ClientCredentialsClientSecret(String oauth2ClientCredentialsClientSecret) {
 		this.oauth2ClientCredentialsClientSecret = oauth2ClientCredentialsClientSecret;
+	}
+
+	public ClientAuthenticationMethod getOauth2ClientCredentialsClientAuthenticationMethod(){
+		return oauth2ClientCredentialsClientAuthenticationMethod;
+	}
+
+	public void setOauth2ClientCredentialsClientAuthenticationMethod(ClientAuthenticationMethod oauth2ClientCredentialsClientAuthenticationMethod){
+		this.oauth2ClientCredentialsClientAuthenticationMethod = oauth2ClientCredentialsClientAuthenticationMethod;
 	}
 
 	public String getOauth2ClientCredentialsTokenUri() {
