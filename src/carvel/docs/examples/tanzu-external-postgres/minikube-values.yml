@@ -1,0 +1,19 @@
+scdf:
+  deploy:
+    database:
+      enabled: false
+  server:
+    service:
+      type:
+        NodePort
+    database:
+      url: jdbc:postgresql://${POSTGRES-DATAFLOW_SERVICE_HOST}:${POSTGRES-DATAFLOW_SERVICE_PORT}/scdf
+      username: scdf
+      password: <pw created by controller>
+      driverClassName: org.postgresql.Driver
+  skipper:
+    database:
+      url: jdbc:postgresql://${POSTGRES-DATAFLOW_SERVICE_HOST}:${POSTGRES-DATAFLOW_SERVICE_PORT}/scdf
+      username: scdf
+      password: <pw created by controller>
+      driverClassName: org.postgresql.Driver

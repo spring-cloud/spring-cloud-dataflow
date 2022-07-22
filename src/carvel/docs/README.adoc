@@ -7,9 +7,13 @@ ifdef::env-github[]
 endif::[]
 :servers: link:servers.adoc[Servers]
 :examples: link:examples.adoc[Examples]
+:options: link:configuration-options.adoc[Configuration Options]
+:debug: link:debug.adoc[Debug]
 ifndef::env-github[]
 :servers: <<servers>>
 :examples: <<examples>>
+:options: <<options>>
+:debug: <<debug>>
 endif::[]
 
 = Spring Cloud Data Flow Carvel Documentation
@@ -27,6 +31,8 @@ link:binder.adoc[Binder]
 link:database.adoc[Database]
 
 link:examples.adoc[Examples]
+
+link:debug.adoc[Debug]
 
 endif::[]
 
@@ -80,6 +86,12 @@ comes with a price of maintaining created resources manually. Essentially this
 means you need to be aware of what resources are created if those needs
 to be cleared or maintained in a future.
 
+All resources are created at a same time and if databases are deployed
+as services, you may see _dataflow_ and _skipper_ servers to restart
+if cluster didn't bring up databases up fast enough. With _carvel_ this
+is handled by services waiting reconciliation before deploying dependant
+services.
+
 [[deployment-kapp]]
 ==== Deploy via kapp
 Essentially much like deploying with _kubectl_ but uses _kapp_ spesific
@@ -117,13 +129,19 @@ managing a _worker cluster_. If you don't want to down this route it
 may be easier to work with lower level deployment options mentioned above.
 ====
 
+=== Configuration Options
+For possible configuration options for carvel, see {options}.
+
 === Configure Servers
 More info to configure servers see {servers}.
 
 === Binder and Database
 Whether you want to use _rabbit_ or a _kafka_ as a binder and _mysql_ or
-a _postgres_ as a database we provided easy deployment which steps away when
+_postgres_ as a database we provide easy deployment which steps away when
 external services are defined.
 
 ==== Use Deployed Services
 On default _postgres_ and _rabbit_ are used as a database and a binder.
+
+=== Debug Servers
+More info to debug servers see {debug}.

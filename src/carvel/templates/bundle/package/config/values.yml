@@ -8,10 +8,16 @@ scdf:
       type: mysql
   server:
     image:
-      tag: (@= data.values.project.version @)
+      repository: (@= data.values.server.repository @)
+      tag: (@= data.values.server.version @)
   ctr:
     image:
-      tag: (@= data.values.project.version @)
+      tag: (@= data.values.ctr.version @)
   skipper:
     image:
-      tag: (@= data.values.spring.cloud.skipper.version @)
+      tag: (@= data.values.skipper.version @)
+  feature:
+    monitoring:
+      grafana:
+        image:
+          tag: (@= data.values.grafana.version @)

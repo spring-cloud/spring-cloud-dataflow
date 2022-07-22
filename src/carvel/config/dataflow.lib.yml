@@ -18,6 +18,11 @@ imagePullSecret: reg-creds
 
 #@ def base_config():
 config:
+#@ if has_context_path():
+  server:
+    servlet:
+      context-path: #@ context_path()
+#@ end
   spring:
     cloud:
       dataflow:

@@ -1,7 +1,9 @@
+(@ load("@ytt:data", "data") @)
+---
 apiVersion: imgpkg.carvel.dev/v1alpha1
 kind: Bundle
 metadata:
-  name: scdf
+  name: (@= data.values.package.name @)
 authors:
 - name: Janne Valkealahti
   email: janne.valkealahti@gmail.com

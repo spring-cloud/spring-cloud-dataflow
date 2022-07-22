@@ -33,7 +33,7 @@ image:
 registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
-#@ if mysql_enabled():
+#@ if mariadb_enabled():
 --- #@ template.replace(overlay.apply(library.get("mysql").with_data_values(db_mysql_values()).eval(), db_overlay()))
 #@ end
 

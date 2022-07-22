@@ -3,7 +3,10 @@
 #@ load("dataflow.star", "ctr_image")
 #@ load("dataflow.star", "dataflow_container_env")
 #@ load("dataflow.star", "has_image_pull_secrets")
+#@ load("dataflow.star", "registry_secret_ref")
 #@ load("dataflow.star", "image_pull_secrets")
+#@ load("dataflow.star", "dataflow_liveness_path")
+#@ load("dataflow.star", "dataflow_readiness_path")
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,27 +36,30 @@ spec:
           mountPath: /workspace/config
           readOnly: true
         - name: database
-          mountPath: /etc/secrets/database
+          mountPath: /workspace/runtime/secrets/database
+          readOnly: true
+        - name: scdfmetadata
+          mountPath: /workspace/runtime/secrets
           readOnly: true
         ports:
         - containerPort: 80
         livenessProbe:
           httpGet:
-            path: /management/health
+            path: #@ dataflow_liveness_path()
             port: 9393
           initialDelaySeconds: 45
         readinessProbe:
           httpGet:
-            path: /management/info
+            path: #@ dataflow_readiness_path()
             port: 9393
           initialDelaySeconds: 45
         resources:
           limits:
-            cpu: 1.0
-            memory: 2048Mi
+            cpu: #@ data.values.scdf.server.resources.limits.cpu
+            memory: #@ data.values.scdf.server.resources.limits.memory
           requests:
-            cpu: 0.5
-            memory: 1024Mi
+            cpu: #@ data.values.scdf.server.resources.requests.cpu
+            memory: #@ data.values.scdf.server.resources.requests.memory
         env: #@ dataflow_container_env()
       serviceAccountName: scdf-sa
       #@ if has_image_pull_secrets():
@@ -71,3 +77,12 @@ spec:
       - name: database
         secret:
           secretName: db-dataflow
+      #@ if has_image_pull_secrets():
+      - name: scdfmetadata
+        secret:
+          secretName: #@ registry_secret_ref()
+      #@ else:
+      - name: scdfmetadata
+        secret:
+          secretName: reg-creds
+      #@ end

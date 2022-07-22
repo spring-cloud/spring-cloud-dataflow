@@ -1,0 +1,86 @@
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+:scdf-server-env: link:configuration-options.adoc#configuration-options-scdf.server.env[scdf.server.env]
+:scdf-skipper-env: link:configuration-options.adoc#configuration-options-scdf.skipper.env[scdf.skipper.env]
+endif::[]
+ifndef::env-github[]
+:scdf-server-env: <<configuration-options-scdf.server.env>>
+:scdf-skipper-env: <<configuration-options-scdf.skipper.env>>
+endif::[]
+
+[[debug]]
+== Debug
+There are times when you need to debug a _dataflow_ environment running on a
+_k8s_ cluster. Here are tips what you can do.
+
+[[debug-dataflow]]
+=== Dataflow
+To prepare running _dataflow_ container to accept a debugger, configure
+container environment values to have `JAVA_TOOL_OPTIONS` using {scdf-server-env}.
+
+[source, yaml]
+----
+scdf:
+  server:
+    env:
+    - name: JAVA_TOOL_OPTIONS
+      value: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005
+----
+
+Find _pod_ name for server and forward port.
+
+[source, bash]
+----
+$ kubectl get pod
+NAME                           READY   STATUS    RESTARTS   AGE
+db-dataflow-5f54b69b9b-ms78g   1/1     Running   0          5m17s
+db-skipper-58bfcb6f4-xnkl4     1/1     Running   0          5m17s
+rabbitmq-6df954df66-xhbfj      1/1     Running   0          5m18s
+scdf-server-8698c78d9-2r574    1/1     Running   0          5m17s
+skipper-6b8fd4f9bd-xf86v       1/1     Running   0          5m17s
+
+$ kubectl port-forward pod/scdf-server-8698c78d9-2r574 5005:5005
+----
+
+Now you can point your favourite _IDE_ debugger into it.
+
+TIP: Dataflow's vscode has a launch configuration to attach debugger to
+     localhost port 5005.
+
+[[debug-skipper]]
+=== Skipper
+To prepare running _skipper_ container to accept a debugger, configure
+container environment values to have `JAVA_TOOL_OPTIONS` using {scdf-skipper-env}.
+
+[source, yaml]
+----
+scdf:
+  skipper:
+    env:
+    - name: JAVA_TOOL_OPTIONS
+      value: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:6006
+----
+
+Find _pod_ name for server and forward port.
+
+[source, bash]
+----
+$ kubectl get pod
+NAME                           READY   STATUS    RESTARTS   AGE
+db-dataflow-5f54b69b9b-ms78g   1/1     Running   0          5m17s
+db-skipper-58bfcb6f4-xnkl4     1/1     Running   0          5m17s
+rabbitmq-6df954df66-xhbfj      1/1     Running   0          5m18s
+scdf-server-8698c78d9-2r574    1/1     Running   0          5m17s
+skipper-6b8fd4f9bd-xf86v       1/1     Running   0          5m17s
+
+$ kubectl port-forward pod/skipper-6b8fd4f9bd-xf86v 6006:6006
+----
+
+Now you can point your favourite _IDE_ debugger into it.
+
+TIP: Skipper's vscode has a launch configuration to attach debugger to
+     localhost port 6006.

@@ -19,7 +19,7 @@ Deploy controller:
 kapp deploy \
   -a sg \
   -y \
-  -f https://github.com/vmware-tanzu/carvel-secretgen-controller/releases/download/v0.5.0/release.yml
+  -f https://github.com/vmware-tanzu/carvel-secretgen-controller/releases/latest/download/release.yml
 ----
 
 Deploy secrets:

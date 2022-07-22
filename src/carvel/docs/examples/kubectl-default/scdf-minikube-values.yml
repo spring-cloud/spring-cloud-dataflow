@@ -1,6 +1,9 @@
 #@data/values
 ---
 scdf:
+  deploy:
+    database:
+      type: mysql
   server:
     image:
       tag: 2.9.5-SNAPSHOT
@@ -9,7 +12,7 @@ scdf:
         NodePort
   skipper:
     image:
-      tag: 2.8.1-SNAPSHOT
+      tag: 2.8.5-SNAPSHOT
   ctr:
     image:
       tag: 2.9.5-SNAPSHOT

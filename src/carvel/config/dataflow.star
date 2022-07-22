@@ -32,7 +32,7 @@ def dataflow_container_env():
   envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI", "value": "docker://" + ctr_image()}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API", "value": "false"}])
-  envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_PATHS", "value": "/etc/secrets"}])
+  envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_PATHS", "value": "/workspace/runtime/secrets"}])
   envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_SERVER_URI", "value": "http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}"}])
   envs.extend([{"name": "SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI", "value": "http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api"}])
   envs.extend([{"name": "SPRING_APPLICATION_JSON", "value": "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"}])
@@ -42,6 +42,9 @@ def dataflow_container_env():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST", "value": "prometheus-rsocket-proxy"}])
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
     envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL", "value": "http://localhost:3000"}])
+  end
+  for e in data.values.scdf.server.env:
+    envs.extend([{"name": e.name, "value": e.value}])
   end
   return envs
 end
@@ -60,4 +63,20 @@ end
 
 def service_spec_type():
   return data.values.scdf.server.service.type
+end
+
+def context_path():
+  return data.values.scdf.server.contextPath
+end
+
+def has_context_path():
+  return non_empty_string(data.values.scdf.server.contextPath)
+end
+
+def dataflow_liveness_path():
+  return data.values.scdf.server.contextPath + "/management/health"
+end
+
+def dataflow_readiness_path():
+  return data.values.scdf.server.contextPath + "/management/info"
 end

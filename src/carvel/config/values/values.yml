@@ -64,9 +64,17 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     metrics:
       dashboard:
         url: ""
+    contextPath: ""
     database:
       url: ""
       username: ""
@@ -77,6 +85,9 @@ scdf:
     #! additional dataflow server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   ctr:
     image:
       #! ctr image repository id
@@ -93,6 +104,13 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     database:
       url: ""
       username: ""
@@ -103,6 +121,9 @@ scdf:
     #! additional skipper server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   #! external binder settings, will disable binder deployment
   binder:
     kafka:

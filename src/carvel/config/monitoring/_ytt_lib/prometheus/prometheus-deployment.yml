@@ -1,5 +1,7 @@
 #@ load("prometheus.lib.yml", "name")
 #@ load("prometheus.lib.yml", "prometheus_image")
+#@ load("prometheus.star", "has_image_pull_secrets")
+#@ load("prometheus.star", "image_pull_secrets")
 
 apiVersion: apps/v1
 kind: Deployment
@@ -32,6 +34,11 @@ spec:
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /prometheus/
+      #@ if has_image_pull_secrets():
+      imagePullSecrets: #@ image_pull_secrets()
+      #@ else:
+      imagePullSecrets: [{name: reg-creds}]
+      #@ end
       volumes:
         - name: prometheus-config-volume
           configMap:
