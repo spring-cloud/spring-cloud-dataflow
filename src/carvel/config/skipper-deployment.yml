@@ -33,11 +33,11 @@ spec:
           mountPath: /workspace/config
           readOnly: true
         - name: database
-          mountPath: /etc/secrets/database
+          mountPath: /workspace/runtime/secrets/database
           readOnly: true
         #@ if rabbitmq_enabled():
         - name: rabbitmq
-          mountPath: /etc/secrets/rabbitmq
+          mountPath: /workspace/runtime/secrets/rabbitmq
           readOnly: true
         #@ end
         ports:
@@ -54,11 +54,11 @@ spec:
           initialDelaySeconds: 45
         resources:
           limits:
-            cpu: 1.0
-            memory: 1024Mi
+            cpu: #@ data.values.scdf.skipper.resources.limits.cpu
+            memory: #@ data.values.scdf.skipper.resources.limits.memory
           requests:
-            cpu: 0.5
-            memory: 640Mi
+            cpu: #@ data.values.scdf.skipper.resources.requests.cpu
+            memory: #@ data.values.scdf.skipper.resources.requests.memory
         env: #@ skipper_container_env()
       serviceAccountName: scdf-sa
       #@ if has_image_pull_secrets():

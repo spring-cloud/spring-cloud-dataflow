@@ -4,6 +4,8 @@
 #@ load("db/db.lib.yml", "dataflow_datasource_config")
 #@ load("monitoring/monitoring.star", "grafana_enabled")
 #@ load("dataflow.star", "has_image_pull_secrets")
+#@ load("dataflow.star", "context_path")
+#@ load("dataflow.star", "has_context_path")
 #@ load("dataflow.star", "registry_secret_ref")
 
 #@ def dataflow_platform_config():
@@ -18,6 +20,11 @@ imagePullSecret: reg-creds
 
 #@ def base_config():
 config:
+#@ if has_context_path():
+  server:
+    servlet:
+      context-path: #@ context_path()
+#@ end
   spring:
     cloud:
       dataflow:

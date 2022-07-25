@@ -19,5 +19,5 @@ Deploy controller:
 kapp deploy \
   -a kc \
   -y \
-  -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/download/v0.28.0/release.yml
+  -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
 ----

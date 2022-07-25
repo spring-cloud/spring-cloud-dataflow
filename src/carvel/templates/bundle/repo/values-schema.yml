@@ -63,9 +63,9 @@ components:
                       type: string
                       default: postgres
                       enum:
-                        - mysql
+                        - mariadb
                         - postgres
-                      description: Defines a database type if deployment is enabled, either mysql or postgres
+                      description: Defines a database type if deployment is enabled, either mariadb or postgres
                     postgres:
                       type: object
                       properties:
@@ -77,7 +77,7 @@ components:
                           type: string
                           default: secret
                           description: Password for deployed database as base64 encoded value
-                    mysql:
+                    mariadb:
                       type: object
                       properties:
                         username:
@@ -94,6 +94,9 @@ components:
                 database:
                   type: object
                   properties:
+                    url:
+                      type: string
+                      description: Datasource url setting
                     username:
                       type: string
                       description: Datasource username setting
@@ -122,9 +125,42 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
                 config:
                   type: string
                   description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
                 metrics:
                   type: object
                   properties:
@@ -134,12 +170,18 @@ components:
                         url:
                           type: string
                           description: Metrics dashboard url for UI
+                contextPath:
+                  type: string
+                  description: Server context path, aka server.servlet.context-path
             skipper:
               type: object
               properties:
                 database:
                   type: object
                   properties:
+                    url:
+                      type: string
+                      description: Datasource url setting
                     username:
                       type: string
                       description: Datasource username setting
@@ -168,9 +210,42 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                resources:
+                  type: object
+                  properties:
+                    limits:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Limits cpu setting
+                        memory:
+                          type: string
+                          description: Limits memory setting
+                    requests:
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                          description: Requests cpu setting
+                        memory:
+                          type: string
+                          description: Requests memory setting
                 config:
                   type: string
                   description: Raw server config as yml
+                env:
+                  type: array
+                  description: Extra environment variables for container
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Name of environment variable
+                      value:
+                        type: string
+                        description: Value of environment variable
             ctr:
               type: object
               properties:

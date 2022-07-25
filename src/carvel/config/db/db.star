@@ -1,6 +1,6 @@
 load("@ytt:data", "data")
 
-database_types = {"mysql": "mysql", "postgres": "postgres"}
+database_types = {"mariadb": "mariadb", "postgres": "postgres"}
 
 def db_deploy_enabled():
   return data.values.scdf.deploy.database.enabled == True
@@ -12,10 +12,10 @@ def db_external_dataflow():
     x.setdefault("url", data.values.scdf.server.database.url)
   end
   if len(data.values.scdf.server.database.username) > 0:
-    x.setdefault("username", data.values.scdf.server.database.username)
+    x.setdefault("username", "${external-user}")
   end
   if len(data.values.scdf.server.database.password) > 0:
-    x.setdefault("password", data.values.scdf.server.database.password)
+    x.setdefault("password", "${external-password}")
   end
   if len(data.values.scdf.server.database.driverClassName) > 0:
     x.setdefault("driverClassName", data.values.scdf.server.database.driverClassName)
@@ -37,10 +37,10 @@ def db_external_skipper():
     x.setdefault("url", data.values.scdf.skipper.database.url)
   end
   if len(data.values.scdf.skipper.database.username) > 0:
-    x.setdefault("username", data.values.scdf.skipper.database.username)
+    x.setdefault("username", "${external-user}")
   end
   if len(data.values.scdf.skipper.database.password) > 0:
-    x.setdefault("password", data.values.scdf.skipper.database.password)
+    x.setdefault("password", "${external-password}")
   end
   if len(data.values.scdf.skipper.database.driverClassName) > 0:
     x.setdefault("driverClassName", data.values.scdf.skipper.database.driverClassName)
@@ -56,8 +56,8 @@ def db_external_skipper():
   return x
 end
 
-def mysql_enabled():
-  return database_types.get(data.values.scdf.deploy.database.type) == "mysql" and db_deploy_enabled()
+def mariadb_enabled():
+  return database_types.get(data.values.scdf.deploy.database.type) == "mariadb" and db_deploy_enabled()
 end
 
 def postgres_enabled():
@@ -72,10 +72,10 @@ def db_postgres_password():
   return data.values.scdf.deploy.database.postgres.password;
 end
 
-def db_mysql_username():
-  return data.values.scdf.deploy.database.mysql.username;
+def db_mariadb_username():
+  return data.values.scdf.deploy.database.mariadb.username;
 end
 
-def db_mysql_password():
-  return data.values.scdf.deploy.database.mysql.password;
+def db_mariadb_password():
+  return data.values.scdf.deploy.database.mariadb.password;
 end

@@ -35,7 +35,7 @@ scdf:
     database:
       #! if database deployment is enabled
       enabled: true
-      #! database type, either mysql or postgres (required)
+      #! database type, either mariadb or postgres (required)
       type: postgres
       postgres:
         #! database username (defaults to dataflow)
@@ -46,14 +46,14 @@ scdf:
           repository: postgres
           tag: "10"
           digest: ""
-      mysql:
+      mariadb:
         #! database username (defaults to dataflow)
         username: ZGF0YWZsb3c=
         #! database password (default to secret)
         password: c2VjcmV0
         image:
-          repository: mysql
-          tag: "5.7"
+          repository: mariadb
+          tag: "10.4"
           digest: ""
   server:
     image:
@@ -64,9 +64,17 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     metrics:
       dashboard:
         url: ""
+    contextPath: ""
     database:
       url: ""
       username: ""
@@ -77,6 +85,9 @@ scdf:
     #! additional dataflow server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   ctr:
     image:
       #! ctr image repository id
@@ -93,6 +104,13 @@ scdf:
       digest: ""
     service:
       type: ClusterIP
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+      requests:
+        cpu: 500m
+        memory: 1024Mi
     database:
       url: ""
       username: ""
@@ -103,6 +121,9 @@ scdf:
     #! additional skipper server configuration
     #@schema/type any=True
     config:
+    env:
+    - name: ""
+      value: ""
   #! external binder settings, will disable binder deployment
   binder:
     kafka:

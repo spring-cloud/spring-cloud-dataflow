@@ -17,7 +17,11 @@ describe('binders rabbit', () => {
   it('should have deployment', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=mysql', 'scdf.deploy.binder.type=rabbit']
+      dataValues: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.deploy.database.type=mariadb',
+        'scdf.deploy.binder.type=rabbit'
+      ]
     });
 
     expect(result.success).toBeTruthy();
@@ -49,7 +53,7 @@ describe('binders rabbit', () => {
     expect(rabbitVolume?.secret?.secretName).toBe('rabbitmq');
 
     const rabbitVolumeMount = containerVolumeMount(skipperContainer, 'rabbitmq');
-    expect(rabbitVolumeMount?.mountPath).toBe('/etc/secrets/rabbitmq');
+    expect(rabbitVolumeMount?.mountPath).toBe('/workspace/runtime/secrets/rabbitmq');
   });
 
   it('should skip deploy if external settings', async () => {
@@ -57,7 +61,7 @@ describe('binders rabbit', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=mysql',
+        'scdf.deploy.database.type=mariadb',
         'scdf.deploy.binder.enabled=false',
         'scdf.binder.rabbit.host=localhost',
         'scdf.binder.rabbit.port=1234',

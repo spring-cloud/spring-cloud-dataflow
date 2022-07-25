@@ -8,3 +8,4 @@ image:
 service:
   spec:
     type: NodePort
+registrySecretRef: ""
