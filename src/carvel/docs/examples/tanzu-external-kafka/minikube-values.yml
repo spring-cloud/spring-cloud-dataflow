@@ -1,0 +1,16 @@
+scdf:
+  deploy:
+    binder:
+      enabled: false
+  binder:
+    kafka:
+      broker:
+        host: my-cluster-kafka-bootstrap.kafka
+        port: 9092
+      zk:
+        host: my-cluster-zookeeper-client.kafka
+        port: 2181
+  server:
+    service:
+      type:
+        NodePort

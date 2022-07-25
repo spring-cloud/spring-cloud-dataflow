@@ -1,0 +1,18 @@
+apiVersion: "acid.zalan.do/v1"
+kind: postgresql
+metadata:
+  name: postgres-dataflow
+  namespace: default
+spec:
+  teamId: "postgres"
+  volume:
+    size: 1Gi
+  numberOfInstances: 1
+  users:
+    scdf:
+    - superuser
+    - createdb
+  databases:
+    scdf: scdf
+  postgresql:
+    version: "14"

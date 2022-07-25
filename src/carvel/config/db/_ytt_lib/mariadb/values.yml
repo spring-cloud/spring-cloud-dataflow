@@ -1,10 +1,10 @@
 #@data/values-schema
 ---
-name: mysql
+name: mariadb
 username: ""
 password: ""
 image:
-  repository: mysql
-  tag: "5.7"
+  repository: mariadb
+  tag: "10.4"
   digest: ""
 registrySecretRef: ""
