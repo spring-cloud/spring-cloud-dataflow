@@ -268,7 +268,7 @@ describe('servers', () => {
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_KUBERNETES_SECRETS_PATHS',
-          value: '/etc/secrets'
+          value: '/workspace/runtime/secrets'
         })
       ])
     );
@@ -337,7 +337,7 @@ describe('servers', () => {
     const container = deploymentContainer(deployment, SCDF_SERVER_NAME);
     const envs = containerEnvValues(container);
     expect(envs).toBeTruthy();
-    expect(envs).toHaveLength(11);
+    expect(envs).toHaveLength(10);
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -374,16 +374,63 @@ describe('servers', () => {
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_KUBERNETES_SECRETS_PATHS',
-          value: '/etc/secrets'
+          value: '/workspace/runtime/secrets'
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_DATAFLOW_SERVER_URI'
         }),
         expect.objectContaining({
           name: 'SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI'
-        }),
+        })
+      ])
+    );
+  });
+
+  it('dataflow should have extra env values', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.server.env=[{"name":"JAVA_TOOL_OPTIONS","value":"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005"}]'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const deployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const container = deploymentContainer(deployment, SCDF_SERVER_NAME);
+    const envs = containerEnvValues(container);
+    expect(envs).toBeTruthy();
+    expect(envs).toEqual(
+      expect.arrayContaining([
         expect.objectContaining({
-          name: 'SPRING_APPLICATION_JSON'
+          name: 'JAVA_TOOL_OPTIONS',
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5005'
+        })
+      ])
+    );
+  });
+
+  it('skipper should have extra env values', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.skipper.env=[{"name":"JAVA_TOOL_OPTIONS","value":"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5006"}]'
+      ]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const deployment = findDeployment(yaml, SKIPPER_NAME);
+    const container = deploymentContainer(deployment, SKIPPER_NAME);
+    const envs = containerEnvValues(container);
+    expect(envs).toBeTruthy();
+    expect(envs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'JAVA_TOOL_OPTIONS',
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:5006'
         })
       ])
     );
@@ -493,5 +540,105 @@ describe('servers', () => {
     const dataflowJson = dataflowDoc.toJSON();
     const url = lodash.get(dataflowJson, 'spring.cloud.dataflow.metrics.dashboard.url') as string;
     expect(url).toEqual('http://fakedashboard');
+  });
+
+  it('should have default servlet context path', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const url = lodash.get(dataflowJson, 'server.servlet.context-path') as string;
+    expect(url).toBeUndefined();
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/management/health');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/management/info');
+  });
+
+  it('should change server servlet context path', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.server.contextPath=/scdf']
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const dataflowApplicationYaml = dataflowConfigMap?.data ? dataflowConfigMap.data['application.yaml'] : '';
+    const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
+    const dataflowJson = dataflowDoc.toJSON();
+    const url = lodash.get(dataflowJson, 'server.servlet.context-path') as string;
+    expect(url).toBe('/scdf');
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/scdf/management/health');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/scdf/management/info');
+  });
+
+  it('should have default resources', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const skipperDeployment = findDeployment(yaml, SKIPPER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
+
+    expect(dataflowContainer?.resources?.limits?.cpu).toBe('1000m');
+    expect(dataflowContainer?.resources?.limits?.memory).toBe('2048Mi');
+    expect(dataflowContainer?.resources?.requests?.cpu).toBe('500m');
+    expect(dataflowContainer?.resources?.requests?.memory).toBe('1024Mi');
+
+    expect(skipperContainer?.resources?.limits?.cpu).toBe('1000m');
+    expect(skipperContainer?.resources?.limits?.memory).toBe('2048Mi');
+    expect(skipperContainer?.resources?.requests?.cpu).toBe('500m');
+    expect(skipperContainer?.resources?.requests?.memory).toBe('1024Mi');
+  });
+
+  it('should change resources', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [
+        ...DEFAULT_REQUIRED_DATA_VALUES,
+        'scdf.server.resources.limits.cpu=600m',
+        'scdf.server.resources.limits.memory=1000Mi',
+        'scdf.server.resources.requests.cpu=600m',
+        'scdf.server.resources.requests.memory=1000Mi',
+        'scdf.skipper.resources.limits.cpu=600m',
+        'scdf.skipper.resources.limits.memory=1000Mi',
+        'scdf.skipper.resources.requests.cpu=600m',
+        'scdf.skipper.resources.requests.memory=1000Mi'
+      ]
+    });
+    expect(result.success).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
+    const skipperDeployment = findDeployment(yaml, SKIPPER_NAME);
+    const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
+    const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
+
+    expect(dataflowContainer?.resources?.limits?.cpu).toBe('600m');
+    expect(dataflowContainer?.resources?.limits?.memory).toBe('1000Mi');
+    expect(dataflowContainer?.resources?.requests?.cpu).toBe('600m');
+    expect(dataflowContainer?.resources?.requests?.memory).toBe('1000Mi');
+
+    expect(skipperContainer?.resources?.limits?.cpu).toBe('600m');
+    expect(skipperContainer?.resources?.limits?.memory).toBe('1000Mi');
+    expect(skipperContainer?.resources?.requests?.cpu).toBe('600m');
+    expect(skipperContainer?.resources?.requests?.memory).toBe('1000Mi');
   });
 });

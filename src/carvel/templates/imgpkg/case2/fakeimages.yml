@@ -10,4 +10,4 @@ spec:
   spec:
     containers:
     - name: fakectr
-      image: springcloud/spring-cloud-dataflow-composed-task-runner:(@= data.values.dataflow.version @)
+      image: springcloud/spring-cloud-dataflow-composed-task-runner:(@= data.values.ctr.version @)

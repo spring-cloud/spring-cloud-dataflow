@@ -1,6 +1,6 @@
 import { execYtt } from '../src/ytt';
 import 'jest-extended';
-import { findService, findDeployment, findAnnotation, findAnnotations } from '../src/k8s-helper';
+import { findService, findDeployment, findAnnotation, findAnnotations, findConfigMap } from '../src/k8s-helper';
 import {
   SCDF_SERVER_NAME,
   SKIPPER_NAME,
@@ -46,5 +46,20 @@ describe('ordering', () => {
       'upsert after upserting scdf.tanzu.vmware.com/db',
       'upsert after upserting scdf.tanzu.vmware.com/skipper'
     ]);
+  });
+
+  it('should have annotation for servers configmap', async () => {
+    const result = await execYtt({
+      files: ['config'],
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
+    });
+    expect(result.success, result.stderr).toBeTruthy();
+    const yaml = result.stdout;
+
+    const dataflowCm = findConfigMap(yaml, SCDF_SERVER_NAME);
+    const skipperCm = findConfigMap(yaml, SKIPPER_NAME);
+
+    expect(dataflowCm?.metadata?.annotations?.['kapp.k14s.io/versioned']).toBe('');
+    expect(skipperCm?.metadata?.annotations?.['kapp.k14s.io/versioned']).toBe('');
   });
 });

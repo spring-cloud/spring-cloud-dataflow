@@ -19,6 +19,7 @@ spec:
   publicName: #@ package.name + "." + str(package.domain)
   version: #@ package.version
   description: #@ package.description
+  releasedAt: #@ package.timestamp
   valuesSchema:
     openAPIv3: #@ schema()
   template:

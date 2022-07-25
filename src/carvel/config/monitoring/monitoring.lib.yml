@@ -12,16 +12,19 @@ image: #@ data.values.scdf.feature.monitoring.grafana.image
 service:
   spec:
     type: #@ data.values.scdf.feature.monitoring.grafana.service.type
+registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
 #@ def prometheus_values():
 name: prometheus
 image: #@ data.values.scdf.feature.monitoring.prometheus.image
+registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
 #@ def prometheus_rsocket_proxy_values():
 name: prometheus-rsocket-proxy
 image: #@ data.values.scdf.feature.monitoring.prometheusRsocketProxy.image
+registrySecretRef: #@ data.values.scdf.registry.secret.ref
 #@ end
 
 #@ def monitoring_config():
