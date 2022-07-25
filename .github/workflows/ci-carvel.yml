@@ -19,7 +19,7 @@ jobs:
         shell: bash
         working-directory: src/carvel
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: 12
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: jvalkeal/setup-maven@v1
         with:
           maven-version: 3.6.2
