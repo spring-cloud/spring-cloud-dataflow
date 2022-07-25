@@ -29,7 +29,9 @@ jobs:
                 "cppwfs",
                 "mminella",
                 "dturanski",
-                "sobychacko"
+                "sobychacko",
+                "corneil",
+                "onobc"
               ]
             },
             "recipes": [
