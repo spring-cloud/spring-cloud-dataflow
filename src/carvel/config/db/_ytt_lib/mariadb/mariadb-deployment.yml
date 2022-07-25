@@ -1,9 +1,9 @@
-#@ load("mysql.lib.yml", "name")
-#@ load("mysql.lib.yml", "username")
-#@ load("mysql.lib.yml", "password")
-#@ load("mysql.star", "image")
-#@ load("mysql.star", "has_image_pull_secrets")
-#@ load("mysql.star", "image_pull_secrets")
+#@ load("mariadb.lib.yml", "name")
+#@ load("mariadb.lib.yml", "username")
+#@ load("mariadb.lib.yml", "password")
+#@ load("mariadb.star", "image")
+#@ load("mariadb.star", "has_image_pull_secrets")
+#@ load("mariadb.star", "image_pull_secrets")
 
 apiVersion: apps/v1
 kind: Deployment
@@ -23,31 +23,31 @@ spec:
     spec:
       containers:
       - image: #@ image()
-        name: mysql
+        name: mariadb
         env:
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MARIADB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: mysql-root-password
+              key: mariadb-root-password
               name: #@ name()
-        - name: MYSQL_USER
+        - name: MARIADB_USER
           valueFrom:
             secretKeyRef:
-              key: mysql-user
+              key: mariadb-user
               name: #@ name()
-        - name: MYSQL_PASSWORD
+        - name: MARIADB_PASSWORD
           valueFrom:
             secretKeyRef:
-              key: mysql-password
+              key: mariadb-password
               name: #@ name()
-        - name: MYSQL_DATABASE
+        - name: MARIADB_DATABASE
           value: #@ name()
         ports:
         - containerPort: 3306
           name: #@ name()
         volumeMounts:
         - name: data
-          mountPath: /var/lib/mysql
+          mountPath: /var/lib/mariadb
         args:
         - "--ignore-db-dir=lost+found"
       #@ if has_image_pull_secrets():

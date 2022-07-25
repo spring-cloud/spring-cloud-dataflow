@@ -5,18 +5,18 @@
 #@ def password(): return data.values.password
 
 #@ def skipper_datasource():
-url: jdbc:mysql://${DB-SKIPPER_SERVICE_HOST}:${DB-SKIPPER_SERVICE_PORT}/db-skipper
-username: ${mysql-user}
-password: ${mysql-password}
+url: jdbc:mariadb://${DB-SKIPPER_SERVICE_HOST}:${DB-SKIPPER_SERVICE_PORT}/db-skipper
+username: ${mariadb-user}
+password: ${mariadb-password}
 driverClassName: org.mariadb.jdbc.Driver
 testOnBorrow: true
 validationQuery: "SELECT 1"
 #@ end
 ---
 #@ def dataflow_datasource():
-url: jdbc:mysql://${DB-DATAFLOW_SERVICE_HOST}:${DB-DATAFLOW_SERVICE_PORT}/db-dataflow
-username: ${mysql-user}
-password: ${mysql-password}
+url: jdbc:mariadb://${DB-DATAFLOW_SERVICE_HOST}:${DB-DATAFLOW_SERVICE_PORT}/db-dataflow
+username: ${mariadb-user}
+password: ${mariadb-password}
 driverClassName: org.mariadb.jdbc.Driver
 testOnBorrow: true
 validationQuery: "SELECT 1"
