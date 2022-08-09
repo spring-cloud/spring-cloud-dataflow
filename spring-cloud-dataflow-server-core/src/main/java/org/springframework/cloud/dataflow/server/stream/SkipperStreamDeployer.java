@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
@@ -100,6 +102,7 @@ import org.springframework.util.StringUtils;
  * @author Soby Chacko
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Chris Bono
  */
 public class SkipperStreamDeployer implements StreamDeployer {
 
@@ -451,7 +454,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 		dumperOptions.setPrettyFlow(false);
 		dumperOptions.setSplitLines(false);
-		Yaml yaml = new Yaml(dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
 		configValues.setRaw(yaml.dump(configValueMap));
 
 		pkg.setConfigValues(configValues);

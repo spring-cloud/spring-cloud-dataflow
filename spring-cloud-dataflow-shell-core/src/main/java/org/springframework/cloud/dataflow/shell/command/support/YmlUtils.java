@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.shell.command.support;
 
 import io.codearte.props2yaml.Props2YAML;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 /**
  * Utility for converting a String of comma delimited property values to YAML.
@@ -30,9 +31,8 @@ public abstract class YmlUtils {
 		String stringToConvert = propertiesAsString.replaceAll(",", "\n");
 		String yamlString = Props2YAML.fromContent(stringToConvert).convert();
 		// validate the yaml can be parsed
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		yaml.load(yamlString);
 		return yamlString;
 	}
 }
-
