@@ -7,6 +7,9 @@
 - name: area/composed-tasks
   color: F9D0C4
   description: Belongs to ctr
+- name: area/db
+  color: F9D0C4
+  description: Belongs to database
 - name: area/dependencies
   color: F9D0C4
   description: Belongs project dependencies
@@ -40,6 +43,9 @@
 - name: area/skipper
   color: F9D0C4
   description: Belongs to skipper
+- name: area/stream
+  color: F9D0C4
+  description: Belongs to stream
 - name: area/task-orchestration
   color: F9D0C4
   description: Belongs to task orchestration
