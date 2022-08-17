@@ -1,0 +1,36 @@
+plugins {
+    id 'maven-publish'
+}
+
+defaultTasks 'publishToMavenLocal'
+
+task combinedJar(type: Jar) {
+    def appFile = "${appFolder}/${appName}-${appVersion}.jar"
+    from zipTree(appFile)
+    into('BOOT-INF/lib') {
+        from file(depsFolder)
+    }
+    archiveFileName = "${appName}.jar"
+    destinationDirectory = project.buildDir
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = appGroup
+            artifactId = appName
+            version = appVersion
+            artifact combinedJar
+        }
+    }
+    repositories {
+        maven {
+            url = repoUrl
+            credentials {
+                username = repoUser
+                password = repoPassword
+            }
+        }
+    }
+}
