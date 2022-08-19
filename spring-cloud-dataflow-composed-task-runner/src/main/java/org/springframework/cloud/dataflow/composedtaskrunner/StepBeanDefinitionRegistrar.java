@@ -227,7 +227,7 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		properties.setOauth2ClientCredentialsClientSecret(getPropertyValue("oauth2-client-credential-client-secret"));
 		
 		String oauth2ClientCredentialsClientAuthenticationMethodAsString = getPropertyValue("oauth2-client-credential-client-authentication-method");
-		if(oauth2ClientCredentialsClientAuthenticationMethodAsString != null) {
+		if (oauth2ClientCredentialsClientAuthenticationMethodAsString != null) {
 			properties.setOauth2ClientCredentialsClientAuthenticationMethod(new ClientAuthenticationMethod(oauth2ClientCredentialsClientAuthenticationMethodAsString));
 		}
 		
