@@ -1,0 +1,9 @@
+{
+  "password": "54321",
+  "username": "user21",
+  "server": "localhost",
+  "aws": {
+    "secretKey": "5432111",
+    "keyId": "key12"
+  }
+}

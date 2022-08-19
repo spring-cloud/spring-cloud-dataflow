@@ -19,7 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.shell</groupId>
-			<artifactId>spring-shell</artifactId>
+			<artifactId>spring-shell-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -97,4 +97,14 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<reuseForks>false</reuseForks>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

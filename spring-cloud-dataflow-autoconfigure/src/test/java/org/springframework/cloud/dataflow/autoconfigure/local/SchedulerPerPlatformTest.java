@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @RunWith(Enclosed.class)
 public class SchedulerPerPlatformTest {
@@ -83,8 +84,9 @@ public class SchedulerPerPlatformTest {
 	public static class CloudFoundrySchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test
-		public void testCloudFoundryScheudlerEnabled() {
-			assertFalse("K8s should be disabled", context.getEnvironment().containsProperty("kubernetes_service_host"));
+		public void testCloudFoundrySchedulerEnabled() {
+			assertFalse("K8s should be disabled", context.getEnvironment()
+					.containsProperty("kubernetes_service_host"));
 			assertTrue("CF should be enabled", CloudPlatform.CLOUD_FOUNDRY.isActive(context.getEnvironment()));
 
 		}

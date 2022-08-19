@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
 import org.springframework.util.Assert;
 
 /**
@@ -38,11 +37,7 @@ public class TargetHolder {
 	}
 
 	/**
-	 * Return the {@link Target} which encapsulates not only the Target URI but also
-	 * success/error messages + status.
-	 *
-	 * @return Should never be null. Initialized by
-	 * {@link ConfigCommands#afterPropertiesSet()}
+	 * @return the {@link Target} which encapsulates not only the Target URI but also success/error messages + status.
 	 */
 	public Target getTarget() {
 		return target;

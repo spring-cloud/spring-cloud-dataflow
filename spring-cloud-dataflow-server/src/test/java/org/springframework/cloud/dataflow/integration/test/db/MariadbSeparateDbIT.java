@@ -31,6 +31,6 @@ public class MariadbSeparateDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {
-		return TagNames.MARIADB_10_3;
+		return TagNames.MARIADB_10_5;
 	}
 }

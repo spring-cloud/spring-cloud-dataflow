@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,63 +16,30 @@
 
 package org.springframework.cloud.dataflow.shell.converter;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.AppRegistryCommands;
-import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.shell.ShellException;
-import org.springframework.shell.core.Completion;
-import org.springframework.shell.core.Converter;
-import org.springframework.shell.core.MethodTarget;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
- * Knows how to build and query
- * {@link AppRegistryCommands.QualifiedApplicationName}s.
+ * Knows how to parse String representations of {@link AppRegistryCommands.QualifiedApplicationName}s.
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
  * @author Mark Fisher
+ * @author Chris Bono
  */
 @Component
-public class QualifiedApplicationNameConverter implements Converter<AppRegistryCommands.QualifiedApplicationName> {
-
-	@Autowired
-	private DataFlowShell dataFlowShell;
+public class QualifiedApplicationNameConverter implements Converter<String, AppRegistryCommands.QualifiedApplicationName> {
 
 	@Override
-	public boolean supports(Class<?> type, String optionContext) {
-		return AppRegistryCommands.QualifiedApplicationName.class.isAssignableFrom(type);
-	}
-
-	@Override
-	public AppRegistryCommands.QualifiedApplicationName convertFromText(String value, Class<?> targetType,
-			String optionContext) {
+	public AppRegistryCommands.QualifiedApplicationName convert(String value) {
 		int colonIndex = value.indexOf(':');
 		if (colonIndex == -1) {
-			throw new ShellException("Incorrect syntax. Valid syntax is '<ApplicationType>:<ApplicationName>'.");
+			throw new IllegalArgumentException("Incorrect syntax. Valid syntax is '<ApplicationType>:<ApplicationName>'.");
 		}
 		ApplicationType applicationType = ApplicationType.valueOf(value.substring(0, colonIndex));
 		return new AppRegistryCommands.QualifiedApplicationName(value.substring(colonIndex + 1), applicationType);
-	}
-
-	@Override
-	public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData,
-			String optionContext, MethodTarget target) {
-		for (AppRegistrationResource app : dataFlowShell.getDataFlowOperations().appRegistryOperations().list()) {
-			String value = app.getType() + ":" + app.getName();
-			completions.add(new Completion(value, app.getName(), pretty(app.getType()), 0));
-		}
-		return true;
-
-	}
-
-	private String pretty(String type) {
-		return StringUtils.capitalize(type) + "s";
 	}
 }

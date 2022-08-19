@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,9 +166,11 @@ public class TaskLauncherTasklet implements Tasklet {
 				}
 				args = cleansedArgs;
 			}
-			if(this.taskProperties.getExecutionid() != null) {
-				args.add("--spring.cloud.task.parent-execution-id=" + this.taskProperties.getExecutionid());
+			String parentTaskExecutionId = getParentTaskExecutionId(contribution);
+			if(parentTaskExecutionId != null) {
+				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
 			}
+
 			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
@@ -212,6 +214,17 @@ public class TaskLauncherTasklet implements Tasklet {
 			}
 		}
 		return RepeatStatus.CONTINUABLE;
+	}
+
+	public String getParentTaskExecutionId(StepContribution stepContribution) {
+		Long result = null;
+		if (this.taskProperties.getExecutionid() != null) {
+			result = this.taskProperties.getExecutionid();
+		}
+		else if (stepContribution != null) {
+			result = this.taskExplorer.getTaskExecutionIdByJobExecutionId(stepContribution.getStepExecution().getJobExecutionId());
+		}
+		return result != null ? String.valueOf(result) : null;
 	}
 
 	public TaskOperations taskOperations() {

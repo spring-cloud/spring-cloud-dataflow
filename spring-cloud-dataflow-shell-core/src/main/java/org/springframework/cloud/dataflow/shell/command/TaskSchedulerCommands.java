@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,23 +33,23 @@ import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BeanListTableModel;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
-import org.springframework.stereotype.Component;
-
 
 /**
  * Task Scheduler commands
  *
  * @author Daniel Serleg
+ * @author Chris Bono
  */
-@Component
-public class TaskSchedulerCommands implements CommandMarker {
+@ShellComponent
+public class TaskSchedulerCommands {
 
 	private static final String PROPERTIES_OPTION = "properties";
 	private static final String PROPERTIES_FILE_OPTION = "propertiesFile";
@@ -63,35 +63,34 @@ public class TaskSchedulerCommands implements CommandMarker {
 	@Autowired
 	private DataFlowShell dataFlowShell;
 
-	@CliAvailabilityIndicator({ SCHEDULER_CREATE })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.TASK);
+	public Availability availableWithCreateRole() {
+		return availabilityFor(RoleType.CREATE, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ SCHEDULER_LIST })
-	public boolean availableWithListRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.TASK);
+	public Availability availableWithListRole() {
+		return availabilityFor(RoleType.VIEW, OpsType.TASK);
 	}
 
-	@CliAvailabilityIndicator({ SCHEDULER_UNSCHEDULE })
-	public boolean availableWithUnscheduleRole() {
-		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.TASK);
+	public Availability availableWithUnscheduleRole() {
+		return availabilityFor(RoleType.DESTROY, OpsType.TASK);
 	}
 
-	@CliCommand(value = SCHEDULER_CREATE, help = "Create new task schedule")
+	private Availability availabilityFor(RoleType roleType, OpsType opsType) {
+		return dataFlowShell.hasAccess(roleType, opsType)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
+	}
+
+	@ShellMethod(key = SCHEDULER_CREATE, value = "Create new task schedule")
+	@ShellMethodAvailability("availableWithCreateRole")
 	public String create(
-			@CliOption(mandatory = true, key = { "name" }, help = "the name to give to the schedule") String name,
-			@CliOption(mandatory = true, key = {
-					"definitionName" }, help = "a task definition name") String definitionName,
-			@CliOption(mandatory = true, key = {
-					"expression" }, help = "the cron expression of the schedule") String expression,
-			@CliOption(key = {
-					PROPERTIES_OPTION }, help = "a task properties (comma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'") String properties,
-			@CliOption(key = {
-					PROPERTIES_FILE_OPTION }, help = "the properties for this deployment (as a File)") File propertiesFile,
-			@CliOption(key = {
-					"arguments" }, help = "command line args (space separated string eg.: --arguments 'a b c d'") String arguments,
-			@CliOption(key = { "platform" }, help = "the name of the platform from which to create the schedule") String platform) throws IOException {
+			@ShellOption(help = "the name to give to the schedule") String name,
+			@ShellOption(value = "--definitionName", help = "a task definition name") String definitionName,
+			@ShellOption(help = "the cron expression of the schedule") String expression,
+			@ShellOption(help = "a task properties (comma separated string eg.: --properties 'prop.first=prop,prop.sec=prop2'", defaultValue = ShellOption.NULL) String properties,
+			@ShellOption(value = "--propertiesFile", help = "the properties for this deployment (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
+			@ShellOption(help = "command line args (space separated string eg.: --arguments 'a b c d'", defaultValue = ShellOption.NULL) String arguments,
+			@ShellOption(help = "the name of the platform from which to create the schedule", defaultValue = ShellOption.NULL) String platform) throws IOException {
 
 		int which = Assertions.atMostOneOf(PROPERTIES_OPTION, properties, PROPERTIES_FILE_OPTION,
 				propertiesFile);
@@ -105,10 +104,11 @@ public class TaskSchedulerCommands implements CommandMarker {
 		return String.format("Created schedule '%s'", name);
 	}
 
-	@CliCommand(value = SCHEDULER_LIST, help = "List task schedules by task definition name")
+	@ShellMethod(key =SCHEDULER_LIST, value = "List task schedules by task definition name")
+	@ShellMethodAvailability("availableWithListRole")
 	public Table listByDefinition(
-			@CliOption(key = { "platform" }, help = "the name platform from which to retrieve a list of schedules") String platform,
-			@CliOption(key = { "definitionName" }, help = "the task definition name") String definitionName) {
+			@ShellOption(help = "the name platform from which to retrieve a list of schedules", defaultValue = ShellOption.NULL) String platform,
+			@ShellOption(value = "--definitionName", help = "the task definition name", defaultValue = ShellOption.NULL) String definitionName) {
 		PagedModel<ScheduleInfoResource> schedules;
 		if (Strings.isEmpty(definitionName)) {
 			schedules = scheduleOperations().listByPlatform(platform);
@@ -125,10 +125,11 @@ public class TaskSchedulerCommands implements CommandMarker {
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
-	@CliCommand(value = SCHEDULER_UNSCHEDULE, help = "Delete task schedule")
+	@ShellMethod(key =SCHEDULER_UNSCHEDULE, value = "Delete task schedule")
+	@ShellMethodAvailability("availableWithUnscheduleRole")
 	public String unschedule(
-			@CliOption(mandatory = true, key = { "name" }, help = "The name of the task schedule") String name,
-			@CliOption(key = { "platform" }, help = "the name platform from which to unschedule") String platform) {
+			@ShellOption(help = "The name of the task schedule") String name,
+			@ShellOption(help = "the name platform from which to unschedule", defaultValue = ShellOption.NULL) String platform) {
 		scheduleOperations().unschedule(name, platform);
 		return String.format("Deleted task schedule '%s'", name);
 	}

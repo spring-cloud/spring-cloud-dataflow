@@ -28,6 +28,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -118,6 +119,18 @@ public class ComposedTaskPropertiesTests {
 					assertThat(properties.getComposedTaskAppArguments()).containsEntry("app.AAA.2", "arg3");
 					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.3", "arg4");
 					assertThat(Base64Utils.decodeMap(properties.getComposedTaskAppArguments())).containsEntry("app.*.4", "arg5");
+				});
+	}
+
+	@Test
+	public void testAssignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
+		this.contextRunner
+				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=POST")
+				.withUserConfiguration(Config1.class).run((context) -> {
+					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
+					assertThat(properties.getOauth2ClientCredentialsClientAuthenticationMethod())
+							.withFailMessage("The OAuth2 client credentials client authentication method couldn't be assigned correctly.")
+							.isEqualTo(ClientAuthenticationMethod.POST);
 				});
 	}
 

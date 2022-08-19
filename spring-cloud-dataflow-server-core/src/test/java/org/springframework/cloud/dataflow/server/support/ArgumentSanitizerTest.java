@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.support;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -30,10 +33,14 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class ArgumentSanitizerTest {
 
@@ -151,38 +158,31 @@ public class ArgumentSanitizerTest {
 		Assert.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
 		Assert.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
 	}
+	private String loadStringFromResource(String uri) throws IOException {
+		Resource resource = new DefaultResourceLoader().getResource(uri);
+		try (Reader reader = new InputStreamReader(resource.getInputStream())) {
+			return FileCopyUtils.copyToString(reader);
+		}
+	}
+	@Test
+	public void testJsonData() throws IOException {
+		String input = loadStringFromResource("classpath:sanitizer1.json");
+		String output = sanitizer.sanitizeJsonOrYamlString(input);
+		System.out.println("Read:" + input);
+		System.out.println("Sanitized:" + output);
+		Assert.assertTrue(output.contains("*****"));
+		Assert.assertFalse(output.contains("54321"));
 
-//	@Test
-//	public void testHierarchicalPropertyNames() {
-//		Assert.assertEquals("time --password='******' | log",
-//				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --password=bar | log")));
-//	}
-//
-//	@Test
-//	public void testStreamPropertyOrder() {
-//		Assert.assertEquals("time --some.password='******' --another-secret='******' | log",
-//				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --some.password=foobar --another-secret=kenny | log")));
-//	}
-//
-//	@Test
-//	public void testStreamMatcherWithHyphenDotChar() {
-//		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
-//						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "
-//						+ "--twitter.credentials.consumer-key='******' | "
-//						+ "filter --expression=#jsonPath(payload,'$.lang')=='en' | "
-//						+ "twitter-sentiment --vocabulary=https://dl.bintray.com/test --model-fetch=output/test "
-//						+ "--model=https://dl.bintray.com/test | field-value-counter --field-name=sentiment --name=sentiment",
-//				sanitizer.sanitizeStream(new StreamDefinition("stream", "twitterstream "
-//						+ "--twitter.credentials.consumer-key=dadadfaf --twitter.credentials.consumer-secret=dadfdasfdads "
-//						+ "--twitter.credentials.access-token=58849055-dfdae "
-//						+ "--twitter.credentials.access-token-secret=deteegdssa4466 | filter --expression='#jsonPath(payload,''$.lang'')==''en''' | "
-//						+ "twitter-sentiment --vocabulary=https://dl.bintray.com/test --model-fetch=output/test --model=https://dl.bintray.com/test | "
-//						+ "field-value-counter --field-name=sentiment --name=sentiment")));
-//	}
-//
-//	@Test
-//	public void testStreamSanitizeOriginalDsl() {
-//		StreamDefinition streamDefinition = new StreamDefinition("test", "time --password='******' | log --password='******'", "time --password='******' | log");
-//		Assert.assertEquals("time --password='******' | log", sanitizer.sanitizeOriginalStreamDsl(streamDefinition));
-//	}
+	}
+
+	@Test
+	public void testYamlData() throws IOException {
+		String input = loadStringFromResource("classpath:sanitizer2.yaml");
+		String output = sanitizer.sanitizeJsonOrYamlString(input);
+		System.out.println("Read:" + input);
+		System.out.println("Sanitized:" + output);
+		Assert.assertTrue(output.contains("*****"));
+		Assert.assertFalse(output.contains("54321"));
+	}
+
 }

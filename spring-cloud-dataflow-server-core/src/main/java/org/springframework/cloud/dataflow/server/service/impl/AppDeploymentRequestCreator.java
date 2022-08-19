@@ -117,7 +117,7 @@ public class AppDeploymentRequestCreator {
 
 			AppDeploymentRequest request = new AppDeploymentRequest(appDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
-
+			logger.debug("createUpdateRequests:request:{}", request);
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
@@ -194,8 +194,8 @@ public class AppDeploymentRequestCreator {
 				isDownStreamAppPartitioned = isPartitionedConsumer(appDeployTimeProperties, upstreamAppSupportsPartition);
 			}
 
-			logger.info(String.format("Creating resource with [%s] for application [%s]",
-					appRegistration.getUri().toString(), currentApp.getName()));
+			logger.info("Creating resource with [{}] for application [{}]",
+					appRegistration.getUri().toString(), currentApp.getName());
 			Resource appResource = this.appRegistry.getAppResource(appRegistration);
 			Resource metadataResource = this.appRegistry.getAppMetadataResource(appRegistration);
 
@@ -219,8 +219,7 @@ public class AppDeploymentRequestCreator {
 			AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
 
-			logger.debug("Created AppDeploymentRequest = " + request.toString() + " AppDefinition = "
-					+ request.getDefinition().toString());
+			logger.debug("Created AppDeploymentRequest = {}, AppDefinition = {}", request, request.getDefinition());
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
@@ -262,6 +261,7 @@ public class AppDeploymentRequestCreator {
 		String appPrefix = String.format("app.%s.", appDefinition.getName());
 		parseAndPopulateProperties(streamDeploymentProperties, appDeploymentProperties, producerPropertyPrefix,
 				consumerPropertyPrefix, appPrefix);
+		logger.debug("extractAppProperties:{}", appDeploymentProperties);
 		return appDeploymentProperties;
 	}
 

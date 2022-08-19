@@ -66,17 +66,6 @@ For example, if relying on Maven coordinates, an application URI would be of the
 connects to the Spring Cloud Data Flow Server's REST API and supports a DSL that simplifies the process of defining a
 stream or task and managing its lifecycle.
 
-**Community Implementations**: There are also community maintained Spring Cloud Data Flow implementations that are currently
-based on the 1.7.x series of Spring Cloud Data Flow.
-
- * [HashiCorp Nomad](https://github.com/donovanmuller/spring-cloud-dataflow-server-nomad)
- * [OpenShift](https://github.com/donovanmuller/spring-cloud-dataflow-server-openshift)
- * [Apache Mesos](https://github.com/trustedchoice/spring-cloud-dataflow-server-mesos)
-
-The [Apache YARN](https://github.com/spring-cloud/spring-cloud-dataflow-server-yarn) implementation has reached end-of-life
-status. Let us know at [Gitter](https://gitter.im/spring-cloud/spring-cloud-dataflow) if you are interested in forking
-the project to continue developing and maintaining it.
-
 ----
 
 ## Building

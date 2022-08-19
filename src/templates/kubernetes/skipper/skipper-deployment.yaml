@@ -17,7 +17,7 @@ spec:
       containers:
       - name: skipper
         image: springcloud/spring-cloud-skipper-server:@spring-cloud-skipper.version@
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
             mountPath: /workspace/config
@@ -31,12 +31,23 @@ spec:
           httpGet:
             path: /actuator/health
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
+          periodSeconds: 60
+          timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/info
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
+          periodSeconds: 10
+          timeoutSeconds: 2
+        startupProbe:
+          tcpSocket:
+            port: 7577
+          initialDelaySeconds: 30
+          periodSeconds: 3
+          failureThreshold: 20
+          timeoutSeconds: 3
         resources:
           limits:
             cpu: 1.0
@@ -55,7 +66,8 @@ spec:
           value: /etc/secrets
       initContainers:
       - name: init-mariadb-wait
-        image: busybox
+        image: busybox:1
+        imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       - name: init-mariadb-database
         image: mariadb:10.4.22

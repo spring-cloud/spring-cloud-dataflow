@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.server.controller.support.ControllerUtils;
 import org.springframework.cloud.dataflow.server.repository.NoSuchStreamDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -80,16 +82,18 @@ public class StreamDeploymentController {
 	 */
 	private final StreamDefinitionRepository repository;
 
+	private final ArgumentSanitizer sanitizer = new ArgumentSanitizer();
+
 	/**
 	 * Construct a new UpdatableStreamDeploymentController, given a
 	 * {@link StreamDeploymentController} and {@link StreamService}
 	 *
-	 * @param repository the repository this controller will use for stream CRUD operations
+	 * @param repository    the repository this controller will use for stream CRUD operations
 	 * @param streamService the underlying UpdatableStreamService to deploy the stream
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
-			StreamService streamService,
-			StreamDefinitionService streamDefinitionService) {
+									  StreamService streamService,
+									  StreamDefinitionService streamDefinitionService) {
 
 		Assert.notNull(repository, "StreamDefinitionRepository must not be null");
 		Assert.notNull(streamService, "StreamService must not be null");
@@ -102,9 +106,10 @@ public class StreamDeploymentController {
 
 	/**
 	 * Scale application instances in a deployed stream.
+	 *
 	 * @param streamName the name of an existing stream definition (required)
-	 * @param appName in stream application name to scale (required)
-	 * @param count number of instances for the selected stream application (required)
+	 * @param appName    in stream application name to scale (required)
+	 * @param count      number of instances for the selected stream application (required)
 	 * @param properties scale deployment specific properties (optional)
 	 * @return response without a body
 	 */
@@ -115,14 +120,14 @@ public class StreamDeploymentController {
 			@PathVariable("count") Integer count,
 			@RequestBody(required = false) Map<String, String> properties) {
 
-		logger.info(String.format("Scale stream: %s, apps: %s instances to %s", streamName, appName, count));
+		logger.info("Scale stream: {}, apps: {} instances to {}", streamName, appName, count);
 		this.streamService.scaleApplicationInstances(streamName, appName, count, properties);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
 	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
 	public ResponseEntity<Void> update(@PathVariable("name") String name,
-			@RequestBody UpdateStreamRequest updateStreamRequest) {
+									   @RequestBody UpdateStreamRequest updateStreamRequest) {
 		this.streamService.updateStream(name, updateStreamRequest);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -135,14 +140,24 @@ public class StreamDeploymentController {
 
 	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
 	public ResponseEntity<String> manifest(@PathVariable("name") String name,
-			@PathVariable("version") Integer version) {
+										   @PathVariable("version") Integer version) {
 		return new ResponseEntity<>(this.streamService.manifest(name, version), HttpStatus.OK);
 	}
 
 	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName) {
-		return this.streamService.history(releaseName);
+		return this.streamService.history(releaseName)
+				.stream()
+				.map(this::sanitizeRelease)
+				.collect(Collectors.toList());
+	}
+
+	private Release sanitizeRelease(Release release) {
+		if (release.getConfigValues() != null && StringUtils.hasText(release.getConfigValues().getRaw())) {
+			release.getConfigValues().setRaw(sanitizer.sanitizeJsonOrYamlString(release.getConfigValues().getRaw()));
+		}
+		return release;
 	}
 
 	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
@@ -167,6 +182,7 @@ public class StreamDeploymentController {
 
 	/**
 	 * Request un-deployment of all streams.
+	 *
 	 * @return instance of {@link ResponseEntity}
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
@@ -179,13 +195,14 @@ public class StreamDeploymentController {
 
 	/**
 	 * Request deployment of an existing stream definition.
+	 *
 	 * @param name the name of an existing stream definition (required)
 	 * @return The stream deployment
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDeploymentResource info(@PathVariable("name") String name,
-			@RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties) {
+										 @RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties) {
 		StreamDefinition streamDefinition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);
@@ -203,14 +220,15 @@ public class StreamDeploymentController {
 
 	/**
 	 * Request deployment of an existing stream definition.
-	 * @param name the name of an existing stream definition (required)
+	 *
+	 * @param name       the name of an existing stream definition (required)
 	 * @param properties the deployment properties for the stream as a comma-delimited list of
-	 *     key=value pairs
+	 *                   key=value pairs
 	 * @return response without a body
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
 	public ResponseEntity<Void> deploy(@PathVariable("name") String name,
-			@RequestBody(required = false) Map<String, String> properties) {
+									   @RequestBody(required = false) Map<String, String> properties) {
 		this.streamService.deployStream(name, properties);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
@@ -241,8 +259,7 @@ public class StreamDeploymentController {
 		public StreamDeploymentResource toModel(StreamDeployment streamDeployment) {
 			try {
 				return createModelWithId(streamDeployment.getStreamName(), streamDeployment);
-			}
-			catch (IllegalStateException e) {
+			} catch (IllegalStateException e) {
 				logger.warn("Failed to create StreamDeploymentResource. " + e.getMessage());
 			}
 			return null;
@@ -255,7 +272,7 @@ public class StreamDeploymentController {
 					(StringUtils.hasText(streamDeployment.getDeploymentProperties()) && canDisplayDeploymentProperties())) {
 				deploymentProperties = streamDeployment.getDeploymentProperties();
 			}
-				return new StreamDeploymentResource(streamDeployment.getStreamName(),
+			return new StreamDeploymentResource(streamDeployment.getStreamName(),
 					streamDefinitionService.redactDsl(new StreamDefinition(streamDeployment.getStreamName(), this.dslText)),
 					this.description,
 					deploymentProperties, this.status);

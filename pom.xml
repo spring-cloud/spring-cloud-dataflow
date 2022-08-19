@@ -66,14 +66,9 @@
 
 		<spring-cloud-skipper.version>2.9.0-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.3.5</spring-cloud-task.version>
-
-		<!-- Only used for tests -->
-		<spring-security-oauth2.version>2.3.7.RELEASE</spring-security-oauth2.version>
+		<spring-cloud-task.version>2.4.2</spring-cloud-task.version>
 
 		<spring-cloud-common-security-config.version>1.8.0-SNAPSHOT</spring-cloud-common-security-config.version>
-
-		<spring-shell.version>1.2.0.RELEASE</spring-shell.version>
 
 		<jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
@@ -90,6 +85,7 @@
 		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.4</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.4</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 	</properties>
 	<modules>
 		<module>spring-cloud-dataflow-container-registry</module>
@@ -196,11 +192,6 @@
 				<version>${spring-cloud-deployer-cloudfoundry.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.shell</groupId>
-				<artifactId>spring-shell</artifactId>
-				<version>${spring-shell.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${spring-cloud-common-security-config.version}</version>
@@ -221,11 +212,6 @@
 				<version>${codearte-props2yml.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.security.oauth</groupId>
-				<artifactId>spring-security-oauth2</artifactId>
-				<version>${spring-security-oauth2.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-assertj</artifactId>
 				<version>${json-unit.version}</version>
@@ -244,6 +230,11 @@
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-ecr</artifactId>
 				<version>${aws-java-sdk-ecr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springdoc</groupId>
+				<artifactId>springdoc-openapi-ui</artifactId>
+				<version>${springdoc-openapi-ui.version}</version>
 			</dependency>
 			<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 			<dependency>
@@ -426,7 +417,7 @@
 					<name>Spring Milestones</name>
 					<url>https://repo.spring.io/libs-milestone-local</url>
 					<snapshots>
-						<enabled>false</enabled>
+						<enabled>true</enabled>
 					</snapshots>
 				</repository>
 				<repository>

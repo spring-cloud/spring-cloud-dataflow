@@ -52,3 +52,5 @@ cleanup.sh
 
 # Carvel
 node_modules
+!/.idea/checkstyle-idea.xml
+yagni/

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
+import org.springframework.cloud.skipper.domain.ActuatorPostRequest;
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ import org.springframework.data.domain.Pageable;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Chris Bono
  */
 public interface StreamDeployer {
 
@@ -121,7 +123,26 @@ public interface StreamDeployer {
 
 	/**
 	 * Returns the list of stream names that correspond to the currently available skipper releases.
-	 * @return
+	 * @return list of string names currently available
 	 */
 	List<String> getStreams();
+
+	/**
+	 * Access an HTTP GET exposed actuator resource for a deployed app instance.
+	 *
+	 * @param appId the application id
+	 * @param instanceId the application instance id
+	 * @param endpoint the relative actuator path, e.g., {@code /info}
+	 * @return the contents as JSON text
+	 */
+	String getFromActuator(String appId, String instanceId, String endpoint);
+
+	/**
+	 * Access an HTTP POST exposed actuator resource for a deployed app instance.
+	 *
+	 * @param appId the deployer assigned guid of the app instance
+	 * @param instanceId the application instance id
+	 * @param actuatorPostRequest the request body containing the endpoint and data to pass to the endpoint
+	 */
+	Object postToActuator(String appId, String instanceId, ActuatorPostRequest actuatorPostRequest);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,8 +102,9 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
 		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_READ_COMMITTED");
 
-		List<String> args = new ArrayList<>(1);
+		List<String> args = new ArrayList<>(2);
 		args.add("--baz=boo --foo=bar");
+		args.add("--spring.cloud.task.parent-execution-id=1");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(taskOperations).launch("ComposedTest-AAA", props, args);
 	}

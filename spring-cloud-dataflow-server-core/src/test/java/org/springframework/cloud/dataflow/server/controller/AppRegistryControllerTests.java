@@ -267,26 +267,26 @@ public class AppRegistryControllerTests {
 	public void testRegisterAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.0"));
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.0"));
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
-				is("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.0"));
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.task.app:timestamp-task:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.0"));
 	}
 
 	@Test
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.0"));
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.0"));
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
-				is("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.0"));
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:1.0.0.BUILD-SNAPSHOT"));
+				is("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.0"));
 	}
 
 	@Test
@@ -368,7 +368,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(6)));
+				.andExpect(jsonPath("$.options[*]", hasSize(1)));
 	}
 
 	@Test
@@ -376,7 +376,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(905)));
+				.andExpect(jsonPath("$.options[*]", hasSize(2001)));
 	}
 
 	@Test
@@ -425,11 +425,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isConflict());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/3.2.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/3.2.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -567,11 +567,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isOk());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/3.2.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/3.2.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -671,17 +671,17 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testListApplicationsByVersion() throws Exception {
-		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/apps?version=3.2.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 	}
 
 	@Test
 	public void testListApplicationsByVersionAndSearch() throws Exception {
-		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=3.2.0&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
-		mockMvc.perform(get("/apps?version=1.0.0.BUILD-SNAPSHOT&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=3.2.0&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}

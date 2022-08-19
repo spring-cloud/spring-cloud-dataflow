@@ -1,4 +1,8 @@
 spring:
+  application:
+    name: spring-cloud-dataflow-shell
   main:
-    allow-circular-references: true
-
+    banner-mode: 'off'
+logging:
+  pattern:
+    console:

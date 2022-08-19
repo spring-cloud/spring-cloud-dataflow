@@ -1,1 +1,214 @@
-{"_links":{"dashboard":{"href":"http://localhost/dashboard"},"audit-records":{"href":"http://localhost/audit-records"},"streams/definitions":{"href":"http://localhost/streams/definitions"},"streams/definitions/definition":{"href":"http://localhost/streams/definitions/{name}","templated":true},"streams/validation":{"href":"http://localhost/streams/validation/{name}","templated":true},"runtime/streams":{"href":"http://localhost/runtime/streams{?names}","templated":true},"runtime/streams/{streamNames}":{"href":"http://localhost/runtime/streams/{streamNames}","templated":true},"runtime/apps":{"href":"http://localhost/runtime/apps"},"runtime/apps/{appId}":{"href":"http://localhost/runtime/apps/{appId}","templated":true},"runtime/apps/{appId}/instances":{"href":"http://localhost/runtime/apps/{appId}/instances","templated":true},"runtime/apps/{appId}/instances/{instanceId}":{"href":"http://localhost/runtime/apps/{appId}/instances/{instanceId}","templated":true},"streams/deployments":{"href":"http://localhost/streams/deployments"},"streams/deployments/{name}{?reuse-deployment-properties}":{"href":"http://localhost/streams/deployments/{name}?reuse-deployment-properties=false","templated":true},"streams/deployments/{name}":{"href":"http://localhost/streams/deployments/{name}","templated":true},"streams/deployments/history/{name}":{"href":"http://localhost/streams/deployments/history/{name}","templated":true},"streams/deployments/manifest/{name}/{version}":{"href":"http://localhost/streams/deployments/manifest/{name}/{version}","templated":true},"streams/deployments/platform/list":{"href":"http://localhost/streams/deployments/platform/list"},"streams/deployments/rollback/{name}/{version}":{"href":"http://localhost/streams/deployments/rollback/{name}/{version}","templated":true},"streams/deployments/update/{name}":{"href":"http://localhost/streams/deployments/update/{name}","templated":true},"streams/deployments/deployment":{"href":"http://localhost/streams/deployments/{name}","templated":true},"streams/deployments/scale/{streamName}/{appName}/instances/{count}":{"href":"http://localhost/streams/deployments/scale/{streamName}/{appName}/instances/{count}","templated":true},"streams/logs":{"href":"http://localhost/streams/logs"},"streams/logs/{streamName}":{"href":"http://localhost/streams/logs/{streamName}","templated":true},"streams/logs/{streamName}/{appName}":{"href":"http://localhost/streams/logs/{streamName}/{appName}","templated":true},"tasks/platforms":{"href":"http://localhost/tasks/platforms"},"tasks/definitions":{"href":"http://localhost/tasks/definitions"},"tasks/definitions/definition":{"href":"http://localhost/tasks/definitions/{name}","templated":true},"tasks/executions":{"href":"http://localhost/tasks/executions"},"tasks/executions/name":{"href":"http://localhost/tasks/executions{?name}","templated":true},"tasks/executions/current":{"href":"http://localhost/tasks/executions/current"},"tasks/executions/execution":{"href":"http://localhost/tasks/executions/{id}","templated":true},"tasks/validation":{"href":"http://localhost/tasks/validation/{name}","templated":true},"tasks/info/executions":{"href":"http://localhost/tasks/info/executions{?completed,name}","templated":true},"tasks/logs":{"href":"http://localhost/tasks/logs/{taskExternalExecutionId}{?platformName}","templated":true},"jobs/executions":{"href":"http://localhost/jobs/executions"},"jobs/executions/name":{"href":"http://localhost/jobs/executions{?name}","templated":true},"jobs/executions/status":{"href":"http://localhost/jobs/executions{?status}","templated":true},"jobs/executions/execution":{"href":"http://localhost/jobs/executions/{id}","templated":true},"jobs/executions/execution/steps":{"href":"http://localhost/jobs/executions/{jobExecutionId}/steps","templated":true},"jobs/executions/execution/steps/step":{"href":"http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}","templated":true},"jobs/executions/execution/steps/step/progress":{"href":"http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}/progress","templated":true},"jobs/instances/name":{"href":"http://localhost/jobs/instances{?name}","templated":true},"jobs/instances/instance":{"href":"http://localhost/jobs/instances/{id}","templated":true},"tools/parseTaskTextToGraph":{"href":"http://localhost/tools"},"tools/convertTaskGraphToText":{"href":"http://localhost/tools"},"jobs/thinexecutions":{"href":"http://localhost/jobs/thinexecutions"},"jobs/thinexecutions/name":{"href":"http://localhost/jobs/thinexecutions{?name}","templated":true},"jobs/thinexecutions/jobInstanceId":{"href":"http://localhost/jobs/thinexecutions{?jobInstanceId}","templated":true},"jobs/thinexecutions/taskExecutionId":{"href":"http://localhost/jobs/thinexecutions{?taskExecutionId}","templated":true},"apps":{"href":"http://localhost/apps"},"about":{"href":"http://localhost/about"},"completions/stream":{"href":"http://localhost/completions/stream{?start,detailLevel}","templated":true},"completions/task":{"href":"http://localhost/completions/task{?start,detailLevel}","templated":true}},"api.revision":14}
+{
+  "_links": {
+    "dashboard": {
+      "href": "http://localhost/dashboard"
+    },
+    "audit-records": {
+      "href": "http://localhost/audit-records"
+    },
+    "streams/definitions": {
+      "href": "http://localhost/streams/definitions"
+    },
+    "streams/definitions/definition": {
+      "href": "http://localhost/streams/definitions/{name}",
+      "templated": true
+    },
+    "streams/validation": {
+      "href": "http://localhost/streams/validation/{name}",
+      "templated": true
+    },
+    "runtime/streams": {
+      "href": "http://localhost/runtime/streams{?names}",
+      "templated": true
+    },
+    "runtime/streams/{streamNames}": {
+      "href": "http://localhost/runtime/streams/{streamNames}",
+      "templated": true
+    },
+    "runtime/apps": {
+      "href": "http://localhost/runtime/apps"
+    },
+    "runtime/apps/{appId}": {
+      "href": "http://localhost/runtime/apps/{appId}",
+      "templated": true
+    },
+    "runtime/apps/{appId}/instances": {
+      "href": "http://localhost/runtime/apps/{appId}/instances",
+      "templated": true
+    },
+    "runtime/apps/{appId}/instances/{instanceId}": {
+      "href": "http://localhost/runtime/apps/{appId}/instances/{instanceId}",
+      "templated": true
+    },
+    "runtime/apps/{appId}/instances/{instanceId}/actuator": [
+      {
+        "href": "http://localhost/runtime/apps/{appId}/instances/{instanceId}/actuator?endpoint={endpoint}",
+        "templated": true
+      },
+      {
+        "href": "http://localhost/runtime/apps/{appId}/instances/{instanceId}/actuator",
+        "templated": true
+      }
+    ],
+    "runtime/apps/{appId}/instances/{instanceId}/post": {
+      "href": "http://localhost/runtime/apps/{appId}/instances/{instanceId}/post",
+      "templated": true
+    },
+    "streams/deployments": {
+      "href": "http://localhost/streams/deployments"
+    },
+    "streams/deployments/{name}{?reuse-deployment-properties}": {
+      "href": "http://localhost/streams/deployments/{name}?reuse-deployment-properties=false",
+      "templated": true
+    },
+    "streams/deployments/{name}": {
+      "href": "http://localhost/streams/deployments/{name}",
+      "templated": true
+    },
+    "streams/deployments/history/{name}": {
+      "href": "http://localhost/streams/deployments/history/{name}",
+      "templated": true
+    },
+    "streams/deployments/manifest/{name}/{version}": {
+      "href": "http://localhost/streams/deployments/manifest/{name}/{version}",
+      "templated": true
+    },
+    "streams/deployments/platform/list": {
+      "href": "http://localhost/streams/deployments/platform/list"
+    },
+    "streams/deployments/rollback/{name}/{version}": {
+      "href": "http://localhost/streams/deployments/rollback/{name}/{version}",
+      "templated": true
+    },
+    "streams/deployments/update/{name}": {
+      "href": "http://localhost/streams/deployments/update/{name}",
+      "templated": true
+    },
+    "streams/deployments/deployment": {
+      "href": "http://localhost/streams/deployments/{name}",
+      "templated": true
+    },
+    "streams/deployments/scale/{streamName}/{appName}/instances/{count}": {
+      "href": "http://localhost/streams/deployments/scale/{streamName}/{appName}/instances/{count}",
+      "templated": true
+    },
+    "streams/logs": {
+      "href": "http://localhost/streams/logs"
+    },
+    "streams/logs/{streamName}": {
+      "href": "http://localhost/streams/logs/{streamName}",
+      "templated": true
+    },
+    "streams/logs/{streamName}/{appName}": {
+      "href": "http://localhost/streams/logs/{streamName}/{appName}",
+      "templated": true
+    },
+    "tasks/platforms": {
+      "href": "http://localhost/tasks/platforms"
+    },
+    "tasks/definitions": {
+      "href": "http://localhost/tasks/definitions"
+    },
+    "tasks/definitions/definition": {
+      "href": "http://localhost/tasks/definitions/{name}",
+      "templated": true
+    },
+    "tasks/executions": {
+      "href": "http://localhost/tasks/executions"
+    },
+    "tasks/executions/name": {
+      "href": "http://localhost/tasks/executions{?name}",
+      "templated": true
+    },
+    "tasks/executions/current": {
+      "href": "http://localhost/tasks/executions/current"
+    },
+    "tasks/executions/execution": {
+      "href": "http://localhost/tasks/executions/{id}",
+      "templated": true
+    },
+    "tasks/validation": {
+      "href": "http://localhost/tasks/validation/{name}",
+      "templated": true
+    },
+    "tasks/info/executions": {
+      "href": "http://localhost/tasks/info/executions{?completed,name}",
+      "templated": true
+    },
+    "tasks/logs": {
+      "href": "http://localhost/tasks/logs/{taskExternalExecutionId}{?platformName}",
+      "templated": true
+    },
+    "jobs/executions": {
+      "href": "http://localhost/jobs/executions"
+    },
+    "jobs/executions/name": {
+      "href": "http://localhost/jobs/executions{?name}",
+      "templated": true
+    },
+    "jobs/executions/status": {
+      "href": "http://localhost/jobs/executions{?status}",
+      "templated": true
+    },
+    "jobs/executions/execution": {
+      "href": "http://localhost/jobs/executions/{id}",
+      "templated": true
+    },
+    "jobs/executions/execution/steps": {
+      "href": "http://localhost/jobs/executions/{jobExecutionId}/steps",
+      "templated": true
+    },
+    "jobs/executions/execution/steps/step": {
+      "href": "http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}",
+      "templated": true
+    },
+    "jobs/executions/execution/steps/step/progress": {
+      "href": "http://localhost/jobs/executions/{jobExecutionId}/steps/{stepId}/progress",
+      "templated": true
+    },
+    "jobs/instances/name": {
+      "href": "http://localhost/jobs/instances{?name}",
+      "templated": true
+    },
+    "jobs/instances/instance": {
+      "href": "http://localhost/jobs/instances/{id}",
+      "templated": true
+    },
+    "tools/parseTaskTextToGraph": {
+      "href": "http://localhost/tools"
+    },
+    "tools/convertTaskGraphToText": {
+      "href": "http://localhost/tools"
+    },
+    "jobs/thinexecutions": {
+      "href": "http://localhost/jobs/thinexecutions"
+    },
+    "jobs/thinexecutions/name": {
+      "href": "http://localhost/jobs/thinexecutions{?name}",
+      "templated": true
+    },
+    "jobs/thinexecutions/jobInstanceId": {
+      "href": "http://localhost/jobs/thinexecutions{?jobInstanceId}",
+      "templated": true
+    },
+    "jobs/thinexecutions/taskExecutionId": {
+      "href": "http://localhost/jobs/thinexecutions{?taskExecutionId}",
+      "templated": true
+    },
+    "apps": {
+      "href": "http://localhost/apps"
+    },
+    "about": {
+      "href": "http://localhost/about"
+    },
+    "completions/stream": {
+      "href": "http://localhost/completions/stream{?start,detailLevel}",
+      "templated": true
+    },
+    "completions/task": {
+      "href": "http://localhost/completions/task{?start,detailLevel}",
+      "templated": true
+    }
+  },
+  "api.revision": 14
+}

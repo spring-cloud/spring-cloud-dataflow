@@ -734,7 +734,7 @@ Each of them ran successfully with an `Exit Code` as `0`.
 ===== Passing Properties to the Child Tasks
 
 To set the properties for child tasks in a composed task graph at task launch time,
-use the following format: `app.<composed task definition name>.<child task app name>.<property>`.
+use the following format: `app.<child task app name>.<property>`.
 The following listing shows a composed task definition as an example:
 
 ====
@@ -749,16 +749,16 @@ To have `mytaskapp` display 'HELLO' and set the `mytimestamp` timestamp format t
 ====
 [source,bash]
 ----
-task launch my-composed-task --properties "app.my-composed-task.mytaskapp.displayMessage=HELLO,app.my-composed-task.mytimestamp.timestamp.format=YYYY"
+task launch my-composed-task --properties "app.mytaskapp.displayMessage=HELLO,app.mytimestamp.timestamp.format=YYYY"
 ----
 ====
 
-Similar to application properties, you can also set the `deployer` properties for child tasks by using the following format: `deployer.<composed task definition name>.<child task app name>.<deployer-property>`:
+Similar to application properties, you can also set the `deployer` properties for child tasks by using the following format: `deployer.<child task app name>.<deployer-property>`:
 
 ====
 [source,bash]
 ----
-task launch my-composed-task --properties "deployer.my-composed-task.mytaskapp.memory=2048m,app.my-composed-task.mytimestamp.timestamp.format=HH:mm:ss"
+task launch my-composed-task --properties "deployer.mytaskapp.memory=2048m,app.mytimestamp.timestamp.format=HH:mm:ss"
 Launched task 'a1'
 ----
 ====
@@ -773,7 +773,7 @@ You can pass command-line arguments for the composed task runner by using the `-
 dataflow:>task create my-composed-task --definition "<aaa: timestamp || bbb: timestamp>"
 Created new task 'my-composed-task'
 
-dataflow:>task launch my-composed-task --arguments "--increment-instance-enabled=true --max-wait-time=50000 --split-thread-core-pool-size=4" --properties "app.my-composed-task.bbb.timestamp.format=dd/MM/yyyy HH:mm:ss"
+dataflow:>task launch my-composed-task --arguments "--increment-instance-enabled=true --max-wait-time=50000 --split-thread-core-pool-size=4" --properties "app.bbb.timestamp.format=dd/MM/yyyy HH:mm:ss"
 Launched task 'my-composed-task'
 ----
 ====

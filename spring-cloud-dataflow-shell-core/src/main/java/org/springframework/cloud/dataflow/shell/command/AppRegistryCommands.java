@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
+import org.springframework.cloud.dataflow.shell.completer.ApplicationNameValueProvider;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -39,16 +41,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.Availability;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.AbsoluteWidthSizeConstraints;
 import org.springframework.shell.table.CellMatchers;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -68,30 +70,21 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Christian Tzolov
  * @author Chris Schaefer
+ * @author Chris Bono
  */
-@Component
-public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
-
-	protected DataFlowShell dataFlowShell;
-	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
-
-	// Create Role
+@ShellComponent
+public class AppRegistryCommands implements ResourceLoaderAware {
 
 	private static final String REGISTER_APPLICATION = "app register";
 	private static final String IMPORT_APPLICATIONS = "app import";
-
-	// Destroy Role
-
-	private final static String UNREGISTER_APPLICATION = "app unregister";
-	private final static String UNREGISTER_ALL = "app all unregister";
-
-	// Modify Role
+	private static final String UNREGISTER_APPLICATION = "app unregister";
+	private static final String UNREGISTER_ALL = "app all unregister";
 	private static final String DEFAULT_APPLICATION = "app default";
+	private static final String APPLICATION_INFO = "app info";
+	private static final String LIST_APPLICATIONS = "app list";
 
-	// View Role
-
-	private final static String APPLICATION_INFO = "app info";
-	private final static String LIST_APPLICATIONS = "app list";
+	protected DataFlowShell dataFlowShell;
+	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
 	@Autowired
 	public void setDataFlowShell(DataFlowShell dataFlowShell) {
@@ -103,55 +96,55 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		this.resourceLoader = resourceLoader;
 	}
 
-	@CliAvailabilityIndicator({ REGISTER_APPLICATION, IMPORT_APPLICATIONS })
-	public boolean availableWithCreateRole() {
-		return dataFlowShell.hasAccess(RoleType.CREATE, OpsType.APP_REGISTRY);
+	public Availability availableWithViewRole() {
+		return availabilityFor(RoleType.VIEW, OpsType.APP_REGISTRY);
 	}
 
-	@CliAvailabilityIndicator({ UNREGISTER_APPLICATION })
-	public boolean availableWithDestroyRole() {
-		return dataFlowShell.hasAccess(RoleType.DESTROY, OpsType.APP_REGISTRY);
+	public Availability availableWithCreateRole() {
+		return availabilityFor(RoleType.CREATE, OpsType.APP_REGISTRY);
 	}
 
-	@CliAvailabilityIndicator({ DEFAULT_APPLICATION })
-	public boolean availableWithModifyRole() {
-		return dataFlowShell.hasAccess(RoleType.MODIFY, OpsType.APP_REGISTRY);
+	public Availability availableWithUModifyRole() {
+		return availabilityFor(RoleType.MODIFY, OpsType.APP_REGISTRY);
 	}
 
-	@CliAvailabilityIndicator({ APPLICATION_INFO, LIST_APPLICATIONS })
-	public boolean availableWithViewRole() {
-		return dataFlowShell.hasAccess(RoleType.VIEW, OpsType.APP_REGISTRY);
+	public Availability availableWithDestroyRole() {
+		return availabilityFor(RoleType.DESTROY, OpsType.APP_REGISTRY);
 	}
 
-	@CliCommand(value = APPLICATION_INFO, help = "Get information about an application")
-	public List<Object> info(
-			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "name of the application to query") String name,
-			@CliOption(mandatory = true, key = {
-					"type" }, help = "type of the application to query") ApplicationType type,
-			@CliOption(key = { "version" }, help = "the version for the registered application") String version,
-			@CliOption(key = { "exhaustive" }, help = "return all metadata, including common Spring Boot properties",
-					specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean exhaustive) {
-		List<Object> result = new ArrayList<>();
+	private Availability availabilityFor(RoleType roleType, OpsType opsType) {
+		return dataFlowShell.hasAccess(roleType, opsType)
+				? Availability.available()
+				: Availability.unavailable("you do not have permissions");
+	}
+
+	@ShellMethod(key = APPLICATION_INFO, value = "Get information about an application")
+	@ShellMethodAvailability("availableWithViewRole")
+	public TablesInfo info(
+			@ShellOption(value = { "--name" }, help = "name of the application to query", valueProvider = ApplicationNameValueProvider.class) String name,
+			@ShellOption(help = "type of the application to query") ApplicationType type,
+			@ShellOption(help = "the version for the registered application", defaultValue = ShellOption.NULL) String version,
+			@ShellOption(help = "return all metadata, including common Spring Boot properties", defaultValue = "false") boolean exhaustive) {
+		TablesInfo result = new TablesInfo();
 		try {
 			DetailedAppRegistrationResource info = StringUtils.hasText(version) ?
 					appRegistryOperations().info(name, type, version, exhaustive) :
 					appRegistryOperations().info(name, type, exhaustive);
 			if (info != null) {
 				List<ConfigurationMetadataProperty> options = info.getOptions();
-				result.add(String.format("Information about %s application '%s':", type, name));
+				result.addHeader(String.format("Information about %s application '%s':", type, name));
 				if (info.getVersion() != null) {
-					result.add(String.format("Version: '%s':", info.getVersion()));
+					result.addHeader(String.format("Version: '%s':", info.getVersion()));
 				}
 				if (info.getDefaultVersion()) {
-					result.add(String.format("Default application version: '%s':", info.getDefaultVersion()));
+					result.addHeader(String.format("Default application version: '%s':", info.getDefaultVersion()));
 				}
-				result.add(String.format("Resource URI: %s", info.getUri()));
+				result.addHeader(String.format("Resource URI: %s", info.getUri()));
 				if (info.getShortDescription() != null) {
-					result.add(info.getShortDescription());
+					result.addHeader(info.getShortDescription());
 				}
 				if (options == null) {
-					result.add("Application options metadata is not available");
+					result.addHeader("Application options metadata is not available");
 				}
 				else {
 					TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
@@ -165,26 +158,25 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 					}
 					TableBuilder builder = DataFlowTables.applyStyle(new TableBuilder(modelBuilder.build()))
 							.on(CellMatchers.table()).addSizer(new AbsoluteWidthSizeConstraints(30)).and();
-					result.add(builder.build());
+					result.addTable(builder.build());
 				}
 			}
 			else {
-				result.add(String.format("Application info is not available for %s:%s", type, name));
+				result.addHeader(String.format("Application info is not available for %s:%s", type, name));
 			}
 		}
 		catch (Exception e) {
-			result.add(String.format("Application info is not available for %s:%s", type, name));
+			result.addHeader(String.format("Application info is not available for %s:%s", type, name));
 		}
 		return result;
 	}
 
-	@CliCommand(value = UNREGISTER_APPLICATION, help = "Unregister an application")
+	@ShellMethod(key = UNREGISTER_APPLICATION, value = "Unregister an application")
+	@ShellMethodAvailability("availableWithDestroyRole")
 	public String unregister(
-			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "name of the application to unregister") String name,
-			@CliOption(mandatory = true, key = {
-					"type" }, help = "type of the application to unregister") ApplicationType type,
-			@CliOption(key = { "version" }, help = "the version application to unregister") String version) {
+			@ShellOption(value = { "", "--name" }, help = "name of the application to unregister", valueProvider = ApplicationNameValueProvider.class) String name,
+			@ShellOption(help = "type of the application to unregister") ApplicationType type,
+			@ShellOption(help = "the version application to unregister", defaultValue = ShellOption.NULL) String version) {
 
 		appRegistryOperations().unregister(name, type, version);
 
@@ -210,7 +202,8 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 				.collect(Collectors.toList());
 	}
 
-	@CliCommand(value = UNREGISTER_ALL, help = "Unregister all applications")
+	@ShellMethod(key = UNREGISTER_ALL, value = "Unregister all applications")
+	@ShellMethodAvailability("availableWithDestroyRole")
 	public String unregisterAll() {
 		appRegistryOperations().unregisterAll();
 
@@ -231,37 +224,36 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		return msg.toString();
 	}
 
-	@CliCommand(value = DEFAULT_APPLICATION, help = "Change the default application version")
-	public String defaultApplicaiton(
-			@CliOption(mandatory = true, key = { "",
-					"id" }, help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
-			@CliOption(mandatory = true, key = {
-					"version" }, help = "the new default application version") String version) {
+	@ShellMethod(key = DEFAULT_APPLICATION, value = "Change the default application version")
+	@ShellMethodAvailability("availableWithUModifyRole")
+	public String defaultApplication(
+			@ShellOption(value = { "", "--id" }, help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application,
+			@ShellOption(help = "the new default application version") String version) {
 
 		appRegistryOperations().makeDefault(application.name, application.type, version);
 
 		return String.format("New default Application %s:%s:%s", application.type, application.name, version);
 	}
 
-	@CliCommand(value = REGISTER_APPLICATION, help = "Register a new application")
+	@ShellMethod(key = REGISTER_APPLICATION, value = "Register a new application")
+	@ShellMethodAvailability("availableWithCreateRole")
 	public String register(
-			@CliOption(mandatory = true, key = { "",
-					"name" }, help = "the name for the registered application") String name,
-			@CliOption(mandatory = true, key = {
-					"type" }, help = "the type for the registered application") ApplicationType type,
-			@CliOption(mandatory = true, key = { "uri" }, help = "URI for the application artifact") String uri,
-			@CliOption(key = { "metadata-uri" }, help = "Metadata URI for the application artifact") String metadataUri,
-			@CliOption(key = "force", help = "force update if application is already registered (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
+			@ShellOption(help = "the type for the registered application") ApplicationType type,
+			@ShellOption(help = "URI for the application artifact") String uri,
+			@ShellOption(help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
+			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
 
 		appRegistryOperations().register(name, type, uri, metadataUri, force);
 
 		return String.format(("Successfully registered application '%s:%s'"), type, name);
 	}
 
-	@CliCommand(value = LIST_APPLICATIONS, help = "List all registered applications")
-	public Object list(@CliOption(
-			key = { "", "id" },
-			help = "id of the application to query in the form of 'type:name'") QualifiedApplicationName application) {
+	@ShellMethod(key = LIST_APPLICATIONS, value = "List all registered applications")
+	@ShellMethodAvailability("availableWithViewRole")
+	public Object list(
+			@ShellOption(value = { "", "--id" }, help = "id of the application to query in the form of 'type:name'",
+					defaultValue = ShellOption.NULL) QualifiedApplicationName application) {
 		PagedModel<AppRegistrationResource> appRegistrations = appRegistryOperations().list();
 
 		// TODO This can go outside the method
@@ -331,11 +323,12 @@ public class AppRegistryCommands implements CommandMarker, ResourceLoaderAware {
 		return DataFlowTables.applyStyle(new TableBuilder(model)).build();
 	}
 
-	@CliCommand(value = IMPORT_APPLICATIONS, help = "Register all applications listed in a properties file")
+	@ShellMethod(key = IMPORT_APPLICATIONS, value = "Register all applications listed in a properties file")
+	@ShellMethodAvailability("availableWithCreateRole")
 	public String importFromResource(
-			@CliOption(mandatory = true, key = { "", "uri" }, help = "URI for the properties file") String uri,
-			@CliOption(key = "local", help = "whether to resolve the URI locally (as opposed to on the server)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "true") boolean local,
-			@CliOption(key = "force", help = "force update if any module already exists (only if not in use)", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean force) {
+			@ShellOption(help = "URI for the properties file") String uri,
+			@ShellOption(help = "whether to resolve the URI locally (as opposed to on the server)", defaultValue = "true", arity = 1) boolean local,
+			@ShellOption(help = "force update if any module already exists (only if not in use)", defaultValue = "false") boolean force) {
 		if (local) {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);

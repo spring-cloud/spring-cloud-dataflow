@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,8 @@ import org.springframework.cloud.dataflow.shell.command.TaskCommandTemplate;
 import org.springframework.cloud.dataflow.shell.command.TaskScheduleCommandTemplate;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.context.ApplicationContext;
-import org.springframework.shell.core.CommandResult;
-import org.springframework.shell.core.JLineShellComponent;
+import org.springframework.shell.Shell;
 import org.springframework.util.AlternativeJdkIdGenerator;
-import org.springframework.util.Assert;
 import org.springframework.util.IdGenerator;
 import org.springframework.util.SocketUtils;
 
@@ -50,6 +48,8 @@ import org.springframework.util.SocketUtils;
  * @author Ilayaperumal Gopinathan
  * @author Patrick Peralta
  * @author Glenn Renfro
+ * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public abstract class AbstractShellIntegrationTest {
 
@@ -91,7 +91,7 @@ public abstract class AbstractShellIntegrationTest {
 	/**
 	 * Instance of shell to execute commands for testing.
 	 */
-	private static DataFlowShell dataFlowShell;
+	private static ShellCommandRunner commandRunner;
 
 	/**
 	 * Generator used to create random stream names.
@@ -120,29 +120,20 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",
 					"--security.basic.enabled=false", "--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
-					"--spring.main.allow-circular-references=true",
 					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl,
 					"--spring.cloud.dataflow.features.schedules-enabled=true");
 
-			JLineShellComponent shell = applicationContext.getBean(JLineShellComponent.class);
+			Shell shell = applicationContext.getBean(Shell.class);
 
 			skipperClient = applicationContext.getBean(SkipperClient.class);
-
-			if (!shell.isRunning()) {
-				shell.start();
-			}
-			dataFlowShell = new DataFlowShell(shell);
+			commandRunner = new ShellCommandRunner(shell);
 		}
 	}
 
 	@AfterClass
 	public static void shutdown() {
 		if (shutdownAfterRun) {
-			logger.info("Stopping Data Flow Shell");
-			if (dataFlowShell != null) {
-				dataFlowShell.stop();
-			}
 			if (applicationContext != null) {
 				logger.info("Stopping Data Flow Server");
 				SpringApplication.exit(applicationContext);
@@ -158,7 +149,7 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return template for issuing stream commands
 	 */
 	protected StreamCommandTemplate stream() {
-		return new StreamCommandTemplate(dataFlowShell);
+		return new StreamCommandTemplate(commandRunner);
 	}
 
 	/**
@@ -167,7 +158,34 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return template for issuing task commands
 	 */
 	protected TaskCommandTemplate task() {
-		return new TaskCommandTemplate(dataFlowShell);
+		return new TaskCommandTemplate(commandRunner);
+	}
+
+	/**
+	 * Return a {@link TaskCommandTemplate} that throws any errors back to caller.
+	 *
+	 * @return template for issuing task commands
+	 */
+	protected TaskCommandTemplate taskWithErrors() {
+		return new TaskCommandTemplate(commandRunner.withValidateCommandSuccess());
+	}
+
+	/**
+	 * Return a {@link TaskScheduleCommandTemplate} for issuing shell based task schedule commands.
+	 *
+	 * @return template for issuing task schedule commands
+	 */
+	protected TaskScheduleCommandTemplate schedule() {
+		return new TaskScheduleCommandTemplate(commandRunner, applicationContext);
+	}
+
+	/**
+	 * Return a {@link TaskScheduleCommandTemplate} that throws any errors back to caller.
+	 *
+	 * @return template for issuing task schedule commands
+	 */
+	protected TaskScheduleCommandTemplate scheduleWithErrors() {
+		return new TaskScheduleCommandTemplate(commandRunner.withValidateCommandSuccess(), applicationContext);
 	}
 
 	/**
@@ -176,14 +194,8 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return template for issuing job commands
 	 */
 	protected JobCommandTemplate job() {
-		return new JobCommandTemplate(dataFlowShell);
+		return new JobCommandTemplate(commandRunner);
 	}
-
-	protected TaskScheduleCommandTemplate schedule() {
-		return new TaskScheduleCommandTemplate(dataFlowShell, applicationContext);
-	}
-
-	// Util methods
 
 	/**
 	 * Return a unique random name for stream/task testing.
@@ -208,23 +220,5 @@ public abstract class AbstractShellIntegrationTest {
 		return generateUniqueStreamOrTaskName(name.getMethodName().replace('[', '-').replace("]", ""));
 	}
 
-	private static class DataFlowShell extends JLineShellComponent {
-
-		private final JLineShellComponent shell;
-
-		public DataFlowShell(JLineShellComponent shell) {
-			this.shell = shell;
-		}
-
-		@Override
-		public CommandResult executeCommand(String command) {
-			CommandResult cr = this.shell.executeCommand(command);
-			if (cr.getException() != null) {
-				cr.getException().printStackTrace();
-			}
-			Assert.isTrue(cr.isSuccess(), "Failure.  CommandResult = " + cr.toString());
-			return cr;
-		}
-	}
-
 }
+

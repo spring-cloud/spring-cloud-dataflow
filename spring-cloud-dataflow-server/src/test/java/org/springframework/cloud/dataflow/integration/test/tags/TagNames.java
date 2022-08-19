@@ -42,10 +42,16 @@ public abstract class TagNames {
 
 	public static final String MSSQL = "mssql";
 	public static final String MSSQL_2019_CU10_ubuntu_20_04 = "mssql_2019_CU10_ubuntu_20_04";
+	public static final String MSSQL_2019_CU16_ubuntu_20_04 = "mssql_2019_CU16_ubuntu_20_04";
+	public static final String MSSQL_2022_CTP2_0_ubuntu_20_04 = "mssql_2022_CTP2_0_ubuntu_20_04";
+
 
 	public static final String ORACLE = "oracle";
+	public static final String ORACLE_12_2_0_1_se2 = "oracle_12_2_0_1_se2";
 
 	public static final String DB2 = "db2";
+	public static final String DB2_11_5_0_0a = "db2_11_5_0_0a";
+	public static final String DB2_10_5_0_5_3_10_0 = "db2_10_5_0_5_3_10_0";
 
 	public static final String OAUTH = "oauth";
 	public static final String UAA = "uaa";

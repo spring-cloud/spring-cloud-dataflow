@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
@@ -54,14 +45,11 @@ import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetCredentials;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
+import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
@@ -76,10 +64,9 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.shell.CommandLine;
-import org.springframework.shell.core.CommandMarker;
-import org.springframework.shell.core.annotation.CliCommand;
-import org.springframework.shell.core.annotation.CliOption;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.BorderSpecification;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.CellMatchers;
@@ -91,15 +78,11 @@ import org.springframework.shell.table.SimpleVerticalAligner;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 import org.springframework.shell.table.Tables;
-import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Configuration commands for the Shell. The default Data Flow Server location is
- * <code>http://localhost:9393</code>
+ * Configuration commands for the Shell.
  *
  * @author Gunnar Hillert
  * @author Marius Bogoevici
@@ -108,134 +91,63 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Pollack
  * @author Eric Bottard
  * @author Mike Heath
+ * @author Chris Bono
  */
-@Component
-@Configuration
-public class ConfigCommands implements CommandMarker, InitializingBean, ApplicationListener<ApplicationReadyEvent>,
-		ApplicationContextAware {
-
-	public static final String HORIZONTAL_LINE = "-------------------------------------------------------------------------------\n";
-
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-	@Autowired
-	private DataFlowShell shell;
-
-	@Autowired
-	@Qualifier("restTemplate")
-	private RestTemplate restTemplate;
-
-	@Value("${dataflow.uri:" + Target.DEFAULT_TARGET + "}")
-	private String serverUri;
-
-	@Value("${dataflow.username:" + Target.DEFAULT_USERNAME + "}")
-	private String userName;
-
-	@Value("${dataflow.password:" + Target.DEFAULT_SPECIFIED_PASSWORD + "}")
-	private String password;
-
-	@Value("${dataflow.client-registration-id:" + Target.DEFAULT_CLIENT_REGISTRATION_ID + "}")
-	private String clientRegistrationId;
-
-	@Value("${dataflow.skip-ssl-validation:" + Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION + "}")
-	private boolean skipSslValidation;
-
-	@Value("${dataflow.proxy.uri:" + Target.DEFAULT_PROXY_URI + "}")
-	private String proxyUri;
-
-	@Value("${dataflow.proxy.username:" + Target.DEFAULT_PROXY_USERNAME + "}")
-	private String proxyUsername;
-
-	@Value("${dataflow.proxy.password:" + Target.DEFAULT_PROXY_SPECIFIED_PASSWORD + "}")
-	private String proxyPassword;
-
-	@Value("${dataflow.credentials-provider-command:" + Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND + "}")
-	private String credentialsProviderCommand;
-
-	private UserInput userInput;
-
-	private TargetHolder targetHolder;
-
-	private ApplicationContext applicationContext;
-
-	private volatile boolean initialized;
-
-	@Autowired
-	private CommandLine commandLine;
-
-	@Autowired(required = false)
-	private OAuth2ClientProperties oauth2ClientProperties;
+@ShellComponent
+public class ConfigCommands {
 
 	private static final Authentication DEFAULT_PRINCIPAL = createAuthentication("dataflow-shell-principal");
 
-	@Autowired
-	public void setUserInput(UserInput userInput) {
-		this.userInput = userInput;
-	}
+	private DataFlowShell shell;
 
-	@Autowired
-	public void setTargetHolder(TargetHolder targetHolder) {
-		this.targetHolder = targetHolder;
-	}
+	private DataFlowShellProperties shellProperties;
 
-	@Autowired
-	public void setDataFlowShell(DataFlowShell shell) {
+	private ConsoleUserInput userInput;
+
+	private TargetHolder targetHolder;
+
+	private RestTemplate restTemplate;
+
+	private OAuth2ClientProperties oauth2ClientProperties;
+
+	ConfigCommands(DataFlowShell shell, DataFlowShellProperties shellProperties, ConsoleUserInput userInput,
+			TargetHolder targetHolder, RestTemplate restTemplate, @Nullable OAuth2ClientProperties oauth2ClientProperties) {
 		this.shell = shell;
-	}
-
-	@Autowired
-	@Qualifier("restTemplate")
-	public void setRestTemplate(RestTemplate restTemplate) {
+		this.shellProperties = shellProperties;
+		this.userInput = userInput;
+		this.targetHolder = targetHolder;
 		this.restTemplate = restTemplate;
+		this.oauth2ClientProperties = oauth2ClientProperties;
 	}
 
-	@Bean
-	public RestTemplate restTemplate(Environment ev) {
-		return DataFlowTemplate.getDefaultDataflowRestTemplate();
-	}
-
-	// This is for unit testing
-
-	public void setServerUri(String serverUri) {
-		this.serverUri = serverUri;
-	}
-
-	@CliCommand(value = { "dataflow config server" }, help = "Configure the Spring Cloud Data Flow REST server to use")
+	@ShellMethod(key = "dataflow config server", value = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
-			@CliOption(mandatory = false, key = { "",
-					"uri" }, help = "the location of the Spring Cloud Data Flow REST endpoint", unspecifiedDefaultValue = Target.DEFAULT_TARGET) String targetUriString,
-			@CliOption(mandatory = false, key = {
-					"username" }, help = "the username for authenticated access to the Admin REST endpoint", unspecifiedDefaultValue = Target.DEFAULT_USERNAME) String targetUsername,
-			@CliOption(mandatory = false, key = {
-					"password" }, help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
-					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String targetPassword,
-			@CliOption(mandatory = false, key = {
-					"client-registration-id" }, help = "the registration id for oauth2 config ", unspecifiedDefaultValue = Target.DEFAULT_CLIENT_REGISTRATION_ID) String targetClientRegistrationId,
-			@CliOption(mandatory = false, key = {
-					"credentials-provider-command" }, help = "a command to run that outputs the HTTP credentials used for authentication", unspecifiedDefaultValue = Target.DEFAULT_CREDENTIALS_PROVIDER_COMMAND) String credentialsProviderCommand,
-			@CliOption(mandatory = false, key = {
-					"skip-ssl-validation" }, help = "accept any SSL certificate (even self-signed)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_SKIP_SSL_VALIDATION, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_SKIP_SSL_VALIDATION) boolean skipSslValidation,
+			@ShellOption(value = { "", "--uri" }, help = "the location of the Spring Cloud Data Flow REST endpoint", defaultValue = Target.DEFAULT_TARGET) String uri,
+			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = ShellOption.NULL) String username,
+			@ShellOption(help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
+					+ "username)", defaultValue = ShellOption.NULL) String password,
+			@ShellOption(help = "the registration id for oauth2 config ", defaultValue = Target.DEFAULT_CLIENT_REGISTRATION_ID) String clientRegistrationId,
+			@ShellOption(help = "a command to run that outputs the HTTP credentials used for authentication",
+					defaultValue = ShellOption.NULL) String credentialsProviderCommand,
+			@ShellOption(help = "accept any SSL certificate (even self-signed)", defaultValue = "false") boolean skipSslValidation,
+			@ShellOption(help = "the uri of the proxy server", defaultValue = ShellOption.NULL) String proxyUri,
+			@ShellOption(help = "the username for authenticated access to the secured proxy server", defaultValue = ShellOption.NULL) String proxyUsername,
+			@ShellOption(help = "the password for authenticated access to the secured proxy server (valid only with a "
+					+ "username)", defaultValue = ShellOption.NULL) String proxyPassword
+	) throws Exception {
 
-			@CliOption(mandatory = false, key = {
-					"proxy-uri" }, help = "the uri of the proxy server", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUri,
-			@CliOption(mandatory = false, key = {
-					"proxy-username" }, help = "the username for authenticated access to the secured proxy server", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyUsername,
-			@CliOption(mandatory = false, key = {
-					"proxy-password" }, help = "the password for authenticated access to the secured proxy server (valid only with a "
-					+ "username)", specifiedDefaultValue = Target.DEFAULT_SPECIFIED_PASSWORD, unspecifiedDefaultValue = Target.DEFAULT_UNSPECIFIED_PASSWORD) String proxyPassword) {
-		if (StringUtils.isEmpty(credentialsProviderCommand) &&
-				!StringUtils.isEmpty(targetPassword) && StringUtils.isEmpty(targetUsername)) {
+		if (credentialsProviderCommand == null && password != null && username == null) {
 			return "A password may be specified only together with a username";
 		}
 
 		try {
-			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
+			this.targetHolder.setTarget(new Target(uri, username, password, skipSslValidation));
 
 			final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(this.targetHolder.getTarget().getTargetUri())
 					.skipTlsCertificateVerification(skipSslValidation);
 
 			if (StringUtils.hasText(proxyUri)) {
-				if (StringUtils.isEmpty(proxyPassword) && !StringUtils.isEmpty(proxyUsername)) {
+				if (proxyPassword == null && proxyUsername != null) {
 					// read password from the command line
 					proxyPassword = userInput.prompt("Proxy Server Password", "", false);
 				}
@@ -245,7 +157,7 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 
 			final SecurityInfoResource securityInfoResourceBeforeLogin = restTemplate
-					.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+					.getForObject(uri + "/security/info", SecurityInfoResource.class);
 
 			boolean authenticationEnabled = false;
 			if (securityInfoResourceBeforeLogin != null) {
@@ -253,16 +165,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			}
 
 			if (StringUtils.isEmpty(credentialsProviderCommand) &&
-					StringUtils.isEmpty(targetUsername) && authenticationEnabled) {
-				targetUsername = userInput.prompt("Username", "", true);
+					StringUtils.isEmpty(username) && authenticationEnabled) {
+				username = userInput.prompt("Username", "", true);
 			}
 
 			if (StringUtils.isEmpty(credentialsProviderCommand) && authenticationEnabled &&
-					StringUtils.isEmpty(targetPassword) && !StringUtils.isEmpty(targetUsername)) {
-				targetPassword = userInput.prompt("Password", "", false);
+					StringUtils.isEmpty(password) && !StringUtils.isEmpty(username)) {
+				password = userInput.prompt("Password", "", false);
 			}
 
-			this.targetHolder.setTarget(new Target(targetUriString, targetUsername, targetPassword, skipSslValidation));
+			this.targetHolder.setTarget(new Target(uri, username, password, skipSslValidation));
 
 			if (StringUtils.hasText(credentialsProviderCommand) && authenticationEnabled) {
 				this.targetHolder.getTarget().setTargetCredentials(new TargetCredentials(true));
@@ -272,12 +184,12 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 			if (oauth2ClientProperties != null && !oauth2ClientProperties.getRegistration().isEmpty()) {
 				ClientHttpRequestInterceptor bearerTokenResolvingInterceptor = bearerTokenResolvingInterceptor(
-						oauth2ClientProperties, targetUsername, targetPassword, targetClientRegistrationId);
+						oauth2ClientProperties, username, password, clientRegistrationId);
 				this.restTemplate.getInterceptors().add(bearerTokenResolvingInterceptor);
 			}
 
-			else if (authenticationEnabled && StringUtils.hasText(targetUsername) && StringUtils.hasText(targetPassword)) {
-				httpClientConfigurer.basicAuthCredentials(targetUsername, targetPassword);
+			else if (authenticationEnabled && StringUtils.hasText(username) && StringUtils.hasText(password)) {
+				httpClientConfigurer.basicAuthCredentials(username, password);
 			}
 
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
@@ -285,10 +197,10 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 			this.shell.setDataFlowOperations(
 					new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
 			this.targetHolder.getTarget()
-					.setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
+					.setTargetResultMessage(String.format("Successfully targeted %s", uri));
 
 			final SecurityInfoResource securityInfoResource = restTemplate
-					.getForObject(targetUriString + "/security/info", SecurityInfoResource.class);
+					.getForObject(uri + "/security/info", SecurityInfoResource.class);
 
 			if (securityInfoResource.isAuthenticated()
 					&& this.targetHolder.getTarget().getTargetCredentials() != null) {
@@ -300,29 +212,46 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 
 			this.targetHolder.getTarget().setAuthenticated(securityInfoResource.isAuthenticated());
 			this.targetHolder.getTarget().setAuthenticationEnabled(securityInfoResource.isAuthenticationEnabled());
-			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", targetUriString));
+			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", uri));
 
+			return this.targetHolder.getTarget().getTargetResultMessage();
 		}
 		catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
 			this.shell.setDataFlowOperations(null);
-			handleTargetException(this.targetHolder.getTarget());
+			throw e;
 		}
-		return (this.targetHolder.getTarget().getTargetResultMessage());
-
 	}
 
-	@CliCommand(value = { "dataflow config info" }, help = "Show the Dataflow server being used")
+	/**
+	 * Triggers a connection to the DataFlow server using the configured coordinates.
+	 *
+	 * @return result message of the connection attempt
+	 * @throws Exception
+	 */
+	public String triggerTarget() throws Exception {
+		return target(
+				this.shellProperties.getUri(),
+				this.shellProperties.getUsername(),
+				this.shellProperties.getPassword(),
+				this.shellProperties.getClientRegistrationId(),
+				this.shellProperties.getCredentialsProviderCommand(),
+				this.shellProperties.isSkipSslValidation(),
+				this.shellProperties.getProxy().getUri(),
+				this.shellProperties.getProxy().getUsername(),
+				this.shellProperties.getProxy().getPassword());
+	}
+
+	@ShellMethod(key = "dataflow config info" ,  value = "Show the Dataflow server being used")
 	@SuppressWarnings("unchecked")
-	public List<Object> info() {
+	public TablesInfo info() {
 		Target target = targetHolder.getTarget();
 		if (target.getTargetException() != null) {
-			handleTargetException(target);
 			throw new DataFlowServerException(this.targetHolder.getTarget().getTargetResultMessage());
 		}
 		AboutResource about = this.shell.getDataFlowOperations().aboutOperation().get();
 
-		List<Object> result = new ArrayList<>();
+		TablesInfo result = new TablesInfo();
 		int rowIndex = 0;
 		List<Integer> rowsWithThinSeparators = new ArrayList<>();
 
@@ -412,98 +341,16 @@ public class ConfigCommands implements CommandMarker, InitializingBean, Applicat
 				.fromRowColumn(row, 0).toRowColumn(row + 1, builder.getModel().getColumnCount()));
 
 
-		result.add(builder.build());
+		result.addTable(builder.build());
 
 		if (Target.TargetStatus.ERROR.equals(target.getStatus())) {
 			StringWriter stringWriter = new StringWriter();
 			stringWriter.write("\nAn exception occurred during targeting:\n");
 			target.getTargetException().printStackTrace(new PrintWriter(stringWriter));
 
-			result.add(stringWriter.toString());
+			result.addFooter(stringWriter.toString());
 		}
 		return result;
-	}
-
-	private void handleTargetException(Target target) {
-		Exception targetException = target.getTargetException();
-		Assert.isTrue(targetException != null, "TargetException must not be null");
-		if (targetException instanceof DataFlowServerException) {
-			String message = String.format("Unable to parse server response: %s - at URI '%s'.",
-					targetException.getMessage(), target.getTargetUriAsString());
-			if (logger.isDebugEnabled()) {
-				logger.debug(message, targetException);
-			}
-			else {
-				logger.warn(message);
-			}
-			this.targetHolder.getTarget().setTargetResultMessage(message);
-		}
-		else {
-			if (targetException instanceof HttpClientErrorException && targetException.getMessage().startsWith("401")) {
-				this.targetHolder.getTarget()
-						.setTargetResultMessage(String.format(
-								"Unable to access Data Flow Server"
-										+ " at '%s': '%s'. Unauthorized, did you forget to authenticate?",
-								target.getTargetUriAsString(), targetException.toString()));
-			}
-			else {
-				this.targetHolder.getTarget()
-						.setTargetResultMessage(String.format("Unable to contact Data Flow " + "Server at '%s': '%s'.",
-								target.getTargetUriAsString(), targetException.toString()));
-			}
-		}
-	}
-
-	public String triggerTarget() {
-		return target(
-				this.serverUri,
-				this.userName,
-				this.password,
-				this.clientRegistrationId,
-				this.credentialsProviderCommand,
-				this.skipSslValidation,
-				this.proxyUri,
-				this.proxyUsername,
-				this.proxyPassword
-		);
-	}
-
-	/**
-	 * Will execute the targeting of the Data Flow server ONLY if the shell
-	 * is executing shell command passed directly from the console using
-	 * {@code --spring.shell.commandFile}.
-	 *
-	 * see also: https://github.com/spring-projects/spring-shell/issues/252
-	 */
-	@Override
-	public void onApplicationEvent(ApplicationReadyEvent event) {
-		// Only invoke if the shell is executing in the same application context as the data flow server.
-		if (!initialized && this.commandLine.getShellCommandsToExecute() != null) {
-			triggerTarget();
-		}
-	}
-
-	/**
-	 * Will execute the targeting of the Data Flow server ONLY if the shell
-	 * is executing shell command passed directly from the console using
-	 * {@code --spring.shell.commandFile}.
-	 *
-	 * see also: https://github.com/spring-projects/spring-shell/issues/252
-	 */
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.commandLine.getShellCommandsToExecute() != null) {
-			// Only invoke this lifecycle method if the shell is executing in stand-alone mode.
-			if (applicationContext != null && !applicationContext.containsBean("streamDefinitionRepository")) {
-				initialized = true;
-				System.out.println(triggerTarget());
-			}
-		}
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
 	}
 
 	private ClientRegistrationRepository shellClientRegistrationRepository(OAuth2ClientProperties properties) {

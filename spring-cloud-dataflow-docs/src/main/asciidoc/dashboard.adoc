@@ -459,7 +459,27 @@ When that happens, check the server log files for further details.
 [[dashboard-job-executions-steps-progress]]
 === Step Execution History
 
-Under *Step Execution History*, you can also view various metrics associated with the selected step, such as duration, read counts, write counts, and others.
+Under *Step Execution History*, you can also view various metrics associated with the selected step, such as duration, read counts, write counts, and others across all of its executions.
+For each metric there are 5 attributes:
+
+* Count - The number of step executions that the metric could have participated.  It is not a count for the number of times the event occurred during each step execution.
+* Min - The minimum value for the metric across all the executions for this step.
+* Max - The maximum value for the metric across all the executions for this step.
+* Mean - The mean value for the metric across all the executions for this step.
+* Standard Deviation - The standard deviation for the metric across all the executions for this step.
+
+The Step Execution contains the following metrics:
+
+* Commit Count - The max, min, mean, and standard deviation for the number of commits of all the executions for the given step.
+* Duration - The max, min, mean, and standard deviation for the duration of all the executions for the given step.
+* Duration Per Read - The max, min, mean, and standard deviation for the duration per read of all the executions for the given step.
+* FilterCount - The max, min, mean, and standard deviation for the number of filters of all the executions for the given step.
+* Process Skip Count - The max, min, mean, and standard deviation for the process skips of all the executions for the given step.
+* Read Count - The max, min, mean, and standard deviation for the number of reads of all the executions for the given step.
+* Read Skip Count - The max, min, mean, and standard deviation for the number of read skips of all the executions for the given step.
+* Rollback Count - The max, min, mean, and standard deviation for the number of rollbacks of all the executions for the given step.
+* Write Count - The max, min, mean, and standard deviation for the number of writes of all the executions for the given step.
+* Write Skip Count - The max, min, mean, and standard deviation for the number of skips of all the executions for the given step.
 
 endif::omit-tasks-docs[]
 

@@ -76,7 +76,7 @@ The following example shows how to define a SQL Server database connection with 
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url='jdbc:sqlserver://localhost:1433;databaseName=mydb' \
+    --spring.datasource.url='jdbc:sqlserver://localhost:1433;databaseName=mydb&encrypt=false' \
     --spring.datasource.username=<user> \
     --spring.datasource.password=<password> \
     --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -581,35 +581,12 @@ uaac user get <username>
 
 For local testing and development, you may also use the Resource and Authorization
 Server support provided by
-https://projects.spring.io/spring-security-oauth/[Spring Security OAuth]. It
-allows you to easily create your own (very basic) OAuth2 Server with the following simple annotations:
+https://spring.io/projects/spring-security/[Spring Security]. It
+allows you to easily create your own OAuth2 Server by configuring the SecurityFilterChain.
 
-* `@EnableResourceServer`
-* `@EnableAuthorizationServer`
+Samples can be found at:
+https://docs.spring.io/spring-security/reference/samples.html[Spring Security Samples]
 
-NOTE: In fact the UAA uses Spring Security OAuth2 under the covers, thus the basic endpoints
-are the same.
-
-A working example application can be found at:
-https://github.com/ghillert/oauth-test-server/[https://github.com/ghillert/oauth-test-server/]
-
-Clone the project and configure Spring Cloud Data Flow with the respective Client ID and Client Secret:
-
-[source,yaml]
-----
-security:
-  oauth2:
-    client:
-      client-id: myclient
-      client-secret: mysecret
-      access-token-uri: http://127.0.0.1:9999/oauth/token
-      user-authorization-uri: http://127.0.0.1:9999/oauth/authorize
-    resource:
-      user-info-uri: http://127.0.0.1:9999/me
-      token-info-uri: http://127.0.0.1:9999/oauth/check_token
-----
-
-IMPORTANT: This sample application is not intended for production use
 
 [[configuration-security-shell-authentication]]
 ==== Data Flow Shell Authentication
@@ -624,7 +601,7 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar         \
   --dataflow.uri=http://localhost:9393                                \   # <1>
   --dataflow.username=my_username                                     \   # <2>
   --dataflow.password=my_password                                     \   # <3>
-  --skip-ssl-validation  true                                         \   # <4>
+  --skip-ssl-validation                                               \   # <4>
 ----
 
 <1> Optional, defaults to http://localhost:9393.
@@ -645,7 +622,7 @@ server-unknown:>dataflow config server                                \
   --uri  http://localhost:9393                                        \   # <1>
   --username myuser                                                   \   # <2>
   --password mysecret                                                 \   # <3>
-  --skip-ssl-validation  true                                         \   # <4>
+  --skip-ssl-validation                                               \   # <4>
 ----
 
 <1> Optional, defaults to http://localhost:9393.
