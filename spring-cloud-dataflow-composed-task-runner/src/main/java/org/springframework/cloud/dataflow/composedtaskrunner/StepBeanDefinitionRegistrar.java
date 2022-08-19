@@ -38,6 +38,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.util.StringUtils;
 
 /**
@@ -224,6 +225,12 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		properties.setDataflowServerUsername(getPropertyValue("dataflow-server-username"));
 		properties.setOauth2ClientCredentialsClientId(getPropertyValue("oauth2-client-credentials-client-id"));
 		properties.setOauth2ClientCredentialsClientSecret(getPropertyValue("oauth2-client-credential-client-secret"));
+		
+		String oauth2ClientCredentialsClientAuthenticationMethodAsString = getPropertyValue("oauth2-client-credential-client-authentication-method");
+		if(oauth2ClientCredentialsClientAuthenticationMethodAsString != null) {
+			properties.setOauth2ClientCredentialsClientAuthenticationMethod(new ClientAuthenticationMethod(oauth2ClientCredentialsClientAuthenticationMethodAsString));
+		}
+		
 		properties.setOauth2ClientCredentialsScopes(StringUtils.commaDelimitedListToSet(getPropertyValue("oauth2-client-credentials-scopes")));
 		return properties;
 	}
