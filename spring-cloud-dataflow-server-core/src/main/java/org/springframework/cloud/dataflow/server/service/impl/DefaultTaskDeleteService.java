@@ -263,8 +263,10 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		auditData.put("Deleted # of Job Executions", jobExecutionIds.size());
 		auditData.put("Deleted Job Execution IDs", StringUtils.collectionToDelimitedString(jobExecutionIds, ", "));
 
+		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
+
 		if (!jobExecutionIds.isEmpty()) {
-			deleteRelatedJobAndStepExecutions(jobExecutionIds, auditData);
+			deleteRelatedJobAndStepExecutions(jobExecutionIds, auditData, chunkSize);
 		}
 
 		// Delete Task Related Data
@@ -277,7 +279,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		final AtomicInteger  numberOfDeletedTaskManifestRows =  new AtomicInteger(0);
 		final AtomicInteger  numberOfDeletedTaskExecutionRows =  new AtomicInteger(0);
 
-		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
 		if (chunkSize <= 0) {
 			numberOfDeletedTaskExecutionParamRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskExecutionParamsByTaskExecutionIds(taskExecutionIdsWithChildren));
 			numberOfDeletedTaskTaskBatchRelationshipRows.addAndGet(this.dataflowTaskExecutionDao.deleteTaskTaskBatchRelationshipsByTaskExecutionIds(taskExecutionIdsWithChildren));
@@ -316,9 +317,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	}
 	
 	private void deleteRelatedJobAndStepExecutions(Set<Long> jobExecutionIds,
-			Map<String, Object> auditData) {
-
-		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
+			Map<String, Object> auditData, int chunkSize) {
 
 		final Set<Long> stepExecutionIds = findStepExecutionIds(jobExecutionIds, chunkSize);
 
