@@ -4,7 +4,7 @@ package_repository:
   packageSpec:
     syncPeriod: 5m
     deploy:
-      kappWaitTimeout: 5m
+      kappWaitTimeout: 10m
   packageName: (@= data.values.package.name @).tanzu.vmware.com
   packages:
     - name: (@= data.values.package.name @)
