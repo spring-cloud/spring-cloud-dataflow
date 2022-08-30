@@ -5,6 +5,7 @@ The Data Flow Server deploys Streams by delegating to Spring Cloud Skipper and d
 
 NOTE: The local version of the Data Flow server should only be used for Stream development but can be used in a production environment for Task deployment as a replacement for the Spring Cloud Batch Admin Server.
 
+
 == Getting Started
 
 This shows how to start the Data Flow Server and Shell to create the `time | log` stream.
@@ -140,6 +141,8 @@ To disable the cloud config server set the `spring.cloud.config.enabled` propert
 
 == Docker-Compose Integration Tests
 
+NOTE: The docker-compose files have been decomposed so that you have to specify the database and messaging engine separately. Previously mysql and kafka was the default.
+
 To run the docker compose integration, enable the `-Pfailsafe` maven profile and the `-Dgroups="docker-compose"` JUnit tag.
 
 . You can run just the integration tests like this:
@@ -153,7 +156,7 @@ SCDF, Skipper servers installed, or the versions Stream and Task apps:
 
 ----
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
-   -Dtest.docker.compose.paths=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-influxdb.yml,../src/docker-compose/docker-compose-postgres.yml,../src/docker-compose/docker-compose-rabbitmq.yml \
+   -Dtest.docker.compose.paths="../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-influxdb.yml,../src/docker-compose/docker-compose-postgres.yml,../src/docker-compose/docker-compose-rabbitmq.yml" \
    -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-latest \
    -Dtest.docker.compose.dataflow.version=2.8.0-SNAPSHOT \
    -Dtest.docker.compose.skipper.version=2.7.0-SNAPSHOT \
@@ -163,7 +166,11 @@ The `test.docker.compose.paths` property accepts comma separated list of docker 
 
 ----
 ./mvnw clean test-compile integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
-   -Dtest.docker.compose.paths=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-dood.yml,../src/docker-compose/docker-compose-prometheus.yml \
+   -Dtest.docker.compose.paths=""../src/docker-compose/docker-compose.yml,\
+    ../src/docker-compose/docker-compose-mysql.yml, \
+    ../src/docker-compose/docker-compose-kafka.yml, \
+    ../src/docker-compose/docker-compose-dood.yml, \
+    ../src/docker-compose/docker-compose-prometheus.yml" \
    -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-latest \
    -Dtest.docker.compose.task.apps.uri=https://dataflow.spring.io/task-docker-latest \
    -Dtest.docker.compose.dataflow.version=2.8.0-SNAPSHOT \
@@ -186,7 +193,10 @@ Use the `-Dit.test=class-name#method-name` to filter only selected tests.
 
 ----
 ./mvnw clean test-compile integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
-   -Dtest.docker.compose.paths=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-ssl.yml \
+   -Dtest.docker.compose.paths=""../src/docker-compose/docker-compose.yml,\
+    ../src/docker-compose/docker-compose-mysql.yml, \
+    ../src/docker-compose/docker-compose-kafka.yml, \
+    ../src/docker-compose/docker-compose-ssl.yml" \
    -Dtest.docker.compose.dataflow.uri=https://dataflow-server:9393 \
    -Dtest.docker.compose.skipper.uri=https://skipper-server:7577 \
    -Dtest.docker.compose.waiting.for.service.format=https://$HOST:$EXTERNAL_PORT \
@@ -198,7 +208,10 @@ Use the `-Dit.test=class-name#method-name` to filter only selected tests.
 
 Use the following env. variables to run an IT test from IDE:
 ----
-TEST_DOCKER_COMPOSE_PATHS=../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-ssl.yml
+TEST_DOCKER_COMPOSE_PATHS=../src/docker-compose/docker-compose.yml,\
+    ../src/docker-compose/docker-compose-mysql.yml, \
+    ../src/docker-compose/docker-compose-kafka.yml, \
+    ../src/docker-compose/docker-compose-ssl.yml
 TEST_DOCKER_COMPOSE_SKIPPER_URI=https://skipper-server:7577
 TEST_DOCKER_COMPOSE_DATAFLOW_URI=https://dataflow-server:9393
 TEST_DOCKER_COMPOSE_WAITING_FOR_SERVICE_FORMAT=https://$HOST:$EXTERNAL_PORT
@@ -220,7 +233,10 @@ Create HTTPS docker-compose from shell:
 ----
 export DATAFLOW_URI=https://dataflow-server:9393
 export SKIPPER_URI=https://skipper-server:7577
-docker-compose -f ./src/docker-compose/docker-compose.yml -f ./src/docker-compose/docker-compose-ssl.yml
+docker-compose -f ./src/docker-compose/docker-compose.yml \
+               -f ./src/docker-compose/docker-compose-mysql.yml, \
+               -f ./src/docker-compose/docker-compose-kafka.yml, \
+               -f ./src/docker-compose/docker-compose-ssl.yml
 ----
 
 

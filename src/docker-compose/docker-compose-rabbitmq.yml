@@ -19,6 +19,8 @@ services:
   dataflow-server:
     environment:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - rabbitmq
 
   app-import-stream:
     command: >
