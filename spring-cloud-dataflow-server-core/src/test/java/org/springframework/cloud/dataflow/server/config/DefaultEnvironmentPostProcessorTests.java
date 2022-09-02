@@ -19,34 +19,16 @@ package org.springframework.cloud.dataflow.server.config;
 import org.junit.Test;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
-import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
-import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionService;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
-import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.security.authentication.AuthenticationManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 /**
+ * Tests for {@link DefaultEnvironmentPostProcessor}.
+ *
  * @author Josh Long
+ * @auhor Chris Bono
  */
 public class DefaultEnvironmentPostProcessorTests {
 
@@ -56,7 +38,7 @@ public class DefaultEnvironmentPostProcessorTests {
 
 	@Test
 	public void testDefaultsBeingContributedByServerModule() throws Exception {
-		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class, "--server.port=0",
+		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class, "--server.port=0",
 				"--spring.main.allow-bean-definition-overriding=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration")) {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
@@ -66,7 +48,7 @@ public class DefaultEnvironmentPostProcessorTests {
 
 	@Test
 	public void testOverridingDefaultsWithAConfigFile() {
-		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultApp.class,
+		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class,
 				"--spring.config.name=test", "--server.port=0",
 				"--spring.main.allow-bean-definition-overriding=true",
 				"--spring.cloud.dataflow.server.profileapplicationlistener.ignore=true",
@@ -74,63 +56,6 @@ public class DefaultEnvironmentPostProcessorTests {
 			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
 			assertEquals(cp, "/foo");
 			assertNotNull(ctx.getEnvironment().getProperty("spring.flyway.locations[0]"));
-		}
-	}
-
-	@Configuration
-	@Import(TestConfiguration.class)
-	@EnableAutoConfiguration(exclude = { SessionAutoConfiguration.class, FlywayAutoConfiguration.class,
-			SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class,
-			ManagementWebSecurityAutoConfiguration.class })
-	@EnableDataFlowServer
-	public static class EmptyDefaultApp {
-	}
-
-	private static class TestConfiguration {
-
-		@Bean
-		public AppDeployer appDeployer() {
-			return mock(AppDeployer.class);
-		}
-
-		@Bean
-		public TaskLauncher taskLauncher() {
-			return mock(TaskLauncher.class);
-		}
-
-		@Bean
-		public AuthenticationManager authenticationManager() {
-			return mock(AuthenticationManager.class);
-		}
-
-		@Bean
-		public TaskExecutionService taskService() {
-			return mock(DefaultTaskExecutionService.class);
-		}
-
-		@Bean
-		public TaskRepository taskRepository() {
-			return mock(TaskRepository.class);
-		}
-
-		@Bean
-		public SchedulerService schedulerService() {
-			return mock(SchedulerService.class);
-		}
-
-		@Bean
-		public Scheduler scheduler() {
-			return mock(Scheduler.class);
-		}
-
-		@Bean
-		public OAuth2TokenUtilsService oauth2TokenUtilsService() {
-			return mock(OAuth2TokenUtilsService.class);
-		}
-
-		@Bean
-		public StreamDefinitionService streamDefinitionService() {
-			return mock(StreamDefinitionService.class);
 		}
 	}
 }
