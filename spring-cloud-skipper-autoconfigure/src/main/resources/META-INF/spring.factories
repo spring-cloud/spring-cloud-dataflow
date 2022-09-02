@@ -3,5 +3,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   org.springframework.cloud.skipper.server.autoconfigure.CloudFoundryPlatformAutoConfiguration,\
   org.springframework.cloud.skipper.server.autoconfigure.KubernetesPlatformAutoConfiguration
 
+org.springframework.boot.env.EnvironmentPostProcessor=\
+  org.springframework.cloud.dataflow.common.flyway.FlywayVendorReplacingEnvironmentPostProcessor
+
 org.springframework.context.ApplicationListener=\
   org.springframework.cloud.skipper.server.autoconfigure.ProfileApplicationListener
