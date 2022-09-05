@@ -42,16 +42,24 @@ spec:
         #@ end
         ports:
         - containerPort: 80
+        startupProbe:
+          httpGet:
+            port: 7577
+            path: /actuator
+          failureThreshold: 40
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
+          periodSeconds: 5
         livenessProbe:
           httpGet:
             path: /actuator/health
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/info
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 10
         resources:
           limits:
             cpu: #@ data.values.scdf.skipper.resources.limits.cpu
