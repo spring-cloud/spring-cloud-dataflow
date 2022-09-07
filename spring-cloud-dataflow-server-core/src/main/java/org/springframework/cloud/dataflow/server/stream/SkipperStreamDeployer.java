@@ -41,6 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
@@ -439,13 +441,13 @@ public class SkipperStreamDeployer implements StreamDeployer {
         configValueMap.put("metadata", metadataMap);
         configValueMap.put("spec", specMap);
 
-        DumperOptions dumperOptions = new DumperOptions();
-        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
-        dumperOptions.setPrettyFlow(false);
-        dumperOptions.setSplitLines(false);
-        Yaml yaml = new Yaml(dumperOptions);
-        configValues.setRaw(yaml.dump(configValueMap));
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
+		dumperOptions.setPrettyFlow(false);
+		dumperOptions.setSplitLines(false);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+		configValues.setRaw(yaml.dump(configValueMap));
 
         pkg.setConfigValues(configValues);
         pkg.setTemplates(createGenericTemplate());

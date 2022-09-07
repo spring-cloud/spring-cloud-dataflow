@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.io.IOException;
@@ -30,6 +31,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -77,6 +80,7 @@ import static org.mockito.Mockito.when;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Chris Bono
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -159,7 +163,7 @@ public class DefaultStreamServiceIntegrationTests {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
 
 		Object actualYamlLoaded = yaml.load(actualYaml);
 		Object expectedYamlLoaded = yaml.load(expectedYaml);

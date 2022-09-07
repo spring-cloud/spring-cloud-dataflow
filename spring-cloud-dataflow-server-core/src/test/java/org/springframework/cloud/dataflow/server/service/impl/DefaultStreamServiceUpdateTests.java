@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -54,6 +56,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -124,7 +127,7 @@ public class DefaultStreamServiceUpdateTests {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
 
 		Object actualYamlLoaded = yaml.load(yml);
 		Object expectedYamlLoaded = yaml.load(expectedYaml);
