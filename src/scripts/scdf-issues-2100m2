@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# NOTE: by default all issues will be displayed to the console.
+#
+# USAGE: <script-name> <ISSUE_STATUS> ADDITIONAL_ARGS
+#   where ISSUE_STATUS is the status to filter by
+#   where ADDITIONAL_ARGS are other args passed to the 'gh issue list' command such as '--web'
+#
+# NOTE: You can specify ISSUE_STATUS by itself but If you specify ADDITIONAL_ARGS you must first specify ISSUE_STATUS
+
 VALUES='
 2.10.0-M2,spring-cloud-dataflow-build
 2.10.0-M2,spring-cloud-dataflow-common
@@ -12,12 +20,12 @@ VALUES='
 3.3.0-M2,spring-cloud-dataflow-ui
 2.10.0-M2,spring-cloud-dataflow
 '
-
+ISSUE_STATUS="${1:-all}"
 
 for VALUE in $VALUES;
   do
     MILESTONE=$(echo $VALUE | cut -f1 -d,)
     REPO=$(echo $VALUE | cut -f2 -d,)
     TEMPLATE="{{range .}}spring-cloud/$REPO#{{.number}} {{.title}}{{\"\n\"}}{{end}}"
-    gh issue list --repo spring-cloud/$REPO --search milestone:$MILESTONE --state all
+    gh issue list --repo spring-cloud/$REPO --search milestone:$MILESTONE --state $ISSUE_STATUS $2
 done;
