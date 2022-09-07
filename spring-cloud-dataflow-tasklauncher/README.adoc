@@ -1,0 +1,139 @@
+//tag::ref-doc[]
+= Spring Cloud Data Flow Task Launcher Sink
+
+This application launches a registered task definition using the Data Flow Server https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#api-guide-resources-task-executions-launching[REST API].
+
+== Input
+
+Launch request args including:
+
+* the task name (required and created as a task with the target Data Flow Server)
+* deployment properties (key value pairs, optional).
+* program arguments for the task (a list, optional).
+
+=== Headers:
+
+* `Content-Type: application/json`
+
+=== Payload:
+
+A JSON document:
+
+[source,json]
+----
+{
+  "name":"foo",
+  "deploymentProps": {"key1":"val1","key2":"val2"},
+  "args":["--debug", "--foo", "bar"]
+}
+----
+
+minimally,
+
+[source,json]
+----
+{"name":"foo"}
+----
+
+== Output
+
+N/A (launches task on the SCDF server's task platform).
+
+=== Options
+
+The **$$Spring Cloud Data Flow Task Launcher$$** $$sink$$ supports the following configuration properties:
+
+//tag::configuration-properties[]
+$$platform-name$$:: $$The Spring Cloud Data Flow platform to use for launching tasks.$$ *($$String$$, default: `$$default$$`)*
+$$spring.cloud.dataflow.client.authentication.access-token$$:: $$OAuth2 Access Token.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.basic.password$$:: $$The login password.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.basic.username$$:: $$The login username.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.client-id$$:: $$OAuth2 Client Id.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.client-secret$$:: $$OAuth2 Client Secret.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.scope$$:: $$OAuth2 Scopes.$$ *($$Set<String>$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.authentication.token-uri$$:: $$OAuth2 Token Uri.$$ *($$String$$, default: `$$<none>$$`)*
+$$spring.cloud.dataflow.client.enable-dsl$$:: $$Enable Data Flow DSL access.$$ *($$Boolean$$, default: `$$false$$`)*
+$$spring.cloud.dataflow.client.server-uri$$:: $$The Data Flow server URI.$$ *($$String$$, default: `$$http://localhost:9393$$`)*
+$$spring.cloud.dataflow.client.skip-ssl-validation$$:: $$Skip Ssl validation.$$ *($$Boolean$$, default: `$$false$$`)*
+$$trigger.initial-delay$$:: $$The initial delay in milliseconds.$$ *($$Integer$$, default: `$$1000$$`)*
+$$trigger.max-period$$:: $$The maximum polling period in milliseconds. Will be set to period if period > maxPeriod.$$ *($$Integer$$, default: `$$30000$$`)*
+$$trigger.period$$:: $$The polling period in milliseconds.$$ *($$Integer$$, default: `$$1000$$`)*
+//end::configuration-properties[]
+
+== Using the TaskLauncher
+The Dataflow tasklauncher is a sink that consumes  `TaskLaunchRequest` messages, as described above, and launches a task using the configured Spring Cloud Data Flow server (given by `--spring.cloud.dataflow.client.server-uri`).
+The task launcher periodically polls its input source for launch requests but will pause polling when the platform has reached it's concurrent task execution limit, given by `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximum-concurrent-tasks`.
+This prevents the SCDF deployer's deployment platform from exhausting its resources under heavy task load.
+The poller is scheduled using a `DynamicPeriodicTrigger`. By default the initial polling rate is 1 second, but may be configured to any duration. When polling is paused, or if there are no launch requests present, the trigger period will increase, applying exponential backoff, up to a configured maximum (30 seconds by default).
+
+The SCDF server may be configured to launch tasks on multiple platforms.
+Each task launcher instance is configured for a single platform, given by the `platformName` property (`default` if not specified).
+This limitation is enforced because if the server has multiple task platforms configured, it may be the case that some of its task platforms are at the limit and some are not.
+In this situation, we can only consume the next launch request if we know for which task platform it is targeted.
+For this reason, if the SCDF server is configured for multiple task platforms (or a single non-default platform), we assume that all launch requests are targeted for that platform.
+The task launcher will set the required deployment property `spring.cloud.dataflow.task.platformName` if the request does not provide it.
+
+NOTE: If the request includes the deployment property `spring.cloud.dataflow.task.platformName`, and the value is not the same as the tasklauncher's `platformName`, the task launcher will throw an exception.
+
+To launch tasks on multiple platforms, you must configure a task launcher instance per platform and use a https://github.com/spring-cloud-stream-app-starters/router/tree/master/spring-cloud-starter-stream-sink-router[router sink], or https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/#partitioning[partitioning strategy], to route requests to the correct instance.
+
+NOTE: When the poller is paused it puts pressure
+on the message broker so some tuning will be necessary in extreme cases to balance resource utilization.
+
+=== Client Authentication
+
+If the SCDF server requires authentication, the client must pass credentials with authorization to launch a task.
+The Data Flow client supports both basic and OAuth2 authentication.
+
+For basic authentication set the username and password:
+
+```
+--spring.cloud.dataflow.client.authentication.basic.username=<username> --spring.cloud.dataflow.client.authentication.basic.password=<password>
+```
+
+For OAuth2 authentication, set the `client-id`, `client-secret`, and `token-uri` at a minimum. These values correspond to values set in the SCDF server's OAuth2 configuration.
+For more details, see https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-local-security[the Security section in the Data Flow reference].
+
+```
+--spring.cloud.dataflow.client.authentication.client-id=<client-id> --spring.cloud.dataflow.client.authentication.client-secret=<client-secret> spring.cloud.dataflow.client.authentication.token-uri: <token-uri>
+```
+
+
+== Build
+
+[source,bash]
+----
+$ ./mvnw clean install
+----
+
+=== Examples
+
+Register a task app and create a task, the
+https://github.com/spring-cloud/spring-cloud-task/tree/2.4.x/spring-cloud-task-samples/timestamp[timestamp sample]
+provides a simple demonstration.
+
+[source,bash]
+----
+dataflow:>app register --name timestamp --type task --uri ...
+dataflow:>task create timestamp --definition timestamp
+dataflow:>stream create http --server.port=9000 | task-launcher-dataflow-sink --deploy
+----
+
+Send a launch request,
+
+[source,bash]
+----
+$curl http://localhost:9000 -H"Content-Type:application/json" -d '{"name":"timestamp"}'
+----
+
+[source,bash]
+----
+dataflow:>task execution list
+╔═════════╤══╤════════════════════════════╤════════════════════════════╤═════════╗
+║Task Name│ID│         Start Time         │          End Time          │Exit Code║
+╠═════════╪══╪════════════════════════════╪════════════════════════════╪═════════╣
+║timestamp│1 │Fri Aug 10 08:48:05 EDT 2018│Fri Aug 10 08:48:05 EDT 2018│0        ║
+╚═════════╧══╧════════════════════════════╧════════════════════════════╧═════════╝
+----
+
+//end::ref-doc[]
