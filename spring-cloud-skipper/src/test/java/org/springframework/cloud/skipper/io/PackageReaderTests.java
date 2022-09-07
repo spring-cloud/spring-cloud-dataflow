@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.io;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -33,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Chris Bono
  */
 public class PackageReaderTests {
 
@@ -60,7 +63,7 @@ public class PackageReaderTests {
 		assertThat(metadata.getMaintainer()).isEqualTo("https://github.com/markpollack");
 		assertThat(metadata.getDescription()).isEqualTo("The ticktock stream sends a time stamp and logs the value.");
 		String rawYamlString = pkg.getConfigValues().getRaw();
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Map<String, String> valuesAsMap = (Map<String, String>) yaml.load(rawYamlString);
 		assertThat(valuesAsMap).hasSize(2).containsEntry("foo", "bar").containsEntry("biz", "baz");
 

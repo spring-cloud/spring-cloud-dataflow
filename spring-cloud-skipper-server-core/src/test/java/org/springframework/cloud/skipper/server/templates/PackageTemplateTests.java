@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.server.templates;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -49,6 +51,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 /**
  * @author Mark Pollack
+ * @author Chris Bono
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
@@ -65,7 +68,7 @@ public class PackageTemplateTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testMustasche() throws IOException {
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Map model = (Map) yaml.load(valuesResource.getInputStream());
 		String templateAsString = StreamUtils.copyToString(nestedMapResource.getInputStream(),
 				Charset.defaultCharset());

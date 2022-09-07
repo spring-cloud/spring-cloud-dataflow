@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -29,7 +30,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * Utility methods for merging of configuration values.
+ *
  * @author Mark Pollack
+ * @author Chris Bono
  */
 @SuppressWarnings("unchecked")
 public class ConfigValueUtils {
@@ -50,7 +53,7 @@ public class ConfigValueUtils {
 	 */
 	public static Map<String, Object> mergeConfigValues(Package pkg, ConfigValues overrideValues) {
 		// parse ConfigValues to a map.
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Map<String, Object> mergedValues;
 		// merge top level override values on top level package values
 		if (StringUtils.hasText(overrideValues.getRaw())) {
@@ -86,7 +89,7 @@ public class ConfigValueUtils {
 			return overrideMap;
 		}
 		// load the package values
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Object object = yaml.load(pkg.getConfigValues().getRaw());
 		if (object == null) {
 			// Config Values could have been file with comments only, no data.
@@ -160,7 +163,7 @@ public class ConfigValueUtils {
 	}
 
 	private static Map<String, Object> convertConfigValuesToMap(Package pkg) {
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Map<String, Object> currentPackageValueMap = new TreeMap<>();
 		if (pkg.getConfigValues() != null && StringUtils.hasText(pkg.getConfigValues().getRaw())) {
 			currentPackageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());

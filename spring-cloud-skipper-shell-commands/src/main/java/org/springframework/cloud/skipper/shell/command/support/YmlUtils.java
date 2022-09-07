@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.skipper.shell.command.support;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.support.DeploymentPropertiesUtils;
@@ -33,13 +35,14 @@ import org.springframework.util.StringUtils;
  *
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
+ * @author Chris Bono
  */
 public abstract class YmlUtils {
 
 	public static String getYamlConfigValues(File yamlFile, String properties) {
 		String configValuesYML = null;
 		if (yamlFile != null) {
-			Yaml yaml = new Yaml();
+			Yaml yaml = new Yaml(new SafeConstructor());
 			// Validate it is yaml formatted.
 			try {
 				configValuesYML = yaml.dump(yaml.load(new FileInputStream(yamlFile)));

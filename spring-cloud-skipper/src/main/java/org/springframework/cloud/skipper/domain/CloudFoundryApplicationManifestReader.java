@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import org.springframework.cloud.skipper.SkipperException;
 
@@ -41,6 +42,7 @@ import org.springframework.cloud.skipper.SkipperException;
  * will not throw an exception in the deserialization process.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
 public class CloudFoundryApplicationManifestReader implements SkipperManifestReader {
 
@@ -78,7 +80,7 @@ public class CloudFoundryApplicationManifestReader implements SkipperManifestRea
 	}
 
 	public boolean canSupport(String manifest) {
-		Yaml yaml = new Yaml();
+		Yaml yaml = new Yaml(new SafeConstructor());
 		Iterable<Object> object = yaml.loadAll(manifest);
 		for (Object o : object) {
 			boolean supportKind = assertSupportedKind(o);
