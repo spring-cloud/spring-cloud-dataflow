@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
@@ -84,6 +87,7 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  * @author Chris Schaefer
+ * @author Chris Bono
  */
 @Transactional
 public class DefaultStreamService implements StreamService {
@@ -349,7 +353,7 @@ public class DefaultStreamService implements StreamService {
 			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			dumperOptions.setPrettyFlow(true);
 			dumperOptions.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
-			Yaml yaml = new Yaml(dumperOptions);
+			Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
 			return yaml.dump(skipperConfigValuesMap);
 		}
 		else {
