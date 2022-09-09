@@ -43,16 +43,24 @@ spec:
           readOnly: true
         ports:
         - containerPort: 80
+        startupProbe:
+          httpGet:
+            port: 9393
+            path: #@ dataflow_liveness_path()
+          failureThreshold: 40
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
+          periodSeconds: 5
         livenessProbe:
           httpGet:
             path: #@ dataflow_liveness_path()
             port: 9393
-          initialDelaySeconds: 45
+          initialDelaySeconds: 5
         readinessProbe:
           httpGet:
             path: #@ dataflow_readiness_path()
             port: 9393
-          initialDelaySeconds: 45
+          initialDelaySeconds: 10
         resources:
           limits:
             cpu: #@ data.values.scdf.server.resources.limits.cpu
