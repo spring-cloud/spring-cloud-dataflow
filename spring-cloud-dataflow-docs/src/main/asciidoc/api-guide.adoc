@@ -15,7 +15,39 @@ In fact, the Spring Cloud Data Flow shell is a first-class consumer of that API.
 TIP: If you plan to use the REST API with Java, you should consider using the
 provided Java client (`DataflowTemplate`) that uses the REST API internally.
 
+[[api-guide-version]]
+=== HTTP Version
 
+Spring Cloud Data Flow establishes a RESTful API version that is updated when there is a breaking change to the API.
+The API version can be seen at the end of the home page of Spring Cloud Data Flow as shown in the example below:
+
+====
+[source,json]
+----
+{"_links":
+    {"dashboard":{"href":"http://localhost:9393/dashboard"}
+    ...
+    },
+"api.revision":14}
+----
+====
+The table below shows the SCDF Release version and its current RESTful API version.
+
+|===
+| SCDF Version | API Version
+
+| 2.10.x
+| 14
+
+| 2.9.x
+| 14
+
+| 2.8.x
+| 14
+
+| 2.7.x
+| 14
+|===
 
 [[api-guide-overview-http-verbs]]
 === HTTP verbs
