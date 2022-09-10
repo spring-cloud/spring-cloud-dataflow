@@ -421,14 +421,13 @@ data:
 The password is a base64-encoded value.
 
 [[configuration-kubernetes-rdbms]]
-=== Database Configuration
+=== Database
 
-Spring Cloud Data Flow provides schemas for H2, MariaDB, Oracle, PostgreSQL, DB2, and SQL Server. The appropriate schema is automatically created when the server starts, provided the right database driver and appropriate credentials are in the classpath.
+include::configuration-database.adoc[]
 
-The JDBC drivers for MariaDB, PostgreSQL, SQL Server, and embedded H2 are available out of the box.
-If you use any other database, you need to put the corresponding JDBC driver jar on the classpath of the server.
+==== Database configuration
 
-For instance, if you use MariaDB in addition to a password in the secrets file, you could provide the following properties in the ConfigMap:
+When running in Kubernetes, the database properties are typically set in the ConfigMap. For instance, if you use MariaDB in addition to a password in the secrets file, you could provide the following properties in the ConfigMap:
 
 
 [source,yaml]
@@ -441,13 +440,9 @@ data:
         username: root
         password: ${mariadb-root-password}
         driverClassName: org.mariadb.jdbc.Driver
-        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/test
-        driverClassName: org.mariadb.jdbc.Driver
 ----
 
-
-For PostgreSQL, you could use the following configuration:
-
+Similarly, for PostgreSQL you could use the following configuration:
 
 [source,yaml]
 ----

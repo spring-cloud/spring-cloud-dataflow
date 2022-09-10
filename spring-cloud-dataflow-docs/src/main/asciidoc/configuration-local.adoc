@@ -29,91 +29,31 @@ The REST `/about` endpoint provides information on the features that have been e
 [[configuration-local-rdbms]]
 === Database
 
-A relational database is used to store stream and task definitions as well as the state of executed tasks.
-Spring Cloud Data Flow provides schemas for *H2*, *MariaDB*, *Oracle*, *PostgreSQL*, *Db2*, and *SQL Server*. The schema is automatically created when the server starts.
+include::configuration-database.adoc[]
 
-By default, Spring Cloud Data Flow offers an embedded instance of the *H2* database (if the H2 JDBC driver jar is found on the classpath).
-The *H2* database is good for development purposes but is not recommended for production use.
+==== Database configuration
 
-NOTE: *H2* database is not supported as an external mode.
-
-The JDBC drivers for *MariaDB*, *PostgreSQL*, *SQL Server* are available without additional configuration.
-
-If you are using the embedded *H2* or any other database, then you need to put the corresponding JDBC driver jar on the classpath of the server.
-
-The database properties can be passed as environment variables or command-line arguments to the Data Flow Server.
-
-==== MariaDB
-
-The following example shows how to define a MariaDB database connection with command Line arguments
-
+When running locally, the database properties can be passed as environment variables or command-line arguments to the Data Flow Server. For example, to start the server with MariaDB using command line arguments execute the following command:
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
     --spring.datasource.url=jdbc:mariadb://localhost:3306/mydb \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
+    --spring.datasource.username=user \
+    --spring.datasource.password=pass \
     --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 ----
-
-==== PostgreSQL
-
-The following example shows how to define a PostgreSQL database connection with command line arguments:
-
+Likewise, to start the server with MariaDB using environment variables execute the following command:
 [source,bash,subs=attributes]
 ----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:postgresql://localhost:5432/mydb \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=org.postgresql.Driver
+SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:3306/mydb
+SPRING_DATASOURCE_USERNAME=user
+SPRING_DATASOURCE_PASSWORD=pass
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar
 ----
 
-==== SQL Server
-
-The following example shows how to define a SQL Server database connection with command line arguments:
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url='jdbc:sqlserver://localhost:1433;databaseName=mydb&encrypt=false' \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
-----
-
-==== Db2
-
-The following example shows how to define a Db2 database connection with command line arguments:
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:db2://localhost:50000/mydb \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=com.ibm.db2.jcc.DB2Driver
-----
-
-NOTE: Due to licensing restrictions we're unable to bundle Db2 driver. You need to add it to
-      server's classpath yourself.
-
-==== Oracle
-
-The following example shows how to define a Oracle database connection with command line arguments:
-
-[source,bash,subs=attributes]
-----
-java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
-    --spring.datasource.url=jdbc:oracle:thin:@localhost:1521/MYDB \
-    --spring.datasource.username=<user> \
-    --spring.datasource.password=<password> \
-    --spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-----
-
-NOTE: Due to licensing restrictions we're unable to bundle Oracle driver. You need to add it to
-      server's classpath yourself.
-
+[#add-custom-driver]
 ==== Adding a Custom JDBC Driver
 To add a custom driver for the database (for example, Oracle), you should rebuild the Data Flow Server and add the dependency to the Maven `pom.xml` file.
 You need to modify the maven `pom.xml` of `spring-cloud-dataflow-server` module.
@@ -124,7 +64,7 @@ To add a custom JDBC driver dependency for the Spring Cloud Data Flow server:
 . Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
 . Edit the spring-cloud-dataflow-server/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
 
-[source, xml]
+[source,xml]
 ----
 <dependencies>
 ...
