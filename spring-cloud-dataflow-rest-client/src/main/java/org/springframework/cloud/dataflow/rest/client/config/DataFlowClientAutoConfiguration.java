@@ -89,10 +89,7 @@ public class DataFlowClientAutoConfiguration {
 	@Autowired
 	private @Nullable OAuth2ClientProperties oauth2ClientProperties;
 
-	public DataFlowClientAutoConfiguration() {
-	}
-
-	public DataFlowClientAutoConfiguration(RestTemplate restTemplate) {
+	public DataFlowClientAutoConfiguration(@Nullable RestTemplate restTemplate) {
 		this.restTemplate = restTemplate;
 	}
 
