@@ -78,7 +78,6 @@ public class DataFlowClientAutoConfiguration {
 	@Autowired
 	private DataFlowClientProperties properties;
 
-	@Autowired(required = false)
 	private RestTemplate restTemplate;
 
 	@Autowired
@@ -89,6 +88,10 @@ public class DataFlowClientAutoConfiguration {
 
 	@Autowired
 	private @Nullable OAuth2ClientProperties oauth2ClientProperties;
+
+	public DataFlowClientAutoConfiguration(@Nullable RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
 	@Bean
 	@ConditionalOnMissingBean(DataFlowOperations.class)
