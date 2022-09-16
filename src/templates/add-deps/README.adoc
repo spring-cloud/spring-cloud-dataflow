@@ -1,0 +1,55 @@
+= Adding dependencies
+
+== Container
+
+Users may require the addition of dependencies to the existing Stream application or specific database drivers to Dataflow and Skipper.
+
+=== Instructions
+
+In order to add dependencies to existing container the following steps will be the  approach.
+
+* Create a folder with the extra dependencies.
+* Create a new container image while copying the files to the libraries folder.
+* Push the image to a private registry.
+
+=== Environmental variables
+
+* `DEPS_FOLDER` should be a full filename or path expression for files to copy to the container.
+* `CONTAINER_REPO` the source docker image name.
+* `CONTAINER_TAG` the tag of source image.
+* `PRIVATE_REGISTRY` the host name of the private registry.
+
+=== Examples
+
+[source,shell]
+....
+export CONTAINER_REPO="springcloud/spring-cloud-dataflow-server"
+export CONTAINER_TAG="2.9.5-jdk17"
+export PRIVATE_REGISTRY="our.private.registry"
+export DEPS_FOLDER="./extra-libs/"
+docker build -t "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
+docker push "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
+....
+
+== JAR File
+
+When using CloudFoundry or local deployment you will need to update jar before publishing it to a private registry or Maven Local.
+
+=== Example
+
+This example adds the dependencies and then installs the jar to Maven local.
+
+[source,shell]
+....
+./gradlew -i publishToMavenLocal \
+    -P appFolder="." \
+    -P appGroup="org.springframework.cloud" \
+    -P appName="spring-cloud-dataflow-server" \
+    -P appVersion="2.9.5" \
+    -P depFolder="./extra-libs"
+....
+
+
+
+NOTE: Use the `publishMavenPublicationToMavenRepository` task to publish to a remote repository. Update the `gradle.properties` with the remote repository details. Alternatively move `repoUser` and `repoPassword` to ~/.gradle/gradle.properties
+
