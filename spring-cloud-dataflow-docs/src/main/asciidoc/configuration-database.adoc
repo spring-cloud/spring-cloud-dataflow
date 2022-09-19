@@ -31,7 +31,7 @@ The `username` and `password` are the same regardless of the database. However, 
 |[.small]#Yes#
 
 |[.small]#MySQL 8.0+#
-|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&permitMysqlScheme#{empty}footnote:[SSL is disabled in this example, adjust accordingly for your environment and requirements]
+|[.small]#jdbc:mysql://${db-hostname}:${db-port}/${db-name}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&permitMysqlScheme#{empty}footnote:[SSL is disabled in this example, adjust accordingly for your environment and requirements]
 |[.small]#org.mariadb.jdbc.Driver#
 |[.small]#Yes#
 
