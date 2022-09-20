@@ -36,12 +36,19 @@ def skipper_image():
   end
 end
 
+def skipper_db_dialect():
+  return data.values.scdf.skipper.database.dialect
+end
+
 def skipper_container_env():
   envs = []
   envs.extend([{"name": "SPRING_CLOUD_CONFIG_ENABLED", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_PATHS", "value": "/workspace/runtime/secrets"}])
+  if non_empty_string(skipper_db_dialect()):
+    envs.extend([{"name": "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT", "value": skipper_db_dialect()}])
+  end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
