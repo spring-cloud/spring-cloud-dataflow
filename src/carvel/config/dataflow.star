@@ -23,6 +23,10 @@ def ctr_image():
   end
 end
 
+def dataflow_db_dialect():
+  return data.values.scdf.server.database.dialect
+end
+
 def dataflow_container_env():
   envs = []
   envs.extend([{"name": "KUBERNETES_NAMESPACE", "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}}])
@@ -35,6 +39,9 @@ def dataflow_container_env():
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_PATHS", "value": "/workspace/runtime/secrets"}])
   envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_SERVER_URI", "value": "http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}"}])
   envs.extend([{"name": "SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI", "value": "http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api"}])
+  if non_empty_string(dataflow_db_dialect()):
+    envs.extend([{"name": "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT", "value": dataflow_db_dialect()}])
+  end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])

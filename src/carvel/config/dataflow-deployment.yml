@@ -48,7 +48,7 @@ spec:
             port: 9393
             path: #@ dataflow_liveness_path()
           failureThreshold: 40
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           timeoutSeconds: 3
           periodSeconds: 5
         livenessProbe:
@@ -63,8 +63,12 @@ spec:
           initialDelaySeconds: 10
         resources:
           limits:
+          #@ if non_empty_string(data.values.scdf.server.resources.limits.cpu):
             cpu: #@ data.values.scdf.server.resources.limits.cpu
+          #@ end
+          #@ if non_empty_string(data.values.scdf.server.resources.limits.memory):
             memory: #@ data.values.scdf.server.resources.limits.memory
+          #@ end
           requests:
             cpu: #@ data.values.scdf.server.resources.requests.cpu
             memory: #@ data.values.scdf.server.resources.requests.memory

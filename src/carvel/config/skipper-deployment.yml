@@ -47,7 +47,7 @@ spec:
             port: 7577
             path: /actuator
           failureThreshold: 40
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           timeoutSeconds: 3
           periodSeconds: 5
         livenessProbe:
@@ -62,8 +62,12 @@ spec:
           initialDelaySeconds: 10
         resources:
           limits:
+            #@ if non_empty_string(data.values.scdf.skipper.resources.limits.cpu):
             cpu: #@ data.values.scdf.skipper.resources.limits.cpu
+            #@ end
+            #@ if non_empty_string(data.values.scdf.skipper.resources.limits.memory):
             memory: #@ data.values.scdf.skipper.resources.limits.memory
+            #@ end
           requests:
             cpu: #@ data.values.scdf.skipper.resources.requests.cpu
             memory: #@ data.values.scdf.skipper.resources.requests.memory
