@@ -4,6 +4,7 @@
 #@ load("skipper.star", "has_image_pull_secrets")
 #@ load("skipper.star", "image_pull_secrets")
 #@ load("binder/binder.star", "rabbitmq_enabled")
+#@ load("common/common.star", "non_empty_string")
 
 apiVersion: apps/v1
 kind: Deployment
@@ -25,41 +26,53 @@ spec:
         app: skipper
     spec:
       containers:
-      - name: skipper
-        image: #@ skipper_image()
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: config
-          mountPath: /workspace/config
-          readOnly: true
-        - name: database
-          mountPath: /workspace/runtime/secrets/database
-          readOnly: true
-        #@ if rabbitmq_enabled():
-        - name: rabbitmq
-          mountPath: /workspace/runtime/secrets/rabbitmq
-          readOnly: true
-        #@ end
-        ports:
-        - containerPort: 80
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 7577
-          initialDelaySeconds: 45
-        readinessProbe:
-          httpGet:
-            path: /actuator/info
-            port: 7577
-          initialDelaySeconds: 45
-        resources:
-          limits:
-            cpu: #@ data.values.scdf.skipper.resources.limits.cpu
-            memory: #@ data.values.scdf.skipper.resources.limits.memory
-          requests:
-            cpu: #@ data.values.scdf.skipper.resources.requests.cpu
-            memory: #@ data.values.scdf.skipper.resources.requests.memory
-        env: #@ skipper_container_env()
+        - name: skipper
+          image: #@ skipper_image()
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config
+              mountPath: /workspace/config
+              readOnly: true
+            - name: database
+              mountPath: /workspace/runtime/secrets/database
+              readOnly: true
+            #@ if rabbitmq_enabled():
+            - name: rabbitmq
+              mountPath: /workspace/runtime/secrets/rabbitmq
+              readOnly: true
+          #@ end
+          ports:
+            - containerPort: 80
+          startupProbe:
+            httpGet:
+              port: 7577
+              path: /actuator
+            failureThreshold: 40
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 7577
+            initialDelaySeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /actuator/info
+              port: 7577
+            initialDelaySeconds: 10
+          resources:
+            limits:
+              #@ if non_empty_string(data.values.scdf.skipper.resources.limits.cpu):
+              cpu: #@ data.values.scdf.skipper.resources.limits.cpu
+              #@ end
+              #@ if non_empty_string(data.values.scdf.skipper.resources.limits.memory):
+              memory: #@ data.values.scdf.skipper.resources.limits.memory
+              #@ end
+            requests:
+              cpu: #@ data.values.scdf.skipper.resources.requests.cpu
+              memory: #@ data.values.scdf.skipper.resources.requests.memory
+          env: #@ skipper_container_env()
       serviceAccountName: scdf-sa
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
@@ -67,17 +80,17 @@ spec:
       imagePullSecrets: [{name: reg-creds}]
       #@ end
       volumes:
-      - name: config
-        configMap:
-          name: skipper
-          items:
-          - key: application.yaml
-            path: application.yaml
-      - name: database
-        secret:
-          secretName: db-skipper
-      #@ if rabbitmq_enabled():
-      - name: rabbitmq
-        secret:
-          secretName: rabbitmq
+        - name: config
+          configMap:
+            name: skipper
+            items:
+              - key: application.yaml
+                path: application.yaml
+        - name: database
+          secret:
+            secretName: db-skipper
+        #@ if rabbitmq_enabled():
+        - name: rabbitmq
+          secret:
+            secretName: rabbitmq
       #@ end

@@ -66,8 +66,8 @@ scdf:
       type: ClusterIP
     resources:
       limits:
-        cpu: 1000m
-        memory: 2048Mi
+        cpu: ""
+        memory: ""
       requests:
         cpu: 500m
         memory: 1024Mi
@@ -82,12 +82,13 @@ scdf:
       driverClassName: ""
       testOnBorrow: true
       validationQuery: ""
+      dialect: ""
     #! additional dataflow server configuration
     #@schema/type any=True
     config:
     env:
-    - name: ""
-      value: ""
+      - name: ""
+        value: ""
   ctr:
     image:
       #! ctr image repository id
@@ -106,8 +107,8 @@ scdf:
       type: ClusterIP
     resources:
       limits:
-        cpu: 1000m
-        memory: 2048Mi
+        cpu: ""
+        memory: ""
       requests:
         cpu: 500m
         memory: 1024Mi
@@ -118,12 +119,13 @@ scdf:
       driverClassName: ""
       testOnBorrow: true
       validationQuery: ""
+      dialect: ""
     #! additional skipper server configuration
     #@schema/type any=True
     config:
     env:
-    - name: ""
-      value: ""
+      - name: ""
+        value: ""
   #! external binder settings, will disable binder deployment
   binder:
     kafka:
