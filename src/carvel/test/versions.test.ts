@@ -8,7 +8,7 @@ describe('versions', () => {
       files: ['config'],
       dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=postgres']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const skipperDeployment = findDeployment(yaml, 'skipper');

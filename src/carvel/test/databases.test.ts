@@ -1,3 +1,4 @@
+// @ts-ignore
 import lodash from 'lodash';
 import { execYtt } from '../src/ytt';
 import { findDeployment, findConfigMap, findSecret, deploymentContainer, parseYamlDocument } from '../src/k8s-helper';
@@ -17,7 +18,7 @@ describe('databases', () => {
       files: ['config'],
       dataValues: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const postgresSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -46,7 +47,7 @@ describe('databases', () => {
       files: ['config'],
       dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.postgres.image.digest=fakedigest']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const postgresSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -65,7 +66,7 @@ describe('databases', () => {
       files: ['config'],
       dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=mariadb']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -98,7 +99,7 @@ describe('databases', () => {
         'scdf.deploy.database.mariadb.image.digest=fakedigest'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -117,7 +118,7 @@ describe('databases', () => {
       files: ['config'],
       dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=postgres']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const postgresSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -151,7 +152,7 @@ describe('databases', () => {
         'scdf.deploy.database.mariadb.password=pass'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const mariadbSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);
@@ -185,7 +186,7 @@ describe('databases', () => {
         'scdf.deploy.database.postgres.password=pass'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const postgresSkipperDeployment = findDeployment(yaml, DB_SKIPPER_NAME);

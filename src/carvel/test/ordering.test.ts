@@ -15,7 +15,7 @@ describe('ordering', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=postgres']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const skipperService = findService(yaml, SKIPPER_NAME);

@@ -1,3 +1,4 @@
+// @ts-ignore
 import lodash from 'lodash';
 import 'jest-extended';
 import { execYtt } from '../src/ytt';
@@ -24,7 +25,7 @@ describe('binders rabbit', () => {
       ]
     });
 
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const rabbitDeployment = findDeployment(yaml, BINDER_RABBIT_NAME);
@@ -106,7 +107,7 @@ describe('binders kafka', () => {
         'scdf.deploy.binder.type=kafka'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const kafkaBrokerService = findService(yaml, `${BINDER_KAFKA_NAME}-broker`);
@@ -137,7 +138,7 @@ describe('binders kafka', () => {
         'scdf.deploy.binder.type=kafka'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const skipperConfigMap = findConfigMap(yaml, SKIPPER_NAME);
