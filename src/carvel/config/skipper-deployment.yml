@@ -4,6 +4,7 @@
 #@ load("skipper.star", "has_image_pull_secrets")
 #@ load("skipper.star", "image_pull_secrets")
 #@ load("binder/binder.star", "rabbitmq_enabled")
+#@ load("common/common.star", "non_empty_string")
 
 apiVersion: apps/v1
 kind: Deployment

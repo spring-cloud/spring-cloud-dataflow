@@ -7,6 +7,8 @@
 #@ load("dataflow.star", "image_pull_secrets")
 #@ load("dataflow.star", "dataflow_liveness_path")
 #@ load("dataflow.star", "dataflow_readiness_path")
+#@ load("common/common.star", "non_empty_string")
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
