@@ -11,6 +11,6 @@ describe('generic', () => {
         'scdf.ctr.image.tag=2.8.1'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
   });
 });

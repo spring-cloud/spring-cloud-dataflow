@@ -1,3 +1,4 @@
+// @ts-ignore
 import lodash from 'lodash';
 import 'jest-extended';
 import { execYtt } from '../src/ytt';
@@ -18,7 +19,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowService = findService(yaml, SCDF_SERVER_NAME);
@@ -39,7 +40,7 @@ describe('servers', () => {
         'scdf.skipper.service.type=LoadBalancer'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowService = findService(yaml, SCDF_SERVER_NAME);
@@ -56,7 +57,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
@@ -108,7 +109,7 @@ describe('servers', () => {
         'scdf.binder.kafka.zk.port=1235'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -152,7 +153,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.registry.secret.ref=fakeref']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -193,7 +194,7 @@ describe('servers', () => {
         'scdf.skipper.config.foo=bar'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -222,7 +223,7 @@ describe('servers', () => {
         'scdf.ctr.image.tag=faketag'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const deployment = findDeployment(yaml, SCDF_SERVER_NAME);
@@ -244,7 +245,7 @@ describe('servers', () => {
         'scdf.server.config.foo=bar'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const deployment = findDeployment(yaml, SKIPPER_NAME);
@@ -288,7 +289,7 @@ describe('servers', () => {
         'scdf.feature.monitoring.grafana.enabled=true'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const deployment = findDeployment(yaml, SKIPPER_NAME);
@@ -330,7 +331,7 @@ describe('servers', () => {
         'scdf.server.config.foo=bar'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const deployment = findDeployment(yaml, SCDF_SERVER_NAME);
@@ -450,7 +451,7 @@ describe('servers', () => {
         'scdf.feature.monitoring.grafana.enabled=true'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const deployment = findDeployment(yaml, SCDF_SERVER_NAME);
@@ -499,7 +500,7 @@ describe('servers', () => {
         'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -530,7 +531,7 @@ describe('servers', () => {
         'scdf.server.metrics.dashboard.url=http://fakedashboard'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -547,7 +548,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -568,7 +569,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.server.contextPath=/scdf']
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowConfigMap = findConfigMap(yaml, SCDF_SERVER_NAME);
@@ -589,7 +590,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
@@ -597,13 +598,9 @@ describe('servers', () => {
     const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
     const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
 
-    expect(dataflowContainer?.resources?.limits?.cpu).toBe('1000m');
-    expect(dataflowContainer?.resources?.limits?.memory).toBe('2048Mi');
     expect(dataflowContainer?.resources?.requests?.cpu).toBe('500m');
     expect(dataflowContainer?.resources?.requests?.memory).toBe('1024Mi');
 
-    expect(skipperContainer?.resources?.limits?.cpu).toBe('1000m');
-    expect(skipperContainer?.resources?.limits?.memory).toBe('2048Mi');
     expect(skipperContainer?.resources?.requests?.cpu).toBe('500m');
     expect(skipperContainer?.resources?.requests?.memory).toBe('1024Mi');
   });
@@ -623,7 +620,7 @@ describe('servers', () => {
         'scdf.skipper.resources.requests.memory=1000Mi'
       ]
     });
-    expect(result.success).toBeTruthy();
+    expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
