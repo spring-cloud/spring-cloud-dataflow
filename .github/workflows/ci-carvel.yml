@@ -24,7 +24,12 @@ jobs:
       with:
         node-version: 12
     - uses: vmware-tanzu/carvel-setup-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup npm
+      run: |
+        npm install
+    - name: npm ci
       run: |
         npm ci
     - name: Lint
