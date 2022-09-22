@@ -21,15 +21,24 @@
   "devDependencies": {
     "@types/jest": "^27.4.0",
     "@types/jest-expect-message": "^1.0.4",
-    "@types/lodash": "^4.14.172",
+    "@types/lodash": "^4.14.185",
     "@types/node": "^15.6.0",
     "jest": "^27.5.1",
     "jest-circus": "^27.5.1",
     "jest-expect-message": "^1.1.2",
+    "jest-matcher-utils": "^29.0.3",
     "jest-extended": "^0.11.5",
     "prettier": "^2.3.0",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "json-schema": "^0.4.0",
+    "ansi-regex": "^4.1.1",
+    "got": "^12.5.0",
+    "jose": "^4.9.3",
+    "minimist": "^1.2.6",
+    "path-parse": "^1.0.7",
+    "ws": "^8.8.1",
+    "jsprim": "^1.4.2"
   },
   "dependencies": {
     "@actions/exec": "^1.0.4",
