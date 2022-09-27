@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
-ROOT_DIR=$(realpath $SCDIR/../..)
+ROOT_DIR=$(realpath $SCDIR/..)
 
 if [ "$1" != "" ]; then
     VER=$1
