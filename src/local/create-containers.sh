@@ -17,7 +17,11 @@ fi
 
 # export ARCH=arm64v8 for ARM64 image
 if [ "$ARCH" == "" ]; then
-    ARCH=amd64
+    if [ "$HOSTTYPE" == "x86_64" ]; then
+        ARCH=amd64
+    else
+        ARCH=arm64v8
+    fi
 fi
 CRED=
 if [ "$DOCKER_USERNAME" != "" ]; then
@@ -33,8 +37,8 @@ for app in ${APPS[@]}; do
         exit 1
     fi
     jib jar --from=$ARCH/eclipse-temurin:$v-jdk-jammy $CRED \
-            --target=docker://springcloud/$app:$TAG \
-            $APP_PATH/$app-$TAG.jar
+        --target=docker://springcloud/$app:$TAG \
+        $APP_PATH/$app-$TAG.jar
     # docker tag springcloud/$app:$TAG springcloud/$app:$ARCH
 done
 TS_APPS=("spring-cloud-dataflow-tasklauncher-sink-kafka" "spring-cloud-dataflow-tasklauncher-sink-rabbit")
@@ -46,10 +50,10 @@ for app in ${TS_APPS[@]}; do
     fi
 
     jib jar --from=$ARCH/eclipse-temurin:$v-jdk-jammy $CRED \
-            --target=docker://springcloud/$app:$TAG \
-            $APP_PATH/$app-$TAG.jar
+        --target=docker://springcloud/$app:$TAG \
+        $APP_PATH/$app-$TAG.jar
     # docker tag springcloud/$app:$TAG springcloud/$app:$ARCH
 done
-pushd $ROOT_DIR > /dev/null
+pushd $ROOT_DIR >/dev/null
 docker build -t springcloud/spring-cloud-dataflow-prometheus-local:$TAG src/grafana/prometheus/docker/prometheus-local
-popd > /dev/null
+popd >/dev/null
