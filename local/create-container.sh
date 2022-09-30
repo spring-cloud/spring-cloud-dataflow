@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
-ROOT_DIR=$(realpath $SCDIR/../..)
+ROOT_DIR=$(realpath $SCDIR/..)
 # set to specific version
 if [ "$1" != "" ]; then
     TAG=$1
