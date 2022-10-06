@@ -20,7 +20,7 @@ if [ "$ARCH" == "" ]; then
         ARCH=amd64
         ;;
     *)
-        if [[ "$PROCESSOR" == *"arm64"* ]]; then
+        if [[ "$PROCESSOR" == *"arm"* ]]; then
             ARCH=arm64v8
         fi
         ;;

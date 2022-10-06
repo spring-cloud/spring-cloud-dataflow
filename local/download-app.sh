@@ -73,7 +73,8 @@ function download_deps() {
     if [ "$TS" != "" ] && [ "$DS" != "" ] && [ -f "$TARGET_FILE" ]; then
         FD=$(date -r "$TARGET_FILE" +"%Y-%m-%d %H:%M:%S")
         if [ "$FD" == "$DS" ]; then
-            echo "$TARGET_FILE has same timestamp ($FD) as $SOURCE."
+
+            echo "$(realpath --relative-to $PWD $TARGET_FILE) has same timestamp ($FD) as $SOURCE."
             echo "Skipping download"
             return 0
         fi
