@@ -43,7 +43,7 @@ services:
       - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.10.0-SNAPSHOT}${BP_JVM_VERSION:-}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
     entrypoint: >
-      bin/sh -c "
+      /bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
@@ -65,7 +65,7 @@ services:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
     entrypoint: >
-      bin/sh -c "
+      /bin/sh -c "
          apt-get update && apt-get install --no-install-recommends -y wget &&
          wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
          tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
