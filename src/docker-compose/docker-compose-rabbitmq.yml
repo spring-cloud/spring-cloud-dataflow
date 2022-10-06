@@ -4,12 +4,6 @@ version: '3'
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-rabbitmq.yml up
 services:
 
-  kafka-broker:
-    entrypoint: ["echo", "kafka-broker service is disabled"]
-
-  zookeeper:
-    entrypoint: ["echo", "zookeeper service is disabled"]
-
   rabbitmq:
     image: rabbitmq:3.7
     container_name: dataflow-rabbitmq
