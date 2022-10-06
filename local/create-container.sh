@@ -13,19 +13,25 @@ if [ "$2" != "" ]; then
 else
     v=11
 fi
-# export ARCH=arm64v8 for ARM64 image
+PROCESSOR=$(uname -p)
 if [ "$ARCH" == "" ]; then
-    if [ "$HOSTTYPE" == "x86_64" ]; then
+    case $PROCESSOR in
+    "x86_64")
         ARCH=amd64
-    else
-        ARCH=arm64v8
-    fi
+        ;;
+    *)
+        if [[ "$PROCESSOR" == *"arm64"* ]]; then
+            ARCH=arm64v8
+        fi
+        ;;
+    esac
 fi
+IMAGE="$ARCH/eclipse-temurin:$v-jdk-jammy"
+
 CRED=
 if [ "$DOCKER_USERNAME" != "" ]; then
     CRED="--from-username=$DOCKER_USERNAME --from-password=$DOCKER_PASSWORD"
 fi
-jib jar --from=$ARCH/eclipse-temurin:$v-jdk-jammy $CRED \
+jib jar --from=$IMAGE $CRED \
     --target=docker://springcloud/spring-cloud-skipper-server:$TAG \
     $ROOT_DIR/spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar
-# docker tag springcloud/$app:$TAG springcloud/$app:$ARCH
