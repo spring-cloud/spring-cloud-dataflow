@@ -14,21 +14,27 @@ if [ "$2" != "" ]; then
 else
     v=11
 fi
-
+PROCESSOR=$(uname -p)
 # export ARCH=arm64v8 for ARM64 image
 if [ "$ARCH" == "" ]; then
-    if [ "$HOSTTYPE" == "x86_64" ]; then
+    case $PROCESSOR in
+    "x86_64")
         ARCH=amd64
-    else
-        ARCH=arm64v8
-    fi
+        ;;
+    *)
+        if [[ "$PROCESSOR" == *"arm"* ]]; then
+            ARCH=arm64v8
+        fi
+        ;;
+    esac
 fi
 CRED=
 if [ "$DOCKER_USERNAME" != "" ]; then
+    echo "Using $DOCKER_USERNAME for docker.io"
     CRED="--from-username=$DOCKER_USERNAME --from-password=$DOCKER_PASSWORD"
 fi
 # set with extra option for buildpacks. BP_OPTIONS=
-
+IMAGE="$ARCH/eclipse-temurin:$v-jdk-jammy"
 APPS=("spring-cloud-dataflow-server" "spring-cloud-dataflow-composed-task-runner" "spring-cloud-dataflow-single-step-batch-job")
 for app in ${APPS[@]}; do
     APP_PATH="$ROOT_DIR/$app/target"
@@ -36,9 +42,7 @@ for app in ${APPS[@]}; do
         echo "Cannot find $APP_PATH/$app-$TAG.jar download using download-apps.sh or build using ./mvnw install"
         exit 1
     fi
-    jib jar --from=$ARCH/eclipse-temurin:$v-jdk-jammy $CRED \
-        --target=docker://springcloud/$app:$TAG \
-        $APP_PATH/$app-$TAG.jar
+    jib jar --from=$IMAGE $CRED --target=docker://springcloud/$app:$TAG $APP_PATH/$app-$TAG.jar
     # docker tag springcloud/$app:$TAG springcloud/$app:$ARCH
 done
 TS_APPS=("spring-cloud-dataflow-tasklauncher-sink-kafka" "spring-cloud-dataflow-tasklauncher-sink-rabbit")
@@ -48,12 +52,9 @@ for app in ${TS_APPS[@]}; do
         echo "Cannot find $APP_PATH/$app-$TAG.jar download using download-apps.sh or build using ./mvnw install"
         exit 1
     fi
-
-    jib jar --from=$ARCH/eclipse-temurin:$v-jdk-jammy $CRED \
-        --target=docker://springcloud/$app:$TAG \
-        $APP_PATH/$app-$TAG.jar
-    # docker tag springcloud/$app:$TAG springcloud/$app:$ARCH
+    jib jar --from=$IMAGE $CRED --target=docker://springcloud/$app:$TAG $APP_PATH/$app-$TAG.jar
 done
+
 pushd $ROOT_DIR >/dev/null
 docker build -t springcloud/spring-cloud-dataflow-prometheus-local:$TAG src/grafana/prometheus/docker/prometheus-local
 popd >/dev/null

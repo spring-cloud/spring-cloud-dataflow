@@ -78,8 +78,8 @@ function download_deps() {
             return 0
         fi
     fi
-    echo "Downloading to $TARGET_FILE from $SOURCE"
-    wget -q -O "$TARGET_FILE" "$SOURCE"
+    echo "Downloading to $(realpath --relative-to $PWD $TARGET_FILE) from $SOURCE"
+    wget --show-progress -q -O "$TARGET_FILE" "$SOURCE"
     RC=$?
     if ((RC > 0)); then
         echo "Error downloading $SOURCE. Exit code $RC"
