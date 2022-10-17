@@ -44,17 +44,14 @@ spec:
         startupProbe:
           tcpSocket:
             port: 7577
-          initialDelaySeconds: 30
+          initialDelaySeconds: 15
           periodSeconds: 3
-          failureThreshold: 20
+          failureThreshold: 120
           timeoutSeconds: 3
         resources:
-          limits:
+          requests:
             cpu: 1.0
             memory: 1024Mi
-          requests:
-            cpu: 0.5
-            memory: 640Mi
         env:
         - name: LANG
           value: 'en_US.UTF-8'
