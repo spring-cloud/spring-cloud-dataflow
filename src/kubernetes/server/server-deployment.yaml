@@ -37,13 +37,17 @@ spec:
             path: /management/info
             port: 80
           initialDelaySeconds: 45
+        startupProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 3
+          failureThreshold: 120
+          timeoutSeconds: 3
         resources:
-          limits:
+          requests:
             cpu: 1.0
             memory: 2048Mi
-          requests:
-            cpu: 0.5
-            memory: 1024Mi
         env:
         - name: LANG
           value: 'en_US.UTF-8'
