@@ -56,6 +56,10 @@ spec:
             cpu: 0.5
             memory: 640Mi
         env:
+        - name: LANG
+          value: 'en_US.UTF-8'
+        - name: LC_ALL
+          value: 'en_US.UTF-8'
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API

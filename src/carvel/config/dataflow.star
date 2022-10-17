@@ -29,6 +29,8 @@ end
 
 def dataflow_container_env():
   envs = []
+  envs.extend([{"name": "LANG", "value": "en_US.UTF-8"}])
+  envs.extend([{"name": "LC_ALL", "value": "en_US.UTF-8"}])
   envs.extend([{"name": "KUBERNETES_NAMESPACE", "valueFrom": {"fieldRef": {"fieldPath": "metadata.namespace"}}}])
   envs.extend([{"name": "SPRING_CLOUD_CONFIG_ENABLED", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED", "value": "true"}])
