@@ -252,7 +252,7 @@ describe('servers', () => {
     const container = deploymentContainer(deployment, SKIPPER_NAME);
     const envs = containerEnvValues(container);
     expect(envs).toBeTruthy();
-    expect(envs).toHaveLength(4);
+    expect(envs).toHaveLength(6);
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -338,7 +338,7 @@ describe('servers', () => {
     const container = deploymentContainer(deployment, SCDF_SERVER_NAME);
     const envs = containerEnvValues(container);
     expect(envs).toBeTruthy();
-    expect(envs).toHaveLength(10);
+    expect(envs).toHaveLength(12);
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
