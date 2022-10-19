@@ -161,6 +161,14 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |Job annotations to set for the pod or job created for a job. String of the format `annotation1:value1,annotation2:value2`
 |<none>
 
+|priorityClassName
+|Pod Spec priorityClassName. Create a PriorityClass in Kubernetes before using this property. See https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/[Pod Priority and Preemption]
+|<none>
+
+|shareProcessNamespace
+| Will assign value to Pod.spec.shareProcessNamespace. See https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/[Share Process Namespace between Containers in a Pod]
+|<none>
+
 |minutesToWaitForLoadBalancer
 |Time to wait for load balancer to be available before attempting delete of service (in minutes).
 |5
