@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
@@ -62,6 +63,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Gunnar Hillert
  * @author Daniel Serleg
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
 @RestController
 @RequestMapping("/tasks/definitions")
@@ -176,20 +178,12 @@ public class TaskDefinitionController {
 			}
 		}
 
-		final java.util.HashMap<String, TaskDefinition> taskDefinitionMap = new java.util.HashMap<>();
+		final Map<String, TaskDefinition> taskDefinitionMap = taskDefinitions.stream()
+				.collect(Collectors.toMap(TaskDefinition::getTaskName, Function.identity()));
 
-		for (TaskDefinition taskDefinition : taskDefinitions) {
-			taskDefinitionMap.put(taskDefinition.getName(), taskDefinition);
-		}
-
-		final List<TaskExecution> taskExecutions;
-
+		List<TaskExecution> taskExecutions = null;
 		if (!taskDefinitionMap.isEmpty()) {
-			taskExecutions = this.explorer.getLatestTaskExecutionsByTaskNames(
-					taskDefinitionMap.keySet().toArray(new String[taskDefinitionMap.size()]));
-		}
-		else {
-			taskExecutions = null;
+			taskExecutions = this.explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[0]));
 		}
 
 		final Page<TaskExecutionAwareTaskDefinition> taskExecutionAwareTaskDefinitions = taskDefinitions
