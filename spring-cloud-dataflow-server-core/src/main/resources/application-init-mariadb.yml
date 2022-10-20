@@ -11,3 +11,4 @@ spring:
         - classpath*:/schemas/mariadb/V2-dataflow-after.sql
         - classpath*:/schemas/mariadb/V3-dataflow.sql
         - classpath*:/schemas/mariadb/V4-dataflow.sql
+        - classpath*:/schemas/mariadb/V5-dataflow.sql
