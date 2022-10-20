@@ -28,6 +28,10 @@ Generic order to apply ddl files is:
 
     V4 dataflow schema.
 
+7. V5-dataflow.sql
+
+    V5 dataflow schema.    
+
 To completely disable flyway use Boot property:
 
     spring.flyway.enabled=false
