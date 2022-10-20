@@ -11,3 +11,4 @@ spring:
         - classpath*:/schemas/oracle/V2-dataflow-after.sql
         - classpath*:/schemas/oracle/V3-dataflow.sql
         - classpath*:/schemas/oracle/V4-dataflow.sql
+        - classpath*:/schemas/oracle/V5-dataflow.sql        
