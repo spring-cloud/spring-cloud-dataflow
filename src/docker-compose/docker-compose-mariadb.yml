@@ -24,6 +24,8 @@ services:
     image: mariadb:10.4.22
     container_name: dataflow-mariadb
     environment:
+      LANG: en.US-utf8
+      LC_ALL: en_US.utf8
       MARIADB_DATABASE: dataflow
       MARIADB_ROOT_PASSWORD: rootpw
     expose:

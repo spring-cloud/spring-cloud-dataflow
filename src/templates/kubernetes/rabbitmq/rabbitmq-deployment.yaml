@@ -17,5 +17,10 @@ spec:
       containers:
       - image: rabbitmq:3.6.10
         name: rabbitmq
+        env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
         ports:
         - containerPort: 5672

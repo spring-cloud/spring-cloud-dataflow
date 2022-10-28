@@ -27,6 +27,9 @@ services:
     expose:
       - "9092"
     environment:
+      - LANG=en_US.utf8
+      - LC_ALL=en_US.utf8
+      - JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-broker:9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_HOST_NAME=kafka-broker

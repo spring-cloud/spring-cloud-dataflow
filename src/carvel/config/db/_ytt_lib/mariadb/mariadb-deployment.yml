@@ -50,6 +50,8 @@ spec:
           mountPath: /var/lib/mariadb
         args:
         - "--ignore-db-dir=lost+found"
+        - "--character-set-server=utf8mb4"
+        - "--collation-server=utf8mb4_unicode_ci"
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
       #@ else:
