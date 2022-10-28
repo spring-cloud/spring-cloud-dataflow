@@ -24,6 +24,9 @@ services:
     image: mysql:5.7.25
     container_name: dataflow-mysql
     environment:
+      LANG: en_US.utf8
+      LC_ALL: en_US.utf8
+      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
       MYSQL_DATABASE: dataflow
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: rootpw

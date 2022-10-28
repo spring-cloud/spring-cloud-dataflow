@@ -42,8 +42,8 @@ end
 
 def skipper_container_env():
   envs = []
-  envs.extend([{"name": "LANG", "value": "en_US.UTF-8"}])
-  envs.extend([{"name": "LC_ALL", "value": "en_US.UTF-8"}])
+  envs.extend([{"name": "LANG", "value": "en_US.utf8"}])
+  envs.extend([{"name": "LC_ALL", "value": "en_US.utf8"}])
   envs.extend([{"name": "SPRING_CLOUD_CONFIG_ENABLED", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API", "value": "false"}])

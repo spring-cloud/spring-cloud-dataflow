@@ -10,6 +10,9 @@ services:
     container_name: dataflow-postgres
     restart: always
     environment:
+      LANG: en_US.utf8
+      LC_ALL: en_US.utf8
+      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
       POSTGRES_DB: dataflow
       POSTGRES_USER: root
       POSTGRES_PASSWORD: rootpw
