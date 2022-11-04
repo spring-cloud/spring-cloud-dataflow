@@ -30,51 +30,51 @@ spec:
         app: scdf-server
     spec:
       containers:
-        - name: scdf-server
-          image: #@ dataflow_image()
-          imagePullPolicy: Always
-          volumeMounts:
-            - name: config
-              mountPath: /workspace/config
-              readOnly: true
-            - name: database
-              mountPath: /workspace/runtime/secrets/database
-              readOnly: true
-            - name: scdfmetadata
-              mountPath: /workspace/runtime/secrets
-              readOnly: true
-          ports:
-            - containerPort: 80
-          startupProbe:
-            httpGet:
-              port: 9393
-              path: #@ dataflow_liveness_path()
-            failureThreshold: 40
-            initialDelaySeconds: 30
-            timeoutSeconds: 3
-            periodSeconds: 5
-          livenessProbe:
-            httpGet:
-              path: #@ dataflow_liveness_path()
-              port: 9393
-            initialDelaySeconds: 5
-          readinessProbe:
-            httpGet:
-              path: #@ dataflow_readiness_path()
-              port: 9393
-            initialDelaySeconds: 10
-          resources:
-            limits:
-              #@ if non_empty_string(data.values.scdf.server.resources.limits.cpu):
-              cpu: #@ data.values.scdf.server.resources.limits.cpu
-              #@ end
-              #@ if non_empty_string(data.values.scdf.server.resources.limits.memory):
-              memory: #@ data.values.scdf.server.resources.limits.memory
-            #@ end
-            requests:
-              cpu: #@ data.values.scdf.server.resources.requests.cpu
-              memory: #@ data.values.scdf.server.resources.requests.memory
-          env: #@ dataflow_container_env()
+      - name: scdf-server
+        image: #@ dataflow_image()
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config
+          mountPath: /workspace/config
+          readOnly: true
+        - name: database
+          mountPath: /workspace/runtime/secrets/database
+          readOnly: true
+        - name: scdfmetadata
+          mountPath: /workspace/runtime/secrets
+          readOnly: true
+        ports:
+        - containerPort: 9393
+        startupProbe:
+          httpGet:
+            port: 9393
+            path: #@ dataflow_liveness_path()
+          failureThreshold: 120
+          initialDelaySeconds: 15
+          timeoutSeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: #@ dataflow_liveness_path()
+            port: 9393
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+            path: #@ dataflow_readiness_path()
+            port: 9393
+          initialDelaySeconds: 10
+        resources:
+          limits:
+          #@ if non_empty_string(data.values.scdf.server.resources.limits.cpu):
+            cpu: #@ data.values.scdf.server.resources.limits.cpu
+          #@ end
+          #@ if non_empty_string(data.values.scdf.server.resources.limits.memory):
+            memory: #@ data.values.scdf.server.resources.limits.memory
+          #@ end
+          requests:
+            cpu: #@ data.values.scdf.server.resources.requests.cpu
+            memory: #@ data.values.scdf.server.resources.requests.memory
+        env: #@ dataflow_container_env()
       serviceAccountName: scdf-sa
       #@ if has_image_pull_secrets():
       imagePullSecrets: #@ image_pull_secrets()
@@ -82,21 +82,21 @@ spec:
       imagePullSecrets: [{name: reg-creds}]
       #@ end
       volumes:
-        - name: config
-          configMap:
-            name: scdf-server
-            items:
-              - key: application.yaml
-                path: application.yaml
-        - name: database
-          secret:
-            secretName: db-dataflow
-        #@ if has_image_pull_secrets():
-        - name: scdfmetadata
-          secret:
-            secretName: #@ registry_secret_ref()
-        #@ else:
-        - name: scdfmetadata
-          secret:
-            secretName: reg-creds
+      - name: config
+        configMap:
+          name: scdf-server
+          items:
+          - key: application.yaml
+            path: application.yaml
+      - name: database
+        secret:
+          secretName: db-dataflow
+      #@ if has_image_pull_secrets():
+      - name: scdfmetadata
+        secret:
+          secretName: #@ registry_secret_ref()
+      #@ else:
+      - name: scdfmetadata
+        secret:
+          secretName: reg-creds
       #@ end
