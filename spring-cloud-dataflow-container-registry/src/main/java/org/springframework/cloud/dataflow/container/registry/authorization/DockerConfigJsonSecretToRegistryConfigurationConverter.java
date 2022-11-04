@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.container.registry.authorization;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 public class DockerConfigJsonSecretToRegistryConfigurationConverter implements Converter<String, Map<String, ContainerRegistryConfiguration>> {
 
@@ -164,9 +166,29 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 
 		try {
 			RestTemplate restTemplate = this.containerImageRestTemplate.getContainerRestTemplate(disableSSl, useHttpProxy);
-			restTemplate.exchange(
-					UriComponentsBuilder.newInstance().scheme("https").host(registryHost).path("v2/").build().toUri(),
-					HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), Map.class);
+			String host = registryHost;
+			Integer port = null;
+			if (registryHost.contains(":")) {
+				int colon = registryHost.lastIndexOf(":");
+				String portString = registryHost.substring(colon+1);
+				try {
+					int intPort = Integer.parseInt(portString);
+					if (Integer.toString(intPort).equals(portString) && intPort > 0 && intPort < 32767) {
+						port = intPort;
+						host = registryHost.substring(0, colon);
+					}
+				} catch (NumberFormatException x) {
+					// not valid integer
+				}
+			}
+			UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance().scheme("https").host(host);
+			if (port != null) {
+				uriComponentsBuilder.port(port);
+			}
+			uriComponentsBuilder.path("v2/");
+			URI uri = uriComponentsBuilder.build().toUri();
+			logger.info("getDockerTokenServiceUri:" + uri);
+			restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), Map.class);
 			return Optional.empty();
 		}
 		catch (HttpClientErrorException httpError) {
@@ -209,6 +231,8 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			return Optional.of(tokenServiceUri);
 		}
 		catch (Exception e) {
+			// Log error because we cannot change the contract that returns empty optional.
+			logger.error("Ignoring:" + e, e);
 			return Optional.empty();
 		}
 	}
