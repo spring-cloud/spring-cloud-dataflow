@@ -64,7 +64,7 @@ public class SchedulerPerPlatformTest {
 	}
 
 	@TestPropertySource(properties = { "spring.cloud.dataflow.features.schedules-enabled=true",
-			"kubernetes_service_host=dummy" })
+			"kubernetes_service_host=dummy", "spring.cloud.kubernetes.client.namespace=default" })
 	public static class KubernetesSchedulerActivatedTests extends AbstractSchedulerPerPlatformTest {
 
 		@Test

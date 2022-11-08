@@ -63,7 +63,8 @@ import static org.mockito.Mockito.when;
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		properties = {
 				"spring.cloud.dataflow.features.schedules-enabled=true",
-				"VCAP_SERVICES=foo",
+                "spring.cloud.kubernetes.enabled=false",
+				"VCAP_SERVICES={}",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",

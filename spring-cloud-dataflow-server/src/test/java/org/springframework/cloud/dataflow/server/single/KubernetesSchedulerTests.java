@@ -35,13 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  **/
 @ActiveProfiles("kubernetes")
 @SpringBootTest(
-	classes = { DataFlowServerApplication.class },
-	webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-	properties = {
-		"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
-		"kubernetes_service_host=foo",
-		"spring.cloud.dataflow.features.schedules-enabled=true"
-	})
+        classes = { DataFlowServerApplication.class },
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = {
+                "spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
+                "spring.cloud.kubernetes.client.namespace=default",
+                "kubernetes_service_host=foo",
+                "spring.cloud.dataflow.features.schedules-enabled=true"
+        })
 @RunWith(SpringRunner.class)
 public class KubernetesSchedulerTests {
 
