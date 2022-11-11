@@ -3,6 +3,7 @@
 "spec":
   "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar"
   "applicationProperties":
+    "management.endpoints.web.exposure.include": "health,info,bindings"
     "spring.cloud.dataflow.stream.app.label": "log"
     "spring.cloud.dataflow.stream.name": "ticktock"
     "spring.cloud.dataflow.stream.app.type": "sink"

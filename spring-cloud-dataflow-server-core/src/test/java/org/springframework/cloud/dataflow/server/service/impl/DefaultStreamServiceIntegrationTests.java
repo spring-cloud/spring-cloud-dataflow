@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -293,6 +294,43 @@ public class DefaultStreamServiceIntegrationTests {
 		StreamDefinition streamDefinitionAfterRollback = this.streamDefinitionRepository.findById("ticktock").get();
 		assertThat(streamDefinitionAfterRollback.getDslText())
 				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
+	}
+
+	@Test
+	public void testDeployHasActuatorProps() throws IOException {
+
+		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
+
+		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
+		streamService.deployStream("ticktock", deploymentProperties);
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient).upload(uploadRequestCaptor.capture());
+
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		// ExpectedYaml will have version: 1.2.0.RELEASE and not 1.1.1.RELEASE
+		Package logPackage = null;
+		for (Package subpkg : pkg.getDependencies()) {
+			if (subpkg.getMetadata().getName().equals("log")) {
+				logPackage = subpkg;
+			}
+		}
+		assertThat(logPackage).isNotNull();
+		String actualYaml = logPackage.getConfigValues().getRaw();
+
+		DumperOptions dumperOptions = new DumperOptions();
+		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+		dumperOptions.setPrettyFlow(true);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+
+		Object actualYamlLoaded = yaml.load(actualYaml);
+
+		assertThat(actualYamlLoaded).isInstanceOf(Map.class)
+				.asInstanceOf(InstanceOfAssertFactories.MAP)
+				.extractingByKey("spec", InstanceOfAssertFactories.MAP)
+				.extractingByKey("applicationProperties", InstanceOfAssertFactories.MAP)
+				.containsEntry("management.endpoints.web.exposure.include", "health,info,bindings");
 	}
 
 	@Test
