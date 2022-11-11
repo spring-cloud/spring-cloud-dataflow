@@ -72,6 +72,7 @@ import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
+import org.springframework.cloud.dataflow.server.controller.AccountController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -104,6 +105,7 @@ import org.springframework.cloud.dataflow.server.controller.assembler.StreamDefi
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
+import org.springframework.cloud.dataflow.server.repository.AccountRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
@@ -113,6 +115,7 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.AccountService;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
@@ -127,6 +130,7 @@ import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultAccountService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
@@ -194,7 +198,7 @@ import static org.mockito.Mockito.when;
  */
 @Configuration
 @EnableSpringDataWebSupport
-@Import({CompletionConfiguration.class})
+@Import({ CompletionConfiguration.class })
 @ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class,
 		JacksonAutoConfiguration.class,
 		FlywayAutoConfiguration.class,
@@ -451,7 +455,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService, TaskJobService taskJobService, TaskExplorer taskExplorer) {
+	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService,
+			TaskJobService taskJobService, TaskExplorer taskExplorer) {
 		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 	}
 
@@ -487,7 +492,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskPlatformController taskPlatformController(LauncherService launcherService) {
 		return new TaskPlatformController(launcherService);
 	}
-
 
 	@Bean
 	LauncherService launcherService(LauncherRepository launcherRepository) {
@@ -621,8 +625,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource, ApplicationContext context) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource,
+			ApplicationContext context) {
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(
+				dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -638,7 +644,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
 			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-			List<TaskPlatform> platforms, ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+			List<TaskPlatform> platforms,
+			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(new DataSourceProperties(),
 				registry, taskExplorer, taskDefinitionRepository,
 				taskConfigurationProperties, launcherRepository, platforms, composedTaskRunnerConfigurationProperties);
@@ -747,5 +754,15 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
 		return transactionManager;
+	}
+
+	@Bean
+	public AccountService accountService(AccountRepository accountRepository) {
+		return new DefaultAccountService(accountRepository);
+	}
+
+	@Bean
+	public AccountController accountController(AccountService accountService) {
+		return new AccountController(accountService);
 	}
 }

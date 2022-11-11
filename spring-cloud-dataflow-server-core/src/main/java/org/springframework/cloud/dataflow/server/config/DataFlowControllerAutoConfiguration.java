@@ -61,6 +61,7 @@ import org.springframework.cloud.dataflow.server.config.features.ConditionalOnSt
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
 import org.springframework.cloud.dataflow.server.controller.AboutController;
+import org.springframework.cloud.dataflow.server.controller.AccountController;
 import org.springframework.cloud.dataflow.server.controller.AppRegistryController;
 import org.springframework.cloud.dataflow.server.controller.AuditRecordController;
 import org.springframework.cloud.dataflow.server.controller.CompletionController;
@@ -97,6 +98,7 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.service.AccountService;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
@@ -151,6 +153,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Andy Clement
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Carlos Miquel
  */
 @SuppressWarnings("all")
 @Configuration
@@ -208,6 +211,11 @@ public class DataFlowControllerAutoConfiguration {
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
 		return new RestControllerAdvice();
+	}
+	
+	@Bean
+	public AccountController accountController(AccountService accountService) {
+		return new AccountController(accountService);
 	}
 
 	@Configuration

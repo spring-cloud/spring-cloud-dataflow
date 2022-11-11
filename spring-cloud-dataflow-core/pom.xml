@@ -69,5 +69,9 @@
 			<groupId>org.springframework.hateoas</groupId>
 			<artifactId>spring-hateoas</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-deployer-kubernetes</artifactId>
+		</dependency>
 	</dependencies>
 </project>
