@@ -11,6 +11,10 @@ common:
 
         # Tags required to use the Wavefront Spring Boot tile.
         application: ${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
+    endpoints:
+      web:
+        exposure:
+          include: health,info,bindings
 
   # Properties required for Wavefront Tracing.
   wavefront.application.name: ${spring.cloud.dataflow.stream.name:unknown}
@@ -30,4 +34,3 @@ cloudfoundry:
         space.name: ${vcap.application.space_name:unknown}
         application.id: ${vcap.application.application_id:unknown}
         application.version: ${vcap.application.application_version:unknown}
-
