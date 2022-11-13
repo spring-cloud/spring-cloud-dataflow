@@ -127,7 +127,7 @@ public class DefaultStreamServiceTests {
 		final StreamDefinition expectedStreamDefinition = new StreamDefinition("testStream", "time | log");
 		when(streamDefinitionRepository.save(expectedStreamDefinition)).thenReturn(expectedStreamDefinition);
 
-		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false);
+		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false, null);
 
 		verify(this.streamValidationService).isRegistered("time", ApplicationType.source);
 		verify(this.streamValidationService).isRegistered("log", ApplicationType.sink);
@@ -150,7 +150,7 @@ public class DefaultStreamServiceTests {
 		thrown.expectMessage("Application name 'time' with type 'source' does not exist in the app registry.\n" +
 				"Application name 'log' with type 'sink' does not exist in the app registry.");
 
-		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false);
+		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false, null);
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class DefaultStreamServiceTests {
 		thrown.expect(InvalidStreamDefinitionException.class);
 		thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
 
-		this.defaultStreamService.createStream("testStream", "koza", "demo stream", false);
+		this.defaultStreamService.createStream("testStream", "koza", "demo stream", false, null);
 	}
 
 	@Test

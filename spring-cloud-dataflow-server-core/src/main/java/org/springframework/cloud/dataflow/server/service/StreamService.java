@@ -96,11 +96,13 @@ public interface StreamService {
 	 * @param description description of the stream definition
 	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
 	 * {@code false})
+	 * @param deploymentProperties the optional deployment properties to use when the stream is deployed upon creation
 	 * @return the created stream definition already exists
 	 * @throws InvalidStreamDefinitionException if there are errors in parsing the stream DSL,
 	 * resolving the name, or type of applications in the stream
 	 */
-	StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy);
+	StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy,
+								  Map<String, String> deploymentProperties);
 
 	/**
 	 * Deploys the stream with the user provided deployment properties.

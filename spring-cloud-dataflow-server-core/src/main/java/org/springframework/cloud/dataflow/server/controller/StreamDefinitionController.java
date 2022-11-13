@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,10 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -129,7 +132,10 @@ public class StreamDefinitionController {
 	}
 
 	/**
-	 * Create a new stream.
+	 * Create a new stream and optionally deploy it.
+	 * <p>
+	 * Differs from {@link #saveWithDeployProps} by accepting deployment properties and consuming
+	 * {@link MediaType#APPLICATION_FORM_URLENCODED} request content (required by the Dataflow Shell).
 	 *
 	 * @param name stream name
 	 * @param dsl DSL definition for stream
@@ -139,15 +145,46 @@ public class StreamDefinitionController {
 	 * @return the created stream definition
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
 	 * already exists
-	 * @throws InvalidStreamDefinitionException if there errors in parsing the stream DSL,
+	 * @throws InvalidStreamDefinitionException if there are errors parsing the stream DSL,
 	 * resolving the name, or type of applications in the stream
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST)
+	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public StreamDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
-											@RequestParam(value = "description", defaultValue = "") String description,
-											@RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
-		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy);
+	public StreamDefinitionResource save(@RequestParam("name") String name,
+										 @RequestParam("definition") String dsl,
+										 @RequestParam(value = "description", defaultValue = "") String description,
+										 @RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
+		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, null);
+		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
+				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
+	}
+
+	/**
+	 * Create a new stream and optionally deploy it.
+	 * <p>
+	 * Differs from {@link #save} by accepting deployment properties and consuming
+	 * {@link MediaType#APPLICATION_JSON} request content.
+	 *
+	 * @param name stream name
+	 * @param dsl DSL definition for stream
+	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
+	 * {@code false})
+	 * @param deploymentProperties the optional deployment properties to use when the stream is deployed upon creation
+	 * @param description description of the stream definition
+	 * @return the created stream definition
+	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
+	 * already exists
+	 * @throws InvalidStreamDefinitionException if there are errors parsing the stream DSL,
+	 * resolving the name, or type of applications in the stream
+	 */
+	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.CREATED)
+	public StreamDefinitionResource saveWithDeployProps(@RequestParam("name") String name,
+										 @RequestParam("definition") String dsl,
+										 @RequestParam(value = "description", defaultValue = "") String description,
+										 @RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
+										 @RequestBody(required = false) Map<String, String> deploymentProperties) {
+		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, deploymentProperties);
 		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
 				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
 	}

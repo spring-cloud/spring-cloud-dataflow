@@ -393,19 +393,9 @@ public class DefaultStreamService implements StreamService {
 		return this.skipperStreamDeployer.getStreamInfo(streamName);
 	}
 
-	/**
-	 * Create a new stream.
-	 *
-	 * @param streamName stream name
-	 * @param dsl DSL definition for stream
-	 * @param description description of the stream definition
-	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
-	 *     {@code false})
-	 * @return the created stream definition already exists
-	 * @throws InvalidStreamDefinitionException if there are errors in parsing the stream DSL,
-	 *     resolving the name, or type of applications in the stream
-	 */
-	public StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy) {
+	@Override
+	public StreamDefinition createStream(String streamName, String dsl, String description, boolean deploy,
+										 Map<String, String> deploymentProperties) {
 		StreamDefinition streamDefinition = createStreamDefinition(streamName, dsl, description);
 		List<String> errorMessages = new ArrayList<>();
 
@@ -432,7 +422,7 @@ public class DefaultStreamService implements StreamService {
 		final StreamDefinition savedStreamDefinition = this.streamDefinitionRepository.save(streamDefinition);
 
 		if (deploy) {
-			this.deployStream(streamName, new HashMap<>());
+			this.deployStream(streamName, deploymentProperties);
 		}
 
 		auditRecordService.populateAndSaveAuditRecord(
