@@ -23,10 +23,25 @@ jobs:
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.6.2
-    # build
+    # jfrog cli
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.46.4
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+    # setup frog cli
+    - name: Configure JFrog Cli
+      run: |
+        jfrog rt mvnc \
+          --server-id-resolve=repo.spring.io \
+          --repo-resolve-releases=libs-milestone \
+          --repo-resolve-snapshots=libs-snapshot
+        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
+        echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+    # build and publish
     - name: Build
       run: |
-        mvn -U -B clean package
+        jfrog rt mvn -U -B clean package
     # clean m2 cache
     - name: Clean cache
       run: |
