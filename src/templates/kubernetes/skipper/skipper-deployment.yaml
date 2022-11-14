@@ -26,17 +26,28 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 7577
         livenessProbe:
           httpGet:
             path: /actuator/health
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
+          periodSeconds: 60
+          timeoutSeconds: 5
         readinessProbe:
           httpGet:
             path: /actuator/info
             port: 7577
-          initialDelaySeconds: 45
+          initialDelaySeconds: 1
+          periodSeconds: 10
+          timeoutSeconds: 2
+        startupProbe:
+          tcpSocket:
+            port: 7577
+          initialDelaySeconds: 30
+          periodSeconds: 3
+          failureThreshold: 20
+          timeoutSeconds: 3
         resources:
           limits:
             cpu: 1.0
@@ -45,6 +56,12 @@ spec:
             cpu: 0.5
             memory: 640Mi
         env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+          - name: JDK_JAVA_OPTIONS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
