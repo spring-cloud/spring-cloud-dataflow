@@ -26,16 +26,16 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         livenessProbe:
           httpGet:
             path: /management/health
-            port: 80
+            port: 8080
           initialDelaySeconds: 45
         readinessProbe:
           httpGet:
             path: /management/info
-            port: 80
+            port: 8080
           initialDelaySeconds: 45
         resources:
           limits:
@@ -56,7 +56,7 @@ spec:
               fieldRef:
                 fieldPath: "metadata.namespace"
           - name: SERVER_PORT
-            value: '80'
+            value: '8080'
           - name: SPRING_CLOUD_CONFIG_ENABLED
             value: 'false'
           - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED

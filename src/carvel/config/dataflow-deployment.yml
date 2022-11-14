@@ -44,7 +44,7 @@ spec:
           mountPath: /workspace/runtime/secrets
           readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 9393
         startupProbe:
           httpGet:
             port: 9393

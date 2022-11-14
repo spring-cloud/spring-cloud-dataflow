@@ -26,20 +26,20 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 9393
         livenessProbe:
           httpGet:
             path: /management/health
-            port: 80
+            port: 9393
           initialDelaySeconds: 45
         readinessProbe:
           httpGet:
             path: /management/info
-            port: 80
+            port: 9393
           initialDelaySeconds: 45
         startupProbe:
           tcpSocket:
-            port: 80
+            port: 9393
           initialDelaySeconds: 15
           periodSeconds: 3
           failureThreshold: 120
@@ -60,7 +60,7 @@ spec:
             fieldRef:
               fieldPath: "metadata.namespace"
         - name: SERVER_PORT
-          value: '80'
+          value: '9393'
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: 'false'
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED

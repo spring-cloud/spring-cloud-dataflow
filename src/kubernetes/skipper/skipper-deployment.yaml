@@ -26,7 +26,7 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 80
+        - containerPort: 7577
         livenessProbe:
           httpGet:
             path: /actuator/health
@@ -59,6 +59,8 @@ spec:
           value: 'en_US.utf8'
         - name: JDK_JAVA_OPTIONS
           value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+        - name: SERVER_PORT
+          value: '7577'
         - name: SPRING_CLOUD_CONFIG_ENABLED
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API

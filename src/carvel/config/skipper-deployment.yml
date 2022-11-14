@@ -42,7 +42,7 @@ spec:
           readOnly: true
         #@ end
         ports:
-        - containerPort: 80
+        - containerPort: 7577
         startupProbe:
           httpGet:
             port: 7577
