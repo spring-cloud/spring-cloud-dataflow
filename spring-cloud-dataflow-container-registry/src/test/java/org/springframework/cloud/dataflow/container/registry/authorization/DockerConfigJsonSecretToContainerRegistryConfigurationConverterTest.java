@@ -47,6 +47,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest {
 
@@ -105,6 +106,27 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 		assertThat(registryConfiguration.getUser(), is("testuser"));
 		assertThat(registryConfiguration.getSecret(), is("testpassword"));
 		assertThat(registryConfiguration.getAuthorizationType(), is(ContainerRegistryConfiguration.AuthorizationType.basicauth));
+	}
+
+	@Test
+	public void testConvertWithPort() throws URISyntaxException {
+
+		when(mockRestTemplate.exchange(
+				eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class)))
+				.thenReturn(new ResponseEntity<>(new HashMap<>(), HttpStatus.OK));
+
+		String b = "{\"auths\":{\"demo.repository.io:5050\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
+		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
+
+		assertThat(result).hasSize(1);
+		assertThat(result).containsKey("demo.repository.io:5050");
+
+		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io:5050");
+
+		assertThat(registryConfiguration.getRegistryHost()).isEqualTo("demo.repository.io:5050");
+		assertThat(registryConfiguration.getUser()).isEqualTo("testuser");
+		assertThat(registryConfiguration.getSecret()).isEqualTo("testpassword");
+		assertThat(registryConfiguration.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.basicauth);
 	}
 
 	@Test
