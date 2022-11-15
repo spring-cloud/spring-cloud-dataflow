@@ -24,15 +24,18 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,13 +77,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -110,7 +116,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Daniel Serleg
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -138,7 +143,7 @@ public class StreamControllerTests {
 	@Autowired
 	private StreamDefinitionService streamDefinitionService;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -156,7 +161,7 @@ public class StreamControllerTests {
 		when(skipperClient.search(anyString(), eq(false))).thenReturn(new ArrayList<PackageMetadata>());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		repository.deleteAll();
 		auditRecordRepository.deleteAll();
@@ -164,16 +169,43 @@ public class StreamControllerTests {
 		assertThat(auditRecordRepository.count()).isZero();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testConstructorMissingStreamService() {
-		new StreamDefinitionController(null, null, null, null, null);
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> {
+					new StreamDefinitionController(null, null, null, null, null);
+				});
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	public void testSaveNoDeployJsonEncoded() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+		mockMvc.perform(post("/streams/definitions/")
+						.param("name", "myStream")
+						.param("definition", "time | log")
+						.contentType(MediaType.APPLICATION_JSON)
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isCreated());
+		assertThatStreamSavedWithoutDeploy();
+	}
+
+	@Test
+	public void testSaveNoDeployFormEncoded() throws Exception {
+		assertThat(repository.count()).isZero();
+		MultiValueMap<String, String> values = new LinkedMultiValueMap<>();
+		values.add("name", "myStream");
+		values.add("definition", "time | log");
+		mockMvc.perform(post("/streams/definitions/")
+						.params(values)
+						.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isCreated());
+		assertThatStreamSavedWithoutDeploy();
+	}
+
+	private void assertThatStreamSavedWithoutDeploy() {
 		assertThat(repository.count()).isEqualTo(1);
 		StreamDefinition myStream = repository.findById("myStream").get();
 		assertThat(myStream.getDslText()).isEqualTo("time | log");
@@ -187,6 +219,60 @@ public class StreamControllerTests {
 		assertThat(logDefinition.getProperties()).hasSize(2);
 		assertThat(logDefinition.getProperties().get(BindingPropertyKeys.INPUT_DESTINATION)).isEqualTo("myStream.time");
 		assertThat(logDefinition.getProperties().get(BindingPropertyKeys.INPUT_GROUP)).isEqualTo("myStream");
+	}
+
+	@ParameterizedTest
+	@MethodSource("testSaveAndDeployWithDeployPropsProvider")
+	public void testSaveAndDeploy(Map<String, String> deploymentProps, Map<String, String> expectedPropsOnApps) throws Exception {
+		assertThat(repository.count()).isZero();
+		String definition = "time | log";
+		String streamName = "testSaveAndDeploy-stream";
+		MockHttpServletRequestBuilder requestBuilder = post("/streams/definitions/")
+				.param("name", streamName)
+				.param("definition", definition)
+				.param("deploy", "true")
+				.accept(MediaType.APPLICATION_JSON);
+		if (deploymentProps != null) {
+			requestBuilder
+					.content(new ObjectMapper().writeValueAsBytes(deploymentProps))
+					.contentType(MediaType.APPLICATION_JSON);
+		}
+		mockMvc.perform(requestBuilder)
+				.andDo(print())
+				.andExpect(status().isCreated());
+
+		assertThat(repository.count()).isEqualTo(1);
+		assertThat(repository.findById(streamName)).isPresent()
+				.hasValueSatisfying((sd) -> {
+					assertThat(sd.getName()).isEqualTo(streamName);
+					assertThat(sd.getDslText()).isEqualTo(definition);
+				})
+				.map(this.streamDefinitionService::getAppDefinitions).get().asList()
+				.extracting("name").containsExactly("time", "log");
+
+		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
+		verify(skipperClient, times(1)).upload(uploadRequestCaptor.capture());
+
+		List<UploadRequest> uploadRequests = uploadRequestCaptor.getAllValues();
+		assertThat(uploadRequests).hasSize(1);
+		Package pkg = SkipperPackageUtils.loadPackageFromBytes(uploadRequestCaptor);
+
+		Package timePackage = findChildPackageByName(pkg, "time");
+		assertThat(timePackage).isNotNull();
+		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
+		assertThat(timeSpec.getDeploymentProperties()).containsAllEntriesOf(expectedPropsOnApps);
+
+		Package logPackage = findChildPackageByName(pkg, "log");
+		assertThat(logPackage).isNotNull();
+		SpringCloudDeployerApplicationSpec logAppSpec = parseSpec(logPackage.getConfigValues().getRaw());
+		assertThat(logAppSpec.getDeploymentProperties()).containsAllEntriesOf(expectedPropsOnApps);
+	}
+
+	private static Stream<Arguments> testSaveAndDeployWithDeployPropsProvider() {
+		return Stream.of(
+				Arguments.of(Collections.singletonMap("deployer.*.count", "2"), Collections.singletonMap("spring.cloud.deployer.count", "2")),
+				Arguments.of(Collections.emptyMap(), Collections.emptyMap()),
+				Arguments.of(null, Collections.emptyMap()));
 	}
 
 	@Test
