@@ -18,6 +18,10 @@ spec:
       - image: mariadb:10.4.22
         name: mariadb
         env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
           - name: MARIADB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:

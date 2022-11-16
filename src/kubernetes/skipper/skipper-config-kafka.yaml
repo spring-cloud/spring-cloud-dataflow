@@ -16,15 +16,9 @@ data:
                   default:
                     environmentVariables: 'SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka-broker:9092,SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
                     limits:
-                      memory: 2g
-                      cpu: 2.0                    
-                    readinessProbeDelay: 1
-                    readinessProbeTimeout: 5
-                    livenessProbeDelay: 1
-                    livenessProbeTimeout: 2
-                    startupProbeDelay: 20
-                    startupProbeTimeout: 5
-                    startupProbeFailure: 50
+                      memory: 1024Mi
+                      cpu: 500m                    
+                    startupProbeFailures: 30
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
         username: root
