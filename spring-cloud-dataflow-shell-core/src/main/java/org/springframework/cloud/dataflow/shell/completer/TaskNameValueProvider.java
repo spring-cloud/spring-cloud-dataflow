@@ -22,10 +22,9 @@ import java.util.stream.StreamSupport;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
-import org.springframework.core.MethodParameter;
 import org.springframework.shell.CompletionContext;
 import org.springframework.shell.CompletionProposal;
-import org.springframework.shell.standard.ValueProviderSupport;
+import org.springframework.shell.standard.ValueProvider;
 import org.springframework.stereotype.Component;
 
 /**
@@ -34,7 +33,7 @@ import org.springframework.stereotype.Component;
  * @author Chris Bono
  */
 @Component
-public class TaskNameValueProvider extends ValueProviderSupport {
+public class TaskNameValueProvider implements ValueProvider {
 
 	private final DataFlowShell dataFlowShell;
 
@@ -42,7 +41,7 @@ public class TaskNameValueProvider extends ValueProviderSupport {
 		this.dataFlowShell = dataFlowShell;
 	}
 	@Override
-	public List<CompletionProposal> complete(MethodParameter parameter, CompletionContext completionContext, String[] hints) {
+	public List<CompletionProposal> complete(CompletionContext completionContext) {
 		return StreamSupport.stream(
 				dataFlowShell.getDataFlowOperations().taskOperations().list().spliterator(), false)
 				.map(TaskDefinitionResource::getName)
