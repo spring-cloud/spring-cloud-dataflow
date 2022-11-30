@@ -19,7 +19,6 @@ Having trouble with Spring Cloud Data Flow? We would like to help!
 * Ask a question. We monitor https://stackoverflow.com[stackoverflow.com] for questions
 tagged with https://stackoverflow.com/tags/spring-cloud-dataflow[`spring-cloud-dataflow`].
 * Report bugs with Spring Cloud Data Flow at https://github.com/spring-cloud/spring-cloud-dataflow/issues.
-* Chat with the community and developers on https://gitter.im/spring-cloud/spring-cloud-dataflow[Gitter].
 
 NOTE: All of Spring Cloud Data Flow is open source, including the documentation! If you find problems
 with the docs or if you just want to improve them, please {github-code}[get involved].
