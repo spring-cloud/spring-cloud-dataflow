@@ -452,34 +452,53 @@ sha1 and or sha256 checksum values for the shell dependency. The information
 that is returned for each of the dependencies is configurable by setting the following
 properties:
 
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.name: the
-name to be used for the core.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.version:
-the version to be used for the core.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.name: the
-name to be used for the dashboard.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.version:
-the version to be used for the dashboard.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.name: the
-name to be used for the implementation.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.version:
-the version to be used for the implementation.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.name: the
-name to be used for the shell.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.version:
-the version to be used for the shell.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.url:
-the URL to be used for downloading the shell dependency.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1: the sha1
-checksum value that is returned with the shell dependency info.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256:
-the sha256 checksum value that is returned with the shell dependency info.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1-url:
-if the `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1`
-is not specified, SCDF uses the contents of the file specified at this URL for the checksum.
-* spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256-url:
-if the `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256`
-is not specified, SCDF uses the contents of the file specified at this URL for the checksum.
+[frame="none"]
+[cols="a,a"]
+[cols="60%,40%"]
+|===
+|Property Name | Description
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.name#
+|[.small]#Name to be used for the core#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-core.version#
+|[.small]#Version to be used for the core#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.name#
+|[.small]#Name to be used for the dashboard#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-dashboard.version#
+|[.small]#Version to be used for the dashboard#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.name#
+|[.small]#Name to be used for the implementation#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-implementation.version#
+|[.small]#Version to be used for the implementation#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.name#
+|[.small]#Name to be used for the shell#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.version#
+|[.small]#Version to be used for the shell#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.url#
+|[.small]#URL to be used for downloading the shell dependency#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1#
+|[.small]#Sha1 checksum value that is returned with the shell dependency info#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256#
+|[.small]#Sha256 checksum value that is returned with the shell dependency info#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1-url#
+|[.small]#if `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha1`
+is not specified, SCDF uses the contents of the file specified at this URL for the checksum#
+
+|[.small]#spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256-url#
+|[.small]#if the `spring.cloud.dataflow.version-info.spring-cloud-dataflow-shell.checksum-sha256` is not specified, SCDF uses the contents of the file specified at this URL for the checksum#
+|===
+
 
 ==== Enabling Shell Checksum values
 By default, checksum values are not displayed for the shell dependency. If
