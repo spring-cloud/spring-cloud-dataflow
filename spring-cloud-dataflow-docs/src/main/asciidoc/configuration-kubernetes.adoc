@@ -22,6 +22,9 @@ By default, all the features are enabled.
 
 The `/features` REST endpoint provides information on the features that have been enabled and disabled.
 
+[[configuration-kubernetes-app-props]]
+include::configuration-kubernetes-app-properties.adoc[]
+
 [[configuration-kubernetes-deployer]]
 === Deployer Properties
 You can use the following configuration properties the https://github.com/spring-cloud/spring-cloud-deployer-kubernetes[Kubernetes deployer] to customize how Streams and Tasks are deployed.
