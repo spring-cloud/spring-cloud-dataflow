@@ -57,9 +57,6 @@ The `username` and `password` are the same regardless of the database. However, 
 |===
 
 ==== H2
-When no other database is configured and the *H2* driver has been added to the server classpath then
-Spring Cloud Data Flow uses an embedded instance of the *H2* database as the default.
+When no other database is configured then Spring Cloud Data Flow uses an embedded instance of the *H2* database as the default.
 
 NOTE: *H2* is good for development purposes but is not recommended for production use nor is it supported as an external mode.
-
-To use *H2* add the `com.h2database:h2:2.1.214` JDBC driver to the classpath and do not configure any other database.

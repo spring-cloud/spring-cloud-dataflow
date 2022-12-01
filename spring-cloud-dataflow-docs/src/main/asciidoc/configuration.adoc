@@ -2,8 +2,8 @@
 = Configuration
 
 [[configuration-maven]]
-== Maven
-
+== Maven Resources
+Spring Cloud Dataflow supports referencing artifacts via Maven (`maven:`).
 If you want to override specific Maven configuration properties (remote repositories, proxies, and others) or run the Data Flow Server behind a proxy,
 you need to specify those properties as command-line arguments when you start the Data Flow Server, as shown in the following example:
 

@@ -113,9 +113,6 @@ Here's a description what happens when _Dataflow_ server is started:
   may be in place if a shared DB is used.
 * If schema is empty, flyway assumes to start from a scratch.
 * Goes through all needed schema migrations.
-* Due to historical reasons, if we detect that schema is from _1.7.x_ line
-  we convert these to structures needed from _2.0.x_ onwards and fully
-  continue with flyway.
 
 [NOTE]
 ====
@@ -195,8 +192,7 @@ The logging configuration is located on the classpath contained in a file named 
 By default, the log file is configured to use:
 
 ```
-<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server}"/>
-
+<property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local.log}"/>
 ```
 
 with the logback configuration for the `RollingPolicy`:
@@ -205,7 +201,7 @@ with the logback configuration for the `RollingPolicy`:
 
 <appender name="FILE"
 			  class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${LOG_FILE}.log</file>
+		<file>${LOG_FILE}</file>
 		<rollingPolicy
 				class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<!-- daily rolling -->
@@ -239,7 +235,7 @@ Data Flow Server delegates to the Skipper server the management of the Stream's 
 $ java -jar spring-cloud-dataflow-server-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://192.51.100.1:7577/api
 ----
 
-The configuration of show streams are deployed and to which platforms, is done by configuration of `platform accounts` on the Skipper server.
+The configuration of how streams are deployed and to which platforms, is done by configuration of `platform accounts` on the Skipper server.
 See the documentation on https://docs.spring.io/spring-cloud-skipper/docs/current/reference/htmlsingle/#platforms[platforms] for more information.
 
 
@@ -251,7 +247,7 @@ For Tasks which are Spring Batch Jobs, the job and step execution data is also s
 As with streams launched by Skipper, Tasks can be launched to multiple platforms.
 If no platform is defined, a platform named `default` is created using the default values of the class https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties], which is summarized in the table <<configuration-local-deployer,Local Deployer Properties>>
 
-To configure new platform accounts for the local platform, provide an entry under the `spring.cloud.dataflow.task.platform.local` section in your `application.yaml` file for via another Spring Boot supported mechanism.
+To configure new platform accounts for the local platform, provide an entry under the `spring.cloud.dataflow.task.platform.local` section in your `application.yaml` file or via another Spring Boot supported mechanism.
 In the following example, two local platform accounts named `localDev` and  `localDevDebug` are created.
 The keys such as `shutdownTimeout` and `javaOpts` are local deployer properties.
 
@@ -282,175 +278,12 @@ You can configure the Data Flow server that is running locally to deploy tasks t
 
 Detailed examples for launching and scheduling tasks across multiple platforms, are available in this section https://dataflow.spring.io/docs/recipes/multi-platform-deployment/[Multiple Platform Support for Tasks] on http://dataflow.spring.io.
 
-===== Start Skipper
+[[configuration-local-security]]
+=== Security Configuration
 
-[source,bash]
-----
-git clone https://github.com/spring-cloud/spring-cloud-skipper.git
-cd spring-cloud/spring-cloud-skipper
-./mvnw clean package -DskipTests=true
-java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.2.0.BUILD-SNAPSHOT.jar
-----
-
-===== Start Spring Cloud Data Flow
-
-[source,bash]
-----
-git clone https://github.com/spring-cloud/spring-cloud-dataflow.git
-cd spring-cloud-dataflow
-./mvnw clean package -DskipTests=true
-cd ..
-----
-
-Create a yaml file scdf.yml with the following contents:
-
-[source,yaml]
-----
-spring:
-  cloud:
-    dataflow:
-      security:
-        authorization:
-          provider-role-mappings:
-            uaa:
-              map-oauth-scopes: true
-              role-mappings:
-                ROLE_CREATE: foo.create
-                ROLE_DEPLOY: foo.create
-                ROLE_DESTROY: foo.create
-                ROLE_MANAGE: foo.create
-                ROLE_MODIFY: foo.create
-                ROLE_SCHEDULE: foo.create
-                ROLE_VIEW: foo.view
-  security:
-    oauth2:
-      client:
-        registration:
-          uaa:
-            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
-            authorization-grant-type: authorization_code
-            client-id: dataflow
-            client-secret: dataflow
-            scope:                                                       <1>
-            - openid
-            - foo.create
-            - foo.view
-        provider:
-          uaa:
-            jwk-set-uri: http://uaa:8080/uaa/token_keys
-            token-uri: http://uaa:8080/uaa/oauth/token
-            user-info-uri: http://uaa:8080/uaa/userinfo                  <2>
-            user-name-attribute: user_name
-            authorization-uri: http://uaa:8080/uaa/oauth/authorize
-      resourceserver:
-        opaquetoken:                                                     <3>
-          introspection-uri: http://uaa:8080/uaa/introspect
-          client-id: dataflow
-          client-secret: dataflow
-----
-
-<1> If you use scopes to identify roles, please make sure to also request
-    the relevant scopes, e.g `dataflow.view`, `dataflow.create` and don't forget to request the `openid` scope
-<2> Used to retrieve profile information, e.g. username for display purposes (mandatory)
-<3> Used for token introspection and validation (mandatory)
-
-The `introspection-uri` property is especially important when passing an externally retrieved (opaque)
-OAuth Access Token to Spring Cloud Data Flow. In that case Spring Cloud Data Flow will take the OAuth Access,
-and use the UAA's https://docs.cloudfoundry.org/api/uaa/version/74.4.0/index.html#introspect-token[Introspect Token Endpoint]
-to not only check the validity of the token but also retrieve the associated OAuth scopes from the UAA
-
-Finally startup Spring Cloud Data Flow:
-
-[source,bash]
-----
-java -jar spring-cloud-dataflow/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.4.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=scdf.yml
-----
-
-[[configuration-security-role-mapping]]
-===== Role Mappings
-
-By default all roles are assigned to users that login to Spring Cloud Data Flow.
-However, you can set the property:
-
-`spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes: true`
-
-This will instruct the underlying `DefaultAuthoritiesExtractor` to map
-OAuth scopes to the respective authorities. The following scopes are supported:
-
-* Scope `dataflow.create` maps to the `CREATE` role
-* Scope `dataflow.deploy` maps to the `DEPLOY` role
-* Scope `dataflow.destroy` maps to the `DESTROY` role
-* Scope `dataflow.manage` maps to the `MANAGE` role
-* Scope `dataflow.modify` maps to the `MODIFY` role
-* Scope `dataflow.schedule` maps to the `SCHEDULE` role
-* Scope `dataflow.view` maps to the `VIEW` role
-
-Additionally you can also map arbitrary scopes to each of the Data Flow roles:
-
-[source,yaml]
-----
-spring:
-  cloud:
-    dataflow:
-      security:
-        authorization:
-          provider-role-mappings:
-            uaa:
-              map-oauth-scopes: true                                    # <1>
-              role-mappings:
-                ROLE_CREATE: dataflow.create                            # <2>
-                ROLE_DEPLOY: dataflow.deploy
-                ROLE_DESTROY: dataflow.destoy
-                ROLE_MANAGE: dataflow.manage
-                ROLE_MODIFY: dataflow.modify
-                ROLE_SCHEDULE: dataflow.schedule
-                ROLE_VIEW: dataflow.view
-----
-
-<1> Enables explicit mapping support from OAuth scopes to Data Flow roles
-<2> When role mapping support is enabled, you must provide a mapping for
-all 7 Spring Cloud Data Flow roles *ROLE_CREATE*, *ROLE_DEPLOY*, *ROLE_DESTROY*, *ROLE_MANAGE*, *ROLE_MODIFY*, *ROLE_SCHEDULE*, *ROLE_VIEW*.
-
-[TIP]
-====
-You can assign an OAuth scope to multiple Spring Cloud Data Flow roles, giving you flexible regarding the granularity of your authorization configuration.
-====
-
-[[configuration-security-group-mapping]]
-===== Group Mappings
-
-Mapping roles from scopes has its own problems as it may not be always possible
-to change those in a given identity provider. If it's possible to define group claims
-in a token returned from an identity provider, these can be used as well to
-map into server roles.
-
-====
-[source,yaml]
-----
-spring:
-  cloud:
-    dataflow:
-      security:
-        authorization:
-          provider-role-mappings:
-            uaa:
-              map-oauth-scopes: false
-              map-group-claims: true
-              group-claim: roles
-              group-mappings:
-                ROLE_CREATE: my-group-id
-                ROLE_DEPLOY: my-group-id
-                ROLE_DESTROY: my-group-id
-                ROLE_MANAGE: my-group-id
-                ROLE_MODIFY: my-group-id
-                ROLE_SCHEDULE: my-group-id
-                ROLE_VIEW: my-group-id
-----
-====
-
-Claim defaults to `roles` which you can set using `group-claim` option.
-In above example `my-group-id` would be something what your identity provider
-is placing into a token.
+[[configuration-local-security-cloudfoundry-uaa]]
+==== CloudFoundry User Account and Authentication (UAA) Server
+See the <<configuration#configuration-local-security-enabling-https,CloudFoundry User Account and Authentication (UAA) Server>> configuration section for details how to configure for local testing and development.
 
 [[configuration-security-ldap-authentication]]
 ==== LDAP Authentication
@@ -611,7 +444,7 @@ $ java -jar spring-cloud-dataflow-shell-{project-version}.jar \
 
 ====
 
-=== About Configuration
+=== About API Configuration
 The Spring Cloud Data Flow About Restful API result contains a display name,
 version, and, if specified, a URL for each of the major dependencies that
 comprise Spring Cloud Data Flow.  The result (if enabled) also contains the
