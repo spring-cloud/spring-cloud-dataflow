@@ -453,8 +453,7 @@ that is returned for each of the dependencies is configurable by setting the fol
 properties:
 
 [frame="none"]
-[cols="a,a"]
-[cols="60%,40%"]
+[cols="6,4"]
 |===
 |Property Name | Description
 
