@@ -15,13 +15,13 @@ A task application is short-lived, meaning that it stops running on purpose and 
 One use case might be to scrape a web page and write to the database.
 
 The https://cloud.spring.io/spring-cloud-task/[Spring Cloud Task] framework is based on Spring Boot and adds the ability for Boot applications to record the lifecycle events of a short-lived application, such as when it starts, when it ends, and the exit status.
-The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#features-task-execution-details[`TaskExecution`] documentation shows which information is stored in the database.
-The entry point for code execution in a Spring Cloud Task application is most often an implementation of Boot's `CommandLineRunner` interface, as shown in this https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/htmlsingle/#getting-started-writing-the-code[example].
+The https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/html#features-task-execution-details[`TaskExecution`] documentation shows which information is stored in the database.
+The entry point for code execution in a Spring Cloud Task application is most often an implementation of Boot's `CommandLineRunner` interface, as shown in this https://docs.spring.io/spring-cloud-task/docs/{spring-cloud-task-version}/reference/html#getting-started-writing-the-code[example].
 
 The Spring Batch project is probably what comes to mind for Spring developers writing short-lived applications.
 Spring Batch provides a much richer set of functionality than Spring Cloud Task and is recommended when processing large volumes of data.
 One use case might be to read many CSV files, transform each row of data, and write each transformed row to a database.
-Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/{spring-batch-doc-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
+Spring Batch provides its own database schema with a much more rich https://docs.spring.io/spring-batch/docs/{spring-batch-version}/reference/html/schema-appendix.html#metaDataSchema[set of information] about the execution of a Spring Batch job.
 Spring Cloud Task is integrated with Spring Batch so that, if a Spring Cloud Task application defines a Spring Batch `Job`, a link between the Spring Cloud Task and Spring Cloud Batch execution tables is created.
 
 When running Data Flow on your local machine, Tasks are launched in a separate JVM.
@@ -42,7 +42,8 @@ Before you dive deeper into the details of creating Tasks, you should understand
 [[spring-cloud-dataflow-create-task-apps]]
 === Creating a Task Application
 
-While Spring Cloud Task does provide a number of out-of-the-box applications (at https://github.com/spring-cloud-task-app-starters[spring-cloud-task-app-starters]), most task applications require custom development.
+Spring Cloud Dataflow provides a couple of out-of-the-box task applications (https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/main/timestamp-task[timestamp-task] and https://github.com/spring-cloud/spring-cloud-dataflow-samples/tree/main/timestamp-batch[timestamp-batch]) but most task applications require custom development.
+
 To create a custom task application:
 
 .  Use the https://start.spring.io[Spring Initializer] to create a new project, making sure to select the following starters:
@@ -64,7 +65,7 @@ public class MyTask {
 ----
 +
 . With this class, you need one or more `CommandLineRunner` or `ApplicationRunner` implementations within your application.  You can either implement your own or use the ones provided by Spring Boot (there is one for running batch jobs, for example).
-. Packaging your application with Spring Boot into an über jar is done through the standard {spring-boot-docs-reference}/html/getting-started-first-application.html#getting-started-first-application-executable-jar[Spring Boot conventions].
+. Packaging your application with Spring Boot into an über jar is done through the standard {spring-boot-docs}/#getting-started.first-application.executable-jar[Spring Boot conventions].
 The packaged application can be registered and deployed as noted below.
 
 ==== Task Database Configuration
@@ -867,7 +868,7 @@ If `task1` fails, `task2` does not launch.
 You can also use the Spring Cloud Data Flow Dashboard to create your conditional execution, by using the designer to drag and drop applications that are required and connecting them together to create your directed graph, as shown in the following image:
 
 .Conditional Execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-conditional-execution.png[Composed Task Conditional Execution, scaledwidth="50%"]
 
 The preceding diagram is a screen capture of the directed graph as it being created by using the Spring Cloud Data Flow Dashboard.
 You can see that four components in the diagram comprise a conditional execution:
@@ -908,7 +909,7 @@ All other statuses returned by `cat` have no effect, and the task would end norm
 Using the Spring Cloud Data Flow Dashboard to create the same "`basic transition`" would resemble the following image:
 
 .Basic Transition
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-transition-basic.png[Composed Task Basic Transition, scaledwidth="50%"]
 
 The preceding diagram is a screen capture of the directed graph as it being created in the Spring Cloud Data Flow Dashboard.
 Notice that there are two different types of connectors:
@@ -942,7 +943,7 @@ For any exit status of `cat` other than `FAILED`, `baz` would launch.
 Using the Spring Cloud Data Flow Dashboard to create the same "`transition with wildcard`" would resemble the following image:
 
 .Basic Transition With Wildcard
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-transition-basic-wildcard.png[Composed Task Basic Transition with Wildcard, scaledwidth="50%"]
 
 ==== Transition With a Following Conditional Execution
 
@@ -963,7 +964,7 @@ For any exit status of `foo` other than `FAILED` or `UNKNOWN`, `qux` would launc
 Using the Spring Cloud Data Flow Dashboard to create the same "`transition with conditional execution`" would resemble the following image:
 
 .Transition With Conditional Execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-transition-conditional-execution.png[Composed Task Transition with Conditional Execution, scaledwidth="50%"]
 
 NOTE: In this diagram, the dashed line (transition) connects the `foo` application to the target applications, but a solid line connects the conditional executions between `foo`, `qux`, and  `quux`.
 
@@ -1003,7 +1004,7 @@ The preceding example launches tasks `foo`, `bar` and `baz` in parallel.
 Using the Spring Cloud Data Flow Dashboard to create the same "`split execution`" would resemble the following image:
 
 .Split
-image::{dataflow-asciidoc}/images/dataflow-ctr-split.png[Composed Task Split, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-split.png[Composed Task Split, scaledwidth="50%"]
 
 With the task DSL, you can also run multiple split groups in succession, as shown in the following example:
 
@@ -1022,7 +1023,7 @@ However, if `foo`, `bar`, or `baz` fails, the split containing `qux` and `quux` 
 Using the Spring Cloud Data Flow Dashboard to create the same "`split with multiple groups`" would resemble the following image:
 
 .Split as a part of a conditional execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-multiple-splits.png[Composed Task Split, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-multiple-splits.png[Composed Task Split, scaledwidth="50%"]
 
 Notice that there is a `SYNC` control node that is inserted by the designer when
 connecting two consecutive splits.
@@ -1047,7 +1048,7 @@ However, `bar` does not launch until `foo` completes successfully.
 Using the Spring Cloud Data Flow Dashboard to create the same " `split containing conditional execution` " resembles the following image:
 
 .Split with conditional execution
-image::{dataflow-asciidoc}/images/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-ctr-split-contains-conditional.png[Composed Task Split With Conditional Execution, scaledwidth="50%"]
 
 ==== Establishing the Proper Thread Count for Splits
 
@@ -1226,7 +1227,7 @@ When using Kubernetes, a https://kubernetes.io/docs/concepts/workloads/controlle
 NOTE: Scheduled tasks do not implement the continuous deployment feature. Any changes to application version or properties for a task definition in Spring Cloud Data Flow will not affect scheduled tasks.
 
 .Architectural Overview
-image::{dataflow-asciidoc}/images/dataflow-scheduling-architecture.png[Scheduler Architecture Overview, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-scheduling-architecture.png[Scheduler Architecture Overview, scaledwidth="50%"]
 
 === Enabling Scheduling
 
@@ -1329,7 +1330,7 @@ As task applications evolve, you want to get your updates to production. This se
 
 When a task application is registered (see <<spring-cloud-dataflow-register-task-apps>>), a version is associated with it.  A task application can have multiple versions associated with it, with one selected as the default. The following image illustrates an application with multiple versions associated with it (see the timestamp entry).
 
-image::{dataflow-asciidoc}/images/dataflow-task-application-versions.png[Task Application Versions, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-task-application-versions.png[Task Application Versions, scaledwidth="50%"]
 
 Versions of an application are managed by registering multiple applications with the same name and coordinates, _except_ the version. For example, if you were to register an application with the following values, you would get one application registered with two versions (2.1.0.RELEASE and 2.1.1.RELEASE):
 
@@ -1344,13 +1345,13 @@ Versions of an application are managed by registering multiple applications with
 
 Besides having multiple versions, Spring Cloud Data Flow needs to know which version to run on the next launch. This is indicated by setting a version to be the default version. Whatever version of a task application is configured as the default version is the one to be run on the next launch request. You can see which version is the default in the UI, as this image shows:
 
-image::{dataflow-asciidoc}/images/dataflow-task-default-version.png[Task Application Default Version, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-task-default-version.png[Task Application Default Version, scaledwidth="50%"]
 
 === Task Launch Lifecycle
 
 In previous versions of Spring Cloud Data Flow, when the request to launch a task was received, Spring Cloud Data Flow would deploy the application (if needed) and run it. If the application was being run on a platform that did not need to have the application deployed every time (CloudFoundry, for example), the previously deployed application was used. This flow has changed in 2.3. The following image shows what happens when a task launch request comes in now:
 
-image::{dataflow-asciidoc}/images/dataflow-task-launch-flow.png[Flow For Launching A Task, scaledwidth="50%"]
+image::{dataflow-asciidoc-images}/dataflow-task-launch-flow.png[Flow For Launching A Task, scaledwidth="50%"]
 
 There are three main flows to consider in the preceding diagram. Launching the first time or launching with no changes is one. The other two are launching when there are changes but the appliction is not currently and launching when there are changes and the application is running. We look at the flow with no changes first.
 

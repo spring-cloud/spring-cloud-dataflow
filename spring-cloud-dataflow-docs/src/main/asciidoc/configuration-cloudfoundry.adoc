@@ -505,10 +505,6 @@ The following example shows how to deploy the `http` health check type to an end
 Though we recommend using a Maven Artifactory for application <<spring-cloud-dataflow-register-stream-apps>>,
 there might be situations where one of the following alternative approaches would make sense.
 
-* We have custom-built and maintain a link:https://github.com/spring-cloud-stream-app-starters/scdf-app-tool[SCDF APP Tool]
-that can run as a regular Spring Boot application in Cloud Foundry, but it will in turn host and serve the application
-JARs for SCDF at runtime.
-
 * With the help of Spring Boot, we can serve link:https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-developing-web-applications.html#boot-features-spring-mvc-static-content[static content]
 in Cloud Foundry. A simple Spring Boot application can bundle all the required stream and task applications. By having it
 run on Cloud Foundry, the static application can then serve the über-jar's. From the shell, you can, for example, register the
@@ -742,17 +738,17 @@ logging.level.cloudfoundry-client == DEBUG
 
 
 === Spring Cloud Config Server
-You can use Spring Cloud Config Server to centralize configuration properties for Spring Boot applications. Likewise,
-both Spring Cloud Data Flow and the applications orchestrated by Spring Cloud Data Flow can be integrated with
-a configuration server to use the same capabilities.
+You can use Spring Cloud Config Server to centralize configuration properties for Spring Boot applications.
+Likewise, both Spring Cloud Data Flow and the applications orchestrated by Spring Cloud Data Flow can be integrated with a configuration server to use the same capabilities.
 
 ==== Stream, Task, and Spring Cloud Config Server
 Similar to Spring Cloud Data Flow server, you can configure both the stream and task applications to resolve the centralized properties from the configuration server.
 Setting the `spring.cloud.config.uri` property for the deployed applications is a common way to bind to the configuration server.
 See the link:https://cloud.spring.io/spring-cloud-config/spring-cloud-config.html#_spring_cloud_config_client[Spring Cloud Config Client] reference guide for more information.
-Since this property is likely to be used across all applications deployed by the Data Flow server, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on <<spring-cloud-dataflow-global-properties>> for more information.
 
-Note that, if you use applications from the link:https://cloud.spring.io/spring-cloud-stream-app-starters/[App Starters project], these applications already embed the `spring-cloud-services-starter-config-client` dependency.
+Since this property is likely to be used across all deployed applications, the Data Flow server's `spring.cloud.dataflow.applicationProperties.stream` property for stream applications and `spring.cloud.dataflow.applicationProperties.task` property for task applications can be used to pass the `uri` of the Config Server to each deployed stream or task application. See the section on <<spring-cloud-dataflow-global-properties>> for more information.
+
+Note that, if you use the out-of-the-box link:https://spring.io/projects/spring-cloud-stream-applications/[Stream Applications], these applications already embed the `spring-cloud-services-starter-config-client` dependency.
 If you build your application from scratch and want to add the client side support for config server, you can add a dependency reference to the config server client library. The following snippet shows a Maven example:
 
 
@@ -780,10 +776,9 @@ If you know that you are not using config server functionality, you can disable 
 
 The following SCDF and Skipper `manifest.yml` templates includes the required environment variables for the Skipper and Spring Cloud Data Flow server and deployed applications and tasks to successfully run on Cloud Foundry and automatically resolve centralized properties from `my-config-server` at runtime:
 
-
-[source,yml]
+.SCDF manifest.yml
+[source,yaml]
 ----
----
 applications:
 - name: data-flow-server
   host: data-flow-server
@@ -806,8 +801,11 @@ applications:
 services:
 - postgres
 - my-config-server
+----
 
----
+.Skipper manifest.yml
+[source,yaml]
+----
 applications:
 - name: skipper-server
   host: skipper-server
@@ -829,11 +827,10 @@ applications:
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_PASSWORD: admin
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_CONNECTION_SKIP_SSL_VALIDATION: false
     SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_DELETE_ROUTES: false
-    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit, my-config-server
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[default]_DEPLOYMENT_SERVICES: rabbit,my-config-server
 services:
 - postgres
   my-config-server
-
 ----
 
 where `my-config-server` is the name of the Spring Cloud Config Service instance running on Cloud Foundry.
@@ -857,7 +854,6 @@ get their configuration from the `my-config-server` Cloud Config server (deploye
 
 [source,yml,options="wrap"]
 ----
----
 applications:
 - name: test-server
   host: test-server
@@ -884,13 +880,10 @@ services:
 - my-config-server #this is for the server
 ----
 
-
 Also add the `my-config-server` service to the Skipper's manifest environment
-
 
 [source,yml]
 ----
----
 applications:
 - name: skipper-server
   host: skipper-server
@@ -914,7 +907,6 @@ applications:
 services:
 - postgres
   my-config-server
-
 ----
 
 
@@ -945,7 +937,6 @@ The following sample manifest shows both environment properties configured (assu
 
 [source,yml]
 ----
----
 applications:
 - name: data-flow-server
   host: data-flow-server

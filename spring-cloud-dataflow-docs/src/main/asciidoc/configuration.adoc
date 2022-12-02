@@ -647,7 +647,7 @@ which the user is not authorized.
 ===== Securing the Spring Boot Management Endpoints
 
 When security is enabled, the
-{spring-boot-docs-reference}/html/production-ready-monitoring.html[Spring Boot HTTP Management Endpoints]
+{spring-boot-docs}/#actuator.monitoring[Spring Boot HTTP Management Endpoints]
 are secured in the same way as the other REST endpoints. The management REST endpoints
 are available under `/management` and require the `MANAGEMENT` role.
 
