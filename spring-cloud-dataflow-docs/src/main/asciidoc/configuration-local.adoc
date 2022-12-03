@@ -407,7 +407,7 @@ The following image shows a typical shell command to connect to and authenticate
 Flow Server:
 
 .Target and Authenticate with the Data Flow Server from within the Shell
-image::{dataflow-asciidoc}/images/dataflow-security-shell-target.png[Target and Authenticate with the Data Flow Server from within the Shell, scaledwidth="100%"]
+image::{dataflow-asciidoc-images}/dataflow-security-shell-target.png[Target and Authenticate with the Data Flow Server from within the Shell, scaledwidth="100%"]
 
 Once successfully targeted, you should see the following output:
 
@@ -508,13 +508,17 @@ you need this feature enabled, set the
 There are reserved values (surrounded by curly braces) that you can insert into
 the URL that will make sure that the links are up to date:
 
-* repository: if using a build-snapshot, milestone, or release candidate of
+* `repository`: if using a build-snapshot, milestone, or release candidate of
 Data Flow, the repository refers to the repo-spring-io repository. Otherwise, it
 refers to Maven Central.
-* version: Inserts the version of the jar/pom.
+* `version`: Inserts the version of the jar/pom.
 
 For example,
-`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/\{version}/spring-cloud-dataflow-shell-\{version}.jar`
+```
+https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/\{version}/spring-cloud-dataflow-shell-\{version}.jar
+```
 produces
-`https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar`
-if you were using the 1.2.3.RELEASE version of the Spring Cloud Data Flow Shell
+```
+https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/2.1.4/spring-cloud-dataflow-shell-2.1.4.jar
+```
+if you were using the `2.1.4` version of the Spring Cloud Data Flow Shell.

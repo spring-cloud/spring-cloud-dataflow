@@ -8,30 +8,23 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :hide-uri-scheme:
 :docinfo: shared
 
-:spring-cloud-dataflow-docs: https://docs.spring.io/spring-cloud-dataflow/docs/{project-version}/reference
-:spring-cloud-dataflow-docs-current: https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/
-:spring-cloud-stream-docs: https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
-:spring-boot-version: 2.1.1.RELEASE
-:spring-cloud-task-version: 2.0.0.RELEASE
-:spring-batch-version: 4.1.0.RELEASE
-:spring-batch-doc-version: 4.1.x
-:composed-task-version: 2.1.0.RELEASE
-:spring-boot-docs-reference: https://docs.spring.io/spring-boot/docs/2.1.1.RELEASE/reference
-:scs-app-starters-docs: https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/html
-:scs-app-starters-docs-htmlsingle: https://docs.spring.io/spring-cloud-stream-app-starters/docs/current/reference/htmlsingle
 :github-repo: spring-cloud/spring-cloud-dataflow
 :github-code: https://github.com/{github-repo}
 :microsite-version: master
+:spring-boot-version: 2.7.6
+:spring-cloud-task-version: 2.4.5
+:spring-batch-version: 4.3.7
+:spring-boot-docs: https://docs.spring.io/spring-boot/docs/{spring-boot-version}/reference/htmlsingle
+:scs-stream-apps-docs: https://docs.spring.io/stream-applications/docs/current/reference/html
+:dataflow-asciidoc-images: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/main/spring-cloud-dataflow-docs/src/main/asciidoc/images
 
-:dataflow-asciidoc: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/master/spring-cloud-dataflow-docs/src/main/asciidoc
-
-:docker-http-source-rabbit-version: 2.1.0.RELEASE
-:docker-time-source-rabbit-version: 2.1.0.RELEASE
-:docker-log-sink-rabbit-version: 2.1.0.RELEASE
-:docker-log-sink-kafka-version: 2.1.0.RELEASE
-:docker-http-source-kafka-version: 2.1.0.RELEASE
-:docker-time-source-kafka-version: 2.1.0.RELEASE
-:docker-timestamp-task-version: 2.0.0.RELEASE
+:docker-http-source-rabbit-version: 3.2.1
+:docker-time-source-rabbit-version: 3.2.1
+:docker-log-sink-rabbit-version: 3.2.1
+:docker-log-sink-kafka-version: 3.2.1
+:docker-http-source-kafka-version: 3.2.1
+:docker-time-source-kafka-version: 3.2.1
+:docker-timestamp-task-version: 2.0.2
 
 ifdef::backend-html5[]
 
