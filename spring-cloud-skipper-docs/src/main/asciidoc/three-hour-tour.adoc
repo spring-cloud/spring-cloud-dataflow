@@ -5,7 +5,7 @@ This section is the "'three-hour tour'" of Skipper.
 It describes how to configure and use the main feature set of Skipper in detail.
 We will cover the shell, platforms, packages, and repositories.
 
-Feel free to reach out on https://gitter.im/spring-cloud/spring-cloud-skipper[Gitter] for help and ask questions on https://stackoverflow.com/questions/tagged/spring-cloud-skipper[Stack Overflow].
+Feel free to ask questions on https://stackoverflow.com/questions/tagged/spring-cloud-skipper[Stack Overflow].
 Issues can be filed on https://github.com/spring-cloud/spring-cloud-skipper/issues[Github issues].
 
 [[using-shell]]

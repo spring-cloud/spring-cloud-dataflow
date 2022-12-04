@@ -34,12 +34,11 @@ wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/sp
 wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{project-version}/spring-cloud-skipper-shell-{project-version}.jar
 ----
 
-* Launch the server and shell apps by using the following commands in a terminal session:
+* Launch the downloaded server and shell apps by using the following commands in a terminal session:
 
 [source,bash,subs=attributes]
 ----
 java -jar spring-cloud-skipper-server-{project-version}.jar
-
 
 java -jar spring-cloud-skipper-shell-{project-version}.jar
 ----
