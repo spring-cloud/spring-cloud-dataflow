@@ -1,0 +1,7 @@
+[appendix]
+[[development-tasks]]
+== Development Tasks
+
+include::appendix-extend-classpath.adoc[]
+include::appendix-create-containers.adoc[]
+include::appendix-local-k8s-development.adoc[]
