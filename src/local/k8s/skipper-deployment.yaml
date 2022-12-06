@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skipper
+  labels:
+    app: skipper
+spec:
+  selector:
+    matchLabels:
+      app: skipper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: skipper
+    spec:
+      containers:
+      - name: skipper
+        image: springcloud/spring-cloud-skipper-server:2.9.0-SNAPSHOT
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: config
+            mountPath: /workspace/config
+            readOnly: true
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
+        ports:
+        - containerPort: 7577
+          name: http-skipper
+        - containerPort: 8000
+          name: jdwp-skipper
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 7577
+          initialDelaySeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 7577
+          initialDelaySeconds: 1
+        startupProbe:
+          tcpSocket:
+            port: 7577
+          failureThreshold: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 50
+          periodSeconds: 3
+        resources:
+          requests:
+            cpu: 0.5
+            memory: 640Mi
+        env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+          - name: JDK_JAVA_OPTIONS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+          - name: SPRING_PROFILES_ACTIVE
+            value: 'kubernetes'
+          - name: SERVER_PORT
+            value: '7577'
+          - name: SPRING_CLOUD_CONFIG_ENABLED
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+            value: /etc/secrets
+          # debugging
+#          - name: JAVA_OPTS
+#            value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000'
+      initContainers:
+      - name: init-mariadb-wait
+        image: busybox:1
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
+      - name: init-mariadb-database
+        image: mariadb:10.4
+        env:
+        - name: MARIADB_PWD
+          valueFrom:
+            secretKeyRef:
+              name: mariadb
+              key: mariadb-root-password
+        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
+      serviceAccountName: scdf-sa
+      volumes:
+        - name: config
+          configMap:
+            name: skipper
+            items:
+            - key: 'application-kubernetes.yaml'
+              path: 'application-kubernetes.yaml'
+        - name: database
+          secret:
+            secretName: mariadb

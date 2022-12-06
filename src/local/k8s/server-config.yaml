@@ -5,7 +5,11 @@ metadata:
   labels:
     app: scdf-server
 data:
-  application.yaml: |-
+  application-kubernetes.yaml: |-
+    logging:
+      level:
+        root: info
+        org.springframework: debug
     management:
       metrics:
         export:
@@ -16,17 +20,24 @@ data:
               host: prometheus-proxy
               port: 7001
     spring:
+      output:
+        ansi:
+          enabled: NEVER
       cloud:
+        deployer:
+          kubernetes:
+            imagePullPolicy: IfNotPresent
+            imagePullSecret: registry-key
         dataflow:
           metrics.dashboard:
-            url: 'https://grafana:3000'
+            url: 'http://localhost:3000'
           task:
             platform:
               kubernetes:
-                accounts:                  
+                accounts:
                   default:
-                    fabric8:
-                      
+                    imagePullPolicy: IfNotPresent
+                    imagePullSecret: registry-key
                     limits:
                       memory: 1024Mi
       datasource:
@@ -36,4 +47,7 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-        
+        hikari:
+          data-source-properties:
+            useUnicode: true
+            characterEncoding: 'UTF-8'

@@ -1,0 +1,3 @@
+server:
+  service:
+    nodePort: 8080

@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+spec:
+  selector:
+    matchLabels:
+      app: scdf-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scdf-server
+    spec:
+      containers:
+        - name: scdf-server
+          image: springcloud/scdf-pro-server:1.5.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: config
+              mountPath: /workspace/config
+              readOnly: true
+            - name: database
+              mountPath: /etc/secrets/database
+              readOnly: true
+          ports:
+            - hostPort: 9393
+              containerPort: 9393
+          livenessProbe:
+            httpGet:
+              path: /management/health
+              port: 9393
+            initialDelaySeconds: 45
+          readinessProbe:
+            httpGet:
+              path: /management/info
+              port: 9393
+            initialDelaySeconds: 45
+          startupProbe:
+            httpGet:
+              port: 9393
+              path: /management/health
+            failureThreshold: 3
+            timeoutSeconds: 3
+            initialDelaySeconds: 60
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: 1.0
+              memory: 2048Mi
+            requests:
+              cpu: 0.5
+              memory: 1024Mi
+          env:
+            - name: LANG
+              value: en_US.utf8
+            - name: LC_ALL
+              value: en_US.utf8
+            - name: JDK_JAVA_OPTIONS
+              value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.namespace"
+            - name: SPRING_PROFILES_ACTIVE
+              value: 'kubernetes'
+            - name: SERVER_PORT
+              value: '9393'
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: 'false'
+            - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
+              value: 'true'
+            - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
+              value: 'true'
+            - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
+              value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.10.0-SNAPSHOT'
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+              value: 'false'
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+              value: 'false'
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+              value: /etc/secrets
+            - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
+              value: 'http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}'
+              # Provide the Skipper service location
+            - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
+              value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
+              # Add Maven repo for metadata artifact resolution for all stream apps
+            - name: SPRING_APPLICATION_JSON
+              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
+      initContainers:
+        - name: init-mariadb-wait
+          image: busybox:1
+          command: [ 'sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;' ]
+      serviceAccountName: scdf-sa
+      volumes:
+        - name: config
+          configMap:
+            name: scdf-server
+            items:
+              - key: 'application-kubernetes.yaml'
+                path: 'application-kubernetes.yaml'
+        - name: database
+          secret:
+            secretName: mariadb

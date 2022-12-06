@@ -1,0 +1,191 @@
+[[local-k8s-development]]
+
+=== Configure Kubernetes for local development or testing
+
+==== Prerequisites
+
+You will need to install kubectl and then kind or minikube for a local cluster.
+
+All the examples assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/local`.
+
+On macOS you may need to install `realpath` from link:https://ports.macports.org/port/realpath/[Macports] or `brew install realpath`
+
+NOTE: The scripts require a shell like `bash` or `zsh` and should work on Linux, WSL 2 or macOS.
+
+==== Steps
+* Choose Kubernetes provider. Kind, Minikube or remote GKE or TMC.
+* Decide the namespace to use for deployment if not `default`.
+* Configure Kubernetes and loadbalancer.
+* Choose Broker with `export BROKER=kafka|rabbitmq`
+* Build or Pull container images for Skipper and Data Flow Server.
+* Deploy and Launch Spring Cloud Data Flow.
+* Export Data Flow Server address to env.
+
+===== Kubernetes Provider
+
+_How do I choose between minikube and kind? kind will generally provide quicker setup and teardown time than Minikube. There is little to choose in terms of performance between the 2 apart from being able to configure limits on CPUs and memory when deploying minikube. So in the case where you have memory constraints or need to enforce memory limitations Minikube will be a better option._
+
+===== Kubectl
+
+You will need to link:https://kubernetes.io/docs/tasks/tools/[install] kubectl in order to configure the Kubernetes cluster
+
+===== Kind
+
+Kind is Kubernetes in docker and ideal for local development.
+
+* link:https://kind.sigs.k8s.io/docs/user/quick-start/[Installation]
+* link:https://kind.sigs.k8s.io/docs/user/loadbalancer/[LoadBalancer]
+
+The LoadBalancer will be installed by the `configure-k8s.sh` script by will require an update to a yaml file to provide the address range available to the LoadBalancer.
+
+===== Minikube
+
+Minikube uses one of a selection of drivers to provide a virtualization environment.
+
+* link:https://minikube.sigs.k8s.io/docs/start/[Installation]
+* link:https://minikube.sigs.k8s.io/docs/start/#loadbalancer-deployments[LoadBalancer]
+
+NOTE: Delete existing Minikube installation if you have any. `minikube delete`
+
+===== Remote TMC Cluster
+
+link:https://tanzu.vmware.com/mission-control[Tanzu Mission Control]
+
+==== Building and loading containers.
+
+For local development you need control of the containers used in the local environment.
+
+In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke `./pull-dataflow.sh` and `./pull-skipper.sh` or if you want to use a locally built application you can invoke `./build-skipper-image.sh` and `./build-dataflow.sh`
+
+==== Configure k8s environment
+
+You can invoke one of the following scripts to choose the type of installation you are targeting:
+
+[source,shell]
+----
+use-kind.sh [<namespace>]
+use-mk-docker.sh [<namespace>]
+use-mk-kvm2.sh [<namespace>]
+use-mk.sh <driver> [<namespace>] # <1>
+use-tmc.sh <cluster-name> [<namespace>]
+use-gke.sh <cluster-name> [<namespace>]
+----
+<1> <driver> must be one of `kvm2`, `docker`, `vmware`, `virtualbox`, `vmwarefusion` or `hyperkit`. `docker` is the recommended option for local development.
+
+NOTE: `<namespace>` will be `default` if not provided.
+
+Since these scripts export environmental variable they need to be executes as in the following example:
+
+[source,shell]
+....
+source ./use-mk.sh vmware test-ns
+....
+
+===== TMC or GKE Cluster in Cloud
+
+The cluster must exist before use and you should use the relevant cli to login before executing `source ./use-gke.sh`
+
+===== Create Local Cluster.
+
+The following script will create the local cluster.
+
+[source,shell]
+....
+./configure-k8s.sh
+....
+
+* For *kind* follow instruction to update `./k8s/metallb-configmap.yaml` and then apply using `kubectl apply -f ./k8s/metallb-configmap.yaml`
+
+* For *minikube* launch a new shell and execute `minikube tunnel`
+
+===== Deploy Spring Cloud Data Flow.
+
+====== Configure Broker
+[source,shell]
+....
+export BROKER=<broker> # <1>
+....
+<1> <broker> one of `kafka` or `rabbitmq`
+
+====== Configure Database
+
+[source,shell]
+....
+export DATABASE=<database> # <1>
+....
+<1> <database> one of `mariadb` or `postgresql`
+
+NOTE: This is still optional and PostgreSQL support isn't available yet but will follow soon.
+
+[source,shell]
+....
+./install-scdf.sh
+source ./export-dataflow-ip.sh
+....
+
+===== Delete the deployment from the cluster.
+
+[source,shell]
+....
+./delete-scdf.sh
+....
+
+===== Delete the cluster
+
+This script will also delete the TMC cluster if you have configured one.
+
+[source,shell]
+....
+./destroy-k8s.sh
+....
+
+==== Utilities
+The following list of utilities may prove useful.
+
+[cols="2m,8"]
+|===
+|Name | Description
+
+| link:https://k9scli.io/[k9s] | k9s is a text based monitor to explore the Kubernetes cluster.
+| link:https://github.com/boz/kail[kail] | Extra and tail the logs of various pods based on various naming criteria.
+|===
+
+===== `kail`
+
+
+* Using kail to log activity related to a specific stream.
+```shell
+kail --label=spring-group-id=<stream-name>
+```
+* Using kail to log all pods in specific namespace.
+```shell
+kail --ns=<namespace>
+```
+
+==== Scripts
+
+[cols="5m,10"]
+|===
+|Script |Description
+
+| build-app-images.sh | Build all images of Restaurant Sample Stream Apps
+| pull-app-images.sh | Pull all images of Restaurant Sample Stream Apps from Docker Hub
+| pull-dataflow.sh | Pull dataflow from DockerHub based on `DATAFLOW_VERSION`.
+| pull-scdf-pro.sh | Pull Dataflow Pro from Tanzu Network based on `SCDF_PRO_VERSION`.
+| pull-skipper.sh | Pull Skipper from DockerHub base on the `SKIPPER_VERSION`.
+| build-dataflow-image.sh | Build a docker image from the local repo of Dataflow
+| build-scdf-pro-image.sh | Build a docker image from the local repo of Dataflow Pro. Set `USE_PRO=true` in environment to use Dataflow Pro
+| build-skipper-image.sh | Build a docker image from the local repo of Skipper.
+| configure-k8s.sh | Configure the Kubernetes environment based on your configuration of K8S_DRIVER.
+| delete-scdf.sh | Delete all Kubernetes resources create by the deployment.
+| destroy-k8s.sh | Delete cluster, kind or minikube.
+| export-dataflow-ip.sh | Export the url of the data flow server to `DATAFLOW_IP`
+| export-http-url.sh | Export the url of an http source of a specific flow by name to `HTTP_APP_URL`
+| install-scdf.sh | Configure and deploy all the containers for Spring Cloud Dataflow
+| load-images.sh | Load all container images required by tests into kind or minikube to ensure you have control over what is used.
+| load-image.sh | Load a specific container image into local kind or minikube.
+| local-k8s-acceptance-tests.sh | Execute acceptance tests against cluster where `DATAFLOW_IP` is pointing.
+| register-apps.sh | Register the Task and Stream apps used by the unit tests.
+|===
+
+IMPORTANT: Please report any errors with the scripts along with detail information about the relevant environment.

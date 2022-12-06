@@ -9,8 +9,6 @@ That is also a great place to ask new questions (use the `spring-cloud-dataflow`
 
 We are also more than happy to extend this section. If you want to add a "`how-to`", you can send us a {github-code}[pull request].
 
-
-
 === Configure Maven Properties
 
 You can set the Maven properties, such as the local Maven repository location, remote Maven repositories, authentication credentials, and proxy server properties through command-line properties when you start the Data Flow server.
@@ -85,9 +83,14 @@ NOTE: Depending on the Spring Cloud Data Flow server implementation, you may hav
 
 This section covers how to troubleshoot Spring Cloud Data Flow on your platform of choice. See the Troubleshooting sections of the microsite for link:https://dataflow.spring.io/docs/stream-developer-guides/troubleshooting/[Stream] and link:https://dataflow.spring.io/docs/batch-developer-guides/troubleshooting/[Batch] processing.
 
+include::appendix-extend-classpath.adoc[]
+include::appendix-create-containers.adoc[]
+include::appendix-local-k8s-development.adoc[]
 
 [[faqs]]
 === Frequently Asked Questions
 
 In this section, we review the frequently asked questions for Spring Cloud Data Flow.
 See the https://dataflow.spring.io/docs/resources/faq/[Frequently Asked Questions] section of the microsite for more information.
+
+// TODO move the FAG to reference guide.
