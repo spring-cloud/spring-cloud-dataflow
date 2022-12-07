@@ -51,7 +51,7 @@ else
 fi
 
 echo "DATAFLOW_IP=$DATAFLOW_IP"
-pushd $ROOTDIR
+pushd "$ROOTDIR/../spring-cloud-dataflow-acceptance-tests"
 echo "EXTRA=$EXTRA" | tee build.log
 ./mvnw -Dspring.profiles.active=blah \
   -DPLATFORM_TYPE=kubernetes \
@@ -64,4 +64,4 @@ echo "EXTRA=$EXTRA" | tee build.log
   -Dtest=!DataFlowAT#streamAppCrossVersion \
   -X clean test verify $EXTRA | tee -a build.log | grep -v -F "DEBUG"
 ./mvnw surefire-report:failsafe-report-only
-popd
+popd > /dev/null
