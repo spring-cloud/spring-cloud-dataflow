@@ -137,7 +137,7 @@ public class StreamCommands {
 	@ShellMethodAvailability("availableWithDeployRole")
 	public String deployStream(
 			@ShellOption(value = { "", "--name" }, help = "the name of the stream to deploy", valueProvider = StreamNameValueProvider.class) String name,
-			@ShellOption(help = "the properties for this deployment", defaultValue = ShellOption.NULL) String deploymentProperties,
+			@ShellOption(value = "--properties", help = "the properties for this deployment", defaultValue = ShellOption.NULL) String deploymentProperties,
 			@ShellOption(value = "--propertiesFile", help = "the properties for this deployment (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
 			@ShellOption(value = "--packageVersion", help = "the package version of the package to deploy.  Default is 1.0.0", defaultValue = "1.0.0") String packageVersion,
 			@ShellOption(value = "--platformName", help = "the name of the target platform to deploy to", defaultValue = ShellOption.NULL) String platformName,
