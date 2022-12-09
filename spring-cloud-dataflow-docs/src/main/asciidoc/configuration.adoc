@@ -319,7 +319,7 @@ Do not forget to target the Data Flow Server with the following command:
 ====
 [source,bash]
 ----
-dataflow:> dataflow config server https://localhost:8443/
+dataflow:> dataflow config server --uri https://localhost:8443/
 ----
 ====
 

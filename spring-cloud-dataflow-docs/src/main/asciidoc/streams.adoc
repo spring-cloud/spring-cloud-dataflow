@@ -451,11 +451,11 @@ The `stream info` command shows useful information about the stream, as shown (w
 [source,bash]
 ----
 dataflow:>stream info ticktock
-╔═══════════╤═════════════════╤══════════╗
-║Stream Name│Stream Definition│  Status  ║
-╠═══════════╪═════════════════╪══════════╣
-║ticktock   │time | log       │undeployed║
-╚═══════════╧═════════════════╧══════════╝
+╔═══════════╤═════════════════╤═══════════╤══════════╗
+║Stream Name│Stream Definition│Description│  Status  ║
+╠═══════════╪═════════════════╪═══════════╪══════════╣
+║ticktock   │time | log       │           │undeployed║
+╚═══════════╧═════════════════╧═══════════╧══════════╝
 ----
 ====
 
@@ -483,20 +483,31 @@ The following listing shows the exposed properties for the `time` application:
 [source,bash,options="nowrap"]
 ----
 dataflow:> app info --name time --type source
+Information about source application 'time':
+Version: '3.2.1':
+Default application version: 'true':
+Resource URI: maven://org.springframework.cloud.stream.app:time-source-rabbit:3.2.1
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
-║trigger.time-unit             │The TimeUnit to apply to delay│<none>                        │java.util.concurrent.TimeUnit ║
-║                              │values.                       │                              │                              ║
-║trigger.fixed-delay           │Fixed delay for periodic      │1                             │java.lang.Integer             ║
-║                              │triggers.                     │                              │                              ║
-║trigger.cron                  │Cron expression value for the │<none>                        │java.lang.String              ║
-║                              │Cron Trigger.                 │                              │                              ║
-║trigger.initial-delay         │Initial delay for periodic    │0                             │java.lang.Integer             ║
-║                              │triggers.                     │                              │                              ║
-║trigger.max-messages          │Maximum messages per poll, -1 │1                             │java.lang.Long                ║
-║                              │means infinity.               │                              │                              ║
-║trigger.date-format           │Format for the date value.    │<none>                        │java.lang.String              ║
+║spring.integration.poller.max-│Maximum number of messages to │<none>                        │java.lang.Integer             ║
+║messages-per-poll             │poll per polling cycle.       │                              │                              ║
+║spring.integration.poller.fixe│Polling rate period. Mutually │<none>                        │java.time.Duration            ║
+║d-rate                        │exclusive with 'fixedDelay'   │                              │                              ║
+║                              │and 'cron'.                   │                              │                              ║
+║spring.integration.poller.fixe│Polling delay period. Mutually│<none>                        │java.time.Duration            ║
+║d-delay                       │exclusive with 'cron' and     │                              │                              ║
+║                              │'fixedRate'.                  │                              │                              ║
+║spring.integration.poller.rece│How long to wait for messages │1s                            │java.time.Duration            ║
+║ive-timeout                   │on poll.                      │                              │                              ║
+║spring.integration.poller.cron│Cron expression for polling.  │<none>                        │java.lang.String              ║
+║                              │Mutually exclusive with       │                              │                              ║
+║                              │'fixedDelay' and 'fixedRate'. │                              │                              ║
+║spring.integration.poller.init│Polling initial delay. Applied│<none>                        │java.time.Duration            ║
+║ial-delay                     │for 'fixedDelay' and          │                              │                              ║
+║                              │'fixedRate'; ignored for      │                              │                              ║
+║                              │'cron'.                       │                              │                              ║
+║time.date-format              │Format for the date value.    │MM/dd/yy HH:mm:ss             │java.lang.String              ║
 ╚══════════════════════════════╧══════════════════════════════╧══════════════════════════════╧══════════════════════════════╝
 ----
 ====
@@ -507,6 +518,10 @@ The following listing shows the exposed properties for the `log` application:
 [source,bash,options="nowrap"]
 ----
 dataflow:> app info --name log --type sink
+Information about sink application 'log':
+Version: '3.2.1':
+Default application version: 'true':
+Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣

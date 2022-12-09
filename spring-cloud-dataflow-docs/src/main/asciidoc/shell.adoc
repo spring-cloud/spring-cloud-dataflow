@@ -58,16 +58,14 @@ The following listing shows the output of the `help` command:
 ====
 [source,bash]
 ----
-! - Allows execution of operating system (OS) commands
-clear - Clears the console
-cls - Clears the console
-date - Displays the local date and time
-exit - Exits the shell
-http get - Make GET request to http endpoint
-http post - POST data to http endpoint
-quit - Exits the shell
-system properties - Shows the shells properties {JB - restore the apostrophe}
-version - Displays shell version
+Built-In Commands
+       help: Display help about available commands
+       stacktrace: Display the full stacktrace of the last error.
+       clear: Clear the shell screen.
+       quit, exit: Exit the shell.
+       history: Display or save the history of previously run commands
+       version: Show version info
+       script: Read and execute commands from a file.
 ----
 ====
 
@@ -77,26 +75,28 @@ Adding the name of the command to `help` shows additional information on how to 
 [source,bash]
 ----
 dataflow:>help stream create
-Keyword:                   stream create
-Description:               Create a new stream definition
- Keyword:                  ** default **
- Keyword:                  name
-   Help:                   the name to give to the stream
-   Mandatory:              true
-   Default if specified:   '__NULL__'
-   Default if unspecified: '__NULL__'
+NAME
+       stream create - Create a new stream definition
 
- Keyword:                  definition
-   Help:                   a stream definition, using the DSL (e.g. "http --port=9000 | hdfs")
-   Mandatory:              true
-   Default if specified:   '__NULL__'
-   Default if unspecified: '__NULL__'
+SYNOPSIS
+       stream create [--name String] [--definition String] --description String --deploy boolean
 
- Keyword:                  deploy
-   Help:                   whether to deploy the stream immediately
-   Mandatory:              false
-   Default if specified:   'true'
-   Default if unspecified: 'false'
+OPTIONS
+       --name String
+       the name to give to the stream
+       [Mandatory]
+
+       --definition String
+       a stream definition, using the DSL (e.g. "http --port=9000 | hdfs")
+       [Mandatory]
+
+       --description String
+       a short description about the stream
+       [Optional]
+
+       --deploy boolean
+       whether to deploy the stream immediately
+       [Optional, default = false]
 ----
 ====
 
@@ -109,7 +109,7 @@ You can complete the shell command options in the shell by pressing the `TAB` ke
 [source,bash]
 ----
 dataflow:>stream create --
-stream create --definition    stream create --name
+--definition    --deploy        --description   --name
 ----
 ====
 
