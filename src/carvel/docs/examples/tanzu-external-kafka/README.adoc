@@ -25,11 +25,11 @@ Setup _Dataflow_ package repo:
 
 [source, bash]
 ----
-tanzu package repository add scdf-repo --url springcloud/scdf-repo:2.10.0-SNAPSHOT
+tanzu package repository add scdf-repo --url springcloud/scdf-repo:2.10.1-SNAPSHOT
 
 tanzu package repository list
   NAME        REPOSITORY                            STATUS               DETAILS
-  scdf-repo   springcloud/scdf-repo:2.10.0-SNAPSHOT Reconcile succeeded
+  scdf-repo   springcloud/scdf-repo:2.10.1-SNAPSHOT Reconcile succeeded
 
 tanzu package available list
   NAME                   DISPLAY-NAME  SHORT-DESCRIPTION
@@ -37,9 +37,9 @@ tanzu package available list
 
 tanzu package available list scdf.tanzu.vmware.com
   NAME                   VERSION         RELEASED-AT
-  scdf.tanzu.vmware.com  2.10.0-SNAPSHOT
+  scdf.tanzu.vmware.com  2.10.1-SNAPSHOT
 
-tanzu package available get scdf.tanzu.vmware.com/2.10.0-SNAPSHOT --values-schema
+tanzu package available get scdf.tanzu.vmware.com/2.10.1-SNAPSHOT --values-schema
   KEY                              DEFAULT     TYPE     DESCRIPTION
   scdf.binder.kafka.broker.host    <nil>       string   External kafka broker host
   scdf.binder.kafka.broker.port    <nil>       string   External kafka broker port
@@ -54,7 +54,7 @@ Install:
 ----
 tanzu package install scdf-demo \
   --package-name scdf.tanzu.vmware.com \
-  --version 2.10.0-SNAPSHOT \
+  --version 2.10.1-SNAPSHOT \
   --values-file examples/tanzu-external-kafka/minikube-values.yml
 ----
 

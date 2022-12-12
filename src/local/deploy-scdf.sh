@@ -57,11 +57,11 @@ if [ "$USE_PRO" = "" ]; then
 fi
 
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  DATAFLOW_VERSION=2.10.0-SNAPSHOT
+  DATAFLOW_VERSION=2.10.1-SNAPSHOT
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-  SKIPPER_VERSION=2.9.0-SNAPSHOT
+  SKIPPER_VERSION=2.9.1-SNAPSHOT
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
@@ -128,7 +128,7 @@ kubectl create --namespace "$NS" -f src/kubernetes/mariadb/
 if [ "$PROMETHEUS" = "true" ]; then
   echo "Loading Prometheus and Grafana"
   if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
-    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.0-SNAPSHOT" false
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.1-SNAPSHOT" false
     sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
     sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
   fi

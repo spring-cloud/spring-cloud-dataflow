@@ -66,7 +66,7 @@
 
 		<spring-cloud-skipper.version>2.9.1-SNAPSHOT</spring-cloud-skipper.version>
 
-		<spring-cloud-task.version>2.4.2</spring-cloud-task.version>
+		<spring-cloud-task.version>2.4.5</spring-cloud-task.version>
 
 		<spring-cloud-common-security-config.version>1.8.1-SNAPSHOT</spring-cloud-common-security-config.version>
 
@@ -79,7 +79,7 @@
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
-		<testcontainers.version>1.15.2</testcontainers.version>
+		<testcontainers.version>1.17.5</testcontainers.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>3.0.2</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
