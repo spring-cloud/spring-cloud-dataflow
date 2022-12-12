@@ -2,7 +2,7 @@
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 ROOTDIR=$(realpath "$SCDIR/../..")
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  DATAFLOW_VERSION=2.10.0-SNAPSHOT
+  DATAFLOW_VERSION=2.10.1-SNAPSHOT
 fi
 pushd $ROOTDIR  > /dev/null
     ./mvnw -o clean install -DskipTests
