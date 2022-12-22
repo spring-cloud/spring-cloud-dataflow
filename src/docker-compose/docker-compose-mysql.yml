@@ -35,7 +35,7 @@ services:
 
   dataflow-server:
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow?permitMysqlScheme
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -44,7 +44,7 @@ services:
 
   skipper-server:
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/dataflow?permitMysqlScheme
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
