@@ -19,7 +19,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.6</spring-boot.version>
+		<spring-boot.version>2.7.7</spring-boot.version>
 		<spring-cloud.version>2021.0.5</spring-cloud.version>
 		<spring-shell.version>2.1.4</spring-shell.version>
 		<junit.version>4.13.1</junit.version>
