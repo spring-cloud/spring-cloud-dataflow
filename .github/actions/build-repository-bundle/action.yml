@@ -13,6 +13,9 @@ inputs:
   package-name:
     description: package name
     required: true
+  token:
+    description: 'GITHUB_TOKEN'
+    required: true
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -22,6 +25,8 @@ runs:
   using: "composite"
   steps:
   - uses: vmware-tanzu/carvel-setup-action@v1
+    with:
+      token: ${{ inputs.token }}
   - name: Tanzu Dance
     id: tanzu-dance
     env:
