@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.integration.test.db;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.ContainerLaunchException;
 
 import org.springframework.cloud.dataflow.integration.test.tags.Database;
 import org.springframework.cloud.dataflow.integration.test.tags.DatabaseFailure;
@@ -29,7 +28,6 @@ import org.springframework.cloud.dataflow.integration.test.tags.DataflowMain;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Database
 public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTests {
@@ -50,10 +48,14 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
 		assertSkipperServerRunning(this.dataflowCluster);
 
-		assertThatThrownBy(() -> {
-			this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
-		}).isInstanceOf(ContainerLaunchException.class);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
 
+		assertDataflowServerNotRunning(this.dataflowCluster);
+		try {
+			this.dataflowCluster.stopDataflow();
+		} catch (Throwable x) {
+			// Ignore
+		}
 		Integer count = runCountQuery("select count(*) from flyway_schema_history_dataflow");
 		assertThat(count).isEqualTo(-1);
 

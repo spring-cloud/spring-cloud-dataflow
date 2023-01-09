@@ -13,7 +13,7 @@ case $BROKER in
   echo "BROKER=$BROKER not supported"
 esac
 
-STREAM_APPS_VERSION="3.2.2-SNAPSHOT"
+STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
 
 if [ "$BROKER" = "rabbitmq" ]; then
   # Sample Stream Apps

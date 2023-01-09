@@ -6,7 +6,7 @@
 
 You will need to install kubectl and then kind or minikube for a local cluster.
 
-All the examples assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/local`.
+All the examples assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/local/k8s`.
 
 On macOS you may need to install `realpath` from link:https://ports.macports.org/port/realpath/[Macports] or `brew install realpath`
 
@@ -94,7 +94,7 @@ The following script will create the local cluster.
 ./configure-k8s.sh
 ....
 
-* For *kind* follow instruction to update `./k8s/metallb-configmap.yaml` and then apply using `kubectl apply -f ./k8s/metallb-configmap.yaml`
+* For *kind* follow instruction to update `src/local/k8s/yaml/metallb-configmap.yaml` and then apply using `kubectl apply -f src/local/k8s/yaml/metallb-configmap.yaml`
 
 * For *minikube* launch a new shell and execute `minikube tunnel`
 
@@ -163,6 +163,8 @@ kail --ns=<namespace>
 ```
 
 ==== Scripts
+
+Some of the scripts apply to local containers as well and can be found in `src/local`, the Kubernetes specific scripts are in `src/local/k8s`
 
 [cols="5m,10"]
 |===

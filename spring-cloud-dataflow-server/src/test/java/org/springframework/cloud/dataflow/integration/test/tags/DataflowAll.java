@@ -25,20 +25,15 @@ import org.junit.jupiter.api.Tag;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
-@Tag(TagNames.DATAFLOW_2_0)
-@Tag(TagNames.DATAFLOW_2_1)
-@Tag(TagNames.DATAFLOW_2_2)
-@Tag(TagNames.DATAFLOW_2_3)
-@Tag(TagNames.DATAFLOW_2_4)
-@Tag(TagNames.DATAFLOW_2_5)
-@Tag(TagNames.DATAFLOW_2_6)
+
 @Tag(TagNames.DATAFLOW_2_7)
-@Tag(TagNames.SKIPPER_2_0)
-@Tag(TagNames.SKIPPER_2_1)
-@Tag(TagNames.SKIPPER_2_2)
-@Tag(TagNames.SKIPPER_2_3)
-@Tag(TagNames.SKIPPER_2_4)
-@Tag(TagNames.SKIPPER_2_5)
+@Tag(TagNames.DATAFLOW_2_8)
+@Tag(TagNames.DATAFLOW_2_9)
+@Tag(TagNames.DATAFLOW_2_10)
+
 @Tag(TagNames.SKIPPER_2_6)
+@Tag(TagNames.SKIPPER_2_7)
+@Tag(TagNames.SKIPPER_2_8)
+@Tag(TagNames.SKIPPER_2_9)
 public @interface DataflowAll {
 }

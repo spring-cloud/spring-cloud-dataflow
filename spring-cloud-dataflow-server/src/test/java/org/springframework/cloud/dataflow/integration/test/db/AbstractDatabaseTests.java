@@ -36,6 +36,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	private final Logger log = LoggerFactory.getLogger(AbstractDatabaseTests.class);
+
 	protected abstract String getDatabaseTag();
 
 	/**
@@ -70,11 +71,13 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	protected <T> T runQuery(String sql, Class<T> requiredType) {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		log.info("runQuery:{}", sql);
 		return jdbcTemplate.queryForObject(sql, requiredType);
 	}
 
 	protected void runExecute(String sql) {
 		JdbcTemplate jdbcTemplate = getJdbcTemplate();
+		log.info("runExecute:{}", sql);
 		jdbcTemplate.execute(sql);
 	}
 
@@ -93,37 +96,23 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
 
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_0);
-		assertSkipperServerRunning(this.dataflowCluster);
-
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_0);
-		assertDataflowServerRunning(this.dataflowCluster);
-
-		this.dataflowCluster.replaceDataflow(TagNames.DATAFLOW_2_1);
-		assertDataflowServerRunning(this.dataflowCluster);
-
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_1, TagNames.DATAFLOW_2_2);
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_6);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_7);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_2, TagNames.DATAFLOW_2_3);
+		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_7, TagNames.DATAFLOW_2_8);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_3, TagNames.DATAFLOW_2_4);
+		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_8, TagNames.DATAFLOW_2_9);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_4, TagNames.DATAFLOW_2_5);
+		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_9, TagNames.DATAFLOW_2_10);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_5, TagNames.DATAFLOW_2_6);
-		assertSkipperServerRunning(this.dataflowCluster);
-		assertDataflowServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_6, TagNames.DATAFLOW_2_7);
-		assertSkipperServerRunning(this.dataflowCluster);
-		assertDataflowServerRunning(this.dataflowCluster);
 	}
 }
