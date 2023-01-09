@@ -22,20 +22,20 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.cloud.dataflow.common.flyway.FlywayVendorReplacingEnvironmentPostProcessor;
+import org.springframework.cloud.dataflow.common.flyway.FlywayVendorReplacingApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Lightweight integration test that uses {@link Testcontainers} to start a MariaDB server
- * in order to verify the {@link FlywayVendorReplacingEnvironmentPostProcessor} properly
+ * in order to verify the {@link FlywayVendorReplacingApplicationContextInitializer} properly
  * handles the '{vendor} token.
  *
  * @author Chris Bono
  */
 @Testcontainers(disabledWithoutDocker = true)
-public class FlywayVendorReplacingEnvironmentPostProcessorTests {
+public class FlywayVendorReplacingApplicationContextInitializerTests {
 
 	@Container
 	private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>("mariadb:10.4")
