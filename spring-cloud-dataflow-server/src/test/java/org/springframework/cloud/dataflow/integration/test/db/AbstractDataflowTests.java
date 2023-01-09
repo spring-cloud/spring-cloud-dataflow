@@ -56,23 +56,16 @@ public abstract class AbstractDataflowTests {
 	public final static String DATAFLOW_IMAGE_PREFIX = "springcloud/spring-cloud-dataflow-server:";
 	public final static String SKIPPER_IMAGE_PREFIX = "springcloud/spring-cloud-skipper-server:";
 	public final static List<ClusterContainer> DATAFLOW_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.DATAFLOW_2_0, DATAFLOW_IMAGE_PREFIX + "2.0.3.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_1, DATAFLOW_IMAGE_PREFIX + "2.1.2.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_2, DATAFLOW_IMAGE_PREFIX + "2.2.3.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_3, DATAFLOW_IMAGE_PREFIX + "2.3.1.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_4, DATAFLOW_IMAGE_PREFIX + "2.4.2.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_5, DATAFLOW_IMAGE_PREFIX + "2.5.4.RELEASE"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_6, DATAFLOW_IMAGE_PREFIX + "2.6.5"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_7, DATAFLOW_IMAGE_PREFIX + "2.7.1")
+			ClusterContainer.from(TagNames.DATAFLOW_2_7, DATAFLOW_IMAGE_PREFIX + "2.7.2"),
+			ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
+			ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
+			ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.0")
 			);
 	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.SKIPPER_2_0, SKIPPER_IMAGE_PREFIX + "2.0.3.RELEASE"),
-			ClusterContainer.from(TagNames.SKIPPER_2_1, SKIPPER_IMAGE_PREFIX + "2.1.4.RELEASE"),
-			ClusterContainer.from(TagNames.SKIPPER_2_2, SKIPPER_IMAGE_PREFIX + "2.2.2.RELEASE"),
-			ClusterContainer.from(TagNames.SKIPPER_2_3, SKIPPER_IMAGE_PREFIX + "2.3.2.RELEASE"),
-			ClusterContainer.from(TagNames.SKIPPER_2_4, SKIPPER_IMAGE_PREFIX + "2.4.3.RELEASE"),
-			ClusterContainer.from(TagNames.SKIPPER_2_5, SKIPPER_IMAGE_PREFIX + "2.5.4"),
-			ClusterContainer.from(TagNames.SKIPPER_2_6, SKIPPER_IMAGE_PREFIX + "2.6.1")
+			ClusterContainer.from(TagNames.SKIPPER_2_6, SKIPPER_IMAGE_PREFIX + "2.6.2"),
+			ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
+			ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
+			ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.0")
 			);
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),

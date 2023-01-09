@@ -58,23 +58,26 @@ public abstract class TagNames {
 	public static final String UAA_4_32 = "uaa_4_32";
 
 	public static final String SKIPPER = "skipper";
-	public static final String SKIPPER_2_0 = "skipper_2_0";
-	public static final String SKIPPER_2_1 = "skipper_2_1";
-	public static final String SKIPPER_2_2 = "skipper_2_2";
-	public static final String SKIPPER_2_3 = "skipper_2_3";
-	public static final String SKIPPER_2_4 = "skipper_2_4";
-	public static final String SKIPPER_2_5 = "skipper_2_5";
+
 	public static final String SKIPPER_2_6 = "skipper_2_6";
+
+	public static final String SKIPPER_2_7 = "skipper_2_7";
+
+	public static final String SKIPPER_2_8 = "skipper_2_8";
+
+	public static final String SKIPPER_2_9 = "skipper_2_9";
+
 	public static final String SKIPPER_main = "skipper_main";
 
 	public static final String DATAFLOW = "dataflow";
-	public static final String DATAFLOW_2_0 = "dataflow_2_0";
-	public static final String DATAFLOW_2_1 = "dataflow_2_1";
-	public static final String DATAFLOW_2_2 = "dataflow_2_2";
-	public static final String DATAFLOW_2_3 = "dataflow_2_3";
-	public static final String DATAFLOW_2_4 = "dataflow_2_4";
-	public static final String DATAFLOW_2_5 = "dataflow_2_5";
-	public static final String DATAFLOW_2_6 = "dataflow_2_6";
+
 	public static final String DATAFLOW_2_7 = "dataflow_2_7";
+
+	public static final String DATAFLOW_2_8 = "dataflow_2_8";
+
+	public static final String DATAFLOW_2_9 = "dataflow_2_9";
+
+	public static final String DATAFLOW_2_10 = "dataflow_2_10";
+
 	public static final String DATAFLOW_main = "dataflow_main";
 }

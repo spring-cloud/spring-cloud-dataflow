@@ -4,7 +4,7 @@ if [ "$NS" = "" ]; then
   exit 0
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-PARENT=$(realpath "$SCDIR/../..")
+PARENT=$(realpath "$SCDIR/../../..")
 
 case $BROKER in
   "kafka")
@@ -67,7 +67,7 @@ fi
 if [ "$SCDF_PRO_VERSION" = "" ]; then
   SCDF_PRO_VERSION=1.5.0-SNAPSHOT
 fi
-K8S_PATH=$(realpath $SCDIR/k8s)
+K8S_PATH=$(realpath $SCDIR/yaml)
 
 echo "K8S_PATH=$K8S_PATH"
 

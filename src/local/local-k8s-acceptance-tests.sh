@@ -10,7 +10,7 @@ if [ "$1" = "-h" ]; then
 fi
 SCDIR=$(realpath $(dirname "$(readlink -f "${BASH_SOURCE[0]}")"))
 ROOTDIR=$(realpath $SCDIR/../..)
-/home/pcorneil/work/corneil/
+
 pushd "$ROOTDIR/../spring-cloud-dataflow-acceptance-tests/acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"  > /dev/null
 ./gradlew build install
 popd > /dev/null # This assumes you are using minikube with helm from bitnami and used release name scdf and executed forward-scdf.sh

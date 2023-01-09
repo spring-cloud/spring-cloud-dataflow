@@ -6,7 +6,7 @@ fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 LS_DIR=$(realpath $SCDIR)
-K8S_PATH="$LS_DIR/k8s"
+K8S_PATH="$LS_DIR/yaml"
 set -e
 if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
