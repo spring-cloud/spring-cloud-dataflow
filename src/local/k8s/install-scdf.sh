@@ -19,7 +19,6 @@ if [ "$K8S_DRIVER" = "kind" ]; then
   kubectl apply -f "$K8S_PATH/metallb-configmap.yaml"
 fi
 
-
 sh "$LS_DIR/deploy-scdf.sh"
 
 if [ "$K8S_DRIVER" != "tmc" ]; then

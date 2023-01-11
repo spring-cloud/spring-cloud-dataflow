@@ -36,12 +36,3 @@ data:
                     imagePullSecret: registry-key
                     limits:
                       memory: 1024Mi
-
-#      metrics:
-#        export:
-#          prometheus:
-#            enabled: true
-#            rsocket:
-#              enabled: true
-#              host: prometheus-proxy
-#              port: 7001

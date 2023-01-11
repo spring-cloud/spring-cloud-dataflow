@@ -81,7 +81,7 @@ if [ "$SKIPPER_VERSION" = "" ]; then
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-    SCDF_PRO_VERSION=1.5.0-SNAPSHOT
+    SCDF_PRO_VERSION=1.5.1-SNAPSHOT
 fi
 K8S_PATH=$(realpath $SCDIR/yaml)
 
