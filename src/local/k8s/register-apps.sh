@@ -5,11 +5,10 @@ function dataflow_post() {
     echo "Invoking POST $1 >> $2"
     result=$(curl -s -d "$1" -X POST "$2")
     rc=$?
-    # shellcheck disable=SC2086
-    if [ "$rc" != "0" ]; then
-        echo "$RC : $result"
+    if ((rc != 0 )); then
+        echo "$rc : $result"
         echo ""
-        exit $RC
+        exit $rc
     fi
 }
 
@@ -53,24 +52,19 @@ else
     TYPE=docker
 fi
 
+STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
+
+if [[ "$STREAM_APPS_VERSION" == *"SNAPSHOT"* ]]; then
+    META_DATA="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/maven-metadata.xml"
+    echo "Downloading $META_DATA"
+    curl -o maven-metadata.xml -s $META_DATA
+    STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[1]/value/text()" maven-metadata.xml)
+fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
-DESCRIPTORS="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_NAME-$TYPE"
-rm -f descriptors
-curl -o descriptors -s $DESCRIPTORS
-RC=$?
-if [[ ! -f descriptors ]]; then
-    RC=2
-fi
-if ((RC == 0)); then
-    RC=$(grep -c -i -F "not found" descriptors)
-fi
-if ((RC == 0)); then
-    RC=$(grep -c -F 404 descriptors)
-fi
-if ((RC != 0)); then
-    echo -e "\033[31mCannot download $DESCRIPTORS\033[0m"
-fi
+DESCRIPTORS="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_DL_VERSION.stream-apps-$BROKER_NAME-$TYPE"
+
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"
+
 if [ "$TYPE" = "docker" ]; then
     dataflow_post "uri=docker:springcloudtask/timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
     dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
