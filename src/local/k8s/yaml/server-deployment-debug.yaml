@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  selector:
+    matchLabels:
+      app: scdf-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scdf-server
+    spec:
+      containers:
+        - name: scdf-server
+          ports:
+            - hostPort: 5005
+              containerPort: 5005
+          env:
+            - name: JAVA_OPTS
+              value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+    spring-deployment-id: scdf
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 5005
+      name: jdwp-dataflow
+  selector:
+    app: scdf-server

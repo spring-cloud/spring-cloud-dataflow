@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - image: postgres:14.5
+        name: postgresql
+        env:
+          - name: POSTGRES_INITDB_ARGS
+            value: '--encoding=UTF-8 --lc-collate=en_US.utf8 --lc-ctype=en_US.utf8'
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgresql
+                key: postgresql-root-username
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: postgresql-root-password
+                name: postgresql
+          - name: POSTGRES_DB
+            value: 'dataflow'
+        ports:
+          - containerPort: 5432
+            name: postgresql
+        startupProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 12
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 1
+          periodSeconds: 15
+          timeoutSeconds: 2
+          failureThreshold: 4
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 1
+          periodSeconds: 15
+          timeoutSeconds: 2
+          failureThreshold: 4
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 1Gi
+        volumeMounts:
+          - name: data
+            mountPath: /var/lib/postgresql
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: postgresql

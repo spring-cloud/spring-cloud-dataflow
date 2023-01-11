@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server:2.9.0
+        image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION}
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
@@ -70,23 +70,46 @@ spec:
             value: 'false'
           - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
             value: /etc/secrets
-          # debugging
-#          - name: JAVA_OPTS
-#            value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000'
-      initContainers:
-      - name: init-mariadb-wait
-        image: busybox:1
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
-      - name: init-mariadb-database
-        image: mariadb:10.4
-        env:
-        - name: MARIADB_PWD
-          valueFrom:
-            secretKeyRef:
-              name: mariadb
-              key: mariadb-root-password
-        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: SPRING_DATASOURCE_USERNAME
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: SPRING_DATASOURCE_PASSWORD
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_URL
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_TEST_ON_BORROW
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_TEST_ON_BORROW
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_VALIDATION_QUERY
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_VALIDATION_QUERY
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+                name: scdf-datasource
       serviceAccountName: scdf-sa
       volumes:
         - name: config
@@ -97,4 +120,4 @@ spec:
               path: 'application-kubernetes.yaml'
         - name: database
           secret:
-            secretName: mariadb
+            secretName: ${DATABASE}

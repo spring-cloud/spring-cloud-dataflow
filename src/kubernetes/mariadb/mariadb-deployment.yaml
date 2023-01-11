@@ -23,6 +23,8 @@ spec:
               secretKeyRef:
                 key: mariadb-root-password
                 name: mariadb
+          - name: MARIADB_DATABASE
+            value: 'dataflow'
         ports:
           - containerPort: 3306
             name: mariadb

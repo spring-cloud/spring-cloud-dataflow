@@ -6,6 +6,7 @@ kubectl delete svc --all $WAIT --namespace="$NS"
 kubectl delete all --all $WAIT --namespace="$NS"
 kubectl delete pods --all $WAIT --namespace="$NS"
 kubectl delete secrets --all $WAIT --namespace="$NS"
+kubectl delete configmap --all $WAIT --namespace="$NS"
 kubectl delete pvc --all $WAIT --namespace="$NS"
 kubectl delete secrets --namespace "$NS" --all
 kubectl delete pvc --namespace "$NS" --all
