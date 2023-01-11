@@ -25,15 +25,15 @@ fi
 
 # Stream Apps
 echo "Loading Stream Apps images"
-sh "$SCDIR/load-image.sh" "springcloudstream/log-sink-$BROKER_NAME" "$STREAM_APPS_VERSION"
-sh "$SCDIR/load-image.sh" "springcloudstream/http-source-$BROKER_NAME" "$STREAM_APPS_VERSION"
-sh "$SCDIR/load-image.sh" "springcloudstream/transform-processor-$BROKER_NAME" "$STREAM_APPS_VERSION"
-sh "$SCDIR/load-image.sh" "springcloudstream/splitter-processor-$BROKER_NAME" "$STREAM_APPS_VERSION"
+sh "$SCDIR/load-image.sh" "springcloudstream/log-sink-$BROKER_NAME" "$STREAM_APPS_VERSION" false
+sh "$SCDIR/load-image.sh" "springcloudstream/http-source-$BROKER_NAME" "$STREAM_APPS_VERSION" false
+sh "$SCDIR/load-image.sh" "springcloudstream/transform-processor-$BROKER_NAME" "$STREAM_APPS_VERSION" false
+sh "$SCDIR/load-image.sh" "springcloudstream/splitter-processor-$BROKER_NAME" "$STREAM_APPS_VERSION" false
 sh "$SCDIR/load-image.sh" "springcloudstream/router-sink-$BROKER_NAME" "$STREAM_APPS_VERSION" false
 sh "$SCDIR/load-image.sh" "springcloudstream/analytics-sink-$BROKER_NAME" "$STREAM_APPS_VERSION" false
 sh "$SCDIR/load-image.sh" "springcloudstream/time-source-$BROKER_NAME" "$STREAM_APPS_VERSION" false
 
 # Task Apps
 echo "Loading Task Apps images"
-sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-task" "2.0.1"
-sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-batch-task" "2.0.1"
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-task" "2.0.1" false
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-batch-task" "2.0.1" false

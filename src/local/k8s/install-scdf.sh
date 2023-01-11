@@ -19,13 +19,21 @@ if [ "$K8S_DRIVER" = "kind" ]; then
   kubectl apply -f "$K8S_PATH/metallb-configmap.yaml"
 fi
 
+
 sh "$LS_DIR/deploy-scdf.sh"
 
 if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
-echo "Waiting for mariadb"
-kubectl rollout status deployment --namespace "$NS" mariadb
+
+if [ "$DATABASE" = "mariadb" ]; then
+    echo "Waiting for mariadb"
+    kubectl rollout status deployment --namespace "$NS" mariadb
+else
+    echo "Waiting for PostgreSQL"
+    kubectl rollout status deployment --namespace "$NS" postgresql
+fi
+
 if [ "$BROKER" = "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
   kubectl rollout status deployment --namespace "$NS" kafka-zk

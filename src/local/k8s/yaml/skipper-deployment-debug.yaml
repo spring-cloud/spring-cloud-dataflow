@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  selector:
+    matchLabels:
+      app: skipper
+  template:
+    metadata:
+      labels:
+        app: skipper
+    spec:
+      containers:
+      - name: skipper
+        ports:
+        - containerPort: 8000
+          name: jdwp-skipper
+        env:
+        - name: JAVA_OPTS
+          value: '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000'

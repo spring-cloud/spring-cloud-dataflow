@@ -41,14 +41,8 @@ data:
                     startupProbeDelay: 20
                     startupProbeTimeout: 5
                     startupProbeFailure: 50
-      datasource:
-        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/skipper
-        username: root
-        password: ${mariadb-root-password}
-        driverClassName: org.mariadb.jdbc.Driver
-        testOnBorrow: true
-        validationQuery: "SELECT 1"
-        hikari:
-          data-source-properties:
-            useUnicode: true
-            characterEncoding: 'UTF-8'
+    management:
+      defaults:
+        metrics:
+          export:
+            enabled: false

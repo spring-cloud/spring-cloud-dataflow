@@ -11,14 +11,10 @@ data:
         root: info
         org.springframework: debug
     management:
-      metrics:
-        export:
-          prometheus:
-            enabled: true
-            rsocket:
-              enabled: true
-              host: prometheus-proxy
-              port: 7001
+      defaults:
+        metrics:
+          export:
+            enabled: false
     spring:
       output:
         ansi:
@@ -40,14 +36,12 @@ data:
                     imagePullSecret: registry-key
                     limits:
                       memory: 1024Mi
-      datasource:
-        url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/mysql
-        username: root
-        password: ${mariadb-root-password}
-        driverClassName: org.mariadb.jdbc.Driver
-        testOnBorrow: true
-        validationQuery: "SELECT 1"
-        hikari:
-          data-source-properties:
-            useUnicode: true
-            characterEncoding: 'UTF-8'
+
+#      metrics:
+#        export:
+#          prometheus:
+#            enabled: true
+#            rsocket:
+#              enabled: true
+#              host: prometheus-proxy
+#              port: 7001

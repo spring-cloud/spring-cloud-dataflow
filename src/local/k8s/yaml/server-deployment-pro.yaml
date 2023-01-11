@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: scdf-server
-          image: springcloud/scdf-pro-server:1.5.0
+          image: springcloud/scdf-pro-server:${DATAFLOW_PRO_VERSION}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config
@@ -90,10 +90,46 @@ spec:
               # Add Maven repo for metadata artifact resolution for all stream apps
             - name: SPRING_APPLICATION_JSON
               value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
-      initContainers:
-        - name: init-mariadb-wait
-          image: busybox:1
-          command: [ 'sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;' ]
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: SPRING_DATASOURCE_USERNAME
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: SPRING_DATASOURCE_PASSWORD
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_URL
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_TEST_ON_BORROW
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_TEST_ON_BORROW
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_VALIDATION_QUERY
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_VALIDATION_QUERY
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+                  name: scdf-datasource
+            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+                  name: scdf-datasource
       serviceAccountName: scdf-sa
       volumes:
         - name: config
