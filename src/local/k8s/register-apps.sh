@@ -55,13 +55,14 @@ fi
 STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
 
 if [[ "$STREAM_APPS_VERSION" == *"SNAPSHOT"* ]]; then
-    META_DATA="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/maven-metadata.xml"
+    META_DATA="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
     echo "Downloading $META_DATA"
     curl -o maven-metadata.xml -s $META_DATA
-    STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[1]/value/text()" maven-metadata.xml)
+    DL_TS=$(xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//')
+    STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
 fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
-DESCRIPTORS="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_DL_VERSION.stream-apps-$BROKER_NAME-$TYPE"
+DESCRIPTORS="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"
 

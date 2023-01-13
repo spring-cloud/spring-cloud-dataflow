@@ -54,7 +54,7 @@ jobs:
       run: |
         jfrog rt mvn clean install \
           -Pfull \
-          -U -B
+          -U -B 
         jfrog rt build-publish
 
     # build and publish images via composite action
