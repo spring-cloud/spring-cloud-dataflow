@@ -241,7 +241,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
 			@ShellOption(help = "the type for the registered application") ApplicationType type,
 			@ShellOption(help = "URI for the application artifact") String uri,
-			@ShellOption(help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
+			@ShellOption(value = { "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
 
 		appRegistryOperations().register(name, type, uri, metadataUri, force);
