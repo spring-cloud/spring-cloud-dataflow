@@ -18,10 +18,10 @@ function download_deps() {
     MILESTONE=$(echo "$DEP" | grep -c "\-M")
     if ((SNAPSHOT > 0)); then
         INC_VER=true
-        URL="https://repo.spring.io/libs-snapshot"
+        URL="https://repo.spring.io/snapshot"
     elif ((MILESTONE > 0)); then
         INC_VER=false
-        URL="https://repo.spring.io/libs-milestone-local"
+        URL="https://repo.spring.io/milestone"
     else
         INC_VER=false
         URL="https://repo.maven.apache.org/maven2"

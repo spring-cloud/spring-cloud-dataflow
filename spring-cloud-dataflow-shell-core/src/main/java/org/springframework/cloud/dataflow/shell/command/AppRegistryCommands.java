@@ -42,6 +42,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.Availability;
+import org.springframework.shell.standard.EnumValueProvider;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
@@ -122,7 +123,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	@ShellMethodAvailability("availableWithViewRole")
 	public TablesInfo info(
 			@ShellOption(value = { "--name" }, help = "name of the application to query", valueProvider = ApplicationNameValueProvider.class) String name,
-			@ShellOption(help = "type of the application to query") ApplicationType type,
+			@ShellOption(help = "type of the application to query", valueProvider = EnumValueProvider.class) ApplicationType type,
 			@ShellOption(help = "the version for the registered application", defaultValue = ShellOption.NULL) String version,
 			@ShellOption(help = "return all metadata, including common Spring Boot properties", defaultValue = "false") boolean exhaustive) {
 		TablesInfo result = new TablesInfo();
@@ -175,7 +176,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	@ShellMethodAvailability("availableWithDestroyRole")
 	public String unregister(
 			@ShellOption(value = { "", "--name" }, help = "name of the application to unregister", valueProvider = ApplicationNameValueProvider.class) String name,
-			@ShellOption(help = "type of the application to unregister") ApplicationType type,
+			@ShellOption(help = "type of the application to unregister", valueProvider = EnumValueProvider.class) ApplicationType type,
 			@ShellOption(help = "the version application to unregister", defaultValue = ShellOption.NULL) String version) {
 
 		appRegistryOperations().unregister(name, type, version);
@@ -239,9 +240,9 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	@ShellMethodAvailability("availableWithCreateRole")
 	public String register(
 			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
-			@ShellOption(help = "the type for the registered application") ApplicationType type,
+			@ShellOption(help = "the type for the registered application", valueProvider = EnumValueProvider.class) ApplicationType type,
 			@ShellOption(help = "URI for the application artifact") String uri,
-			@ShellOption(help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
+			@ShellOption(value = { "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
 
 		appRegistryOperations().register(name, type, uri, metadataUri, force);

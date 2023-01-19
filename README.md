@@ -89,7 +89,7 @@ For more information please refer to the [Git documentation, Formatting and Whit
 
 ## Contributing
 
-We welcome contributions! Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-contributing.adoc) for more information on how to contribute.
+We welcome contributions! See the [CONTRIBUTING](./CONTRIBUTING.adoc) guide for details.
 
 ----
 
