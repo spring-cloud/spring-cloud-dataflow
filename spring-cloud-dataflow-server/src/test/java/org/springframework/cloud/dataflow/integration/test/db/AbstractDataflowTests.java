@@ -76,9 +76,9 @@ public abstract class AbstractDataflowTests {
 			ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),
 			ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
 			ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
-			ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2, "springsource-docker-private-local.jfrog.io/oracle/database-prebuilt:12.2.0.1-se2", TagNames.ORACLE),
+			ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2, "dev.registry.pivotal.io/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2", TagNames.ORACLE),
 			ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
-			ClusterContainer.from(TagNames.DB2_10_5_0_5_3_10_0, "springsource-docker-private-local.jfrog.io/ibmcom/database-prebuilt:10.5.0.5-3.10.0", TagNames.DB2)
+			ClusterContainer.from(TagNames.DB2_10_5_0_5_3_10_0, "dev.registry.pivotal.io/p-scdf-for-kubernetes/ibmcom/database-prebuilt:10.5.0.5-3.10.0", TagNames.DB2)
 			);
 	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
