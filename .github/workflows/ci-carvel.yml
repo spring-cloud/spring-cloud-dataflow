@@ -23,7 +23,7 @@ jobs:
     - uses: actions/setup-node@v2
       with:
         node-version: 16
-    - uses: vmware-tanzu/carvel-setup-action@v1
+    - uses: carvel-dev/setup-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup npm

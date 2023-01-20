@@ -24,7 +24,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-  - uses: vmware-tanzu/carvel-setup-action@v1
+  - uses: carvel-dev/setup-action@v1
     with:
       token: ${{ inputs.token }}
   - name: Tanzu Dance
