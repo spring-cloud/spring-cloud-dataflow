@@ -535,28 +535,17 @@
 				<repository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot-local</url>
+					<url>https://repo.spring.io/snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
 				</repository>
 				<repository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone-local</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/release</url>
-					<snapshots>
-						<enabled>false</enabled>
+						<enabled>true</enabled>
 					</snapshots>
 				</repository>
 			</repositories>
@@ -564,26 +553,15 @@
 				<pluginRepository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot-local</url>
+					<url>https://repo.spring.io/plugins-snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
 				</pluginRepository>
 				<pluginRepository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone-local</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/libs-release-local</url>
+					<url>https://repo.spring.io/plugins-milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -596,7 +574,7 @@
 				<repository>
 					<id>repo.spring.io</id>
 					<name>Spring Milestone Repository</name>
-					<url>https://repo.spring.io/libs-milestone-local</url>
+					<url>https://repo.spring.io/milestone</url>
 				</repository>
 			</distributionManagement>
 		</profile>
