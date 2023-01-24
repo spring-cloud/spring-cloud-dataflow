@@ -39,22 +39,20 @@ if [ "$BROKER" = "rabbitmq" ]; then
 else
     BROKER_NAME=$BROKER
 fi
-
-STREAM_APPS_VERSION=2022.0.0-SNAPSHOT
-# STREAM_APPS_VERSION=2021.1.3-SNAPSHOT
-# STREAM_APPS_VERSION=2021.1.2
-RELEASE_SNAPSHOT=snapshot
-# RELEASE_SNAPSHOT=release
-
+if [ "$STREAM_APPS_VERSION" = "" ]; then
+    export STREAM_APPS_VERSION=2022.0.0-SNAPSHOT
+    # export STREAM_APPS_VERSION=2021.1.2 # release
+fi
+echo "STREAM_APPS_VERSION=$STREAM_APPS_VERSION"
 if [ "$PLATFORM_TYPE" != "kubernetes" ]; then
     TYPE=maven
 else
     TYPE=docker
 fi
 
-if [[ "$STREAM_APPS_VERSION" == *"SNAPSHOT"* ]]; then
+if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
-    META_DATA="https://repo.spring.io/$RELEASE_SNAPSHOT/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
+    META_DATA="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
     echo "Downloading $META_DATA"
     curl -o maven-metadata.xml -s $META_DATA
     DL_TS=$(xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//')

@@ -16,8 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,13 +43,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Testcontainers(disabledWithoutDocker = true)
 public class FlywayVendorReplacingApplicationContextInitializerTests {
-
+	private final static Logger logger = LoggerFactory.getLogger(FlywayVendorReplacingApplicationContextInitializerTests.class);
 	@Container
 	private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>("mariadb:10.4")
+			.withStartupTimeout(Duration.of(1, ChronoUnit.MINUTES))
 			.withDatabaseName("dataflow")
 			.withUsername("spring")
 			.withPassword("spring");
-
+	@BeforeEach
+	public void  setup() {
+		MARIADB_CONTAINER.followOutput(new Slf4jLogConsumer(logger));
+	}
 	@Test
 	void vendorIsReplacedInFlywayLocationsWhenMysqlInUrl() {
 		String jdbcUrl = String.format("jdbc:mysql://%s:%d/dataflow?permitMysqlScheme", MARIADB_CONTAINER.getHost(), MARIADB_CONTAINER.getMappedPort(3306));
