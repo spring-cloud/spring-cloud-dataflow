@@ -6,7 +6,7 @@
 				<repository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/libs-staging-local</url>
+					<url>https://repo.spring.io/staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -14,15 +14,7 @@
 				<repository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/libs-release</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -32,7 +24,7 @@
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/libs-staging-local</url>
+					<url>https://repo.spring.io/plugins-staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -45,15 +37,7 @@
 				<repository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/libs-staging-local</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/libs-release</url>
+					<url>https://repo.spring.io/staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -63,7 +47,7 @@
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/libs-staging-local</url>
+					<url>https://repo.spring.io/plugins-staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>

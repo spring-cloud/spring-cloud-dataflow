@@ -60,6 +60,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -117,7 +118,7 @@ public class DataFlowServerConfigurationTests {
 	}
 
 	/**
-	 * Verify that embedded h2 does not start if h2 url is specified with with the
+	 * Verify that embedded h2 does not start if h2 url is specified with the
 	 * spring.dataflow.embedded.database.enabled is set to false.
 	 *
 	 * @throws Throwable if any error occurs and should be handled by the caller.
@@ -157,7 +158,7 @@ public class DataFlowServerConfigurationTests {
 		SkipperClient skipperClient = context.getBean(SkipperClient.class);
 		Object baseUri = TestUtils.readField("baseUri", skipperClient);
 		assertNotNull(baseUri);
-		assertTrue(baseUri.equals("https://fakehost:1234/api"));
+		assertEquals("https://fakehost:1234/api", baseUri);
 	}
 
 	@EnableDataFlowServer
