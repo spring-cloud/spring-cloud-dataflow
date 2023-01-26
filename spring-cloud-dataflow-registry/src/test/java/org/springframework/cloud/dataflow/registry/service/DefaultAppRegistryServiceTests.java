@@ -240,9 +240,9 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration appRegistration = registrations.get(0);
 		assertThat(appRegistration, hasProperty("name", is("cassandra")));
 		assertThat(appRegistration, hasProperty("uri",
-				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
+				is(URI.create("https://repo1.maven.org/maven2/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
 		assertThat(appRegistration, hasProperty("metadataUri",
-				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
+				is(URI.create("https://repo1.maven.org/maven2/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
 		assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
 	}
 
