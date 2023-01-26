@@ -38,7 +38,7 @@ public class CloudFoundryManifestApplicationDeployerTests {
 		when(springBootAppSpec2.getResource()).thenReturn(dockerSpecResource);
 		when(springBootAppSpec2.getVersion()).thenReturn(dockerSpecVersion);
 		SpringCloudDeployerApplicationSpec springBootAppSpec3 = mock(SpringCloudDeployerApplicationSpec.class);
-		String httpSpecResource = "https://repo.spring.io/libs-release/org/springframework/cloud/stream/app/"
+		String httpSpecResource = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/"
 				+ "log-sink-rabbit/1.2.0.RELEASE/log-sink-rabbit";
 		when(springBootAppSpec3.getResource()).thenReturn(httpSpecResource);
 		when(springBootAppSpec3.getVersion()).thenReturn("1.2.0.RELEASE");

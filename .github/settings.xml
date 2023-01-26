@@ -20,20 +20,11 @@
 					</snapshots>
 				</repository>
 				<repository>
-					<id>maven-central</id>
-					<name>Maven Central</name>
-					<url>https://repo.maven.apache.org/maven2</url>
+					<id>spring-release</id>
+					<name>Spring Milestones</name>
+					<url>https://repo.spring.io/release</url>
 					<snapshots>
 						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<!-- TODO remove once https://github.com/spring-cloud/spring-cloud-dataflow/issues/5194 resolved -->
-				<repository>
-					<id>maven-central-spring-milestones</id>
-					<name>Maven Central Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
-					<snapshots>
-						<enabled>true</enabled>
 					</snapshots>
 				</repository>
 			</repositories>
@@ -54,14 +45,6 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</pluginRepository>
-				<pluginRepository>
-					<id>maven-central</id>
-					<name>Maven Central</name>
-					<url>https://repo.maven.apache.org/maven2</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
 			</pluginRepositories>
 		</profile>
 		<profile>
@@ -71,14 +54,6 @@
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
 					<url>https://repo.spring.io/staging</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>maven-central</id>
-					<name>Maven Central</name>
-					<url>https://repo.maven.apache.org/maven2</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -98,14 +73,6 @@
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
 					<url>https://repo.spring.io/staging</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>maven-central</id>
-					<name>Maven Central</name>
-					<url>https://repo.maven.apache.org/maven2</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
