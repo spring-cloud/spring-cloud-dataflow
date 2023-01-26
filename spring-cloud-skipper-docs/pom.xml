@@ -17,7 +17,7 @@
 	</properties>
 	<repositories>
 		<repository>
-			<id>spring-milestones</id>
+			<id>spring-snapshots</id>
 			<name>Spring Repository</name>
 			<url>https://repo.spring.io/snapshot</url>
 		</repository>
