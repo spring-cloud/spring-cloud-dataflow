@@ -24,7 +24,7 @@
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/plugins-staging</url>
+					<url>https://repo.spring.io/staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -47,7 +47,7 @@
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/plugins-staging</url>
+					<url>https://repo.spring.io/staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
