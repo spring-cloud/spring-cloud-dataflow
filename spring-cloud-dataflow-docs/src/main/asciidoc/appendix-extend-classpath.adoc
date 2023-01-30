@@ -1,14 +1,15 @@
 [[extend-classpath]]
 
-=== Extending container classpath
+=== Extending application classpath
+
+Users may require the addition of dependencies to the existing Stream applications or specific database drivers to Dataflow and Skipper or any of the other containers provider by the project.
+
+NOTE: The Spring Cloud Dataflow repository contains scripts to help with this task. The examples below assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/templates/add-deps`.
+
 
 ==== Containers
 
-Users may require the addition of dependencies to the existing Stream applications or specific database drivers to Dataflow and Skipper or any of the other container provider by the project.
-
-===== Instructions
-
-In order to add dependencies to existing container the following steps will be the  approach.
+In order to add dependencies to existing container the following steps will be the approach.
 
 * Create a folder with the extra dependencies.
 * Create a new container image while copying the files to the libraries folder.
@@ -29,9 +30,11 @@ export CONTAINER_REPO="springcloud/spring-cloud-dataflow-server"
 export CONTAINER_TAG="2.9.5-jdk17"
 export PRIVATE_REGISTRY="our.private.registry"
 export DEPS_FOLDER="./extra-libs/"
-docker build -t "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
+docker build -f Dockerfile -t "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
 docker push "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
 ....
+
+NOTE: As pointed out above, the `Dockerfile` lives in the `spring-cloud-dataflow` repository under `src/templates/add-deps`.
 
 ==== JAR File
 
@@ -51,7 +54,4 @@ This example adds the dependencies and then installs the jar to Maven local.
     -P depFolder="./extra-libs"
 ....
 
-
-
 NOTE: Use the `publishMavenPublicationToMavenRepository` task to publish to a remote repository. Update the `gradle.properties` with the remote repository details. Alternatively move `repoUser` and `repoPassword` to ~/.gradle/gradle.properties
-
