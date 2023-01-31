@@ -19,12 +19,20 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</repository>
+				<repository>
+					<id>maven-central</id>
+					<name>Maven Central</name>
+					<url>https://repo.maven.apache.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/plugins-staging</url>
+					<url>https://repo.spring.io/staging</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -32,11 +40,19 @@
 				<pluginRepository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/plugins-milestone</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
-				</pluginRepository>				
+				</pluginRepository>
+				<pluginRepository>
+					<id>maven-central</id>
+					<name>Maven Central</name>
+					<url>https://repo.maven.apache.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
 			</pluginRepositories>	
 		</profile>
 		<profile>
@@ -50,12 +66,28 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</repository>
+				<repository>
+					<id>maven-central</id>
+					<name>Maven Central</name>
+					<url>https://repo.maven.apache.org/maven2</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
 					<id>spring-staging</id>
 					<name>Spring Staging</name>
-					<url>https://repo.spring.io/plugins-staging</url>
+					<url>https://repo.spring.io/staging</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>maven-central</id>
+					<name>Maven Central</name>
+					<url>https://repo.maven.apache.org/maven2</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
