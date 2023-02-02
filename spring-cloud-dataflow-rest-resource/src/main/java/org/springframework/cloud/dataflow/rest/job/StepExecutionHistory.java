@@ -101,7 +101,6 @@ public class StepExecutionHistory {
 		return rollbackCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getReadCount() {
 		return readCount;
 	}
