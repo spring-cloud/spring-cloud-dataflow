@@ -63,22 +63,22 @@ You can invoke one of the following scripts to choose the type of installation y
 
 [source,shell]
 ----
-use-kind.sh [<namespace>]
-use-mk-docker.sh [<namespace>]
-use-mk-kvm2.sh [<namespace>]
-use-mk.sh <driver> [<namespace>] # <1>
-use-tmc.sh <cluster-name> [<namespace>]
-use-gke.sh <cluster-name> [<namespace>]
+use-kind.sh [<namespace>] [<database>] [<broker>]
+use-mk-docker.sh [<namespace>] [<database>] [<broker>]
+use-mk-kvm2.sh [<namespace>] [<database>] [<broker>]
+use-mk.sh <driver> [<namespace>] [<database>] [<broker>] # <1>
+use-tmc.sh <cluster-name> [<namespace>] [<database>] [<broker>]
+use-gke.sh <cluster-name> [<namespace>] [<database>] [<broker>]
 ----
 <1> <driver> must be one of `kvm2`, `docker`, `vmware`, `virtualbox`, `vmwarefusion` or `hyperkit`. `docker` is the recommended option for local development.
 
-NOTE: `<namespace>` will be `default` if not provided.
+NOTE: `<namespace>` will be `default` if not provided. The default `<database>` is `postgresql` and the default `<broker>` is `kafka`.
 
 Since these scripts export environmental variable they need to be executes as in the following example:
 
 [source,shell]
 ....
-source ./use-mk.sh vmware test-ns
+source ./use-mk-docker.sh test-ns postgresql rabbitmq
 ....
 
 ===== TMC or GKE Cluster in Cloud
