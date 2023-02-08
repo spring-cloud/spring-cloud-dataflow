@@ -421,9 +421,9 @@
 					</snapshots>
 				</repository>
 				<repository>
-					<id>spring-libs-milestone</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
+					<id>spring-releases</id>
+					<name>Spring Releases</name>
+					<url>https://repo.spring.io/release</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
