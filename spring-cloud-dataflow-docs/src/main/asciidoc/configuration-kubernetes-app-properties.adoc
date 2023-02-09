@@ -914,17 +914,12 @@ data:
 Replace the `envVarName`, `configMapName`, and `dataKey` attributes with the appropriate values for your ConfigMap.
 
 ==== Pod Security Context
+The pod https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[security context] specifies security settings for a pod and its containers.
 
-The pod security context specifies security settings for a pod and its containers. The following options are configurable:
+The configurable options are listed <<configuration-kubernetes.adoc#pod-security-context-props,HERE>>
+[.small]#(more details for each option can be found in the https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#podsecuritycontext-v1-core[Pod Security Context] section of the Kubernetes API reference)#.
 
-* `runAsUser`: The numeric user ID to run pod container processes under
-* `fsGroup`: The numeric group ID for the volumes of the pod
-* `supplementalGroups`: The numeric group IDs applied to the pod container processes, in addition to the container's primary group ID
-* `seccompProfile`: The seccomp options to use for the pod containers
-
-See the https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[Security Context] section of the Kubernetes reference for more information on each of the above options.
-
-The following example shows how you can individually configure application pods:
+The following example shows how you can configure the security context for an individual application pod:
 
 ====
 [source,options=nowrap]
@@ -936,9 +931,7 @@ deployer.<application>.kubernetes.podSecurityContext={runAsUser: 65534, fsGroup:
 Replace `<application>` with the name of your application and any attributes with the appropriate values for your container environment.
 
 You can configure the pod security context at the global server level as well.
-
 The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
-
 ====
 [source,yaml]
 ----
@@ -963,7 +956,6 @@ data:
 ====
 
 The following example shows how to do so for tasks by editing the `server-config.yaml` file:
-
 ====
 [source,yaml]
 ----
@@ -988,6 +980,69 @@ data:
 ====
 
 Adjust the `podSecurityContext` attributes with the appropriate values for your container environment.
+
+
+==== Container Security Context
+The container https://kubernetes.io/docs/tasks/configure-pod-container/security-context/[security context] specifies security settings for an individual container.
+
+The configurable options are listed <<configuration-kubernetes.adoc#container-security-context-props,HERE>>
+[.small]#(more details for each option can be found in the https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#securitycontext-v1-core[Container Security Context] section of the Kubernetes API reference#).
+
+NOTE: The container security context is applied to all containers in your deployment unless they have their own security already explicitly defined, including regular init containers, stateful set init containers, and additional containers.
+
+The following example shows how you can configure the security context for containers in an individual application pod:
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.containerSecurityContext={allowPrivilegeEscalation: true, runAsUser: 65534}
+----
+====
+
+Replace `<application>` with the name of your application and any attributes with the appropriate values for your container environment.
+
+You can configure the container security context at the global server level as well.
+The following example shows how to do so for streams. Edit the appropriate `skipper-config-(binder).yaml`, replacing `(binder)` with the corresponding binder in use:
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        skipper:
+          server:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: true
+                      runAsUser: 65534
+----
+====
+
+The following example shows how to do so for tasks by editing the `server-config.yaml` file:
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: true
+                      runAsUser: 65534
+----
+====
+
+Adjust the `containerSecurityContext` attributes with the appropriate values for your container environment.
+
 
 ==== Service Ports
 

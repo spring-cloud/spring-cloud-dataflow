@@ -132,6 +132,18 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The CPU request, guaranteed needed value to allocate a pod.
 |<none>
 
+|affinity.nodeAffinity
+|The node affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { nodeSelectorTerms: [ { matchExpressions: [ { key: 'kubernetes.io/e2e-az-name', operator: 'In', values: [ 'e2e-az1', 'e2e-az2']}]}]}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, preference: { matchExpressions: [ { key: 'another-node-label-key', operator: 'In', values: [ 'another-node-label-value' ]}]}}]}```
+|<none>
+
+|affinity.podAffinity
+|The pod affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: [ { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostnam'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|<none>
+
+|affinity.podAntiAffinity
+|The pod anti-affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostname'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|<none>
+
 |statefulSet.volumeClaimTemplate.storageClassName
 |Name of the storage class for a stateful set
 |<none>
@@ -284,12 +296,29 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The maximum concurrent tasks allowed for this platform instance
 |20
 
+[[pod-security-context-props]]
+|podSecurityContext
+|The security context applied to the pod expressed in YAML format. e.g. ```{runAsUser: 65534, fsGroup: 65534, supplementalGroups: [65534, 65535], seccompProfile: { type: 'RuntimeDefault' }}```. Note this defines the entire pod security context - smaller portions of the security context can instead be configured via the  `podSecurityContext.**` properties below.
+|<none>
+
 |podSecurityContext.runAsUser
 |The numeric user ID to run pod container processes under
 |<none>
 
+|podSecurityContext.runAsGroup
+|The numeric group id to run the entrypoint of the container process
+|<none>
+
+|podSecurityContext.runAsNonRoot
+|Indicates that the container must run as a non-root user
+|<none>
+
 |podSecurityContext.fsGroup
 |The numeric group ID for the volumes of the pod
+|<none>
+
+|podSecurityContext.fsGroupChangePolicy
+|Defines behavior of changing ownership and permission of the volume before being exposed inside pod (only applies to volume types which support fsGroup based ownership and permissions) - possible values are "OnRootMismatch", "Always"
 |<none>
 
 |podSecurityContext.supplementalGroups
@@ -297,19 +326,72 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |<none>
 
 |podSecurityContext.seccompProfile
+|The seccomp options to use for the pod containers expressed in YAML format. e.g. ```{ seccompProfile: { type: 'Localhost', localhostProfile: 'my-profiles/profile-allow.json' }}```
+|<none>
+
+|podSecurityContext.seLinuxOptions
+|The SELinux context to be applied to the pod containers expressed in YAML format. e.g. ```{ level: "s0:c123,c456" }``` (not used when spec.os.name is windows).
+|<none>
+
+|podSecurityContext.sysctls
+|List of namespaced sysctls used for the pod expressed in YAML format. e.g. ```[{name: "kernel.shm_rmid_forced", value: 0}]``` (not used when spec.os.name is windows).
+|<none>
+
+|podSecurityContext.windowsOptions
+|The Windows specific settings applied to all containers expressed in YAML format. e.g. ```{ gmsaCredentialSpec: "specA", gmsaCredentialSpecName: "specA-name"}``` (only used when spec.os.name is windows).
+|<none>
+
+[[container-security-context-props]]
+|containerSecurityContext
+|The security context applied to the containers expressed in YAML format. e.g. ```{allowPrivilegeEscalation: true, runAsUser: 65534}```. Note this defines the entire container security context - smaller portions of the security context can instead be configured via the  `containerSecurityContext.**` properties below.
+|<none>
+
+|containerSecurityContext.allowPrivilegeEscalation
+|Whether a process can gain more privileges than its parent process
+|<none>
+
+|containerSecurityContext.capabilities
+|The capabilities to add/drop when running the container expressed in YAML format. e.g. ```{ add: [ "a", "b" ], drop: [ "c" ] }``` (only used when spec.os.name is not windows)
+|<none>
+
+|containerSecurityContext.privileged
+|Run container in privileged mode.
+|<none>
+
+|containerSecurityContext.procMount
+|The type of proc mount to use for the container (only used when spec.os.name is not windows)
+|<none>
+
+|containerSecurityContext.readOnlyRootFilesystem
+|Mounts the container's root filesystem as read-only
+|<none>
+
+|containerSecurityContext.runAsUser
+|The numeric user ID to run pod container processes under
+|<none>
+
+|containerSecurityContext.runAsGroup
+|The numeric group id to run the entrypoint of the container process
+|<none>
+
+|containerSecurityContext.runAsNonRoot
+|Indicates that the container must run as a non-root user
+|<none>
+
+|containerSecurityContext.seccompProfile
 |The seccomp options to use for the pod containers expressed in YAML format.  e.g. ```{ seccompProfile: { type: 'Localhost', localhostProfile: 'my-profiles/profile-allow.json' }}```
 |<none>
 
-|affinity.nodeAffinity
-|The node affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { nodeSelectorTerms: [ { matchExpressions: [ { key: 'kubernetes.io/e2e-az-name', operator: 'In', values: [ 'e2e-az1', 'e2e-az2']}]}]}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, preference: { matchExpressions: [ { key: 'another-node-label-key', operator: 'In', values: [ 'another-node-label-value' ]}]}}]}```
+|containerSecurityContext.seLinuxOptions
+|The SELinux context to be applied to the pod containers expressed in YAML format. e.g. ```{ level: "s0:c123,c456" }``` (not used when spec.os.name is windows).
 |<none>
 
-|affinity.podAffinity
-|The pod affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: [ { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostnam'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|containerSecurityContext.sysctls
+|List of namespaced sysctls used for the pod expressed in YAML format. e.g. ```[{name: "kernel.shm_rmid_forced", value: 0}]``` (not used when spec.os.name is windows).
 |<none>
 
-|affinity.podAntiAffinity
-|The pod anti-affinity expressed in YAML format.  e.g. ```{ requiredDuringSchedulingIgnoredDuringExecution: { labelSelector: { matchExpressions: [ { key: 'app', operator: 'In', values: [ 'store']}]}], topologyKey: 'kubernetes.io/hostname'}, preferredDuringSchedulingIgnoredDuringExecution: [ { weight: 1, podAffinityTerm: { labelSelector: { matchExpressions: [ { key: 'security', operator: 'In', values: [ 'S2' ]}]}, topologyKey: 'failure-domain.beta.kubernetes.io/zone'}}]}```
+|containerSecurityContext.windowsOptions
+|The Windows specific settings applied to all containers expressed in YAML format. e.g. ```{ gmsaCredentialSpec: "specA", gmsaCredentialSpecName: "specA-name"}``` (only used when spec.os.name is windows).
 |<none>
 
 |statefulSetInitContainerImageName
