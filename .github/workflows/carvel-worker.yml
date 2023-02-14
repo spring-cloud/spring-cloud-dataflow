@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: carvel-dev/setup-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login dockerhub
       uses: docker/login-action@v1
       with:
