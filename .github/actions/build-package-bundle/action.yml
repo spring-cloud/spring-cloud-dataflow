@@ -28,9 +28,6 @@ inputs:
   config:
     description: path to ytt config files dir
     required: true
-  token:
-    description: 'GITHUB_TOKEN'
-    required: true
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -39,9 +36,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-  - uses: carvel-dev/setup-action@v1
-    with:
-      token: ${{ inputs.token }}
   - name: Tanzu Dance
     id: tanzu-dance
     env:
