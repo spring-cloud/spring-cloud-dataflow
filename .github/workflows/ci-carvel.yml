@@ -14,10 +14,6 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: src/carvel
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
@@ -27,20 +23,25 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup npm
-      run: |
-        npm install
+      shell: bash
+      working-directory: src/carvel
+      run: npm install
     - name: npm ci
-      run: |
-        npm ci
+      shell: bash
+      working-directory: src/carvel
+      run: npm ci
     - name: Lint
-      run: |
-        npm run format-check
+      shell: bash
+      working-directory: src/carvel
+      run: npm run format-check
     - name: Test
-      run: |
-        npm test
+      shell: bash
+      working-directory: src/carvel
+      run: npm test
     - uses: jvalkeal/setup-maven@v1
       with:
-        maven-version: 3.6.2
+        maven-version: 3.8.4
+        token: ${{ secrets.GITHUB_TOKEN }}
     - name: Login dockerhub
       uses: docker/login-action@v1
       with:
@@ -48,24 +49,24 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure Env
       run: |
-        echo spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
-        echo spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
-        echo spring_cloud_dataflow_version_nopostfix=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
+        echo SPRING_CLOUD_DATAFLOW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        echo SPRING_CLOUD_SKIPPER_VERSION=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
+        echo SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
 
     # Builds a package bundle
     - name: Build Package Bundle
       id: build-package-bundle
       uses: ./.github/actions/build-package-bundle
       with:
-        dataflow-version: ${{ env.spring_cloud_dataflow_version }}
-        skipper-version: ${{ env.spring_cloud_skipper_version }}
-        server-version: ${{ env.spring_cloud_dataflow_version }}
-        server-repository: springcloud/spring-cloud-dataflow-server
-        ctr-version: ${{ env.spring_cloud_dataflow_version }}
-        package-name: scdf
-        package-bundle-template: src/carvel/templates/bundle/package
-        imgpkg-lock-template: src/carvel/templates/imgpkg
-        config: src/carvel/config
+        dataflow-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        skipper-version: '${{ env.SPRING_CLOUD_SKIPPER_VERSION }}'
+        server-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        server-repository: 'springcloud/spring-cloud-dataflow-server'
+        ctr-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        package-name: 'scdf'
+        package-bundle-template: 'src/carvel/templates/bundle/package'
+        imgpkg-lock-template: 'src/carvel/templates/imgpkg'
+        config: 'src/carvel/config'
 
     # Publishes scdf package bundle as it needs to be in place
     # before repository bundle can be created.
@@ -73,28 +74,27 @@ jobs:
       id: publish-package-bundle
       uses: ./.github/actions/publish-bundle
       with:
-        path: ${{ steps.build-package-bundle.outputs.bundle-path }}
-        repository: springcloud/scdf-package
-        version: ${{ env.spring_cloud_dataflow_version_nopostfix }}
-        prerelease: SNAPSHOT
+        path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
+        repository: 'springcloud/scdf-package'
+        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX }}'
+        prerelease: 'SNAPSHOT'
 
     # Builds a repository bundle
     - name: Build Repository Bundle
       id: build-repository-bundle
       uses: ./.github/actions/build-repository-bundle
       with:
-        version: ${{ env.spring_cloud_dataflow_version }}
-        repo-bundle-template: src/carvel/templates/bundle/repo
-        package-bundle-repository: springcloud/scdf-package
-        package-name: scdf
-        token: ${{ secrets.GITHUB_TOKEN }}
+        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        repo-bundle-template: 'src/carvel/templates/bundle/repo'
+        package-bundle-repository: 'springcloud/scdf-package'
+        package-name: 'scdf'
 
     # Publishes scdf repo bundle
     - name: Publish Repository Bundle
       id: publish-repository-bundle
       uses: ./.github/actions/publish-bundle
       with:
-        path: ${{ steps.build-repository-bundle.outputs.bundle-path }}
-        repository: springcloud/scdf-repo
-        version: ${{ env.spring_cloud_dataflow_version_nopostfix }}
-        prerelease: SNAPSHOT
+        path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
+        repository: 'springcloud/scdf-repo'
+        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX }}'
+        prerelease: 'SNAPSHOT'
