@@ -54,3 +54,4 @@ cleanup.sh
 node_modules
 !/.idea/checkstyle-idea.xml
 yagni/
+workspace/
