@@ -17,7 +17,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-  - uses: carvel-dev/setup-action@v1
   - name: Setup Envs
     shell: bash
     run: |

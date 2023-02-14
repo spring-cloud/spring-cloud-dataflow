@@ -47,7 +47,6 @@ jobs:
         package-bundle-template: src/carvel/templates/bundle/package
         imgpkg-lock-template: src/carvel/templates/imgpkg
         config: src/carvel/config
-        token: ${{ secrets.GITHUB_TOKEN }}
 
     # Publishes scdf package bundle as it needs to be in place
     # before repository bundle can be created.
