@@ -11,8 +11,8 @@ on:
 jobs:
 
   # test templating before publishing a package
-  test:
-    name: Test
+  publish:
+    name: Publish
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,13 +38,6 @@ jobs:
     - name: Test
       run: |
         npm test
-
-  publish:
-    name: Publish
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-    - uses: actions/checkout@v2
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.6.2
