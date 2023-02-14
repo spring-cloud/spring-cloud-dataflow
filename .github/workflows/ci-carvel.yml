@@ -41,9 +41,6 @@ jobs:
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.6.2
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.6.2
     - name: Login dockerhub
       uses: docker/login-action@v1
       with:
