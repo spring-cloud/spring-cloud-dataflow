@@ -37,9 +37,9 @@ jobs:
         jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
-          --repo-resolve-releases=libs-milestone \
+          --repo-resolve-releases=libs-spring-dataflow-private-staging-release \
           --repo-resolve-snapshots=libs-snapshot \
-          --repo-deploy-releases=libs-release-local \
+          --repo-deploy-releases=libs-staging-local \
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-build-main-release >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
