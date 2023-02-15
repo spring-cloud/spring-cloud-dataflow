@@ -35,9 +35,12 @@ jobs:
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
+          --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
-          --repo-deploy-releases=libs-staging-local \
-          --repo-deploy-snapshots=libs-staging-local
+          --repo-resolve-releases=libs-milestone \
+          --repo-resolve-snapshots=libs-snapshot \
+          --repo-deploy-releases=libs-release-local \
+          --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-skipper-main-release >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
