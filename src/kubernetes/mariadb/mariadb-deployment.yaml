@@ -18,13 +18,15 @@ spec:
       - image: mariadb:10.4.22
         name: mariadb
         env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
           - name: MARIADB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: mariadb-root-password
                 name: mariadb
-          - name: MARIADB_DATABASE
-            value: 'dataflow'
         ports:
           - containerPort: 3306
             name: mariadb
