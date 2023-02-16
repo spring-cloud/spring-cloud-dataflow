@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.10.2-SNAPSHOT</version>
+		<version>2.10.1-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 	<licenses>

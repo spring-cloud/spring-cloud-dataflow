@@ -25,11 +25,11 @@ Setup _Dataflow_ package repo:
 
 [source, bash]
 ----
-tanzu package repository add scdf-repo --url springcloud/scdf-repo:2.10.2-SNAPSHOT
+tanzu package repository add scdf-repo --url springcloud/scdf-repo:2.10.1-SNAPSHOT
 
 tanzu package repository list
   NAME        REPOSITORY                            STATUS               DETAILS
-  scdf-repo   springcloud/scdf-repo:2.10.2-SNAPSHOT Reconcile succeeded
+  scdf-repo   springcloud/scdf-repo:2.10.1-SNAPSHOT Reconcile succeeded
 
 tanzu package available list
   NAME                   DISPLAY-NAME  SHORT-DESCRIPTION
@@ -37,7 +37,7 @@ tanzu package available list
 
 tanzu package available list scdf.tanzu.vmware.com
   NAME                   VERSION         RELEASED-AT
-  scdf.tanzu.vmware.com  2.10.2-SNAPSHOT
+  scdf.tanzu.vmware.com  2.10.1-SNAPSHOT
 ----
 
 Get password for database and update values yml and install:
@@ -46,6 +46,6 @@ Get password for database and update values yml and install:
 ----
 tanzu package install scdf-demo \
   --package-name scdf.tanzu.vmware.com \
-  --version 2.10.2-SNAPSHOT \
+  --version 2.10.1-SNAPSHOT \
   --values-file examples/tanzu-external-postgres/minikube-values.yml
 ----
