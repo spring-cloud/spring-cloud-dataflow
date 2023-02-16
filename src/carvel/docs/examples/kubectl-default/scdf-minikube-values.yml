@@ -6,7 +6,7 @@ scdf:
       type: mariadb
   server:
     image:
-      tag: 2.10.1-SNAPSHOT
+      tag: 2.10.2-SNAPSHOT
     service:
       type:
         NodePort
@@ -15,4 +15,4 @@ scdf:
       tag: 2.9.1-SNAPSHOT
   ctr:
     image:
-      tag: 2.10.1-SNAPSHOT
+      tag: 2.10.2-SNAPSHOT

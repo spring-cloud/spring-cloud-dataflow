@@ -1,13 +1,13 @@
 #!/bin/bash
 
 VALUES='
-2.10.2,spring-cloud-dataflow-build
-2.10.2,spring-cloud-dataflow-common
-2.8.2,spring-cloud-deployer
-2.8.2,spring-cloud-deployer-local
-2.8.2,spring-cloud-deployer-cloudfoundry
-2.8.2,spring-cloud-deployer-kubernetes
-1.8.2,spring-cloud-common-security-config
+    2.10.2,spring-cloud-dataflow-build
+    2.10.2,spring-cloud-dataflow-common
+  2.8.2,spring-cloud-deployer
+  2.8.2,spring-cloud-deployer-local
+  2.8.2,spring-cloud-deployer-cloudfoundry
+  2.8.2,spring-cloud-deployer-kubernetes
+    1.8.2,spring-cloud-common-security-config
 2.9.2,spring-cloud-skipper
 3.3.2,spring-cloud-dataflow-ui
 2.10.2,spring-cloud-dataflow

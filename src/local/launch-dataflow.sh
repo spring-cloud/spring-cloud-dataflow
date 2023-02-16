@@ -66,7 +66,7 @@ if [ "$USE_PRO" == "true" ]; then
         --spring.datasource.password=spring \
         --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 else
-    java -jar $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.10.1-SNAPSHOT.jar \
+    java -jar $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.10.2-SNAPSHOT.jar \
         --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
         --spring.datasource.username=spring \
         --spring.datasource.password=spring \
