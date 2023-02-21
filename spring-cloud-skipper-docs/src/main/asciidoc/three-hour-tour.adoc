@@ -527,7 +527,7 @@ By default, the following configuration is used:
 ----
 maven:
   remoteRepositories:
-    springRepo: https://repo.spring.io/snapshot
+    springRepo: https://repo.spring.io/libs-snapshot
 ----
 
 You can specify other entries and also specify proxy properties.
@@ -539,7 +539,7 @@ Essentially, this needs to be set as a property in your launch properties or `ma
 # manifest.yml
 ...
 env:
-    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "springRepo": { "url": "https://repo.spring.io/snapshot"} } } }'
+    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "springRepo": { "url": "https://repo.spring.io/libs-snapshot"} } } }'
 ...
 ----
 

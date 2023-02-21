@@ -39,7 +39,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ilayaperumal Gopinathan
  */
 @ActiveProfiles({"repo-test", "local"})
-@TestPropertySource(properties = { "maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot" })
+@TestPropertySource(properties = {
+		"maven.remote-repositories.repo1.url=https://repo.spring.io/libs-snapshot"
+})
 public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzerTests.class);

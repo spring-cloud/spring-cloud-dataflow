@@ -31,7 +31,7 @@ spring:
 
 maven:
   remoteRepositories:
-    springRepo: https://repo.spring.io/snapshot
+    springRepo: https://repo.spring.io/libs-snapshot
 
 logging:
   level:
@@ -47,3 +47,4 @@ logging:
     org.hibernate: 'WARN'
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
+    org.springframework.cloud.deployer: 'DEBUG'
