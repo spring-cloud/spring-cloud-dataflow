@@ -23,4 +23,4 @@ spring:
 maven:
   remoteRepositories:
     springRepo:
-      url: https://repo.spring.io/snapshot
+      url: https://repo.spring.io/libs-snapshot

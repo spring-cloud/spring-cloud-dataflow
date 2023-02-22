@@ -6,13 +6,13 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.5.1-SNAPSHOT
+  DATAFLOW_PRO_VERSION=1.5.2-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  export DATAFLOW_VERSION=2.10.1-SNAPSHOT
+  export DATAFLOW_VERSION=2.10.2-SNAPSHOT
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-  export SKIPPER_VERSION=2.9.1-SNAPSHOT
+  export SKIPPER_VERSION=2.9.2-SNAPSHOT
 fi
 
 case $BROKER in
@@ -73,19 +73,19 @@ if [ "$USE_PRO" = "" ]; then
 fi
 
 if [ "$DATAFLOW_VERSION" = "" ]; then
-    DATAFLOW_VERSION=2.10.1-SNAPSHOT
+    DATAFLOW_VERSION=2.10.2-SNAPSHOT
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-    SKIPPER_VERSION=2.9.1-SNAPSHOT
+    SKIPPER_VERSION=2.9.2-SNAPSHOT
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-    SCDF_PRO_VERSION=1.5.1-SNAPSHOT
+    SCDF_PRO_VERSION=1.5.2-SNAPSHOT
 fi
-K8S_PATH=$(realpath $SCDIR/yaml)
+YAML_PATH=$(realpath $SCDIR/yaml)
 
-echo "K8S_PATH=$K8S_PATH"
+echo "YAML_PATH=$YAML_PATH"
 
 set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
@@ -119,7 +119,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "springcloud/scdf-pro-server" "$SCDF_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server" "$SCDF_PRO_VERSION" true
     else
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
     fi
@@ -144,7 +144,7 @@ kubectl create --namespace "$NS" -f src/kubernetes/$DATABASE/
 if [ "$PROMETHEUS" = "true" ]; then
     echo "Loading Prometheus and Grafana"
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
-        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.1-SNAPSHOT" false
+        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.10.2-SNAPSHOT" false
         sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
         sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
     fi
@@ -164,27 +164,29 @@ kubectl create --namespace "$NS" -f src/kubernetes/server/server-roles.yaml
 kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yaml
 kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
 
-kubectl create --namespace "$NS" -f "$K8S_PATH/datasource-config-$DATABASE.yaml"
+kubectl create --namespace "$NS" -f "$YAML_PATH/datasource-config-$DATABASE.yaml"
 
-kubectl apply --namespace "$NS" -f "$K8S_PATH/server-config.yaml"
+kubectl apply --namespace "$NS" -f "$YAML_PATH/server-config.yaml"
 
 # Deploy Spring Cloud Skipper
 echo "Deploying Skipper $SKIPPER_VERSION for $BROKER and $DATABASE"
-kubectl apply --namespace "$NS" -f "$K8S_PATH/skipper-config-$BROKER.yaml"
-cat "$K8S_PATH/skipper-deployment.yaml" | envsubst '$SKIPPER_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+kubectl apply --namespace "$NS" -f "$YAML_PATH/skipper-config-$BROKER.yaml"
+cat "$YAML_PATH/skipper-deployment.yaml" | envsubst '$SKIPPER_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
 
-kubectl create --namespace "$NS" -f "$K8S_PATH/skipper-svc.yaml"
+kubectl create --namespace "$NS" -f "$YAML_PATH/skipper-svc.yaml"
 
-echo "Deploying Data Flow Server $DATAFLOW_VERSION for $BROKER and $DATABASE"
+
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
 if [ "$USE_PRO" = "true" ]; then
-    cat "$K8S_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+    echo "Deploying Data Flow Server Pro $DATAFLOW_PRO_VERSION for $BROKER and $DATABASE"
+    cat "$YAML_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
 else
-    cat "$K8S_PATH/server-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+    echo "Deploying Data Flow Server $DATAFLOW_VERSION for $BROKER and $DATABASE"
+    cat "$YAML_PATH/server-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
 fi
 
 
-kubectl create --namespace "$NS" -f "$K8S_PATH/server-svc.yaml"
+kubectl create --namespace "$NS" -f "$YAML_PATH/server-svc.yaml"
 
 popd >/dev/null

@@ -60,7 +60,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
 		"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
-		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
@@ -93,7 +93,7 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 				.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 				.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-				.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+				.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 				.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
 				.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 				.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
@@ -112,7 +112,7 @@ public class AboutControllerTests {
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -137,7 +137,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
@@ -174,7 +174,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.7.2-SNAPSHOT/spring-cloud-dataflow-shell-2.7.2-SNAPSHOT.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.7.2-SNAPSHOT/spring-cloud-dataflow-shell-2.7.2-SNAPSHOT.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.7.2-SNAPSHOT")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
@@ -211,7 +211,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.M1/spring-cloud-dataflow-shell-1.2.3.M1.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.M1/spring-cloud-dataflow-shell-1.2.3.M1.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.M1")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
@@ -249,7 +249,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RC1/spring-cloud-dataflow-shell-1.2.3.RC1.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RC1/spring-cloud-dataflow-shell-1.2.3.RC1.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RC1")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
@@ -333,7 +333,7 @@ public class AboutControllerTests {
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha256-url="
 	})
@@ -359,7 +359,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
 		}
@@ -374,7 +374,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1",
@@ -414,7 +414,7 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
@@ -443,7 +443,7 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/libs-milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
