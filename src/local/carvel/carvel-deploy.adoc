@@ -1,0 +1,124 @@
+:source-highlighter: rouge
+= Deploy Spring Cloud Data Flow using Carvel
+
+== Required Tools
+
+* `kubectl` - Kubernetes CLI
+* `carvel` - Packaging and Deployment tools
+
+Carvel CLI can be installed using:
+
+[source,shell]
+....
+wget -O- https://carvel.dev/install.sh | bash
+# or with curl...
+curl -L https://carvel.dev/install.sh | bash
+....
+
+Alternative following the instructions at the bottom of the home page at link:https://carvel.dev/[carvel.dev]
+
+Zip file with scripts or follow the instructions below to create the scripts.
+
+*If you don't have the zip bundle these file can be created by executing the following scripts in a Bash or similar shell, from the section "Create scripts and other files"*
+
+=== Scripts
+
+These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
+
+The following commandline utilities are also used:
+* `jq` - lightweight JSON
+* `wget` - Invoke http requests.
+* `dirname` provides the directory part of a filename.
+* `readlink` provides absolute path of a relative link.
+
+NOTE: Some of these utilities are not installed in macOS by default but will be available from MacPorts or HomeBrew.
+
+
+
+[cols="3m,3,6"]
+|===
+|Name | Arguments |Descriptions
+
+| prepare-cluster.sh
+| N/A
+| Installs cert-manager, secretgen-controller and kapp-controller
+
+| setup-scdf-repo.sh
+| [scdf-type] (oss, pro)
+| Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| deploy-scdf.sh
+| [scdf-type] (oss, pro)
+| Deploys the application using the package and the relevant values file.
+If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| update-scdf.sh
+| [scdf-type] (oss, pro)
+| Updated the deployed application using a modified values file.
+If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| export-dataflow-ip.sh
+| N/A
+| Will print the URL to access dataflow. If you use `source ./export-dataflow-ip.sh` it will export `DATAFLOW_URL` to be used by `register-apps.sh`
+
+| register-apps.sh
+| <broker> [stream-application-version]
+| _broker_ must be one of rabbit or kafka.
+_stream-application-version_ is optional and will install the latest version. The latest version is 2021.1.2
+|===
+
+NOTE: Take note that the registration of application in the _pro_ version can take a few minutes since it retrieves all version information and metadata upfront.
+
+=== Prepare Configuration files
+
+Create a file name `scdf-pro-values.yml` with the following text:
+
+[source,yaml]
+....
+include::scripts/scdf-pro-values.yml[]
+....
+
+Create a file name `scdf-oss-values.yml` with the following text:
+
+[source,yml]
+....
+include::scripts/scdf-oss-values.yml[]
+....
+
+NOTE: The value files can be modified to select _mariadb_ or _postgres_ and _kafka_ or _rabbit_. You  can also configure external databases and brokers.
+
+
+== Add repository and deploy package
+
+Execute the following in a shell.
+
+[source,shell]
+....
+# if you are installing the pro version these entries are required
+export TANZU_DOCKER_USERNAME="<tanzu-net-username>"
+export TANZU_DOCKER_PASSWORD="<tanzu-net-password>"
+# Always required to ensure you don't experience rate limiting with Docker HUB
+export DOCKER_HUB_USERNAME="<docker-hub-username>"
+export DOCKER_HUB_PASSWORD="<docker-hub-password>"
+
+sh ./prepare-cluster.sh
+# change to SCDF_TYPE=oss for the OSS version.
+export SCDF_TYPE=pro
+# Namespace
+export NS=scdf
+# scdf-type is optional and will be derived from SCDF_TYPE environmental variable.
+sh ./setup-scdf-repo.sh [scdf-type]
+sh ./deploy-scdf.sh [scdf-type]
+# This should display Dataflow URL: <url-to-access-dataflow>
+sh ./export-dataflow-ip.sh
+
+# If the load balancer is secure or has a name then use export DATAFLOW_URL with the correct address to access the server.
+# Register apps will need DATAFLOW_URL in order to register the stream and task applications. If not present this script will use source ./export-dataflow-ip.sh to obtain the value.
+sh ./register-apps.sh <broker>
+....
+
+=== Update deployed package.
+
+You can modify the values file used during installation and then update the deployment using `update-scdf.sh`
+
+

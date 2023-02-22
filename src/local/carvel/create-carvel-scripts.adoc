@@ -1,0 +1,88 @@
+= Create Scripts for Carvel Deployment.
+
+In the case where you cannot download the scripts or receive them via email the following instructions will allow you to create all the files by copying and pasting a shell command that will create the various files.
+
+== Create scripts and other files
+
+Create a file named `prepare-cluster.sh` using:
+[source,shell]
+....
+cat <<EOF >prepare-cluster.sh
+include::prepare-cluster.sh.txt[]
+EOF
+....
+
+Create a file name `add-roles.sh` using:
+
+[source,shell]
+....
+cat <<EOF >add-roles.sh
+include::add-roles.sh.txt[]
+EOF
+....
+
+Create a file named `secret-gen-export.yml` using:
+[source,shell]
+....
+cat <<EOF >secret-gen-export.yml
+include::secret-gen-export.yml.txt[]
+EOF
+....
+
+Create a file named `setup-scdf-repo.sh` using:
+
+[source,shell]
+....
+cat <<EOF >setup-scdf-repo.sh
+include::setup-scdf-repo.sh.txt[]
+EOF
+....
+
+Create a file named `deploy-scdf.sh` using:
+[source,shell]
+....
+cat <<EOF >deploy-scdf.sh
+include::deploy-scdf.sh.txt[]
+EOF
+....
+
+Create a file named `delete-scdf.sh` using:
+[source,shell]
+....
+cat <<EOF >delete-scdf.sh
+include::delete-scdf.sh.txt[]
+EOF
+....
+
+Create a file named `export-dataflow-ip.sh` using:
+[source,shell]
+....
+cat <<EOF >export-dataflow-ip.sh
+include::export-dataflow-ip.sh.txt[]
+EOF
+....
+
+Create a file named `register-apps.sh` using:
+[source,shell]
+....
+cat <<EOF >register-apps
+include::register-apps.sh.txt[]
+EOF
+....
+
+Create a file named `update-scdf.sh` using:
+[source,shell]
+....
+cat <<EOF >update-scdf.sh
+include::update-scdf.sh.txt[]
+EOF
+....
+
+== Executable scripts
+
+In order to ensure the scripts are executable run the following:
+
+[source,shell]
+....
+chmod a+x *.sh
+....

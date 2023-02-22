@@ -75,7 +75,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
         fi
       done
     done
-    minikube image load "$IMAGE"
+    PULL=true
+    if [ "$DONT_PULL" == "true" ]; then
+        PULL=false
+    fi
+    minikube image load --pull=$PULL "$IMAGE"
     ;;
   esac
   echo "Loaded:$IMAGE"

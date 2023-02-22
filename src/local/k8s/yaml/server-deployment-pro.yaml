@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: scdf-server
-          image: springcloud/scdf-pro-server:${DATAFLOW_PRO_VERSION}
+          image: dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server:${DATAFLOW_PRO_VERSION}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config
@@ -89,7 +89,7 @@ spec:
               value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
               # Add Maven repo for metadata artifact resolution for all stream apps
             - name: SPRING_APPLICATION_JSON
-              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
+              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -140,4 +140,4 @@ spec:
                 path: 'application-kubernetes.yaml'
         - name: database
           secret:
-            secretName: mariadb
+            secretName: ${DATABASE}

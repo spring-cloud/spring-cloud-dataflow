@@ -1,0 +1,16 @@
+= Simple solution
+
+* SchemaTarget  Selection represents a set of schema version, prefix and name.
+* Boot 2 is default and task and batch will remain as current.
+* Boot 3 task and batch tables will have the same prefix BOOT3_
+* Data flow server will set the properties for prefixes for task and batch.
+* Registration will require Schema (Boot2, Boot3) selection indicator.
+* At task launch data flow server will create an entry in the correct task-exectution table and sequence mechanism with given prefix based on registration of task.
+* Ability to disable Boot 3 support. The feature endpoint will include this indicator.
+* The endpoints to list job and task executions will have to accept the BootVersion as an query parameter  when it is absent is implies the default condition. `http://localhost:9393/tasks/executions{?schemaTarget}`
+* When using the shell to list executions it will be an optional parameter `--schema-target=boot3`
+* When viewing the Task Execution list or Job Execution list there will be a drop-down with the option of Default and Boot3.
+* The each item in the list of executions do include links to retrieve the entity, and will be encoded with the schemaTarget by the resource assembler.
+
+* The UI only needs to add  the drop-downs and passing selection into the query.
+* The user will not have to do anything extra when creating composed tasks.

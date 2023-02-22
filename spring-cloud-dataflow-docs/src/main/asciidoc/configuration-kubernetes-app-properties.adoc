@@ -279,7 +279,7 @@ You can use a `SPRING_APPLICATION_JSON` environment variable to set Data Flow se
 ----
 env:
 - name: SPRING_APPLICATION_JSON
-  value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
+  value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
 ----
 ====
 

@@ -30,6 +30,8 @@ services:
       MARIADB_ROOT_PASSWORD: rootpw
     expose:
       - 3306
+    ports:
+      - '3306:3306'
 
   dataflow-server:
     environment:
