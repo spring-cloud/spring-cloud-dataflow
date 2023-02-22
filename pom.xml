@@ -535,7 +535,7 @@
 				<repository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/snapshot</url>
+					<url>https://repo.spring.io/libs-snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -543,7 +543,7 @@
 				<repository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
+					<url>https://repo.spring.io/libs-milestone</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -561,7 +561,7 @@
 				<pluginRepository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/snapshot</url>
+					<url>https://repo.spring.io/libs-snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -569,7 +569,7 @@
 				<pluginRepository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
+					<url>https://repo.spring.io/libs-milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -612,7 +612,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.7.4.201502262128</version>
+						<version>0.8.8</version>
 						<configuration>
 							<destFile>${sonar.jacoco.reportPath}</destFile>
 							<append>true</append>
@@ -645,7 +645,7 @@
 				<dependency>
 					<groupId>org.sonarsource.java</groupId>
 					<artifactId>sonar-jacoco-listeners</artifactId>
-					<version>3.8</version>
+					<version>4.2</version>
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
