@@ -59,7 +59,7 @@ if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
     DESCRIPTORS="https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
-    DESCRIPTORS="https://repo1.maven.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    DESCRIPTORS="https://repo.maven.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"
