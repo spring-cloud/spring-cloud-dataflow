@@ -18,7 +18,7 @@ Alternatively, you can set the properties by setting the `SPRING_APPLICATION_JSO
 
 The remote Maven repositories need to be configured explicitly if the applications are resolved by using the Maven repository, except for a `local` Data Flow server.
 The other Data Flow server implementations (which use Maven resources for application artifacts resolution) have no default value for remote repositories.
-The `local` server has `https://repo.spring.io/snapshot` as the default remote repository.
+The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
 
 To pass the properties as command-line options, run the server with a command similar to the following:
 

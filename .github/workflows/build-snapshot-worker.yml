@@ -39,7 +39,7 @@ jobs:
       run: |
         jfrog rt mvnc \
           --server-id-deploy=repo.spring.io \
-          --repo-deploy-releases=release \
+          --repo-deploy-releases=milestone \
           --repo-deploy-snapshots=snapshot
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-29x >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
@@ -60,6 +60,9 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-29x >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease=$(echo '${parsedVersion.qualifier}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
 
     # build and publish images via composite action
     - name: Build and Publish Images
@@ -68,6 +71,7 @@ jobs:
         version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
         dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
