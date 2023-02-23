@@ -10,6 +10,9 @@ jobs:
   build:
     if: github.repository_owner == 'spring-cloud'
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}
+      cancel-in-progress: true
     steps:
     - uses: actions/checkout@v3
     # cache maven repo
@@ -39,7 +42,7 @@ jobs:
         jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
-          --repo-resolve-releases=libs-release \
+          --repo-resolve-releases=libs-milestone \
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=release \
           --repo-deploy-snapshots=snapshot
