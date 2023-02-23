@@ -15,7 +15,7 @@ if [ "$STREAM_APPS_VERSION" = "" ]; then
   STREAM_URI="https://dataflow.spring.io/$BROKER-docker-latest"
 else
   STREAM_APPS_VERSION=2021.1.2
-  STREAM_URI=https://repo1.maven.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER-docker
+  STREAM_URI=https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER-docker
 fi
 if [ "$DATAFLOW_URL" = "" ]; then
   source $SCDIR/export-dataflow-ip.sh

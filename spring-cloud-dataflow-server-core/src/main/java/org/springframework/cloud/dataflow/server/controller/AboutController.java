@@ -302,7 +302,7 @@ public class AboutController {
 		final String REPO_SNAPSHOT_ROOT = "https://repo.spring.io/libs-snapshot";
 		final String REPO_MILESTONE_ROOT = "https://repo.spring.io/libs-milestone";
 		final String REPO_RELEASE_ROOT = "https://repo.spring.io/release";
-		final String MAVEN_ROOT = "https://repo1.maven.org/maven2";
+		final String MAVEN_ROOT = "https://repo.maven.apache.org/maven2";
 
 		String result = MAVEN_ROOT;
 		if (version.endsWith("-SNAPSHOT")) {
