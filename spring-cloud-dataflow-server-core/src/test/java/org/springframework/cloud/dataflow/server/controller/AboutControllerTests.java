@@ -283,7 +283,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.GA/spring-cloud-dataflow-shell-1.2.3.GA.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.maven.apache.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.GA/spring-cloud-dataflow-shell-1.2.3.GA.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.GA")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
@@ -320,7 +320,7 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.maven.apache.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RELEASE")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
