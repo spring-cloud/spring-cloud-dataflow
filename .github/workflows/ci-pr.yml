@@ -25,8 +25,17 @@ jobs:
         maven-version: 3.6.2
     # build
     - name: Build
+      env:
+        VERBOSE: ${{ github.debug && 'true' || '' }}
       run: |
-        mvn -U -B clean package
+        MVN_OPT=
+        if [ "$VERBOSE" = "true" ]; then
+          MVN_OPT="-X"
+        fi
+        set +e 
+        mvn $MVN_OPT -U -B -s .github/settings.xml dependency:resolve
+        set -e
+        mvn $MVN_OPT -B -s .github/settings.xml clean package
     # clean m2 cache
     - name: Clean cache
       run: |
