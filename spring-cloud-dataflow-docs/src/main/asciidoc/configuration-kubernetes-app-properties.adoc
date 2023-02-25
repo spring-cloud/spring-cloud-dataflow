@@ -1161,3 +1161,43 @@ The following example shows how you can configure additional containers for an a
 deployer.<application>.kubernetes.additionalContainers=[{name: 'c1', image: 'busybox:latest', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]},{name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]
 ----
 ====
+
+==== Schedule
+===== ttlSecondsAfterFinished
+
+When scheduling an application, You can clean up finished Jobs (either Complete or Failed ) automatically by specifying ttlSecondsAfterFinished value.
+
+The following example shows how you can individually configure application jobs:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.cron.ttlSecondsAfterFinished=86400
+----
+====
+
+Replace `<application>` with the name of your application and the `ttlSecondsAfterFinished` attribute with the appropriate value for clean up finished Jobs.
+
+You can configure the ttlSecondsAfterFinished at the global server level as well.
+
+The following example shows how to do so for tasks:
+
+====
+[source,yaml]
+----
+data:
+  application.yaml: |-
+    spring:
+      cloud:
+        dataflow:
+          task:
+            platform:
+              kubernetes:
+                accounts:
+                  default:
+                    cron:
+                      ttlSecondsAfterFinished: 86400
+----
+====
+
+Replace the `ttlSecondsAfterFinished` attribute with the appropriate value for clean up finished Jobs.
