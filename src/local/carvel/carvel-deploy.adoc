@@ -97,9 +97,12 @@ Execute the following in a shell.
 # if you are installing the pro version these entries are required
 export TANZU_DOCKER_USERNAME="<tanzu-net-username>"
 export TANZU_DOCKER_PASSWORD="<tanzu-net-password>"
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD dev.registry.pivotal.io
+
 # Always required to ensure you don't experience rate limiting with Docker HUB
 export DOCKER_HUB_USERNAME="<docker-hub-username>"
 export DOCKER_HUB_PASSWORD="<docker-hub-password>"
+docker login --username DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD index.docker.io
 
 sh ./prepare-cluster.sh
 # change to SCDF_TYPE=oss for the OSS version.
