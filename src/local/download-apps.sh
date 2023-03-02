@@ -24,7 +24,7 @@ function download_deps() {
         URL="https://repo.spring.io/libs-milestone"
     else
         INC_VER=false
-        URL="https://repo1.maven.apache.org/maven2"
+        URL="https://repo.maven.apache.org/maven2"
     fi
 
     GROUP_ID=$(echo "$DEP" | awk -F":" '{split($0,a); print a[1]}')
