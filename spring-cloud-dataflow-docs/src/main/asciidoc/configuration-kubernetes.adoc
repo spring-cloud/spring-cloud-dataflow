@@ -789,7 +789,6 @@ This section covers customization of how scheduled tasks are configured. Schedul
 
 NOTE: Unless noted, properties set on a per-schedule basis always take precedence over properties set as the server configuration. This arrangement allows for the ability to override global server level properties for a specific schedule.
 
-See https://github.com/spring-cloud/spring-cloud-scheduler-kubernetes/blob/master/src/main/java/org/springframework/cloud/scheduler/spi/kubernetes/KubernetesSchedulerProperties.java[`KubernetesSchedulerProperties`] for more on the supported options.
 
 ==== Entry Point Style
 
@@ -816,7 +815,7 @@ You can also configure the Entry Point Style at the server level in the containe
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_ENTRY_POINT_STYLE
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_ENTRY_POINT_STYLE
   value: entryPointStyle
 ----
 
@@ -826,6 +825,35 @@ Replace `entryPointStyle` with the desired Entry Point Style.
 You should choose an Entry Point Style of either `exec` or `shell`, to correspond to how the `ENTRYPOINT` syntax is defined in the container's `Dockerfile`. For more information and uses cases on `exec` vs `shell`, see the https://docs.docker.com/engine/reference/builder/#entrypoint[ENTRYPOINT] section of the Docker documentation.
 
 Using the `boot` Entry Point Style corresponds to using the `exec` style `ENTRYPOINT`. Command line arguments from the deployment request are passed to the container, with the addition of application properties mapped into the `SPRING_APPLICATION_JSON` environment variable rather than command line arguments.
+
+===== ttlSecondsAfterFinished
+
+When scheduling an application, You can clean up finished Jobs (either Complete or Failed) automatically by specifying `ttlSecondsAfterFinished` value.
+
+The following example shows how you can individually configure application jobs:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.cron.ttlSecondsAfterFinished=86400
+----
+====
+
+Replace `<application>` with the name of your application and the `ttlSecondsAfterFinished` attribute with the appropriate value for clean up finished Jobs.
+
+You can configure the `ttlSecondsAfterFinished` at the global server level as well.
+
+The following example shows how to do so for tasks:
+
+You can configure an image pull policy at the server level in the container `env` section of a deployment YAML, as the following example shows:
+
+[source]
+----
+env:
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_TTL_SECONDS_AFTER_FINISHED
+  value: 86400
+----
+
 
 ==== Environment Variables
 
@@ -849,7 +877,7 @@ NOTE: When specifying environment variables in the server configuration and on a
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_ENVIRONMENT_VARIABLES
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_ENVIRONMENT_VARIABLES
   value: myVar=myVal
 ----
 
@@ -881,7 +909,7 @@ You can configure an image pull policy at the server level in the container `env
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_IMAGE_PULL_POLICY
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_IMAGE_PULL_POLICY
   value: Always
 ----
 
@@ -909,7 +937,7 @@ You can also configure the image pull secret at the server level in the containe
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_IMAGE_PULL_SECRET
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_IMAGE_PULL_SECRET
   value: mysecret
 ----
 
@@ -924,7 +952,7 @@ By default the namespace used for scheduled tasks is `default`. This value can b
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_NAMESPACE
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_NAMESPACE
   value: mynamespace
 ----
 
@@ -958,7 +986,7 @@ You can also configure the service account name at the server level in the conta
 [source]
 ----
 env:
-- name: SPRING_CLOUD_SCHEDULER_KUBERNETES_TASK_SERVICE_ACCOUNT_NAME
+- name: SPRING_CLOUD_DEPLOYER_KUBERNETES_TASK_SERVICE_ACCOUNT_NAME
   value: myserviceaccountname
 ----
 
