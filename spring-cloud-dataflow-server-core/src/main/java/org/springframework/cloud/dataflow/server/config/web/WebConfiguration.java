@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.cloud.dataflow.core.AppBootVersion;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -58,6 +61,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author Christian Tzolov
  * @author David Turanski
  * @author Michael Wirth
+ * @author Chris Bono
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
@@ -91,6 +95,11 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUseSuffixPatternMatch(false);
+			}
+
+			@Override
+			public void addFormatters(FormatterRegistry registry) {
+				registry.addConverter(new AppBootVersionConverter());
 			}
 		};
 	}
@@ -133,4 +142,13 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 			this.longTaskSample = null;
 		}
 	}
+
+	static class AppBootVersionConverter implements Converter<String, AppBootVersion> {
+
+		@Override
+		public AppBootVersion convert(String value) {
+			return AppBootVersion.fromBootVersion(value);
+		}
+	}
+
 }
