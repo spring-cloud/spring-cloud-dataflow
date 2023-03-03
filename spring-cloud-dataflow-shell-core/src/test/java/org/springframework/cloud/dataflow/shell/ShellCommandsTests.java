@@ -69,6 +69,7 @@ public class ShellCommandsTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testSingleFileCommand() {
 		String commandFiles = toAbsolutePaths("commands/registerTask_timestamp.txt");
+		// TODO add boot 3 checks
 		assertThat(runShell(commandFiles)).isTrue();
 		assertAppExists("timestamp", ApplicationType.task);
 	}

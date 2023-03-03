@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Properties;
 
-import org.springframework.cloud.dataflow.core.AppBootVersion;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
@@ -115,11 +115,11 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 
 	@Override
 	public AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force) {
-		return register(name, type, (AppBootVersion) null, uri, metadataUri, force);
+		return register(name, type, (AppBootSchemaVersion) null, uri, metadataUri, force);
 	}
 
 	@Override
-	public AppRegistrationResource register(String name, ApplicationType type, AppBootVersion bootVersion,
+	public AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion,
 			String uri, String metadataUri, boolean force) {
 		MultiValueMap<String, Object> values = valuesForRegisterPost(bootVersion, uri, metadataUri, force);
 		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}", values,
@@ -129,19 +129,19 @@ public class AppRegistryTemplate implements AppRegistryOperations {
 	@Override
 	public AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
 			String metadataUri, boolean force) {
-		return this.register(name, type, AppBootVersion.BOOT2, version, uri, metadataUri, force);
+		return this.register(name, type, null, version, uri, metadataUri, force);
 	}
 
 	@Override
-	public AppRegistrationResource register(String name, ApplicationType type, AppBootVersion bootVersion,
+	public AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion,
 			String version, String uri, String metadataUri, boolean force) {
 		MultiValueMap<String, Object> values = valuesForRegisterPost(bootVersion, uri, metadataUri, force);
 		return restTemplate.postForObject(appsLink.getHref() + "/{type}/{name}/{version}", values,
 				AppRegistrationResource.class, type, name, version);
 	}
 
-	private MultiValueMap<String, Object> valuesForRegisterPost(AppBootVersion bootVersion, String uri,
-			String metadataUri, boolean force) {
+	private MultiValueMap<String, Object> valuesForRegisterPost(AppBootSchemaVersion bootVersion, String uri,
+																String metadataUri, boolean force) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("uri", uri);
 		if (metadataUri != null) {

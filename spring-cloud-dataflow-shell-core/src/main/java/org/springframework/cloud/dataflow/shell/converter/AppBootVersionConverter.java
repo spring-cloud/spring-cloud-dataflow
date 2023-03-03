@@ -16,20 +16,20 @@
 
 package org.springframework.cloud.dataflow.shell.converter;
 
-import org.springframework.cloud.dataflow.core.AppBootVersion;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * Converts strings to {@link AppBootVersion}
+ * Converts strings to {@link AppBootSchemaVersion}
  *
  * @author Chris Bono
  */
 @Component
-public class AppBootVersionConverter implements Converter<String, AppBootVersion> {
+public class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {
 
 	@Override
-	public AppBootVersion convert(String value) {
-		return AppBootVersion.fromBootVersion(value);
+	public AppBootSchemaVersion convert(String value) {
+		return value != null ? AppBootSchemaVersion.fromBootVersion(value) : null;
 	}
 }

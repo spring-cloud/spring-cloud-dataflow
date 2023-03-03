@@ -34,7 +34,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.cloud.dataflow.core.AppBootVersion;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.context.ApplicationListener;
@@ -62,6 +62,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author David Turanski
  * @author Michael Wirth
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
@@ -143,11 +144,11 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		}
 	}
 
-	static class AppBootVersionConverter implements Converter<String, AppBootVersion> {
+	static class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {
 
 		@Override
-		public AppBootVersion convert(String value) {
-			return AppBootVersion.fromBootVersion(value);
+		public AppBootSchemaVersion convert(String value) {
+			return value != null ? AppBootSchemaVersion.fromBootVersion(value) : null;
 		}
 	}
 

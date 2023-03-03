@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
- * Unit tests for {@link AppBootVersion}.
+ * Unit tests for {@link AppBootSchemaVersion}.
  *
  * @author Chris Bono
  */
@@ -30,33 +30,26 @@ public class AppBootVersionTests {
 
 	@Test
 	void bootVersion2() {
-		assertThat(AppBootVersion.BOOT2.getBootVersion()).isEqualTo("2");
-		assertThat(AppBootVersion.BOOT2.getDescription()).isEqualTo("Boot 2 Tasks/Jobs");
-		assertThat(AppBootVersion.BOOT2.getTaskPrefix()).isNull();
-		assertThat(AppBootVersion.BOOT2.getBatchPrefix()).isNull();
-		assertThat(AppBootVersion.BOOT2.toString()).isEqualTo(
-				"AppBootVersion{description='Boot 2 Tasks/Jobs', bootVersion='2', taskPrefix='null', batchPrefix='null'}");
+		assertThat(AppBootSchemaVersion.BOOT2.getBootVersion()).isEqualTo("2");
 	}
 
 	@Test
 	void bootVersion3() {
-		assertThat(AppBootVersion.BOOT3.getBootVersion()).isEqualTo("3");
-		assertThat(AppBootVersion.BOOT3.getDescription()).isEqualTo("Boot 3 Tasks/Jobs");
-		assertThat(AppBootVersion.BOOT3.getTaskPrefix()).isEqualTo("BOOT3_TASK_");
-		assertThat(AppBootVersion.BOOT3.getBatchPrefix()).isEqualTo("BOOT3_BATCH_");
-		assertThat(AppBootVersion.BOOT3.toString()).isEqualTo(
-				"AppBootVersion{description='Boot 3 Tasks/Jobs', bootVersion='3', taskPrefix='BOOT3_TASK_', batchPrefix='BOOT3_BATCH_'}");
-
+		assertThat(AppBootSchemaVersion.BOOT3.getBootVersion()).isEqualTo("3");
 	}
 
 	@Test
 	void fromBootVersion() {
-		assertThat(AppBootVersion.fromBootVersion("2")).isEqualTo(AppBootVersion.BOOT2);
-		assertThat(AppBootVersion.fromBootVersion("3")).isEqualTo(AppBootVersion.BOOT3);
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootVersion.fromBootVersion(null))
-				.withMessage("Unsupported bootVersion: null");
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootVersion.fromBootVersion("4"))
-				.withMessage("Unsupported bootVersion: 4");
-	}
+		assertThat(AppBootSchemaVersion.fromBootVersion("2")).isEqualTo(AppBootSchemaVersion.BOOT2);
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("Boot2")).withMessage("Invalid AppBootSchemaVersion:Boot2");
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("boot2")).withMessage("Invalid AppBootSchemaVersion:boot2");
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("BOOT2")).withMessage("Invalid AppBootSchemaVersion:BOOT2");
 
+		assertThat(AppBootSchemaVersion.fromBootVersion("3")).isEqualTo(AppBootSchemaVersion.BOOT3);
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("Boot3")).withMessage("Invalid AppBootSchemaVersion:Boot3");
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("boot3")).withMessage("Invalid AppBootSchemaVersion:boot3");
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("BOOT3")).withMessage("Invalid AppBootSchemaVersion:BOOT3");
+
+		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion(null)).withMessage("Invalid AppBootSchemaVersion:null");
+	}
 }

@@ -399,7 +399,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 			String[] typeName = lineSplit[0].split("\\.");
 			if (typeName.length < 2 || typeName.length > 3) {
 				throw new IllegalArgumentException("Invalid format for app key '" + lineSplit[0]
-						+ "'in file. Must be <type>.<name> or <type>.<name>.metadata");
+						+ "'in file. Must be <type>.<name> or <type>.<name>.metadata or <type>.<name>.bootVersion");
 			}
 			String type = typeName[0].trim();
 			String name = typeName[1].trim();
