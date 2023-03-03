@@ -259,7 +259,7 @@ public class AppRegistryController {
 	public void register(
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
-			@RequestParam(name = "boot-version", required = false) AppBootSchemaVersion bootVersion,
+			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
 			@RequestParam("uri") String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {

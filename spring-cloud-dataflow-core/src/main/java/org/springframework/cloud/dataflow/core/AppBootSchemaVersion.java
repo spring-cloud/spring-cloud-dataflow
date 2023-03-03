@@ -29,16 +29,18 @@ import java.util.Arrays;
 public enum AppBootSchemaVersion {
 
 	BOOT2("2"),
-	BOOT3( "3");
+	BOOT3("3");
 
 	private String bootVersion;
 
 	AppBootSchemaVersion(String bootVersion) {
 		this.bootVersion = bootVersion;
 	}
+
 	public static AppBootSchemaVersion defaultVersion() {
 		return BOOT2;
 	}
+
 	public static AppBootSchemaVersion fromBootVersion(String bootVersion) {
 		return Arrays.stream(AppBootSchemaVersion.values())
 				.filter((bv) -> bv.bootVersion.equals(bootVersion))
