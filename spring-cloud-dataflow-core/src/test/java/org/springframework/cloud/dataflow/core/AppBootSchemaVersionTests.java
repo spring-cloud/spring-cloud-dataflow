@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.core;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -25,8 +28,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Unit tests for {@link AppBootSchemaVersion}.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class AppBootVersionTests {
+public class AppBootSchemaVersionTests {
 
 	@Test
 	void bootVersion2() {
@@ -39,17 +43,17 @@ public class AppBootVersionTests {
 	}
 
 	@Test
-	void fromBootVersion() {
+	void fromBootVersionWithValidValues() {
 		assertThat(AppBootSchemaVersion.fromBootVersion("2")).isEqualTo(AppBootSchemaVersion.BOOT2);
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("Boot2")).withMessage("Invalid AppBootSchemaVersion:Boot2");
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("boot2")).withMessage("Invalid AppBootSchemaVersion:boot2");
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("BOOT2")).withMessage("Invalid AppBootSchemaVersion:BOOT2");
-
 		assertThat(AppBootSchemaVersion.fromBootVersion("3")).isEqualTo(AppBootSchemaVersion.BOOT3);
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("Boot3")).withMessage("Invalid AppBootSchemaVersion:Boot3");
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("boot3")).withMessage("Invalid AppBootSchemaVersion:boot3");
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion("BOOT3")).withMessage("Invalid AppBootSchemaVersion:BOOT3");
+	}
 
-		assertThatIllegalArgumentException().isThrownBy(() -> AppBootSchemaVersion.fromBootVersion(null)).withMessage("Invalid AppBootSchemaVersion:null");
+	@ParameterizedTest
+	@NullAndEmptySource
+	@ValueSource(strings = { "Boot2", "boot2", "BOOT2", "foo", "Boot3", "boot3", "BOOT3" })
+	void fromBootVersionWithInvalidValues(String invalidBootVersion) {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> AppBootSchemaVersion.fromBootVersion(invalidBootVersion))
+				.withMessage("Invalid AppBootSchemaVersion: %s", invalidBootVersion);
 	}
 }
