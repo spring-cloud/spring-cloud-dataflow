@@ -20,12 +20,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -71,6 +71,7 @@ import org.springframework.util.StringUtils;
  * @author Oleg Zhurakousky
  * @author Christian Tzolov
  * @author Chris Schaefer
+ * @author Corneil du Plessis
  */
 @Transactional
 public class DefaultAppRegistryService implements AppRegistryService {
@@ -224,8 +225,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	}
 
 	@Override
-	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri) {
-		return this.save(new AppRegistration(name, type, version, uri, metadataUri));
+	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion) {
+		return this.save(new AppRegistration(name, type, version, uri, metadataUri, bootVersion));
 	}
 
 	@Override
@@ -363,24 +364,17 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public List<AppRegistration> importAll(boolean overwrite, Resource... resources) {
-		List<AppRegistration> registrations = new ArrayList<>();
-		Stream.of(resources)
-				// parallel takes effect if multiple resources
-				.parallel()
+		List<String[]> lines = Stream.of(resources)
 				// take lines
 				.flatMap(this::resourceAsLines)
 				// take valid splitted lines
-				.flatMap(this::splitValidLines)
-				// reduce to AppRegistration map key'd by <type><name><version>
-				.reduce(new HashMap<String, AppRegistration>(), reduceToAppRegistrations(), (left, right) -> {
-					// combiner is used if multiple resources caused parallel stream,
-					// then just let last processed resource to override.
-					left.putAll(right);
-					return left;
-				})
-				// don't care about keys anymore
-				.values()
-				// back to stream
+				.flatMap(this::splitValidLines).collect(Collectors.toList());
+		Map<String, AppRegistration> registrations = new HashMap<>();
+		AppRegistration previous = null;
+		for(String [] line : lines) {
+			previous = createAppRegistrations(registrations, line, previous);
+		}
+		List<AppRegistration> result = registrations.values()
 				.stream()
 				// drop registration if it doesn't have main uri as user only had metadata
 				.filter(ar -> ar.getUri() != null)
@@ -388,54 +382,62 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				.filter(ar -> isOverwrite(ar, overwrite))
 				.map(ar -> {
 					save(ar);
-					registrations.add(ar);
 					return ar;
 				}).collect(Collectors.toList());
-		return registrations;
+		return result;
 	}
 
-	private BiFunction<HashMap<String, AppRegistration>, ? super String[], HashMap<String, AppRegistration>> reduceToAppRegistrations() {
-		return (map, lineSplit) -> {
-			String[] typeName = lineSplit[0].split("\\.");
-			if (typeName.length < 2 || typeName.length > 3) {
-				throw new IllegalArgumentException("Invalid format for app key '" + lineSplit[0]
-						+ "'in file. Must be <type>.<name> or <type>.<name>.metadata");
+	private AppRegistration createAppRegistrations(Map<String, AppRegistration> registrations, String[] lineSplit, AppRegistration previous) {
+		String[] typeName = lineSplit[0].split("\\.");
+		if (typeName.length < 2 || typeName.length > 3) {
+			throw new IllegalArgumentException("Invalid format for app key '" + lineSplit[0]
+					+ "'in file. Must be <type>.<name> or <type>.<name>.metadata or <type>.<name>.bootVersion");
+		}
+		String type = typeName[0].trim();
+		String name = typeName[1].trim();
+		String extra = typeName.length == 3 ? typeName[2] : null;
+		String version = "bootVersion".equals(extra) ? null : getResourceVersion(lineSplit[1]);
+		// This is now versioned key
+		String key = type + name + version;
+		if (!registrations.containsKey(key) && registrations.containsKey(type + name + "latest")) {
+			key = type + name + "latest";
+		}
+		if("bootVersion".equals(extra)) {
+			if (previous == null) {
+				throw new IllegalArgumentException("Expected uri for bootVersion:" + lineSplit[0]);
 			}
-			String type = typeName[0].trim();
-			String name = typeName[1].trim();
-			String version = getResourceVersion(lineSplit[1]);
-			// This is now versioned key
-			String key = type + name + version;
-			if (!map.containsKey(key) && map.containsKey(type + name + "latest")) {
-				key = type + name + "latest";
+			ApplicationType appType = ApplicationType.valueOf(type);
+			Assert.isTrue(appType == previous.getType() && name.equals(previous.getName()), "Expected previous to be same type and name for:" + lineSplit[0]);
+			previous.setBootVersion(AppBootSchemaVersion.fromBootVersion(lineSplit[1]));
+			return previous;
+		}
+		AppRegistration ar = registrations.getOrDefault(key, new AppRegistration());
+		ar.setName(name);
+		ar.setType(ApplicationType.valueOf(type));
+		ar.setVersion(version);
+		if (typeName.length == 2) {
+			// normal app uri
+			try {
+				ar.setUri(new URI(lineSplit[1]));
+				warnOnMalformedURI(lineSplit[0], ar.getUri());
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e);
 			}
-			AppRegistration ar = map.getOrDefault(key, new AppRegistration());
-			ar.setName(name);
-			ar.setType(ApplicationType.valueOf(type));
-			ar.setVersion(version);
-			if (typeName.length == 2) {
-				// normal app uri
-				try {
-					ar.setUri(new URI(lineSplit[1]));
-					warnOnMalformedURI(lineSplit[0], ar.getUri());
-				}
-				catch (Exception e) {
-					throw new IllegalArgumentException(e);
-				}
-			}
-			else if (typeName.length == 3) {
+		} else if (typeName.length == 3) {
+			if (extra.equals("metadata")) {
 				// metadata app uri
 				try {
 					ar.setMetadataUri(new URI(lineSplit[1]));
 					warnOnMalformedURI(lineSplit[0], ar.getMetadataUri());
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
+			} else if (!"bootVersion".equals(extra)) {
+				throw new IllegalArgumentException("Invalid property: " + lineSplit[0]);
 			}
-			map.put(key, ar);
-			return map;
-		};
+		}
+		registrations.put(key, ar);
+		return ar;
 	}
 
 	private Stream<String> resourceAsLines(Resource resource) {
