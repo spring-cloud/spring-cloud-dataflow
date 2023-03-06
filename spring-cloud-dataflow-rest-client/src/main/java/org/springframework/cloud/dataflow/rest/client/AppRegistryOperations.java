@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Properties;
 
-import org.springframework.cloud.dataflow.core.AppBootVersion;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
@@ -83,7 +83,7 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootVersion, String, String, boolean)}
+	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
@@ -93,13 +93,13 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name application name
 	 * @param type application type
-	 * @param bootVersion application boot version
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
+	 * @param bootVersion application boot version
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootVersion bootVersion, String uri, String metadataUri, boolean force);
+	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, AppBootSchemaVersion bootVersion, boolean force);
 
 	/**
 	 * Register an application name, type and version with its Maven coordinates.
@@ -111,7 +111,7 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootVersion, String, String, String, boolean)}
+	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, String, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
@@ -122,15 +122,20 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name application name
 	 * @param type application type
-	 * @param bootVersion application boot version
 	 * @param version application version
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
+	 * @param bootVersion application boot version
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootVersion bootVersion, String version, String uri,
-			String metadataUri, boolean force);
+	AppRegistrationResource register(String name,
+									 ApplicationType type,
+									 String version,
+									 String uri,
+									 String metadataUri,
+									 AppBootSchemaVersion bootVersion,
+									 boolean force);
 
 	/**
 	 * Unregister an application name and type.

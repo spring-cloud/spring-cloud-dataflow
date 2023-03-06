@@ -113,7 +113,7 @@ public class TaskSchedulerControllerTests {
 	@Test
 	public void testListSchedules() throws Exception {
 		this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
@@ -128,7 +128,7 @@ public class TaskSchedulerControllerTests {
 	public void testGetSchedule() throws Exception {
 
 		this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
@@ -150,7 +150,7 @@ public class TaskSchedulerControllerTests {
 	@Test
 	public void testListSchedulesByTaskDefinitionName() throws Exception {
 		this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("foo", "testApp"));
 		repository.save(new TaskDefinition("bar", "testApp"));
@@ -185,7 +185,7 @@ public class TaskSchedulerControllerTests {
 
 	private void createAndVerifySchedule(String scheduleName, String createdScheduleName) throws Exception {
 		this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
@@ -248,7 +248,7 @@ public class TaskSchedulerControllerTests {
 	}
 
 	private String createScheduleWithArguments(String arguments) throws Exception {
-		this.registry.save("testApp", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+		this.registry.save("testApp", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
@@ -278,7 +278,7 @@ public class TaskSchedulerControllerTests {
 	@Test
 	public void testCreateScheduleBadCron() throws Exception {
 		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
@@ -291,7 +291,7 @@ public class TaskSchedulerControllerTests {
 	@Test
 	public void testRemoveSchedulesByTaskName() throws Exception {
 		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("mySchedule");
@@ -306,7 +306,7 @@ public class TaskSchedulerControllerTests {
 	@Test
 	public void testRemoveSchedule() throws Exception {
 		AppRegistration registration = this.registry.save("testApp", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("mySchedule");

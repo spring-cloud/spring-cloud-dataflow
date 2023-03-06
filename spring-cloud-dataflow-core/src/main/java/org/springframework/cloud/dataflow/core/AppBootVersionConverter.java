@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.converter;
+package org.springframework.cloud.dataflow.core;
 
-import org.springframework.cloud.dataflow.core.AppBootVersion;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
 /**
- * Converts strings to {@link AppBootVersion}
- *
+ * Convert AppBootSchemaVersion in Web requests.
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-@Component
-public class AppBootVersionConverter implements Converter<String, AppBootVersion> {
+public class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {
 
 	@Override
-	public AppBootVersion convert(String value) {
-		return AppBootVersion.fromBootVersion(value);
+	public AppBootSchemaVersion convert(String value) {
+		return value != null ? AppBootSchemaVersion.fromBootVersion(value) : null;
 	}
 }

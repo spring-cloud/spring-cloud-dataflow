@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.AppBootVersion;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -83,6 +83,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Patrick Peralta
  * @author Thomas Risberg
  * @author Chris Schaefer
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/apps")
@@ -233,7 +234,7 @@ public class AppRegistryController {
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
 			@PathVariable("version") String version,
-			@RequestParam(name = "bootVersion", required = false) AppBootVersion bootVersion,
+			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
 			@RequestParam("uri") String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
@@ -245,7 +246,7 @@ public class AppRegistryController {
 		}
 		try {
 			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
-					metadataUri != null ? new URI(metadataUri) : null);
+					metadataUri != null ? new URI(metadataUri) : null, bootVersion);
 			prefetchMetadata(Arrays.asList(registration));
 		}
 		catch (URISyntaxException e) {
@@ -259,7 +260,7 @@ public class AppRegistryController {
 	public void register(
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
-			@RequestParam(name = "bootVersion", required = false) AppBootVersion bootVersion,
+			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
 			@RequestParam("uri") String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
