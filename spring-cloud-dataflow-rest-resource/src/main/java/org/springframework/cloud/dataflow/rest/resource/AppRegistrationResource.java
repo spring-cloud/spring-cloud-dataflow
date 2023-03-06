@@ -17,7 +17,9 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.util.HashSet;
+import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -28,6 +30,7 @@ import org.springframework.hateoas.RepresentationModel;
  * @author Mark Fisher
  * @author Patrick Peralta
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class AppRegistrationResource extends RepresentationModel<AppRegistrationResource> {
 
@@ -57,9 +60,13 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	private Boolean defaultVersion;
 
 	/**
+	 * Represents Spring Boot version supporting Task / Batch schema versions.
+	 */
+	private AppBootSchemaVersion bootVersion;
+	/**
 	 * All the registered versions for this app.
 	 */
-	private HashSet<String> versions;
+	private Set<String> versions;
 
 	/**
 	 * The label name of the application.
@@ -73,7 +80,7 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	}
 
 	public AppRegistrationResource(String name, String type, String uri) {
-		this(name, type, null, uri, false);
+		this(name, type, null, uri, null, false);
 	}
 
 	/**
@@ -83,13 +90,15 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param type app type
 	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param bootVersion Spring Boot version of the application
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion) {
+	public AppRegistrationResource(String name, String type, String version, String uri, AppBootSchemaVersion bootVersion, Boolean defaultVersion) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.bootVersion = bootVersion;
 		this.defaultVersion = defaultVersion;
 	}
 
@@ -100,14 +109,16 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param type app type
 	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param bootVersion Spring Boot version of the application
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 * @param versions all the registered versions of this application
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, HashSet<String> versions) {
+	public AppRegistrationResource(String name, String type, String version, String uri, AppBootSchemaVersion bootVersion, Boolean defaultVersion, Set<String> versions) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.bootVersion = bootVersion;
 		this.defaultVersion = defaultVersion;
 		this.versions = versions;
 	}
@@ -119,20 +130,21 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param type app type
 	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param bootVersion Spring Boot version of the application
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 * @param versions all the registered versions of this application
 	 * @param label the label name of the application
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, HashSet<String> versions, String label) {
+	public AppRegistrationResource(String name, String type, String version, String uri, AppBootSchemaVersion bootVersion, Boolean defaultVersion, HashSet<String> versions, String label) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.bootVersion = bootVersion;
 		this.defaultVersion = defaultVersion;
 		this.versions = versions;
 		this.label = label;
 	}
-
 
 	/**
 	 * @return the name of the app
@@ -162,6 +174,10 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 		return version;
 	}
 
+	public AppBootSchemaVersion getBootVersion() {
+		return bootVersion != null ? bootVersion : AppBootSchemaVersion.defaultVersion();
+	}
+
 	/**
 	 * @return if this app selected to be the default
 	 */
@@ -172,7 +188,7 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	/**
 	 * @return all the available versions of the app
 	 */
-	public HashSet<String> getVersions() {
+	public Set<String> getVersions() {
 		return this.versions;
 	}
 

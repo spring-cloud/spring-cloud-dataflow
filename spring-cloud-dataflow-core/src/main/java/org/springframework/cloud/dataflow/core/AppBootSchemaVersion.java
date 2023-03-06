@@ -18,6 +18,9 @@ package org.springframework.cloud.dataflow.core;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * Defines the possible schema versions that currently map to Spring {@code "Boot"}. A registered application can only support one schema version.
  *
@@ -26,6 +29,8 @@ import java.util.Arrays;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
+@JsonSerialize(using = AppBootSchemaVersionSerializer.class)
+@JsonDeserialize(using = AppBootSchemaVersionDeserializer.class)
 public enum AppBootSchemaVersion {
 
 	BOOT2("2"),

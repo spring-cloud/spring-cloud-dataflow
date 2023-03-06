@@ -20,6 +20,7 @@ create table app_registration (
   type integer,
   uri clob,
   version varchar(255),
+  boot_version varchar(16),
   primary key (id)
 );
 

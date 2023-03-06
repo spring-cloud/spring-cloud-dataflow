@@ -34,14 +34,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.core.AppBootVersionConverter;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.hateoas.server.core.DefaultLinkRelationProvider;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -62,7 +61,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author David Turanski
  * @author Michael Wirth
  * @author Chris Bono
- * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
@@ -141,14 +139,6 @@ public class WebConfiguration implements ServletContextInitializer, ApplicationL
 		if (this.longTaskSample != null) {
 			this.longTaskSample.stop();
 			this.longTaskSample = null;
-		}
-	}
-
-	static class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {
-
-		@Override
-		public AppBootSchemaVersion convert(String value) {
-			return value != null ? AppBootSchemaVersion.fromBootVersion(value) : null;
 		}
 	}
 
