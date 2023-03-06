@@ -93,13 +93,13 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name application name
 	 * @param type application type
-	 * @param bootVersion application boot version
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
+	 * @param bootVersion application boot version
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion, String uri, String metadataUri, boolean force);
+	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, AppBootSchemaVersion bootVersion, boolean force);
 
 	/**
 	 * Register an application name, type and version with its Maven coordinates.
@@ -122,15 +122,20 @@ public interface AppRegistryOperations {
 	 *
 	 * @param name application name
 	 * @param type application type
-	 * @param bootVersion application boot version
 	 * @param version application version
 	 * @param uri URI for the application artifact
 	 * @param metadataUri URI for the application metadata artifact
+	 * @param bootVersion application boot version
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
 	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion, String version, String uri,
-									 String metadataUri, boolean force);
+	AppRegistrationResource register(String name,
+									 ApplicationType type,
+									 String version,
+									 String uri,
+									 String metadataUri,
+									 AppBootSchemaVersion bootVersion,
+									 boolean force);
 
 	/**
 	 * Unregister an application name and type.

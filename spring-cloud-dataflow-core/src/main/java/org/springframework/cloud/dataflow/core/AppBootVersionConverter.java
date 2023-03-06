@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.shell.converter;
+package org.springframework.cloud.dataflow.core;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Component;
  * Converts strings to {@link AppBootSchemaVersion}
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @Component
 public class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {

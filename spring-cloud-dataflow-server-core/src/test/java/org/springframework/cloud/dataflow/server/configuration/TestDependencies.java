@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
 import org.springframework.cloud.dataflow.completion.TaskCompletionProvider;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
+import org.springframework.cloud.dataflow.core.AppBootVersionConverter;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
@@ -169,6 +171,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -177,7 +180,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -748,4 +753,20 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
 		return transactionManager;
 	}
+	@Bean
+	public WebMvcConfigurer configurer() {
+		return new WebMvcConfigurer() {
+
+			@Override
+			public void configurePathMatch(PathMatchConfigurer configurer) {
+				configurer.setUseSuffixPatternMatch(false);
+			}
+
+			@Override
+			public void addFormatters(FormatterRegistry registry) {
+				registry.addConverter(new AppBootVersionConverter());
+			}
+		};
+	}
+
 }

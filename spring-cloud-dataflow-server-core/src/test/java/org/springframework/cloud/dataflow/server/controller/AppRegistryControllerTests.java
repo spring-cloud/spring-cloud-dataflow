@@ -29,6 +29,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
@@ -124,6 +125,45 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+	}
+
+	@Test
+	public void testRegisterBoot3App() throws Exception {
+		// given
+		mockMvc.perform(
+				post("/apps/sink/log1/3.0.0")
+						.queryParam("bootVersion", "3")
+						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
+				)
+				.andDo(print())
+				.andExpect(status().isCreated());
+		// when
+		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
+		// then
+		assertThat(registration.getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0"));
+		assertThat(registration.getBootVersion(), is(AppBootSchemaVersion.BOOT3));
+	}
+
+	@Test
+	public void testRegisterAppAndUpdateToBoot3() throws Exception {
+		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
+				.andDo(print()).andExpect(status().isCreated());
+		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		// given
+		mockMvc.perform(post("/apps/sink/log1/3.0.0")
+								.queryParam("force", "true")
+								.queryParam("bootVersion", "3")
+								.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
+				)
+				.andDo(print())
+				.andExpect(status().isCreated());
+		// updating default version to 3.0.0
+		mockMvc.perform(put("/apps/sink/log1/3.0.0")).andDo(print()).andExpect(status().isAccepted());
+		// when
+		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
+		// then
+		assertThat(registration.getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0"));
+		assertThat(registration.getBootVersion(), is(AppBootSchemaVersion.BOOT3));
 	}
 
 	@Test
