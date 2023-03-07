@@ -32,15 +32,14 @@ import org.springframework.cloud.dataflow.shell.command.TaskScheduleCommandTempl
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.shell.Shell;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
-import org.springframework.util.SocketUtils;
 
 /**
  * Base class for shell integration tests. This class sets up and tears down the
  * infrastructure required for executing shell tests - in particular, the Data Flow
  * server.
- *
  * Extensions of this class may obtain instances of command templates. For example, call
  * {@link #stream} to obtain a {@link StreamCommandTemplate} in order to perform stream
  * operations.
@@ -68,7 +67,7 @@ public abstract class AbstractShellIntegrationTest {
 	/**
 	 * TCP port for the server.
 	 */
-	private static final int serverPort = SocketUtils.findAvailableTcpPort();
+	private static final int serverPort = TestSocketUtils.findAvailableTcpPort();
 
 	/**
 	 * Application context for server application.
@@ -107,15 +106,11 @@ public abstract class AbstractShellIntegrationTest {
 	@BeforeClass
 	public static void startUp() {
 		if (applicationContext == null) {
-			if (System.getProperty(SHUTDOWN_AFTER_RUN) != null) {
-				shutdownAfterRun = Boolean.getBoolean(SHUTDOWN_AFTER_RUN);
-			}
-
-			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
-
-			int randomPort = SocketUtils.findAvailableTcpPort();
+			shutdownAfterRun = Boolean.parseBoolean(System.getProperty(SHUTDOWN_AFTER_RUN, "false"));
+			int randomPort = TestSocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
 			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
+			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
 			applicationContext = application.run(String.format("--server.port=%s", serverPort), dataFlowUri,
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",
 					"--security.basic.enabled=false", "--spring.main.show_banner=false",
@@ -123,9 +118,7 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl,
 					"--spring.cloud.dataflow.features.schedules-enabled=true");
-
 			Shell shell = applicationContext.getBean(Shell.class);
-
 			skipperClient = applicationContext.getBean(SkipperClient.class);
 			commandRunner = new ShellCommandRunner(shell);
 		}
@@ -133,13 +126,10 @@ public abstract class AbstractShellIntegrationTest {
 
 	@AfterClass
 	public static void shutdown() {
-		if (shutdownAfterRun) {
-			if (applicationContext != null) {
-				logger.info("Stopping Data Flow Server");
-				SpringApplication.exit(applicationContext);
-
-				applicationContext = null;
-			}
+		if (shutdownAfterRun && applicationContext != null) {
+			logger.info("Stopping Data Flow Server");
+			SpringApplication.exit(applicationContext);
+			applicationContext = null;
 		}
 	}
 
@@ -198,6 +188,14 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 	/**
+	 * Gets the configured shell command runner.
+	 * @return the configured shell command runner
+	 */
+	protected ShellCommandRunner commandRunner() {
+		return commandRunner;
+	}
+
+	/**
 	 * Return a unique random name for stream/task testing.
 	 *
 	 * @param name name to use as part of stream/task name
@@ -221,4 +219,3 @@ public abstract class AbstractShellIntegrationTest {
 	}
 
 }
-
