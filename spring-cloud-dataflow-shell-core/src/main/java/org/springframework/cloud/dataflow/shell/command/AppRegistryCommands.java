@@ -182,10 +182,10 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 
 		List<AppRegistrationResource> appRegistrations = findAllAppsByNameAndType(name, type);
 		Optional<AppRegistrationResource> defaultApp = appRegistrations.stream()
-				.filter(a -> a.getDefaultVersion() == true).findFirst();
+				.filter(AppRegistrationResource::getDefaultVersion).findFirst();
 
 		if (!CollectionUtils.isEmpty(appRegistrations) && !defaultApp.isPresent()) {
-			String appVersions = appRegistrations.stream().map(app -> app.getVersion())
+			String appVersions = appRegistrations.stream().map(AppRegistrationResource::getVersion)
 					.collect(Collectors.joining(", ", "(", ")"));
 			return String.format("Successfully unregistered application '%s' with type '%s'. " +
 					"Please select new default version from: %s", name, type, appVersions);
@@ -240,7 +240,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	public String register(
 			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
 			@ShellOption(help = "the type for the registered application", valueProvider = EnumValueProvider.class) ApplicationType type,
-			@ShellOption(value = { "-bv", "--bootVersion" }, help = "the boot version to use for the registered application", defaultValue = ShellOption.NULL) AppBootSchemaVersion bootVersion,
+			@ShellOption(value = { "-b", "--bootVersion" }, help = "the boot version to use for the registered application", defaultValue = ShellOption.NULL) AppBootSchemaVersion bootVersion,
 			@ShellOption(help = "URI for the application artifact") String uri,
 			@ShellOption(value = { "-m", "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
@@ -275,7 +275,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 			List<String> column = mappings.get(appRegistration.getType());
 			String value = appRegistration.getName();
 			if (application != null) {
-				String version = StringUtils.isEmpty(appRegistration.getVersion()) ? "" : "-"+appRegistration.getVersion();
+				String version = StringUtils.hasLength(appRegistration.getVersion()) ?  ("-" + appRegistration.getVersion()) : "";
 				value = value + version;
 				if (appRegistration.getDefaultVersion()) {
 					value = String.format("> %s <", value);
@@ -333,7 +333,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
 				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
-				PagedModel<AppRegistrationResource> registered = null;
+				PagedModel<AppRegistrationResource> registered;
 				try {
 					registered = appRegistryOperations().registerAll(applications, force);
 				}
