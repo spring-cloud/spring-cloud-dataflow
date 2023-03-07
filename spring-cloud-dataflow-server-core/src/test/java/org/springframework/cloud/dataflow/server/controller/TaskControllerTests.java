@@ -211,7 +211,7 @@ public class TaskControllerTests {
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn(null);
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
-				"1.0.0", new URI("maven://org.springframework.cloud:foo:1"), null, null);
+				"1.0.0", new URI("maven://org.springframework.cloud:foo:1"), null);
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isInternalServerError());
@@ -230,7 +230,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSave() throws Exception {
 		assertThat(repository.count()).isZero();
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
@@ -246,7 +246,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testSaveDuplicate() throws Exception {
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
@@ -256,7 +256,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveWithParameters() throws Exception {
 
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -275,7 +275,7 @@ public class TaskControllerTests {
 
 	@Test
 	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
-		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
+		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -296,7 +296,7 @@ public class TaskControllerTests {
 	@Test
 	public void testSaveCompositeTaskWithParameters() throws Exception {
 
-		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
+		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
 				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -502,7 +502,7 @@ public class TaskControllerTests {
 	public void testLaunch() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
@@ -542,7 +542,7 @@ public class TaskControllerTests {
 
 			repository.save(new TaskDefinition("myTask", "foo"));
 			this.registry.save("foo", ApplicationType.task,
-					"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+					"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 			mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isCreated());
@@ -570,7 +570,7 @@ public class TaskControllerTests {
 
 		repository.save(new TaskDefinition("myTask2", "foo2 --common.prop2=wizz"));
 		this.registry.save("foo2", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask2")
 				.accept(MediaType.APPLICATION_JSON))
@@ -588,7 +588,7 @@ public class TaskControllerTests {
 	public void testLaunchWithArguments() throws Exception {
 		repository.save(new TaskDefinition("myTask3", "foo3"));
 		this.registry.save("foo3", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		mockMvc.perform(post("/tasks/executions")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -686,7 +686,7 @@ public class TaskControllerTests {
 	public void testValidate() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 
 		mockMvc.perform(get("/tasks/validation/myTask")).andExpect(status().isOk())
 				.andDo(print()).andExpect(content().json(
@@ -707,7 +707,7 @@ public class TaskControllerTests {
 				.thenReturn(Arrays.asList(taskExecutionComplete, taskExecutionComplete));
 		repository.save(new TaskDefinition("myTask3", "foo"));
 		this.registry.save("foo", ApplicationType.task,
-				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
+				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
 		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
 		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk());

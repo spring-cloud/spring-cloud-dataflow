@@ -83,7 +83,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Patrick Peralta
  * @author Thomas Risberg
  * @author Chris Schaefer
- * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/apps")
@@ -246,7 +245,7 @@ public class AppRegistryController {
 		}
 		try {
 			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
-					metadataUri != null ? new URI(metadataUri) : null, bootVersion);
+					metadataUri != null ? new URI(metadataUri) : null);
 			prefetchMetadata(Arrays.asList(registration));
 		}
 		catch (URISyntaxException e) {
