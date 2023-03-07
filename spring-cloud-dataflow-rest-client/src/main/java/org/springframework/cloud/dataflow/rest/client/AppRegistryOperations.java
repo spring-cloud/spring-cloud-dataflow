@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2023 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Properties;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
@@ -33,7 +32,6 @@ import org.springframework.hateoas.PagedModel;
  * @author Patrick Peralta
  * @author Mark Fisher
  * @author Chris Schaefer
- * @author Chris Bono
  */
 public interface AppRegistryOperations {
 
@@ -83,23 +81,8 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, boolean)}
 	 */
-	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
-
-	/**
-	 * Register an application name, type, and boot version with its Maven coordinates.
-	 *
-	 * @param name application name
-	 * @param type application type
-	 * @param bootVersion application boot version
-	 * @param uri URI for the application artifact
-	 * @param metadataUri URI for the application metadata artifact
-	 * @param force if {@code true}, overwrites a pre-existing registration
-	 * @return the new app registration
-	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion, String uri, String metadataUri, boolean force);
 
 	/**
 	 * Register an application name, type and version with its Maven coordinates.
@@ -111,26 +94,9 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, String, boolean)}
 	 */
-	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
 			String metadataUri, boolean force);
-
-	/**
-	 * Register an application name, type, boot version, and version with its Maven coordinates.
-	 *
-	 * @param name application name
-	 * @param type application type
-	 * @param bootVersion application boot version
-	 * @param version application version
-	 * @param uri URI for the application artifact
-	 * @param metadataUri URI for the application metadata artifact
-	 * @param force if {@code true}, overwrites a pre-existing registration
-	 * @return the new app registration
-	 */
-	AppRegistrationResource register(String name, ApplicationType type, AppBootSchemaVersion bootVersion, String version, String uri,
-									 String metadataUri, boolean force);
 
 	/**
 	 * Unregister an application name and type.

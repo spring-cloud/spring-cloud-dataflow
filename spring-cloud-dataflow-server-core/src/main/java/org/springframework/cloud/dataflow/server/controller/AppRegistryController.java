@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -222,21 +221,17 @@ public class AppRegistryController {
 	 * @param type module type
 	 * @param name module name
 	 * @param version module version
-	 * @param bootVersion module boot version or {@code null} to use the default
 	 * @param uri URI for the module artifact (e.g. {@literal maven://group:artifact:version})
 	 * @param metadataUri URI for the metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
 	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(
-			@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name,
+	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
 			@PathVariable("version") String version,
-			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
-			@RequestParam("uri") String uri,
-			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
+			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+
 		validateApplicationName(name);
 		appRegistryService.validate(appRegistryService.getDefaultApp(name, type), uri, version);
 		AppRegistration previous = appRegistryService.find(name, type, version);
@@ -256,15 +251,11 @@ public class AppRegistryController {
 	@Deprecated
 	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(
-			@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name,
-			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
-			@RequestParam("uri") String uri,
-			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
+	public void register(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
+			@RequestParam("uri") String uri, @RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		String version = this.appRegistryService.getResourceVersion(uri);
-		this.register(type, name, version, bootVersion, uri, metadataUri, force);
+		this.register(type, name, version, uri, metadataUri, force);
 	}
 
 	/**
