@@ -174,6 +174,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 						fieldWithPath("version").description("The version of the application"),
 						fieldWithPath("versions").description("All the registered versions of the application"),
 						fieldWithPath("defaultVersion").description("If true, the application is the default version"),
+						fieldWithPath("bootVersion").description("The version of Spring Boot the application targets (2, 3)"),
 						subsectionWithPath("options").description("The options of the application (Array)"),
 						fieldWithPath("shortDescription").description("The description of the application"),
 						fieldWithPath("inboundPortNames").description("Inbound port names of the application"),
