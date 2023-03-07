@@ -21,14 +21,12 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
@@ -50,10 +48,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -211,7 +207,7 @@ public class DefaultAppRegistryServiceTests {
 
 		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
 				eq(fooSource2.getName()), eq(fooSource2.getType()), eq(fooSource2.getVersion())))
-				.thenReturn(fooSource2);
+						.thenReturn(fooSource2);
 
 		appRegistryService.save(fooSource);
 
@@ -247,7 +243,7 @@ public class DefaultAppRegistryServiceTests {
 				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
 		assertThat(appRegistration, hasProperty("metadataUri",
 				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
-		assertThat(appRegistration, hasProperty("type", is(ApplicationType.sink)));
+		assertThat(appRegistration,	hasProperty("type", is(ApplicationType.sink)));
 	}
 
 	@Test
@@ -550,49 +546,6 @@ public class DefaultAppRegistryServiceTests {
 		List<AppRegistration> appsToDelete = Collections.emptyList();
 		appRegistryService.deleteAll(appsToDelete);
 		verify(appRegistrationRepository, times(1)).deleteAll(appsToDelete);
-	}
-
-	@Test
-	public void testMultipleBootVersions() {
-		// given
-		Resource resource = new ClassPathResource("AppRegistryTests-importMultipleBootVersions.properties", getClass());
-		// when
-		List<AppRegistration> result = appRegistryService.importAll(false, resource);
-		// then
-		List<AppRegistration> boot2 = result.stream().filter(r -> r.getBootVersion().equals(AppBootSchemaVersion.BOOT2)).collect(Collectors.toList());
-		List<AppRegistration> boot3 = result.stream().filter(r -> r.getBootVersion().equals(AppBootSchemaVersion.BOOT3)).collect(Collectors.toList());
-		assertEquals(1L, boot2.size());
-		assertEquals(1L, boot3.size());
-		assertEquals("2.0.1", boot2.get(0).getVersion());
-		assertEquals("3.0.0", boot3.get(0).getVersion());
-	}
-	@Test
-	public void testMultipleBootVersionsExpectError() {
-		// given
-		Resource resource = new ClassPathResource("AppRegistryTests-importInvalidBootVersions.properties", getClass());
-		// when
-		try {
-			appRegistryService.importAll(false, resource);
-			fail("Expected Exception");
-		} catch (IllegalArgumentException x) {
-			// then
-			assertTrue(x.toString().contains("Invalid"));
-		}
-	}
-	@Test
-	public void testBootVersionsMissingURI() {
-		// given
-		Resource resource = new ClassPathResource("AppRegistryTests-importBootVersionsMissingURI.properties", getClass());
-		// when
-		try {
-			appRegistryService.importAll(false, resource);
-			fail("Expected Exception");
-		} catch (IllegalArgumentException x) {
-			// then
-			assertNotNull(x.getMessage());
-			System.out.println("Exception:" + x.getMessage());
-			assertTrue(x.getMessage().startsWith("Expected uri for bootVersion") || x.getMessage().startsWith("Expected previous to be same type and name for"));
-		}
 	}
 
 	private AppRegistration appRegistration() {

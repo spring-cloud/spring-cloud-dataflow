@@ -296,7 +296,7 @@ public class DataFlowIT {
         // Docker app with container image metadata
         dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata",
                 ApplicationType.source,
-                "docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null,  true);
+                "docker:springcloudstream/time-source-kafka:2.1.4.RELEASE", null, true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadata = dataFlowOperations.appRegistryOperations()
                 .info("docker-app-with-container-metadata", ApplicationType.source, false);
         assertThat(dockerAppWithContainerMetadata.getOptions()).hasSize(6);
@@ -304,7 +304,7 @@ public class DataFlowIT {
         // Docker app with container image metadata with escape characters.
         dataFlowOperations.appRegistryOperations().register("docker-app-with-container-metadata-escape-chars",
                 ApplicationType.source,
-                "docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null,  true);
+                "docker:springcloudstream/http-source-rabbit:2.1.3.RELEASE", null, true);
         DetailedAppRegistrationResource dockerAppWithContainerMetadataWithEscapeChars = dataFlowOperations
                 .appRegistryOperations()
                 .info("docker-app-with-container-metadata-escape-chars", ApplicationType.source, false);

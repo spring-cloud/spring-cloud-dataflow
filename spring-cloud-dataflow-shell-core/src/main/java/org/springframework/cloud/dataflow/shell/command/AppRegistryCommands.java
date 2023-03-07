@@ -85,10 +85,11 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	private static final String APPLICATION_INFO = "app info";
 	private static final String LIST_APPLICATIONS = "app list";
 
-	protected final DataFlowShell dataFlowShell;
+	protected DataFlowShell dataFlowShell;
 	protected ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	public AppRegistryCommands(DataFlowShell dataFlowShell) {
+	@Autowired
+	public void setDataFlowShell(DataFlowShell dataFlowShell) {
 		this.dataFlowShell = dataFlowShell;
 	}
 
@@ -245,7 +246,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 			@ShellOption(help = "URI for the application artifact") String uri,
 			@ShellOption(value = { "-m", "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
-		appRegistryOperations().register(name, type, uri, metadataUri, bootVersion, force);
+		appRegistryOperations().register(name, type, bootVersion, uri, metadataUri, force);
 		return String.format(("Successfully registered application '%s:%s%s"), type, name,
 				bootVersion == null ? "" : " (boot " + bootVersion.getBootVersion() + ")");
 	}

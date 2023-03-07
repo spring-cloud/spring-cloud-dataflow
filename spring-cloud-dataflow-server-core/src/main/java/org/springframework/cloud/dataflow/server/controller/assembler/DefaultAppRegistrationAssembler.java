@@ -38,23 +38,11 @@ public class DefaultAppRegistrationAssembler<R extends AppRegistrationResource> 
 
 	@Override
 	protected R instantiateModel(AppRegistration registration) {
-		AppRegistrationResource appRegistrationResource = (registration.getVersions() == null)
-				? new AppRegistrationResource(
-						registration.getName(),
-						registration.getType().name(),
-						registration.getVersion(),
-						registration.getUri().toString(),
-						registration.getBootVersion(),
-						registration.isDefaultVersion()
-				) : new AppRegistrationResource(
-						registration.getName(),
-						registration.getType().name(),
-						registration.getVersion(),
-						registration.getUri().toString(),
-						registration.getBootVersion(),
-						registration.isDefaultVersion(),
-						registration.getVersions()
-				);
+		AppRegistrationResource appRegistrationResource = (registration.getVersions() == null) ? new AppRegistrationResource(registration.getName(), registration.getType().name(),
+				registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion()) :
+				new AppRegistrationResource(registration.getName(), registration.getType().name(),
+						registration.getVersion(), registration.getUri().toString(), registration.isDefaultVersion(),
+						registration.getVersions());
 		return (R) appRegistrationResource;
 	}
 }
