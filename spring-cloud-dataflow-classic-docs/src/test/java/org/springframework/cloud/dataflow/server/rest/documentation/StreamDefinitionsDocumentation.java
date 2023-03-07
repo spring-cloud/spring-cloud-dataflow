@@ -160,6 +160,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 								fieldWithPath("[].uri").description("The uri of the application"),
 								fieldWithPath("[].version").description("The version of the application"),
 								fieldWithPath("[].defaultVersion").description("If true, the application is the default version"),
+								fieldWithPath("[].bootVersion").description("The version of Spring Boot the application targets (2, 3)"),
 								fieldWithPath("[].versions").description("All the registered versions of the application"),
 								fieldWithPath("[]._links.self.href").description("Link to the application resource")
 						)));
