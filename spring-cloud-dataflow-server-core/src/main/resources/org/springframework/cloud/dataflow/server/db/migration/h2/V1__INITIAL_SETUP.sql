@@ -50,6 +50,12 @@ create table task_definitions (
   primary key (definition_name)
 );
 
+create table ACCOUNTS (
+  ACCOUNT_NAME varchar(255) not null,
+  DEPLOYMENT_PROPERTIES varchar(65535),
+  primary key (ACCOUNT_NAME)
+);
+
 CREATE TABLE TASK_EXECUTION (
   TASK_EXECUTION_ID BIGINT NOT NULL PRIMARY KEY,
   START_TIME TIMESTAMP DEFAULT NULL,

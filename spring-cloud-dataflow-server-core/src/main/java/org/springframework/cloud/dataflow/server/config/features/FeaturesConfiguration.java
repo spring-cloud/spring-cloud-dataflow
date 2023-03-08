@@ -26,6 +26,6 @@ import org.springframework.context.annotation.Import;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@Import({ StreamConfiguration.class, TaskConfiguration.class, SchedulerConfiguration.class })
+@Import({ StreamConfiguration.class, TaskConfiguration.class, SchedulerConfiguration.class, AccountConfiguration.class })
 public class FeaturesConfiguration {
 }

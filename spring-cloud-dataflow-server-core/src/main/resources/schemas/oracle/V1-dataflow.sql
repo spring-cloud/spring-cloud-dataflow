@@ -45,6 +45,15 @@ create table task_definitions (
   primary key (definition_name)
 );
 
+create table accounts (
+  account_name varchar2(255 char) not null,
+  namespace varchar2(255 char) not null,
+  deployment_service_account_name varchar2(255 char),
+  entry_point_style varchar2(255 char),
+  primary key (account_name)
+);
+
+
 CREATE TABLE TASK_EXECUTION (
   TASK_EXECUTION_ID NUMBER NOT NULL PRIMARY KEY,
   START_TIME TIMESTAMP DEFAULT NULL,
