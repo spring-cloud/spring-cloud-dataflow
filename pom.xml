@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-dataflow-parent</artifactId>
-	<version>2.10.2-SNAPSHOT</version>
+	<version>2.10.2</version>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.10.2-SNAPSHOT</version>
+		<version>2.10.2</version>
 		<relativePath/>
 	</parent>
 	<licenses>
@@ -56,19 +56,19 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
-		<spring-cloud-dataflow-ui.version>3.3.2-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>3.3.2</spring-cloud-dataflow-ui.version>
 		<dataflow.version>${project.version}</dataflow.version>
-		<spring-cloud-dataflow-common.version>2.10.2-SNAPSHOT</spring-cloud-dataflow-common.version>
-		<spring-cloud-deployer.version>2.8.2-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.8.2-SNAPSHOT</spring-cloud-deployer-local.version>
-		<spring-cloud-deployer-cloudfoundry.version>2.8.2-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-		<spring-cloud-deployer-kubernetes.version>2.8.2-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-dataflow-common.version>2.10.2</spring-cloud-dataflow-common.version>
+		<spring-cloud-deployer.version>2.8.2</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.8.2</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.8.2</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.8.2</spring-cloud-deployer-kubernetes.version>
 
-		<spring-cloud-skipper.version>2.9.2-SNAPSHOT</spring-cloud-skipper.version>
+		<spring-cloud-skipper.version>2.9.2</spring-cloud-skipper.version>
 
 		<spring-cloud-task.version>2.4.5</spring-cloud-task.version>
 
-		<spring-cloud-common-security-config.version>1.8.2-SNAPSHOT</spring-cloud-common-security-config.version>
+		<spring-cloud-common-security-config.version>1.8.2</spring-cloud-common-security-config.version>
 
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
@@ -145,7 +145,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-				<version>2.10.2-SNAPSHOT</version>
+				<version>2.10.2</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
