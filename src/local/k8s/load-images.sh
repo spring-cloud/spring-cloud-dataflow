@@ -12,8 +12,13 @@ case $BROKER in
 *)
   echo "BROKER=$BROKER not supported"
 esac
-
-STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
+if [ "$STREAM_APPS_VERSION" == "" ]; then
+    if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
+        STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
+    else
+        STREAM_APPS_VERSION="3.2.1"
+    fi
+fi
 
 if [ "$BROKER" = "rabbitmq" ]; then
   # Sample Stream Apps

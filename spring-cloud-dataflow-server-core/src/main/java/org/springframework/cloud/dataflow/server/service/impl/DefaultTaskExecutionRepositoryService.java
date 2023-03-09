@@ -39,6 +39,7 @@ public class DefaultTaskExecutionRepositoryService implements TaskExecutionCreat
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	// TODO pass the SchemaVersionTarget
 	public TaskExecution createTaskExecution(String taskName) {
 		return taskRepository.createTaskExecution(taskName);
 	}

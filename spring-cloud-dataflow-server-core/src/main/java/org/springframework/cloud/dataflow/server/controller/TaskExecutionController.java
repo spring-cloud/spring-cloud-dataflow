@@ -201,6 +201,7 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
+	// TODO add schemaVersionTarget queryParam
 	public TaskExecutionResource view(@PathVariable("id") long id) {
 		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
 		if (taskExecution == null) {
@@ -242,6 +243,7 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
+	// TODO add schemaVersionTarget queryParam
 	public void cleanup(@PathVariable("id") Set<Long> ids,
 			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions) {
 		final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>(Arrays.asList(actions));
@@ -276,6 +278,7 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
+	// TODO add schemaVersionTarget queryParam
 	public void stop(@PathVariable("id") Set<Long> ids,
 	@RequestParam(defaultValue = "", name="platform") String platform) {
 		this.taskExecutionService.stopTaskExecution(ids, platform);
@@ -340,6 +343,7 @@ public class TaskExecutionController {
 
 		@Override
 		public TaskExecutionResource toModel(TaskJobExecutionRel taskJobExecutionRel) {
+			// TODO add schemaVersionTarget queryParam
 			return createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
 		}
 

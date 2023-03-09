@@ -9,6 +9,7 @@ if [ "$1" = "" ]; then
   echo "Driver must be one of kind, Or a valid driver for minikube like kvm2, docker, vmware, virtualbox, podman, vmwarefusion, hyperkit"
   return 2
 fi
+export USE_PRO=false
 export K8S_DRIVER=$1
 export KUBECONFIG=
 export NS=default
@@ -26,6 +27,9 @@ while [ "$1" != "" ]; do
         ;;
     "kafka")
         export  BROKER=kafka
+        ;;
+    "--pro")
+        export USE_PRO=true
         ;;
     "--namespace" | "-ns")
         if [ "$2" == "" ]; then

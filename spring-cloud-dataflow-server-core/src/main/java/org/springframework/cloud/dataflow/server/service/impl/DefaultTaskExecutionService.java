@@ -347,7 +347,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				return arg.replaceFirst(regex, "");
 			}).collect(Collectors.toList());
 		}
-
+		// TODO Determine the SchemaVersionTarget
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 
 		if (taskExecutionInformation.isComposed()) {
@@ -384,6 +384,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 								: null,
 						taskExecutionInformation.getTaskDeploymentProperties()).getMergedDeploymentProperties();
 		// Get the merged deployment properties and update the task exec. info
+		// TODO add properties as needed
 		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
 
 		// Finally create App deployment request

@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDeploymentReposi
 import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
+import org.springframework.cloud.dataflow.server.service.SchemaService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -53,6 +54,7 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
@@ -118,6 +120,10 @@ public class TaskConfiguration {
 			List<TaskPlatform> platforms,
 			DeployerConfigurationMetadataResolver resolver) {
 		return new LauncherInitializationService(launcherRepository, platforms, resolver);
+	}
+	@Bean
+	public SchemaService schemaService() {
+		return new DefaultSchemaService();
 	}
 
 	/**

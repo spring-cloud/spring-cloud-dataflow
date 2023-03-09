@@ -134,6 +134,9 @@ public class RootController {
 			root.add(linkTo(methodOn(StreamLogsController.class).getLog(null, null)).withRel("streams/logs/{streamName}/{appName}"));
 		}
 		if (featuresProperties.isTasksEnabled()) {
+			root.add(linkTo(methodOn(SchemaController.class).getVersions()).withRel("schema/versions"));
+			root.add(linkTo(methodOn(SchemaController.class).getTargets()).withRel("schema/targets"));
+
 			root.add(entityLinks.linkToCollectionResource(LauncherResource.class).withRel("tasks/platforms"));
 
 			root.add(entityLinks.linkToCollectionResource(TaskDefinitionResource.class).withRel("tasks/definitions"));

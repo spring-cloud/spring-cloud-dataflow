@@ -2,7 +2,7 @@
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 ROOTDIR=$(realpath "$SCDIR/../..")
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-  SCDF_PRO_VERSION=1.5.0-SNAPSHOT
+  SCDF_PRO_VERSION=1.5.3-SNAPSHOT
 fi
 pushd "$ROOTDIR/../scdf-pro"  > /dev/null
     ./mvnw -o clean install -DskipTests
