@@ -5,6 +5,7 @@ version: '3'
 services:
 
   rabbitmq:
+    platform: linux/amd64
     image: rabbitmq:3.7
     container_name: dataflow-rabbitmq
     environment:
