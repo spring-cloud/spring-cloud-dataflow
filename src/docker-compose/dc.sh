@@ -11,8 +11,8 @@ if [ "$1" == "" ]; then
     echo "  This will invoke docker-compose with all the relevant files and provided options as well as the 'up' command"
     exit 1
 fi
-BROKER=
-DATABASE=
+BROKER=rabbitmq
+DATABASE=postgres
 ARGS=
 DC_OPTS=
 while [ "$1" != "" ]; do
@@ -58,4 +58,7 @@ if [ "$DATABASE" == "" ]; then
     echo "Provide a database name like mysql, mariadb or postgres"
     exit 1
 fi
-docker-compose -f "$SCDIR/docker-compose.yml" -f "$SCDIR/docker-compose-$BROKER.yml" -f "$SCDIR/docker-compose-$DATABASE.yml" $ARGS $DC_OPTS up
+if [ "$DC_OPTS" = "" ]; then
+    DC_OPTS=up
+fi
+docker-compose -f "$SCDIR/docker-compose.yml" -f "$SCDIR/docker-compose-$BROKER.yml" -f "$SCDIR/docker-compose-$DATABASE.yml" $ARGS $DC_OPTS
