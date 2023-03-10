@@ -61,6 +61,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @author David Turanski
  * @author Michael Wirth
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication
