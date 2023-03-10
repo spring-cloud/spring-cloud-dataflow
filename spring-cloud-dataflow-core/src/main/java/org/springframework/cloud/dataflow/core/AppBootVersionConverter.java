@@ -17,15 +17,13 @@
 package org.springframework.cloud.dataflow.core;
 
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 
 /**
- * Converts strings to {@link AppBootSchemaVersion}
+ * Converts strings to {@link AppBootVersion}
  *
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@Component
 public class AppBootVersionConverter implements Converter<String, AppBootSchemaVersion> {
 
 	@Override

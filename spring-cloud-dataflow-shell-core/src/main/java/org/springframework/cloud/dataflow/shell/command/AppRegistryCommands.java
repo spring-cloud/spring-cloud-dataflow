@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -182,10 +183,10 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 
 		List<AppRegistrationResource> appRegistrations = findAllAppsByNameAndType(name, type);
 		Optional<AppRegistrationResource> defaultApp = appRegistrations.stream()
-				.filter(AppRegistrationResource::getDefaultVersion).findFirst();
+				.filter(a -> a.getDefaultVersion() == true).findFirst();
 
 		if (!CollectionUtils.isEmpty(appRegistrations) && !defaultApp.isPresent()) {
-			String appVersions = appRegistrations.stream().map(AppRegistrationResource::getVersion)
+			String appVersions = appRegistrations.stream().map(app -> app.getVersion())
 					.collect(Collectors.joining(", ", "(", ")"));
 			return String.format("Successfully unregistered application '%s' with type '%s'. " +
 					"Please select new default version from: %s", name, type, appVersions);
@@ -240,7 +241,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	public String register(
 			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
 			@ShellOption(help = "the type for the registered application", valueProvider = EnumValueProvider.class) ApplicationType type,
-			@ShellOption(value = { "-b", "--bootVersion" }, help = "the boot version to use for the registered application", defaultValue = ShellOption.NULL) AppBootSchemaVersion bootVersion,
+			@ShellOption(value = { "-bv", "--bootVersion" }, help = "the boot version to use for the registered application", defaultValue = ShellOption.NULL) AppBootSchemaVersion bootVersion,
 			@ShellOption(help = "URI for the application artifact") String uri,
 			@ShellOption(value = { "-m", "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
@@ -333,7 +334,7 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 			try {
 				Resource resource = this.resourceLoader.getResource(uri);
 				Properties applications = PropertiesLoaderUtils.loadProperties(resource);
-				PagedModel<AppRegistrationResource> registered;
+				PagedModel<AppRegistrationResource> registered = null;
 				try {
 					registered = appRegistryOperations().registerAll(applications, force);
 				}

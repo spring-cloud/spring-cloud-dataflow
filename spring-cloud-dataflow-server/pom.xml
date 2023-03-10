@@ -40,12 +40,6 @@
 		<dependency>
 			<groupId>io.pivotal.spring.cloud</groupId>
 			<artifactId>spring-cloud-services-starter-config-client</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.security</groupId>
-					<artifactId>spring-security-oauth2-client</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.fabric8</groupId>
