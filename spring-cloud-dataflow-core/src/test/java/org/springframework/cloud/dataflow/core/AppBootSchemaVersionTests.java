@@ -46,6 +46,7 @@ public class AppBootSchemaVersionTests {
 	void fromBootVersionWithValidValues() {
 		assertThat(AppBootSchemaVersion.fromBootVersion("2")).isEqualTo(AppBootSchemaVersion.BOOT2);
 		assertThat(AppBootSchemaVersion.fromBootVersion("3")).isEqualTo(AppBootSchemaVersion.BOOT3);
+		assertThat(AppBootSchemaVersion.defaultVersion()).isEqualTo(AppBootSchemaVersion.fromBootVersion(AppBootSchemaVersion.defaultVersion().getBootVersion()));
 	}
 
 	@ParameterizedTest
