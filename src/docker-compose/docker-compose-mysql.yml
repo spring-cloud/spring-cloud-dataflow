@@ -21,6 +21,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mysql:
+    platform: linux/amd64
     image: mysql:5.7.25
     container_name: dataflow-mysql
     environment:
