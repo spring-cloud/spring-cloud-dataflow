@@ -53,7 +53,7 @@ runs:
       IMGPKG_LOCK_GENERATED_OUT: ${{ runner.temp }}/generated/imgpkgout
     shell: bash
     run: |
-      echo "::set-output name=bundle-path::$PACKAGE_BUNDLE_GENERATED"
+      echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
       ytt \
         -f $PACKAGE_BUNDLE_TEMPLATE \
         --output-files $PACKAGE_BUNDLE_GENERATED \
