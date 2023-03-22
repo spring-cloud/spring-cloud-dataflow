@@ -1,0 +1,6 @@
+version: '3'
+services:
+  testservice3:
+    image: 'springcloud/openjdk:latest'
+    command: sh -c 'sleep 60'
+

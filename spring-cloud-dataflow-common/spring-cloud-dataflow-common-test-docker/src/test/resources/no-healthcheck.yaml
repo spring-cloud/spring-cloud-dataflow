@@ -1,0 +1,6 @@
+version: "2"
+
+services:
+  noHealthcheck:
+    image: gliderlabs/alpine:3.4
+    command: sh -c 'while true; do sleep 10; done'

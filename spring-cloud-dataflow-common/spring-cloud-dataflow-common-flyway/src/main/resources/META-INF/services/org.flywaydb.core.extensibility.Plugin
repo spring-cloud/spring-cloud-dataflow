@@ -1,0 +1,2 @@
+org.flywaydb.database.mysql.mariadb.MariaDB57DatabaseType
+org.flywaydb.database.mysql.MySQL57DatabaseType
