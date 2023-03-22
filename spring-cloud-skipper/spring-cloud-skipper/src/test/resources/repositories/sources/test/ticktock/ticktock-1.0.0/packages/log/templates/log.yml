@@ -1,0 +1,16 @@
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+deployment:
+  name: log
+  count: {{deployment.count}}
+  applicationProperties:
+    {{#deployment.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/deployment.applicationProperties.entrySet}}
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:{{appVersion}}
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{appVersion}}
+  deploymentProperties:
+    {{#deployment.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/deployment.deploymentProperties.entrySet}}
+

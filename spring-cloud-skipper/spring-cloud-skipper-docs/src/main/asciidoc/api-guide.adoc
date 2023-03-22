@@ -1,0 +1,691 @@
+[[api-guide]]
+= REST API Guide
+
+[partintro]
+--
+This section covers the Spring Cloud Skipper REST API.
+--
+
+[[api-guide-overview]]
+== Overview
+
+Spring Cloud Skipper provides a REST API that lets you access all aspects of the server.
+The Spring Cloud Skipper shell is a first-class consumer of the API.
+
+[[api-guide-overview-http-verbs]]
+=== HTTP Verbs
+
+Spring Cloud Skipper tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP verbs.
+The following table shows each verb and how Skipper uses it:
+
+|===
+| Verb | Usage
+
+| `GET`
+| Used to retrieve a resource.
+
+| `POST`
+| Used to create a new resource.
+
+| `PUT`
+| Used to update an existing resource, including partial updates.
+Also used for resources that imply the concept of `restarts`.
+
+| `DELETE`
+| Used to delete an existing resource.
+|===
+
+[[api-guide-overview-http-status-codes]]
+=== HTTP Status Codes
+
+Skipper adheres as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
+The following table shows each status and its meaning in Skipper:
+
+|===
+| Status code | Usage
+
+| `200 OK`
+| The request completed successfully.
+
+| `201 Created`
+| A new resource has been created successfully.
+The resource's URI is available from the response's `Location` header.
+
+| `204 No Content`
+| An update to an existing resource has been applied successfully.
+
+| `400 Bad Request`
+| The request was malformed. The response body includes an error that provides further information.
+
+| `404 Not Found`
+| The requested resource does not exist.
+
+|===
+
+[[api-guide-overview-headers]]
+=== Headers
+
+Every response has the following header(s):
+
+include::{snippets}/api-documentation/headers/response-headers.adoc[]
+
+[[api-guide-overview-errors]]
+=== Errors
+
+include::{snippets}/api-documentation/errors/response-fields.adoc[]
+
+[[api-guide-overview-hypermedia]]
+=== Hypermedia
+
+Spring Cloud Skipper uses hypermedia.
+As a result, resources include links to other resources in their responses.
+More specifically, responses are in http://stateless.co/hal_specification.html[Hypertext Application from resource to resource Language (HAL)] format.
+Links can be found beneath the `_links` key.
+Consumers of the API should not create URIs themselves.
+Instead they should use the links in the resources to navigate.
+
+[[api-guide-resources]]
+== Resources
+
+[[api-guide-resources-index]]
+=== Index
+
+The index provides the entry point into Spring Cloud Skipper's REST API.
+
+[[api-guide-resources-index-access]]
+==== Accessing the Index
+
+You can use a `GET` request to access the index.
+
+===== Request Structure
+
+The following
+
+include::{snippets}/api-documentation/index/http-request.adoc[]
+
+===== Example Request
+
+include::{snippets}/api-documentation/index/curl-request.adoc[]
+
+===== Example Response
+
+include::{snippets}/api-documentation/index/http-response.adoc[]
+
+[[api-guide-resources-index-links]]
+===== Links
+
+The links are the main element of the index, as they let you traverse the API and invoke the desired functionality.
+The following table dsecribes the links:
+
+include::{snippets}/api-documentation/index/links.adoc[]
+
+[[resources-about]]
+=== Server
+
+The Server resource exposes build and version information of the server.
+
+==== Server info
+A `GET` request returns meta information for Spring Cloud Skipper, including the following:
+
+* Server name -- typically `spring-cloud-skipper-server`
+* Version of the server -- for example, `{project-version}`
+
+===== Request structure
+
+include::{snippets}/about-documentation/get-meta-information/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/about-documentation/get-meta-information/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/about-documentation/get-meta-information/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/about-documentation/get-meta-information/response-fields.adoc[]
+
+=== Platforms
+
+
+The Platforms (or Platform Deployer) resource is exported from the Spring Data Repository `DeployerRepository` and exposed by Spring Data REST.
+
+==== Find All
+A `GET` request returns a paginated list for all the Spring Cloud Skipper platform deployers.
+
+===== Request structure
+
+include::{snippets}/deployers-documentation/get-all-deployers/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/deployers-documentation/get-all-deployers/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/deployers-documentation/get-all-deployers/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/deployers-documentation/get-all-deployers/response-fields.adoc[]
+
+[[resources-packages-metadata]]
+=== Packages
+
+The Packages resource is exported from the Spring Data Repository `PackageMetadata` and exposed by Spring Data REST.
+
+[[resources-package-search]]
+==== Search
+
+A `GET` request will return a paginated list for all Spring Cloud Skipper package metadata.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/response-fields.adoc[]
+
+[[resources-package-search-summary]]
+==== Search summary
+
+A `GET` request returns the list of available package metadata with the summary information of each package.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-summary/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-summary/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-summary/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-summary/response-fields.adoc[]
+
+
+[[resources-package-search-details]]
+==== Search with details
+
+A `GET` request returns the details of a package using the `id` of the package.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/response-fields.adoc[]
+
+[[resources-package-search-find-by-name]]
+==== Search by Package Name
+
+A `GET` request returns a list of all the Spring Cloud Skipper package metadata for the given package name.
+
+===== Request structure
+getPackageMetadataSearchFindByName
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/response-fields.adoc[]
+
+[[resources-package-search-findbyname-ignore-case]]
+==== Search by Package Name, Ignoring Case
+
+A `GET` request returns a list for all Spring Cloud Skipper package metadata by the given package name ignoring case.
+
+===== Request structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case//http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/response-fields.adoc[]
+
+
+[[resources-package]]
+=== Package
+
+The Package resource maps onto the PackageController for uploading and installing packages.
+
+[[resources-package-upload]]
+==== Upload
+
+The `upload` link uploads a package into a the `local` database backed repository.
+
+===== Request structure
+
+include::{snippets}/upload-documentation/upload-release/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/upload-documentation/upload-release/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/upload-documentation/upload-release/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/upload-documentation/upload-release/response-fields.adoc[]
+
+[[resources-package-install]]
+==== Install
+
+The `install` link can install a package (identified by the `InstallRequest`) into the target platform.
+
+===== Request structure
+
+include::{snippets}/install-documentation/install-package/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/install-documentation/install-package/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/install-documentation/install-package/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/install-documentation/install-package/response-fields.adoc[]
+
+[[resources-package-install-id]]
+==== Install with ID
+
+The `install` link can install a package identified by its ID into the target platform.
+
+===== Request structure
+
+include::{snippets}/install-documentation/install-package-with-id/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/install-documentation/install-package-with-id/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/install-documentation/install-package-with-id/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/install-documentation/install-package-with-id/response-fields.adoc[]
+
+[[repositories]]
+=== Repositories
+
+The Repositories resource is exported from the Spring Data Repository `RepositoryRepository` (yes, it's a funny name) and exposed by Spring Data REST.
+
+==== Find All
+A `GET` request returns a paginated list for all Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/repositories-documentation/get-all-repositories/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/repositories-documentation/get-all-repositories/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/repositories-documentation/get-all-repositories/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/repositories-documentation/get-all-repositories/response-fields.adoc[]
+
+==== Find By Name
+
+A `GET` request returns a single Spring Cloud Skipper repositories.
+
+===== Request structure
+
+include::{snippets}/repositories-documentation/get-single-repository/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/repositories-documentation/get-single-repository/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/repositories-documentation/get-single-repository/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/repositories-documentation/get-single-repository/response-fields.adoc[]
+
+
+[[resources-releases]]
+=== Releases
+
+The `release` resource is exported from the Spring Data Repository `ReleaseRepository` and exposed by Spring Data REST.
+
+[[resources-release-find-all]]
+==== Find all
+A `GET` request returns a paginated list for all Spring Cloud Skipper releases.
+
+===== Request structure
+
+include::{snippets}/releases-documentation/get-all-releases/http-request.adoc[]
+
+===== Example request
+
+include::{snippets}/releases-documentation/get-all-releases/curl-request.adoc[]
+
+===== Response structure
+
+include::{snippets}/releases-documentation/get-all-releases/http-response.adoc[]
+
+===== Response fields
+
+include::{snippets}/releases-documentation/get-all-releases/response-fields.adoc[]
+
+[[resources-release]]
+=== Release
+
+The Release resource maps onto the ReleaseController for managing the lifecycle of a release.
+
+
+[[resources-release-list]]
+==== List
+
+===== List latest
+
+The `list` link can list the latest version of releases with status of deployed or failed.
+
+====== Request structure
+
+include::{snippets}/list-documentation/list-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/list-documentation/list-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/list-documentation/list-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/list-documentation/list-release/response-fields.adoc[]
+
+===== List latest by name
+
+The `list` link can list the latest version of releases with status of deployed or failed by the
+given release name.
+
+====== Request structure
+
+include::{snippets}/list-documentation/list-releases-by-release-name/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/list-documentation/list-releases-by-release-name/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/list-documentation/list-releases-by-release-name/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/list-documentation/list-releases-by-release-name/response-fields.adoc[]
+
+[[resources-release-status]]
+==== Status
+
+===== Get the status of a release
+
+The `status` REST endpoint provides the status for the last known release version.
+
+====== Request structure
+
+include::{snippets}/status-documentation/get-status-of-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/status-documentation/get-status-of-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/status-documentation/get-status-of-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/status-documentation/get-status-of-release/response-fields.adoc[]
+
+===== Status by version
+
+The `status` REST endpoint can provide the status for a specific release version.
+
+====== Request structure
+
+include::{snippets}/status-documentation/get-status-of-release-for-version/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/status-documentation/get-status-of-release-for-version/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/status-documentation/get-status-of-release-for-version/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/status-documentation/get-status-of-release-for-version/response-fields.adoc[]
+
+
+[[resources-release-upgrade]]
+==== Upgrade
+
+===== Upgrade a release
+
+The upgrade link upgrades an existing release with the configured package and config values from the `UpgradeRequest`.
+
+====== Request structure
+
+include::{snippets}/upgrade-documentation/upgrade-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/upgrade-documentation/upgrade-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/upgrade-documentation/upgrade-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/upgrade-documentation/upgrade-release/response-fields.adoc[]
+
+[[resources-release-rollback]]
+==== Rollback
+
+===== Rollback release using uri variables
+
+The rollback link rolls back the release to a previous or a specific release.
+
+[NOTE]
+====
+This part of the api is deprecated, please use
+<<resources-release-rollback-request>>.
+====
+
+====== Request structure
+
+include::{snippets}/rollback-documentation/rollback-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/rollback-documentation/rollback-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/rollback-documentation/rollback-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/rollback-documentation/rollback-release/response-fields.adoc[]
+
+[[resources-release-rollback-request]]
+===== Rollback release using request object
+
+The rollback link rolls back the release to a previous or a specific release.
+
+====== Request structure
+
+include::{snippets}/rollback-documentation/rollback-release-request/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/rollback-documentation/rollback-release-request/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/rollback-documentation/rollback-release-request/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/rollback-documentation/rollback-release-request/response-fields.adoc[]
+
+[[resources-release-manifest]]
+==== Manifest
+
+===== Get manifest
+
+The `manifest` REST endpoint returns the manifest for the last known release version.
+
+====== Request structure
+
+include::{snippets}/manifest-documentation/get-manifest-of-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/manifest-documentation/get-manifest-of-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/manifest-documentation/get-manifest-of-release/http-response.adoc[]
+
+===== Get manifest by version
+
+The `manifest` REST endpoint can return the manifest for a specific release version.
+
+====== Request structure
+
+include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/http-response.adoc[]
+
+
+[[resources-release-delete]]
+==== Delete
+
+===== Delete a release
+
+You can use a `DELETE` request to delete an existing release.
+The delete operation does not uninstall the uploaded packages corresponding to the release.
+
+====== Request structure
+
+include::{snippets}/delete-documentation/delete-release-default/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/delete-documentation/delete-release-default/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/delete-documentation/delete-release-default/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/delete-documentation/delete-release-default/response-fields.adoc[]
+
+===== Delete a release and uninstall package
+
+You can use a DELETE request to delete an existing release and uninstall the packages corresponding to the release, provided there are no other releases in active state use these packages.
+
+====== Request structure
+
+include::{snippets}/delete-documentation/delete-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/delete-documentation/delete-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/delete-documentation/delete-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/delete-documentation/delete-release/response-fields.adoc[]
+
+[[resources-release-cancel]]
+==== Cancel
+
+===== Cancel a release
+
+You can use a `POST` request to cancel an existing release operation.
+
+====== Request structure
+
+include::{snippets}/cancel-documentation/cancel-release/http-request.adoc[]
+
+====== Example request
+
+include::{snippets}/cancel-documentation/cancel-release/curl-request.adoc[]
+
+====== Response structure
+
+include::{snippets}/cancel-documentation/cancel-release/http-response.adoc[]
+
+====== Response fields
+
+include::{snippets}/cancel-documentation/cancel-release/response-fields.adoc[]

@@ -1,0 +1,225 @@
+
+info:
+  app:
+    name: "@project.artifactId@"
+    version: "@project.version@"
+management:
+  security:
+    roles: MANAGE
+  context-path: /actuator
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    info:
+      enabled: true
+  metrics:
+    tags:
+      application: "@project.artifactId@"
+      application.version: "@project.version@"
+      service: "skipper server"
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true # true is default to Boot 2.3.2 at least.
+            percentiles-histogram: true
+    export:
+      influx:
+        enabled: false
+      prometheus:
+        enabled: false
+        rsocket:
+          enabled: false
+      wavefront:
+        enabled: false
+server:
+  port: 7577
+  error:
+    include-message: always
+spring:
+  main:
+    banner-mode: "off"
+  data:
+    rest:
+      base-path: /api
+  jpa:
+    generate-ddl: false
+    properties:
+      hibernate:
+        id.new_generator_mappings: true
+        # Statistics generation is required for publishing JPA micrometer metrics.
+        # generate_statistics: true
+  cloud:
+    skipper:
+      server:
+        version-info:
+          dependency-fetch:
+            enabled: false
+          dependencies:
+            spring-cloud-skipper-server:
+              name: Spring Cloud Skipper Server
+              version: "@project.version@"
+            spring-cloud-skipper-shell:
+              name: Spring Cloud Skipper Shell
+              version: "@project.version@"
+              url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar"
+              checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha1"
+              checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-skipper-shell/{version}/spring-cloud-skipper-shell-{version}.jar.sha256"
+        package-repositories:
+          local:
+            name: local
+            url: http://${spring.cloud.client.hostname}:7577
+            local: true
+            description: Default local database backed repository
+            repoOrder: 1
+        deployer-properties:
+          group-excludes:
+            - spring.cloud.deployer.kubernetes.fabric8
+          property-excludes:
+            - spring.cloud.deployer.local.maximum-concurrent-tasks
+            - spring.cloud.deployer.kubernetes.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.maximum-concurrent-tasks
+            - spring.cloud.deployer.cloudfoundry.org
+            - spring.cloud.deployer.cloudfoundry.space
+            - spring.cloud.deployer.cloudfoundry.url
+            - spring.cloud.deployer.cloudfoundry.username
+            - spring.cloud.deployer.cloudfoundry.password
+            - spring.cloud.deployer.cloudfoundry.skip-ssl-validation
+      security:
+        authorization:
+          enabled: true
+          permit-all-paths: "/actuator/health,/actuator/info,/authenticate,/security/info,/features,/assets/**,/dashboard/logout-success-oauth.html"
+          authenticated-paths: "/,/api"
+          rules:
+            # About
+
+            - GET /api/about                      => hasRole('ROLE_VIEW')
+
+             # AppDeployerDatas
+
+            - GET /api/appDeployerDatas           => hasRole('ROLE_VIEW')
+
+            # Deployers
+
+            - GET /api/deployers                  => hasRole('ROLE_VIEW')
+
+            ## Releases
+
+            - GET /api/releases                   => hasRole('ROLE_VIEW')
+            - GET /api/releases/**                => hasRole('ROLE_VIEW')
+
+            # Statuses
+
+            - GET /api/release/statuses          => hasRole('ROLE_VIEW')
+
+            # States
+
+            - GET /api/release/states            => hasRole('ROLE_VIEW')
+
+            # Status
+
+            - GET /api/release/status/**         => hasRole('ROLE_VIEW')
+
+            # Manifest
+
+            - GET /api/release/manifest/**       => hasRole('ROLE_VIEW')
+
+            # Logs
+
+            - GET /api/release/logs/**           => hasRole('ROLE_VIEW')
+
+            # Upgrade
+
+            - POST /api/release/upgrade          => hasRole('ROLE_CREATE')
+
+            # Rollback
+
+            - POST /api/release/rollback/**      => hasRole('ROLE_CREATE')
+
+            # Delete
+
+            - DELETE /api/release/**             => hasRole('ROLE_CREATE')
+
+            # History
+
+            - GET /api/release/history/**        => hasRole('ROLE_VIEW')
+
+            # List
+
+            - GET /api/release/list              => hasRole('ROLE_VIEW')
+            - GET /api/release/list/**           => hasRole('ROLE_VIEW')
+
+            # Scale
+
+            - GET /api/release/scale             => hasRole('ROLE_VIEW')
+            - GET /api/release/scale/**          => hasRole('ROLE_VIEW')
+
+            # Packages
+
+            - GET /api/package                   => hasRole('ROLE_VIEW')
+
+            # Upload
+
+            - POST /api/package/upload             => hasRole('ROLE_CREATE')
+
+            # Install
+
+            - POST /api/package/install             => hasRole('ROLE_CREATE')
+            - POST /api/package/install/**          => hasRole('ROLE_CREATE')
+
+            # Delete
+
+            - DELETE /api/package/**                => hasRole('ROLE_CREATE')
+
+            # PackageMetaData
+
+            - GET /api/packageMetadata              => hasRole('ROLE_VIEW')
+            - GET /api/packageMetadata/**           => hasRole('ROLE_VIEW')
+
+            # Repositories
+
+            - GET /api/repositories                 => hasRole('ROLE_VIEW')
+            - GET /api/repositories/**              => hasRole('ROLE_VIEW')
+
+            # Boot Endpoints
+
+            - GET  /actuator/**                     => hasRole('ROLE_MANAGE')
+
+  flyway:
+    baselineVersion: 1
+    baselineOnMigrate: true
+    locations:
+      - classpath:org/springframework/cloud/skipper/server/db/migration/{vendor}
+    check-location: false
+  mvc:
+    async:
+      request-timeout: 120000
+  mustache:
+    check-template-location: false
+
+maven:
+  remoteRepositories:
+    springRepo:
+      url: https://repo.spring.io/libs-snapshot
+
+logging:
+  level:
+    org.springframework.beans: 'WARN'
+    org.springframework.context: 'WARN'
+    org.springframework.core.io: 'WARN'
+    org.springframework.data: 'WARN'
+    org.springframework.jmx: 'WARN'
+    org.springframework.web: 'WARN'
+    org.springframework.security: 'WARN'
+    org.springframework.integration: 'WARN'
+    org.springframework.boot: 'WARN'
+    org.springframework.boot.web.embedded.tomcat: 'INFO'
+    org.hibernate: 'WARN'
+    # The following INFO is to log the generated password when using basic security
+    org.springframework.boot.autoconfigure.security: 'INFO'
+    org.springframework.cloud.skipper: 'INFO'
+    org.springframework.statemachine: 'INFO'
+    # The following can be removed after https://github.com/spring-cloud/spring-cloud-kubernetes/pull/303 is merged
+    org.springframework.cloud.kubernetes.config: 'ERROR'

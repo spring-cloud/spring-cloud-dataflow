@@ -1,0 +1,45 @@
+= Spring Cloud Skipper Reference Guide
+Mark Pollack; Ilayaperumal Gopinathan; Janne Valkealahti; Gunnar Hillert; Sabby Anandan; Vinicius Carvalho; Jay Bryant
+:doctype: book
+:toc: left
+:toclevels: 4
+:source-highlighter: prettify
+:numbered:
+:icons: font
+:hide-uri-scheme:
+:docinfo: shared
+
+:spring-cloud-skipper-docs: https://docs.spring.io/spring-cloud-skipper/docs/{project-version}/reference
+:spring-cloud-skipper-docs-current: https://docs.spring.io/spring-cloud-skipper/docs/current-SNAPSHOT/reference/htmlsingle/
+:spring-cloud-stream-docs: https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html
+:github-repo: spring-cloud/spring-cloud-skipper
+:github-code: https://github.com/{github-repo}
+
+ifdef::backend-html5[]
+
+Version {project-version}
+
+(C) 2012-2020 Pivotal Software, Inc.
+
+_Copies of this document may be made for your own use and for distribution to
+others, provided that you do not charge any fee for such copies and further
+provided that each copy contains this Copyright Notice, whether distributed in
+print or electronically._
+
+endif::backend-html5[]
+
+// ======================================================================================
+
+include::preface.adoc[]
+include::overview.adoc[]
+include::getting-started.adoc[]
+include::three-minute-tour.adoc[]
+include::three-hour-tour.adoc[]
+include::installation.adoc[]
+include::security.adoc[]
+include::command-reference.adoc[]
+include::architecture.adoc[]
+include::api-guide.adoc[]
+include::appendix.adoc[]
+
+// ======================================================================================

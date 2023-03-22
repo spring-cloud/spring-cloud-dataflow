@@ -1,0 +1,9 @@
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+name: testapp
+version: 1.0.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts successfully.

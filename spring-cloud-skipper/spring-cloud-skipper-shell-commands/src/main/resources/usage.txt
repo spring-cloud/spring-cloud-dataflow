@@ -1,0 +1,12 @@
+Skipper Options:
+
+  --spring.cloud.skipper.client.serverUri=<uri>                        Address of the Skipper Server [default: http://localhost:7577].
+  --spring.cloud.skipper.client.username=<USER>                        Username of the Skipper Server [no default].
+  --spring.cloud.skipper.client.password=<PASSWORD>                    Password of the Skipper Server [no default].
+  --spring.cloud.skipper.client.credentials-provider-command=<COMMAND> Executes an external command which must return an OAuth Access Token [no default].
+  --spring.cloud.skipper.client.skip-ssl-validation=<true|false>       Accept any SSL certificate (even self-signed) [default: no].
+
+  --spring.shell.historySize=<SIZE>                 Default size of the shell log file [default: 3000].
+  --spring.shell.commandFile=<FILE>                 Skipper Shell executes commands read from the file(s) and then exits.
+
+  --help                                            This message.

@@ -1,0 +1,250 @@
+[[skipper-installation]]
+= Installation
+
+[[skipper-installation-local]]
+== Installing on a Local Platform
+
+=== Local Platform configuration
+
+The following example YAML file configures two local deployer accounts, named `localDev` and `localDevDebug`:
+```
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          local:
+            accounts:
+              localDev:
+                shutdownTimeout: 60
+                javaOpts: "-Dtest=foo"
+              localDevDebug:
+                javaOpts: "-Xdebug"
+```
+
+The key-value pairs that follow the name of the account are `javaCmd`, `workingDirectoriesRoot`, `deleteFilesOnExit`, `envVarsToInherit`, `shutdownTimeout`, `javaOpts`, and `useSpringApplicationJson`.
+More information can be found in the JavaDocs for https://github.com/spring-cloud/spring-cloud-deployer-local/blob/master/spring-cloud-deployer-local/src/main/java/org/springframework/cloud/deployer/spi/local/LocalDeployerProperties.java[LocalDeployerProperties].
+
+[[skipper-installation-cloudfoundry]]
+== Installing on Cloud Foundry
+
+This section contains an example YAML file that configures two Cloud Foundry accounts, named `cf-dev` and `cf-qa`.
+This is useful on Cloud Foundry if you use the Spring Cloud Config Server to manage Skipper's configuration properties.
+
+=== Cloud Foundry Configuration
+
+You can modify the following sample YML snippet to fit your needs:
+
+[source,yml]
+----
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          cloudfoundry:
+            accounts:
+              cf-dev:
+                connection:
+                  url: https://api.run.pivotal.io
+                  org: myOrg
+                  space: mySpace
+                  domain: cfapps.io
+                  username: cf-dev@example.com
+                  password: drowssap
+                  skipSslValidation: false
+                deployment:
+                  memory: 2048m
+                  disk: 2048m
+                  services: rabbit
+                  deleteRoutes: false
+              cf-qa:
+                connection:
+                  url: https://api.run.pivotal.io
+                  org: myOrgQA
+                  space: mySpaceQA
+                  domain: cfapps.io
+                  username: cf-qa@example.com
+                  password: drowssap
+                  skipSslValidation: true
+                deployment:
+                  memory: 1024m
+                  disk: 1024m
+                  services: rabbitQA
+                  deleteRoutes: false
+----
+
+NOTE: The `deleteRoutes` deployment setting is `false` so that "`v2`" of an application has the same route as "`v1`".
+Otherwise, undeploying "`v1`" removes the route.
+
+You can also run the Skipper server locally and deploy to Cloud Foundry.
+In this case, it is more convenient to specify the configuration in a `skipper.yml` file and start the server with the `--spring.config.additional-location=skipper.yml` option.
+
+If you use `cf push` to deploy Skipper, a Cloud Foundry manifest is more appropriate to use.
+You can modify the following sample manifest.yml to fit your needs:
+
+[source,yml,options="nowrap"]
+----
+applications:
+- name: mlp-skipper
+  host: mlp-skipper
+  memory: 1G
+  disk_quota: 1G
+  timeout: 180
+  instances: 1
+  buildpack: java_buildpack
+  path: spring-cloud-skipper-server.jar
+env:
+    SPRING_APPLICATION_NAME: mlp-skipper
+    JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_URL: https://api.run.pivotal.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_ORG: myOrgQA
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SPACE: mySpaceQA
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_DOMAIN: cfapps.io
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_USERNAME: cf-qa@example.com
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_PASSWORD: drowssap
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_CONNECTION_SKIPSSLVALIDATION: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETEROUTES: false
+    SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES: rabbitmq
+services:
+- mysqlboost
+----
+
+NOTE: In the preceding manifest, we bound the application to the `mysqlboost` service.
+If you do not specify a service, the server uses an embedded database.
+
+NOTE: As of Skipper 2.0, you must disable Spring Auto-reconfiguration and set the profile to `cloud`.
+
+NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_DELETEROUTES: false` so that "`v2`" of an application has the same route as "`v1`".
+Otherwise, undeploying "`v1`" removes the route.
+
+NOTE: You must set `SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_CLOUDFOUNDRY_ACCOUNTS[pws]_DEPLOYMENT_SERVICES` property that binds the specified services to each of the deployed applications.
+
+You can find information on the deployment properties that you can configure in https://github.com/spring-cloud/spring-cloud-deployer-cloudfoundry/blob/master/src/main/java/org/springframework/cloud/deployer/spi/cloudfoundry/CloudFoundryDeploymentProperties.java[CloudFoundryDeploymentProperties].
+
+When starting the Skipper shell on your local machine, it tries to connect to the Server at the default location of `http://localhost:7577/api`.
+Use the shell's `--spring.cloud.skipper.client.serverUri` command line option to specify the location of the server.
+You can alternatively use the `config` interactive shell command to set the server location, as follows:
+
+[source,bash]
+----
+server-unknown:>skipper config --uri https://mlp-skipper.cfapps.io/api
+Successfully targeted https://mlp-skipper.cfapps.io/api
+skipper:>
+----
+
+=== Database Connection Pool
+As of Skipper 2.0, the Spring Cloud Connector library is no longer used to create the DataSource.
+The library  https://github.com/pivotal-cf/java-cfenv[java-cfenv] is now used which allows you to set https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-connect-to-production-database[Spring Boot properties] to configure the connection pool.
+
+[[skipper-installation-cloudfoundry-maximum-disk-quota-configuration]]
+=== Maximum Disk Quota
+By default, every application in Cloud Foundry starts with 1G disk quota and this can be adjusted to a default maximum of
+2G. The default maximum can also be overridden up to 10G by using Pivotal Cloud Foundry's (PCF) Ops Manager GUI.
+
+This configuration is relevant for Spring Cloud Skipper because every deployment is composed of applications
+(typically Spring Boot uber-jar's), and those applications are resolved from a remote maven repository. After resolution,
+the application artifacts are downloaded to the local Maven Repository for caching and reuse. With this happening in the background,
+the default disk quota (1G) can fill up rapidly, especially when we experiment with streams that
+are made up of unique applications. In order to overcome this disk limitation and depending
+on your scaling requirements, you may want to change the default maximum from 2G to 10G. Let's review the
+steps to change the default maximum disk quota allocation.
+
+From PCF's Ops Manager, select the "`Pivotal Elastic Runtime`" tile and navigate to the "`Application Developer Controls`" tab.
+Change the "`Maximum Disk Quota per App (MB)`" setting from 2048 (2G) to 10240 (10G). Save the disk quota update and click
+"`Apply Changes`" to complete the configuration override.
+
+[[configuration-cloudfoundry-managing-disk-utilization]]
+=== Managing Disk Use
+
+Even when configuring Skipper to use 10G of space, there is the possibility of exhausting the available space on the local disk.
+To prevent this, `jar` artifacts downloaded from external sources, i.e., apps registered as `http` or `maven` resources, are automatically deleted whenever the application is deployed, whether or not the deployment request succeeds.
+This behavior is optimal for production environments in which container runtime stability is more critical than I/O latency incurred during deployment.
+In development environments deployment happens more frequently. Additionally, the `jar` artifact (or a lighter `metadata` jar) contains metadata describing application configuration properties
+which is used by various operations related to application configuration, more frequently performed during pre-production activities.
+To provide a more responsive interactive developer experience at the expense of more disk usage in pre-production environments, you can set the CloudFoundry deployer property `autoDeleteMavenArtifacts` to `false`.
+
+If you deploy the Skipper by using the default `port` health check type, you must explicitly monitor the disk space on the server in order to avoid running out space.
+If you deploy the server by using the `http` health check type (see the next example), the server is restarted if there is low disk space.
+This is due to Spring Boot's link:https://github.com/spring-projects/spring-boot/blob/v1.5.14.RELEASE/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DiskSpaceHealthIndicator.java[Disk Space Health Indicator].
+You can link:https://docs.spring.io/spring-boot/docs/1.5.14.RELEASE/reference/htmlsingle/#common-application-properties[configure] the settings of the Disk Space Health Indicator by using the properties that have the `management.health.diskspace` prefix.
+
+For version 1.7, we are investigating the use of link:https://docs.cloudfoundry.org/devguide/services/using-vol-services.html[Volume Services] for the server to store `.jar` artifacts before pushing them to Cloud Foundry.
+
+The following example shows how to deploy the `http` health check type to an endpoint called `/management/health`:
+
+====
+[source]
+----
+---
+  ...
+  health-check-type: http
+  health-check-http-endpoint: /management/health
+----
+====
+
+[[skipper-installation-kubernetes]]
+== Installing on Kubernetes
+
+A docker image, named `springcloud/spring-cloud-skipper-server`, is available for Skipper server in dockerhub.
+You can use this image to run the Skipper server in Kubernetes.
+
+
+[[skipper-kubernetes-configuration]]
+=== Kubernetes configuration
+
+
+The following example YAML file configures two accounts, named `k8s-dev` and `k8sqa`, on a Kubernetes cluster.
+
+```
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          kubernetes:
+            accounts:
+              k8s-dev:
+                namespace: devNamespace
+                cpu: 4
+              k8s-qa:
+                namespace: qaNamespace
+                memory: 1024m
+```
+
+The accounts correspond to different namespaces.
+We are investigating how to support connecting to different Kubernetes clusters.
+
+You can find more information on the deployment properties that you can configure in https://github.com/spring-cloud/spring-cloud-deployer-kubernetes/blob/master/src/main/java/org/springframework/cloud/deployer/spi/kubernetes/KubernetesDeployerProperties.java[KubernetesDeployerProperties]
+
+[[skipper-database-configuration]]
+== Database configuration
+
+include::configuration-database.adoc[]
+
+[#add-custom-driver]
+==== Adding a Custom JDBC Driver
+To add a custom driver for the database (for example, Oracle), you should rebuild the Skipper Server and add the dependency to the Maven `pom.xml` file.
+You need to modify the maven `pom.xml` of `spring-cloud-skipper` module.
+There are GA release tags in GitHub repository, so you can switch to desired GA tags to add the drivers on the production-ready codebase.
+
+To add a custom JDBC driver dependency for the Spring Cloud Skipper server:
+
+. Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
+. Edit the spring-cloud-skipper-server/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
+
+[source,xml]
+----
+<dependencies>
+  ...
+  <dependency>
+    <groupId>com.oracle.jdbc</groupId>
+    <artifactId>ojdbc8</artifactId>
+    <version>12.2.0.1</version>
+  </dependency>
+  ...
+</dependencies>
+----
+
+[start=3]
+. Build the application as described in <<appendix-building.adoc#building, Building Spring Cloud Skipper>>

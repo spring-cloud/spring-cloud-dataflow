@@ -1,0 +1,64 @@
+[[overview]]
+= Spring Cloud Skipper Overview
+
+Skipper is a lightweight tool that lets you discover Spring Boot applications and manage their lifecycle on multiple Cloud Platforms.
+You can use Skipper standalone or integrate it with Continuous Integration pipelines to help implement the practice of Continuous Deployment.
+
+Skipper consists of a server application that exposes an HTTP API.
+A shell application provides easy-to-use <<skipper-commands-reference,commands>> to interact with the server.
+The server uses a relational database to store state.
+Documentation to call the HTTP API is available in the <<api-guide>>.
+
+Applications in Skipper are bundled as packages that contain a templated configuration file and a default set of values that are used to fill in the template.
+You can override these defaults when installing or upgrading a package.
+Skipper provides a means to orchestrate the upgrade/rollback procedure of applications between different versions, taking the minimal set of actions to bring the system to the desired state.
+
+Skipper's design is influenced by a large number of projects in the Kubernetes ecosystem that perform resource templating and/or orchestration, hence the nautically inspired project name Skipper.
+In particular, https://github.com/kubernetes/helm[Helm]'s approach to present the user with a familiar `apt-get` or `brew` like installation experience was a big influence.
+
+== Features
+
+The main features are:
+
+* Define multiple platform accounts where Spring Boot applications can be deployed.
+Supported platforms are Local, Cloud Foundry, and Kubernetes.
+* Substitute variables in Mustache-templated files that describe how to deploy applications to a platform.
+* Search Package Repositories for existing applications.
+* Upgrade/Rollback a package based on a simple workflow.
+* Store the history of resolved template files (AKA 'application manifests') that represent the final description of what has been deployed to a platform for a specific release.
+* Use a standalone interactive shell or an HTTP API.
+
+== Concepts
+The main concepts are *Platforms*, *Packages*, *Repositories*, *Releases*, and *Release Workflows*.
+
+*Platforms* are where your apps run. Skipper 1.0 supports deploying applications to platforms by using the https://github.com/spring-cloud/spring-cloud-deployer[Spring Cloud Deployer] family of libraries.
+Doing so lets Skipper deploy Spring Boot applications to Cloud Foundry, Kubernetes, and your local machine.
+You can configure a single Skipper server to deploy to multiple platforms, with each platform identified
+by a unique name.
+
+NOTE: The Spring Cloud Deployer libraries for Apache YARN, Apache Mesos, Redhat Openshift, and Hashicorp Nomad were not
+bundled with Skipper in 1.0.  https://github.com/donovanmuller[Donovan Muller] has provided support for Redhat Openshift.
+
+*Packages* define the basic recipe for describing what to install on a platform.
+A package can define a single application or it can define a group of applications.
+It contains descriptive metadata, the location of the Spring Boot uber jar, and default application or deployment
+properties.
+The location of the uber jar can be a Maven repository, docker registry, file location, or HTTP location.
+A package is a collection of YAML files that are zipped up into a file with a naming convention of `name-version.zip` (for example: `myapp-1.0.3.zip`).
+
+*Repositories* are where package metadata and zip files are hosted. Repositories can either be 'local' or 'remote'.
+A remote repository is one that is only accessible over HTTP.
+Any arbitrary web app that serves up files off a file system can be used to host a remote repository as long as certain directory and file naming conventions are followed.
+// TODO Add a link to where we describe the conventions.
+A local repository is managed by the Skipper server and backed by a relational database.
+Skipper lets you search for packages that are hosted in repositories.
+
+*Releases* are created in Skipper after you install, upgrade, or rollback a package.
+A release has a unique name that you provide to perform release operations such as upgrading, rolling back, and deleting.
+The release contains the fully resolved template files, also known as *application manifests*, that represent the final description of what has been deployed to the platform.
+You can also get the status and application manifest for a specific release.
+
+*Release Workflows* are the steps taken to upgrade or rollback an application from one version to another.
+In Skipper terms, it is how we go from one Release to another on a Platform.
+
+NOTE: An upgrade may keep the same version but update application properties.

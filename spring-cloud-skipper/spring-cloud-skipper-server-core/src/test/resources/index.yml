@@ -1,0 +1,15 @@
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: org.springframework.cloud.skipper.testing
+name: scdf
+version: 1.2.3
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: org.springframework.cloud.skipper.testing
+name: zipkin
+version: 1.28.1
+

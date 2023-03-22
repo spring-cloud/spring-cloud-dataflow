@@ -1,0 +1,9 @@
+apiVersion: skipper.spring.io/v1
+kind: CloudFoundryApplication
+spec:
+  resource: https://github.com/ilayaperumalg/sandbox/raw/master/python/1.0.0/hello.py-{{spec.version}}.zip
+  version: "{{{spec.version}}}"
+  manifest:
+    {{#spec.manifest.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.manifest.entrySet}}

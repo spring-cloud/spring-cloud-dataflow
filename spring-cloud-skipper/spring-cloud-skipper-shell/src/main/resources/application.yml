@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: spring-cloud-skipper-shell
+  main:
+    banner-mode: 'off'
+logging:
+  pattern:
+    console:

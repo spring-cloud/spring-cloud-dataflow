@@ -1,0 +1,9 @@
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+name: python-printer
+version: 1.0.1
+packageSourceUrl: https://testing
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, printer
+maintainer: https://github.com/ilayaperumalg
+description: The python printer app that greets in tamil.

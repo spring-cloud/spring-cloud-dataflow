@@ -1,0 +1,13 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+spec:
+  manifest:
+    memory: 1024
+    disk-quota: 1024
+    timeout: 180
+    instances: 1
+    buildpack: python_buildpack
+    command: python hello.py
+    health-check-type: process
+  version: 1.0.0

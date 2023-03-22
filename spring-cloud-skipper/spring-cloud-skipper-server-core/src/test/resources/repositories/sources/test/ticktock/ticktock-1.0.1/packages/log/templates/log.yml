@@ -1,0 +1,21 @@
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: log
+  type: sink
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:{{version}}
+  version: {{version}}
+  bool: {{bool}}
+  adate: {{adate}}
+  array: {{array}}
+  applicationProperties:
+    server.port: 0
+    {{#spec.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.applicationProperties.entrySet}}
+  deploymentProperties:
+    {{#spec.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.deploymentProperties.entrySet}}

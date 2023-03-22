@@ -1,0 +1,18 @@
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: testapp
+  type: sink
+spec:
+  resource: maven://org.springframework.cloud:spring-cloud-deployer-spi-test-app:jar:exec:{{version}}
+  version: {{version}}
+  applicationProperties:
+    server.port: 0
+    kill-delay: 30000
+    {{#spec.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.applicationProperties.entrySet}}
+  deploymentProperties:
+    {{#spec.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/spec.deploymentProperties.entrySet}}

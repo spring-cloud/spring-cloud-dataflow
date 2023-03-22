@@ -1,0 +1,228 @@
+image:https://codecov.io/gh/spring-cloud/spring-cloud-skipper/branch/master/graph/badge.svg["Codecov", link="https://codecov.io/gh/spring-cloud/spring-cloud-skipper/branch/master"]
+
+== Spring Cloud Skipper image:https://build.spring.io/plugins/servlet/wittified/build-status/SCSKIP-BMASTER[Build Status, link=https://build.spring.io/browse/SCSKIP]
+
+== Spring Cloud Skipper
+
+A package manager that installs, upgrades, and rolls back applications on multiple Cloud Platforms.
+
+Supported application types are Spring Boot applications.
+
+Supported Cloud Platforms are `Cloud Foundry`, `Kubernetes`.
+
+For development experience, `Local` deployment is supported.
+
+Skipper can be used as part of implementing the practice of Continuous Deployment.  It provides a versioned "single
+source of truth" that defines what applications were deployed to the cloud.  This enables easy rollbacks and upgrades without having to rebuild applications from source code.
+
+=== Building
+
+Clone the repo and type
+
+----
+$ ./mvnw clean install
+----
+
+which will run the tests as well.
+
+To just create the executables, type
+
+----
+$./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
+----
+
+To generate just the RESTDocs documentation
+
+----
+./mvnw test -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
+----
+
+To build just the documentation, if the RESTDocs generated from tests are already present
+
+----
+./mvnw -DskipTests -Pfull package -pl spring-cloud-skipper-docs
+----
+
+
+=== Quick Tour
+
+There are some sample packages in the test directory that you can use to get started.  Create a `skipper.yml` file in your home directory
+
+```
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+          -
+            name: test
+            url: "file:///home/mpollack/projects/spring-cloud-skipper/spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/"
+```
+
+Where you replace `/home/mpollack/projects/` to the path where you cloned `spring-cloud-skipper`.
+
+Then start the Skipper server
+
+----
+$ java -jar spring-cloud-skipper-server/target/spring-cloud-skipper-server-1.0.0.BUILD-SNAPSHOT.jar --spring.config.additional-location=/home/mpollack/skipper.yml
+----
+
+Where you replace `/home/mpollack/` with your own home directory.
+
+Then launch the Skipper shell in another terminal
+
+----
+$ java -jar spring-cloud-skipper-shell/target/spring-cloud-skipper-shell-1.0.0.BUILD-SNAPSHOT.jar
+----
+
+The command `package search` will search for all available packages. It should then show you the following output
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤═════════════════════════════════════════════════════════════╗
+║      Name       │Version│                         Description                         ║
+╠═════════════════╪═══════╪═════════════════════════════════════════════════════════════╣
+║helloworld-docker│1.0.0  │The hello world app says hello.                              ║
+║log              │1.1.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log              │2.0.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log              │1.0.0  │The log sink uses the application logger to output the data  ║
+║                 │       │for inspection.                                              ║
+║log-docker       │1.0.0  │Docker version of the log sink application version           ║
+║log-docker       │2.0.0  │Docker version of the log sink application                   ║
+║ticktock         │1.0.0  │The ticktock stream sends a time stamp and logs the value.   ║
+║time             │2.0.0  │The time source periodically emits a timestamp string.       ║
+╚═════════════════╧═══════╧═════════════════════════════════════════════════════════════╝
+----
+
+In another window you can run `watch -n 2 jps` so see which Java processes are running, since by default, the local deployer will be used to deploy packages.
+
+Now deploy the log 1.0.0 package.
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --package-name log --package-version 1.0.0 --release-name mylog
+Released mylog. Now at version v1.
+----
+
+Note that the log 1.0.0 package deploys the version 1.2.0.RC1 of the application.  You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
+
+You can ask for the status using the status command
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name mylog
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 15:44:00 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │[mylog.log-v1], State = [mylog.log-v1-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════╝
+----
+
+The manifest for this release that represents the file instructions to deploy onto the platform, can be shown using the `get manifest` command.
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name mylog
+
+---
+# Source: log.yml
+apiVersion: skipper/v1
+kind: SpringBootApp
+metadata:
+  name: log
+  count: 1
+  type: sink
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RC1
+  resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RC1
+  applicationProperties:
+  deploymentProperties:
+----
+
+Now update the release with a newer version
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name mylog --package-name log --package-version 2.0.0
+mylog has been upgraded.  Now at version v2.
+----
+
+You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
+
+The status command should shortly show it has been deployed successfully.  Note you can type `!status` to execute the last command that started with the word `status`
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name mylog
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 15:45:43 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │[mylog.log-v2], State = [mylog.log-v2-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════╝
+----
+
+Next rollback to the previous release
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback --release-name mylog
+mylog has been rolled back.  Now at version v3.
+----
+
+You should see the java app named `log-sink-rabbit-1.2.0.RC1.jar` running in the output of the `jps` command
+
+The status command should shortly show it has been deployed successfully.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name mylog
+╔═══════════════╤═════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 15:48:03 IST 2017                     ║
+║Status         │DEPLOYED                                         ║
+║Platform Status│All applications have been successfully deployed.║
+║               │[mylog.log-v3], State = [mylog.log-v3-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════╝
+----
+
+The `history` command shows you the various releases that were made
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name mylog
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Fri Oct 27 15:48:03 IST 2017│DEPLOYED│log         │1.0.0          │Upgrade complete║
+║2      │Fri Oct 27 15:45:43 IST 2017│DELETED │log         │2.0.0          │Delete complete ║
+║1      │Fri Oct 27 15:44:00 IST 2017│DELETED │log         │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+Now delete the release.
+
+
+[source,bash,options="nowrap"]
+----
+skipper:>release delete --release-name mylog
+mylog has been deleted.
+----
+
+You should not see any `log-sink-rabbit` apps in the `jps` command.
+
+
+=== Code formatting guidelines
+
+* The directory ./etc/eclipse has two files for use with code formatting, `eclipse-code-formatter.xml` for the majority of the code formatting rules and `eclipse.importorder` to order the import statements.
+
+* In eclipse you import these files by navigating `Windows -> Preferences` and then the menu items `Preferences > Java > Code Style > Formatter` and `Preferences > Java > Code Style > Organize Imports` respectfully.
+
+* In `IntelliJ`, install the plugin `Eclipse Code Formatter`.  You can find it by searching the "Browse Repositories" under the plugin option within `IntelliJ` (Once installed you will need to reboot Intellij for it to take effect).
+Then navigate to `Intellij IDEA > Preferences` and select the Eclipse Code Formatter.  Select the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
+Enable the `Eclipse code formatter` by clicking `Use the Eclipse code formatter` then click the *OK* button.
+** NOTE: If you configure the `Eclipse Code Formatter` from `File > Other Settings > Default Settings` it will set this policy across all of your Intellij projects.
+

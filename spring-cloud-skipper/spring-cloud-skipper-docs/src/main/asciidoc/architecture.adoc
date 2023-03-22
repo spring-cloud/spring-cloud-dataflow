@@ -1,0 +1,18 @@
+[[architecture]]
+= Architecture
+
+Skipper uses a basic client-server architecture.
+The server exposes a REST API that is used by the interactive shell.
+You can browse the API using familiar HTTP client tools.
+The server persists Package Metadata and Release state in a relational database.
+
+Platforms are defined by using the following property prefix: `spring.cloud.skipper.server.platform`.
+For each of the supported platforms (`cloudfoundry`, 'kubernetes`' and local), you can define multiple accounts.
+Each account maps onto an instance of a Spring Cloud Deployer implementation that is responsible for deploying the applications.
+The <<skipper-installation>> shows more details, but it is important to note that the Skipper server is not tied to a deploying to a single platform.
+Wherever Skipper is running, it can be configured to deploy to any platform.
+For example, if Skipper is deployed on Cloud Foundry, you can still register accounts for Kubernetes and deploy apps to Kubernetes from Cloud Foundry.
+
+The release workflow is currently a hard-coded workflow managed by the
+https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project.
+The state of the State Machine is persisted in a relational database.

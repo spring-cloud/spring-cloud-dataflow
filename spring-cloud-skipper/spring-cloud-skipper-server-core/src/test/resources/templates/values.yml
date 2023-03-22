@@ -1,0 +1,9 @@
+appVersion: 1.2.0.RELEASE
+deployment:
+  count: 10
+  applicationProperties:
+    log.level: DEBUG
+    server.port: 8089
+  deploymentProperties:
+    app.time.producer.partitionKeyExpression: payload
+    app.log.spring.cloud.stream.bindings.input.consumer.maxAttempts: 5

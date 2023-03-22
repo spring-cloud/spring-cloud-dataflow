@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          local:
+            accounts:
+              default:
+                shutdownTimeout: 60

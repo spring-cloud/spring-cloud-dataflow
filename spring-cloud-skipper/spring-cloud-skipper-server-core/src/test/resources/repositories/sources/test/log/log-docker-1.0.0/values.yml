@@ -1,0 +1,4 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+version: 1.1.0.RELEASE

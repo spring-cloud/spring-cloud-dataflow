@@ -1,0 +1,17 @@
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+deployment:
+  name: time
+  count: {{deployment.count}}
+  applicationProperties:
+    {{#deployment.applicationProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/deployment.applicationProperties.entrySet}}
+  resource: maven://org.springframework.cloud.stream.app:time-source-rabbit
+  resourceMetadata: maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:{{appVersion}}
+  version: {{appVersion}}
+  deploymentProperties:
+    {{#deployment.deploymentProperties.entrySet}}
+    {{key}}: {{value}}
+    {{/deployment.deploymentProperties.entrySet}}
+

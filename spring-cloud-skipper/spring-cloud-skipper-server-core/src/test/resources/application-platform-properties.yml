@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        packageRepositories:
+         -
+           name: test
+           url: "classpath:"
+        platform:
+          local:
+            accounts:
+              localDev:
+                shutdownTimeout: 60
+                javaOpts: "-Dtest=foo"
+              localDevDebug:
+                javaOpts: "-Xdebug"

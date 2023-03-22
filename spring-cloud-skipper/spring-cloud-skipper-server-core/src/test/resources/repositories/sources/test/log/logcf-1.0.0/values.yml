@@ -1,0 +1,13 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: 1.3.0.RELEASE
+  manifest:
+    memory: 1024
+    disk-quota: 2048
+    timeout: 180
+    instances: 1  
+    services:
+      - rabbit

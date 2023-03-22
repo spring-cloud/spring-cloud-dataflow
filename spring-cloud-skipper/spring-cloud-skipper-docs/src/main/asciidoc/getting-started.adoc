@@ -1,0 +1,158 @@
+[[getting-started]]
+= Getting Started
+
+This section describes the minimal steps to install Skipper on your local machine in addition to using Skipper to installing a sample application.
+It is the "`three-second tour`".
+After completing this section, you can move on to the <<three-minute-tour>>.
+When you are ready to dive deeper, head on over to the "`three-hour tour`" section, <<three-hour-tour>>.
+(Well, it is not really three hours....)
+
+[[getting-started-system-requirements]]
+== System Requirements
+
+The Skipper server is a Spring Boot application.
+Both the server and the shell are based on Java 8.
+The server uses an RDBMS to store state.
+An embedded H2 database is used if you do not provide a Data Source configuration through Spring Boot configuration properties.
+Supported databases are H2, HSQLDB, MySQL, Oracle, Postgresql, DB2, and SqlServer.
+Schemas are created on server startup
+
+
+[[getting-started-installing-skipper]]
+== Installing Skipper
+
+This section covers installing Skipper on your *local machine*, as it is the easiest way to get started.
+The section <<skipper-installation>> discusses installing on Cloud Foundry and Kubernetes.
+It also shows additional options for installing on your local machine.
+
+* Download the Skipper server and shell apps by using the following commands in a terminal session:
+
+[source,bash,subs=attributes]
+----
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-server/{project-version}/spring-cloud-skipper-server-{project-version}.jar
+
+wget http://repo.spring.io/{version-type-lowercase}/org/springframework/cloud/spring-cloud-skipper-shell/{project-version}/spring-cloud-skipper-shell-{project-version}.jar
+----
+
+* Launch the downloaded server and shell apps by using the following commands in a terminal session:
+
+[source,bash,subs=attributes]
+----
+java -jar spring-cloud-skipper-server-{project-version}.jar
+
+java -jar spring-cloud-skipper-shell-{project-version}.jar
+----
+
+The default port that the server listens on is 7577.  That is `SKPR` on a telephone keypad.  :)
+
+There is also a docker image hosted on https://hub.docker.com/r/springcloud/spring-cloud-skipper-server/[dockerhub]
+
+*Now install some apps!*
+
+
+[[three-second-tour]]
+== A Three-second Tour
+
+The default configuration of Skipper deploys apps to the local machine.
+The default configuration also has one local repository, named `local`, where you can upload packages.
+You can get a list of the package repositories by using the command `repo list`, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║local       │https://10.55.13.45:7577                                    │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+----
+
+Search for the available packages using the `package search` or its alias `package list` command.
+The following example shows the `package search` command and typical output for it:
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+Install the Maven-based Hello World application by using the `package install` command.
+Since this application picks a random port for the HTTP server by default, we specify the Spring Boot property `server.port`, prefixed with `spec.applicationProperties`.
+The prefix is due to the internal format of the <<package-templates,template file>>.
+The following example shows the whole command with its output:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --release-name helloworld-local --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+Released helloworld-local. Now at version v1.
+----
+You can now curl the `greeting` endpoint, as follows:
+----
+$ curl http://localhost:8099/greeting
+Hello World!
+----
+
+The release name, `helloworld-local`, is used for subsequent commands, such as `release status`, `release upgrade` or `release delete`.
+
+To see the status of the release, use the `release status` command, as shown (with its output) in the following example:
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworld-local
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 16:17:53 IST 2017                                                         ║
+║Status         │DEPLOYED                                                                             ║
+║Platform Status│All applications have been successfully deployed.                                    ║
+║               │[helloworld-local.helloworld-v1], State = [helloworld-local.helloworld-v1-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
+----
+Now we can upgrade the release.
+The `1.0.1` package refers to a newly released application that changed the default value of the greeting to be in `Portuguese`.
+The following example shows a typical `release upgrade` command with its output:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworld-local --package-name helloworld --package-version 1.0.1  --properties spec.applicationProperties.server.port=8100
+helloworld-local has been upgraded.  Now at version v2.
+----
+
+The preceding example command deploys the new version of the application, waits until it is healthy, and then destroys the old version of the application.
+You can then see the status of the application by using the `release status` command, as follows:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworld-local
+╔═══════════════╤═════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Fri Oct 27 16:20:07 IST 2017                                                         ║
+║Status         │DEPLOYED                                                                             ║
+║Platform Status│All applications have been successfully deployed.                                    ║
+║               │[helloworld-local.helloworld-v2], State = [helloworld-local.helloworld-v2-0=deployed]║
+╚═══════════════╧═════════════════════════════════════════════════════════════════════════════════════╝
+----
+
+You can now curl the `greeting` endpoint at the new port and see that the application has been updated, as follows:
+
+----
+$ curl http://localhost:8100/greeting
+Olá Mundo!
+----
+
+To delete the release, use the `delete` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release delete --release-name helloworld-local
+helloworld-local has been deleted.
+----
+NOTE: This example, where the upgrade changed only a property of the application, is not realistic.
+A more realistic example is the case where code has changed so that the updated application behaves differently.
+
+You can also deploy the other packages named `helloworld-docker` to the local machine.
+
+The examples in this section have shown the most basic operations.
+Other interesting commands such as `manifest get`, `release rollback`, `release list`, and `release history` are covered in the <<three-minute-tour>>.

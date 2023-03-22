@@ -1,0 +1,50 @@
+spring:
+  main:
+    banner-mode: "off"
+  data:
+    rest:
+      base-path: /api
+  datasource:
+    initialize: true
+    url: 'jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE'
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+  cloud:
+    skipper:
+      server:
+        version-info:
+          dependency-fetch:
+            enabled: false
+          dependencies:
+            spring-cloud-skipper-server:
+              name: Spring Cloud Skipper Server
+              version: fake-server-version
+            spring-cloud-skipper-shell:
+              name: Spring Cloud Skipper Shell
+              version: fake-shell-version
+
+
+maven:
+  remoteRepositories:
+    springRepo: https://repo.spring.io/libs-snapshot
+
+logging:
+  level:
+    org.springframework.beans: 'WARN'
+    org.springframework.context: 'WARN'
+    org.springframework.core.io: 'WARN'
+    org.springframework.data: 'WARN'
+    org.springframework.jmx: 'WARN'
+    org.springframework.web: 'WARN'
+    org.springframework.security: 'WARN'
+    org.springframework.integration: 'WARN'
+    org.springframework.boot: 'WARN'
+    org.hibernate: 'WARN'
+    # The following INFO is to log the generated password when using basic security
+    org.springframework.boot.autoconfigure.security: 'INFO'
+    org.springframework.cloud.deployer: 'DEBUG'

@@ -1,0 +1,17 @@
+!!org.springframework.cloud.skipper.domain.PackageMetadata
+apiVersion: null
+description: null
+displayName: null
+iconUrl: null
+kind: null
+maintainer: bob
+name: myapp
+origin: null
+packageFile: null
+packageHomeUrl: null
+packageSourceUrl: null
+repositoryId: null
+repositoryName: null
+sha256: null
+tags: null
+version: 1.0.0

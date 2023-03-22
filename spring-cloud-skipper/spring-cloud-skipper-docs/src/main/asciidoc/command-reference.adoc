@@ -1,0 +1,989 @@
+[[skipper-commands-reference]]
+= Skipper Commands
+
+Skipper commands fit into the following categories:
+
+* <<skipper-commands-package>>
+* <<skipper-commands-release>>
+* <<skipper-commands-manifest>>
+* <<skipper-commands-platform>>
+* <<skipper-commands-repository>>
+* <<skipper-commands-config>>
+
+NOTE: More details about commands can be found from <<skipper-commands-generic-usage>>.
+
+[[skipper-commands-package]]
+== Package Commands
+
+Skipper's package commands include the following:
+
+* <<skipper-commands-package-search>>
+* <<skipper-commands-package-upload>>
+* <<skipper-commands-package-install>>
+* <<skipper-commands-package-delete>>
+
+[[skipper-commands-package-search]]
+=== Search
+This command searches existing packages.
+====
+NAME::
+	package search - Search for packages.
+
+SYNOPSYS::
+	package search [[*--name*] string]  [*--details*]
+
+OPTIONS::
+	--name  string:::
+		wildcard expression to search for the package name +
+		*[Optional, default = <none>]* +
+
+	--details  boolean:::
+		to set for more detailed package metadata +
+		*[Optional, default = false]* +
+
+ALSO KNOWN AS::
+	package list
+====
+
+The  `search` or its alias `list` command shows all the packages available to be installed by the Skipper server, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+[source,bash,options="nowrap"]
+----
+skipper:>package list
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+The `search` command can use `--name` option to search for the package name containing the given option value, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search --name helloworld-
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+To search for more details of the packages, the `--details` option can be used, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search --name helloworld- --details
+╔════════════════╤═════════════════════════════════════════════════════════════════════════════╗
+║      Name      │                                    Value                                    ║
+╠════════════════╪═════════════════════════════════════════════════════════════════════════════╣
+║apiVersion      │v1                                                                           ║
+║origin          │A sample repository for using Skipper                                        ║
+║repositoryId    │1                                                                            ║
+║kind            │skipper                                                                      ║
+║name            │helloworld-docker                                                            ║
+║version         │1.0.0                                                                        ║
+║packageSourceUrl│https://github.com/markpollack/skipper-sample-repository                     ║
+║packageHomeUrl  │https://github.com/markpollack/skipper-sample-repository                     ║
+║tags            │web, demo, docker, helloworld                                                ║
+║maintainer      │https://github.com/markpollack                                               ║
+║description     │The app has two endpoints, /about and /greeting in English.  Docker resource.║
+║sha256          │                                                                             ║
+║iconUrl         │                                                                             ║
+╚════════════════╧═════════════════════════════════════════════════════════════════════════════╝
+
+╔════════════════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name      │                                     Value                                      ║
+╠════════════════╪════════════════════════════════════════════════════════════════════════════════╣
+║apiVersion      │v1                                                                              ║
+║origin          │A sample repository for using Skipper                                           ║
+║repositoryId    │1                                                                               ║
+║kind            │skipper                                                                         ║
+║name            │helloworld-docker                                                               ║
+║version         │1.0.1                                                                           ║
+║packageSourceUrl│https://github.com/markpollack/skipper-sample-repository                        ║
+║packageHomeUrl  │https://github.com/markpollack/skipper-sample-repository                        ║
+║tags            │web, demo, docker, helloworld                                                   ║
+║maintainer      │https://github.com/markpollack                                                  ║
+║description     │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║sha256          │                                                                                ║
+║iconUrl         │                                                                                ║
+╚════════════════╧════════════════════════════════════════════════════════════════════════════════╝
+
+----
+
+[[skipper-commands-package-upload]]
+=== Upload
+This command uploads a package .zip file, as shown (with output) in the following example:
+
+====
+NAME::
+	package upload - Upload a package.
+
+SYNOPSYS::
+	package upload [*--path*] string  [[*--repo-name*] string]
+
+OPTIONS::
+	--path  string:::
+		the package to be uploaded +
+		*[Mandatory]* +
+
+	--repo-name  string:::
+		the local repository name to upload to +
+		*[Optional, default = <none>]* +
+
+====
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --path /path-to-package/mypackage-1.0.0.zip
+Package uploaded successfully:[mypackage:1.0.0]
+----
+
+If no `--repo-name` is set, the `upload` command uses `local` as the repository to upload.
+
+[[skipper-commands-package-install]]
+=== Install
+This command installs a package, as shown (with output) in the following example:
+
+====
+NAME::
+	package install - Install a package.
+
+SYNOPSYS::
+	package install [*--package-name*] string  [[*--package-version*] string]  [[*--file*] file]  [[*--properties*] string]  [*--release-name*] string  [[*--platform-name*] string]
+
+OPTIONS:::
+	--package-name  string:::
+		name of the package to install +
+		*[Mandatory]* +
+
+	--package-version  string:::
+		version of the package to install, if not specified latest version will be used +
+		*[Optional, default = <none>]* +
+
+	--file  file:::
+		specify values in a YAML file +
+		*[Optional, default = <none>]* +
+
+	--properties  string:::
+		the comma separated set of properties to override during install +
+		*[Optional, default = <none>]* +
+
+	--release-name  string:::
+		the release name to use +
+		*[Mandatory]* +
+
+	--platform-name  string:::
+		the platform name to use +
+		*[Optional, default = default]* +
+====
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+Released helloworldlocal. Now at version v1.
+----
+
+If no `package-version` is specified, then the latest package version by the given `package-name` is considered.
+
+If no `platform-name` is specified, the platform name, `default`, is used.
+
+The properties can either be provided through comma separated YAML string by using the `--properties` option or through a YAML
+file by using the `--file` option.
+
+[[skipper-commands-package-delete]]
+=== Delete
+This command deletes a package.
+
+====
+NAME::
+	package delete - Delete a package.
+
+SYNOPSYS::
+	package delete [*--package-name*] string
+
+OPTIONS::
+	--package-name  string:::
+		the package name to be deleted +
+		*[Mandatory]* +
+====
+
+You can only delete a package that is in a local (database backed) repository, as shown (with output) in the following example:
+[source,bash,options="nowrap"]
+----
+skipper:>package delete --package-name helloworld
+Can not delete package [helloworld], associated repository [experimental] is remote.
+----
+
+
+[[skipper-commands-release]]
+== Release Commands
+
+Skipper's release commands include the following:
+
+* <<skipper-commands-release-list>>
+* <<skipper-commands-release-status>>
+* <<skipper-commands-release-upgrade>>
+* <<skipper-commands-release-rollback>>
+* <<skipper-commands-release-history>>
+* <<skipper-commands-release-delete>>
+* <<skipper-commands-release-cancel>>
+
+[[skipper-commands-release-list]]
+=== List
+This command lists the latest deployed or failed release.
+
+====
+NAME::
+	release list - List the latest version of releases with status of deployed or failed.
+
+SYNOPSYS::
+	*release list* [[*--release-name*] string]
+
+OPTIONS::
+	--release-name  string:::
+		wildcard expression to search by release name +
+		*[Optional, default = <none>]* +
+
+====
+
+Listing the latest deployed or failed release, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release list
+╔═══════════════╤═══════╤═════════════════════════╤════════╤═══════════╤══════════════╤════════════╤══════════════════════════════════════════════════════════════════════════════╗
+║     Name      │Version│      Last updated       │ Status │  Package  │   Package    │  Platform  │                               Platform Status                                ║
+║               │       │                         │        │   Name    │   Version    │    Name    │                                                                              ║
+╠═══════════════╪═══════╪═════════════════════════╪════════╪═══════════╪══════════════╪════════════╪══════════════════════════════════════════════════════════════════════════════╣
+║helloworldlocal│3      │Mon Oct 30 17:57:41 IST  │DEPLOYED│helloworld │1.0.0         │default     │[helloworldlocal.helloworld-v3], State =                                      ║
+║               │       │2017                     │        │           │              │            │[helloworldlocal.helloworld-v3-0=deployed]                                    ║
+╚═══════════════╧═══════╧═════════════════════════╧════════╧═══════════╧══════════════╧════════════╧══════════════════════════════════════════════════════════════════════════════╝
+----
+
+[[skipper-commands-release-status]]
+=== Status
+This command shows a release status.
+
+====
+NAME::
+	release status - Status for a last known release version.
+
+SYNOPSYS::
+	*release status* [*--release-name*] string  [[*--release-version*] integer]  
+
+OPTIONS::
+	--release-name  string:::
+		release name +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--release-version  integer:::
+		the specific release version. +
+		*[Optional, default = <none>]* +
+====
+
+Shows the `status` of a specific release and version, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldlocal
+╔═══════════════╤═══════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:53:50 IST 2017                                                       ║
+║Status         │DEPLOYED                                                                           ║
+║Platform Status│All applications have been successfully deployed.                                  ║
+║               │[helloworldlocal.helloworld-v2], State = [helloworldlocal.helloworld-v2-0=deployed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════════════════════════╝
+----
+
+If no `--release-version` specified, the latest release version is used.
+The following example shows the command with the `--release-version` option:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldlocal --release-version 1
+╔═══════════════╤════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Mon Oct 30 17:52:57 IST 2017                                            ║
+║Status         │DELETED                                                                 ║
+║Platform Status│The applications are known to the system, but is not currently deployed.║
+║               │[helloworldlocal.helloworld-v1], State = [unknown]                      ║
+╚═══════════════╧════════════════════════════════════════════════════════════════════════╝
+----
+
+[[skipper-commands-release-upgrade]]
+=== Upgrade
+This command upgrades a package.
+
+====
+NAME::
+	release upgrade - Upgrade a release.
+
+SYNOPSYS::
+	*release upgrade* [*--release-name*] string  [*--package-name*] string  [[*--package-version*] string]  [[*--file*] file]  [[*--properties*] string]  [[*--timeout-expression*] string]  
+
+OPTIONS::
+	--release-name  string:::
+		The name of the release to upgrade +
+		*[Mandatory]* +
+
+	--package-name  string:::
+		the name of the package to use for the upgrade +
+		*[Mandatory]* +
+
+	--package-version  string:::
+		the version of the package to use for the upgrade, if not specified latest version will be used +
+		*[Optional, default = <none>]* +
+
+	--file  file:::
+		specify values in a YAML file +
+		*[Optional, default = <none>]* +
+
+	--properties  string:::
+		the comma separated set of properties to override during upgrade +
+		*[Optional, default = <none>]* +
+
+	--timeout-expression  string:::
+		the expression for upgrade timeout +
+		*[Optional, default = <none>]* +
+
+	--force	force upgrade
+		[Optional, default = false]
+
+	--app-names  string
+		application names to force upgrade. If no specific list is provided, all the apps in the packages are force upgraded
+		[Optional, default = <none>]
+
+====
+
+
+Upgrades a package, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=9090
+helloworldpcf has been upgraded.  Now at version v2.
+----
+
+The manifest for this release would look like this:
+
+[source,bash,options="nowrap"]
+----
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.0.RELEASE"
+  "applicationProperties":
+    "server.port": "9090"
+  "deploymentProperties": !!null "null"
+----
+
+
+If no `package-version` is specified, the latest package version by the given `--package-name` option is considered.
+The properties can either be provided through comma separated YAML string by using the `--properties` option or through a YAML
+file by using the `--file` option.
+
+NOTE: An upgrade can be done by overriding the package version or by keeping the existing package version but overriding the properties.
+When overriding the package version, it needs to accompany with the corresponding properties as the existing properties are not carried over.
+In a future release, we plan to introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+
+For instance, if the package version is not changed but only other properties are changed, the manifest would add the new properties with the existing properties of the same package version.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.log.level=DEBUG
+helloworldpcf has been upgraded.  Now at version v3.
+----
+
+[source,bash,options="nowrap"]
+----
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.0.RELEASE"
+  "applicationProperties":
+    "server.port": "9090"
+    "log.level": "DEBUG"
+  "deploymentProperties": !!null "null"
+----
+
+Instead, if the upgrade is performed with a new package version as follows,
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1
+helloworldpcf has been upgraded.  Now at version v3.
+----
+
+Since the package version is changed, the manifest wouldn't carry the properties from the existing release.
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get helloworldlocal
+"apiVersion": "skipper.spring.io/v1"
+"kind": "SpringCloudDeployerApplication"
+"metadata":
+  "name": "helloworld"
+  "type": "demo"
+"spec":
+  "resource": "maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld"
+  "version": "1.0.1.RELEASE"
+  "applicationProperties": !!null "null"
+  "deploymentProperties": !!null "null"
+----
+
+
+When performing an update on a package that contains nested packages, use the name of the package as a prefix in the property string or as the first level in the YAML document.
+For example, the `ticktock` package that contains a `time` and a `log` application, a command to upgrade the `log` application would be as follows:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --file /home/mpollack/log-level-change.yml
+----
+
+where `log-level-change.yml` contains the following:
+
+[source,bash,options="nowrap"]
+----
+log:
+  version: 1.1.1.RELEASE
+  spec:
+    applicationProperties:
+      server.port: 9999
+      endpoints.sensitive: false
+      log.level: ERROR
+----
+
+Since it is a common use-case to change only the version of the application, the packages can list the version as a top-level property in the `values.yml` file.
+For example, in the test package `ticktock` (located https://github.com/spring-cloud/spring-cloud-skipper/blob/master/spring-cloud-skipper-server-core/src/test/resources/repositories/sources/test/ticktock/ticktock-1.0.0/packages/log/values.yml[here]), `values.yml` contains the following:
+
+[source,bash,options="nowrap"]
+----
+version: 1.1.0.RELEASE
+spec:
+  applicationProperties:
+    log.level: DEBUG
+  deploymentProperties:
+    memory: 1024m
+----
+
+You can then use the `--properties` option in the `upgrade` command, as shown in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --properties log.version=1.1.1.RELEASE
+----
+
+You can use `--timeout-expression` to alter _timeout_ setting used to wait healthy applications
+when server is in state to do that. Global setting to override is
+`spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` mentioned earlier. More about
+expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name ticktockskipper --package-name ticktock --timeout-expression=30s
+----
+
+
+
+The `--force` option is used to deploy new instances of currently deployed applications.
+In other words, Skipper will upgrade the application again even if the manifest is unchanged.
+This behavior is needed in the case when configuration information is obtained by the application itself at startup time, for example from https://cloud.spring.io/spring-cloud-config/[Spring Cloud Config Server].
+You can specify which applications for force upgrade by using the option `--app-names`.
+If you do not specify any application names, all the applications will be force upgraded.
+You can specify `--force` and `--app-names` options together with `--properties` or `--file` options.
+
+Following example describes `force` upgrade:
+
+First, install the package `ticktock` that has `time` and `log` apps.
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --repo-name local --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/ticktock/ticktock-1.0.0.zip
+Package uploaded successfully:[ticktock:1.0.0]
+
+skipper:>package install --package-name ticktock --release-name a1
+Released a1. Now at version v1.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═════════════════════════════════════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│               Platform Status               ║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═════════════════════════════════════════════╣
+║a1  │1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │default      │[a1.log-v1], State = [a1.log-v1-0=deployed]  ║
+║    │       │                            │        │            │               │             │[a1.time-v1], State = [a1.time-v1-0=deployed]║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═════════════════════════════════════════════╝
+
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │Install complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+----
+
+Now, perform the upgrade even though there are no explicit differences between the `latest` and the `current` package.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock
+Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.
+----
+
+If the upgrade needs to be forced for all the apps of `ticktock` (for both `time` and `log`)
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock --force
+a1 has been upgraded.  Now at version v2.
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│      Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════════════╣
+║2      │Thu Sep 13 08:35:53 IST 2018│UNKNOWN │ticktock    │1.0.0          │Upgrade install underway║
+║1      │Thu Sep 13 08:34:50 IST 2018│DEPLOYED│ticktock    │1.0.0          │Install complete        ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════════════╝
+
+skipper:>release history --release-name a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Thu Sep 13 08:35:53 IST 2018│DEPLOYED│ticktock    │1.0.0          │Upgrade complete║
+║1      │Thu Sep 13 08:34:50 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+----
+
+If the `force` upgrade needs to be done for a specific list of applications, then `--app-names` option can be used.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name a1 --package-name ticktock --force --app-names log
+a1 has been upgraded.  Now at version v3.
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Thu Sep 13 08:36:51 IST 2018│DEPLOYED│ticktock    │1.0.0          │Upgrade complete║
+║2      │Thu Sep 13 08:35:53 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+║1      │Thu Sep 13 08:34:50 IST 2018│DELETED │ticktock    │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+[[skipper-commands-release-rollback]]
+=== Rollback
+This command rolls back the release.
+
+====
+NAME::
+	release rollback - Rollback the release to a previous or a specific release.
+
+SYNOPSYS::
+	*release rollback* [*--release-name*] string  [[*--release-version*] int]  [[*--timeout-expression*] string]  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to rollback +
+		*[Mandatory]* +
+
+	--release-version  int:::
+		the specific release version to rollback to. Not specifying the value rolls back to the previous release. +
+		*[Optional, default = 0]* +
+
+	--timeout-expression  string:::
+		the expression for rollback timeout +
+		*[Optional, default = <none>]* +
+====
+
+Rolls back the release to a specific version, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback --release-name helloworldlocal --release-version 1
+helloworldlocal has been rolled back.  Now at version v3.
+----
+
+If no `--release-version` is specified, then the rollback version is the previous stable release (either in `DELETED` or
+`DEPLOYED` status).
+
+You can use `--timeout-expression` to alter _timeout_ setting used to wait healthy applications
+when server is in state to do that. Global setting to override is
+`spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` mentioned earlier. More about
+expression itself, see <<skipper-commands-generic-usage-timeout-expression>>.
+
+[[skipper-commands-release-history]]
+=== History
+This command shows the history of a specific release.
+
+====
+NAME::
+	release history - List the history of versions for a given release.
+
+SYNOPSYS::
+	*release history* [*--release-name*] string  
+
+OPTIONS::
+	--release-name  string:::
+		wildcard expression to search by release name +
+		*[Mandatory]* +
+		*[may not be null] +
+
+====
+
+Showing the history of a specific release, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Mon Oct 30 17:57:41 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Mon Oct 30 17:53:50 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Mon Oct 30 17:52:57 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+[[skipper-commands-release-delete]]
+=== Delete
+This command deletes a specific release's latest deployed revision.
+
+====
+NAME::
+	release delete - Delete the release.
+
+SYNOPSYS::
+	*release delete* [*--release-name*] string  [*--delete-package*]  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to delete +
+		*[Mandatory]* +
+
+	--delete-package	delete the release package:::
+		*[Optional, default = false]* +
+====
+
+Deleting a specific release's latest deployed revision, undeploying the application or applications, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release delete --release-name helloworldlocal
+helloworldlocal has been deleted.
+----
+
+[[skipper-commands-release-cancel]]
+=== Cancel
+This command attempts cancellation of existing release operation.
+
+====
+NAME::
+	release cancel - Request a cancellation of current release operation.
+
+SYNOPSYS::
+	*release cancel* [*--release-name*] string  
+
+OPTIONS::
+	--release-name  string:::
+		the name of the release to cancel +
+		*[Mandatory]* +
+====
+
+This command can be used to attempt a cancel for a running release operation if it supports it and
+release is currently in state where any type of cancellation can be attempted. For example during
+an upgrade server will delete old applications if new applications are detected healtly. Before
+state is transitioned to deleting old applications, it is possible to request cancellation of whole
+upgrade procedure.
+
+One other use case is that if new applications are failed and server will timeout waiting healtly
+applications, it's convenient to cancel operation without waiting full timeout to happen.
+
+Here is an example how cancellation is attempted when upgraded applications fail:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --package-name testapp --package-version 1.0.0 --release-name mytestapp
+Released mytestapp. Now at version v1.
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+skipper:>release upgrade --package-name testapp --package-version 1.1.0 --release-name mytestapp
+mytestapp has been upgraded.  Now at version v2.
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│      Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════════════╣
+║2      │Thu May 17 11:18:52 BST 2018│UNKNOWN │testapp     │1.1.0          │Upgrade install underway║
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete        ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════════════╝
+
+skipper:>release status --release-name mytestapp
+╔═══════════════╤═══════════════════════════════════════════════════════════════╗
+║Last Deployed  │Thu May 17 11:18:52 BST 2018                                   ║
+║Status         │UNKNOWN                                                        ║
+║Platform Status│All apps have failed deployment.                               ║
+║               │[mytestapp.testapp-v2], State = [mytestapp.testapp-v2-0=failed]║
+╚═══════════════╧═══════════════════════════════════════════════════════════════╝
+
+skipper:>release cancel --release-name mytestapp
+Cancel request for release mytestapp sent
+
+skipper:>release history --release-name mytestapp
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│       Description       ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════════════╣
+║2      │Thu May 17 11:18:52 BST 2018│FAILED  │testapp     │1.1.0          │Cancelled after 39563 ms.║
+║1      │Thu May 17 11:18:07 BST 2018│DEPLOYED│testapp     │1.0.0          │Install complete         ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════════════╝
+----
+
+[[skipper-commands-manifest]]
+== Manifest Commands
+
+Skipper's manifest has only one command: `get`.
+
+[[skipper-commands-manifest-get]]
+=== Get
+Thsi command shows a manifest.
+
+====
+NAME::
+	manifest get - Get the manifest for a release
+
+SYNOPSYS::
+	manifest get [*--release-name*] string  [[*--release-version*] integer]
+
+OPTIONS::
+	--release-name  string:::
+		release name +
+		*[Mandatory]* +
+		*[may not be null]* +
+
+	--release-version  integer:::
+		specific release version. +
+		*[Optional, default = <none>]* +
+====
+
+The `manifest get` command shows the manifest used for a specific release, as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldk8s
+
+---
+# Source: template.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: helloworld-docker
+spec:
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+  deploymentProperties:
+    spring.cloud.deployer.kubernetes.createNodePort: 32123
+----
+
+
+[[skipper-commands-platform]]
+== Platform commands
+
+Skipper's platform has only one command: `list`.
+
+[[skipper-commands-platform-list]]
+=== List
+This command lists platforms.
+
+====
+NAME::
+	platform list - List platforms
+
+SYNOPSYS::
+	platform list
+====
+
+The `platform list` command shows the list all the available deployment platform accounts, as shown (with output) in the following example:
+
+```
+skipper:>platform list
+╔════════╤════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║  Name  │    Type    │                                                                         Description                                                                          ║
+╠════════╪════════════╪══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╣
+║default │local       │ShutdownTimeout = [30], EnvVarsToInherit = [TMP,LANG,LANGUAGE,LC_.*,PATH], JavaCmd =                                                                          ║
+║        │            │[/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/bin/java], WorkingDirectoriesRoot = [/var/folders/t3/qf1wkpwj4lgd9gjccwk0wr7h0000gp/T], ║
+║        │            │DeleteFilesOnExit = [true]                                                                                                                                    ║
+║cf-dev  │cloudfoundry│org = [scdf-ci], space = [ilaya-space], url = [https://api.run.pivotal.io]                                                                                    ║
+║minikube│kubernetes  │master url = [https://192.168.99.101:8443/], namespace = [default], api version = [v1]                                                                        ║
+╚════════╧════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+[[skipper-commands-repository]]
+== Repository Commands
+Skipper's repository commands include the following:
+
+* <<skipper-commands-repo-list>>
+
+[[skipper-commands-repo-list]]
+=== List
+This command list repositories.
+
+====
+NAME::
+	repo list - List package repositories
+
+SYNOPSYS::
+	repo list
+====
+
+List repositories as shown (with output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://10.55.13.45:7577                                    │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+----
+
+If a repository is local, it is backed by Skipper's database and you can upload packages to the repository.
+If it is not local, it is a remote repository and you can only read packages.
+The packages in a remote repository are updated outside of Skipper's control.
+The 1.0 release only polls the remote repository for contents upon server startup.
+Follow issue https://github.com/spring-cloud/spring-cloud-skipper/issues/262[GH-262] for more on adding support for dynamic updating of remote repository metadata.
+
+
+[[skipper-commands-config]]
+== Skipper Server Commands
+
+Skipper's package commands include the following:
+
+* <<skipper-commands-config-config>>
+* <<skipper-commands-config-info>>
+
+[[skipper-commands-config-config]]
+=== Config
+This command configures the shell to reference the HTTP API endpoint of the Skipper Server.
+
+====
+NAME::
+	skipper config - Configure the Spring Cloud Skipper REST server to use.
+
+SYNOPSYS::
+	skipper config [[*--uri*] string]  [[*--username*] string]  [[*--password*] string]  [[*--credentials-provider-command*] string]  [*--skip-ssl-validation*]
+
+OPTIONS::
+	--uri  string:::
+		the location of the Spring Cloud Skipper REST endpoint +
+		*[Optional, default = http://localhost:7577/api]* +
+
+	--username  string:::
+		the username for authenticated access to the Admin REST endpoint +
+		*[Optional, default = <none>]* +
+
+	--password  string:::
+		the password for authenticated access to the Admin REST endpoint (valid only with a username) +
+		*[Optional, default = <none>]* +
+
+	--credentials-provider-command  string:::
+		a command to run that outputs the HTTP credentials used for authentication +
+		*[Optional, default = <none>]* +
+
+	--skip-ssl-validation :::
+		accept any SSL certificate (even self-signed) +
+		*[Optional, default = <none>]* +
+====
+
+Configures shell as shown in the following example:
+
+[source,bash]
+----
+skipper:>skipper config --uri https://localhost:8443/api
+----
+
+When using OAuth, you can use the username and password options.
+
+
+From within the Skipper Shell you can also provide credentials, as shown in the following example:
+
+[source,bash]
+----
+skipper:> skipper config --uri https://localhost:7577/api --username my_username --password my_password
+----
+
+See the <<configuration-security>> section for more information.
+
+[[skipper-commands-config-info]]
+=== Info
+This command shows server info.
+
+====
+NAME::
+	skipper info - Show the Skipper server being used.
+
+SYNOPSYS::
+	skipper info
+====
+
+Show which server version is being used, as shown (with output) in the following example:
+[source,bash,subs=attributes]
+----
+skipper:>info
+Spring Cloud Skipper Server v1.0.0.{project-version}
+----
+
+[[skipper-commands-generic-usage]]
+== Generic Usage
+This section contains generic notes about commands.
+
+[[skipper-commands-generic-usage-timeout-expression]]
+=== Timeout Expression
+* A regular long representation (using milliseconds as the default unit)
+* The standard ISO-8601 format https://docs.oracle.com/javase/8/docs/api//java/time/Duration.html#parse-java.lang.CharSequence-[used by]
+_java.util.Duration_
+* A more readable format where the value and the unit are coupled (e.g. 10s means 10 seconds)
+
+To specify a session timeout of 30 seconds, 30, PT30S and 30s are all equivalent. A read timeout
+of 500ms can be specified in any of the following form: 500, PT0.5S and 500ms.
+
+You can also use any of the supported unit. These are:
+
+* ns for nanoseconds
+* ms for milliseconds
+* s for seconds
+* m for minutes
+* h for hours
+* d for days
+

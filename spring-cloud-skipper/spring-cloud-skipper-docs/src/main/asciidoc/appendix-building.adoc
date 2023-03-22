@@ -1,0 +1,235 @@
+[appendix]
+[[building]]
+== Building
+To build the source, you need to install JDK 1.8.
+
+The build uses the Maven wrapper so that you do not have to install a specific version of Maven.
+
+The main build command is
+
+----
+$ ./mvnw clean install
+----
+
+To create the executables and avoid running the tests and generating JavaDocs, use the following command:
+
+----
+$ ./mvnw clean package -DskipTests -Dmaven.javadoc.skip=true
+----
+
+NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command in place of `./mvnw` in the examples.
+If you do so, you also might need to add `-P spring` if your local Maven settings do not contain repository declarations for spring pre-release artifacts.
+
+NOTE: You might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`.
+We try to cover this in the `.mvn` configuration, so, if you find you have to increase memory to make a build succeed, please raise a ticket to get the settings added to source control.
+
+=== Documentation
+
+To generate only the REST Docs documentation, use the following command:
+
+----
+$ ./mvnw test -pl spring-cloud-skipper-server-core -Dtest=*Documentation*
+----
+
+To build the only the Asciidoctor documentation, use the following command:
+
+----
+$ ./mvnw package -DskipTests -Pfull -pl spring-cloud-skipper-docs
+----
+
+=== Custom Server Build
+This chapter contains instructions how to create a custom server
+build and should cause exactly same packaged _uber-jar_ compared to
+one from a Skipper build itself.
+
+It is required to follow same _Spring Boot_ main class structure used in Skipper itself.
+Example of it is shown below:
+
+[source,java,indent=0,subs="attributes+"]
+----
+package com.example.customskipperserver;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.actuate.autoconfigure.ManagementWebSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
+import org.springframework.cloud.skipper.server.EnableSkipperServer;
+
+@SpringBootApplication(exclude = {
+                CloudFoundryDeployerAutoConfiguration.class,
+                KubernetesAutoConfiguration.class,
+                LocalDeployerAutoConfiguration.class,
+                ManagementWebSecurityAutoConfiguration.class,
+                SecurityAutoConfiguration.class,
+                SessionAutoConfiguration.class
+        })
+@EnableSkipperServer
+public class CustomSkipperServerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(CustomSkipperServerApplication.class, args);
+	}
+}
+----
+
+Working build file for _Maven_ would look like something shown below:
+
+[source,xml,indent=0,subs="attributes+"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.example</groupId>
+	<artifactId>custom-skipper-server</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>custom-skipper-server</name>
+	<description>Demo project for Spring Boot</description>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.9.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<spring-cloud.version>Dalston.SR5</spring-cloud.version>
+		<spring-cloud-skipper.version>{project-version}</spring-cloud-skipper.version>
+		<!--
+			reactor and flyway are managed by boot so only clean way with maven is to
+			change version properties. trying to import boms in dependencyManagement
+			would not actually change versions.
+		-->
+		<reactor.version>3.0.7.RELEASE</reactor.version>
+		<flyway.version>5.0.5</flyway.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-skipper-server</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-skipper-dependencies</artifactId>
+				<version>${spring-cloud-skipper.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+----
+
+Working build file for _Gradle_ would look like something shown below:
+
+[source,groovy,indent=0,subs="attributes+"]
+----
+buildscript {
+	ext {
+		springBootVersion = '1.5.9.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven { url "https://repo.springsource.org/libs-snapshot" }
+	maven { url "https://repo.springsource.org/libs-release" }
+	maven { url "https://repo.springsource.org/libs-milestone" }
+}
+
+
+ext {
+	springCloudVersion = 'Dalston.SR5'
+	springCloudSkipperVersion = '{project-version}'
+	reactorVersion = 'Aluminium-SR3'
+	reactorNettyVersion = '0.6.6.RELEASE'
+	objenesisVersion = '2.1'
+}
+
+dependencies {
+	compile('org.springframework.cloud:spring-cloud-starter-skipper-server')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom "org.springframework.cloud:spring-cloud-skipper-dependencies:${springCloudSkipperVersion}"
+		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
+	}
+	dependencies {
+		// latest reactor bom is still using reactor-netty:0.6.3.RELEASE
+		// so we need to change it here because cf java client use
+		// dedicated netty version while they should have been using
+		// reactor boms assuming reactor boms would be up-to-date
+		dependency "io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}"
+		// this is unfortunate mess with objenesis as there's versions 2.1 and 2.6
+		// in build path and nobody manages version and maven vs. gradle is different
+		dependency "org.objenesis:objenesis:${objenesisVersion}"
+	}
+}
+
+----
+
+=== Importing into eclipse
+You can generate Eclipse project metadata by using the following command:
+
+[indent=0]
+----
+$ ./mvnw eclipse:eclipse
+----
+
+In Eclipse, the generated projects can be imported by selecting `Import existing projects` from the `File` menu.

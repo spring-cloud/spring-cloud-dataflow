@@ -1,0 +1,29 @@
+---
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: log-sink
+  type: sink
+spec:
+  resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit
+  version: 1.1.0.RELEASE
+  applicationProperties:
+    log.level: DEBUG
+    log.expression: hellobaby
+  deploymentProperties:
+    memory: 1024
+    disk: 2
+---
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: time-source
+  type: source
+spec:
+  resource: maven://org.springframework.cloud.stream.app:time-source-rabbit
+  version: 1.1.0.RELEASE
+  applicationProperties:
+    log.level: INFO
+  deploymentProperties:
+    memory: 2048
+    disk: 4

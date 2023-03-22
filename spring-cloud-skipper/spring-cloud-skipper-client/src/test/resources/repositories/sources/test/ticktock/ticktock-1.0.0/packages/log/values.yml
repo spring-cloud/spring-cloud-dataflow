@@ -1,0 +1,14 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+appVersion: 1.2.0.RELEASE
+deployment:
+  count: 1
+  applicationProperties:
+    log.level: DEBUG
+  deploymentProperties:
+    memory: 1024m
+
+
+
+

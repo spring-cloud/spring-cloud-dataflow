@@ -1,0 +1,1185 @@
+[[three-minute-tour]]
+= Three minute Tour
+
+Picking up from where the <<three-second-tour>> left off, this section walks through the additional commands and other features of Skipper.
+Each section walks through the same set of operations, but for a different platform:
+
+* <<tour-local>>
+* <<tour-cloud-foundry>>
+* <<tour-kubernetes>>
+
+[[tour-local]]
+== Local Machine
+
+Start up the server and shell as in the <<three-second-tour, three-second tour>>.
+
+Now you can install and then update the Hello World application.
+Start by running the `package install` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --release-name helloworldlocal --package-name helloworld --package-version 1.0.0 --properties spec.applicationProperties.server.port=8099
+Released helloworldlocal. Now at version v1.
+----
+
+You can now curl the `greeting` endpoint, as shown (with its output) in the following example:
+```
+$ curl http://localhost:8099/greeting
+Hello World!
+$ curl http://localhost:8099/about
+Hello World v1.0.0.RELEASE
+```
+
+We use a YAML file to update the release.
+This application contains a Spring Boot `@ConfigurationProperty`, named `helloworld.greeting`, so we set that along with a standard Spring Boot property: `endpoints.sensitive=false`.
+We also bump the memory up to 2G, make the Boot actuator endpoint not sensitive, and set the port to 8100.
+
+The `helloworld-upgrade-local.yml` file contains the following code:
+----
+spec:
+  applicationProperties:
+    server.port: 8100
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.memory: 2048m
+----
+
+The following example shows the `release upgrade` command, with its output:
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldlocal --package-name helloworld --package-version 1.0.1 --file /home/mpollack/helloworld-upgrade-local.yml
+helloworldlocal has been upgraded.  Now at version v2.
+----
+
+The `--package-version 1.0.1` command line option is also used to upgrade to a newer version of the package.
+
+The current upgrade strategy is simple: If the new app is healthy, the old app is removed.
+There is no rolling upgrade option. All new apps are deployed and checked for health. Then any previous versions are removed.
+More flexible upgrade strategies are planned in a future release of Skipper.
+
+
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown (with its output) in the following example:
+```
+$ curl http://localhost:8100/greeting
+yo
+$ curl http://localhost:8100/about
+Hello World v1.0.1.RELEASE
+```
+
+You can also view the endpoints in your browser.
+
+The `list` command shows you the current `DEPLOYED` and `DELETED` releases for every release name.
+In this case there, is just one entry, as you can see with the `release list` command, as follows:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release list
+╔═══════════════╤═══════╤═════════════╤════════╤══════════╤═════════╤═════════╤════════════════════════════════════════════════════╗
+║     Name      │Version│Last updated │ Status │ Package  │ Package │Platform │                  Platform Status                   ║
+║               │       │             │        │   Name   │ Version │  Name   │                                                    ║
+╠═══════════════╪═══════╪═════════════╪════════╪══════════╪═════════╪═════════╪════════════════════════════════════════════════════╣
+║helloworldlocal│2      │Fri Oct 27   │DEPLOYED│helloworld│1.0.1    │default  │[helloworldlocal.helloworld-v2], State =            ║
+║               │       │16:39:03 IST │        │          │         │         │[helloworldlocal.helloworld-v2-0=deployed]          ║
+║               │       │2017         │        │          │         │         │                                                    ║
+╚═══════════════╧═══════╧═════════════╧════════╧══════════╧═════════╧═════════╧════════════════════════════════════════════════════╝
+----
+
+You can get the full history of the release by using the `history` command, as shown (with its output) in the following example:
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Fri Oct 27 16:39:03 IST 2017│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
+║1      │Fri Oct 27 16:37:59 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+To see what changed, you can look at the Skipper manifest for each release by using the `manifest get` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldlocal --release-version 2
+
+---
+# Source: helloworld.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.1.RELEASE
+  applicationProperties:
+    server.port: 8100
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.memory: 2048m
+    spring.cloud.deployer.count: 1
+----
+
+The following example shows the `manifest get` command and its output for version 1:
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldlocal --release-version 1
+
+---
+# Source: helloworld.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+    server.port: 8099
+  deploymentProperties:
+----
+
+(A `manifest diff` command is coming in a future release.)
+
+
+Now we can use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback --release-name helloworldlocal --release-version 1
+helloworldlocal has been rolled back.  Now at version v3.
+----
+
+NOTE: The history now shows a new `v3` version, even though it is identical in terms of app behavior to the `v1` version.
+
+The `release history` command shows all the versions that have been deployed, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldlocal
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Fri Oct 27 16:42:47 IST 2017│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║2      │Fri Oct 27 16:39:03 IST 2017│DELETED │helloworld  │1.0.1          │Delete complete ║
+║1      │Fri Oct 27 16:37:59 IST 2017│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+
+You can now curl the `greeting` endpoint and see the output of each endpoint, as follows:
+```
+$ curl http://localhost:8099/greeting
+Hello World!
+$ curl http://localhost:8099/about
+Hello World v1.0.0.RELEASE
+```
+
+[[tour-cloud-foundry]]
+== Cloud Foundry
+
+First, follow the instructions in the section <<skipper-installation-cloudfoundry>> to deploy the Skipper Server to Cloud Foundry.
+
+When you start the Skipper shell, by default, it tries to look for the Skipper server on the same (local) machine.
+To specify the Skipper server that is running on Cloud Foundry, provide the `serverUrl` when launching the shell or use the `config` command after the shell has started.
+The following example provides the `serverUrl`:
+
+[source,bash,subs=attributes]
+----
+java -jar spring-cloud-skipper-shell-{project-version}.jar --spring.cloud.skipper.client.serverUri=https://mlp-skipper.cfapps.io/api
+----
+
+The following example uses `config`:
+[source,bash]
+----
+skipper:>skipper config --uri https://mlp-skipper.cfapps.io/api
+Successfully targeted https://mlp-skipper.cfapps.io/api
+----
+
+The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default.
+The `local` repository is where you can upload new packages.
+The `experimental` repository has a few "hello world" applications to help get you started.
+The following example shows the `repo list` command and the output of our example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+----
+
+NOTE: Above example assumes that `experimental` repository has been added to the server configuration. More about
+working with repositories can be found from <<using-repositories>>.
+
+The following example shows the `package search` command and the output of our example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+The command `platform list` shows the platforms with which the server has been configured, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+╔════╤════════════╤═════════════════════════════════════════════════════════════════════════╗
+║Name│    Type    │                               Description                               ║
+╠════╪════════════╪═════════════════════════════════════════════════════════════════════════╣
+║pws │cloudfoundry│org = [scdf-ci], space = [space-mark], url = [https://api.run.pivotal.io]║
+╚════╧════════════╧═════════════════════════════════════════════════════════════════════════╝
+----
+
+In the preceding example, there is only one Cloud Foundry platform.
+
+Now we can install the Hello World app (specifically, the maven based artifact).
+The following example shows the `package install` command (with its output) that we use to install the `Hello World` application:
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --platform-name pws --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+Released helloworldpcf. Now at version v1.
+----
+
+The `spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io` deployment property is set so that, when different versions of this application are deployed, they have the same HTTP route.
+
+Because the default value of that shell option is `default`he `--platform-name pws`, we used the command option.
+When installing Skipper, you can register a platform under the name `default`, but it is a best practice to specify the target platform name.
+
+You can monitor the progress of the deployment by using the `release status` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldpcf
+╔═══════════════╤════════════════════════════════════════════════╗
+║Last Deployed  │Thu Jan 18 13:18:44 EST 2018                    ║
+║Status         │DEPLOYED                                        ║
+║Platform Status│The applications are being deployed.            ║
+║               │[helloworldpcf-helloworld-v1], State = [partial]║
+╚═══════════════╧════════════════════════════════════════════════╝
+----
+
+Eventually, the Platform Status says, `All applications have been successfully deployed.`
+
+NOTE: The `DEPLOYED` status in the preceding example indicates that Skipper has told the platform to deploy.
+Skipper does not keep track of the intermediate states 'deploying' or 'deleting'.
+The platform status provides finer-grained status information.
+
+The `cf apps` command now has a new listing for this deployed application, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
+OK
+
+name                          requested state   instances   memory   disk   urls
+helloworldpcf-helloworld-v1   started           1/1         1G       1G     helloworldpcf.cfapps.io
+----
+
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
+
+[source,bash,options="nowrap"]
+----
+$ curl https://helloworldpcf.cfapps.io/greeting
+Hello World!
+$ curl https://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
+----
+
+The name of the application is based on the `<release-name>-<package-name>-v<incrementing-counter>` convention.
+
+Also note that we specified a route for this application that is different than the application's name.
+The deployment property `spring.cloud.deployer.cloudfoundry.route` is set to something that does not change across the deployment of different versions of this application -- in this case, `helloworldpcf.cfapps.io`.
+
+The package provides a means to template the application version, application properties, and deployment properties that are used to deploy the application to Cloud Foundry.
+The `manifest get` command shows the final YAML file which is passed off to the Spring Cloud Deployer Library, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldpcf
+
+---
+# Source: helloworld.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: helloworld
+  type: demo
+spec:
+  resource: maven://org.springframework.cloud.samples:spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+  deploymentProperties:
+    spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
+----
+
+The manifest format is inspired by the Kubernetes Resource file format.
+By looking at the manifest, you can see which Maven artifact was used and which properties were set before the final push to Cloud Foundry.
+A future release of Skipper will use the metadata values to support searching for releases based on those values.
+
+Since it is somewhat awkward to specify multiple flattened-out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
+In the next example, we use a YAML file, named `helloworld-upgrade.yml`, to update the release.
+This application contains a Spring Boot `@ConfigurationProperty` named `helloworld.greeting`, so we set that, along with a standard Spring Boot property: `endpoints.sensitive=false`.
+We also bump the memory up to 2G from the default 1G.
+The contents of the `helloworld-upgrade.yml` file follows:
+
+[source,yml]
+----
+spec:
+  applicationProperties:
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.cloudfoundry.route: helloworldpcf.cfapps.io
+    spring.cloud.deployer.memory: 2048m
+----
+
+Now you can run the `release upgrade` command, as shown (with its output) in the following example:
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade.yml
+helloworldpcf has been upgraded.  Now at version v2.
+----
+
+The preceding example starts another instance of the hello world application, and Skipper determines when it can stop the instance of the previous instance.
+If you do not specify `--package-version`, it picks the latest version of the `helloworld` package.
+You do not need to specify the `--platform-name`, as it is always where the current application was deployed.
+
+The following example shows the `cf apps` command and its output:
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-mark as mpollack@gopivotal.com...
+OK
+
+name                          requested state   instances   memory   disk   urls
+helloworldpcf-helloworld-v1   started           1/1         1G       1G     helloworldpcf.cfapps.io
+helloworldpcf-helloworld-v2   stopped           0/1         2G       1G     helloworldpcf.cfapps.io
+----
+
+The following example shows the `cf routes` command and its output:
+
+[source,bash,options="nowrap"]
+----
+$ cf routes
+Getting routes for org scdf-ci / space space-mark as mpollack@gopivotal.com ...
+
+space        host                          domain      port   path   type   apps                                                      service
+space-mark   helloworldpcf                 cfapps.io                        helloworldpcf-helloworld-v1,helloworldpcf-helloworld-v2
+
+----
+
+At this point, Skipper is checking the health of the new application.
+The default health checks whether the HTTP port of the application is open.
+There is a customization in Skipper that influences the way the health check is performed.
+The `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` property is the maximum time the upgrade process waits for a healthy app.
+The default value is 5 minutes.
+Skipper fails the deployment if it is not healthy within that time.
+The `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` property is how long to sleep between health checks.
+
+The current upgrade strategy is very simple: If the new app is healthy, the old app is removed.
+There is not a rolling upgrade option, all new apps are deployed, checked for health, and then previous versions removed.
+More flexible upgrade strategies are planned in a future release.
+
+
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
+[source,bash,options="nowrap"]
+----
+$ curl https://helloworldpcf.cfapps.io/greeting
+yo
+$ curl https://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
+----
+
+The `release list` command shows the current `DEPLOYED` and `DELETED` releases for every release name.
+In the following example from the sample application, there is only one entry, as shown in the following example:
+
+[source,bash,options="nowrap"]
+----
+╔═════════════╤═══════╤══════════════════╤════════╤═══════════╤═══════════╤══════════╤════════════════════════════════════════╗
+║    Name     │Version│   Last updated   │ Status │  Package  │  Package  │ Platform │         Platform Status                ║
+║             │       │                  │        │   Name    │  Version  │   Name   │                                        ║
+╠═════════════╪═══════╪══════════════════╪════════╪═══════════╪═══════════╪══════════╪════════════════════════════════════════╣
+║helloworldpcf│2      │Thu Jan 18        │DEPLOYED│helloworld │1.0.0      │pws       │[helloworldpcf-helloworld-v2], State =  ║
+║             │       │13:26:50 EST 2018 │        │           │           │          │[helloworldpcf-helloworld-v2-0=deployed]║
+╚═════════════╧═══════╧══════════════════╧════════╧═══════════╧═══════════╧══════════╧════════════════════════════════════════╝
+
+----
+
+You can get the full history of the release byusing the `release history` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Thu Jan 18 13:26:50 EST 2018│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║1      │Thu Jan 18 13:18:44 EST 2018│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+A more typical upgrade process is not to change application properties but to change the version of the application because the code has changed.
+In the following example, we now upgrade the release to use a new Maven artifact, version 1.0.1, which also corresponds to version 1.0.1 of the `helloworld` Skipper package.
+In this case, we do not add any additional properties other than the route.
+The following example shows the `release upgrade` command (with its update) to deploy version 1.0.1:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldpcf --package-name helloworld --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=helloworldpcf.cfapps.io
+helloworldpcf has been upgraded.  Now at version v3.
+----
+
+Note that the current release's property values, such as using 2G or the greeting being `yo` are not carried over.
+A future release will introduce a `--reuse-properties` command that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade by using the `status` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldpcf
+╔═══════════════╤════════════════════════════════════════════════╗
+║Last Deployed  │Thu Jan 18 13:49:42 EST 2018                    ║
+║Status         │UNKNOWN                                         ║
+║Platform Status│The applications are being deployed.            ║
+║               │[helloworldpcf-helloworld-v3], State = [partial]║
+╚═══════════════╧════════════════════════════════════════════════╝
+----
+
+Now a `curl` command shows the following output:
+
+[source,bash,options="nowrap"]
+----
+curl https://helloworldpcf.cfapps.io/greeting
+Olá Mundo!
+$ curl https://helloworldpcf.cfapps.io/about
+Hello World v1.0.1.RELEASE
+----
+
+Our release history is now as follows:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║3      │Thu Jan 18 13:49:42 EST 2018│DEPLOYED│helloworld  │1.0.1          │Upgrade complete║
+║2      │Thu Jan 18 13:26:50 EST 2018│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Thu Jan 18 13:18:44 EST 2018│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+Next, we use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release.
+The following example shows the `release rollback` command and its output:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback --release-name helloworldpcf --release-version 2
+helloworldpcf has been rolled back.  Now at version v4.
+----
+
+The history now shows a new `v4` version, even though it is identical in terms of app behavior to the `v2` version, as follows:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldpcf
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║4      │Thu Jan 18 13:51:43 EST 2018│DEPLOYED│helloworld  │1.0.0          │Upgrade complete║
+║3      │Thu Jan 18 13:49:42 EST 2018│DELETED │helloworld  │1.0.1          │Delete complete ║
+║2      │Thu Jan 18 13:26:50 EST 2018│DELETED │helloworld  │1.0.0          │Delete complete ║
+║1      │Thu Jan 18 13:18:44 EST 2018│DELETED │helloworld  │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+----
+
+The `curl` commands shows the following output:
+[source,bash,options="nowrap"]
+----
+$ curl https://helloworldpcf.cfapps.io/greeting
+yo
+$ curl https://helloworldpcf.cfapps.io/about
+Hello World v1.0.0.RELEASE
+----
+
+[[tour-kubernetes]]
+== Kuberenetes
+
+In this example, we run the Skipper server on the local machine and deploy to minikube, which also runs on the local machine.
+
+NOTE: The upgrade approach in 1.02 does not correctly handle the routing of HTTP traffic between versions, so the following representation may not be exactly accurate.
+
+The Spring Cloud Deployer for Kubernetes creates a service, a replication controller, and a pod for the app (or, optionally, a deployment).
+This is not an issue for apps that communicate over Messaging middleware and will be addressed in a future release.
+
+Start the Skipper server with the `--spring.config.additional-location=skipper.yml` option. The YAML content follows:
+
+----
+spring:
+  cloud:
+    skipper:
+      server:
+        platform:
+          kubernetes:
+            accounts:
+              minikube:
+                namespace: default
+----
+
+The `repo list` command shows the `experimental` and `local` repositories, since they are configured by default, as follows:
+[source,bash,options="nowrap"]
+----
+skipper:>repo list
+╔════════════╤═══════════════════════════════════════════════════════════╤═════╤═════╗
+║    Name    │                            URL                            │Local│Order║
+╠════════════╪═══════════════════════════════════════════════════════════╪═════╪═════╣
+║experimental│https://skipper-repository.cfapps.io/repository/experimental│false│0    ║
+║local       │https://d4d6d1b6-c7e5-4226-69ec-01d4:7577                   │true │1    ║
+╚════════════╧═══════════════════════════════════════════════════════════╧═════╧═════╝
+----
+
+The `package search` command shows the Name, the Version, and the Description, as follows:
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+The `platform list` command shows which platforms the server has been configured with -- in this case, one Kubernetes namespace.
+
+[source,bash,options="nowrap"]
+----
+skipper:>platform list
+╔════════╤══════════╤══════════════════════════════════════════════════════════════════════════════════════╗
+║  Name  │   Type   │                                     Description                                      ║
+╠════════╪══════════╪══════════════════════════════════════════════════════════════════════════════════════╣
+║minikube│kubernetes│master url = [https://192.168.99.100:8443/], namespace = [default], api version = [v1]║
+╚════════╧══════════╧══════════════════════════════════════════════════════════════════════════════════════╝
+----
+
+Now we can install the Hello World app (specifically, the Docker-based artifact), as follows:
+[source,bash,options="nowrap"]
+----
+skipper:>package install --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --platform-name minikube --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32123
+Released helloworldk8s. Now at version v1.
+----
+We use the `--platform-name minikube` command option, because the default value of that shell option is `default`.
+You can register a platform under the `default` name when installing Skipper, but it is a best practice to specify the target platform name.
+
+You can monitor the process by using the `release status` command, as follows:
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldk8s
+╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Wed Oct 25 17:34:24 EDT 2017                                                                      ║
+║Status         │DEPLOYED                                                                                          ║
+║Platform Status│The applications are being deployed.                                                              ║
+║               │[helloworldk8s-helloworld-docker-v1], State = [helloworldk8s-helloworld-docker-v1-cch68=deploying]║
+╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════╝
+----
+
+
+Eventually, the Platform Status says, `All applications have been successfully deployed.`
+
+Note that the `DEPLOYED` status in the preceding example indicates that Skipper has told the platform to deploy.
+Skipper does not keep track of the intermediate states ('deploying' or 'deleting').
+
+A `kubectl pods` command now shows a new listing for this deployed application, as follows:
+[source,bash,options="nowrap"]
+----
+$ kubectl get pods
+NAME                                       READY     STATUS    RESTARTS   AGE
+helloworldk8s-helloworld-docker-v1-g8j39   0/1       Running   0          37s
+
+$ kubectl get service
+NAME                                 CLUSTER-IP   EXTERNAL-IP   PORT(S)          AGE
+helloworldk8s-helloworld-docker-v1   10.0.0.202   <nodes>       8080:32123/TCP   41s
+kubernetes                           10.0.0.1     <none>        443/TCP          57m
+
+----
+
+To get the URL of this app on minikube, use the `minikube service` command, as follows:
+[source,bash,options="nowrap"]
+----
+$ minikube service --url helloworldk8s-helloworld-docker-v1
+https://192.168.99.100:32123
+----
+
+You can now curl the `greeting` endpoint and the `about` endpoint, as shown in the following example:
+[source,bash,options="nowrap"]
+----
+$ curl https://192.168.99.100:32123/greeting
+Hello World!
+$ curl https://192.168.99.100:32123/about
+Hello World v1.0.0.RELEASE
+----
+
+The name of the application is based on the following convention: `<release-name>-<package-name>-v<incrementing-counter>`.
+Future releases will change this convention to correctly handle routing.
+
+The package provides a means to template the application version, application properties, and deployment properties that are used to deploy the application to Kubernetes.
+The `manifest get` command shows the final YAML file, which is passed off to the Spring Cloud Deployer Library, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get --release-name helloworldk8s
+
+---
+# Source: template.yml
+apiVersion: skipper.spring.io/v1
+kind: SpringCloudDeployerApplication
+metadata:
+  name: helloworld-docker
+spec:
+  resource: docker:springcloud/spring-cloud-skipper-samples-helloworld:1.0.0.RELEASE
+  applicationProperties:
+  deploymentProperties:
+    spring.cloud.deployer.kubernetes.createNodePort: 32123
+----
+
+The format of the is inspired by the Kubernetes Resource file format.
+By looking at the manifest, you can see which Docker images were used and which properties were set before the final push to Kubernetes.
+A future release of Skipper will use the metadata values to support searching for releases based on those values.
+
+Since it is somewhat awkward to specify multiple flattened out YAML values for the `--properties` argument in the shell, you can also specify the location of a YAML file when installing or upgrading.
+We use a YAML file when we update the release.
+This application contains a Spring Boot
+`@ConfigurationProperty` named `helloworld.greeting`, so we set that, along with a standard Spring Boot property: `endpoints.sensitive=false`.  We also bump the memory down to 768m from the default 1G.
+The following listing shows all the settings:
+
+[source,bash,options="nowrap"]
+----
+spec:
+  applicationProperties:
+    endpoints.sensitive: false
+    helloworld.greeting: yo
+  deploymentProperties:
+    spring.cloud.deployer.kubernetes.createNodePort: 32124
+    spring.cloud.deployer.memory: 768m
+----
+
+The following example shows the `release upgrade` command and its output:
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.0 --file /home/mpollack/helloworld-upgrade-k8s.yml
+helloworldk8s has been upgraded.  Now at version v2.
+----
+
+The preceding command starts another instance of the hello world application.
+If you do not specify `--package-version`, it picks the latest version of the `helloworld-docker` package.
+You do not need to specify the `--platform-name` as it is always where the current application was deployed.
+
+
+The following example shows the `kubectl get all` command and its output:
+[source,bash,options="nowrap"]
+----
+$ kubectl get all
+NAME                                          READY     STATUS    RESTARTS   AGE
+po/helloworldk8s-helloworld-docker-v1-g8j39   1/1       Running   0          2m
+po/helloworldk8s-helloworld-docker-v2-jz85l   0/1       Running   0          50s
+
+NAME                                    DESIRED   CURRENT   READY     AGE
+rc/helloworldk8s-helloworld-docker-v1   1         1         1         2m
+rc/helloworldk8s-helloworld-docker-v2   1         1         0         50s
+
+NAME                                     CLUSTER-IP   EXTERNAL-IP   PORT(S)          AGE
+svc/helloworldk8s-helloworld-docker-v1   10.0.0.202   <nodes>       8080:32123/TCP   2m
+svc/helloworldk8s-helloworld-docker-v2   10.0.0.154   <nodes>       8080:32124/TCP   51s
+svc/kubernetes                           10.0.0.1     <none>        443/TCP          59m
+----
+
+At this point, Skipper is looking to see if the health endpoint of the Boot application is OK.
+The `spring.cloud.skipper.server.strategies.healthcheck.timeoutInMillis` property sets the maximum time the upgrade process waits for a healthy app.
+The default value is 5 minutes.
+Skipper fails the deployment if it is not healthy within that time.
+The `spring.cloud.skipper.server.strategies.healthcheck.sleepInMillis` property sets how long to sleep between health checks.
+
+The current upgrade strategy is simple: If the new app is healthy, the old app is removed.
+There is not a rolling upgrade option. All new apps are deployed and checked for health. Then any previous versions are removed.
+Future releases will have more flexible upgrade strategies, along with the introduction of the https://projects.spring.io/spring-statemachine/[Spring Cloud State Machine] project to orchestrate the update process.
+
+
+You can now curl the `greeting` endpoint and the `about` endpoint, as follows:
+
+[source,bash,options="nowrap"]
+----
+$ curl https://192.168.99.100:32124/greeting
+yo
+$ curl https://192.168.99.100:32124/about
+Hello World v1.0.0.RELEASE
+----
+
+
+The `release list` command shows the current `DEPLOYED` and `DELETED` release for every release name.
+In the following example, there is only one entry:
+[source,bash,options="nowrap"]
+----
+skipper:>release list
+╔═════════════╤═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤═════════════╤═══════════════╗
+║    Name     │Version│        Last updated        │ Status │  Package Name   │Package Version│Platform Name│Platform Status║
+╠═════════════╪═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪═════════════╪═══════════════╣
+║helloworldk8s│2      │Wed Oct 25 17:36:16 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │minikube     │               ║
+╚═════════════╧═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧═════════════╧═══════════════╝
+----
+
+You can get the full history of the release using the `history` command, as follows:
+
+----
+skipper:>release history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║2      │Wed Oct 25 17:36:16 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │Upgrade complete║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+A more typical upgrade process is not to change application properties but to change the version of the application because the code has changed.
+We can now upgrade the release to use a new Docker artifact, version 1.0.1, which also corresponds to version 1.0.1 of the `helloworld` Skipper package.
+In the following example, we do not add any additional properties other than `NodePort`:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --release-name helloworldk8s --package-name helloworld-docker --package-version 1.0.1 --properties spec.deploymentProperties.spring.cloud.deployer.kubernetes.createNodePort=32125
+Released helloworldk8s. Now at version v3.
+----
+
+Note that the the current release's property values, such as using 2G RAM or the greeting being `yo`, are not carried over.
+A future release will introduce a `--reuse-properties` command option that will carry the current release properties over to the next release to be made.
+You can monitor the status of the upgrade by using the `status` command, as shown (with its output) in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release status --release-name helloworldk8s
+╔═══════════════╤══════════════════════════════════════════════════════════════════════════════════════════════════╗
+║Last Deployed  │Wed Oct 25 17:41:33 EDT 2017                                                                      ║
+║Status         │DEPLOYED                                                                                          ║
+║Platform Status│All applications have been successfully deployed.                                                 ║
+║               │[helloworldk8s-helloworld-docker-v3], State = [helloworldk8s-helloworld-docker-v3-sb59j=deployed] ║
+╚═══════════════╧══════════════════════════════════════════════════════════════════════════════════════════════════╝
+----
+
+A `curl` command shows the following output:
+[source,bash,options="nowrap"]
+----
+$ curl https://192.168.99.100:32125/greeting
+Olá Mundo!
+
+$ curl https://192.168.99.100:32125/about
+Hello World v1.0.1.RELEASE
+----
+
+The following example shows the `release history` command and its output:
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║3      │Wed Oct 25 17:41:33 EDT 2017│DEPLOYED│helloworld-docker│1.0.1          │Upgrade complete║
+║2      │Wed Oct 25 17:36:16 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+
+Next, we use the `rollback` command to deploy an older version of the application.
+Since we have the manifest for that version, we have all we need to redeploy an earlier release.
+The following example shows the rollback command and its output:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback --release-name helloworldk8s --release-version 2
+helloworldk8s has been rolled back.  Now at version v4.
+----
+
+The history now shows a new `v4` version, even though it is identical to the `v2` version, as shown in the following example:
+
+[source,bash,options="nowrap"]
+----
+skipper:>release history --release-name helloworldk8s
+╔═══════╤════════════════════════════╤════════╤═════════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │  Package Name   │Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪═════════════════╪═══════════════╪════════════════╣
+║4      │Wed Oct 25 17:44:25 EDT 2017│DEPLOYED│helloworld-docker│1.0.0          │Upgrade complete║
+║3      │Wed Oct 25 17:41:33 EDT 2017│DELETED │helloworld-docker│1.0.1          │Delete complete ║
+║2      │Wed Oct 25 17:36:16 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+║1      │Wed Oct 25 17:34:24 EDT 2017│DELETED │helloworld-docker│1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧═════════════════╧═══════════════╧════════════════╝
+----
+
+The `curl` commands now shows the following:
+[source,bash,options="nowrap"]
+----
+$ curl https://192.168.99.100:32124/greeting
+yo
+$ curl https://192.168.99.100:32124/about
+Hello World v1.0.0.RELEASE
+----
+
+[[tour-cf-manifest]]
+== CF manifest based deployments
+
+Following examples cover the scenarios of managing CF manifest based packages.
+
+[source,bash,options="nowrap"]
+----
+skipper:>platform list
+╔═══════╤════════════╤══════════════════════════════════════════════════════════════════════════╗
+║ Name  │    Type    │                               Description                                ║
+╠═══════╪════════════╪══════════════════════════════════════════════════════════════════════════╣
+║cf-dev │cloudfoundry│org = [scdf-ci], space = [space-ilaya], url = [https://api.run.pivotal.io]║
+╚═══════╧════════════╧══════════════════════════════════════════════════════════════════════════╝
+----
+
+Upload the log application packages available in the test directory under `spring-cloud-skipper-server-core`.
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --repo-name local --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/log/logcf-1.0.0.zip
+Package uploaded successfully:[logcf:1.0.0]
+----
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --repo-name local --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/log/logcf-1.0.1.zip
+Package uploaded successfully:[logcf:1.0.1]
+----
+
+[source,bash,options="nowrap"]
+----
+skipper:>package search
+╔═════════════════╤═══════╤════════════════════════════════════════════════════════════════════════════════╗
+║      Name       │Version│                                  Description                                   ║
+╠═════════════════╪═══════╪════════════════════════════════════════════════════════════════════════════════╣
+║helloworld       │1.0.0  │The app has two endpoints, /about and /greeting in English.  Maven resource.    ║
+║helloworld       │1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Maven resource. ║
+║helloworld-docker│1.0.0  │The app has two endpoints, /about and /greeting in English.  Docker resource.   ║
+║helloworld-docker│1.0.1  │The app has two endpoints, /about and /greeting in Portuguese.  Docker resource.║
+║logcf            │1.0.0  │The log sink uses the application logger to output the data for inspection.     ║
+║logcf            │1.0.1  │The log sink uses the application logger to output the data for inspection.     ║
+╚═════════════════╧═══════╧════════════════════════════════════════════════════════════════════════════════╝
+----
+
+Install the `logcf` package with the version `1.0.0`
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install logcf --release-name a1 --platform-name cf-dev --package-version 1.0.0
+Released a1. Now at version v1.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════════════════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│          Platform Status          ║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════════════════════════╣
+║a1  │1      │Thu Aug 09 12:29:02 IST 2018│DEPLOYED│logcf       │1.0.0          │cf-dev       │[a1-v1], State = [a1-v1-0=deployed]║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════════════════════════╝
+
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║1      │Thu Aug 09 12:29:02 IST 2018│DEPLOYED│logcf       │1.0.0          │Install complete║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+skipper:>manifest get a1
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "version": "1.3.0.RELEASE"
+  "manifest":
+    "memory": "1024"
+    "disk-quota": "2048"
+    "instances": "1"
+    "services":
+    - "rabbit"
+    "timeout": "180"
+
+----
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name    requested state   instances   memory   disk   urls
+a1-v1   started           1/1         1G       2G     a1-v1.cfapps.io
+----
+
+Upgrade the `logcf` package with the version `1.0.1`
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --package-name logcf --package-version 1.0.1 --release-name a1
+a1 has been upgraded.  Now at version v2.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════════════════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│          Platform Status          ║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════════════════════════╣
+║a1  │2      │Thu Aug 09 12:33:44 IST 2018│DEPLOYED│logcf       │1.0.1          │cf-dev       │[a1-v2], State = [a1-v2-0=deployed]║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════════════════════════╝
+
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║2      │Thu Aug 09 12:33:44 IST 2018│DEPLOYED│logcf       │1.0.1          │Upgrade complete║
+║1      │Thu Aug 09 12:29:02 IST 2018│DELETED │logcf       │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+skipper:>manifest get a1
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "version": "1.3.1.RELEASE"
+  "manifest":
+    "memory": "1024"
+    "disk-quota": "2048"
+    "instances": "1"
+    "services":
+    - "rabbit"
+    "timeout": "180"
+
+----
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name    requested state   instances   memory   disk   urls
+a1-v2   started           1/1         1G       2G     a1-v2.cfapps.io
+----
+
+Rollback the `logcf` package with the version `1.0.1`
+
+[source,bash,options="nowrap"]
+----
+skipper:>release rollback a1
+a1 has been rolled back.  Now at version v3.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│Platform Status║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════╣
+║a1  │3      │Thu Aug 09 12:39:17 IST 2018│DEPLOYED│logcf       │1.0.0          │cf-dev       │               ║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════╝
+
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│   Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════════╣
+║3      │Thu Aug 09 12:39:17 IST 2018│DEPLOYED│logcf       │1.0.0          │Rollback complete║
+║2      │Thu Aug 09 12:33:44 IST 2018│DELETED │logcf       │1.0.1          │Delete complete  ║
+║1      │Thu Aug 09 12:29:02 IST 2018│DELETED │logcf       │1.0.0          │Delete complete  ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════════╝
+
+skipper:>manifest get a1
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "version": "1.3.0.RELEASE"
+  "manifest":
+    "memory": "1024"
+    "disk-quota": "2048"
+    "instances": "1"
+    "services":
+    - "rabbit"
+    "timeout": "180"
+
+
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name    requested state   instances   memory   disk   urls
+a1-v3   started           1/1         1G       2G     a1-v3.cfapps.io
+----
+
+
+Upgrade the `logcf` package into the latest `1.0.1` version and also update the manifest's memory to `2G`.
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade --package-name logcf --release-name a1 --properties "spec.manifest.memory=2G"
+a1 has been upgraded.  Now at version v4.
+
+skipper:>release list
+╔════╤═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤═════════════╤═══════════════════════════════════╗
+║Name│Version│        Last updated        │ Status │Package Name│Package Version│Platform Name│          Platform Status          ║
+╠════╪═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪═════════════╪═══════════════════════════════════╣
+║a1  │4      │Thu Aug 09 12:49:49 IST 2018│DEPLOYED│logcf       │1.0.1          │cf-dev       │[a1-v4], State = [a1-v4-0=deployed]║
+╚════╧═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧═════════════╧═══════════════════════════════════╝
+
+skipper:>release history a1
+╔═══════╤════════════════════════════╤════════╤════════════╤═══════════════╤════════════════╗
+║Version│        Last updated        │ Status │Package Name│Package Version│  Description   ║
+╠═══════╪════════════════════════════╪════════╪════════════╪═══════════════╪════════════════╣
+║4      │Thu Aug 09 12:49:49 IST 2018│DEPLOYED│logcf       │1.0.1          │Upgrade complete║
+║3      │Thu Aug 09 12:39:17 IST 2018│DELETED │logcf       │1.0.0          │Delete complete ║
+║2      │Thu Aug 09 12:33:44 IST 2018│DELETED │logcf       │1.0.1          │Delete complete ║
+║1      │Thu Aug 09 12:29:02 IST 2018│DELETED │logcf       │1.0.0          │Delete complete ║
+╚═══════╧════════════════════════════╧════════╧════════════╧═══════════════╧════════════════╝
+
+skipper:>manifest get a1
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "maven://org.springframework.cloud.stream.app:log-sink-rabbit"
+  "version": "1.3.1.RELEASE"
+  "manifest":
+    "memory": "2G"
+    "disk-quota": "2048"
+    "instances": "1"
+    "services":
+    - "rabbit"
+    "timeout": "180"
+
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name    requested state   instances   memory   disk   urls
+a1-v4   started           1/1         2G       2G     a1-v4.cfapps.io
+
+----
+
+Delete the release
+
+[source,bash,options="nowrap"]
+----
+skipper:>release delete a1
+a1 has been deleted.
+----
+
+
+The following example shows how Skipper helps managing any application that can be deployed into CF using manifest
+In this case, we have a couple of python packages that print the greeting messages.
+
+Upload the python packages from the `spring-cloud-skipper-server-core` test directory
+
+[source,bash,options="nowrap"]
+----
+skipper:>package upload --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/python/python-printer-1.0.0.zip
+Package uploaded successfully:[python-printer:1.0.0]
+
+skipper:>package upload --path spring-cloud-skipper-server-core/src/test/resources/repositories/binaries/test/python/python-printer-1.0.1.zip
+Package uploaded successfully:[python-printer:1.0.1]
+
+----
+
+Install the python package
+
+[source,bash,options="nowrap"]
+----
+skipper:>package install --package-name python-printer --package-version 1.0.0 --release-name printer --platform-name cf-dev
+Released printer. Now at version v1.
+----
+
+[source,bash,options="nowrap"]
+----
+skipper:>manifest get printer
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "https://github.com/ilayaperumalg/sandbox/raw/master/python/1.0.0/hello.py-1.0.0.zip"
+  "version": "1.0.0"
+  "manifest":
+    "memory": "1024"
+    "disk-quota": "1024"
+    "instances": "1"
+    "health-check-type": "process"
+    "buildpack": "python_buildpack"
+    "timeout": "180"
+    "command": "python hello.py"
+----
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name         requested state   instances   memory   disk   urls
+printer-v1   started           1/1         1G       1G     printer-v1.cfapps.io
+----
+
+
+[source,bash,options="nowrap"]
+----
+$ cf logs printer-v1
+Retrieving logs for app printer-v1 in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+
+   2018-08-09T13:33:36.55+0530 [APP/PROC/WEB/0] OUT Hello!
+   2018-08-09T13:33:41.55+0530 [APP/PROC/WEB/0] OUT Hello!
+----
+
+
+Upgrade the python package with the version `1.0.1`
+
+[source,bash,options="nowrap"]
+----
+skipper:>release upgrade printer --package-name python-printer --package-version 1.0.1
+printer has been upgraded.  Now at version v2.
+
+skipper:>manifest get printer
+"apiVersion": "skipper.spring.io/v1"
+"kind": "CloudFoundryApplication"
+"spec":
+  "resource": "https://github.com/ilayaperumalg/sandbox/raw/master/python/1.0.1/hello.py-1.0.1.zip"
+  "version": "1.0.1"
+  "manifest":
+    "memory": "1024"
+    "disk-quota": "1024"
+    "instances": "1"
+    "health-check-type": "process"
+    "buildpack": "python_buildpack"
+    "timeout": "180"
+    "command": "python vanakkam.py"
+----
+
+[source,bash,options="nowrap"]
+----
+$ cf apps
+Getting apps in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+OK
+
+name         requested state   instances   memory   disk   urls
+printer-v2   started           1/1         1G       1G     printer-v2.cfapps.io
+----
+
+[source,bash,options="nowrap"]
+----
+$ cf logs printer-v2
+Retrieving logs for app printer-v2 in org scdf-ci / space space-ilaya as igopinathan@pivotal.io...
+
+   2018-08-09T13:36:13.39+0530 [APP/PROC/WEB/0] OUT Vanakkam!
+   2018-08-09T13:36:18.40+0530 [APP/PROC/WEB/0] OUT Vanakkam!
+----

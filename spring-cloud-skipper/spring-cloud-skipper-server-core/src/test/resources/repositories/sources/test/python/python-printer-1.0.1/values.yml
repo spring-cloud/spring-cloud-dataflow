@@ -1,0 +1,13 @@
+# Default values for {{name}}
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates
+spec:
+  version: 1.0.1
+  manifest:
+    memory: 1024
+    disk-quota: 1024
+    timeout: 180
+    instances: 1
+    buildpack: python_buildpack
+    command: python vanakkam.py
+    health-check-type: process

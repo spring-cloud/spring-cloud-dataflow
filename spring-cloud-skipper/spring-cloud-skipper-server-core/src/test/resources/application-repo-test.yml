@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    skipper:
+      server:
+        package-repositories:
+          test:
+            url: "classpath:/repositories/binaries/test"
+            description: test repository with a few packages
+          local:
+            url: "http://localhost:7577"
+            local: true
+            description: Default local database backed repository
