@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsSe
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -317,28 +316,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation = findOrCreateTaskExecutionInformation(taskName,
 				taskDeploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
-		// pre prosess command-line args
-		// moving things like app.<label> = arg
-		// into deployment properties if ctr and removing
-		// prefix if simple task.
 		if (taskExecutionInformation.isComposed()) {
-			List<String> composedTaskArguments = new ArrayList<>();
-			commandLineArgs.forEach(arg -> {
-				if (arg.startsWith("app.")) {
-					String[] split = arg.split("=", 2);
-					if (split.length == 2) {
-						composedTaskArguments.add("--composed-task-app-arguments." + Base64Utils.encode(split[0]) + "=" + split[1]);
-					}
-					else {
-						composedTaskArguments.add("--composed-task-app-arguments." + arg);
-					}
-				}
-				else {
-					composedTaskArguments.add(arg);
-				}
-			});
-			logger.info("composedTaskArguments {}", StringUtils.collectionToCommaDelimitedString(composedTaskArguments));
-			commandLineArgs = composedTaskArguments;
+			// Preprocess command-line args moving things like app.<label> = arg into deployment properties if ctr and
+			// removing prefix if simple task.
+			commandLineArgs = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArgs);
 		} else {
 			// remove argument prefix for simple task
 			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();

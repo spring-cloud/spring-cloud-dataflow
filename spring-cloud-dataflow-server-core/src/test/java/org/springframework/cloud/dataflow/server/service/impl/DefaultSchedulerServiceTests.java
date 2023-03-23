@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,9 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -65,6 +68,7 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.listener.TaskException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -221,8 +225,15 @@ public class DefaultSchedulerServiceTests {
 
 	@Test
 	public void testScheduleCTR(){
-		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, Collections.singletonList("app.demo.0=foo=bar"));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
+		AuditActionType[] createActions = {AuditActionType.CREATE};
+		AuditOperationType[] operationTypes = {AuditOperationType.SCHEDULE};
+		Page<AuditRecord> auditPropertyResults = auditRecordService.
+				findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(PageRequest.of(0, 500), createActions,
+						operationTypes, null, null);
+		assertThat(auditPropertyResults.getTotalElements()).isEqualTo(1);
+		assertThat(auditPropertyResults.getContent().get(0).getAuditData()).contains("--composed-task-app-arguments.base64_YXBwLmRlbW8uMA=foo=bar");
 	}
 
 	@Test(expected = CreateScheduleException.class)

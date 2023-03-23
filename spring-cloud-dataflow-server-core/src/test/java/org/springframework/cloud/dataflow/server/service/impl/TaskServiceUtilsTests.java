@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -376,6 +378,45 @@ public class TaskServiceUtilsTests {
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
 		assertFalse("Use user access token should be false", result);
+	}
+
+	@Test
+	public void testConvertCommandLineArgsToCTRFormat() {
+		validateSingleCTRArgs("app.a.0=foo=bar", "--composed-task-app-arguments.base64_YXBwLmEuMA=foo=bar");
+		validateSingleCTRArgs("app.a.0=foo", "--composed-task-app-arguments.base64_YXBwLmEuMA=foo");
+		validateSingleCTRArgs("app.foo.bar", "--composed-task-app-arguments.app.foo.bar");
+		validateSingleCTRArgs("foo=bar", "foo=bar");
+	}
+
+	@Test
+	public void testConvertCommandLineArgsToCTRFormatWithNull() {
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						TaskServiceUtils.convertCommandLineArgsToCTRFormat(Collections.singletonList(null)))
+				.withMessage("Command line Arguments for ComposedTaskRunner contain a null entry.");
+	}
+
+	@Test
+	public void testConvertMultipleCommandLineArgsToCTRFormat() {
+		List<String> originalList = new ArrayList<>();
+		originalList.add("app.a.0=foo=bar");
+		originalList.add("app.b.0=baz=boo");
+		originalList.add("app.c.0=val=buz");
+		List<String> expectedList = new ArrayList<>();
+		expectedList.add("--composed-task-app-arguments.base64_YXBwLmEuMA=foo=bar");
+		expectedList.add("--composed-task-app-arguments.base64_YXBwLmIuMA=baz=boo");
+		expectedList.add("--composed-task-app-arguments.base64_YXBwLmMuMA=val=buz");
+		validateCTRArgs(expectedList, TaskServiceUtils.convertCommandLineArgsToCTRFormat(originalList));
+	}
+
+	private void validateSingleCTRArgs(String original, String expected) {
+		List<String> testArgs = Collections.singletonList(original);
+		validateCTRArgs(Collections.singletonList(expected),
+				TaskServiceUtils.convertCommandLineArgsToCTRFormat(testArgs));
+
+	}
+
+	private void validateCTRArgs(List<String> expectedList, List<String> resultList) {
+		assertThat(resultList).containsExactlyInAnyOrderElementsOf(expectedList);
 	}
 
 	private TaskNode parse(String dsltext) {
