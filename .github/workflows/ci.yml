@@ -6,6 +6,9 @@ on:
     paths-ignore:
       - '.github/**'
 
+env:
+  MAVEN_THREADS: ''
+
 jobs:
   build:
     if: github.repository_owner == 'spring-cloud'
@@ -54,7 +57,7 @@ jobs:
       run: |
         jfrog rt mvn clean install \
           -Pfull \
-          -U -B -T 0.5C
+          -U -B $MAVEN_THREADS
         jfrog rt build-publish
 
     # build and publish images via composite action

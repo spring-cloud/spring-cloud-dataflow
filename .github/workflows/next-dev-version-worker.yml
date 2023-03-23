@@ -7,6 +7,9 @@ on:
         description: 'Build Zoo Handler Payload'
         required: true
 
+env:
+  MAVEN_THREADS: ''
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -108,7 +111,7 @@ jobs:
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
           -B
         jfrog rt build-clean
-        jfrog rt mvn clean install -DskipTests -B -T 0.5C
+        jfrog rt mvn clean install -DskipTests -B $MAVEN_THREADS
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
