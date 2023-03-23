@@ -7,7 +7,7 @@ on:
       - '.github/**'
 
 env:
-  MAVEN_THREADS: ''
+  MAVEN_THREADS: '-T 0.5C'
 
 jobs:
   build:
@@ -55,11 +55,8 @@ jobs:
     # build and publish
     - name: Build and Publish
       run: |
-        jfrog rt mvn clean install -B -U -f spring-cloud-dataflow-build
-        jfrog rt mvn clean install -B -U -f spring-cloud-dataflow-common
-        jfrog rt mvn clean install \
-          -Pfull \
-          -U -B $MAVEN_THREADS
+        mvn clean        
+        jfrog rt mvn install -Pfull -U -B $MAVEN_THREADS
         jfrog rt build-publish
 
     # build and publish images via composite action

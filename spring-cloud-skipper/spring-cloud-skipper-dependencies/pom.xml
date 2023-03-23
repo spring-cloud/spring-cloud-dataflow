@@ -10,7 +10,6 @@
 		<artifactId>spring-cloud-dataflow-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
 		<version>2.11.0-SNAPSHOT</version>
-		<relativePath />
 	</parent>
 
 	<dependencyManagement>

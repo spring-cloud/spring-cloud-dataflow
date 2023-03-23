@@ -14,7 +14,7 @@
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
 		<version>2.11.0-SNAPSHOT</version>
-		<relativePath/>
+		<relativePath>../spring-cloud-dataflow-build</relativePath>
 	</parent>
 
 	<properties>
@@ -30,11 +30,10 @@
 		<spring-statemachine.version>2.3.1</spring-statemachine.version>
 
 		<spring-cloud-dataflow-common.version>2.11.0-SNAPSHOT</spring-cloud-dataflow-common.version>
-		<spring-cloud-deployer.version>2.8.3-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-deployer-local.version>2.8.3-SNAPSHOT</spring-cloud-deployer-local.version>
-		<spring-cloud-deployer-cloudfoundry.version>2.8.3-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
-
-		<spring-cloud-deployer-kubernetes.version>2.8.3-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
+		<spring-cloud-deployer.version>2.9.0-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer-local.version>2.9.0-SNAPSHOT</spring-cloud-deployer-local.version>
+		<spring-cloud-deployer-cloudfoundry.version>2.9.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
+		<spring-cloud-deployer-kubernetes.version>2.9.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 
 		<zeroturnaround.version>1.13</zeroturnaround.version>
 		<spring-restdocs.version>1.2.2.RELEASE</spring-restdocs.version>
