@@ -7,7 +7,7 @@ on:
       - '.github/**'
 
 env:
-  MAVEN_THREADS: '-T 0.5C'
+  MAVEN_THREADS: '-T 2'
 
 jobs:
   build:
