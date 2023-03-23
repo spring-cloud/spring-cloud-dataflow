@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -398,5 +399,29 @@ public class TaskServiceUtils {
 		}
 
 		return taskConfigurationProperties.isUseUserAccessToken();
+	}
+
+	/**
+	 * Move and configure app arguments to the composed-task-app-arguments argument.  Also convert app args to base64 if necessary.
+	 * @param commandLineArgs The command line arguments to be converted
+	 * @return list of command line args where app args are now associated with the comosed-task-app arguments and all other remain unchanged.
+	 */
+	static List<String> convertCommandLineArgsToCTRFormat(List<String> commandLineArgs) {
+		List<String> composedTaskArguments = new ArrayList<>();
+		commandLineArgs.forEach(arg -> {
+			if (arg.startsWith("app.")) {
+				String[] split = arg.split("=", 2);
+				if (split.length == 2) {
+					composedTaskArguments.add("--composed-task-app-arguments." + Base64Utils.encode(split[0]) + "=" + split[1]);
+				}
+				else {
+					composedTaskArguments.add("--composed-task-app-arguments." + arg);
+				}
+			}
+			else {
+				composedTaskArguments.add(arg);
+			}
+		});
+		return composedTaskArguments;
 	}
 }

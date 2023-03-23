@@ -210,6 +210,7 @@ public class DefaultSchedulerService implements SchedulerService {
 			catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 			}
+			commandLineArgs = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArgs);
 		}
 		else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
