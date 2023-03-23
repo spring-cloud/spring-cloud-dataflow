@@ -27,7 +27,7 @@ services:
 
   grafana:
     platform: linux/amd64
-    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:-2.10.2-SNAPSHOT}
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}
     container_name: grafana
     ports:
       - '3000:3000'

@@ -862,7 +862,7 @@ public class DataFlowIT {
             String dataflowTaskLauncherAppName = "dataflow-tasklauncher";
 
             String skipOnIncompatibleDataFlowVersion = dataflowTaskLauncherAppName + "-sink-test: SKIP - Dataflow version:"
-                    + runtimeApps.getDataflowServerVersion() + " is older than 2.9.2-SNAPSHOT!";
+                    + runtimeApps.getDataflowServerVersion() + " is older than 2.11.0-SNAPSHOT!";
             if (!runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.9.2-SNAPSHOT")) {
                 logger.warn(skipOnIncompatibleDataFlowVersion);
             }

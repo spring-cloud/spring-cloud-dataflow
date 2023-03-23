@@ -52,13 +52,13 @@ if [ "$1" != "" ]; then
 fi
 case $SCDF_TYPE in
 "pro")
-  PACKAGE_VERSION=1.5.2-SNAPSHOT
+  PACKAGE_VERSION=1.5.3-SNAPSHOT
   PACKAGE_NAME=scdfpro.tanzu.vmware.com
   REGISTRY=dev.registry.pivotal.io
   REPO_NAME="p-scdf-for-kubernetes/scdf-pro-repo"
   ;;
 "oss")
-  PACKAGE_VERSION=2.10.2-SNAPSHOT
+  PACKAGE_VERSION=2.11.0-SNAPSHOT
   PACKAGE_NAME=scdf.tanzu.vmware.com
   REGISTRY=index.docker.io
   # REGISTRY=registry.docker.io

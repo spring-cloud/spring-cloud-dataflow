@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.server.config.kubernetes;
 import java.util.Map;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  * @author Chris Bono
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = KubernetesPlatformPropertiesTests.TestConfig.class,
         properties = { "spring.cloud.kubernetes.client.namespace=default" })
 @ActiveProfiles("kubernetes-platform-properties")

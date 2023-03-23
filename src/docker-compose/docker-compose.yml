@@ -22,7 +22,7 @@ services:
   dataflow-server:
     user: root
     platform: linux/amd64
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.10.2-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -71,7 +71,7 @@ services:
   skipper-server:
     user: root
     platform: linux/amd64
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.2-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"

@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.10.3-SNAPSHOT</version>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.9</version>
+		<relativePath/>
 	</parent>
+	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-single-step-batch-job</artifactId>
+	<version>2.11.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
+		<java.version>1.8</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-parent</artifactId>
+				<version>2.11.0-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -91,6 +107,15 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
@@ -105,14 +130,26 @@
 						<sourceTypes>
 							<filter>org.springframework.cloud.task.batch.autoconfigure.SingleStepJobProperties</filter>
 							<filter>org.springframework.boot.autoconfigure.batch.BatchProperties$Job</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemReaderProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemWriterProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcBatchItemWriterProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcCursorItemReaderProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemReaderProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemWriterProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemReaderProperties</filter>
-							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemWriterProperties</filter>
+							<filter>
+								org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemReaderProperties
+							</filter>
+							<filter>
+								org.springframework.cloud.task.batch.autoconfigure.flatfile.FlatFileItemWriterProperties
+							</filter>
+							<filter>
+								org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcBatchItemWriterProperties
+							</filter>
+							<filter>
+								org.springframework.cloud.task.batch.autoconfigure.jdbc.JdbcCursorItemReaderProperties
+							</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemReaderProperties
+							</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.kafka.KafkaItemWriterProperties
+							</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemReaderProperties
+							</filter>
+							<filter>org.springframework.cloud.task.batch.autoconfigure.rabbit.AmqpItemWriterProperties
+							</filter>
 							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties</filter>
 							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties$Template</filter>
 							<filter>org.springframework.boot.autoconfigure.amqp.RabbitProperties$Retry</filter>
