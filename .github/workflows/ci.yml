@@ -55,6 +55,8 @@ jobs:
     # build and publish
     - name: Build and Publish
       run: |
+        jfrog rt mvn clean install -B -U -f spring-cloud-dataflow-build
+        jfrog rt mvn clean install -B -U -f spring-cloud-dataflow-common
         jfrog rt mvn clean install \
           -Pfull \
           -U -B $MAVEN_THREADS
