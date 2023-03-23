@@ -26,26 +26,6 @@ jobs:
               "action": "workflow_dispatch",
               "workflow_dispatch": {
                 "owner": "spring-cloud",
-                "repo": "spring-cloud-dataflow-build",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-dataflow-build' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-dataflow-common",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-dataflow-common' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
                 "ref": "main",
                 "workflow": "next-dev-version-worker.yml"
@@ -53,56 +33,6 @@ jobs:
             },
             {
               "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-deployer-local",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-local' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-deployer-cloudfoundry",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-cloudfoundry' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-deployer-kubernetes",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-deployer-kubernetes' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-common-security-config",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-common-security-config' && data.owner == 'spring-cloud'",
-              "action": "workflow_dispatch",
-              "workflow_dispatch": {
-                "owner": "spring-cloud",
-                "repo": "spring-cloud-skipper",
-                "ref": "main",
-                "workflow": "next-dev-version-worker.yml"
-              }
-            },
-            {
-              "if": "data.event == 'next-dev-version-succeed' && data.repo == 'spring-cloud-skipper' && data.owner == 'spring-cloud'",
               "action": "workflow_dispatch",
               "workflow_dispatch": {
                 "owner": "spring-cloud",
