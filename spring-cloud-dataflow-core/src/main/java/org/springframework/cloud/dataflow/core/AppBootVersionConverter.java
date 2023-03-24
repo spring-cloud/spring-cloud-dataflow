@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.core;
 import org.springframework.core.convert.converter.Converter;
 
 /**
- * Converts strings to {@link AppBootVersion}
+ * Converts strings to {@link AppBootSchemaVersion}
  *
  * @author Chris Bono
  * @author Corneil du Plessis
