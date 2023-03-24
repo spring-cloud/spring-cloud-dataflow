@@ -68,7 +68,7 @@ jobs:
         repo-bundle-template: 'src/carvel/templates/bundle/repo'
         package-bundle-repository: 'springcloud/scdf-package'
         package-name: 'scdf'
-        token: ${{ secrets.GITHUB_TOKEN }}
+
 
     # Publishes scdf repo bundle
     - name: Publish Repository Bundle

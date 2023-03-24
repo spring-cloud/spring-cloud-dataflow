@@ -77,7 +77,6 @@ jobs:
         version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
         dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-        token: ${{ secrets.GITHUB_TOKEN }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
