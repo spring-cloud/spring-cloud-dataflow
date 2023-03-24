@@ -16,6 +16,7 @@
 
 	<properties>
 		<skipTests>true</skipTests>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -35,6 +36,7 @@
 			<plugin>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+				<version>${spring-cloud-dataflow-apps-metadata-plugin.version}</version>
 				<configuration>
 					<storeFilteredMetadata>true</storeFilteredMetadata>
 					<metadataFilter>
@@ -77,6 +79,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
 				<executions>
 					<execution>
 						<id>javadoc</id>

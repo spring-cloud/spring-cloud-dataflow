@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -63,7 +64,8 @@ public class PackageReaderTests {
 		assertThat(metadata.getMaintainer()).isEqualTo("https://github.com/markpollack");
 		assertThat(metadata.getDescription()).isEqualTo("The ticktock stream sends a time stamp and logs the value.");
 		String rawYamlString = pkg.getConfigValues().getRaw();
-		Yaml yaml = new Yaml(new SafeConstructor());
+		LoaderOptions options = new LoaderOptions();
+		Yaml yaml = new Yaml(new SafeConstructor(options));
 		Map<String, String> valuesAsMap = (Map<String, String>) yaml.load(rawYamlString);
 		assertThat(valuesAsMap).hasSize(2).containsEntry("foo", "bar").containsEntry("biz", "baz");
 

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -157,9 +159,11 @@ public class DefaultPackageReader implements PackageReader {
 	private PackageMetadata loadPackageMetadata(File file) {
 		// The Representer will not try to set the value in the YAML on the
 		// Java object if it isn't present on the object
-		Representer representer = new Representer();
+		DumperOptions options = new DumperOptions();
+		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class), representer);
+		LoaderOptions loaderOptions = new LoaderOptions();
+		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class, loaderOptions), representer);
 		String fileContents = null;
 		try {
 			fileContents = FileUtils.readFileToString(file);

@@ -15,6 +15,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
+		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -122,6 +123,7 @@
 			<plugin>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+				<version>${spring-cloud-dataflow-apps-metadata-plugin.version}</version>
 				<configuration>
 					<storeFilteredMetadata>true</storeFilteredMetadata>
 					<metadataFilter>

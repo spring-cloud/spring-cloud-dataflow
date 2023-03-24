@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -81,7 +82,8 @@ public class SpringCloudDeployerApplicationManifestReader implements SkipperMani
 	}
 
 	public boolean canSupport(String manifest) {
-		Yaml yaml = new Yaml(new SafeConstructor());
+		LoaderOptions options = new LoaderOptions();
+		Yaml yaml = new Yaml(new SafeConstructor(options));
 		Iterable<Object> object = yaml.loadAll(manifest);
 		for (Object o : object) {
 			boolean supportKind = assertSupportedKind(o);

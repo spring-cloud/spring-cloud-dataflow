@@ -13,6 +13,7 @@
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.resources.version>0.2.1.RELEASE</docs.resources.version>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -76,6 +77,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>${maven-javadoc-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>attach-javadocs</id>
@@ -146,7 +148,7 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.6</version>
+						<version>2.2.3</version>
 						<configuration>
 							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
 							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
