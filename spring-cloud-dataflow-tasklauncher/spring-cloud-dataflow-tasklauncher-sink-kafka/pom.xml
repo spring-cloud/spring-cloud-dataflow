@@ -4,10 +4,9 @@
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-dataflow-tasklauncher-sink-dependencies</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
-		<relativePath>../spring-cloud-dataflow-tasklauncher-sink-dependencies</relativePath>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.7.10</version>
 	</parent>
 
 	<artifactId>spring-cloud-dataflow-tasklauncher-sink-kafka</artifactId>
@@ -17,7 +16,19 @@
 	<properties>
 		<skipTests>true</skipTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
+		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dataflow-tasklauncher-sink-dependencies</artifactId>
+				<version>2.11.0-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
