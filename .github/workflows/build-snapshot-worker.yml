@@ -9,7 +9,7 @@ on:
         required: true
 
 env:
-  MAVEN_THREADS: ''
+  MAVEN_THREADS: '-T 2'
 
 jobs:
   build:
@@ -61,7 +61,7 @@ jobs:
       run: |
         jfrog rt mvn clean install \
           -Pfull \
-          -U -B $MAVEN_THREADS 
+          -B $MAVEN_THREADS 
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV

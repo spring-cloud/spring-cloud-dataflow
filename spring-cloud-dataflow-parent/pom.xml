@@ -10,7 +10,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
-		<spring-boot.version>2.7.9</spring-boot.version>
+		<spring-boot.version>2.7.10</spring-boot.version>
 		<spring-cloud-dataflow-ui.version>3.3.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<dataflow.version>${project.version}</dataflow.version>
 		<spring-cloud-dataflow-common.version>${project.version}</spring-cloud-dataflow-common.version>

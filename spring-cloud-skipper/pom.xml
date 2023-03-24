@@ -41,7 +41,7 @@
 		<spring-cloud-common-security-config.version>2.11.0-SNAPSHOT</spring-cloud-common-security-config.version>
 
 		<jsonpath.version>2.4.0</jsonpath.version>
-		<equalverifier.version>2.4.1</equalverifier.version>
+		<equalverifier.version>3.14.1</equalverifier.version>
 		<hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
 
 		<jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
