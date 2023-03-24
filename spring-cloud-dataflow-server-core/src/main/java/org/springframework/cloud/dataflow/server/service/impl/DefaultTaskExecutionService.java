@@ -317,13 +317,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskDeploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
 		if (taskExecutionInformation.isComposed()) {
-			// pre process command-line args
-			// moving things like app.<label> = arg
-			// into deployment properties if ctr and removing
-			// prefix if simple task.
+			// Preprocess command-line args moving things like app.<label> = arg into deployment properties if ctr and
+			// removing prefix if simple task.
 			commandLineArgs = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArgs);
-			logger.info("composedTaskArguments {}", StringUtils.collectionToCommaDelimitedString(commandLineArgs));
-
 		} else {
 			// remove argument prefix for simple task
 			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();

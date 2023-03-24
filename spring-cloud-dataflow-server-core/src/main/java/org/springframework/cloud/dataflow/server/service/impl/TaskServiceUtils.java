@@ -402,13 +402,21 @@ public class TaskServiceUtils {
 	}
 
 	/**
-	 * Move and configure app arguments to the composed-task-app-arguments argument.  Also convert app args to base64 if necessary.
+	 * Converts command lines args into a format acceptable for CTR.
+	 * <p>The input args are copied and entries that begin with {@code 'app.'}
+	 * are  replaced with a {@code 'composed-task-app-arguments.'}
+	 * prefixed entry. The transformed arg will also be converted to Base64
+	 * if necessary (eg. when it has an {@code =} sign in the value).
+	 *
 	 * @param commandLineArgs The command line arguments to be converted
-	 * @return list of command line args where app args are now associated with the comosed-task-app arguments and all other remain unchanged.
+	 * @return list of converted command line arguments
 	 */
 	static List<String> convertCommandLineArgsToCTRFormat(List<String> commandLineArgs) {
 		List<String> composedTaskArguments = new ArrayList<>();
 		commandLineArgs.forEach(arg -> {
+			if (arg == null) {
+				throw new IllegalArgumentException("Command line Arguments for ComposedTaskRunner contain a null entry.");
+			}
 			if (arg.startsWith("app.")) {
 				String[] split = arg.split("=", 2);
 				if (split.length == 2) {
