@@ -16,6 +16,7 @@ jobs:
     - uses: carvel-dev/setup-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        ytt: v0.44.3        
     - name: Login dockerhub
       uses: docker/login-action@v1
       with:
