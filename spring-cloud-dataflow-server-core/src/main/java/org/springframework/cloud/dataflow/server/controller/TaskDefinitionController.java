@@ -128,6 +128,7 @@ public class TaskDefinitionController {
 	 * Delete the task from the repository so that it can no longer be executed.
 	 *
 	 * @param name name of the task to be deleted
+	 * @param cleanup optional cleanup indicator.
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
@@ -221,6 +222,7 @@ public class TaskDefinitionController {
 	 * Return a given task definition resource.
 	 *
 	 * @param name the name of an existing task definition (required)
+	 * @param manifest indicator to include manifest in response.
 	 * @return the task definition
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)

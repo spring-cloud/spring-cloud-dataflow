@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Contains various Spring Shell {@link org.springframework.shell.core.Converter}s.
+ * Contains various Spring Shell {@link org.springframework.core.convert.converter.Converter}s.
  */
 package org.springframework.cloud.dataflow.shell.converter;

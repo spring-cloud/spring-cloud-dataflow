@@ -169,6 +169,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param dataflowTaskExecutionMetadataDao repository used to manipulate task manifests
 	 * @param oauth2TokenUtilsService the oauth2 token server
 	 * @param taskSaveService the task save service
+	 * @param taskConfigurationProperties task configuration properties.
 	 */
 	@Deprecated
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
@@ -207,6 +208,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param oauth2TokenUtilsService the oauth2 token server
 	 * @param taskSaveService the task save service
 	 * @param composedTaskRunnerConfigurationProperties properties used to configure the composed task runner
+	 * @param taskConfigurationProperties task configuration properties
 	 */
 	public DefaultTaskExecutionService(LauncherRepository launcherRepository,
 									   AuditRecordService auditRecordService,
@@ -668,13 +670,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return same;
 	}
 
-	@Override
+
 	/**
 	 * Return the log content of the task execution identified by the given task deployment ID (external execution ID).
 	 * In case of concurrent task executions on Cloud Foundry, the logs of all the concurrent executions are displayed.
 	 * Also, on Cloud Foundry, the task execution log is retrieved only for the latest execution that matches the
 	 * given deployment ID (external execution ID).
+	 * @param platformName the platform
+	 * @param taskId the task id
+	 * @return the log of the specified task.
 	 */
+	@Override
 	public String getLog(String platformName, String taskId) {
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		// In case of Cloud Foundry, fetching logs by external execution Id isn't valid as the execution instance is destroyed.

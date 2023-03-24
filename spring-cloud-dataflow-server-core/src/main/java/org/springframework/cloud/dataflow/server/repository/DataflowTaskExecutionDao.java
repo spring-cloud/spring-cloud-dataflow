@@ -74,6 +74,8 @@ public interface DataflowTaskExecutionDao {
 	 * Returns the size of all the task executions with the option to include only the completed executions.
 	 * @param onlyCompleted filter by completed task executions
 	 * @param taskName the task name, if null then retrieve all the tasks
+	 *
+	 * @return The count of task executions matching inputs.
 	 */
 	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName);
 
@@ -81,6 +83,8 @@ public interface DataflowTaskExecutionDao {
 	 * Returns all the task execution IDs of the completed task executions.
 	 * @param onlyCompleted filter by completed task executions
 	 * @param taskName the task name, if null then retrieve all the tasks
+	 *
+	 * @return The set of all execution ids matching inputs.
 	 */
 	Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName);
 

@@ -140,7 +140,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	 * @param version app version
 	 * @param uri URI for the app resource
 	 * @param metadataUri URI for the app metadata resource
-	 * @param schemaTargetName The name of the SchemaVersionTarget. Null means the default entry.
+	 * @param bootVersion The bootVersion of the application.
 	 */
 	public AppRegistration(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion) {
 		this(name,type,version,uri,metadataUri);

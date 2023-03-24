@@ -83,7 +83,7 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, boolean)}
+	 * @deprecated in favor of {@link #register(String, ApplicationType, String, String, AppBootSchemaVersion, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
@@ -111,7 +111,7 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, AppBootSchemaVersion, String, String, String, boolean)}
+	 * @deprecated in favor of {@link #register(String, ApplicationType, String, String, String, AppBootSchemaVersion, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,

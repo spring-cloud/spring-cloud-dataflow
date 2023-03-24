@@ -133,6 +133,7 @@ public class AppRegistryController {
 	 * @param type the application type: source, sink, processor, task
 	 * @param version optional application version
 	 * @param search optional findByTaskNameContains parameter
+	 * @param defaultVersion Indicator to use default version.
 	 * @return the list of registered applications
 	 */
 	@GetMapping

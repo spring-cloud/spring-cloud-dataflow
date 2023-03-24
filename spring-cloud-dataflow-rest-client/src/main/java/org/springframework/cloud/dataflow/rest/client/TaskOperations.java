@@ -173,6 +173,7 @@ public interface TaskOperations {
 	 * Get the task executions count with the option to filter only the completed task executions.
 	 * @param completed cleanup only completed task executions
 	 * @param taskName the name of the task to cleanup, if null then all the tasks are considered.
+	 * @return the number of task executions.
 	 */
 	Integer getAllTaskExecutionsCount(boolean completed, String taskName);
 

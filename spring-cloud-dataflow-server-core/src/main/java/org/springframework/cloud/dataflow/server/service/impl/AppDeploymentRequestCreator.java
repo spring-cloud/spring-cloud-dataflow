@@ -138,6 +138,7 @@ public class AppDeploymentRequestCreator {
 	 * {@link StreamDefinition} and map of deployment properties.
 	 * @param streamDefinition the stream definition
 	 * @param streamDeploymentProperties the stream's deployment properties
+	 * @param platformType the platform types to include
 	 * @return list of AppDeploymentRequests
 	 */
 	public List<AppDeploymentRequest> createRequests(StreamDefinition streamDefinition,

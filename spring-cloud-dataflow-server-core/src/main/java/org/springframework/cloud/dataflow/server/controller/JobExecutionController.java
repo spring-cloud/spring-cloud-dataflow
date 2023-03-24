@@ -80,10 +80,12 @@ public class JobExecutionController {
 	 *
 	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%,
 	 *     m_Job, ...)
+	 * @param status Optional status criteria.
 	 * @param pageable page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 * @throws NoSuchJobExecutionException if the job execution doesn't exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -156,7 +158,7 @@ public class JobExecutionController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that
 	 * converts {@link JobExecution}s to {@link JobExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecution, JobExecutionResource> {

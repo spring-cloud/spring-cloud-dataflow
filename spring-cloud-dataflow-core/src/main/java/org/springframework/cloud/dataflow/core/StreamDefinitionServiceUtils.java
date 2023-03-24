@@ -49,6 +49,7 @@ public class StreamDefinitionServiceUtils {
 	 * stream. The application definitions are returned in reverse order; i.e. the sink is
 	 * returned first followed by the processors in reverse order followed by the source.
 	 *
+	 * @param streamAppDefinitions List of stream definitions
 	 * @return iterator that iterates over the application definitions in deployment order
 	 */
 	public static Iterator<StreamAppDefinition> getDeploymentOrderIterator(LinkedList<StreamAppDefinition> streamAppDefinitions) {

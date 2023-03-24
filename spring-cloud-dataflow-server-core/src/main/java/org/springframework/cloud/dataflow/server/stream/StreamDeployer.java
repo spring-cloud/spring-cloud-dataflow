@@ -143,6 +143,7 @@ public interface StreamDeployer {
 	 * @param appId the deployer assigned guid of the app instance
 	 * @param instanceId the application instance id
 	 * @param actuatorPostRequest the request body containing the endpoint and data to pass to the endpoint
+	 * @return the response from actuator.
 	 */
 	Object postToActuator(String appId, String instanceId, ActuatorPostRequest actuatorPostRequest);
 }

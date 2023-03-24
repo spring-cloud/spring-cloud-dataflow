@@ -354,6 +354,7 @@ public class TaskServiceUtils {
 	 *
 	 * @param defaultProperties Default properties, if any, to contribute to the launch app properties.
 	 * @param appDeploymentProperties App deployment properties passed to the Task at launch.
+	 * @param taskPlatformType the platform type
 	 */
 	public static void contributeCommonProperties(Optional<Properties> defaultProperties,
 			Map<String, String> appDeploymentProperties, String taskPlatformType) {

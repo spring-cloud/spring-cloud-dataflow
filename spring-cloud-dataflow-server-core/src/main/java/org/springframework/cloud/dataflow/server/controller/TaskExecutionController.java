@@ -255,6 +255,7 @@ public class TaskExecutionController {
 	 *
 	 * @param actions Defaults to "CLEANUP" if not specified
 	 * @param completed Defaults to cleanup only completed task executions
+	 * @param taskName Optional name of task to clean up.
 	 */
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)

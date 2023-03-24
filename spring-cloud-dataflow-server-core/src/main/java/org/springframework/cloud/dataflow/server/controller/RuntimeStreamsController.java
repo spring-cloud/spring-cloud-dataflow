@@ -75,6 +75,7 @@ public class RuntimeStreamsController {
 	}
 
 	/**
+	 * @param names The names of streams to include in result.
 	 * @param pageable the page
 	 * @param assembler the resource assembler
 	 *
@@ -117,6 +118,9 @@ public class RuntimeStreamsController {
 
 	/**
 	 * @param streamNames comma separated list of streams to retrieve the statuses for
+	 * @param pageable Pageable required on subsequent calls.
+	 * @param assembler The resource assembler for the results.
+	 * @return paged results.
 	 */
 	@RequestMapping(value = "/{streamNames}", method = RequestMethod.GET)
 	public PagedModel<StreamStatusResource> streamStatus(@PathVariable("streamNames") String[] streamNames, Pageable pageable,

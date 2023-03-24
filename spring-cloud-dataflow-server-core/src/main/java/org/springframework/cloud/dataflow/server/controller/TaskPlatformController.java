@@ -52,7 +52,8 @@ public class TaskPlatformController {
 	/**
 	 * Returns the list of platform accounts available for launching tasks.
 	 * @param pageable the Pageable request
-	 * @param assembler the paged resource assembler for Launcher
+	 * @param schedulesEnabled optional criteria to indicate enabled schedules.
+	 * @param assembler the paged resource assembler for Launcher*
 	 * @return the paged resources of type {@link LauncherResource}
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
@@ -70,7 +71,7 @@ public class TaskPlatformController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link Launcher}s to {@link LauncherResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<Launcher, LauncherResource> {

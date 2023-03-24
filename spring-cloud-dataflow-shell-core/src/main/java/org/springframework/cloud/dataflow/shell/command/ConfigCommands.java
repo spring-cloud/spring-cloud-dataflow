@@ -227,7 +227,7 @@ public class ConfigCommands {
 	 * Triggers a connection to the DataFlow server using the configured coordinates.
 	 *
 	 * @return result message of the connection attempt
-	 * @throws Exception
+	 * @throws Exception from target method.
 	 */
 	public String triggerTarget() throws Exception {
 		return target(

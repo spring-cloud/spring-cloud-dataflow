@@ -248,7 +248,7 @@ public class ArgumentSanitizer {
 	 *
 	 * @param input to be sanitized
 	 * @return The sanitized JSON string
-	 * @throws JsonProcessingException
+	 * @throws JsonProcessingException from mapper.
 	 */
 	public String sanitizeJsonString(String input) throws JsonProcessingException {
 		if (input == null) {
@@ -263,7 +263,7 @@ public class ArgumentSanitizer {
 	 *
 	 * @param input to be sanitized
 	 * @return The sanitized YAML string
-	 * @throws JsonProcessingException
+	 * @throws JsonProcessingException from mapper
 	 */
 	public String sanitizeYamlString(String input) throws JsonProcessingException {
 		if (input == null) {
@@ -278,7 +278,6 @@ public class ArgumentSanitizer {
 	 *
 	 * @param input to be sanitized
 	 * @return the sanitized string
-	 * @throws JsonProcessingException
 	 */
 	public String sanitizeJsonOrYamlString(String input) {
 		if (input == null) {

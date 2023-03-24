@@ -86,10 +86,11 @@ public class StreamDeploymentController {
 
 	/**
 	 * Construct a new UpdatableStreamDeploymentController, given a
-	 * {@link StreamDeploymentController} and {@link StreamService}
+	 * {@link StreamDeploymentController} and {@link StreamService} and {@link StreamDefinitionService}
 	 *
 	 * @param repository    the repository this controller will use for stream CRUD operations
 	 * @param streamService the underlying UpdatableStreamService to deploy the stream
+	 * @param streamDefinitionService the StreamDefinitionService
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
 									  StreamService streamService,
@@ -197,6 +198,7 @@ public class StreamDeploymentController {
 	 * Request deployment of an existing stream definition.
 	 *
 	 * @param name the name of an existing stream definition (required)
+	 * @param reuseDeploymentProperties Indicator to re-use deployment properties.
 	 * @return The stream deployment
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)

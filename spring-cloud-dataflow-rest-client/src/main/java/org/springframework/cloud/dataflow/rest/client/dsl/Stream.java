@@ -219,7 +219,7 @@ public class Stream implements AutoCloseable {
 
 	/**
 	 * @return Returns a map of the stream applications, associating every application with its applications instances
-	 * and their current runtime states: (App -> (AppInstanceId -> AppInstanceState)).
+	 * and their current runtime states: {@code (App -> (AppInstanceId -> AppInstanceState))}.
 	 */
 	public Map<StreamApplication, Map<String, String>> runtimeApps() {
 

@@ -167,6 +167,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * {@link TaskExecution}.
 	 *
 	 * @param taskExecution contains the {@link TaskExecution}
+	 * @param composedTaskJobExecution the optional composed task execution.
 	 */
 	public TaskExecutionResource(TaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
@@ -190,6 +191,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 *
 	 * @param taskExecution contains the {@link TaskExecution}
 	 * @param taskManifest contains the (@link TaskManifest}
+	 * @param composedTaskJobExecution The optional composed task execution.
 	 */
 	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");

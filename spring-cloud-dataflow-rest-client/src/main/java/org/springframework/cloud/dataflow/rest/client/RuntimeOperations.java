@@ -67,6 +67,7 @@ public interface RuntimeOperations {
 	 * @param instanceId the application instance id
 	 * @param endpoint   the relative actuator path, e.g., {@code /info}
 	 * @param data       map representing the data to post on request body
+	 * @return response from actuator
 	 */
 	Object postToActuator(String appId, String instanceId, String endpoint, Map<String, Object> data);
 
