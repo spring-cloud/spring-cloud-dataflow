@@ -5,14 +5,14 @@ if [ "$TAG" == "" ]; then
 fi
 
 function pack_image {
-    PATH="$1"
+    JAR="$1"
     REPO="$2"
-    echo "Packaging $PATH"
+    echo "Packaging $JAR"
     for v in 8 11 17; do
 
         echo "Creating: $REPO:$TAG-jdk$v"
-        /usr/bin/pack build --builder gcr.io/paketo-buildpacks/builder:base \
-            --path "$PATH-$TAG.jar" \
+        pack build --builder gcr.io/paketo-buildpacks/builder:base \
+            --path "$JAR-$TAG.jar" \
             --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
         echo "Created: $REPO:$TAG-jdk$v"
 
