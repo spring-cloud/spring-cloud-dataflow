@@ -54,38 +54,4 @@ runs:
     shell: bash
     run: |
       echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
-      ytt \
-        -f $PACKAGE_BUNDLE_TEMPLATE \
-        --output-files $PACKAGE_BUNDLE_GENERATED \
-        --data-value-yaml server.version=$SERVER_VERSION \
-        --data-value-yaml server.repository=$SERVER_REPOSITORY \
-        --data-value-yaml ctr.version=$DATAFLOW_VERSION \
-        --data-value-yaml dataflow.version=$DATAFLOW_VERSION \
-        --data-value-yaml skipper.version=$SKIPPER_VERSION \
-        --data-value-yaml grafana.version=$DATAFLOW_VERSION \
-        --data-value-yaml package.name=$PACKAGE_NAME \
-        --file-mark 'config/values.yml:type=text-template' \
-        --file-mark '.imgpkg/bundle.yaml:type=text-template'
-      ytt \
-        -f $IMGPKG_LOCK_TEMPLATE \
-        --output-files $IMGPKG_LOCK_GENERATED_IN \
-        --data-value-yaml server.version=$SERVER_VERSION \
-        --data-value-yaml server.repository=$SERVER_REPOSITORY \
-        --data-value-yaml ctr.version=$DATAFLOW_VERSION \
-        --data-value-yaml dataflow.version=$DATAFLOW_VERSION \
-        --data-value-yaml skipper.version=$SKIPPER_VERSION \
-        --data-value-yaml grafana.version=$DATAFLOW_VERSION \
-        --file-mark '**/*.yml:type=text-template'
-      cp -R $VENDIR_SRC_IN $PACKAGE_BUNDLE_GENERATED/config/upstream
-      vendir sync --chdir $PACKAGE_BUNDLE_GENERATED
-      mkdir -p $IMGPKG_LOCK_GENERATED_OUT
-
-      for DIR in $(ls $IMGPKG_LOCK_GENERATED_IN)
-      do
-        ytt -f $PACKAGE_BUNDLE_GENERATED -f $IMGPKG_LOCK_GENERATED_IN/$DIR > $IMGPKG_LOCK_GENERATED_OUT/$DIR.yml
-      done
-
-      mkdir -p $PACKAGE_BUNDLE_GENERATED/.imgpkg
-      kbld \
-        -f $IMGPKG_LOCK_GENERATED_OUT \
-        --imgpkg-lock-output $PACKAGE_BUNDLE_GENERATED/.imgpkg/images.yml
+      .github/actions/build-package-bundle/build-package-bundle.sh
