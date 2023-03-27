@@ -15,10 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
-import static java.util.stream.Collectors.joining;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,14 +27,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static java.util.stream.Collectors.joining;
 
 public class Command {
 
 	public static final int HOURS_TO_WAIT_FOR_STD_OUT_TO_CLOSE = 12;
+
 	public static final int MINUTES_TO_WAIT_AFTER_STD_OUT_CLOSES = 1;
+
 	private final Executable executable;
+
 	private final Consumer<String> logConsumer;
 
 	public Command(Executable executable, Consumer<String> logConsumer) {

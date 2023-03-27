@@ -15,14 +15,15 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import com.github.zafarkhaja.semver.Version;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.github.zafarkhaja.semver.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
 
@@ -59,16 +60,19 @@ public class DockerComposeExecutable implements Executable {
 				List<String> args = new ArrayList<>();
 				args.add(defaultDockerComposePath());
 				args.addAll(Arrays.asList(commands));
+				log.debug("execute:{}", args);
 				return new ProcessBuilder(args).redirectErrorStream(true).start();
 			}
-		}, log::trace);
+		}, log::debug);
 
 		String versionOutput = dockerCompose.execute(Command.throwingOnError(), "-v");
 		return DockerComposeVersion.parseFromDockerComposeVersion(versionOutput);
 	}
 
 	private DockerComposeFiles dockerComposeFiles;
+
 	private DockerConfiguration dockerConfiguration;
+
 	private ProjectName projectName = ProjectName.random();
 
 	public DockerComposeExecutable(DockerComposeFiles dockerComposeFiles, DockerConfiguration dockerConfiguration, ProjectName projectName) {
@@ -82,6 +86,7 @@ public class DockerComposeExecutable implements Executable {
 	public DockerComposeFiles dockerComposeFiles() {
 		return dockerComposeFiles;
 	}
+
 	public DockerConfiguration dockerConfiguration() {
 		return dockerConfiguration;
 	}
@@ -106,10 +111,14 @@ public class DockerComposeExecutable implements Executable {
 
 		List<String> args = new ArrayList<>();
 		args.add(dockerComposePath());
-		args.addAll(projectName().constructComposeFileCommand());
-		args.addAll(dockerComposeFiles().constructComposeFileCommand());
+		// if a single option is provided that starts with - skips the file commands.
+		if (commands.length > 1 || commands[0].charAt(0) != '-') {
+			args.addAll(projectName().constructComposeFileCommand());
+			args.addAll(dockerComposeFiles().constructComposeFileCommand());
+		}
 		args.addAll(Arrays.asList(commands));
 
+		log.debug("execute:{}", args);
 		return dockerConfiguration().configuredDockerComposeProcess()
 				.command(args)
 				.redirectErrorStream(true)
@@ -123,7 +132,9 @@ public class DockerComposeExecutable implements Executable {
 
 	public static class Builder {
 		private DockerComposeFiles dockerComposeFiles;
+
 		private DockerConfiguration dockerConfiguration;
+
 		private ProjectName projectName;
 
 		public Builder dockerComposeFiles(DockerComposeFiles dockerComposeFiles) {

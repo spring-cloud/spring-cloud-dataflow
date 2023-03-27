@@ -147,9 +147,9 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn -gs .github/settings.xml -Pstagingmilestone build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease=$(echo '${parsedVersion.qualifier}' | mvn -gs .github/settings.xml -Pstagingmilestone build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease=$(echo '${parsedVersion.qualifier}' | mvn -gs .github/settings.xml -Pstagingmilestone build-helper:parse-version help:evaluate -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
     # zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4

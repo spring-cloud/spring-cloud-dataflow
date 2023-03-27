@@ -15,15 +15,14 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.junit5;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerExecutionException;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompose;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DockerCompose(locations = {"src/test/resources/docker-compose-1.yml"})
 public class DockerCompose1Tests  {
@@ -37,7 +36,10 @@ public class DockerCompose1Tests  {
 		Throwable thrown = catchThrowable(() -> {
 			dockerComposeInfo.id("").getRule().containers().container("testservice2").state();
 		});
-		assertThat(thrown).isInstanceOf(DockerExecutionException.class).hasNoCause()
-				.hasMessageContaining("No such service: testservice2");
+		assertThat(thrown)
+				.isInstanceOf(DockerExecutionException.class)
+				.hasNoCause();
+		assertThat(thrown).message()
+				.containsIgnoringCase("No such service: testservice2");
 	}
 }
