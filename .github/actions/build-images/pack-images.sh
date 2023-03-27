@@ -7,7 +7,7 @@ fi
 function pack_image {
     JAR="$1-$TAG.jar"
     REPO="$2"
-    if [ ! -f $JAR ]; then
+    if [ ! -f "$JAR" ]; then
         echo "File not found $JAR"
         exit 2
     fi
@@ -16,7 +16,7 @@ function pack_image {
 
         echo "Creating: $REPO:$TAG-jdk$v"
         pack build --builder gcr.io/paketo-buildpacks/builder:base \
-            --path $JAR \
+            --path "$JAR" \
             --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
         RC=$?
         if ((RC!=0)); then

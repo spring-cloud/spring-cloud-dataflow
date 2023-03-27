@@ -36,24 +36,7 @@ runs:
     shell: bash
     run: |
       DEFAULT_JDK=11
-      docker tag springcloud/spring-cloud-dataflow-server:$TAG-jdk$DEFAULT_JDK springcloud/spring-cloud-dataflow-server:$TAG
-      docker tag springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk$DEFAULT_JDK springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
-      docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk$DEFAULT_JDK springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
-      docker tag springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk$DEFAULT_JDK springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
-      docker tag springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk$DEFAULT_JDK springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
-      for v in 8 11 17
-      do
-        docker push springcloud/spring-cloud-dataflow-server:$TAG-jdk$v
-        docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG-jdk$v
-        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG-jdk$v
-        docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG-jdk$v
-        docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG-jdk$v
-      done
-      docker push springcloud/spring-cloud-dataflow-server:$TAG
-      docker push springcloud/spring-cloud-dataflow-composed-task-runner:$TAG
-      docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:$TAG
-      docker push springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit:$TAG
-      docker push springcloud/spring-cloud-dataflow-single-step-batch-job:$TAG
+      .github/actions/build-images/push-images.sh
 
   # build/publish support images
   - name: Publish Grafana Prometheus
