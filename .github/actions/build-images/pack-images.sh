@@ -7,7 +7,7 @@ fi
 function pack_image {
     JAR="$1-$TAG.jar"
     REPO="$2"
-    if [ ! -f $JAR ]; then
+    if [ ! -f "$JAR" ]; then
         echo "File not found $JAR"
         exit 2
     fi
@@ -16,7 +16,7 @@ function pack_image {
 
         echo "Creating: $REPO:$TAG-jdk$v"
         pack build --builder gcr.io/paketo-buildpacks/builder:base \
-            --path $JAR \
+            --path "$JAR" \
             --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
         RC=$?
         if ((RC!=0)); then
@@ -32,3 +32,4 @@ pack_image "spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataf
 pack_image "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka"
 pack_image "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit" "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit"
 pack_image "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job" "springcloud/spring-cloud-dataflow-single-step-batch-job"
+pack_image "spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server" "springcloud/spring-cloud-skipper-server"
