@@ -35,7 +35,7 @@ runs:
       TAG: ${{ inputs.version }}
     shell: bash
     run: |
-      DEFAULT_JDK=11
+      export DEFAULT_JDK=11
       .github/actions/build-images/push-images.sh
 
   # build/publish support images
