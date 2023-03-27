@@ -14,25 +14,35 @@
  * limitations under the License.
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
+
 import com.github.zafarkhaja.semver.Version;
 
 public final class DockerComposeVersion {
 
-    private DockerComposeVersion() {}
+	private DockerComposeVersion() {
+	}
 
-    //docker-compose version format is like 1.7.0rc1, which can't be parsed by java-semver
-    //here we only pass 1.7.0 to java-semver
-    public static Version parseFromDockerComposeVersion(String versionOutput) {
-        String[] splitOnSeparator = versionOutput.split(" ");
-        String version = splitOnSeparator[2];
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < version.length(); i++) {
-            if (version.charAt(i) >= '0' && version.charAt(i) <= '9' || version.charAt(i) == '.') {
-                builder.append(version.charAt(i));
-            } else {
-                return Version.valueOf(builder.toString());
-            }
-        }
-        return Version.valueOf(builder.toString());
-    }
+	//docker-compose version format is like 1.7.0rc1, which can't be parsed by java-semver
+	//here we only pass 1.7.0 to java-semver
+	public static Version parseFromDockerComposeVersion(String versionOutput) {
+		String[] splitOnSeparator = versionOutput.split(" ");
+		String version = null;
+		for (String value : splitOnSeparator) {
+			if (Character.isDigit(value.charAt(0))) {
+				version = value;
+				break;
+			} else if (value.charAt(0) == 'v' && value.length() > 1 && Character.isDigit(value.charAt(1))) {
+				version = value.substring(1);
+			}
+		}
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < version.length(); i++) {
+			if (version.charAt(i) >= '0' && version.charAt(i) <= '9' || version.charAt(i) == '.') {
+				builder.append(version.charAt(i));
+			} else {
+				return Version.valueOf(builder.toString());
+			}
+		}
+		return Version.valueOf(builder.toString());
+	}
 }
