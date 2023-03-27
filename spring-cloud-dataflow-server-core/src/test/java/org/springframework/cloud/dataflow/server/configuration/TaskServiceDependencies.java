@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +70,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.SchemaService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -77,6 +79,7 @@ import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
+import org.springframework.cloud.dataflow.server.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecutionRepositoryService;
@@ -131,18 +134,18 @@ import static org.mockito.Mockito.when;
 @EnableSpringDataWebSupport
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(CompletionConfiguration.class)
-@ImportAutoConfiguration({ HibernateJpaAutoConfiguration.class,
+@ImportAutoConfiguration({HibernateJpaAutoConfiguration.class,
 		JacksonAutoConfiguration.class,
 		FlywayAutoConfiguration.class,
-		RestTemplateAutoConfiguration.class })
+		RestTemplateAutoConfiguration.class})
 @EnableWebMvc
-@EnableConfigurationProperties({ CommonApplicationProperties.class,
+@EnableConfigurationProperties({CommonApplicationProperties.class,
 		VersionInfoProperties.class,
 		DockerValidatorProperties.class,
 		TaskConfigurationProperties.class,
 		TaskProperties.class,
 		DockerValidatorProperties.class,
-		ComposedTaskRunnerConfigurationProperties.class })
+		ComposedTaskRunnerConfigurationProperties.class})
 @EntityScan({
 		"org.springframework.cloud.dataflow.registry.domain",
 		"org.springframework.cloud.dataflow.core"
@@ -176,7 +179,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskValidationService taskValidationService(AppRegistryService appRegistry,
-			DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository) {
+													   DockerValidatorProperties dockerValidatorProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		return new DefaultTaskValidationService(appRegistry,
 				dockerValidatorProperties,
 				taskDefinitionRepository);
@@ -212,12 +215,17 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		}
-		catch (MetaDataAccessException e) {
+		} catch (MetaDataAccessException e) {
 			throw new IllegalStateException(e);
 		}
 		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
 				"task_execution_metadata_seq"));
+	}
+
+	@Bean
+	@Primary
+	public SchemaService schemaService() {
+		return new DefaultSchemaService();
 	}
 
 	@Bean
@@ -279,15 +287,15 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDeleteService deleteTaskService(TaskExplorer taskExplorer, LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDeploymentRepository taskDeploymentRepository,
-			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowJobExecutionDao dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			@Autowired(required = false) SchedulerService schedulerService,
-			TaskConfigurationProperties taskConfigurationProperties,
-			DataSource dataSource) {
+											   TaskDefinitionRepository taskDefinitionRepository,
+											   TaskDeploymentRepository taskDeploymentRepository,
+											   AuditRecordService auditRecordService,
+											   DataflowTaskExecutionDao dataflowTaskExecutionDao,
+											   DataflowJobExecutionDao dataflowJobExecutionDao,
+											   DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+											   @Autowired(required = false) SchedulerService schedulerService,
+											   TaskConfigurationProperties taskConfigurationProperties,
+											   DataSource dataSource) {
 
 		return new DefaultTaskDeleteService(taskExplorer, launcherRepository, taskDefinitionRepository,
 				taskDeploymentRepository,
@@ -302,7 +310,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			AuditRecordService auditRecordService, AppRegistryService registry) {
+										   AuditRecordService auditRecordService, AppRegistryService registry) {
 		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
 	}
 
@@ -326,15 +334,15 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskExecutionService defaultTaskService(LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService, TaskRepository taskRepository,
-			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository,
-			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService) {
+												   AuditRecordService auditRecordService, TaskRepository taskRepository,
+												   TaskExecutionInfoService taskExecutionInfoService,
+												   TaskDeploymentRepository taskDeploymentRepository,
+												   TaskExecutionCreationService taskExecutionRepositoryService,
+												   TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+												   TaskExplorer taskExplorer, DataflowTaskExecutionDao dataflowTaskExecutionDao,
+												   DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
+												   OAuth2TokenUtilsService oauth2TokenUtilsService,
+												   TaskSaveService taskSaveService) {
 		DefaultTaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 				launcherRepository, auditRecordService, taskRepository,
 				taskExecutionInfoService, taskDeploymentRepository,
@@ -348,9 +356,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(AppRegistryService registry,
-			TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
-			TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
-		List<TaskPlatform> taskPlatforms, ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+															TaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository,
+															TaskConfigurationProperties taskConfigurationProperties, LauncherRepository launcherRepository,
+															List<TaskPlatform> taskPlatforms, ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultTaskExecutionInfoService(this.dataSourceProperties,
 				registry, taskExplorer, taskDefinitionRepository,
 				taskConfigurationProperties, launcherRepository, taskPlatforms,
@@ -358,16 +366,16 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	@Conditional({ SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
+	@Conditional({SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
 	public SchedulerService schedulerService(CommonApplicationProperties commonApplicationProperties,
-			List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
-			AppRegistryService registry, ResourceLoader resourceLoader,
-			ApplicationConfigurationMetadataResolver metaDataResolver,
-			SchedulerServiceProperties schedulerServiceProperties,
-			AuditRecordService auditRecordService,
-			TaskConfigurationProperties taskConfigurationProperties,
-			DataSourceProperties dataSourceProperties,
-			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+											 List<TaskPlatform> taskPlatforms, TaskDefinitionRepository taskDefinitionRepository,
+											 AppRegistryService registry, ResourceLoader resourceLoader,
+											 ApplicationConfigurationMetadataResolver metaDataResolver,
+											 SchedulerServiceProperties schedulerServiceProperties,
+											 AuditRecordService auditRecordService,
+											 TaskConfigurationProperties taskConfigurationProperties,
+											 DataSourceProperties dataSourceProperties,
+											 ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
 				taskPlatforms, taskDefinitionRepository,
 				registry, resourceLoader,
@@ -398,7 +406,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public JobRepository jobRepository(DataSource dataSource, PlatformTransactionManager transactionManager) throws Exception{
+	public JobRepository jobRepository(DataSource dataSource, PlatformTransactionManager transactionManager) throws Exception {
 		JobRepositoryFactoryBean jobRepositoryFactoryBean = new JobRepositoryFactoryBean();
 		jobRepositoryFactoryBean.setDataSource(dataSource);
 		jobRepositoryFactoryBean.setTransactionManager(transactionManager);

@@ -145,8 +145,9 @@ public class RestControllerAdvice {
 	 * {@link NoSuchTaskExecutionException}, {@link NoSuchJobExecutionException},
 	 * {@link NoSuchJobInstanceException}, {@link NoSuchJobException},
 	 * {@link NoSuchStepExecutionException},
-	 * {@link NoSuchAppException}, or
-	 * {@link NoSuchAppInstanceException}
+	 * {@link NoSuchAppException},
+	 * {@link NoSuchAppInstanceException}, or
+	 *{@link NoSuchSchemaTargetException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
@@ -155,7 +156,9 @@ public class RestControllerAdvice {
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, NoSuchAppException.class, NoSuchAppInstanceException.class,
-			NoSuchScheduleException.class })
+			NoSuchScheduleException.class,
+			NoSuchSchemaTargetException.class
+	})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {
