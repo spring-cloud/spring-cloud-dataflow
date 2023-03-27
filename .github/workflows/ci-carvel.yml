@@ -21,7 +21,6 @@ jobs:
         node-version: 16
     - uses: carvel-dev/setup-action@v1
       with:
-        ytt: v0.44.3
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup npm
       shell: bash
