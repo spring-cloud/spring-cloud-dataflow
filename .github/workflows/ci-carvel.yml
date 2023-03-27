@@ -21,6 +21,7 @@ jobs:
         node-version: 16
     - uses: carvel-dev/setup-action@v1
       with:
+        ytt: v0.44.3
         token: ${{ secrets.GITHUB_TOKEN }}
     - name: Setup npm
       shell: bash
@@ -49,9 +50,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure Env
       run: |
-        echo SPRING_CLOUD_DATAFLOW_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
-        echo SPRING_CLOUD_SKIPPER_VERSION=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -q -DforceStdout) >> $GITHUB_ENV
-        echo SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
+        source .github/workflows/export-app-versions.sh        
+        echo SPRING_CLOUD_DATAFLOW_VERSION=$SPRING_CLOUD_DATAFLOW_VERSION >> $GITHUB_ENV
+        echo SPRING_CLOUD_SKIPPER_VERSION=$SPRING_CLOUD_SKIPPER_VERSION >> $GITHUB_ENV
+        echo SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX=$SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
 
     # Builds a package bundle
     - name: Build Package Bundle
