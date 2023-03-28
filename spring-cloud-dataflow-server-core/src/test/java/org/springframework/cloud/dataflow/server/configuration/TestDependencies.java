@@ -715,6 +715,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
 	public SchemaService schemaService() {
 		return new DefaultSchemaService();
 	}

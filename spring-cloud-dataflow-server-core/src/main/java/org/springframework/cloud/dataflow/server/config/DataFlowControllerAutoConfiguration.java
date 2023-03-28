@@ -214,6 +214,15 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 	@Configuration
+	public static class SchemaConfiguration {
+		@Bean
+		@ConditionalOnMissingBean
+		public SchemaService schemaService() {
+			return new DefaultSchemaService();
+		}
+	}
+
+	@Configuration
 	public static class AppRegistryConfiguration {
 
 		@Bean
@@ -260,10 +269,6 @@ public class DataFlowControllerAutoConfiguration {
 	@Configuration
 	@ConditionalOnTasksEnabled
 	public static class TaskEnabledConfiguration {
-		@Bean
-		public SchemaService schemaService() {
-			return new DefaultSchemaService();
-		}
 
 		@Bean
 		public SchemaController schemaController(SchemaService schemaService) {

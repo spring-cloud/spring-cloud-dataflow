@@ -171,11 +171,6 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public SchemaService schemaService() {
-		return new DefaultSchemaService();
-	}
-
-	@Bean
 	public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository) {
 		return new DefaultAuditRecordService(auditRecordRepository);
 	}
@@ -422,6 +417,11 @@ public class JobDependencies {
 				new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader()), auditRecordService);
 	}
 
+	@Bean
+	@ConditionalOnMissingBean
+	public SchemaService schemaService() {
+		return new DefaultSchemaService();
+	}
 	@Bean
 	public TaskPlatform taskPlatform() {
 		Launcher launcher = new Launcher("default", "defaultType", null, null);
