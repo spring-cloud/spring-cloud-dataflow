@@ -223,7 +223,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	@Primary
+	@ConditionalOnMissingBean
 	public SchemaService schemaService() {
 		return new DefaultSchemaService();
 	}

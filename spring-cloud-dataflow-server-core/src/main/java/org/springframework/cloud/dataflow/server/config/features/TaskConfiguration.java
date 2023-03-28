@@ -26,6 +26,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
@@ -121,7 +122,9 @@ public class TaskConfiguration {
 			DeployerConfigurationMetadataResolver resolver) {
 		return new LauncherInitializationService(launcherRepository, platforms, resolver);
 	}
+
 	@Bean
+	@ConditionalOnMissingBean
 	public SchemaService schemaService() {
 		return new DefaultSchemaService();
 	}
