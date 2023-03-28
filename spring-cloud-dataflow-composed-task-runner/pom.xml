@@ -150,6 +150,16 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<imageName>springcloud/${project.name}:${project.version}</imageName>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

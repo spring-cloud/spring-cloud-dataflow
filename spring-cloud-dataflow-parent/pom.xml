@@ -10,6 +10,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.10</spring-boot.version>
 		<spring-cloud-dataflow-ui.version>3.3.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<dataflow.version>${project.version}</dataflow.version>
@@ -291,7 +292,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.1</version>
+				<version>3.0.0</version>
 				<configuration>
 					<includes>
 						<include>**/*Tests.java</include>
@@ -346,7 +347,9 @@
 			<build>
 				<plugins>
 					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-resources-plugin</artifactId>
+						<version>${maven-resources-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>replace-deployment-files</id>
@@ -356,10 +359,10 @@
 								</goals>
 								<configuration>
 									<overwrite>true</overwrite>
-									<outputDirectory>${basedir}/src</outputDirectory>
+									<outputDirectory>${basedir}/../src</outputDirectory>
 									<resources>
 										<resource>
-											<directory>${basedir}/src/templates</directory>
+											<directory>${basedir}/../src/templates</directory>
 											<includes>
 												<include>**/*</include>
 											</includes>
