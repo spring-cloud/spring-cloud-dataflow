@@ -6,13 +6,13 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.5.2-SNAPSHOT
+  DATAFLOW_PRO_VERSION=1.5.3-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
   export DATAFLOW_VERSION=2.10.3-SNAPSHOT
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-  export SKIPPER_VERSION=2.9.2-SNAPSHOT
+  export SKIPPER_VERSION=2.9.3-SNAPSHOT
 fi
 
 case $BROKER in
@@ -77,11 +77,11 @@ if [ "$DATAFLOW_VERSION" = "" ]; then
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-    SKIPPER_VERSION=2.9.2-SNAPSHOT
+    SKIPPER_VERSION=2.9.3-SNAPSHOT
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-    SCDF_PRO_VERSION=1.5.2-SNAPSHOT
+    SCDF_PRO_VERSION=1.5.3-SNAPSHOT
 fi
 YAML_PATH=$(realpath $SCDIR/yaml)
 

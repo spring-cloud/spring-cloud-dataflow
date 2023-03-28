@@ -80,7 +80,7 @@ services:
 
   skipper-server:
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.2-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.9.3-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"
