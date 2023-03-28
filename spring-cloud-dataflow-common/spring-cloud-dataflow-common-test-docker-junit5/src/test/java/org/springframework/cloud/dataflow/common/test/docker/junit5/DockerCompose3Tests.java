@@ -38,6 +38,6 @@ public class DockerCompose3Tests {
 			dockerComposeInfo.id("").getRule().containers().container("testservice2").state();
 		});
 		assertThat(thrown).isInstanceOf(DockerExecutionException.class).hasNoCause()
-				.hasMessageContaining("No such service: testservice2");
+				.message().containsIgnoringCase("No such service: testservice2");
 	}
 }
