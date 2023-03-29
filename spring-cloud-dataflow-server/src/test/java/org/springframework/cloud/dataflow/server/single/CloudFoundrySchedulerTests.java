@@ -30,8 +30,7 @@ import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,6 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
 		})
-@RunWith(SpringRunner.class)
 public class CloudFoundrySchedulerTests {
 
 	@Autowired
