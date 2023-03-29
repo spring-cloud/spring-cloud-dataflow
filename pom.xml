@@ -56,26 +56,26 @@
 		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-core-dsl</module>
 		<module>spring-cloud-dataflow-core</module>
-		<module>spring-cloud-dataflow-single-step-batch-job</module>
-		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-server-core</module>
-		<module>spring-cloud-skipper</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-audit</module>
 		<module>spring-cloud-dataflow-registry</module>
 		<module>spring-cloud-dataflow-platform-kubernetes</module>
 		<module>spring-cloud-dataflow-platform-cloudfoundry</module>
 		<module>spring-cloud-dataflow-autoconfigure</module>
-		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-rest-client</module>
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
 		<module>spring-cloud-dataflow-completion</module>
+		<module>spring-cloud-skipper</module>
 		<module>spring-cloud-starter-dataflow-server</module>
 		<module>spring-cloud-starter-dataflow-ui</module>
+		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-tasklauncher</module>
+		<module>spring-cloud-dataflow-single-step-batch-job</module>
+		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-test</module>
 		<module>spring-cloud-dataflow-dependencies</module>
 	</modules>

@@ -24,5 +24,5 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractBootVersio
  * @author Corneil du Plessis
  * @since 2.11
  */
-public class V7_Boot3_Boot_Version extends AbstractBootVersionMigration {
+public class V7__Boot3_Boot_Version extends AbstractBootVersionMigration {
 }

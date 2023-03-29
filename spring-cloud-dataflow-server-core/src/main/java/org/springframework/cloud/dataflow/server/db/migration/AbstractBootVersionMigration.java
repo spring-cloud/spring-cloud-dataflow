@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.db.migration;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.flywaydb.core.api.migration.BaseJavaMigration;
@@ -34,7 +35,11 @@ public abstract class AbstractBootVersionMigration extends AbstractMigration {
 	private static final String ADD_BOOT_VERSION = "alter table app_registration add boot_version varchar(16)";
 
 	public AbstractBootVersionMigration() {
-		super(Arrays.asList(SqlCommand.from(ADD_BOOT_VERSION)));
+		super(null);
 	}
 
+	@Override
+	public List<SqlCommand> getCommands() {
+		return Collections.singletonList(SqlCommand.from(ADD_BOOT_VERSION));
+	}
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration.db2;
+package org.springframework.cloud.dataflow.server.db.migration.postgresql;
 
 import org.springframework.cloud.dataflow.server.db.migration.AbstractBootVersionMigration;
 
@@ -24,5 +24,5 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractBootVersio
  * @author Corneil du Plessis
  * @since 2.11
  */
-public class V7_Boot3_Boot_Version extends AbstractBootVersionMigration {
+public class V6__Boot3_Boot_Version extends AbstractBootVersionMigration {
 }
