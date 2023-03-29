@@ -59,7 +59,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<imageName>springcloud/${project.name}:${project.version}</imageName>
+					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
 				</configuration>
 			</plugin>
 

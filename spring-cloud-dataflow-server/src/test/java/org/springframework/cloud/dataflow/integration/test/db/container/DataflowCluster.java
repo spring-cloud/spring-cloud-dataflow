@@ -30,6 +30,7 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.lifecycle.Startable;
 
@@ -41,32 +42,54 @@ import org.springframework.util.StringUtils;
 public class DataflowCluster implements Startable {
 
 	private final static Logger logger = LoggerFactory.getLogger(DataflowCluster.class);
+
 	private final int DATAFLOW_PORT = 9393;
+
 	private final int SKIPPER_PORT = 7577;
+
 	private final int POSTGRES_PORT = 5432;
+
 	private final int MSSQL_PORT = 1433;
+
 	private final int MARIADB_PORT = 3306;
+
 	private final int ORACLE_PORT = 1521;
+
 	private final int DB2_PORT = 50000;
+
 	private final int UAA_PORT = 8099;
+
 	private final Map<String, ClusterContainer> dataflowImages;
+
 	private final Map<String, ClusterContainer> skipperImages;
+
 	private final Map<String, ClusterContainer> databaseImages;
+
 	private final Map<String, ClusterContainer> oauthImages;
+
 	private final boolean sharedDatabase;
+
 	private JdbcDatabaseContainer<?> runningDatabase;
+
 	private GenericContainer<?> runningOauth;
+
 	private JdbcDatabaseContainer<?> runningSkipperDatabase;
+
 	private JdbcDatabaseContainer<?> runningDataflowDatabase;
+
 	private SkipperContainer<?> runningSkipper;
+
 	private DataflowContainer<?> runningDataflow;
+
 	private ClusterContainer skipperDatabaseClusterContainer;
+
 	private ClusterContainer dataflowDatabaseClusterContainer;
+
 	private final Network network;
 
 	public DataflowCluster(List<ClusterContainer> databaseContainers, List<ClusterContainer> oauthContainers,
-			List<ClusterContainer> skipperContainers, List<ClusterContainer> dataflowContainers,
-			boolean sharedDatabase) {
+						   List<ClusterContainer> skipperContainers, List<ClusterContainer> dataflowContainers,
+						   boolean sharedDatabase) {
 		Assert.notNull(databaseContainers, "databaseContainers must be set");
 		Assert.notNull(oauthContainers, "oauthContainers must be set");
 		Assert.notNull(skipperContainers, "skipperContainers must be set");
@@ -192,7 +215,9 @@ public class DataflowCluster implements Startable {
 		String skipperDatabaseAlias = sharedDatabase ? "database" : "skipperdatabase";
 		SkipperContainer<?> skipperContainer = buildSkipperContainer(clusterContainer, getSkipperDatabaseContainer(),
 				getIdentityProviderContainer(), skipperDatabaseAlias);
+
 		skipperContainer.start();
+		skipperContainer.followOutput(ContainerUtils::outputSkipper);
 		runningSkipper = skipperContainer;
 	}
 
@@ -233,6 +258,7 @@ public class DataflowCluster implements Startable {
 				runningSkipper.getMappedPort(SKIPPER_PORT));
 	}
 
+
 	public void startDataflow(String id) {
 		Assert.state(runningDataflow == null, "There's a running dataflow");
 		Assert.state(runningSkipper != null, "There's no running skipper");
@@ -244,6 +270,7 @@ public class DataflowCluster implements Startable {
 				getDataflowDatabaseContainer(), getIdentityProviderContainer(), runningSkipper, dataflowDatabaseAlias,
 				skipperDatabaseAlias);
 		dataflowContainer.start();
+		dataflowContainer.followOutput(ContainerUtils::outputDataFlow);
 		runningDataflow = dataflowContainer;
 	}
 
@@ -334,8 +361,8 @@ public class DataflowCluster implements Startable {
 	}
 
 	private SkipperContainer<?> buildSkipperContainer(ClusterContainer clusterContainer,
-			JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
-			String skipperDatabaseAlias) {
+													  JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
+													  String skipperDatabaseAlias) {
 		logger.info("Building skipper container for {}", clusterContainer);
 		SkipperContainer<?> skipperContainer = new SkipperContainer<>(clusterContainer.image);
 		skipperContainer.withExposedPorts(SKIPPER_PORT);
@@ -395,8 +422,8 @@ public class DataflowCluster implements Startable {
 	}
 
 	private DataflowContainer<?> buildDataflowContainer(ClusterContainer clusterContainer,
-			JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
-			SkipperContainer<?> skipperContainer, String dataflowDatabaseAlias, String skipperDatabaseAlias) {
+														JdbcDatabaseContainer<?> databaseContainer, GenericContainer<?> oauthContainer,
+														SkipperContainer<?> skipperContainer, String dataflowDatabaseAlias, String skipperDatabaseAlias) {
 		logger.info("Building dataflow container for {}", clusterContainer);
 		DataflowContainer<?> dataflowContainer = new DataflowContainer<>(clusterContainer.image);
 		dataflowContainer.withExposedPorts(DATAFLOW_PORT);
@@ -458,7 +485,9 @@ public class DataflowCluster implements Startable {
 
 	public static class ClusterContainer {
 		String id;
+
 		String image;
+
 		String tag;
 
 		ClusterContainer(String id, String image, String tag) {

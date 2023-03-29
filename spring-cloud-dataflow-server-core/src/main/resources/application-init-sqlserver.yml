@@ -11,4 +11,5 @@ spring:
         - classpath*:/schemas/sqlserver/V2-dataflow-after.sql
         - classpath*:/schemas/sqlserver/V3-dataflow.sql
         - classpath*:/schemas/sqlserver/V4-dataflow.sql
+        - classpath*:/schemas/sqlserver/V4_1-dataflow.sql
         - classpath*:/schemas/sqlserver/V5-dataflow.sql

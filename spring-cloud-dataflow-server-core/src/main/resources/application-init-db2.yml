@@ -12,3 +12,4 @@ spring:
         - classpath*:/schemas/db2/V3-dataflow.sql
         - classpath*:/schemas/db2/V4-dataflow.sql
         - classpath*:/schemas/db2/V5-dataflow.sql
+        - classpath*:/schemas/db2/V6-dataflow.sql

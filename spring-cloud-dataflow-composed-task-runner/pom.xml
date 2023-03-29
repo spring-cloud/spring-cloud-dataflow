@@ -158,7 +158,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<imageName>springcloud/${project.name}:${project.version}</imageName>
+					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
 				</configuration>
 			</plugin>
 		</plugins>
