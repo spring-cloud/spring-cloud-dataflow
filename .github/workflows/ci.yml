@@ -11,7 +11,7 @@ jobs:
     if: github.repository_owner == 'spring-cloud'
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v2
