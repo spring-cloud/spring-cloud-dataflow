@@ -56,7 +56,14 @@ jobs:
           -Pfull \
           -U -B
         jfrog rt build-publish
-
+    - name: Capture Test Results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: '**/target/surefire-reports/**/*.*'
+        retention-days: 7
+        if-no-files-found: ignore
     # build and publish images via composite action
     - name: Build and Publish Images
       uses: ./.github/actions/build-images
