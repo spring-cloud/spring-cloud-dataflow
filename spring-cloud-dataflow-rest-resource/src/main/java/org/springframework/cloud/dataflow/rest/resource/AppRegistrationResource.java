@@ -135,7 +135,7 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param versions all the registered versions of this application
 	 * @param label the label name of the application
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, AppBootSchemaVersion bootVersion, Boolean defaultVersion, HashSet<String> versions, String label) {
+	public AppRegistrationResource(String name, String type, String version, String uri, AppBootSchemaVersion bootVersion, Boolean defaultVersion, Set<String> versions, String label) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
