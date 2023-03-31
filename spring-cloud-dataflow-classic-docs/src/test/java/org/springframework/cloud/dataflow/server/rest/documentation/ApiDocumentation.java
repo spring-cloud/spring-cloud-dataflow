@@ -119,6 +119,9 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks.  The results can be filtered to show the platforms that support scheduling by adding a request parameter of 'schedulesEnabled=true"),
 				linkWithRel("tasks/logs").description("Retrieve the task application log"),
 
+				linkWithRel("schema/versions").description("List of Spring Boot related schemas"),
+				linkWithRel("schema/targets").description("List of schema targets"),
+
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
 				linkWithRel("streams/validation").description("Provides the validation for a stream definition"),

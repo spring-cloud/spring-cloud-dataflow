@@ -30,7 +30,8 @@ import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,17 +62,18 @@ import static org.mockito.Mockito.when;
  **/
 @ActiveProfiles("cloud")
 @SpringBootTest(
-		classes = { DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class },
+		classes = {DataFlowServerApplication.class, CloudFoundrySchedulerTests.TestConfig.class},
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		properties = {
 				"spring.cloud.dataflow.features.schedules-enabled=true",
-                "spring.cloud.kubernetes.enabled=false",
+				"spring.cloud.kubernetes.enabled=false",
 				"VCAP_SERVICES={}",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.url=https://localhost",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.org=org",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
 		})
+@RunWith(SpringRunner.class)
 public class CloudFoundrySchedulerTests {
 
 	@Autowired

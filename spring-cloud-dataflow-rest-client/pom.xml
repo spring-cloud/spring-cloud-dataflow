@@ -9,6 +9,9 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-rest-client</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.security</groupId>

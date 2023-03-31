@@ -9,6 +9,9 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-platform-kubernetes</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

@@ -10,6 +10,10 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-server-core</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+		<forkCount>0.5C</forkCount>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>io.micrometer</groupId>

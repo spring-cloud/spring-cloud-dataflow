@@ -10,6 +10,9 @@
 	</parent>
 	<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -93,6 +96,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>

@@ -93,6 +93,9 @@ public class RootController {
 		root.add(linkTo(UiController.class).withRel("dashboard"));
 		root.add(linkTo(AuditRecordController.class).withRel("audit-records"));
 
+		root.add(linkTo(methodOn(SchemaController.class).getVersions()).withRel("schema/versions"));
+		root.add(linkTo(methodOn(SchemaController.class).getTargets()).withRel("schema/targets"));
+
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));
@@ -133,9 +136,8 @@ public class RootController {
 			root.add(linkTo(methodOn(StreamLogsController.class).getLog(null)).withRel("streams/logs/{streamName}"));
 			root.add(linkTo(methodOn(StreamLogsController.class).getLog(null, null)).withRel("streams/logs/{streamName}/{appName}"));
 		}
+
 		if (featuresProperties.isTasksEnabled()) {
-			root.add(linkTo(methodOn(SchemaController.class).getVersions()).withRel("schema/versions"));
-			root.add(linkTo(methodOn(SchemaController.class).getTargets()).withRel("schema/targets"));
 
 			root.add(entityLinks.linkToCollectionResource(LauncherResource.class).withRel("tasks/platforms"));
 

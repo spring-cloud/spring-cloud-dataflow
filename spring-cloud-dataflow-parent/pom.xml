@@ -52,6 +52,11 @@
 				<version>1.33</version>
 			</dependency>
 			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>1.5.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-oauth2-client</artifactId>
 				<version>${spring-security.version}</version>
@@ -307,8 +312,6 @@
 					<excludes>
 						<exclude>**/Abstract*.java</exclude>
 					</excludes>
-					<!-- see https://stackoverflow.com/questions/18107375/getting-skipping-jacoco-execution-due-to-missing-execution-data-file-upon-exec -->
-					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

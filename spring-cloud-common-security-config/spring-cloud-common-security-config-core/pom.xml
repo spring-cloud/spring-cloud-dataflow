@@ -9,6 +9,9 @@
 	</parent>
 	<artifactId>spring-cloud-common-security-config-core</artifactId>
 	<packaging>jar</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.security</groupId>

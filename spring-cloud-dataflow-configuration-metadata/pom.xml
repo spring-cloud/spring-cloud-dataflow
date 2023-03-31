@@ -10,6 +10,7 @@
 	<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<failIfNoTests>true</failIfNoTests>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -63,6 +64,11 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -18,15 +18,18 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.List;
 
-
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.test.context.ActiveProfiles;
-
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,14 +38,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  **/
 @ActiveProfiles("kubernetes")
 @SpringBootTest(
-        classes = { DataFlowServerApplication.class },
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = {
-                "spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
-                "spring.cloud.kubernetes.client.namespace=default",
-                "kubernetes_service_host=foo",
-                "spring.cloud.dataflow.features.schedules-enabled=true"
-        })
+		classes = {DataFlowServerApplication.class},
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = {
+				"spring.cloud.dataflow.task.platform.kubernetes.accounts[k8s].namespace=default",
+				"spring.cloud.kubernetes.client.namespace=default",
+				"kubernetes_service_host=foo",
+				"spring.cloud.dataflow.features.schedules-enabled=true"
+		})
+@RunWith(SpringRunner.class)
 public class KubernetesSchedulerTests {
 
 	@Autowired
@@ -53,7 +57,7 @@ public class KubernetesSchedulerTests {
 
 	@Test
 	public void schedulerServiceCreated() {
-		for (TaskPlatform taskPlatform: taskPlatforms) {
+		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");
 			}

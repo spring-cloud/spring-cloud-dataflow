@@ -8,6 +8,9 @@
 	</parent>
 	<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 	<packaging>pom</packaging>
+	<properties>
+		<failIfNoTests>true</failIfNoTests>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

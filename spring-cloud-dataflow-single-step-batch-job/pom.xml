@@ -3,31 +3,20 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.10</version>
-		<relativePath/>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-dataflow-parent</artifactId>
+		<version>2.11.0-SNAPSHOT</version>
+		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
-	<groupId>org.springframework.cloud</groupId>
+
 	<artifactId>spring-cloud-dataflow-single-step-batch-job</artifactId>
-	<version>2.11.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>1.8</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<failIfNoTests>true</failIfNoTests>
 	</properties>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-parent</artifactId>
-				<version>2.11.0-SNAPSHOT</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -4,10 +4,10 @@
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.10</version>
-		<relativePath/>
+		<groupId>org.springframework.cloud</groupId>
+		<artifactId>spring-cloud-dataflow-parent</artifactId>
+		<version>2.11.0-SNAPSHOT</version>
+		<relativePath>../../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<version>2.11.0-SNAPSHOT</version>
 	<artifactId>spring-cloud-dataflow-tasklauncher-sink-rabbit</artifactId>
@@ -18,18 +18,8 @@
 		<skipTests>true</skipTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<failIfNoTests>true</failIfNoTests>
 	</properties>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dataflow-parent</artifactId>
-				<version>2.11.0-SNAPSHOT</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -61,6 +51,13 @@
 				<configuration>
 					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
 				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.cloud</groupId>
@@ -98,13 +95,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>${skipTests}</skipTests>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

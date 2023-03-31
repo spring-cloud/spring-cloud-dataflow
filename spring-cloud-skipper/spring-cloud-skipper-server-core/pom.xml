@@ -13,6 +13,8 @@
 
 	<properties>
 		<cloudfoundry-java-lib.version>2.23.0.RELEASE</cloudfoundry-java-lib.version>
+		<failIfNoTests>true</failIfNoTests>
+		<forkCount>0.5C</forkCount>
 	</properties>
 
 	<dependencies>
