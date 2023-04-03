@@ -1,39 +1,46 @@
 #!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 function register_app() {
-  set +e
-  echo "Registering $1 as $2"
-  wget -q -O- "$DATAFLOW_URL/apps/$1" --post-data="uri=$2"
-  RC=$?
-  if ((RC > 0)); then
-    echo "Error registering $1: $RC"
-  fi
+    set +e
+    echo "Registering $1 as $2"
+    wget -q -O- "$DATAFLOW_URL/apps/$1" --post-data="uri=$2"
+    RC=$?
+    if ((RC > 0)); then
+        echo "Error registering $1: $RC"
+    fi
 }
-if  [ "$1" = "" ]; then
-  echo "Arguments: <broker> [stream-applications-version]"
-  echo "  broker: Should be one of rabbitmq or kafka"
-  echo "  stream-applications-version: Optional. Use 2021.1.2 for latest release."
-  exit 1
+if [ "$1" = "" ]; then
+    echo "Arguments: <broker> [stream-applications-version]"
+    echo "  broker: Should be one of rabbitmq or kafka"
+    echo "  stream-applications-version: Optional. Use 2021.1.2 for latest release."
+    exit 1
 fi
-
+BROKER=$1
 if [ "$2" != "" ]; then
-  STREAM_APPS_VERSION=$2
+    STREAM_APPS_VERSION=$2
 fi
 if [ "$BROKER" == "kafka" ]; then
-  BROKER_NAME=kafka
+    BROKER_NAME=kafka
 else
-  # unfortunately different in docker image names and registration link.
-  BROKER_NAME=rabbit
-fi  
+    # unfortunately different in docker image names and registration link.
+    BROKER_NAME=rabbit
+fi
 
 if [ "$STREAM_APPS_VERSION" = "" ]; then
-  STREAM_URI="https://dataflow.spring.io/$BROKER-docker-latest"
+    STREAM_URI="https://dataflow.spring.io/$BROKER-docker-latest"
+elif [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
+    STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
+    META_DATA="https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
+    echo "Downloading $META_DATA"
+    curl -o maven-metadata.xml -s $META_DATA
+    DL_TS=$(xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//')
+    STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
+    STREAM_URI="https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
-  STREAM_APPS_VERSION=2021.1.2
-  STREAM_URI=https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER-docker
+    STREAM_URI=https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER-docker
 fi
 if [ "$DATAFLOW_URL" = "" ]; then
-  source $SCDIR/export-dataflow-ip.sh
+    source $SCDIR/export-dataflow-ip.sh
 fi
 
 echo "Registering Stream applications at $DATAFLOW_URL using $STREAM_URI"
