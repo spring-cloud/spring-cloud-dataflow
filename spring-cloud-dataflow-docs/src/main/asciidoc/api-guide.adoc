@@ -2100,7 +2100,7 @@ The following topics provide more details:
 [[api-guide-resources-task-executions-current-count-request-structure]]
 ===== Request Structure
 
-include::{snippets}/task-executions-documentation/launch-task-current-count/http-request.adoc[]
+include::{snippets}/task-executions-documentation/get-task-current-count/http-request.adoc[]
 
 [[api-guide-resources-task-executions-current-count-request-parameters]]
 ===== Request Parameters
@@ -2110,12 +2110,12 @@ There are no request parameters for this endpoint.
 [[api-guide-resources-task-executions-current-count-example-request]]
 ===== Example Request
 
-include::{snippets}/task-executions-documentation/launch-task-current-count/curl-request.adoc[]
+include::{snippets}/task-executions-documentation/get-task-current-count/curl-request.adoc[]
 
 [[api-guide-resources-task-executions-current-count-response-structure]]
 ===== Response Structure
 
-include::{snippets}/task-executions-documentation/launch-task-current-count/http-response.adoc[]
+include::{snippets}/task-executions-documentation/get-task-current-count/http-response.adoc[]
 
 
 [[api-guide-resources-job-executions]]
