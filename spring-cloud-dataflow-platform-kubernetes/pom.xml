@@ -11,6 +11,7 @@
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
+		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -33,6 +34,7 @@
 		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-client</artifactId>
+			<version>${kubernetes-fabric8-client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
