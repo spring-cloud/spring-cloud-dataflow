@@ -66,6 +66,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 /**
  * Controller for operations on
  * {@link org.springframework.cloud.task.repository.TaskExecution}. This includes
@@ -77,6 +80,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Christian Tzolov
  * @author David Turanski
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/tasks/executions")
@@ -344,12 +348,17 @@ public class TaskExecutionController {
 		@Override
 		public TaskExecutionResource toModel(TaskJobExecutionRel taskJobExecutionRel) {
 			// TODO add schemaVersionTarget queryParam
-			return createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
+			TaskExecutionResource resource = createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
+			resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+			return resource;
 		}
 
 		@Override
 		public TaskExecutionResource instantiateModel(TaskJobExecutionRel taskJobExecutionRel) {
-			return new TaskExecutionResource(taskJobExecutionRel);
+			// TODO add schemaVersionTarget queryParam
+			TaskExecutionResource resource = new TaskExecutionResource(taskJobExecutionRel);
+			resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+			return resource;
 		}
 	}
 
