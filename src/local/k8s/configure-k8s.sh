@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 bold="\033[1m"
 dim="\033[2m"
@@ -15,10 +16,14 @@ set -e
 if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
-K8S_VERSION=1.24.10
+if [ "$1" != "" ]; then
+    export K8S_VERSION="$1"
+else
+    export K8S_VERSION="1.24.10"
+fi
 case "$K8S_DRIVER" in
 "kind")
-  echo "Creating kind cluster"
+  echo "Creating kind cluster: $K8S_VERSION"
   kind create cluster --image "kindest/node:v$K8S_VERSION"
   ;;
 "gke")
@@ -38,7 +43,7 @@ case "$K8S_DRIVER" in
   fi
   ;;
 *)
-  echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_K8S_VERSION"
+  echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"
   # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion or hyperkit
   minikube start --cpus=8 --memory=16g "--driver=$K8S_DRIVER" "--kubernetes-version=$K8S_VERSION"
   echo -e "Please run ${bold}'minikube tunnel'${end} in a separate shell to ensure a LoadBalancer is active."
