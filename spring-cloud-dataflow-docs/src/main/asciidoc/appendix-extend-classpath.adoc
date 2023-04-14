@@ -34,7 +34,7 @@ docker build -f Dockerfile -t "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
 docker push "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
 ....
 
-NOTE: As pointed out above, the `Dockerfile` lives in the `spring-cloud-dataflow` repository under `src/templates/add-deps`.
+NOTE: As pointed out above, the `Dockerfile` lives in the `spring-cloud-dataflow` repository under `src/add-deps`.
 
 ==== JAR File
 
