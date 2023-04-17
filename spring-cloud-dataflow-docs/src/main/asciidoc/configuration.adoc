@@ -454,7 +454,87 @@ setting the boolean property `map-oauth-scopes` for your provider to `true` (the
 For example, if your provider's ID is `uaa`, the property would be
 `spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes`.
 
-For more details, see the chapter on <<configuration-security-role-mapping>>.
+[[configuration-security-role-mapping]]
+===== Role Mappings
+
+By default all roles are assigned to users that login to Spring Cloud Data Flow.
+However, you can set the property:
+
+`spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes: true`
+
+This will instruct the underlying `DefaultAuthoritiesExtractor` to map
+OAuth scopes to the respective authorities. The following scopes are supported:
+
+* Scope `dataflow.create` maps to the `CREATE` role
+* Scope `dataflow.deploy` maps to the `DEPLOY` role
+* Scope `dataflow.destroy` maps to the `DESTROY` role
+* Scope `dataflow.manage` maps to the `MANAGE` role
+* Scope `dataflow.modify` maps to the `MODIFY` role
+* Scope `dataflow.schedule` maps to the `SCHEDULE` role
+* Scope `dataflow.view` maps to the `VIEW` role
+
+Additionally you can also map arbitrary scopes to each of the Data Flow roles:
+
+[source,yaml]
+----
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: true                                    # <1>
+              role-mappings:
+                ROLE_CREATE: dataflow.create                            # <2>
+                ROLE_DEPLOY: dataflow.deploy
+                ROLE_DESTROY: dataflow.destoy
+                ROLE_MANAGE: dataflow.manage
+                ROLE_MODIFY: dataflow.modify
+                ROLE_SCHEDULE: dataflow.schedule
+                ROLE_VIEW: dataflow.view
+----
+
+<1> Enables explicit mapping support from OAuth scopes to Data Flow roles
+<2> When role mapping support is enabled, you must provide a mapping for
+all 7 Spring Cloud Data Flow roles *ROLE_CREATE*, *ROLE_DEPLOY*, *ROLE_DESTROY*, *ROLE_MANAGE*, *ROLE_MODIFY*, *ROLE_SCHEDULE*, *ROLE_VIEW*.
+
+[TIP]
+====
+You can assign an OAuth scope to multiple Spring Cloud Data Flow roles, giving you flexible regarding the granularity of your authorization configuration.
+====
+
+[[configuration-security-group-mapping]]
+===== Group Mappings
+
+Mapping roles from scopes has its own problems as it may not be always possible
+to change those in a given identity provider. If it's possible to define group claims
+in a token returned from an identity provider, these can be used as well to
+map into server roles.
+
+====
+[source,yaml]
+----
+spring:
+  cloud:
+    dataflow:
+      security:
+        authorization:
+          provider-role-mappings:
+            uaa:
+              map-oauth-scopes: false
+              map-group-claims: true
+              group-claim: roles
+              group-mappings:
+                ROLE_CREATE: my-group-id
+                ROLE_DEPLOY: my-group-id
+                ROLE_DESTROY: my-group-id
+                ROLE_MANAGE: my-group-id
+                ROLE_MODIFY: my-group-id
+                ROLE_SCHEDULE: my-group-id
+                ROLE_VIEW: my-group-id
+----
+====
 
 You can also customize the role-mapping behavior by providing your own Spring bean definition that
 extends Spring Cloud Data Flow's `AuthorityMapper` interface. In that case,
