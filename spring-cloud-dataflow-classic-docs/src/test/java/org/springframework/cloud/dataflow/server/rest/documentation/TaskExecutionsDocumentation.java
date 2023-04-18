@@ -124,7 +124,8 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task exectuion"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task execution"),
 								subsectionWithPath("platformName").description("The platform selected for the task execution"),
-								subsectionWithPath("_links.self").description("Link to the task execution resource")
+								subsectionWithPath("_links.self").description("Link to the task execution resource"),
+								subsectionWithPath("_links.tasks/logs").description("Link to the task execution logs")
 						)
 				));
 	}
