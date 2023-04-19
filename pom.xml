@@ -75,6 +75,7 @@
 		<semver.version>2.2.0</semver.version>
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
+		<jettison.version>1.5.4</jettison.version>
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -122,6 +123,11 @@
 				<groupId>org.yaml</groupId>
 				<artifactId>snakeyaml</artifactId>
 				<version>1.33</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>${jettison.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
