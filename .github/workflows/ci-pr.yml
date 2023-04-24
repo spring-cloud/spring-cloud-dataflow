@@ -31,3 +31,24 @@ jobs:
     - name: Clean cache
       run: |
         find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+      - name: 'Scanned'
+        shell: bash
+        run: echo "::info ::Scanned"
+  done:
+    runs-on: ubuntu-latest
+    needs: [ scan, build ]
+    steps:
+      - name: 'Done'
+        shell: bash
+        run: echo "::info ::Done"
