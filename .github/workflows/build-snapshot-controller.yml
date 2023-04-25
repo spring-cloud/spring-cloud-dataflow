@@ -59,7 +59,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-local",
-                "ref": "2.8.x",
+                "ref": "main",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
@@ -69,7 +69,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-cloudfoundry",
-                "ref": "2.8.x",
+                "ref": "main",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
@@ -79,7 +79,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer-kubernetes",
-                "ref": "2.8.x",
+                "ref": "main",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
