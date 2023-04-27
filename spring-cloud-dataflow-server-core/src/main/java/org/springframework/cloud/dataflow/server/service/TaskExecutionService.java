@@ -55,6 +55,14 @@ public interface TaskExecutionService {
 	String getLog(String platformName, String taskId);
 
 	/**
+	 * Retrieve logs for the task application.
+	 *
+	 * @param executionId the execution ID that uniquely identifies the task execution.
+	 * @return the logs of the task application.
+	 */
+	String getLog(Long executionId);
+
+	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
 	 * @param ids a set of ids for the task executions to be stopped.

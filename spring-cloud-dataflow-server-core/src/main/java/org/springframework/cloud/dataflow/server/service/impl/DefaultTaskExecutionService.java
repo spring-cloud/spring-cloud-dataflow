@@ -715,6 +715,25 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return result;
 	}
 
+
+	/**
+	 * Return the log content of the task execution identified by the given task execution ID.
+	 * In case of concurrent task executions on Cloud Foundry, the logs of all the concurrent executions are displayed.
+	 * Also, on Cloud Foundry, the task execution log is retrieved only for the latest execution that matches the
+	 * given deployment ID (external execution ID).
+	 * If no platform is specified in the task execution it will assume the platform is the default.
+	 * @param executionId the execution id of the task.
+	 * @return the log of the specified task.
+	 */
+	@Override
+	public String getLog(Long executionId) {
+		Assert.notNull(executionId, "executionId must not be null");
+		Assert.notNull(this.taskExplorer.getTaskExecution(executionId), "Task Execution does not exist for executionId");
+		TaskManifest taskManifest = findTaskManifestById(executionId);
+		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(executionId);
+		return getLog(taskManifest.getPlatformName(), taskExecution.getExternalExecutionId());
+	}
+
 	@Override
 	public void stopTaskExecution(Set<Long> ids) {
 		stopTaskExecution(ids, null);

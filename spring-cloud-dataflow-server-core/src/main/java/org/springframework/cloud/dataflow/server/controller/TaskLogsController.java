@@ -60,4 +60,9 @@ public class TaskLogsController {
 	public ResponseEntity<String> getLog(@PathVariable String taskExternalExecutionId, @RequestParam(required = false, defaultValue = "default") String platformName) {
 		return new ResponseEntity<>(this.taskExecutionService.getLog(platformName, taskExternalExecutionId), HttpStatus.OK);
 	}
+	@RequestMapping(value = "/taskexecutionid/{taskExecutionId}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<String> getLog(@PathVariable Long taskExecutionId) {
+		return new ResponseEntity<>(this.taskExecutionService.getLog(taskExecutionId), HttpStatus.OK);
+	}
 }

@@ -76,6 +76,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String RETRIEVE_LOG = "tasks/logs";
 
+	private static final String RETRIEVE_LOG_TASK_EXECUTION_ID = "tasks/logs/taskexecutionid";
+
 	private final RestTemplate restTemplate;
 
 	private final Link definitionsLink;
@@ -100,6 +102,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link retrieveLogLink;
 
+	private final Link retrieveLogForTaskExecutionIdLink;
+
 	TaskTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
@@ -111,6 +115,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
+		Assert.notNull(resources.getLink(RETRIEVE_LOG_TASK_EXECUTION_ID), "Task Execution Id is required");
 
 		this.dataFlowServerVersion = dataFlowServerVersion;
 
@@ -139,6 +144,7 @@ public class TaskTemplate implements TaskOperations {
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
+		this.retrieveLogForTaskExecutionIdLink = resources.getLink(RETRIEVE_LOG_TASK_EXECUTION_ID).get();
 	}
 
 	@Override
@@ -229,6 +235,13 @@ public class TaskTemplate implements TaskOperations {
 		map.put("taskExternalExecutionId",externalExecutionId);
 		map.put("platformName", platform);
 		return restTemplate.getForObject(retrieveLogLink.expand(map).getHref(), String.class);
+	}
+
+	@Override
+	public String taskExecutionLog(Long executionId) {
+		Map<String,Long> map = new HashMap<>();
+		map.put("taskExecutionId" ,executionId);
+		return restTemplate.getForObject(retrieveLogForTaskExecutionIdLink.expand(map).getHref(), String.class);
 	}
 
 	@Override

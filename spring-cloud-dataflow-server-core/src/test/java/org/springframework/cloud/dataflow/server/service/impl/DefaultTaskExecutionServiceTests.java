@@ -95,13 +95,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -936,14 +935,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void getTaskLog() {
+		public void getTaskLogTest() {
 			String platformName = "test-platform";
 			String taskDefinitionName = "test";
-			String taskDeploymentId = "12345";
-			TaskDeployment taskDeployment = new TaskDeployment();
-			taskDeployment.setPlatformName(platformName);
-			taskDeployment.setTaskDefinitionName(taskDefinitionName);
-			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			TaskDeployment taskDeployment = getTaskDeployment(platformName, taskDefinitionName);
+			String taskDeploymentId = taskDeployment.getTaskDeploymentId();
 			this.launcherRepository.save(new Launcher(platformName, "local", taskLauncher));
 			when(taskLauncher.getLog(taskDeploymentId)).thenReturn("Logs");
 			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
@@ -951,19 +947,54 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void getCFTaskLog() {
+		public void getTaskLogByExecutionTest() {
+			String platformName = "test-platform-execution";
+			String taskDefinitionName = "test";
+			TaskDeployment taskDeployment = getTaskDeployment(platformName, taskDefinitionName);
+			String taskDeploymentId = taskDeployment.getTaskDeploymentId();
+			this.launcherRepository.save(new Launcher(platformName, "local", taskLauncher));
+
+			TaskExecution taskExecution = new TaskExecution(1, 0, "foo", new Date(), new Date(),
+					"", Collections.emptyList(), "", taskDeploymentId, null);
+			this.taskRepository.createTaskExecution(taskExecution);
+			TaskManifest taskManifest = new TaskManifest();
+			taskManifest.setPlatformName(platformName);
+			this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+
+			when(taskLauncher.getLog(taskDeploymentId)).thenReturn("Logs");
+			assertEquals("Logs", this.taskExecutionService.getLog(taskExecution.getExecutionId()));
+		}
+
+		@Test
+		@DirtiesContext
+		public void getTaskLogByInvalidTaskExecutionTest() {
+			assertThatThrownBy(() -> {
+				this.taskExecutionService.getLog(1L);
+			}).isInstanceOf(IllegalArgumentException.class).hasMessage("Task Execution does not exist for executionId");
+		}
+
+		@Test
+		@DirtiesContext
+		public void getCFTaskLogTest() {
 			String platformName = "cf-test-platform";
 			String taskDefinitionName = "test";
-			String taskDeploymentId = "12345";
-			TaskDeployment taskDeployment = new TaskDeployment();
-			taskDeployment.setPlatformName(platformName);
-			taskDeployment.setTaskDefinitionName(taskDefinitionName);
-			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			TaskDeployment taskDeployment = getTaskDeployment(platformName, taskDefinitionName);
+			String taskDeploymentId = taskDeployment.getTaskDeploymentId();
+
 			this.taskDeploymentRepository.save(taskDeployment);
 			this.launcherRepository.save(new Launcher(platformName,
 					TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
 			when(taskLauncher.getLog(taskDefinitionName)).thenReturn("Logs");
 			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId));
+		}
+
+		private TaskDeployment getTaskDeployment(String platformName, String taskDefinitionName) {
+			String taskDeploymentId = "12345";
+			TaskDeployment taskDeployment = new TaskDeployment();
+			taskDeployment.setPlatformName(platformName);
+			taskDeployment.setTaskDefinitionName(taskDefinitionName);
+			taskDeployment.setTaskDeploymentId(taskDeploymentId);
+			return taskDeployment;
 		}
 
 		@Test
@@ -1641,7 +1672,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteAll();
-			assertThat(preDeleteSize - 5, is(equalTo(taskDefinitionRepository.count())));
+			assertThat(preDeleteSize - 5).isEqualTo(taskDefinitionRepository.count());
 		}
 
 		@Test
@@ -1657,7 +1688,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 4, is(equalTo(taskDefinitionRepository.count())));
+			assertThat(preDeleteSize - 4).isEqualTo(taskDefinitionRepository.count());
 		}
 
 		@Test
@@ -1673,7 +1704,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDeleteService.deleteTaskDefinition("deleteTask-BBB");
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			assertThat(preDeleteSize - 3).isEqualTo(taskDefinitionRepository.count());
 		}
 
 		@Test
@@ -1690,7 +1721,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			assertThat(preDeleteSize - 3).isEqualTo(taskDefinitionRepository.count());
 			verifyTaskExistsInRepo("deleteTask-AAA", "AAA", taskDefinitionRepository);
 		}
 
@@ -1706,7 +1737,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			long preDeleteSize = taskDefinitionRepository.count();
 			taskDeleteService.deleteTaskDefinition("deleteTask");
-			assertThat(preDeleteSize - 3, is(equalTo(taskDefinitionRepository.count())));
+			assertThat(preDeleteSize - 3).isEqualTo(taskDefinitionRepository.count());
 		}
 
 		@Test
@@ -1891,8 +1922,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void verifyTaskExistsInRepo(String taskName, String dsl,
 			TaskDefinitionRepository taskDefinitionRepository) {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findById(taskName).get();
-		assertThat(taskDefinition.getName(), is(equalTo(taskName)));
-		assertThat(taskDefinition.getDslText(), is(equalTo(dsl)));
+		assertThat(taskDefinition.getName()).isEqualTo(taskName);
+		assertThat(taskDefinition.getDslText()).isEqualTo(dsl);
 	}
 
 	private static boolean wasTaskDefinitionCreated(String taskName,

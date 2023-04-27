@@ -2965,7 +2965,7 @@ The following topic provides more details:
 [[api-guide-resources-stream-logs-by-task-id]]
 ==== Get the task execution log
 
-To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint by using the HTTP `GET` method..
+To retrieve the logs of the task execution, query the `/tasks/logs/<ExternalTaskExecutionId>` endpoint by using the HTTP `GET` method.
 The following topics provide more details:
 
 * <<api-guide-resources-task-logs-by-task-id-request-structure>>
@@ -2995,6 +2995,33 @@ include::{snippets}/task-logs-documentation/get-logs-by-task-id/curl-request.ado
 ===== Response Structure
 
 include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-response.adoc[]
+
+[[api-guide-resources-task-logs-by-task-executionid]]
+==== Get the task execution log by task execution id
+
+To retrieve the logs of the task execution by the task execution id, query the `/tasks/logs/taskexecutionid/<TaskExecutionId>` endpoint by using the HTTP `GET` method.
+The following topics provide more details:
+
+* <<api-guide-resources-task-logs-by-task-execution-id-request-structure>>
+* <<api-guide-resources-task-logs-by-task-execution-id-example-request>>
+* <<api-guide-resources-task-logs-by-task-execution-id-response-structure>>
+
+
+[[api-guide-resources-task-logs-by-task-execution-id-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-execution-id/http-request.adoc[]
+
+[[api-guide-resources-task-logs-by-task-execution-id-example-request]]
+===== Example Request
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-execution-id/curl-request.adoc[]
+
+
+[[api-guide-resources-task-logs-by-task-execution-id-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-logs-documentation/get-logs-by-task-execution-id/http-response.adoc[]
 
 [[api-guide-openapi]]
 == OpenAPI
