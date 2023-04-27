@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -115,8 +114,8 @@ public class AppRegistryController {
 			ForkJoinPool forkJoinPool,
 			StreamDefinitionService streamDefinitionService,
 			AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
-		this.streamDefinitionRepository = streamDefinitionRepository.isPresent() ? streamDefinitionRepository.get() : null;
-		this.streamService = streamService.isPresent() ? streamService.get() : null;
+		this.streamDefinitionRepository = streamDefinitionRepository.orElse(null);
+		this.streamService = streamService.orElse(null);
 		this.appRegistryService = appRegistryService;
 		this.metadataResolver = metadataResolver;
 		this.forkJoinPool = forkJoinPool;
@@ -248,7 +247,7 @@ public class AppRegistryController {
 		try {
 			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
 					metadataUri != null ? new URI(metadataUri) : null, bootVersion);
-			prefetchMetadata(Arrays.asList(registration));
+			prefetchMetadata(Collections.singletonList(registration));
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
@@ -324,42 +323,44 @@ public class AppRegistryController {
 		if (this.streamDefinitionRepository == null || this.streamService == null) {
 			return null;
 		}
+		// TODO inject this or ask StreamDeployment/Service to give us a desered map instead of sered string
+		ObjectMapper objectMapper = new ObjectMapper();
 		Iterable<StreamDefinition> streamDefinitions = streamDefinitionRepository.findAll();
 		for (StreamDefinition streamDefinition : streamDefinitions) {
 			StreamDeployment streamDeployment = this.streamService.info(streamDefinition.getName());
 			for (StreamAppDefinition streamAppDefinition : this.streamDefinitionService.getAppDefinitions(streamDefinition)) {
-				final String streamAppName = streamAppDefinition.getRegisteredAppName();
-				final ApplicationType streamAppType = streamAppDefinition.getApplicationType();
-				if (appType != streamAppType) {
+				if (appType != streamAppDefinition.getApplicationType()) {
 					continue;
 				}
-				Map<String, Map<String, String>> streamDeploymentPropertiesMap;
-				String streamDeploymentPropertiesString = streamDeployment.getDeploymentProperties();
-				if (!StringUtils.hasText(streamDeploymentPropertiesString)) {
+				if (!appName.equals(streamAppDefinition.getRegisteredAppName())) {
 					continue;
 				}
-				ObjectMapper objectMapper = new ObjectMapper();
-				try {
-					streamDeploymentPropertiesMap = objectMapper.readValue(streamDeploymentPropertiesString,
-							new TypeReference<Map<String, Map<String, String>>>() {
-							});
+				String streamDeploymentPropsJson = streamDeployment.getDeploymentProperties();
+				if (!StringUtils.hasText(streamDeploymentPropsJson)) {
+					continue;
 				}
-				catch (IOException e) {
-					throw new RuntimeException("Can not deserialize Stream Deployment Properties JSON '"
-							+ streamDeploymentPropertiesString + "'");
+				Map<String, Map<String, String>> deploymentPropsByAppName = deploymentPropsFromJson(streamDeploymentPropsJson, objectMapper);
+				Map<String, String> deploymentProps = deploymentPropsByAppName.get(appName);
+				if (deploymentProps == null) {
+					continue;
 				}
-				if (streamDeploymentPropertiesMap.containsKey(appName)) {
-					Map<String, String> appDeploymentProperties = streamDeploymentPropertiesMap.get(streamAppName);
-					if (appDeploymentProperties.containsKey(SkipperStream.SKIPPER_SPEC_VERSION)) {
-						String version = appDeploymentProperties.get(SkipperStream.SKIPPER_SPEC_VERSION);
-						if (version != null && version.equals(appVersion)) {
-							return streamDefinition.getName();
-						}
-					}
+				String deployedAppVersion = deploymentProps.get(SkipperStream.SKIPPER_SPEC_VERSION);
+				if (appVersion.equals(deployedAppVersion)) {
+					return streamDefinition.getName();
 				}
 			}
 		}
 		return null;
+	}
+
+	private Map<String, Map<String, String>> deploymentPropsFromJson(String streamDeploymentPropsJson, ObjectMapper objectMapper) {
+		try {
+			return objectMapper.readValue(streamDeploymentPropsJson, new TypeReference<Map<String, Map<String, String>>>() {});
+		}
+		catch (IOException e) {
+			throw new RuntimeException(String.format("Can not deserialize stream deployment properties JSON '%s'",
+					streamDeploymentPropsJson));
+		}
 	}
 
 	@Deprecated
