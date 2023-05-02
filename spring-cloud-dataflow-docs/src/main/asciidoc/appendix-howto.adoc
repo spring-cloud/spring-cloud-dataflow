@@ -14,9 +14,11 @@ We are also more than happy to extend this section. If you want to add a "`how-t
 You can set the Maven properties, such as the local Maven repository location, remote Maven repositories, authentication credentials, and proxy server properties through command-line properties when you start the Data Flow server.
 Alternatively, you can set the properties by setting the `SPRING_APPLICATION_JSON` environment property for the Data Flow server.
 
-The remote Maven repositories need to be configured explicitly if the applications are resolved by using the Maven repository, except for a `local` Data Flow server.
-The other Data Flow server implementations (which use Maven resources for application artifacts resolution) have no default value for remote repositories.
-The `local` server has `https://repo.spring.io/libs-snapshot` as the default remote repository.
+The remote Maven repositories need to be configured explicitly if the applications are resolved by using the Maven repository.
+The one exception to this rule is for the `local` Data Flow server installation, which already has the `https://repo.maven.apache.org/maven2` and `https://repo.spring.io/snapshot` remote repositories pre-configured.
+The other (`non-local`) server installations have no default value for remote repositories.
+
+NOTE: If you configure your own remote repositories, be sure to add Maven central (`https://repo.maven.apache.org/maven2`) as it is not automatically added for you.
 
 To pass the properties as command-line options, run the server with a command similar to the following:
 

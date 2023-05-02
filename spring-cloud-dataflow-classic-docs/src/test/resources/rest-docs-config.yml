@@ -20,7 +20,10 @@ spring:
       org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration,
       org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration,
       org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration
+
 maven:
   remoteRepositories:
+    mavenCentral:
+      url: https://repo.maven.apache.org/maven2
     springRepo:
-      url: https://repo.spring.io/libs-snapshot
+      url: https://repo.spring.io/snapshot

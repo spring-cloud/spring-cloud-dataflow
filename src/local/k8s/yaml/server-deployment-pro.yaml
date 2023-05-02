@@ -89,7 +89,7 @@ spec:
               value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
               # Add Maven repo for metadata artifact resolution for all stream apps
             - name: SPRING_APPLICATION_JSON
-              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/libs-snapshot\"} } } }"
+              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"central\": { \"url\": \"https://repo.maven.apache.org/maven2\" }, \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
