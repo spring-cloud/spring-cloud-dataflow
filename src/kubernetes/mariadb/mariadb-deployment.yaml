@@ -21,7 +21,7 @@ spec:
           - name: MARIADB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: mariadb-root-password
+                key: database-password
                 name: mariadb
           - name: MARIADB_DATABASE
             value: 'dataflow'

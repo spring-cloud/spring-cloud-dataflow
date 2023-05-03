@@ -3,40 +3,5 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:library", "library")
 #@ load("monitoring.star", "grafana_enabled")
-#@ load("monitoring.star", "prometheus_enabled")
 #@ load("monitoring.star", "prometheus_rsocket_proxy_enabled")
 
-#@ def grafana_values():
-name: grafana
-image: #@ data.values.scdf.feature.monitoring.grafana.image
-service:
-  spec:
-    type: #@ data.values.scdf.feature.monitoring.grafana.service.type
-registrySecretRef: #@ data.values.scdf.registry.secret.ref
-#@ end
-
-#@ def prometheus_values():
-name: prometheus
-image: #@ data.values.scdf.feature.monitoring.prometheus.image
-registrySecretRef: #@ data.values.scdf.registry.secret.ref
-#@ end
-
-#@ def prometheus_rsocket_proxy_values():
-name: prometheus-rsocket-proxy
-image: #@ data.values.scdf.feature.monitoring.prometheusRsocketProxy.image
-registrySecretRef: #@ data.values.scdf.registry.secret.ref
-#@ end
-
-#@ def monitoring_config():
-#@ if grafana_enabled():
---- #@ template.replace(overlay.apply(library.get("grafana").with_data_values(grafana_values()).eval()))
-#@ end
-
-#@ if prometheus_enabled():
---- #@ template.replace(overlay.apply(library.get("prometheus").with_data_values(prometheus_values()).eval()))
-#@ end
-
-#@ if prometheus_rsocket_proxy_enabled():
---- #@ template.replace(overlay.apply(library.get("prometheus-rsocket-proxy").with_data_values(prometheus_rsocket_proxy_values()).eval()))
-#@ end
-#@ end

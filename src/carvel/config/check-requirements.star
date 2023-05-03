@@ -1,7 +1,6 @@
 load("@ytt:data", "data")
 load("@ytt:assert", "assert")
 
-db_types = {"postgres": "postgres", "mariadb": "mariadb"}
 binder_types = {"rabbit": "rabbit", "kafka": "kafka"}
 
 def non_empty_string(value):
@@ -23,12 +22,8 @@ def validate():
     errors.append("Either scdf.ctr.image.tag or scdf.ctr.image.digest must be defined")
   end
 
-  if db_types.get(data.values.scdf.deploy.database.type) == None:
-    errors.append("Illegal scdf.deploy.database.type")
-  end
-
-  if binder_types.get(data.values.scdf.deploy.binder.type) == None:
-    errors.append("Illegal scdf.deploy.binder.type")
+  if binder_types.get(data.values.scdf.binder.type) == None:
+    errors.append("Illegal scdf.binder.type")
   end
 
   if len(errors) > 0:

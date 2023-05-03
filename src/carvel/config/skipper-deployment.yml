@@ -3,7 +3,7 @@
 #@ load("skipper.star", "skipper_container_env")
 #@ load("skipper.star", "has_image_pull_secrets")
 #@ load("skipper.star", "image_pull_secrets")
-#@ load("binder/binder.star", "rabbitmq_enabled")
+#@ load("skipper.star", "skipper_has_password")
 #@ load("common/common.star", "non_empty_string")
 
 apiVersion: apps/v1
@@ -33,12 +33,9 @@ spec:
         - name: config
           mountPath: /workspace/config
           readOnly: true
+        #@ if skipper_has_password():
         - name: database
           mountPath: /workspace/runtime/secrets/database
-          readOnly: true
-        #@ if rabbitmq_enabled():
-        - name: rabbitmq
-          mountPath: /workspace/runtime/secrets/rabbitmq
           readOnly: true
         #@ end
         ports:
@@ -86,11 +83,8 @@ spec:
           items:
           - key: application.yaml
             path: application.yaml
+      #@ if skipper_has_password():
       - name: database
         secret:
           secretName: db-skipper
-      #@ if rabbitmq_enabled():
-      - name: rabbitmq
-        secret:
-          secretName: rabbitmq
       #@ end

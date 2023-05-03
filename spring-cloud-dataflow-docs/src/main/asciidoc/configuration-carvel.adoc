@@ -1,0 +1,186 @@
+:source-highlighter: rouge
+= Deploy Spring Cloud Data Flow using Carvel
+
+== Required Tools
+
+* `kubectl` - Kubernetes CLI
+* `carvel` - Packaging and Deployment tools
+
+Carvel CLI can be installed using:
+
+[source,shell]
+....
+wget -O- https://carvel.dev/install.sh | bash
+# or with curl...
+curl -L https://carvel.dev/install.sh | bash
+....
+
+Alternative following the instructions at the bottom of the home page at link:https://carvel.dev/[carvel.dev]
+
+Zip file with scripts or follow the instructions below to create the scripts.
+
+*If you don't have the zip bundle these file can be created by executing the following scripts in a Bash or similar shell, from the section "Create scripts and other files"*
+
+=== Scripts
+
+These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
+
+The following commandline utilities are also used:
+
+* `jq` - lightweight JSON parser
+* `yq` - lightweight YAML parser
+* `wget` - Invoke http requests.
+* `dirname` provides the directory part of a filename.
+* `readlink` provides absolute path of a relative link.
+
+NOTE: Some of these utilities are not installed in macOS by default but will be available from MacPorts or HomeBrew.
+
+
+
+[cols="3m,3,6"]
+|===
+|Name | Arguments |Descriptions
+
+| start-deploy.sh
+| <broker> [database] <namespace> [scdf-type]
+| Configures environmental variables needs for the reset of the scripts
+
+| prepare-cluster.sh
+| N/A
+| Installs cert-manager, secretgen-controller and kapp-controller
+
+| carvel-use-template.sh
+| N/A
+| Creates scdf-values.yml based on scdf-pro-values.yml or scdf-oss-values.yml
+
+| setup-scdf-repo.sh
+| N/A
+| Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| deploy-scdf.sh
+| [scdf-type] (oss, pro)
+| Deploys the application using the package and the relevant values file.
+If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| update-scdf.sh
+| [scdf-type] (oss, pro)
+| Updated the deployed application using a modified values file.
+If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+
+| export-dataflow-ip.sh
+| N/A
+| Will print the URL to access dataflow. If you use `source ./export-dataflow-ip.sh` it will export `DATAFLOW_URL` to be used by `register-apps.sh`
+
+| register-apps.sh
+| <broker> [stream-application-version]
+| _broker_ must be one of rabbit or kafka.
+_stream-application-version_ is optional and will install the latest version. The latest version is 2021.1.2
+|===
+
+NOTE: Take note that the registration of application in the _pro_ version can take a few minutes since it retrieves all version information and metadata upfront.
+
+== Prepare Configuration parameters
+
+Setup the various environmental variables.
+
+In order to use a private container registry you must configure `REGISTRY=<private-registry/repo-name>`. This will be used to prefix the carvel repo and package.
+
+
+[source,shell]
+....
+source ./start-deploy.sh <broker> [database] <namespace> [scdf-type]
+....
+
+Where:
+
+* `broker` is one of rabbitmq or kafka
+* `database` is one of postgresql or mariadb. This is only required if local database deployment will be used.
+* `namespace` A valid Kubernetes namespace other than `default`
+* `scdf-type` One of oss or pro. oss is the default.
+
+== Prepare Configuration file
+
+Create a file name `scdf-values.yml` by executing:
+
+[source,shell]
+....
+./carvel-use-template.sh
+....
+
+Edit the file as needed to configure the deployment.
+
+_Uses environmental variable previously selected._
+
+== Prepare cluster and add repository
+
+Login to docker and optionally registry.pivotal.io for Spring Cloud Data Flow Pro.
+
+[source,shell]
+....
+# When deploying SCDF Pro.
+export TANZU_DOCKER_USERNAME="<tanzu-net-username>"
+export TANZU_DOCKER_PASSWORD="<tanzu-net-password>"
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.pivotal.io
+
+# Always required to ensure you don't experience rate limiting with Docker HUB
+export DOCKER_HUB_USERNAME="<docker-hub-username>"
+export DOCKER_HUB_PASSWORD="<docker-hub-password>"
+docker login --username DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD index.docker.io
+....
+
+Install carvel kapp-controller, secretgen-controller and certmanager
+
+[source,shell]
+....
+./prepare-cluster.sh
+....
+
+[source,shell]
+....
+./setup-scdf-repo.sh
+....
+
+== Install supporting services
+
+In a production environment you should be using supported database and broker services or operators along with shared observability tools.
+
+For local development or demonstration the following can be used to install database, broker and prometheus.
+
+=== Deploy local database.
+
+[source,shell]
+....
+./deploy-local-database.sh [database]  # <1>
+....
+<1> Optional `database` may be one of postgresql or mariadb. Default is postgresql or configure in `DATABASE` using `start-deploy.sh`
+
+NOTE: This script updates `scdf-values.yml` with the correct secret name.
+
+=== Deploy local message broker.
+[source,shell]
+....
+./deploy-local-broker.sh
+....
+
+=== Deploy local prometheus.
+[source,shell]
+....
+./deploy-local-prometheus.sh
+....
+
+== Deploy Spring Cloud Data Flow
+
+[source,shell]
+....
+./deploy-scdf.sh
+# This should display Dataflow URL: <url-to-access-dataflow>
+source ./export-dataflow-ip.sh
+./register-apps.sh
+....
+
+== Update deployed application.
+
+You can modify the values file used during installation and then update the deployment using `update-scdf.sh`
+
+
+

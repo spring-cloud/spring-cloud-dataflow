@@ -13,7 +13,7 @@ describe('ordering', () => {
   it('should have correct kapp change ordering', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=postgres']
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
     expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
@@ -29,21 +29,11 @@ describe('ordering', () => {
     expect(findAnnotation(skipperDeployment, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/skipper');
     expect(findAnnotation(dataflowService, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/server');
     expect(findAnnotation(dataflowDeployment, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/server');
-    expect(findAnnotation(skipperDbService, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/db');
-    expect(findAnnotation(dataflowDbService, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/db');
 
-    expect(findAnnotations(skipperService, 'kapp.k14s.io/change-rule')).toContainAnyValues([
-      'upsert after upserting scdf.tanzu.vmware.com/db'
-    ]);
-    expect(findAnnotations(skipperDeployment, 'kapp.k14s.io/change-rule')).toContainAnyValues([
-      'upsert after upserting scdf.tanzu.vmware.com/db'
-    ]);
     expect(findAnnotations(dataflowService, 'kapp.k14s.io/change-rule')).toContainAnyValues([
-      'upsert after upserting scdf.tanzu.vmware.com/db',
       'upsert after upserting scdf.tanzu.vmware.com/skipper'
     ]);
     expect(findAnnotations(dataflowDeployment, 'kapp.k14s.io/change-rule')).toContainAnyValues([
-      'upsert after upserting scdf.tanzu.vmware.com/db',
       'upsert after upserting scdf.tanzu.vmware.com/skipper'
     ]);
   });

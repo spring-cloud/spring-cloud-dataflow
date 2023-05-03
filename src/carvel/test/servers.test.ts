@@ -102,7 +102,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
@@ -185,7 +185,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
@@ -237,7 +237,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
@@ -280,13 +280,14 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
         'scdf.binder.kafka.zk.port=1235',
         'scdf.server.config.foo=bar',
-        'scdf.feature.monitoring.grafana.enabled=true'
+        'scdf.feature.monitoring.grafana.enabled=true',
+        'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true'
       ]
     });
     expect(result.success, result.stderr).toBeTruthy();
@@ -323,7 +324,7 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
@@ -442,13 +443,14 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
         'scdf.binder.kafka.zk.port=1235',
         'scdf.server.config.foo=bar',
-        'scdf.feature.monitoring.grafana.enabled=true'
+        'scdf.feature.monitoring.grafana.enabled=true',
+        'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true'
       ]
     });
     expect(result.success, result.stderr).toBeTruthy();
@@ -488,15 +490,13 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
+        'scdf.binder.type=kafka',
         'scdf.binder.kafka.broker.host=localhost',
         'scdf.binder.kafka.broker.port=1234',
         'scdf.binder.kafka.zk.host=localhost',
         'scdf.binder.kafka.zk.port=1235',
         'scdf.server.config.foo=bar',
         'scdf.feature.monitoring.grafana.enabled=true',
-        'scdf.feature.monitoring.grafana.image.tag=1.2.3',
-        'scdf.feature.monitoring.prometheus.enabled=true',
         'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true'
       ]
     });
@@ -526,8 +526,8 @@ describe('servers', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=postgres',
         'scdf.feature.monitoring.grafana.enabled=true',
+        'scdf.feature.monitoring.prometheusRsocketProxy.enabled=true',
         'scdf.server.metrics.dashboard.url=http://fakedashboard'
       ]
     });

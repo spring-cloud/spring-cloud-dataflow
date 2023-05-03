@@ -1,7 +1,4 @@
 scdf:
-  deploy:
-    database:
-      enabled: false
   server:
     service:
       type:

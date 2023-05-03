@@ -1,11 +1,6 @@
 (@ load("@ytt:data", "data") @)#@data/values
 ---
 scdf:
-  deploy:
-    binder:
-      type: rabbit
-    database:
-      type: mariadb
   server:
     image:
       repository: (@= data.values.server.repository @)
@@ -21,3 +16,10 @@ scdf:
       grafana:
         image:
           tag: (@= data.values.grafana.version @)
+  binder:
+    type: rabbit
+    rabbit:
+      host: (@= data.values.scdf.binder.rabbit.host @)
+      port: (@= data.values.scdf.binder.rabbit.port @)
+      username: (@= data.values.scdf.binder.rabbit.username @)
+      password: (@= data.values.scdf.binder.rabbit.password @)

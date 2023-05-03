@@ -1,11 +1,6 @@
 (@ load("@ytt:data", "data") @)#@data/values
 ---
 scdf:
-  deploy:
-    binder:
-      type: rabbit
-    database:
-      type: mariadb
   server:
     image:
       repository: (@= data.values.server.repository @)
@@ -22,7 +17,9 @@ scdf:
         enabled: true
         image:
           tag: (@= data.values.grafana.version @)
-      prometheus:
-        enabled: true
       prometheusRsocketProxy:
         enabled: true
+  binder:
+    type: rabbit
+    rabbit:
+      host: (@= data.values.binder.rabbit.host @)

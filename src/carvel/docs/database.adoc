@@ -16,8 +16,16 @@ endif::[]
 
 [[database]]
 == Database
-On default a database is deployed as a service for both skipper and dataflow
-servers. Servers are configured to use these database services.
+No default database is deployed.
+
+For local demo use:
+[source,shell]
+....
+kubectl create --namespace <database> -f src/kubernetes/<database>/
+kubectl get --namespace <database> services <database> | grep -F <database> | awk '{ print $3 }'
+....
+
+Supply the host ip to the relevant url.
 
 === Configure External Database
 Disable database deployment {scdf-deploy-database-enabled} and define a custom

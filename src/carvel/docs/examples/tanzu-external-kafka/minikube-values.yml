@@ -1,7 +1,4 @@
 scdf:
-  deploy:
-    binder:
-      enabled: false
   binder:
     kafka:
       broker:

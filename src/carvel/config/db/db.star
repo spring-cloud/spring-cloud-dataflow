@@ -2,10 +2,6 @@ load("@ytt:data", "data")
 
 database_types = {"mariadb": "mariadb", "postgres": "postgres"}
 
-def db_deploy_enabled():
-  return data.values.scdf.deploy.database.enabled == True
-end
-
 def db_external_dataflow():
   x = {}
   if len(data.values.scdf.server.database.url) > 0:
@@ -54,14 +50,6 @@ def db_external_skipper():
     x.setdefault("testOnBorrow", False)
   end
   return x
-end
-
-def mariadb_enabled():
-  return database_types.get(data.values.scdf.deploy.database.type) == "mariadb" and db_deploy_enabled()
-end
-
-def postgres_enabled():
-  return database_types.get(data.values.scdf.deploy.database.type) == "postgres" and db_deploy_enabled()
 end
 
 def db_postgres_username():

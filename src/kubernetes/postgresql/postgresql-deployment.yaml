@@ -24,11 +24,11 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: postgresql
-                key: postgresql-root-username
+                key: database-username
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: postgresql-root-password
+                key: database-password
                 name: postgresql
           - name: POSTGRES_DB
             value: 'dataflow'

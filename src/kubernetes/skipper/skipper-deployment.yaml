@@ -81,7 +81,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: mariadb
-              key: mariadb-root-password
+              key: database-password
         command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
       volumes:
