@@ -44,6 +44,15 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</repository>
+				<!-- Required for io.spring.docresources:spring-doc-resources:zip:0.2.5 -->
+				<repository>
+					<id>spring-releases</id>
+					<name>Spring Releases</name>
+					<url>https://repo.spring.io/libs-release</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
