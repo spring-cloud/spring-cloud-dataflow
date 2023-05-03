@@ -13,3 +13,4 @@ spring:
         - classpath*:/schemas/mysql/V4-dataflow.sql
         - classpath*:/schemas/mysql/V5-dataflow.sql
         - classpath*:/schemas/mysql/V6-dataflow.sql
+        - classpath*:/schemas/mysql/V7-dataflow.sql
