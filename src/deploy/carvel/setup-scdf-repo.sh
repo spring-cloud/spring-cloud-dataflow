@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 function check_env() {
-  eval ev='$'$1
-  if [ "$ev" == "" ]; then
-    echo "env var $1 not defined"
-    exit 1
-  fi
+    eval ev='$'$1
+    if [ "$ev" == "" ]; then
+        echo "env var $1 not defined"
+        exit 1
+    fi
 }
 
 function count_kind() {
@@ -26,21 +26,26 @@ $SCDIR/carvel-add-registry-secret.sh scdf-metadata-default docker.io "$DOCKER_HU
 $SCDIR/carvel-add-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 
 case $SCDF_TYPE in
-    "pro")
-      PACKAGE_VERSION=1.5.3-SNAPSHOT
-      PACKAGE_NAME=scdfpro.tanzu.vmware.com
-      REGISTRY_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
-      REPO_NAME="scdf-pro-repo"
-      ;;
-    "oss")
-      PACKAGE_VERSION=2.11.0-SNAPSHOT
-      PACKAGE_NAME=scdf.tanzu.vmware.com
-      REGISTRY_REPO="index.docker.io/springcloud"
-      REPO_NAME="scdf-repo"
-      ;;
-    *)
-      echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
-    esac
+"pro")
+    if [ "$PACKAGE_VERSION" = "" ]; then
+        PACKAGE_VERSION=1.5.3-SNAPSHOT
+    fi
+    PACKAGE_NAME=scdfpro.tanzu.vmware.com
+    REGISTRY_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
+    REPO_NAME="scdf-pro-repo"
+    ;;
+"oss")
+    if [ "$PACKAGE_VERSION" = "" ]; then
+        PACKAGE_VERSION=2.11.0-SNAPSHOT
+    fi
+    PACKAGE_NAME=scdf.tanzu.vmware.com
+    REGISTRY_REPO="index.docker.io/springcloud"
+    REPO_NAME="scdf-repo"
+    ;;
+*)
+    echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
+    ;;
+esac
 if [ "$REGISTRY" != "" ]; then
     PACKAGE="$REGISTRY/$REPO_NAME:$PACKAGE_VERSION"
 else
@@ -48,9 +53,9 @@ else
     echo "Adding repository for SCDF $SCDF_TYPE: $PACKAGE_VERSION"
 
     if [ "$SCDF_TYPE" = "pro" ]; then
-      check_env TANZU_DOCKER_USERNAME
-      check_env TANZU_DOCKER_PASSWORD
-      $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry dev.registry.pivotal.io "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+        check_env TANZU_DOCKER_USERNAME
+        check_env TANZU_DOCKER_PASSWORD
+        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry dev.registry.pivotal.io "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
     fi
 fi
 $SCDIR/carvel-add-package.sh "$PACKAGE" "$PACKAGE_NAME" "$NS"

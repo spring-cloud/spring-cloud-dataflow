@@ -3,8 +3,8 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
 if [ "$NS" = "" ]; then
-  echo "Expected env var NS"
-  exit 1
+    echo "Expected env var NS"
+    exit 1
 fi
 COUNT=$(kubectl get namespace $NS | grep -c "$NS")
 if ((COUNT == 0)); then
@@ -21,17 +21,22 @@ fi
 
 case $SCDF_TYPE in
 "pro")
-  APP_NAME=scdf-pro
-  PACKAGE_VERSION=1.5.3-SNAPSHOT
-  PACKAGE_NAME=scdfpro.tanzu.vmware.com
-  ;;
+    APP_NAME=scdf-pro
+    if [ "$PACKAGE_VERSION" = "" ]; then
+        PACKAGE_VERSION=1.5.3-SNAPSHOT
+    fi
+    PACKAGE_NAME=scdfpro.tanzu.vmware.com
+    ;;
 "oss")
-  APP_NAME=scdf-oss
-  PACKAGE_VERSION=2.11.0-SNAPSHOT
-  PACKAGE_NAME=scdf.tanzu.vmware.com
-  ;;
+    APP_NAME=scdf-oss
+    if [ "$PACKAGE_VERSION" = "" ]; then
+        PACKAGE_VERSION=2.11.0-SNAPSHOT
+    fi
+    PACKAGE_NAME=scdf.tanzu.vmware.com
+    ;;
 *)
-  echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
+    echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
+    ;;
 esac
 
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"

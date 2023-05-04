@@ -81,10 +81,7 @@ NOTE: Take note that the registration of application in the _pro_ version can ta
 
 == Prepare Configuration parameters
 
-Setup the various environmental variables.
-
-In order to use a private container registry you must configure `REGISTRY=<private-registry/repo-name>`. This will be used to prefix the carvel repo and package.
-
+Executing the following script will configure the environmental variables needed.
 
 [source,shell]
 ....
@@ -97,6 +94,47 @@ Where:
 * `database` is one of postgresql or mariadb. This is only required if local database deployment will be used.
 * `namespace` A valid Kubernetes namespace other than `default`
 * `scdf-type` One of oss or pro. oss is the default.
+
+
+The environmental variables can be configured manually to override the values.
+
+[cols="3m,6,2"]
+|===
+|Name |Description|Default
+
+|PACKAGE_VERSION
+|Version of Carvel package.
+| Release version
+
+|DATAFLOW_VERSION
+|Version of Spring Cloud Data Flow
+|2.10.3
+
+|SKIPPER_VERSION
+|Version of Spring Cloud Skipper
+|2.9.3
+
+|REGISTRY
+|Url and repository of package registry. Format `<private-registry-host/repo-name>`. This will be used to prefix the carvel repo and package.
+| `docker.io/springcloud`
+
+| BROKER
+| One of `kafka` or `rabbitmq`
+| `rabbitmq`
+
+| DATABASE
+| One of `mariadb` or `postgresql`. The default is `postgresql`. This will only apply when you `deploy-local-database.sh`
+|`postgresql`
+
+| NS
+| A Kubernetes namespace other than `default`.
+| `scdf`
+
+| SCDF_TYPE
+| One of `oss` or `pro`.
+| `oss`
+
+|===
 
 == Prepare Configuration file
 
