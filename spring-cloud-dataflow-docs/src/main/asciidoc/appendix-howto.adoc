@@ -15,7 +15,7 @@ You can set the Maven properties, such as the local Maven repository location, r
 Alternatively, you can set the properties by setting the `SPRING_APPLICATION_JSON` environment property for the Data Flow server.
 
 The remote Maven repositories need to be configured explicitly if the applications are resolved by using the Maven repository.
-The one exception to this rule is for the `local` Data Flow server installation, which already has the `https://repo.maven.apache.org/maven2` and `https://repo.spring.io/snapshot` remote repositories pre-configured.
+The one exception to this rule is for the `local` Data Flow server installation, which already has Maven Central and the Spring Artifactory remote repositories pre-configured.
 The other (`non-local`) server installations have no default value for remote repositories.
 
 NOTE: If you configure your own remote repositories, be sure to add Maven central (`https://repo.maven.apache.org/maven2`) as it is not automatically added for you.

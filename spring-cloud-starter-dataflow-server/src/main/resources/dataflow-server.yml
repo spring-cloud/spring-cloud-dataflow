@@ -10,8 +10,12 @@ maven:
   remoteRepositories:
     mavenCentral:
       url: https://repo.maven.apache.org/maven2
-    springRepo:
+    springSnapshot:
       url: https://repo.spring.io/snapshot
+    springMilestone:
+      url: https://repo.spring.io/milestone
+    springRelease:
+      url: https://repo.spring.io/release
 
 spring:
   application:
