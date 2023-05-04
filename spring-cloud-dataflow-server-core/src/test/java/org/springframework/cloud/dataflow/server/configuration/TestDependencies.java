@@ -254,7 +254,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public MavenProperties mavenProperties() {
 		MavenProperties mavenProperties = new MavenProperties();
 		mavenProperties.setRemoteRepositories(new HashMap<>(Collections.singletonMap("springRepo",
-				new MavenProperties.RemoteRepository("https://repo.spring.io/libs-snapshot"))));
+				new MavenProperties.RemoteRepository("https://repo.spring.io/snapshot"))));
 		return mavenProperties;
 	}
 
