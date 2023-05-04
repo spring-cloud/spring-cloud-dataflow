@@ -28,7 +28,7 @@ check_env REPO_BUNDLE_RENDERED
 check_env VERSION
 check_env PACKAGE_BUNDLE_REPOSITORY
 check_env PACKAGE_NAME
-
+set -e
 ytt \
     -f $REPO_BUNDLE_TEMPLATE \
     --output-files $REPO_BUNDLE_RENDERED \

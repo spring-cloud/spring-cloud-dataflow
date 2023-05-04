@@ -18,6 +18,10 @@ kubectl create --namespace "$NS" -f $K8S/prometheus/prometheus-deployment.yaml
 kubectl create --namespace "$NS" -f $K8S/prometheus/prometheus-service.yaml
 kubectl create --namespace "$NS" -f $K8S/grafana/
 
+kubectl rollout status deployment --namespace "$NS" grafana
+kubectl rollout status deployment --namespace "$NS" prometheus
+kubectl rollout status deployment --namespace "$NS" prometheus-proxy
+
 yq ".scdf.feature.monitoring.grafana.enabled=true" -i $SCDIR/scdf-values.yml
 yq ".scdf.feature.monitoring.prometheusRsocketProxy.enabled=true" -i $SCDIR/scdf-values.yml
 end_time=$(date +%s)

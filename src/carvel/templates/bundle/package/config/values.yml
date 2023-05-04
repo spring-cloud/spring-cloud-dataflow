@@ -11,15 +11,3 @@ scdf:
   skipper:
     image:
       tag: (@= data.values.skipper.version @)
-  feature:
-    monitoring:
-      grafana:
-        image:
-          tag: (@= data.values.grafana.version @)
-  binder:
-    type: rabbit
-    rabbit:
-      host: (@= data.values.scdf.binder.rabbit.host @)
-      port: (@= data.values.scdf.binder.rabbit.port @)
-      username: (@= data.values.scdf.binder.rabbit.username @)
-      password: (@= data.values.scdf.binder.rabbit.password @)

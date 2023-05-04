@@ -34,7 +34,7 @@ check_env SKIPPER_VERSION
 check_env PACKAGE_NAME
 check_env IMGPKG_LOCK_TEMPLATE
 check_env VENDIR_SRC_IN
-
+set -e
 ytt -f "$PACKAGE_BUNDLE_TEMPLATE" \
     --output-files "$PACKAGE_BUNDLE_GENERATED" \
     --data-value-yaml server.version="$SERVER_VERSION" \

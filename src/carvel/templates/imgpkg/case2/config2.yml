@@ -15,12 +15,5 @@ scdf:
     monitoring:
       grafana:
         enabled: true
-        image:
-          tag: (@= data.values.grafana.version @)
       prometheusRsocketProxy:
         enabled: true
-  binder:
-    type: kafka
-    kafka:
-      broker:
-        host: (@= data.values.binder.kafka.broker.host @)
