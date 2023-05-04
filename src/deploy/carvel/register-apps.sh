@@ -34,7 +34,7 @@ else
 fi
 
 if [ "$STREAM_APPS_VERSION" = "" ]; then
-    STREAM_URI="https://dataflow.spring.io/$BROKER_NAME-docker-latest"
+    STREAM_URI="https://dataflow.spring.io/$BROKER_NAME-${TYPE}-latest"
 elif [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
     META_DATA="https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
@@ -44,7 +44,7 @@ elif [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
     STREAM_URI="https://repo.spring.io/libs-snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
-    STREAM_URI=https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-$BROKER_BROKER_NAME-docker
+    STREAM_URI="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-${BROKER_NAME}-${TYPE}"
 fi
 if [ "$DATAFLOW_URL" = "" ]; then
     source $SCDIR/export-dataflow-ip.sh
@@ -63,7 +63,7 @@ wget -qO- $DATAFLOW_URL/apps --post-data="uri=$STREAM_URI"
 #register_app "processor/splitter" "docker:springcloudstream/splitter-processor-$BROKER_NAME:3.2.1"
 #register_app "processor/transform" "docker:springcloudstream/transform-processor-$BROKER_NAME:3.2.1"
 
-TASK_URI=https://dataflow.spring.io/task-docker-latest
+TASK_URI=https://dataflow.spring.io/task-${TYPE}-latest
 echo "Registering Task applications at $DATAFLOW_URL using $TASK_URI"
 wget -qO- "$DATAFLOW_URL/apps" --post-data="uri=$TASK_URI"
 
