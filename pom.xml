@@ -117,6 +117,12 @@
 	</modules>
 	<dependencyManagement>
 		<dependencies>
+			<!-- CVE-2022-31690 -->
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-oauth2-client</artifactId>
+				<version>5.7.8</version>
+			</dependency>
 			<!-- address CVEs CVE-2022-41854, CVE-2022-38752, CVE-2022-38751, CVE-2022-38750, CVE-2022-38749, CVE-2022-25857 -->
 			<!-- CVE-2022-1471 remains but is address but using safe constructors -->
 			<dependency>
