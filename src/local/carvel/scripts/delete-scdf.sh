@@ -30,7 +30,7 @@ case $SCDF_TYPE in
   ;;
 "oss")
   APP_NAME=scdf-oss
-  PACKAGE_VERSION=2.10.3-SNAPSHOT
+  PACKAGE_VERSION=2.10.4-SNAPSHOT
   PACKAGE_NAME=scdf.tanzu.vmware.com
   REGISTRY=index.docker.io
   REPO_NAME="springcloud/scdf-repo"

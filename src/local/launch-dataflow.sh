@@ -46,7 +46,7 @@ wget --retry-connrefused  --read-timeout=20 --timeout=15 --tries=10 --continue -
 
 if [ "$SKIPPER_CLI" == "true" ]; then
     echo "java -jar skipper"
-    java -jar $SCDIR/../../../spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.9.3-SNAPSHOT.jar \
+    java -jar $SCDIR/../../../spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.9.4-SNAPSHOT.jar \
         --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
         --spring.datasource.username=spring \
         --spring.datasource.password=spring \
@@ -66,7 +66,7 @@ if [ "$USE_PRO" == "true" ]; then
         --spring.datasource.password=spring \
         --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 else
-    java -jar $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.10.3-SNAPSHOT.jar \
+    java -jar $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.10.4-SNAPSHOT.jar \
         --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
         --spring.datasource.username=spring \
         --spring.datasource.password=spring \

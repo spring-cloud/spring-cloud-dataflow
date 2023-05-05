@@ -5,4 +5,4 @@ metadata:
 spec:
   fetch:
     imgpkgBundle:
-      image: springcloud/scdf-repo:2.10.3-SNAPSHOT
+      image: springcloud/scdf-repo:2.10.4-SNAPSHOT

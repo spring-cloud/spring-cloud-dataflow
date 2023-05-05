@@ -6,7 +6,7 @@ ROOT_DIR=$(realpath $SCDIR/../..)
 if [ "$1" != "" ]; then
     VER=$1
 else
-    VER=2.10.3-SNAPSHOT
+    VER=2.10.4-SNAPSHOT
 fi
 
 function download_deps() {

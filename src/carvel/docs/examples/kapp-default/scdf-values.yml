@@ -3,10 +3,10 @@
 scdf:
   server:
     image:
-      tag: 2.10.3-SNAPSHOT
+      tag: 2.10.4-SNAPSHOT
   skipper:
     image:
-      tag: 2.9.3-SNAPSHOT
+      tag: 2.9.4-SNAPSHOT
   ctr:
     image:
-      tag: 2.10.3-SNAPSHOT
+      tag: 2.10.4-SNAPSHOT

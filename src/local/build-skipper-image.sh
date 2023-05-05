@@ -2,7 +2,7 @@
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 ROOTDIR=$(realpath "$SCDIR/../..")
 if [ "$SKIPPER_VERSION" = "" ]; then
-  SKIPPER_VERSION=2.9.3-SNAPSHOT
+  SKIPPER_VERSION=2.9.4-SNAPSHOT
 fi
 
 pushd "$ROOTDIR/../spring-cloud-skipper" > /dev/null
