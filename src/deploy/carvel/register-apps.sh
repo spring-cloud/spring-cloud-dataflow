@@ -18,7 +18,6 @@ if [ "$1" = "" ]; then
     echo "Arguments: [stream-applications-version] [type]"
     echo "  stream-applications-version: Optional. Use 2021.1.2 for latest release."
     echo "  type: docker or maven"
-    exit 1
 fi
 if [ "$TYPE" = "" ]; then
     TYPE=docker
@@ -26,11 +25,12 @@ fi
 if [ "$1" != "" ]; then
     STREAM_APPS_VERSION=$1
 fi
+
 if [ "$BROKER" == "kafka" ]; then
     BROKER_NAME=kafka
 else
     # unfortunately different in docker image names and registration link.
-    BROKER_NAME=rabbit
+    BROKER_NAME=rabbitmq
 fi
 
 if [ "$STREAM_APPS_VERSION" = "" ]; then

@@ -41,7 +41,7 @@ esac
 
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
 set +e
-$SCDIR/carvel-deploy-package.sh $APP_NAME $PACKAGE_NAME $PACKAGE_VERSION "$SCDIR/scdf-values.yml" "$NS"
+$SCDIR/carvel-deploy-package.sh $APP_NAME $PACKAGE_NAME $PACKAGE_VERSION "./scdf-values.yml" "$NS"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed SCDF in ${bold}$elapsed${end} seconds"

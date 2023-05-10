@@ -1,9 +1,9 @@
 :source-highlighter: rouge
-= Deploy Spring Cloud Data Flow using Carvel
+== Deploy Spring Cloud Data Flow using Carvel
 
 == Required Tools
 
-* `kubectl` - Kubernetes CLI
+* `kubectl` - Kubernetes CLI (Install with `brew install kubectl`)
 * `carvel` - Packaging and Deployment tools
 
 Carvel CLI can be installed using:
@@ -17,15 +17,7 @@ curl -L https://carvel.dev/install.sh | bash
 
 Alternative following the instructions at the bottom of the home page at link:https://carvel.dev/[carvel.dev]
 
-Zip file with scripts or follow the instructions below to create the scripts.
-
-*If you don't have the zip bundle these file can be created by executing the following scripts in a Bash or similar shell, from the section "Create scripts and other files"*
-
-=== Scripts
-
-These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
-
-The following commandline utilities are also used:
+The following tools are use by the scripts.
 
 * `jq` - lightweight JSON parser
 * `yq` - lightweight YAML parser
@@ -33,9 +25,11 @@ The following commandline utilities are also used:
 * `dirname` provides the directory part of a filename.
 * `readlink` provides absolute path of a relative link.
 
-NOTE: Some of these utilities are not installed in macOS by default but will be available from MacPorts or HomeBrew.
+NOTE: Some of these utilities are not installed in macOS or *nix by default but will be available from MacPorts or HomeBrew.
 
+=== Scripts
 
+These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
 
 [cols="3m,3,6"]
 |===
@@ -43,29 +37,29 @@ NOTE: Some of these utilities are not installed in macOS by default but will be 
 
 | start-deploy.sh
 | <broker> [database] <namespace> [scdf-type]
-| Configures environmental variables needs for the reset of the scripts
+| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set and optionally `DATABASE`.
 
 | prepare-cluster.sh
 | N/A
 | Installs cert-manager, secretgen-controller and kapp-controller
 
 | carvel-use-template.sh
-| N/A
-| Creates scdf-values.yml based on scdf-pro-values.yml or scdf-oss-values.yml
+| [scdf-type] (oss, pro)
+| Creates `scdf-values.yml` based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
 
 | setup-scdf-repo.sh
-| N/A
-| Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+| [scdf-type] (oss, pro)
+| Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
 
 | deploy-scdf.sh
 | [scdf-type] (oss, pro)
 | Deploys the application using the package and the relevant values file.
-If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
 
 | update-scdf.sh
 | [scdf-type] (oss, pro)
 | Updated the deployed application using a modified values file.
-If the optional _scdf-type_ is not provided the environmental variable SCDF_TYPE will be used.
+If the optional _scdf-type_ is not provided, the environmental variable `SCDF_TYPE` will be used.
 
 | export-dataflow-ip.sh
 | N/A
@@ -163,7 +157,7 @@ docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD
 # Always required to ensure you don't experience rate limiting with Docker HUB
 export DOCKER_HUB_USERNAME="<docker-hub-username>"
 export DOCKER_HUB_PASSWORD="<docker-hub-password>"
-docker login --username DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD index.docker.io
+docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD index.docker.io
 ....
 
 Install carvel kapp-controller, secretgen-controller and certmanager
@@ -173,6 +167,7 @@ Install carvel kapp-controller, secretgen-controller and certmanager
 ./prepare-cluster.sh
 ....
 
+Load scdf repo package for the _scdf-type_
 [source,shell]
 ....
 ./setup-scdf-repo.sh

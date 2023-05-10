@@ -19,9 +19,9 @@ while [ "$1" != "" ]; do
     case $1 in
     "rabbit" | "rabbitmq")
         BROKER=rabbitmq
-      ;;
+        ;;
     "kafka")
-          BROKER=kafka
+        BROKER=kafka
         ;;
     "mysql")
         DATABASE=mysql

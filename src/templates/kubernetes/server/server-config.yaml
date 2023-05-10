@@ -13,7 +13,7 @@ data:
             enabled: true
             rsocket:
               enabled: true
-              host: prometheus-proxy
+              host: prometheus-rsocket-proxy
               port: 7001
     spring:
       cloud:

@@ -30,7 +30,7 @@ esac
 echo "Updating SCDF-$SCDF_TYPE $PACKAGE_VERSION as $APP_NAME"
 set +e
 kctrl package installed update --package-install $APP_NAME \
-    --values-file "$SCDIR/scdf-values.yml" \
+    --values-file "./scdf-values.yml" \
     --version $PACKAGE_VERSION --namespace "$NS" --yes \
     --wait --wait-check-interval 10s
 

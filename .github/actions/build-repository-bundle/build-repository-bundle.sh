@@ -25,14 +25,14 @@ mkdir -p "$REPO_BUNDLE_RENDERED"
 
 check_env REPO_BUNDLE_TEMPLATE
 check_env REPO_BUNDLE_RENDERED
-check_env VERSION
+check_env PACKAGE_VERSION
 check_env PACKAGE_BUNDLE_REPOSITORY
 check_env PACKAGE_NAME
 set -e
 ytt \
     -f $REPO_BUNDLE_TEMPLATE \
     --output-files $REPO_BUNDLE_RENDERED \
-    --data-value-yaml project.version=$VERSION \
+    --data-value-yaml project.version=$PACKAGE_VERSION \
     --data-value-yaml repository=$PACKAGE_BUNDLE_REPOSITORY \
     --data-value-yaml package.name=$PACKAGE_NAME \
     --data-value-yaml package.timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \

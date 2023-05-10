@@ -55,7 +55,7 @@ jobs:
       uses: ./.github/actions/publish-bundle
       with:
         path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-package'
+        repository: 'springcloud/scdf-oss-package'
         version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
         prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
 
@@ -66,7 +66,7 @@ jobs:
       with:
         version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
         repo-bundle-template: 'src/carvel/templates/bundle/repo'
-        package-bundle-repository: 'springcloud/scdf-package'
+        package-bundle-repository: 'springcloud/scdf-oss-package'
         package-name: 'scdf'
 
 
@@ -76,7 +76,7 @@ jobs:
       uses: ./.github/actions/publish-bundle
       with:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-repo'
+        repository: 'springcloud/scdf-oss-repo'
         version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
         prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
 

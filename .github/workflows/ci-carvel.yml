@@ -7,15 +7,30 @@ on:
     paths:
       - 'src/carvel/**'
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch or tag to use to determine version numbers'
+        default: 'main'
+        required: true
+      package_version:
+        description: 'Package version to publish. If blank will match dataflow version'
+        required: false
 
+env:
+  TARGET_DIR=${{ github.workspace + '/target' }}
 jobs:
-
   # test templating before publishing a package
   publish:
     name: Publish
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: 'main'
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.branch && inputs.branch || 'main' }}
+        path: ${{ github.workspace + '/target' }}
     - uses: actions/setup-node@v2
       with:
         node-version: 16
@@ -49,21 +64,24 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure Env
       run: |
-        source .github/workflows/export-app-versions.sh        
-        echo SPRING_CLOUD_DATAFLOW_VERSION=$SPRING_CLOUD_DATAFLOW_VERSION >> $GITHUB_ENV
-        echo SPRING_CLOUD_SKIPPER_VERSION=$SPRING_CLOUD_SKIPPER_VERSION >> $GITHUB_ENV
-        echo SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX=$SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
+        if [ "$TARGET_DIR" = "" ]; then
+          TARGET_DIR="."
+        fi
+        source $TARGET_DIR/.github/workflows/export-app-versions.sh        
+        echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
+        echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
+        echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
 
     # Builds a package bundle
     - name: Build Package Bundle
       id: build-package-bundle
       uses: ./.github/actions/build-package-bundle
       with:
-        dataflow-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
-        skipper-version: '${{ env.SPRING_CLOUD_SKIPPER_VERSION }}'
-        server-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        dataflow-version: '${{ env.DATAFLOW_VERSION }}'
+        skipper-version: '${{ env.SKIPPER_VERSION }}'
+        server-version: '${{ env.DATAFLOW_VERSION }}'
         server-repository: 'springcloud/spring-cloud-dataflow-server'
-        ctr-version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        ctr-version: '${{ env.DATAFLOW_VERSION }}'
         package-name: 'scdf'
         package-bundle-template: 'src/carvel/templates/bundle/package'
         imgpkg-lock-template: 'src/carvel/templates/imgpkg'
@@ -76,8 +94,8 @@ jobs:
       uses: ./.github/actions/publish-bundle
       with:
         path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-package'
-        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX }}'
+        repository: 'springcloud/scdf-oss-package'
+        version: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
         prerelease: 'SNAPSHOT'
 
     # Builds a repository bundle
@@ -85,9 +103,9 @@ jobs:
       id: build-repository-bundle
       uses: ./.github/actions/build-repository-bundle
       with:
-        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION }}'
+        version: '${{ env.DATAFLOW_VERSION }}'
         repo-bundle-template: 'src/carvel/templates/bundle/repo'
-        package-bundle-repository: 'springcloud/scdf-package'
+        package-bundle-repository: 'springcloud/scdf-oss-package'
         package-name: 'scdf'
 
     # Publishes scdf repo bundle
@@ -96,6 +114,6 @@ jobs:
       uses: ./.github/actions/publish-bundle
       with:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-repo'
-        version: '${{ env.SPRING_CLOUD_DATAFLOW_VERSION_NOPOSTFIX }}'
+        repository: 'springcloud/scdf-oss'
+        version: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
         prerelease: 'SNAPSHOT'

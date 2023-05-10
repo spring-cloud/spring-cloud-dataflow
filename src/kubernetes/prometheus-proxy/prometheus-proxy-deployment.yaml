@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prometheus-proxy
+  name: prometheus-rsocket-proxy
   labels:
-    app: prometheus-proxy
+    app: prometheus-rsocket-proxy
 spec:
 #  replicas: 3
   selector:
     matchLabels:
-      app: prometheus-proxy
+      app: prometheus-rsocket-proxy
   template:
     metadata:
       labels:
-        app: prometheus-proxy
+        app: prometheus-rsocket-proxy
     spec:
-      serviceAccountName: prometheus-proxy
+      serviceAccountName: prometheus-rsocket-proxy
       containers:
-        - name: prometheus-proxy
+        - name: prometheus-rsocket-proxy
           image: micrometermetrics/prometheus-rsocket-proxy:1.5.0
           imagePullPolicy: IfNotPresent
           ports:
@@ -31,6 +31,9 @@ spec:
             requests:
               cpu: 0.5
               memory: 1024Mi
+          env:
+            - name: LOGGING_LEVEL_IO_MICROMETER
+              value: DEBUG
       securityContext:
         fsGroup: 2000
         runAsNonRoot: true

@@ -34,16 +34,16 @@ echo "Deployed $DATABASE. Host: $DATABASE_HOST"
 
 JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE.svc.cluster.local/dataflow"
 
-yq ".scdf.server.database.url=\"$JDBC_URL\"" -i $SCDIR/scdf-values.yml
-yq ".scdf.skipper.database.url=\"$JDBC_URL\"" -i $SCDIR/scdf-values.yml
+yq ".scdf.server.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
+yq ".scdf.skipper.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
 JDBC_DRIVER_CLASS=org.postgresql.Driver
 if [ "$DATABASE" = "mariadb" ]; then
     JDBC_DRIVER_CLASS=org.mariadb.jdbc.Driver
 fi
-yq ".scdf.server.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i $SCDIR/scdf-values.yml
-yq ".scdf.skipper.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i $SCDIR/scdf-values.yml
-yq ".scdf.server.database.secretName=\"$DATABASE\"" -i $SCDIR/scdf-values.yml
-yq ".scdf.skipper.database.secretName=\"$DATABASE\"" -i $SCDIR/scdf-values.yml
+yq ".scdf.server.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
+yq ".scdf.skipper.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
+yq ".scdf.server.database.secretName=\"$DATABASE\"" -i ./scdf-values.yml
+yq ".scdf.skipper.database.secretName=\"$DATABASE\"" -i ./scdf-values.yml
 
 echo "Set JDBC url: $JDBC_URL"
 echo "Set JDBC class: $JDBC_DRIVER_CLASS"

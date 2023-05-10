@@ -15,9 +15,9 @@ if [ "$PROMETHEUS" = "true" ]; then
     kubectl delete clusterroles prometheus
     kubectl delete clusterrolebindings prometheus
     kubectl delete serviceaccounts prometheus --namespace "$NS"
-    kubectl delete clusterroles prometheus-proxy
-    kubectl delete clusterrolebindings prometheus-proxy
-    kubectl delete serviceaccounts prometheus-proxy --namespace "$NS"
+    kubectl delete clusterroles prometheus-rsocket-proxy
+    kubectl delete clusterrolebindings prometheus-rsocket-proxy
+    kubectl delete serviceaccounts prometheus-rsocket-proxy --namespace "$NS"
 fi
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   echo "stopping port forward"

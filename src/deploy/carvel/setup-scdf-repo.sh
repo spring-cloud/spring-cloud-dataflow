@@ -40,7 +40,7 @@ case $SCDF_TYPE in
     fi
     PACKAGE_NAME=scdf.tanzu.vmware.com
     REGISTRY_REPO="index.docker.io/springcloud"
-    REPO_NAME="scdf-repo"
+    REPO_NAME="scdf-oss-repo"
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"

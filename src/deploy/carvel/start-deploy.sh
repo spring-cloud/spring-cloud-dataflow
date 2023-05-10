@@ -26,6 +26,9 @@ while [ "$1" != "" ]; do
     "rabbitmq" | "rabbit")
         BROKER=rabbitmq
         ;;
+    "kafka")
+        BROKER=kafka
+        ;;
     "pro" | "oss")
         SCDF_TYPE=$1
         ;;

@@ -20,10 +20,12 @@ kubectl create --namespace "$NS" -f $K8S/grafana/
 
 kubectl rollout status deployment --namespace "$NS" grafana
 kubectl rollout status deployment --namespace "$NS" prometheus
-kubectl rollout status deployment --namespace "$NS" prometheus-proxy
-
-yq ".scdf.feature.monitoring.grafana.enabled=true" -i $SCDIR/scdf-values.yml
-yq ".scdf.feature.monitoring.prometheusRsocketProxy.enabled=true" -i $SCDIR/scdf-values.yml
+kubectl rollout status deployment --namespace "$NS" prometheus-rsocket-proxy
+GRAFANA_HOST=$(kubectl get --namespace $NS services grafana | grep -F grafana | awk '{ print $3 }')
+echo "Set dashboard url=$GRAFANA_HOST:3000"
+yq ".scdf.server.metrics.dashboard.url=\"http://$GRAFANA_HOST:3000\"" -i ./scdf-values.yml
+yq ".scdf.feature.monitoring.grafana.enabled=true" -i ./scdf-values.yml
+yq ".scdf.feature.monitoring.prometheusRsocketProxy.enabled=true" -i ./scdf-values.yml
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed Prometheus, Prometheus proxy and Grafana in ${bold}$elapsed${end} seconds"

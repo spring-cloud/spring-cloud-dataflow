@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus-proxy
+  name: prometheus-rsocket-proxy
   labels:
-    app: prometheus-proxy
+    app: prometheus-rsocket-proxy
 spec:
   selector:
-    app: prometheus-proxy
+    app: prometheus-rsocket-proxy
   ports:
     - name: scrape
       port: 8080

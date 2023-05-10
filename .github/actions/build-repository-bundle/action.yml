@@ -27,7 +27,7 @@ runs:
   - name: Tanzu Dance
     id: tanzu-dance
     env:
-      VERSION: ${{ inputs.version }}
+      PACKAGE_VERSION: ${{ inputs.version }}
       PACKAGE_BUNDLE_REPOSITORY: ${{ inputs.package-bundle-repository }}
       PACKAGE_NAME: ${{ inputs.package-name }}
       REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}

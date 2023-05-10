@@ -41,7 +41,7 @@ def skipper_container_env():
   if non_empty_string(data.values.scdf.skipper.database.secretName):
     envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretUsernameKey}}}])
     envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretPasswordKey}}}])
-    end
+  end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
