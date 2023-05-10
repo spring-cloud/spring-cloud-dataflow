@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,22 @@ public class TaskServiceUtilsTests {
 		taskDeploymentProperties.put("app.test.test", "baz");
 		taskDeploymentProperties.put("app.none.test", "boo");
 		Map<String, String> result = TaskServiceUtils.extractAppProperties("test",
+				taskDeploymentProperties);
+
+		assertThat(result.size()).isEqualTo(2);
+		assertThat(result.get("foo")).isEqualTo("bar");
+		assertThat(result.get("test")).isEqualTo("baz");
+	}
+
+	@Test
+	public void testExtractAppLabelProperties() {
+		Map<String, String> taskDeploymentProperties = new HashMap<>();
+		taskDeploymentProperties.put("app.mylabel.foo", "bar");
+		taskDeploymentProperties.put("test.none", "boo");
+		taskDeploymentProperties.put("app.test.test", "boo");
+		taskDeploymentProperties.put("app.mylabel.test", "baz");
+		taskDeploymentProperties.put("app.none.test", "boo");
+		Map<String, String> result = TaskServiceUtils.extractAppProperties("test", "mylabel",
 				taskDeploymentProperties);
 
 		assertThat(result.size()).isEqualTo(2);

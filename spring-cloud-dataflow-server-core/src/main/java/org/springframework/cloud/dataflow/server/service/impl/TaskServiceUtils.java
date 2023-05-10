@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,7 @@ public class TaskServiceUtils {
 	private static Map<String, String> extractPropertiesByPrefix(String type,
 			String name, String label, Map<String, String> taskDeploymentProperties) {
 		final String prefix1 = type + "." + name + ".";
-		final String prefix2 = StringUtils.hasText(label) ? type + "." + label + "." + name + "." : null;
+		final String prefix2 = StringUtils.hasText(label) ? type + "." + label + "." : null;
 
 		Map<String, String> props = taskDeploymentProperties.entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix1))
