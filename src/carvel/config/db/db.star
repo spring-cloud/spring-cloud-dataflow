@@ -44,9 +44,9 @@ def db_external_skipper():
   if len(data.values.scdf.skipper.database.validationQuery) > 0:
     x.setdefault("validationQuery", data.values.scdf.skipper.database.validationQuery)
   end
-  if data.values.scdf.skipper.database.testOnBorrow == True:
+  if data.values.scdf.skipper.database.testOnBorrow:
     x.setdefault("testOnBorrow", True)
-  elif data.values.scdf.skipper.database.testOnBorrow == False:
+  elif not data.values.scdf.skipper.database.testOnBorrow:
     x.setdefault("testOnBorrow", False)
   end
   return x

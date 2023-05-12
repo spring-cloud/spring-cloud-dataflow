@@ -52,20 +52,26 @@ spec:
           httpGet:
             port: 9393
             path: #@ dataflow_liveness_path()
-          failureThreshold: 120
-          initialDelaySeconds: 15
+          failureThreshold: 4
+          initialDelaySeconds: 10
           timeoutSeconds: 3
-          periodSeconds: 5
+          periodSeconds: 15
         livenessProbe:
           httpGet:
             path: #@ dataflow_liveness_path()
             port: 9393
-          initialDelaySeconds: 5
+          failureThreshold: 4
+          initialDelaySeconds: 1
+          timeoutSeconds: 3
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: #@ dataflow_readiness_path()
             port: 9393
-          initialDelaySeconds: 10
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 15
         resources:
           limits:
           #@ if non_empty_string(data.values.scdf.server.resources.limits.cpu):

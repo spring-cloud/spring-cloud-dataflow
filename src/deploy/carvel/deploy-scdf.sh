@@ -38,8 +38,16 @@ case $SCDF_TYPE in
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
-
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
+if [ "$DATAFLOW_VERSION" != "" ]; then
+    yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+    yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+    echo "Overriding Data Flow version=$DATAFLOW_VERSION"
+fi
+if [ "$SKIPPER_VERSION" != "" ]; then
+    yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
+    echo "Overriding Skipper version=$SKIPPER_VERSION"
+fi
 set +e
 $SCDIR/carvel-deploy-package.sh $APP_NAME $PACKAGE_NAME $PACKAGE_VERSION "./scdf-values.yml" "$NS"
 end_time=$(date +%s)

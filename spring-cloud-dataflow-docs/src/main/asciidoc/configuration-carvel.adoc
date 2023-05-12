@@ -1,5 +1,6 @@
 :source-highlighter: rouge
-== Deploy Spring Cloud Data Flow using Carvel
+[[configuration-carvel]]
+== Deployment using Carvel
 
 == Required Tools
 
@@ -45,7 +46,7 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 
 | carvel-use-template.sh
 | [scdf-type] (oss, pro)
-| Creates `scdf-values.yml` based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
+| Creates `scdf-values.yml` in current directory based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
 
 | setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
@@ -53,7 +54,7 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 
 | deploy-scdf.sh
 | [scdf-type] (oss, pro)
-| Deploys the application using the package and the relevant values file.
+| Deploys the application using the package and `scdf-values.yml` in the current directory.
 If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
 
 | update-scdf.sh
@@ -90,7 +91,7 @@ Where:
 * `scdf-type` One of oss or pro. oss is the default.
 
 
-The environmental variables can be configured manually to override the values.
+The environmental variables can also be configured manually to override the values.
 
 [cols="3m,6,2"]
 |===

@@ -26,6 +26,26 @@ echo "Set dashboard url=$GRAFANA_HOST:3000"
 yq ".scdf.server.metrics.dashboard.url=\"http://$GRAFANA_HOST:3000\"" -i ./scdf-values.yml
 yq ".scdf.feature.monitoring.grafana.enabled=true" -i ./scdf-values.yml
 yq ".scdf.feature.monitoring.prometheusRsocketProxy.enabled=true" -i ./scdf-values.yml
+
+yq ".scdf.server.config.management.metrics.export.prometheus.pushgateway.base-url=\"http://prometheus-rsocket-proxy:7001\"" -i ./scdf-values.yml
+yq ".scdf.server.config.management.metrics.export.prometheus.pushgateway.enabled=true" -i ./scdf-values.yml
+yq ".scdf.server.config.management.metrics.export.prometheus.pushgateway.shutdown-operation=\"PUSH\"" -i ./scdf-values.yml
+yq ".scdf.server.config.management.metrics.export.prometheus.step=\"10s\"" -i ./scdf-values.yml
+yq ".scdf.server.config.spring.cloud.dataflow.task.management.metrics.export.prometheus.pushgateway.base-url=\"http://prometheus-rsocket-proxy:7001\"" -i ./scdf-values.yml
+yq ".scdf.server.config.spring.cloud.dataflow.task.management.metrics.export.prometheus.pushgateway.enabled=true" -i ./scdf-values.yml
+yq ".scdf.server.config.spring.cloud.dataflow.task.management.metrics.export.prometheus.pushgateway.shutdown-operation=\"PUSH\"" -i ./scdf-values.yml
+yq ".scdf.server.config.spring.cloud.dataflow.task.management.metrics.export.prometheus.step=\"10s\"" -i ./scdf-values.yml
+
+yq ".scdf.skipper.config.management.metrics.export.prometheus.pushgateway.base-url=\"http://prometheus-rsocket-proxy:7001\"" -i ./scdf-values.yml
+yq ".scdf.skipper.config.management.metrics.export.prometheus.pushgateway.enabled=true" -i ./scdf-values.yml
+yq ".scdf.skipper.config.management.metrics.export.prometheus.pushgateway.shutdown-operation=\"PUSH\"" -i ./scdf-values.yml
+yq ".scdf.skipper.config.management.metrics.export.prometheus.step=\"10s\"" -i ./scdf-values.yml
+
+yq ".scdf.skipper.config.spring.cloud.skipper.server.platform.kubernetes.accounts.default.management.metrics.export.prometheus.pushgateway.base-url=\"http://prometheus-rsocket-proxy:7001\"" -i ./scdf-values.yml
+yq ".scdf.skipper.config.spring.cloud.skipper.server.platform.kubernetes.accounts.default.management.metrics.export.prometheus.pushgateway.enabled=true" -i ./scdf-values.yml
+yq ".scdf.skipper.config.spring.cloud.skipper.server.platform.kubernetes.accounts.default.management.metrics.export.prometheus.pushgateway.shutdown-operation=\"PUSH\"" -i ./scdf-values.yml
+yq ".scdf.skipper.config.spring.cloud.skipper.server.platform.kubernetes.accounts.default.management.metrics.export.prometheus.step=\"10s\"" -i ./scdf-values.yml
+
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed Prometheus, Prometheus proxy and Grafana in ${bold}$elapsed${end} seconds"

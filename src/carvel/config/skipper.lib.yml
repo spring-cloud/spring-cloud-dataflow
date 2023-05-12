@@ -12,8 +12,8 @@ environmentVariables: #@ env_config()
 limits:
   memory: 1024Mi
   cpu: 500m
-readinessProbeDelay: 120
-livenessProbeDelay: 90
+readinessProbeDelay: 30
+livenessProbeDelay: 15
 #@ if has_image_pull_secrets():
 imagePullSecret: #@ registry_secret_ref()
 #@ else:

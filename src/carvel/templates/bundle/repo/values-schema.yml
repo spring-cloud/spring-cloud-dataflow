@@ -24,6 +24,18 @@ components:
             server:
               type: object
               properties:
+                image:
+                  type: object
+                  properties:
+                    repository:
+                      type: string
+                      description: Composed Task Runner image repository
+                    tag:
+                      type: string
+                      description: Composed Task Runner image tag
+                    digest:
+                      type: string
+                      description: Composed Task Runner image digest
                 database:
                   type: object
                   properties:
@@ -118,6 +130,18 @@ components:
             skipper:
               type: object
               properties:
+                image:
+                  type: object
+                  properties:
+                    repository:
+                      type: string
+                      description: Composed Task Runner image repository
+                    tag:
+                      type: string
+                      description: Composed Task Runner image tag
+                    digest:
+                      type: string
+                      description: Composed Task Runner image digest
                 database:
                   type: object
                   properties:

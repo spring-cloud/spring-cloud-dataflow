@@ -44,20 +44,26 @@ spec:
           httpGet:
             port: 7577
             path: /actuator
-          failureThreshold: 120
-          initialDelaySeconds: 15
+          failureThreshold: 4
+          initialDelaySeconds: 10
           timeoutSeconds: 3
-          periodSeconds: 5
+          periodSeconds: 15
         livenessProbe:
           httpGet:
             path: /actuator/health
             port: 7577
-          initialDelaySeconds: 5
+          failureThreshold: 4
+          initialDelaySeconds: 1
+          timeoutSeconds: 3
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: /actuator/info
             port: 7577
-          initialDelaySeconds: 10
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 15
         resources:
           limits:
             #@ if non_empty_string(data.values.scdf.skipper.resources.limits.cpu):

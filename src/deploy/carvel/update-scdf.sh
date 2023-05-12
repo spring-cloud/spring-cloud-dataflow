@@ -28,6 +28,15 @@ case $SCDF_TYPE in
     ;;
 esac
 echo "Updating SCDF-$SCDF_TYPE $PACKAGE_VERSION as $APP_NAME"
+if [ "$DATAFLOW_VERSION" != "" ]; then
+    yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+    yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+    echo "Overriding Data Flow version=$DATAFLOW_VERSION"
+fi
+if [ "$SKIPPER_VERSION" != "" ]; then
+    yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
+    echo "Overriding Skipper version=$SKIPPER_VERSION"
+fi
 set +e
 kctrl package installed update --package-install $APP_NAME \
     --values-file "./scdf-values.yml" \

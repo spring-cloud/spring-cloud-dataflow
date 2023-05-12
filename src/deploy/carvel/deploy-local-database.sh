@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
-case $1 in
-"postgresql" | "postgres" | "")
-    DATABASE=postgresql
-    ;;
-"mariadb")
-    DATABASE=mariadb
-    ;;
-*)
-    echo "Unsupported or invalid database $1"
+if [ "$1" != "" ]; then
+    case $1 in
+    "postgresql" | "postgres" | "")
+        DATABASE=postgresql
+        ;;
+    "mariadb")
+        DATABASE=mariadb
+        ;;
+    *)
+        echo "Unsupported or invalid database $1"
+        exit 1
+        ;;
+    esac
+fi
+if [ "$DATABASE" = "" ]; then
+    echo "DATABASE must be define or passed as parameter to this script"
     exit 1
-esac
-
+fi
 K8S=$(realpath $SCDIR/../../kubernetes)
 COUNT=$(kubectl get namespace $DATABASE | grep -c "$DATABASE")
 if ((COUNT == 0)); then
