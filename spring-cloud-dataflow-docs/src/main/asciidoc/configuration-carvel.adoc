@@ -38,7 +38,7 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 
 | start-deploy.sh
 | <broker> [scdf-type] [namespace]
-| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The default `SCDF_TYPE` is `oss`
+| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The namespace will be created if it doesn't exist by `setup-scdf-repo.sh`. The default `SCDF_TYPE` is `oss`
 
 | prepare-cluster.sh
 | N/A
@@ -50,7 +50,7 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 
 | setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
-| Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
+| Creates the namespace and installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
 
 | configure-prometheus-proxy.sh
 | <host> <port> [step]
@@ -84,13 +84,12 @@ Executing the following script will configure the environmental variables needed
 
 [source,shell]
 ....
-source ./start-deploy.sh <broker> [database] <namespace> [scdf-type]
+source ./start-deploy.sh <broker> <namespace> [scdf-type]
 ....
 
 Where:
 
 * `broker` is one of rabbitmq or kafka
-* `database` is one of postgresql or mariadb. This is only required if local database deployment will be used.
 * `namespace` A valid Kubernetes namespace other than `default`
 * `scdf-type` One of oss or pro. oss is the default.
 
@@ -144,9 +143,9 @@ Create a file name `scdf-values.yml` by executing:
 ./carvel-use-template.sh
 ....
 
-Edit the file as needed to configure the deployment.
+Edit the file as needed to configure the deployment. The `deploy-local-` scripts will
 
-_Uses environmental variable previously selected._
+_Uses scdf-type previously selected._
 
 == Prepare cluster and add repository
 
