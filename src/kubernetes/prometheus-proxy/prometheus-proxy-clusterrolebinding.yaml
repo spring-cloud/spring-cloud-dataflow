@@ -1,13 +1,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: prometheus-proxy
+  name: prometheus-rsocket-proxy
   labels:
-    app: prometheus-proxy
+    app: prometheus-rsocket-proxy
 subjects:
   - kind: ServiceAccount
-    name: prometheus-proxy
-    namespace: default
+    name: prometheus-rsocket-proxy
+    namespace: prometheus
 roleRef:
   kind: ClusterRole
   name: cluster-admin

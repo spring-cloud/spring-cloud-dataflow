@@ -7,6 +7,7 @@
 #@ load("dataflow.star", "image_pull_secrets")
 #@ load("dataflow.star", "dataflow_liveness_path")
 #@ load("dataflow.star", "dataflow_readiness_path")
+#@ load("dataflow.star", "dataflow_has_password")
 #@ load("common/common.star", "non_empty_string")
 
 apiVersion: apps/v1
@@ -37,9 +38,11 @@ spec:
         - name: config
           mountPath: /workspace/config
           readOnly: true
+        #@ if dataflow_has_password():
         - name: database
           mountPath: /workspace/runtime/secrets/database
           readOnly: true
+        #@ end
         - name: scdfmetadata
           mountPath: /workspace/runtime/secrets
           readOnly: true
@@ -49,20 +52,26 @@ spec:
           httpGet:
             port: 9393
             path: #@ dataflow_liveness_path()
-          failureThreshold: 120
-          initialDelaySeconds: 15
+          failureThreshold: 4
+          initialDelaySeconds: 10
           timeoutSeconds: 3
-          periodSeconds: 5
+          periodSeconds: 15
         livenessProbe:
           httpGet:
             path: #@ dataflow_liveness_path()
             port: 9393
-          initialDelaySeconds: 5
+          failureThreshold: 4
+          initialDelaySeconds: 1
+          timeoutSeconds: 3
+          periodSeconds: 15
         readinessProbe:
           httpGet:
             path: #@ dataflow_readiness_path()
             port: 9393
-          initialDelaySeconds: 10
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          periodSeconds: 15
         resources:
           limits:
           #@ if non_empty_string(data.values.scdf.server.resources.limits.cpu):
@@ -88,9 +97,11 @@ spec:
           items:
           - key: application.yaml
             path: application.yaml
+      #@ if dataflow_has_password():
       - name: database
         secret:
           secretName: db-dataflow
+      #@ end
       #@ if has_image_pull_secrets():
       - name: scdfmetadata
         secret:

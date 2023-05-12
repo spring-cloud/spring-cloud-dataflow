@@ -30,11 +30,6 @@ services:
       - LANG=en_US.utf8
       - LC_ALL=en_US.utf8
       - JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=PLAINTEXT://kafka-broker:9092
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://kafka-broker:9092
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper:2181
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper:2181
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
       # Set CLOSECONTEXTENABLED=true to ensure that the CRT launcher is closed.
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
@@ -64,10 +59,10 @@ services:
       - dataflow-server
     command: >
       /bin/sh -c "
-
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-maven-latest&force=true}';
         echo 'Maven Task apps imported'"
+
   skipper-server:
     user: root
     platform: linux/amd64

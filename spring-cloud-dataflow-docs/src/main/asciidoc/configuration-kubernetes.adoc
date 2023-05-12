@@ -487,7 +487,7 @@ data:
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/database
         username: root
-        password: ${mariadb-root-password}
+        password: ${database-password}
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
@@ -507,7 +507,7 @@ metadata:
   labels:
     app: mariadb
 data:
-  mariadb-root-password: eW91cnBhc3N3b3Jk
+  database-password: eW91cnBhc3N3b3Jk
 ----
 
 
@@ -531,7 +531,7 @@ data:
       datasource:
         url: jdbc:mariadb://${MARIADB_SERVICE_HOST}:${MARIADB_SERVICE_PORT}/database
         username: root
-        password: ${mariadb-root-password}
+        password: ${database-password}
         driverClassName: org.mariadb.jdbc.Driver
 ----
 
@@ -771,10 +771,10 @@ If upgrading from a previous version of SCDF be sure to verify that `spring.data
             secretKeyRefs:
               - envVarName: "spring.datasource.password"
                 secretName: mariadb
-                dataKey: mariadb-root-password
+                dataKey: database-password
               - envVarName: "spring.datasource.username"
                   secretName: mariadb
-                  dataKey: mariadb-root-username
+                  dataKey: database-username
 ...
 ----
 

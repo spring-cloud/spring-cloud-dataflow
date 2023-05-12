@@ -17,6 +17,7 @@ spec:
       containers:
       - image: postgres:14.5
         name: postgresql
+        imagePullPolicy: IfNotPresent
         env:
           - name: POSTGRES_INITDB_ARGS
             value: '--encoding=UTF-8 --lc-collate=en_US.utf8 --lc-ctype=en_US.utf8'
@@ -24,11 +25,11 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: postgresql
-                key: postgresql-root-username
+                key: database-username
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: postgresql-root-password
+                key: database-password
                 name: postgresql
           - name: POSTGRES_DB
             value: 'dataflow'

@@ -19,7 +19,7 @@ Deploy repository:
 
 [source, bash]
 ----
-kapp deploy -y -a scdf-repo -f scdf-repo-ghcr.yml
+kapp deploy -y -a scdf-oss-repo -f scdf-oss-repo-ghcr.yml
 
 kubectl get packagerepositories
 NAME                          AGE     DESCRIPTION

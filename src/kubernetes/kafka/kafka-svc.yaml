@@ -2,11 +2,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kafka-broker
+  namespace: kafka
   labels:
     app: kafka
     component: kafka-broker
 spec:
-  clusterIP: None
   ports:
   - port: 9092
     name: kafka-port

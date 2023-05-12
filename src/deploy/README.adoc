@@ -1,0 +1,8 @@
+= Deployment to Kubernetes
+
+This document describes how to use the Carvel packages to deploy Spring Cloud Data Flow, and it also has a section on creating local development cluster using minikube or kind.
+
+include::../../spring-cloud-dataflow-docs/src/main/asciidoc/configuration-carvel.adoc[]
+
+include::../../spring-cloud-dataflow-docs/src/main/asciidoc/appendix-local-k8s-development.adoc[]
+

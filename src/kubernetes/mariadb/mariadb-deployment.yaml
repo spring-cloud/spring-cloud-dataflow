@@ -16,12 +16,13 @@ spec:
     spec:
       containers:
       - image: mariadb:10.4.22
+        imagePullPolicy: IfNotPresent
         name: mariadb
         env:
           - name: MARIADB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                key: mariadb-root-password
+                key: database-password
                 name: mariadb
           - name: MARIADB_DATABASE
             value: 'dataflow'

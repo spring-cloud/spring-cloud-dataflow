@@ -1,0 +1,231 @@
+:source-highlighter: rouge
+[[configuration-carvel]]
+== Deployment using Carvel
+
+== Required Tools
+
+* `kubectl` - Kubernetes CLI (Install with `brew install kubectl`)
+* `carvel` - Packaging and Deployment tools
+
+Carvel CLI can be installed using:
+
+[source,shell]
+....
+wget -O- https://carvel.dev/install.sh | bash
+# or with curl...
+curl -L https://carvel.dev/install.sh | bash
+....
+
+Alternative following the instructions at the bottom of the home page at link:https://carvel.dev/[carvel.dev]
+
+The following tools are use by the scripts.
+
+* `jq` - lightweight JSON parser
+* `yq` - lightweight YAML parser
+* `wget` - Invoke http requests.
+* `dirname` provides the directory part of a filename.
+* `readlink` provides absolute path of a relative link.
+
+NOTE: Some of these utilities are not installed in macOS or *nix by default but will be available from MacPorts or HomeBrew.
+
+=== Scripts
+
+These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
+
+[cols="3m,3,6"]
+|===
+|Name | Arguments |Descriptions
+
+| start-deploy.sh
+| <broker> [scdf-type] [namespace]
+| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The namespace will be created if it doesn't exist by `setup-scdf-repo.sh`. The default `SCDF_TYPE` is `oss`
+
+| prepare-cluster.sh
+| N/A
+| Installs cert-manager, secretgen-controller and kapp-controller
+
+| carvel-use-template.sh
+| [scdf-type] (oss, pro)
+| Creates `scdf-values.yml` in current directory based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
+
+| setup-scdf-repo.sh
+| [scdf-type] (oss, pro)
+| Creates the namespace and installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
+
+| configure-prometheus-proxy.sh
+| <host> <port> [step]
+| Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default `step` is 10s
+
+| deploy-scdf.sh
+| [scdf-type] (oss, pro)
+| Deploys the application using the package and `scdf-values.yml` in the current directory.
+If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
+
+| update-scdf.sh
+| [scdf-type] (oss, pro)
+| Updated the deployed application using a modified values file.
+If the optional _scdf-type_ is not provided, the environmental variable `SCDF_TYPE` will be used.
+
+| export-dataflow-ip.sh
+| N/A
+| Will print the URL to access dataflow. If you use `source ./export-dataflow-ip.sh` it will export `DATAFLOW_URL` to be used by `register-apps.sh`
+
+| register-apps.sh
+| <broker> [stream-application-version]
+| _broker_ must be one of rabbit or kafka.
+_stream-application-version_ is optional and will install the latest version. The latest version is 2021.1.2
+|===
+
+NOTE: Take note that the registration of application in the _pro_ version can take a few minutes since it retrieves all version information and metadata upfront.
+
+== Prepare Configuration parameters
+
+Executing the following script will configure the environmental variables needed.
+
+[source,shell]
+....
+source ./start-deploy.sh <broker> <namespace> [scdf-type]
+....
+
+Where:
+
+* `broker` is one of rabbitmq or kafka
+* `namespace` A valid Kubernetes namespace other than `default`
+* `scdf-type` One of oss or pro. oss is the default.
+
+
+The environmental variables can also be configured manually to override the values.
+
+[cols="3m,6,2"]
+|===
+|Name |Description|Default
+
+|PACKAGE_VERSION
+|Version of Carvel package.
+| Release version
+
+|DATAFLOW_VERSION
+|Version of Spring Cloud Data Flow
+|2.10.3
+
+|SKIPPER_VERSION
+|Version of Spring Cloud Skipper
+|2.9.3
+
+|REGISTRY
+|Url and repository of package registry. Format `<private-registry-host/repo-name>`. This will be used to prefix the carvel repo and package.
+| `docker.io/springcloud`
+
+| BROKER
+| One of `kafka` or `rabbitmq`
+| `rabbitmq`
+
+| DATABASE
+| One of `mariadb` or `postgresql`. The default is `postgresql`. This will only apply when you `deploy-local-database.sh`
+|`postgresql`
+
+| NS
+| A Kubernetes namespace other than `default`.
+| `scdf`
+
+| SCDF_TYPE
+| One of `oss` or `pro`.
+| `oss`
+
+|===
+
+== Prepare Configuration file
+
+Create a file name `scdf-values.yml` by executing:
+
+[source,shell]
+....
+./carvel-use-template.sh
+....
+
+Edit the file as needed to configure the deployment. The `deploy-local-` scripts will
+
+_Uses scdf-type previously selected._
+
+== Prepare cluster and add repository
+
+Login to docker and optionally registry.pivotal.io for Spring Cloud Data Flow Pro.
+
+[source,shell]
+....
+# When deploying SCDF Pro.
+export TANZU_DOCKER_USERNAME="<tanzu-net-username>"
+export TANZU_DOCKER_PASSWORD="<tanzu-net-password>"
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.pivotal.io
+
+# Always required to ensure you don't experience rate limiting with Docker HUB
+export DOCKER_HUB_USERNAME="<docker-hub-username>"
+export DOCKER_HUB_PASSWORD="<docker-hub-password>"
+docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD index.docker.io
+....
+
+Install carvel kapp-controller, secretgen-controller and certmanager
+
+[source,shell]
+....
+./prepare-cluster.sh
+....
+
+Load scdf repo package for the _scdf-type_
+[source,shell]
+....
+./setup-scdf-repo.sh
+....
+
+== Install supporting services
+
+In a production environment you should be using supported database and broker services or operators along with shared observability tools.
+
+For local development or demonstration the following can be used to install database, broker and prometheus.
+
+=== Deploy local database.
+
+[source,shell]
+....
+./deploy-local-database.sh <database>  # <1>
+....
+<1> `database` must be one of `postgresql` or `mariadb`. Default is postgresql or configure in `DATABASE` using `start-deploy.sh`.
+
+NOTE: This script updates `scdf-values.yml` with the correct secret name.
+
+=== Deploy local message broker.
+[source,shell]
+....
+./deploy-local-broker.sh
+....
+
+=== Deploy local Prometheus and proxy.
+[source,shell]
+....
+./deploy-local-prometheus.sh
+....
+
+_This script also configures the Grafana endpoint in `scdf-values.yml`_
+
+=== Configure Prometheus proxy
+
+In the case where and existing prometheus and prometheus proxy is deployed the proxy can be configured using:
+
+[source,shell]
+....
+./configure-prometheus-proxy.sh <host> <port> [step]
+....
+
+== Deploy Spring Cloud Data Flow
+
+[source,shell]
+....
+./deploy-scdf.sh
+# This should display Dataflow URL: <url-to-access-dataflow>
+source ./export-dataflow-ip.sh
+./register-apps.sh
+....
+
+== Update deployed application.
+
+You can modify the values file used during installation and then update the deployment using `update-scdf.sh`

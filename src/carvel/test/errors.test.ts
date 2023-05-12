@@ -16,13 +16,11 @@ describe('errors', () => {
       files: ['config'],
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.deploy.database.type=fake1',
-        'scdf.deploy.binder.type=fake2'
+        'scdf.binder.type=fake2'
       ]
     });
     expect(result.success, result.stderr).toBeFalsy();
     expect(result.stderr).toContain('Validation failed with following errors');
-    expect(result.stderr).toContain('scdf.deploy.database.type');
-    expect(result.stderr).toContain('scdf.deploy.binder.type');
+    expect(result.stderr).toContain('scdf.binder.type');
   });
 });

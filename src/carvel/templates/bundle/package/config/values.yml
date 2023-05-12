@@ -1,11 +1,6 @@
 (@ load("@ytt:data", "data") @)#@data/values
 ---
 scdf:
-  deploy:
-    binder:
-      type: rabbit
-    database:
-      type: mariadb
   server:
     image:
       repository: (@= data.values.server.repository @)
@@ -16,8 +11,3 @@ scdf:
   skipper:
     image:
       tag: (@= data.values.skipper.version @)
-  feature:
-    monitoring:
-      grafana:
-        image:
-          tag: (@= data.values.grafana.version @)

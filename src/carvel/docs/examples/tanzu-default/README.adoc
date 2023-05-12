@@ -24,12 +24,12 @@ Setup `2.11.0-SNAPSHOT` repo:
 
 [source, bash]
 ----
-tanzu package repository add scdf-repo \
-  --url springcloud/scdf-repo:2.11.0-SNAPSHOT
+tanzu package repository add scdf-oss-repo \
+  --url springcloud/scdf-oss-repo:2.11.0-SNAPSHOT
 
 tanzu package repository list
   NAME                REPOSITORY                                     STATUS               DETAILS
-  scdf-repo           springcloud/scdf-repo:2.11.0-SNAPSHOT           Reconcile succeeded
+  scdf-oss-repo           springcloud/scdf-oss-repo:2.11.0-SNAPSHOT           Reconcile succeeded
 
 tanzu package available list
   NAME                   DISPLAY-NAME  SHORT-DESCRIPTION
@@ -60,5 +60,5 @@ Cleanup:
 [source, bash]
 ----
 tanzu package installed delete scdf-demo -y
-tanzu package repository delete scdf-repo -y
+tanzu package repository delete scdf-oss-repo -y
 ----

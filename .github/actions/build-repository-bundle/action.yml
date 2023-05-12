@@ -13,6 +13,9 @@ inputs:
   package-name:
     description: package name
     required: true
+  project-directory:
+    description: The working directory
+    required: false
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -24,7 +27,7 @@ runs:
   - name: Tanzu Dance
     id: tanzu-dance
     env:
-      VERSION: ${{ inputs.version }}
+      PACKAGE_VERSION: ${{ inputs.version }}
       PACKAGE_BUNDLE_REPOSITORY: ${{ inputs.package-bundle-repository }}
       PACKAGE_NAME: ${{ inputs.package-name }}
       REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}
@@ -33,28 +36,5 @@ runs:
     shell: bash
     run: |
       echo "::set-output name=bundle-path::$REPO_BUNDLE_GENERATED"
-
-      mkdir -p $REPO_BUNDLE_GENERATED/packages
-      mkdir -p $REPO_BUNDLE_GENERATED/.imgpkg
-      ytt \
-        -f $REPO_BUNDLE_TEMPLATE \
-        --output-files $REPO_BUNDLE_RENDERED \
-        --data-value-yaml project.version=$VERSION \
-        --data-value-yaml repository=$PACKAGE_BUNDLE_REPOSITORY \
-        --data-value-yaml package.name=$PACKAGE_NAME \
-        --data-value-yaml package.timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
-        --file-mark 'package.yml:type=text-plain' \
-        --file-mark 'metadata.yml:type=text-plain' \
-        --file-mark 'values-schema.yml:type=text-plain' \
-        --file-mark 'values-schema.star:type=text-plain' \
-        --file-mark 'values-schema.star:for-output=true' \
-        --file-mark 'versions.yml:type=text-template'
-
-      ytt \
-        -f $REPO_BUNDLE_RENDERED \
-        --file-mark 'values-schema.yml:type=data' \
-        > $REPO_BUNDLE_GENERATED/packages/packages.yml
-
-      kbld \
-        --file $REPO_BUNDLE_GENERATED/packages \
-        --imgpkg-lock-output $REPO_BUNDLE_GENERATED/.imgpkg/images.yml
+      SCDF_DIR="${{ inputs.project-directory || '.' }}"
+      $SCDF_DIR/.github/actions/build-repository-bundle/build-repository-bundle.sh

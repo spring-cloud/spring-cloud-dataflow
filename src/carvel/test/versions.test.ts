@@ -6,7 +6,7 @@ describe('versions', () => {
   it('should replace versions', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValues: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.deploy.database.type=postgres']
+      dataValues: [...DEFAULT_REQUIRED_DATA_VALUES]
     });
     expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;

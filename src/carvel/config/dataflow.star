@@ -1,11 +1,7 @@
 load("@ytt:data", "data")
-load("binder/binder.star", "rabbitmq_enabled")
-load("binder/binder.star", "kafka_enabled")
 load("monitoring/monitoring.star", "grafana_enabled")
-
-def non_empty_string(value):
-  return type(value) == "string" and len(value) > 0
-end
+load("monitoring/monitoring.star", "prometheus_rsocket_proxy_enabled")
+load("common/common.star", "non_empty_string")
 
 def dataflow_image():
   if non_empty_string(data.values.scdf.server.image.digest):
@@ -46,13 +42,16 @@ def dataflow_container_env():
   end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
+  end
+  if prometheus_rsocket_proxy_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST", "value": "prometheus-rsocket-proxy"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
-    envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL", "value": "http://localhost:3000"}])
+  end
+  if non_empty_string(data.values.scdf.server.database.secretName):
+    envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])
+    envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretPasswordKey}}}])
   end
   for e in data.values.scdf.server.env:
-    envs.extend([{"name": e.name, "value": e.value}])
+      envs.extend([{"name": e.name, "value": e.value}])
   end
   return envs
 end
@@ -87,4 +86,8 @@ end
 
 def dataflow_readiness_path():
   return data.values.scdf.server.contextPath + "/management/info"
+end
+
+def dataflow_has_password():
+  return non_empty_string(data.values.scdf.server.database.password)
 end

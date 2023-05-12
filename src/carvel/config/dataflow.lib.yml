@@ -44,7 +44,6 @@ config: #@ data.values.scdf.server.config
 #@ end
 
 #@ def monitoring_config():
-#@ if grafana_enabled():
 #@overlay/match-child-defaults missing_ok=True
 config:
   management:
@@ -63,7 +62,6 @@ config:
         metrics:
           dashboard:
             url: #@ data.values.scdf.server.metrics.dashboard.url
-#@ end
 #@ end
 #@ end
 

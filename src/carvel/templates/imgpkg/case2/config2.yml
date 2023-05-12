@@ -1,11 +1,6 @@
 (@ load("@ytt:data", "data") @)#@data/values
 ---
 scdf:
-  deploy:
-    binder:
-      type: kafka
-    database:
-      type: postgres
   server:
     image:
       repository: (@= data.values.server.repository @)
@@ -19,10 +14,6 @@ scdf:
   feature:
     monitoring:
       grafana:
-        enabled: true
-        image:
-          tag: (@= data.values.grafana.version @)
-      prometheus:
         enabled: true
       prometheusRsocketProxy:
         enabled: true

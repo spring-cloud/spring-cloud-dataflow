@@ -24,15 +24,21 @@ endif::[]
 
 [[binder]]
 == Binder
-On default a binder is deployed as a service for both skipper and dataflow
-servers. Servers are configured to use these binder services.
+No default binder is deployed.
+
+For local demo use:
+[source,shell]
+....
+kubectl create --namespace <binder> -f src/kubernetes/<binder>/
+kubectl get --namespace <binder> services <binder> | grep -F <binder> | awk '{ print $3 }'
+....
+
+Supply the ip to the relevant host configuration option.
 
 === Configure External Kafka Binder
-Disable binder deployment {scdf-deploy-binder-enabled} and define a custom
-settings for binder under _scdf.binder_. You need to set all options {scdf-binder-kafka-broker-host},
+Define custom settings for binder under _scdf.binder_. You need to set all options {scdf-binder-kafka-broker-host},
 {scdf-binder-kafka-broker-port}, {scdf-binder-kafka-zk-host} and {scdf-binder-kafka-zk-port}.
 
 === Configure External Rabbit Binder
-Disable binder deployment {scdf-deploy-binder-enabled} and define a custom
-settings for binder under _scdf.binder_. You need to set all options {scdf-binder-rabbit-host}
+Define custom settings for binder under _scdf.binder_. You need to set all options {scdf-binder-rabbit-host}
 and {scdf-binder-rabbit-port}.

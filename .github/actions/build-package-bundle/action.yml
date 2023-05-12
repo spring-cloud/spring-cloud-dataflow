@@ -28,7 +28,7 @@ inputs:
   config:
     description: path to ytt config files dir
     required: true
-  working-directory:
+  project-directory:
     description: The working directory
     required: false
 outputs:
@@ -57,5 +57,5 @@ runs:
     shell: bash
     run: |
       echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
-      SCDF_DIR="${{ inputs.working-directory || '.' }}"
+      SCDF_DIR="${{ inputs.project-directory || '.' }}"
       $SCDF_DIR/.github/actions/build-package-bundle/build-package-bundle.sh

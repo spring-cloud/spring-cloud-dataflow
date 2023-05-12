@@ -6,55 +6,6 @@ scdf:
     secret:
       #! if defined ref will be added as imagePullSecrets resources
       ref: ""
-  deploy:
-    binder:
-      #! if binder deployment is enabled
-      enabled: true
-      type: rabbit
-      rabbit:
-        image:
-          repository: rabbitmq
-          tag: 3.9.5
-          digest: ""
-        #! rabbit username (defaults to dataflow)
-        username: ZGF0YWZsb3c=
-        #! rabbit password (default to secret)
-        password: c2VjcmV0
-        #@schema/type any=True
-        config:
-      kafka:
-        brokerImage:
-          repository: confluentinc/cp-kafka
-          tag: 5.5.2
-          digest: ""
-        zkImage:
-          repository: confluentinc/cp-zookeeper
-          tag: 5.5.2
-          digest: ""
-    #! deploy database settings
-    database:
-      #! if database deployment is enabled
-      enabled: true
-      #! database type, either mariadb or postgres (required)
-      type: postgres
-      postgres:
-        #! database username (defaults to dataflow)
-        username: ZGF0YWZsb3c=
-        #! database password (default to secret)
-        password: c2VjcmV0
-        image:
-          repository: postgres
-          tag: "10"
-          digest: ""
-      mariadb:
-        #! database username (defaults to dataflow)
-        username: ZGF0YWZsb3c=
-        #! database password (default to secret)
-        password: c2VjcmV0
-        image:
-          repository: mariadb
-          tag: "10.4"
-          digest: ""
   server:
     image:
       #! dataflow server image repository id
@@ -83,6 +34,9 @@ scdf:
       testOnBorrow: true
       validationQuery: ""
       dialect: ""
+      secretName: ""
+      secretUsernameKey: ""
+      secretPasswordKey: ""
     #! additional dataflow server configuration
     #@schema/type any=True
     config:
@@ -120,6 +74,9 @@ scdf:
       testOnBorrow: true
       validationQuery: ""
       dialect: ""
+      secretName: ""
+      secretUsernameKey: ""
+      secretPasswordKey: ""
     #! additional skipper server configuration
     #@schema/type any=True
     config:
@@ -128,6 +85,8 @@ scdf:
       value: ""
   #! external binder settings, will disable binder deployment
   binder:
+    #! default is rabbit. Alternative is kafka
+    type: rabbit
     kafka:
       broker:
         host: ""
@@ -143,23 +102,11 @@ scdf:
   #! optional feature
   feature:
     monitoring:
-      prometheus:
-        enabled: false
-        image:
-          repository: prom/prometheus
-          tag: v2.12.0
-          digest: ""
       grafana:
         enabled: false
-        image:
-          repository: springcloud/spring-cloud-dataflow-grafana-prometheus
-          tag: ""
-          digest: ""
-        service:
-          type: ClusterIP
       prometheusRsocketProxy:
         enabled: false
         image:
           repository: micrometermetrics/prometheus-rsocket-proxy
-          tag: 1.0.0
+          tag: 1.5.0
           digest: ""

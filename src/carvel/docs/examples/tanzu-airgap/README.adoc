@@ -39,8 +39,8 @@ Copy source, sink and task:
 [source, bash]
 ----
 imgpkg copy \
-  -b springcloud/scdf-repo:2.11.0-SNAPSHOT \
-  --to-repo ghcr.io/jvalkeal/private/scdf-repo
+  -b springcloud/scdf-oss-repo:2.11.0-SNAPSHOT \
+  --to-repo ghcr.io/jvalkeal/private/scdf-oss-repo
 
 imgpkg copy \
   -i springcloudstream/time-source-rabbit:3.0.1 \

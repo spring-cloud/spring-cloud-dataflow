@@ -3,41 +3,5 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:template", "template")
 #@ load("binder.lib.yml", "binder_overlay")
-#@ load("binder.star", "binder_install_enabled")
-#@ load("binder.star", "rabbitmq_enabled")
-#@ load("binder.star", "kafka_enabled")
 
-#@ def binder_rabbit_values():
-name: rabbitmq
-config: #@ data.values.scdf.deploy.binder.rabbit.config
-image:
-  repository: #@ data.values.scdf.deploy.binder.rabbit.image.repository
-  tag: #@ data.values.scdf.deploy.binder.rabbit.image.tag
-  digest: #@ data.values.scdf.deploy.binder.rabbit.image.digest
-username: #@ data.values.scdf.deploy.binder.rabbit.username
-password: #@ data.values.scdf.deploy.binder.rabbit.password
-registrySecretRef: #@ data.values.scdf.registry.secret.ref
-#@ end
 
-#@ def binder_kafka_values():
-name: kafka
-brokerImage:
-  repository: #@ data.values.scdf.deploy.binder.kafka.brokerImage.repository
-  tag: #@ data.values.scdf.deploy.binder.kafka.brokerImage.tag
-  digest: #@ data.values.scdf.deploy.binder.kafka.brokerImage.digest
-zkImage:
-  repository: #@ data.values.scdf.deploy.binder.kafka.zkImage.repository
-  tag: #@ data.values.scdf.deploy.binder.kafka.zkImage.tag
-  digest: #@ data.values.scdf.deploy.binder.kafka.zkImage.digest
-registrySecretRef: #@ data.values.scdf.registry.secret.ref
-#@ end
-
-#@ if binder_install_enabled():
-#@ if rabbitmq_enabled():
---- #@ template.replace(overlay.apply(library.get("rabbitmq").with_data_values(binder_rabbit_values()).eval(), binder_overlay()))
-#@ end
-
-#@ if kafka_enabled():
---- #@ template.replace(overlay.apply(library.get("kafka").with_data_values(binder_kafka_values()).eval(), binder_overlay()))
-#@ end
-#@ end

@@ -22,7 +22,7 @@ data:
       relabel_configs:
         - source_labels: [__meta_kubernetes_pod_label_app]
           action: keep
-          regex: prometheus-proxy
+          regex: prometheus-rsocket-proxy
         - source_labels: [__meta_kubernetes_pod_container_port_number]
           action: keep
           regex: 8080
@@ -36,7 +36,7 @@ data:
       relabel_configs:
         - source_labels: [__meta_kubernetes_pod_label_app]
           action: keep
-          regex: prometheus-proxy
+          regex: prometheus-rsocket-proxy
         - source_labels: [__meta_kubernetes_pod_container_port_number]
           action: keep
           regex: 8080
