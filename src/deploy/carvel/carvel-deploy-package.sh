@@ -34,13 +34,17 @@ check_env PACKAGE_NAME
 check_env PACKAGE_VERSION
 check_env VALUES_FILE
 echo "Install package $PACKAGE_NAME as $APP_NAME"
-
+if [ "$DEBUG" = "true" ]; then
+    ARGS="--debug"
+else
+    ARGS=""
+fi
 kctrl package install --package-install "$APP_NAME" \
   --service-account-name "$SA" \
   --package "$PACKAGE_NAME" \
   --values-file "$VALUES_FILE" \
   --version "$PACKAGE_VERSION" --namespace "$NS" --yes \
-  --wait --wait-check-interval 10s
+  --wait --wait-check-interval 10s $ARGS
 
 kctrl app status --app "$APP_NAME" --namespace "$NS" --json
 kctrl package installed status --package-install "$APP_NAME" --namespace "$NS"

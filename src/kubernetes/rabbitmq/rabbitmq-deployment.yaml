@@ -17,6 +17,7 @@ spec:
       containers:
       - image: rabbitmq:3.6.10
         name: rabbitmq
+        imagePullPolicy: IfNotPresent
         env:
           - name: LANG
             value: en_US.utf8

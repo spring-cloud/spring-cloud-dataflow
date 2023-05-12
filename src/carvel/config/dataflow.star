@@ -1,5 +1,6 @@
 load("@ytt:data", "data")
 load("monitoring/monitoring.star", "grafana_enabled")
+load("monitoring/monitoring.star", "prometheus_rsocket_proxy_enabled")
 load("common/common.star", "non_empty_string")
 
 def dataflow_image():
@@ -41,14 +42,9 @@ def dataflow_container_env():
   end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
+  end
+  if prometheus_rsocket_proxy_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST", "value": "prometheus-rsocket-proxy"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
-    if non_empty_string(data.values.scdf.server.metrics.dashboard.url):
-      envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL", "value": data.values.scdf.server.metrics.dashboard.url}])
-    else:
-      envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL", "value": "http://localhost:3000"}])
-    end
   end
   if non_empty_string(data.values.scdf.server.database.secretName):
     envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])

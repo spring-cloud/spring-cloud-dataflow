@@ -39,4 +39,4 @@ if [ "$5" != "" ]; then
 fi
 check_env NS
 create_secret "$SECRET_NAME" "$REGISTRY_NAME" "$REGISTRY_USER" "$REGISTRY_PWD" "secrets-ns"
-kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "registry-key"}]}' --namespace "$NS"
+

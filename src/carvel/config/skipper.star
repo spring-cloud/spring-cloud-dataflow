@@ -4,6 +4,7 @@ load("binder/binder.star", "external_kafka_enabled")
 load("binder/binder.star", "external_rabbitmq_env_str")
 load("binder/binder.star", "external_kafka_env_str")
 load("monitoring/monitoring.star", "grafana_enabled")
+load("monitoring/monitoring.star", "prometheus_rsocket_proxy_enabled")
 load("common/common.star", "non_empty_string")
 def env_config():
   env = ""
@@ -44,9 +45,9 @@ def skipper_container_env():
   end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
+  end
+  if prometheus_rsocket_proxy_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST", "value": "prometheus-rsocket-proxy"}])
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT", "value": "7001"}])
   end
   for e in data.values.scdf.skipper.env:
     envs.extend([{"name": e.name, "value": e.value}])

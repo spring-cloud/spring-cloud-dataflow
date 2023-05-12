@@ -4,12 +4,6 @@ scdf:
   server:
     service:
       type: LoadBalancer
-    database:
-      url: jdbc:postgresql://postgresql.postgresql.svc.cluster.local/dataflow
-      driverClassName: org.postgresql.Driver
-      secretName: postgresql
-      secretUsernameKey: database-username
-      secretPasswordKey: database-password
     env:
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_STREAMS_ENABLED
         value: "true"
@@ -18,12 +12,6 @@ scdf:
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
         value: "true"
   skipper:
-    database:
-      url: jdbc:postgresql://postgresql.postgresql.svc.cluster.local/dataflow
-      driverClassName: org.postgresql.Driver
-      secretName: postgresql
-      secretUsernameKey: database-username
-      secretPasswordKey: database-password
   registry:
     secret:
       ref: "reg-creds-dockerhub"

@@ -16,5 +16,11 @@ check_env NS
 check_env PACKAGE
 check_env PACKAGE_NAME
 echo "Adding $PACKAGE as $PACKAGE_NAME in $NS"
-kctrl package repository add --namespace $NS --repository $PACKAGE_NAME --url $PACKAGE --yes --wait --wait-check-interval 10s
+
+if [ "$DEBUG" = "true" ]; then
+    ARGS="--debug"
+else
+    ARGS=""
+fi
+kctrl package repository add --namespace $NS --repository $PACKAGE_NAME --url $PACKAGE --yes --wait --wait-check-interval 10s $ARGS
 kctrl package repository list --namespace $NS

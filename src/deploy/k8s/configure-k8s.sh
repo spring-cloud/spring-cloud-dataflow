@@ -47,7 +47,10 @@ case "$K8S_DRIVER" in
 *)
     echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"
     # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion or hyperkit
-    minikube start --cpus=8 --memory=16g "--driver=$K8S_DRIVER" "--kubernetes-version=$K8S_VERSION"
+    if [ "$K8S_DRIVER" != "docker" ] && [ "$MK_ARGS" = "" ]; then
+        MK_ARGS="--cpus=8 --memory=12g"
+    fi
+    minikube start $MK_ARGS "--driver=$K8S_DRIVER" "--kubernetes-version=$K8S_VERSION"
     echo -e "Please run ${bold}'minikube tunnel'${end} in a separate shell to ensure a LoadBalancer is active."
     ;;
 esac

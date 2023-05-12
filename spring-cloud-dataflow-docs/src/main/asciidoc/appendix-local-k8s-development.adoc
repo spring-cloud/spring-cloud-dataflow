@@ -91,6 +91,8 @@ The following script will create the local cluster.
 
 [source,shell]
 ....
+# Optionally add to control cpu and memory allocation.
+export MK_ARGS="--cpus=8 --memory=12g"
 ./configure-k8s.sh
 ....
 

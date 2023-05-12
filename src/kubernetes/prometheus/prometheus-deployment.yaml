@@ -17,6 +17,7 @@ spec:
       containers:
         - name: prometheus
           image: prom/prometheus:v2.37.8
+          imagePullPolicy: IfNotPresent
           args:
             - "--web.console.libraries=/usr/share/prometheus/console_libraries"
             - "--web.console.templates=/usr/share/prometheus/consoles"

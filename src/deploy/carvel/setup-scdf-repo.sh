@@ -22,8 +22,6 @@ check_env DOCKER_HUB_PASSWORD
 $SCDIR/carvel-prepare-namespaces.sh $NS
 # Credentials for docker.io
 
-$SCDIR/carvel-add-registry-secret.sh scdf-metadata-default docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
-$SCDIR/carvel-add-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 
 case $SCDF_TYPE in
 "pro")
@@ -51,13 +49,8 @@ if [ "$REGISTRY" != "" ]; then
 else
     PACKAGE="$REGISTRY_REPO/$REPO_NAME:$PACKAGE_VERSION"
     echo "Adding repository for SCDF $SCDF_TYPE: $PACKAGE_VERSION"
-
-    if [ "$SCDF_TYPE" = "pro" ]; then
-        check_env TANZU_DOCKER_USERNAME
-        check_env TANZU_DOCKER_PASSWORD
-        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry dev.registry.pivotal.io "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
-    fi
 fi
+
 $SCDIR/carvel-add-package.sh "$PACKAGE" "$PACKAGE_NAME" "$NS"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))

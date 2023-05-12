@@ -37,8 +37,8 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 |Name | Arguments |Descriptions
 
 | start-deploy.sh
-| <broker> [database] <namespace> [scdf-type]
-| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set and optionally `DATABASE`.
+| <broker> [scdf-type] [namespace]
+| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The default `SCDF_TYPE` is `oss`
 
 | prepare-cluster.sh
 | N/A
@@ -51,6 +51,10 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 | setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
 | Installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
+
+| configure-prometheus-proxy.sh
+| <host> <port> [step]
+| Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default `step` is 10s
 
 | deploy-scdf.sh
 | [scdf-type] (oss, pro)
@@ -184,9 +188,9 @@ For local development or demonstration the following can be used to install data
 
 [source,shell]
 ....
-./deploy-local-database.sh [database]  # <1>
+./deploy-local-database.sh <database>  # <1>
 ....
-<1> Optional `database` may be one of postgresql or mariadb. Default is postgresql or configure in `DATABASE` using `start-deploy.sh`
+<1> `database` must be one of `postgresql` or `mariadb`. Default is postgresql or configure in `DATABASE` using `start-deploy.sh`.
 
 NOTE: This script updates `scdf-values.yml` with the correct secret name.
 
@@ -196,10 +200,21 @@ NOTE: This script updates `scdf-values.yml` with the correct secret name.
 ./deploy-local-broker.sh
 ....
 
-=== Deploy local prometheus.
+=== Deploy local Prometheus and proxy.
 [source,shell]
 ....
 ./deploy-local-prometheus.sh
+....
+
+_This script also configures the Grafana endpoint in `scdf-values.yml`_
+
+=== Configure Prometheus proxy
+
+In the case where and existing prometheus and prometheus proxy is deployed the proxy can be configured using:
+
+[source,shell]
+....
+./configure-prometheus-proxy.sh <host> <port> [step]
 ....
 
 == Deploy Spring Cloud Data Flow
@@ -215,6 +230,3 @@ source ./export-dataflow-ip.sh
 == Update deployed application.
 
 You can modify the values file used during installation and then update the deployment using `update-scdf.sh`
-
-
-
