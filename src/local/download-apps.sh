@@ -92,7 +92,7 @@ function download_deps() {
 }
 
 set -e
-APPS=("spring-cloud-dataflow-server" "spring-cloud-dataflow-composed-task-runner" "spring-cloud-dataflow-single-step-batch-job")
+APPS=("spring-cloud-dataflow-server" "spring-cloud-dataflow-composed-task-runner" "spring-cloud-dataflow-single-step-batch-job" "spring-cloud-dataflow-shell")
 for app in ${APPS[@]}; do
     APP_PATH="$app/target"
     download_deps "org.springframework.cloud:$app:$VER" "$ROOT_DIR/$APP_PATH"
