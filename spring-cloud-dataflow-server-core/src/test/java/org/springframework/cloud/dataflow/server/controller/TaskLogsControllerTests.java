@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Collections;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,11 +31,15 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -48,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
@@ -68,6 +74,12 @@ public class TaskLogsControllerTests {
 	private LauncherRepository launcherRepository;
 
 	@Autowired
+	TaskExecutionDao taskExecutionDao;
+
+	@Autowired
+	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+
+	@Autowired
 	private TaskPlatform taskPlatform;
 
 	@Before
@@ -83,6 +95,30 @@ public class TaskLogsControllerTests {
 	public void testGetCurrentExecutionLog() throws Exception {
 		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
 		mockMvc.perform(get("/tasks/logs/mytask1").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testGetCurrentExecutionExternalIdLog() throws Exception {
+		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
+		mockMvc.perform(get("/tasks/logs/mytask1").param("idType", "external").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	public void testGetCurrentExecutionInvalidTypeIdLog() throws Exception {
+		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
+		mockMvc.perform(get("/tasks/logs/mytask1").param("idType", "adfads").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().is5xxServerError());
+	}
+	@Test
+	public void testGetCurrentExecutionWithInternalIDLog() throws Exception {
+		TaskExecution taskExecution = this.taskExecutionDao.createTaskExecution("sampleTaskName", new Date(), Collections.emptyList(), "myTask2");
+		TaskManifest taskManifest = new TaskManifest();
+		taskManifest.setPlatformName("default");
+		this.dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
+		when(taskLauncher.getLog("myTask2")).thenReturn("Log");
+		mockMvc.perform(get("/tasks/logs/" + taskExecution.getExecutionId()).param("idType", "internal").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 }

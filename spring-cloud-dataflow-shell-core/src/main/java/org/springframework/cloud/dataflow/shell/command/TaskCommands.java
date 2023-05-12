@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,16 +258,10 @@ public class TaskCommands {
 	@ShellMethod(key = LOG, value = "Retrieve task execution log")
 	public String retrieveTaskExecutionLog(
 			@ShellOption(value = { "", "--id" }, help = "the task execution id") long id,
-			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform) {
+			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform,
+			@ShellOption(help = "the idType of the task execution", defaultValue = ShellOption.NULL) String idType) {
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
-		String result;
-		if (platform != null) {
-			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform);
-		}
-		else {
-			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId());
-		}
-		return result;
+		return taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform, idType);
 	}
 
 	@ShellMethod(key = DESTROY, value = "Destroy an existing task")

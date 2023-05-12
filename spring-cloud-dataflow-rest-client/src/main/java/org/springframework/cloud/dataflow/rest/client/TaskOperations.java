@@ -122,29 +122,15 @@ public interface TaskOperations {
 	TaskExecutionResource taskExecutionStatus(long id);
 
 	/**
-	 * Return the task execution log.  The platform from which to retrieve the log will be set to {@code default}.
-	 *
-	 * @param externalExecutionId the external execution identifier of the task execution.
-	 * @return {@link String} containing the log.
-	 */
-	String taskExecutionLog(String externalExecutionId);
-
-	/**
 	 * Return the task execution log.
 	 *
 	 * @param externalExecutionId the external execution identifier of the task execution.
 	 * @param platform the platform from which to obtain the log.
+	 * @param idType identifies whether the log should be obtained using the {@code externalExecutionId} or the {@code taskExecutionId} created by SCDF.
+	 * The default is "external" which means the method will use the {@code externalExecutionId}.  If you wish to use the {@code taskExecutionId} created by SCDF then set {@code idType} to "internal".
 	 * @return {@link String} containing the log.
 	 */
-	String taskExecutionLog(String externalExecutionId, String platform);
-
-	/**
-	 * Return the task execution log.
-	 *
-	 * @param executionId the task execution identifier.
-	 * @return {@link String} containing the log.
-	 */
-	String taskExecutionLog(Long executionId);
+	String taskExecutionLog(String externalExecutionId, String platform, String idType);
 
 	/**
 	 * Return information including the count of currently executing tasks and task execution

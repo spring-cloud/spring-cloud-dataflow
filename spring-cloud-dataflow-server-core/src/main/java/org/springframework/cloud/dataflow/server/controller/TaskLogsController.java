@@ -51,18 +51,24 @@ public class TaskLogsController {
 
 	/**
 	 * Retrieve logs for the task execution identified by the provided external execution ID
-	 * @param taskExternalExecutionId the external execution ID returned by the platform when launching the task
+	 * @param executionId the execution ID used to retrieve the log.
 	 * @param platformName the platform name
+	 * @param idType identifies whether the log should be obtained using the {@code externalExecutionId} or the {@code taskExecutionId} created by SCDF.
+	 * The default is "external" which means the method will use the {@code externalExecutionId}.  If you wish to use the {@code taskExecutionId} created by SCDF then set {@code idType} to "internal".
 	 * @return the log content represented as String
 	 */
-	@RequestMapping(value = "/{taskExternalExecutionId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{executionId}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> getLog(@PathVariable String taskExternalExecutionId, @RequestParam(required = false, defaultValue = "default") String platformName) {
-		return new ResponseEntity<>(this.taskExecutionService.getLog(platformName, taskExternalExecutionId), HttpStatus.OK);
-	}
-	@RequestMapping(value = "/taskexecutionid/{taskExecutionId}", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	public ResponseEntity<String> getLog(@PathVariable Long taskExecutionId) {
-		return new ResponseEntity<>(this.taskExecutionService.getLog(taskExecutionId), HttpStatus.OK);
+	public ResponseEntity<String> getLog(@PathVariable String executionId, @RequestParam(required = false, defaultValue = "default") String platformName, @RequestParam(required = false, defaultValue = "external") String idType) {
+		ResponseEntity<String> result;
+		if(idType.equals("external")) {
+			result = new ResponseEntity<>(this.taskExecutionService.getLog(platformName, executionId), HttpStatus.OK);
+		} else if(idType.equals("internal")) {
+			Long t = Long.valueOf(executionId);
+			result = new ResponseEntity<>(this.taskExecutionService.getLog(Long.valueOf(executionId)), HttpStatus.OK);
+		} else {
+			throw new IllegalArgumentException("Invalid idType specified.");
+		}
+		return result;
 	}
 }

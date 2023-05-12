@@ -350,7 +350,7 @@ public class TaskExecutionController {
 			// TODO add schemaVersionTarget queryParam to self
 			TaskExecutionResource resource = createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
 			if(!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getIdType())).withRel("tasks/logs"));
 			}
 			return resource;
 		}
@@ -360,7 +360,7 @@ public class TaskExecutionController {
 			// TODO add schemaVersionTarget queryParam
 			TaskExecutionResource resource = new TaskExecutionResource(taskJobExecutionRel);
 			if(!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getIdType())).withRel("tasks/logs"));
 			}
 			return resource;
 		}

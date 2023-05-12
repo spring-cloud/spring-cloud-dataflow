@@ -41,6 +41,10 @@ import org.springframework.util.StringUtils;
  */
 public class TaskExecutionResource extends RepresentationModel<TaskExecutionResource> {
 
+	public static final String INTERNAL_ID_TYPE = "internal";
+
+	public static final String EXTERNAL_ID_TYPE = "external";
+
 	/**
 	 * The unique id associated with the task execution.
 	 */
@@ -118,6 +122,8 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	private String taskExecutionStatus;
 
 	private String composedTaskJobExecutionStatus;
+
+	private String idType = EXTERNAL_ID_TYPE;
 
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
@@ -279,6 +285,15 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
+	}
+
+
+	public String getIdType() {
+		return idType;
+	}
+
+	public void setIdType(String idType) {
+		this.idType = idType;
 	}
 
 	public void setTaskExecutionStatus(String taskExecutionStatus) {
