@@ -31,6 +31,7 @@
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.2</jettison.version>
+		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -50,7 +51,7 @@
 			<dependency>
 				<groupId>org.yaml</groupId>
 				<artifactId>snakeyaml</artifactId>
-				<version>1.33</version>
+				<version>${snakeyaml.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
@@ -400,7 +401,7 @@
 				<repository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -408,7 +409,7 @@
 				<repository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
@@ -416,7 +417,7 @@
 				<repository>
 					<id>spring-releases</id>
 					<name>Spring Releases</name>
-					<url>https://repo.spring.io/libs-release</url>
+					<url>https://repo.spring.io/release</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -434,7 +435,7 @@
 				<pluginRepository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -442,7 +443,7 @@
 				<pluginRepository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>

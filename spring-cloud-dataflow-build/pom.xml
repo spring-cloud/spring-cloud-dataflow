@@ -22,7 +22,7 @@
 		<docs.main>${project.artifactId}</docs.main>
 		<spring-cloud-dataflow-build.version>2.11.0-SNAPSHOT</spring-cloud-dataflow-build.version>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.10</spring-boot.version>
+		<spring-boot.version>2.7.11</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
@@ -555,7 +555,7 @@
 				<repository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -563,7 +563,7 @@
 				<repository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -581,7 +581,7 @@
 				<pluginRepository>
 					<id>spring-snapshots</id>
 					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/libs-snapshot</url>
+					<url>https://repo.spring.io/snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
 					</snapshots>
@@ -589,7 +589,7 @@
 				<pluginRepository>
 					<id>spring-milestones</id>
 					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/libs-milestone</url>
+					<url>https://repo.spring.io/milestone</url>
 					<snapshots>
 						<enabled>false</enabled>
 					</snapshots>
