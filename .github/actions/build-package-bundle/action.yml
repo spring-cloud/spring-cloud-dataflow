@@ -58,4 +58,4 @@ runs:
     run: |
       echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
       SCDF_DIR="${{ inputs.project-directory || '.' }}"
-      $SCDF_DIR/.github/actions/build-package-bundle/build-package-bundle.sh
+      bash $SCDF_DIR/.github/actions/build-package-bundle/build-package-bundle.sh

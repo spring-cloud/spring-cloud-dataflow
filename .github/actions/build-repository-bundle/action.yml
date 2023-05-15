@@ -37,4 +37,4 @@ runs:
     run: |
       echo "::set-output name=bundle-path::$REPO_BUNDLE_GENERATED"
       SCDF_DIR="${{ inputs.project-directory || '.' }}"
-      $SCDF_DIR/.github/actions/build-repository-bundle/build-repository-bundle.sh
+      bash $SCDF_DIR/.github/actions/build-repository-bundle/build-repository-bundle.sh
