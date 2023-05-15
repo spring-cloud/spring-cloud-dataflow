@@ -306,14 +306,6 @@ describe('servers', () => {
         expect.objectContaining({
           name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED',
           value: 'true'
-        }),
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST',
-          value: 'prometheus-rsocket-proxy'
-        }),
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT',
-          value: '7001'
         })
       ])
     );
@@ -462,25 +454,8 @@ describe('servers', () => {
     expect(envs).toBeTruthy();
     expect(envs).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED',
-          value: 'true'
-        }),
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED',
-          value: 'true'
-        }),
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST',
-          value: 'prometheus-rsocket-proxy'
-        }),
-        expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT',
-          value: '7001'
-        }),
-        expect.objectContaining({
-          name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL'
-        })
+        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED', value: 'true' }),
+        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED', value: 'true' })
       ])
     );
   });

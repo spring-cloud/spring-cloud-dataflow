@@ -5,8 +5,6 @@ import { findDeployment, deploymentContainer, findPodSpecsWithImagePullSecrets, 
 import { execYtt } from '../src/ytt';
 
 describe('secrets', () => {
-
-
   it('should add carvel secretgen on default 4', async () => {
     const result = await execYtt({
       files: ['config'],
@@ -26,11 +24,7 @@ describe('secrets', () => {
   it('should add manual image pull secret if defined 1', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValueYamls: [
-        ...DEFAULT_REQUIRED_DATA_VALUES,
-        'scdf.binder.type=rabbit',
-        'scdf.registry.secret.ref=fakeref'
-      ]
+      dataValueYamls: [...DEFAULT_REQUIRED_DATA_VALUES, 'scdf.binder.type=rabbit', 'scdf.registry.secret.ref=fakeref']
     });
     expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
@@ -46,7 +40,6 @@ describe('secrets', () => {
     const secret = findSecret(yaml, 'reg-creds');
     expect(secret).toBeFalsy();
   });
-
 
   it('should add manual image pull secret if defined 4', async () => {
     const result = await execYtt({

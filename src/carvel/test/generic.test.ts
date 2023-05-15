@@ -4,11 +4,7 @@ describe('generic', () => {
   it('should work with minimal config', async () => {
     const result = await execYtt({
       files: ['config'],
-      dataValueYamls: [
-        'scdf.server.image.tag=2.8.1',
-        'scdf.skipper.image.tag=2.7.1',
-        'scdf.ctr.image.tag=2.8.1'
-      ]
+      dataValueYamls: ['scdf.server.image.tag=2.8.1', 'scdf.skipper.image.tag=2.7.1', 'scdf.ctr.image.tag=2.8.1']
     });
     expect(result.success, result.stderr).toBeTruthy();
   });
