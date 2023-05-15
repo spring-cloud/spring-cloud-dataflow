@@ -108,6 +108,6 @@ jobs:
       uses: ./.github/actions/publish-bundle
       with:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-oss'
+        repository: 'springcloud/scdf-oss-repo'
         version: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
         prerelease: 'SNAPSHOT'
