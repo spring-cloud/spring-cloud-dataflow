@@ -100,7 +100,7 @@ jobs:
         version: '${{ env.DATAFLOW_VERSION }}'
         repo-bundle-template: 'src/carvel/templates/bundle/repo'
         package-bundle-repository: 'springcloud/scdf-oss-package'
-        package-name: 'scdf'
+        package-name: 'scdf-oss'
 
     # Publishes scdf repo bundle
     - name: Publish Repository Bundle
