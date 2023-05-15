@@ -52,5 +52,4 @@ describe('rabbitmq', () => {
     // const rabbitConf = rabbitConfigMap?.data ? rabbitConfigMap.data['rabbitmq.conf'] : '';
     // expect(rabbitConf).toHaveLength(0);
   });
-
 });

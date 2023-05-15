@@ -39,6 +39,4 @@ describe('kafka', () => {
     // const kafkaBrokerService = findService(yaml, `${BINDER_KAFKA_NAME}-broker`);
     // expect(kafkaBrokerService).toBeTruthy();
   });
-
-
 });
