@@ -13,7 +13,6 @@ import {
 } from '../src/constants';
 
 describe('databases', () => {
-
   it('should configure external db settings', async () => {
     const result = await execYtt({
       files: ['config'],
