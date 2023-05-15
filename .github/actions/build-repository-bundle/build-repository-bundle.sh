@@ -28,7 +28,11 @@ check_env REPO_BUNDLE_RENDERED
 check_env PACKAGE_VERSION
 check_env PACKAGE_BUNDLE_REPOSITORY
 check_env PACKAGE_NAME
+
+echo "Build Repository Bundle: $REPO_BUNDLE_TEMPLATE, project.version=$PACKAGE_VERSION, package.name=$PACKAGE_NAME, repository=$PACKAGE_BUNDLE_REPOSITORY, output=$REPO_BUNDLE_RENDERED"
+
 set -e
+
 ytt \
     -f $REPO_BUNDLE_TEMPLATE \
     --output-files $REPO_BUNDLE_RENDERED \

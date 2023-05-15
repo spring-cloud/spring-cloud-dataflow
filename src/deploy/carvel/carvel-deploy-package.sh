@@ -35,10 +35,11 @@ check_env PACKAGE_VERSION
 check_env VALUES_FILE
 echo "Install package $PACKAGE_NAME as $APP_NAME"
 if [ "$DEBUG" = "true" ]; then
-    ARGS="--debug"
+    ARGS="--debug --json"
 else
     ARGS=""
 fi
+echo "Installing $APP_NAME from $PACKAGE_NAME:$PACKAGE_VERSION"
 kctrl package install --package-install "$APP_NAME" \
   --service-account-name "$SA" \
   --package "$PACKAGE_NAME" \

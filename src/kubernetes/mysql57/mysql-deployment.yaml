@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql57
+  labels:
+    app: mysql57
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql57
+  template:
+    metadata:
+      labels:
+        app: mysql57
+    spec:
+      containers:
+        - image: mysql:5.7-debian
+          name: mysql57
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: mysql57
+            - name: MYSQL_DATABASE
+              value: 'dataflow'
+          ports:
+            - containerPort: 3306
+              name: mysql57
+          startupProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 12
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 1
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 4
+          livenessProbe:
+            tcpSocket:
+              port: 3306
+            initialDelaySeconds: 1
+            periodSeconds: 15
+            timeoutSeconds: 2
+            failureThreshold: 4
+          resources:
+            requests:
+              cpu: 2000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql57
+            - name: init-db
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mysql57
+        - name: init-db
+          configMap:
+            name: init-sql
