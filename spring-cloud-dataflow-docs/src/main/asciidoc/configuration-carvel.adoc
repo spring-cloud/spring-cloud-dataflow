@@ -57,14 +57,14 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 | Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default `step` is 10s
 
 | deploy-scdf.sh
-| [scdf-type] (oss, pro)
+| [app-name]
 | Deploys the application using the package and `scdf-values.yml` in the current directory.
-If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
+The default _app-name_ is `scdf-${SCDF_TYPE}`.
 
 | update-scdf.sh
-| [scdf-type] (oss, pro)
+| [app-name]
 | Updated the deployed application using a modified values file.
-If the optional _scdf-type_ is not provided, the environmental variable `SCDF_TYPE` will be used.
+The default _app-name_ is `scdf-${SCDF_TYPE}`.
 
 | export-dataflow-ip.sh
 | N/A

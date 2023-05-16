@@ -8,10 +8,8 @@ if [ "$NS" = "" ]; then
 fi
 SA=$NS-sa
 if [ "$SCDF_TYPE" == "" ]; then
-    SCDF_TYPE=pro
-fi
-if [ "$1" != "" ]; then
-    SCDF_TYPE=$1
+    echo "Environmental variable SCDF_TYPE must defined."
+    exit 1
 fi
 
 case $SCDF_TYPE in
@@ -27,6 +25,9 @@ case $SCDF_TYPE in
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
+if [ "$1" != "" ]; then
+    APP_NAME="$1"
+fi
 echo "Updating SCDF-$SCDF_TYPE $PACKAGE_VERSION as $APP_NAME"
 if [ "$DATAFLOW_VERSION" != "" ]; then
     yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml

@@ -38,6 +38,9 @@ case $SCDF_TYPE in
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
+if [ "$1" != "" ]; then
+    APP_NAME="$1"
+fi
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
 if [ "$DATAFLOW_VERSION" != "" ]; then
     yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
