@@ -18,8 +18,11 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketClientProperties;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -37,6 +40,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboar
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.util.StringUtils;
 
@@ -44,22 +48,26 @@ import org.springframework.util.StringUtils;
  * This post-processor helps to replicate the metrics property defined for the DataFlow server to the
  * spring.cloud.dataflow.applicationProperties.stream.* and spring.cloud.dataflow.applicationProperties.task.* as well.
  * This allows to reuse the same metrics configuration for all deployed stream applications and launched tasks.
- *
+ * <br>
  * The post-processor also automatically computes some of the the Monitoring Dashboard properties from the server's
  * metrics properties.
- *
+ * <br>
  * Only the properties not explicitly set are updated. That means that you can explicitly set any monitoring dashboard or
  * stream/task metrics and your settings will be honored.
  *
  * @author Christian Tzolov
+ * @author Chris Bono
  */
 public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	private static final Logger logger = LoggerFactory.getLogger(MetricsReplicationEnvironmentPostProcessor.class);
 	private static final String PROPERTY_SOURCE_KEY_NAME = MetricsReplicationEnvironmentPostProcessor.class.getName();
-	public static final String MONITORING_PREFIX = retrievePropertyPrefix(DataflowMetricsProperties.class);
-	public static final String MONITORING_DASHBOARD_PREFIX = MONITORING_PREFIX + ".dashboard";
-	public static final String COMMON_APPLICATION_PREFIX = retrievePropertyPrefix(CommonApplicationProperties.class);
+	private static final String MONITORING_PREFIX = retrievePropertyPrefix(DataflowMetricsProperties.class);
+	private static final String MONITORING_DASHBOARD_PREFIX = MONITORING_PREFIX + ".dashboard";
+	private static final String COMMON_APPLICATION_PREFIX = retrievePropertyPrefix(CommonApplicationProperties.class);
+	private static final String COMMON_STREAM_PROPS_PREFIX = COMMON_APPLICATION_PREFIX + ".stream.";
+	private static final String COMMON_TASK_PROPS_PREFIX = COMMON_APPLICATION_PREFIX + ".task.";
+	private static final Pattern METRIC_PROP_NAME_PATTERN = Pattern.compile("(management\\.)(metrics\\.export\\.)(\\w+\\.)(.+)");
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -76,34 +84,23 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 			// 2. Replicates the server's metrics properties to the applicationProperties.stream
 			//    and applicationProperties.task.
 			if (environment.getProperty(MONITORING_PREFIX + ".property-replication", Boolean.class, true)) {
-				// Callback function that checks if the input property is set the server's configuration. If it is then
-				// the property is replicated as a common Stream and Task property.
-				Consumer<String> propertyReplicator = metricsPropertyName -> {
-					if (environment.containsProperty(metricsPropertyName)) {
+				// Callback function to handle property replication
+				Consumer<String> propertyReplicator = metricsPropName -> {
+					if (environment.containsProperty(metricsPropName)) {
 						try {
-							String serverPropertyValue = environment.getProperty(metricsPropertyName);
-							// Overrides only the Stream applicationProperties that have not been set explicitly.
-							String commonStreamPropertyName = COMMON_APPLICATION_PREFIX + ".stream." + metricsPropertyName;
-							if (!environment.containsProperty(commonStreamPropertyName)) {
-								logger.info("Replicate metrics property:" + commonStreamPropertyName + "=" + serverPropertyValue);
-								// if a property with same key occurs multiple times only the first is set.
-								additionalProperties.putIfAbsent(commonStreamPropertyName, serverPropertyValue);
-							}
-							// Overrides only the Task applicationProperties that have not been set explicitly.
-							String commonTaskPropertyName = COMMON_APPLICATION_PREFIX + ".task." + metricsPropertyName;
-							if (!environment.containsProperty(commonTaskPropertyName)) {
-								logger.info("Replicate metrics property:" + commonTaskPropertyName + "=" + serverPropertyValue);
-								// if a property with same key occurs multiple times only the first is set.
-								additionalProperties.putIfAbsent(commonTaskPropertyName, serverPropertyValue);
-							}
+							String serverPropValue = environment.getProperty(metricsPropName);
+							ensurePropIsReplicatedExactlyOnceToCommonStreamsAndTasksProps(metricsPropName, serverPropValue,
+									environment, additionalProperties);
+							metricsPropertyNameInBoot3(metricsPropName).ifPresent((metricsPropNameBoot3) ->
+									ensurePropIsReplicatedExactlyOnceToCommonStreamsAndTasksProps(metricsPropNameBoot3,
+											serverPropValue, environment, additionalProperties));
 						}
 						catch (Throwable throwable) {
-							logger.error("Failed with replicating {}, because of {}", metricsPropertyName,
+							logger.error("Failed with replicating {}, because of {}", metricsPropName,
 									ExceptionUtils.getRootCauseMessage(throwable));
 						}
 					}
 				};
-
 				this.replicateServerMetricsPropertiesToStreamAndTask(environment, WavefrontProperties.class, propertyReplicator);
 				this.replicateServerMetricsPropertiesToStreamAndTask(environment, InfluxProperties.class, propertyReplicator);
 				this.replicateServerMetricsPropertiesToStreamAndTask(environment, PrometheusProperties.class, propertyReplicator);
@@ -121,6 +118,38 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 		}
 	}
 
+	private void ensurePropIsReplicatedExactlyOnceToCommonStreamsAndTasksProps(String metricsPropName, Object serverPropValue,
+			Environment environment, Properties additionalProperties) {
+		ensurePropIsReplicatedExactlyOnceToCommonProps(metricsPropName, serverPropValue, COMMON_STREAM_PROPS_PREFIX,
+				environment, additionalProperties);
+		ensurePropIsReplicatedExactlyOnceToCommonProps(metricsPropName, serverPropValue, COMMON_TASK_PROPS_PREFIX,
+				environment, additionalProperties);
+	}
+
+	private void ensurePropIsReplicatedExactlyOnceToCommonProps(String metricsPropName,
+			Object serverPropValue, String commonPropsPrefix, Environment environment, Properties additionalProperties) {
+		// Only add if not already added explicitly
+		String commonStreamPropName = commonPropsPrefix + metricsPropName;
+		if (!environment.containsProperty(commonStreamPropName)) {
+			logger.info("Replicate metrics property:{}={}", commonStreamPropName, serverPropValue);
+			// Only add it once
+			additionalProperties.putIfAbsent(commonStreamPropName, serverPropValue);
+		}
+	}
+
+	private Optional<String> metricsPropertyNameInBoot3(String metricsPropertyName) {
+		// Handle the Spring Boot 3 form of the metrics property
+		//
+		// Boot 2.x: 'management.metrics.export.<meter-registry>.<property-path>'
+		// Boot 3.x: 'management.<meter-registry>.metrics.export.<property-path>'
+		//
+		Matcher matcher = METRIC_PROP_NAME_PATTERN.matcher(metricsPropertyName);
+		if (matcher.matches()) {
+			return Optional.of(matcher.group(1) + matcher.group(3) + matcher.group(2) + matcher.group(4));
+		}
+		return Optional.empty();
+	}
+
 	/**
 	 * Checks if the management.metrics.export.<meter-registry>.enabled property is set to ture for the provided
 	 * meterRegistryPropertyClass.
@@ -133,7 +162,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	 */
 	private boolean isMetricsRegistryEnabled(Class<?> meterRegistryPropertyClass, ConfigurableEnvironment environment) {
 		String metricsPrefix = retrievePropertyPrefix(meterRegistryPropertyClass);
-		return !StringUtils.isEmpty(metricsPrefix) &&
+		return StringUtils.hasText(metricsPrefix) &&
 				environment.getProperty(metricsPrefix + ".enabled", Boolean.class, false);
 	}
 
@@ -146,7 +175,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	private static String retrievePropertyPrefix(Class<?> metricsPropertyClass) {
 		if (metricsPropertyClass.isAnnotationPresent(ConfigurationProperties.class)) {
 			ConfigurationProperties cp = metricsPropertyClass.getAnnotation(ConfigurationProperties.class);
-			return StringUtils.isEmpty(cp.prefix()) ? cp.value() : cp.prefix();
+			return StringUtils.hasText(cp.prefix()) ? cp.prefix() : cp.value();
 		}
 		return null;
 	}
@@ -212,7 +241,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	 * Converts the class fields into metrics property candidates and handles them to the replication handler
 	 * to process. The metrics prefix is retrieved from the {@link ConfigurationProperties} annotation.
 	 * Drops the non-annotated classes.
-	 *
+	 * <br>
 	 * The traversePropertyClassFields iterates and repeats the computation over the class's parent
 	 * classes when available.
 	 *
@@ -221,7 +250,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	 */
 	private void traversePropertyClassFields(Class<?> metricsPropertyClass, Consumer<String> metricsReplicationHandler) {
 		String metricsPrefix = retrievePropertyPrefix(metricsPropertyClass);
-		if (!StringUtils.isEmpty(metricsPrefix)) {
+		if (StringUtils.hasText(metricsPrefix)) {
 			do {
 				traverseClassFieldsRecursively(metricsPropertyClass, metricsPrefix, metricsReplicationHandler);
 				// traverse the parent class if not Object.
@@ -234,7 +263,7 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	 * Iterate over the fields of the provided class. For non-inner class fields generate a metrics property candidate
 	 * and pass it to the metrics replication handler for processing. For the inner-class fields extend the
 	 * prefix with the name of the field and call traverseClassFieldsRecursively recursively.
-	 *
+	 * <br/>
 	 * Use the RelaxedNames.camelCaseToHyphenLower utility to convert the field names into property keys.
 	 *
 	 * @param metricsPropertyClass Class to be processed.
