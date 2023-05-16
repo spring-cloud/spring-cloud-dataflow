@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+if [ "$DEBUG" == "true" ]; then
+    echo "DEBUG: configure-database.sh $*"
+fi
+
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$4" = "" ]; then
     echo "<app> <database> <url> <secret-name> [secret-username-key] [secret-password-key]"
@@ -17,6 +21,9 @@ case $1 in
     exit 1
     ;;
 esac
+if [ "$DEBUG" == "true" ]; then
+    echo "DEBUG: APP=$APP"
+fi
 case $2 in
 "postgresql" | "postgres")
     DATABASE=postgresql
@@ -32,12 +39,14 @@ case $2 in
     exit 1
     ;;
 esac
-
 set +e
 JDBC_URL="$3"
 
 yq ".scdf.${APP}.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
 
+if [ "$DEBUG" == "true" ]; then
+    echo "DEBUG: DATABASE=$DATABASE"
+fi
 case $DATABASE in
 "mariadb" | "mysql57")
     JDBC_DRIVER_CLASS=org.mariadb.jdbc.Driver
@@ -49,6 +58,10 @@ case $DATABASE in
     echo "Unsupported $DATABASE."
     ;;
 esac
+
+if [ "$DEBUG" == "true" ]; then
+    echo "DEBUG: JDBC_DRIVER_CLASS=$JDBC_DRIVER_CLASS"
+fi
 
 if [ "$JDBC_DRIVER_CLASS" != "" ]; then
     yq ".scdf.${APP}.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
@@ -64,6 +77,10 @@ if [ "$6" != "" ]; then
     SECRET_PASSWORD_KEY="$6"
 else
     SECRET_PASSWORD_KEY=password
+fi
+
+if [ "$DEBUG" == "true" ]; then
+    echo "DEBUG: SECRET_NAME=$SECRET_NAME"
 fi
 yq ".scdf.${APP}.database.secretName=\"$SECRET_NAME\"" -i ./scdf-values.yml
 yq ".scdf.${APP}.database.secretUsernameKey=\"$SECRET_USERNAME_KEY\"" -i ./scdf-values.yml
