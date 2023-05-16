@@ -25,6 +25,8 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 
+import java.time.Duration;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -56,7 +58,7 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 		TaskDeploymentRepository taskDeploymentRepository =
 				springDataflowServer.getWebApplicationContext().getBean(TaskDeploymentRepository.class);
 		TaskExecutionService service = this.springDataflowServer.getWebApplicationContext().getBean(TaskExecutionService.class);
-		Awaitility.await().until(() -> service.getLog("default",
+		Awaitility.await().atMost(Duration.ofSeconds(30)).until(() -> service.getLog("default",
 				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId()).length() > 0);
 		this.mockMvc.perform(
 				get("/tasks/logs/"+taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName)

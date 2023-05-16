@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
+import org.awaitility.Awaitility;
 import org.springframework.cloud.dataflow.shell.ShellCommandRunner;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
@@ -124,12 +128,35 @@ public class TaskCommandTemplate {
 	 */
 	public String getTaskExecutionLog(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
-		// TODO  investigate race condition, getting null results for execution log.
-		Thread.sleep(10000);
-		Object result = commandRunner.executeCommand("task execution log --id " + id);
+		String result = getLogForCommand("task execution log --id " + id);
+		assertThat(result).contains("Starting");
+		return result;
+	}
 
-		assertThat(result.toString()).contains("Starting");
-		return result.toString();
+	/**
+	 * Launch a task and return executionid
+	 *
+	 * @param taskName the name of the task
+	 */
+	public long getTaskExecutionId(String taskName) throws Exception{
+		long id = launchTaskExecutionForLog(taskName);
+		getLogForCommand("task execution log --id " + id);
+		return id;
+	}
+	/**
+	 * Launch a task and return log from the application
+	 *
+	 * @param executionId the external execution id of the task
+	 */
+	public String getTaskLogByExternalExecutionID(String executionId) {
+		return getLogForCommand("task execution log-by-id-type --id " + executionId + " --idType external");
+	}
+
+	private String getLogForCommand(String command) {
+		// TODO  investigate race condition, getting null results for execution log.
+		Predicate<String> predicate = logData -> logData.contains("Starting");
+		Supplier<String> supplier = () ->commandRunner.executeCommand(command).toString();
+		return Awaitility.await().atMost(Duration.ofSeconds(10)).until(supplier::get, predicate);
 	}
 
 	/**
@@ -163,12 +190,8 @@ public class TaskCommandTemplate {
 	}
 
 	private void waitForDBToBePopulated(long id) throws Exception {
-		for (int waitTime = 0; waitTime <= MAX_WAIT_TIME; waitTime += WAIT_INTERVAL) {
-			Thread.sleep(WAIT_INTERVAL);
-			if (isEndTime(id)) {
-				break;
-			}
-		}
+		Supplier<Boolean> supplier = () -> isEndTime(id);
+		Awaitility.await().atMost(Duration.ofMillis(MAX_WAIT_TIME)).pollDelay(Duration.ofMillis(WAIT_INTERVAL)).until(supplier::get);
 	}
 
 	private boolean isEndTime(long id) {

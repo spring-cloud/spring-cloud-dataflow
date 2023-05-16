@@ -148,6 +148,20 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
+	public void testGetLogByExternalId() throws Exception{
+		logger.info("Retrieving task execution log for external id");
+		String taskName = generateUniqueStreamOrTaskName();
+		task().create(taskName, "timestamp");
+		long executionId = task().getTaskExecutionId(taskName);
+		Table idResultTable = (Table) task().taskExecutionList();
+		long value = (long) idResultTable.getModel().getValue(findRowForExecutionId(idResultTable, executionId), 1);
+		logger.info("Looking up external id " + value);
+		Table table = (Table)task().taskExecutionStatus(value);
+		assertThat(task().getTaskLogByExternalExecutionID((String)table.getModel().getValue(13, 1)))
+				.contains("Starting");
+	}
+
+	@Test
 	public void testGetLogInvalidId() {
 		assertThatThrownBy(() -> taskWithErrors().getTaskExecutionLogInvalidId())
 				.isInstanceOf(RuntimeException.class)

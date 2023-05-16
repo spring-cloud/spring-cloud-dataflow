@@ -219,12 +219,16 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public String taskExecutionLog(String externalExecutionId, String platform, String idType) {
+	public String taskExecutionLog(String executionId) {
+		return taskExecutionLog(executionId, "default", "external");
+	}
+
+	@Override
+	public String taskExecutionLog(String executionId, String platform, String idType) {
 		Map<String,String> map = new HashMap<>();
-		map.put("executionId",externalExecutionId);
+		map.put("executionId",executionId);
 		map.put("platformName", platform);
 		map.put("idType", idType);
-		String foo = retrieveLogLink.expand(map).getHref();
 		return restTemplate.getForObject(retrieveLogLink.expand(map).getHref(), String.class);
 	}
 

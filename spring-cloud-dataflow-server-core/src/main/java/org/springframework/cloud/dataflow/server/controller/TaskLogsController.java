@@ -64,7 +64,6 @@ public class TaskLogsController {
 		if(idType.equals("external")) {
 			result = new ResponseEntity<>(this.taskExecutionService.getLog(platformName, executionId), HttpStatus.OK);
 		} else if(idType.equals("internal")) {
-			Long t = Long.valueOf(executionId);
 			result = new ResponseEntity<>(this.taskExecutionService.getLog(Long.valueOf(executionId)), HttpStatus.OK);
 		} else {
 			throw new IllegalArgumentException("Invalid idType specified.");

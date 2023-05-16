@@ -87,6 +87,8 @@ public class TaskCommands {
 
 	private static final String LOG = "task execution log";
 
+	private static final String ID_TYPE_LOG = "task execution log-by-id-type";
+
 	// Destroy Role
 
 	private static final String DESTROY = "task destroy";
@@ -255,13 +257,27 @@ public class TaskCommands {
 		return message;
 	}
 
+	@ShellMethod(key = ID_TYPE_LOG, value = "Retrieve task execution log using external or internal execution id")
+	public String retrieveExternalTaskExecutionLog(
+			@ShellOption(value = { "", "--id" }, help = "the task execution id") String id,
+			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform,
+			@ShellOption(help = "the idType of the task execution", defaultValue = ShellOption.NULL) String idType) {
+		return taskOperations().taskExecutionLog(id, platform, idType);
+	}
+
 	@ShellMethod(key = LOG, value = "Retrieve task execution log")
 	public String retrieveTaskExecutionLog(
 			@ShellOption(value = { "", "--id" }, help = "the task execution id") long id,
-			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform,
-			@ShellOption(help = "the idType of the task execution", defaultValue = ShellOption.NULL) String idType) {
+			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform) {
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
-		return taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform, idType);
+		String result;
+		if (platform != null) {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), platform, "external");
+		}
+		else {
+			result = taskOperations().taskExecutionLog(taskExecutionResource.getExternalExecutionId(), taskExecutionResource.getPlatformName(), "external");
+		}
+		return result;
 	}
 
 	@ShellMethod(key = DESTROY, value = "Destroy an existing task")

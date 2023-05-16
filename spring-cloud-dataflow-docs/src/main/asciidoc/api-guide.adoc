@@ -2965,8 +2965,8 @@ The following topic provides more details:
 [[api-guide-resources-stream-logs-by-task-id]]
 ==== Get the task execution log
 
-To retrieve the logs of the task execution, query the `/tasks/logs/<executionId>` endpoint by using the HTTP `GET` method.  The current default is to retrieve the logs using the external execution id (deployer id) provided by the platform.  But if you wish to retrieve the log using the execution id
-provided set the `idType` request parameter to `internal`.   The default for the `idType` request parameter is `external`.
+To retrieve the logs of the task execution, query the `/tasks/logs/<executionId>` endpoint by using the HTTP `GET` method.  The current default is to retrieve the logs using the external execution id (deployer id) provided by the platform.  But if you wish to retrieve the log using the execution id  provided set the `idType` request parameter to `internal`.   The default for the `idType` request parameter is `external`.
+
 The following topics provide more details:
 
 * <<api-guide-resources-task-logs-by-task-id-request-structure>>
