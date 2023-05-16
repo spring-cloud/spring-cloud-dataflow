@@ -16,13 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
@@ -52,6 +45,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Controller for operations on {@link TaskDefinition}. This includes CRUD operations.
@@ -151,36 +153,41 @@ public class TaskDefinitionController {
 	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
 	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}
-	 * @param search optional findByTaskNameContains parameter
+	 * @param taskName optional findByTaskNameContains parameter
 	 * @param dslText optional findByDslText parameter
+	 * @param description optional findByDescription parameter
 	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
 	 * @param assembler assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<? extends TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
-			@RequestParam(required = false) boolean manifest, @RequestParam(required = false) String dslText,
-			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
+	public PagedModel<? extends TaskDefinitionResource> list(Pageable pageable,
+															 @RequestParam(required = false) String taskName,
+															 @RequestParam(required = false) String description,
+															 @RequestParam(required = false) String dslText,
+															 @RequestParam(required = false) boolean manifest,
+															 PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
-		if (search != null) {
-			if (dslText != null) {
-				throw new TaskQueryParamException(new String[] {"search", "dslText"});
-			} else {
-				taskDefinitions = repository.findByTaskNameContains(search, pageable);
-			}
+
+		if (Stream.of(taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
+			throw new TaskQueryParamException(new String[]{"taskName", "description", "dslText"});
 		}
-		else {
-			if (dslText != null) {
-				taskDefinitions = repository.findByDslTextContains(dslText, pageable);
+
+		if (taskName == null && dslText == null && description == null) {
+			taskDefinitions = repository.findAll(pageable);
+		} else {
+			if (taskName != null) {
+				taskDefinitions = repository.findByTaskNameContains(taskName, pageable);
+			} else if (description != null) {
+				taskDefinitions = repository.findByDescriptionContains(description, pageable);
 			} else {
-				taskDefinitions = repository.findAll(pageable);
+				taskDefinitions = repository.findByDslTextContains(dslText, pageable);
 			}
 		}
 
-		final Map<String, TaskDefinition> taskDefinitionMap = taskDefinitions.stream()
-				.collect(Collectors.toMap(TaskDefinition::getTaskName, Function.identity()));
+		final Map<String, TaskDefinition> taskDefinitionMap = taskDefinitions.stream().collect(Collectors.toMap(TaskDefinition::getTaskName, Function.identity()));
 
 		List<TaskExecution> taskExecutions = null;
 		if (!taskDefinitionMap.isEmpty()) {

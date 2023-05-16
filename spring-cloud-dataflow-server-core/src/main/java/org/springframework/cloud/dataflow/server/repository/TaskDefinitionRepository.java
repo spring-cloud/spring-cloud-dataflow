@@ -32,7 +32,7 @@ public interface TaskDefinitionRepository extends KeyValueRepository<TaskDefinit
 
 	Page<TaskDefinition> findByTaskNameContains(String taskName, Pageable pageable);
 
-	Page<TaskDefinition> findByTaskNameContainsAndDslTextContains(String taskName, String dslText, Pageable pageable);
+	Page<TaskDefinition> findByDescriptionContains(String description, Pageable pageable);
 
 	Page<TaskDefinition> findByDslTextContains(String dslText, Pageable pageable);
 
