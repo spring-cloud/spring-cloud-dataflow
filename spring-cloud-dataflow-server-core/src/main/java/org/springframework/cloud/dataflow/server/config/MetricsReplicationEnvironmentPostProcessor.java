@@ -143,6 +143,12 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 		// Boot 2.x: 'management.metrics.export.<meter-registry>.<property-path>'
 		// Boot 3.x: 'management.<meter-registry>.metrics.export.<property-path>'
 		//
+		// Regex breaks the original into 4 groups:
+		// 			1			  2 			    3				4
+		// 	  (management.)(metrics.export.)(<meter-registry>.)(<property-path>)
+		//
+		// We simply swap groups 2 and 3 to get Boot3 version of the property
+		//
 		Matcher matcher = METRIC_PROP_NAME_PATTERN.matcher(metricsPropertyName);
 		if (matcher.matches()) {
 			return Optional.of(matcher.group(1) + matcher.group(3) + matcher.group(2) + matcher.group(4));
