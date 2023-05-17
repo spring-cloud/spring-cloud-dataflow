@@ -47,8 +47,16 @@ def dataflow_container_env():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
   end
   if non_empty_string(data.values.scdf.server.database.secretName):
-    envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])
-    envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretPasswordKey}}}])
+    if non_empty_string(data.values.scdf.server.database.secretUsernameKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": "username"}}}])
+    end
+    if non_empty_string(data.values.scdf.server.database.secretPasswordKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretPasswordKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": "password"}}}])
+    end
   end
   for e in data.values.scdf.server.env:
       envs.extend([{"name": e.name, "value": e.value}])
