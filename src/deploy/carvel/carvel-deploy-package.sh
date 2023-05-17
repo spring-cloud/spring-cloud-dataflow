@@ -35,7 +35,7 @@ check_env PACKAGE_VERSION
 check_env VALUES_FILE
 echo "Install package $PACKAGE_NAME as $APP_NAME"
 if [ "$DEBUG" = "true" ]; then
-    ARGS="--debug --json"
+    ARGS="--debug"
 else
     ARGS=""
 fi
