@@ -26,7 +26,7 @@ $SCDIR/carvel-prepare-namespaces.sh $NS
 case $SCDF_TYPE in
 "pro")
     if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=1.5.3-SNAPSHOT
+        PACKAGE_VERSION=1.6.0-SNAPSHOT
     fi
     PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     REGISTRY_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"

@@ -15,6 +15,7 @@ function count_kind() {
 function patch_serviceaccount() {
     kubectl patch serviceaccount scdf-sa -p "$1" --namespace "$NS"
     kubectl patch serviceaccount default -p "$1" --namespace "$NS"
+    kubectl patch serviceaccount default -p "$1" --namespace default
 }
 if [ "$1" != "" ]; then
     NS=$1
