@@ -347,6 +347,22 @@ public class TaskControllerTests {
 	}
 
 	@Test
+	public void testFindTaskDescriptionAndDslContainsSubstring() throws Exception {
+		repository.save(new TaskDefinition("foo", "fooDsl", "fooTask"));
+		repository.save(new TaskDefinition("foz", "fozDsl", "fozTask"));
+
+		mockMvc.perform(get("/tasks/definitions").param("description", "fooTask")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].description", is("fooTask")));
+
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fozDsl")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("fozDsl")));
+	}
+
+	@Test
 	public void testFindDslTextContainsSubstring() throws Exception {
 		repository.save(new TaskDefinition("foo", "task-foo"));
 		repository.save(new TaskDefinition("foz", "task-foz"));
