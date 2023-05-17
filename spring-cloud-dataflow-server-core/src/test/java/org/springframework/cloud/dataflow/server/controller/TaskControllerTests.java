@@ -29,9 +29,10 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.hamcrest.MatcherAssert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -63,13 +64,13 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
@@ -98,7 +99,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -148,7 +148,7 @@ public class TaskControllerTests {
 
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -196,14 +196,16 @@ public class TaskControllerTests {
 		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
@@ -317,27 +319,28 @@ public class TaskControllerTests {
 		assertThat(myTask2.getName()).isEqualTo("myTask-t2");
 	}
 
-	@Test
-	public void testFindTaskNameContainsSubstring() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = { "search", "taskName" })
+	public void testFindTaskNameContainsSubstring(String taskNameRequestParamName) throws Exception {
 		repository.save(new TaskDefinition("foo", "task"));
 		repository.save(new TaskDefinition("foz", "task"));
 		repository.save(new TaskDefinition("ooz", "task"));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "f")
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "f")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "oz")
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "oz")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foz")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("ooz")));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "o")
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "o")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
