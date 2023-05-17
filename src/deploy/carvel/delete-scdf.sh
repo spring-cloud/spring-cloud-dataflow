@@ -24,14 +24,14 @@ case $SCDF_TYPE in
 "pro")
   APP_NAME=scdf-pro
   PACKAGE_VERSION=1.5.3-SNAPSHOT
-  PACKAGE_NAME=scdfpro.tanzu.vmware.com
+  PACKAGE_NAME=scdf-pro.tanzu.vmware.com
   REGISTRY=dev.registry.pivotal.io
   REPO_NAME="p-scdf-for-kubernetes/scdf-pro-repo"
   ;;
 "oss")
   APP_NAME=scdf-oss
   PACKAGE_VERSION=2.11.0-SNAPSHOT
-  PACKAGE_NAME=scdf.tanzu.vmware.com
+  PACKAGE_NAME=scdf-oss.tanzu.vmware.com
   REGISTRY=index.docker.io
   REPO_NAME="springcloud/scdf-oss-repo"
   ;;

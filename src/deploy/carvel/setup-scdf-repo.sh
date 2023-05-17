@@ -28,7 +28,7 @@ case $SCDF_TYPE in
     if [ "$PACKAGE_VERSION" = "" ]; then
         PACKAGE_VERSION=1.5.3-SNAPSHOT
     fi
-    PACKAGE_NAME=scdfpro.tanzu.vmware.com
+    PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     REGISTRY_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
     REPO_NAME="scdf-pro-repo"
     ;;
@@ -36,7 +36,7 @@ case $SCDF_TYPE in
     if [ "$PACKAGE_VERSION" = "" ]; then
         PACKAGE_VERSION=2.11.0-SNAPSHOT
     fi
-    PACKAGE_NAME=scdf.tanzu.vmware.com
+    PACKAGE_NAME=scdf-oss.tanzu.vmware.com
     REGISTRY_REPO="index.docker.io/springcloud"
     REPO_NAME="scdf-oss-repo"
     ;;

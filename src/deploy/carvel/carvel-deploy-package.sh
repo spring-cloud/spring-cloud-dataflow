@@ -46,6 +46,9 @@ kctrl package install --package-install "$APP_NAME" \
   --values-file "$VALUES_FILE" \
   --version "$PACKAGE_VERSION" --namespace "$NS" --yes \
   --wait --wait-check-interval 10s $ARGS
-
+RC=$?
+if ((RC!=0)); then
+    kubectl --namespace "$NS" describe package/$PACKAGE_NAME
+fi
 kctrl app status --app "$APP_NAME" --namespace "$NS" --json
 kctrl package installed status --package-install "$APP_NAME" --namespace "$NS"
