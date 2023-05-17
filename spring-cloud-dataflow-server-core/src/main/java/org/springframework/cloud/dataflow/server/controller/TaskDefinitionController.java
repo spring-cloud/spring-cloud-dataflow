@@ -173,7 +173,7 @@ public class TaskDefinitionController {
 
 		final Page<TaskDefinition> taskDefinitions;
 
-		if (Stream.of(taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
+		if (Stream.of(search, taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
 			throw new TaskQueryParamException(new String[]{"taskName (or search)", "description", "dslText"});
 		}
 
