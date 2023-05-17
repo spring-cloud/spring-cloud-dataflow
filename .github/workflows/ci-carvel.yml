@@ -62,11 +62,12 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Configure Env
         run: |
-          source ./target/.github/workflows/export-app-versions.sh        
-          echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
-          echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
-          echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
-
+          pushd target
+            source .github/workflows/export-app-versions.sh        
+            echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
+            echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
+            echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
+          popd
       # Builds a package bundle
       - name: Build Package Bundle
         id: build-package-bundle
