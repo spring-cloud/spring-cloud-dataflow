@@ -152,28 +152,8 @@ public class TaskDefinitionController {
 	/**
 	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
 	 *
-	 * @deprecated please use {@link #list(Pageable, String, String, String, boolean, PagedResourcesAssembler)} instead.
-	 *
 	 * @param pageable page-able collection of {@code TaskDefinitionResource}
-	 * @param search optional findByTaskNameContains parameter
-	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
-	 * @param dslText optional findByDslText parameter
-	 * @param assembler assembler for the {@link TaskDefinition}
-	 * @return a list of task definitions
-	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
-	@ResponseStatus(HttpStatus.OK)
-	@Deprecated
-	public PagedModel<? extends TaskDefinitionResource> list(Pageable pageable, @RequestParam(required = false) String search,
-															 @RequestParam(required = false) boolean manifest, @RequestParam(required = false) String dslText,
-															 PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
-		return list(pageable, search, null, dslText, manifest, assembler);
-	}
-
-	/**
-	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
-	 *
-	 * @param pageable page-able collection of {@code TaskDefinitionResource}
+	 * @param search optional findByTaskNameContains parameter (Deprecated: please use taskName instead)
 	 * @param taskName optional findByTaskNameContains parameter
 	 * @param dslText optional findByDslText parameter
 	 * @param description optional findByDescription parameter
@@ -184,10 +164,11 @@ public class TaskDefinitionController {
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends TaskDefinitionResource> list(Pageable pageable,
+															 @RequestParam(required = false) @Deprecated String search,
 															 @RequestParam(required = false) String taskName,
 															 @RequestParam(required = false) String description,
-															 @RequestParam(required = false) String dslText,
 															 @RequestParam(required = false) boolean manifest,
+															 @RequestParam(required = false) String dslText,
 															 PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
 
 		final Page<TaskDefinition> taskDefinitions;
@@ -198,9 +179,11 @@ public class TaskDefinitionController {
 
 		if (taskName != null) {
 			taskDefinitions = repository.findByTaskNameContains(taskName, pageable);
+		} else if (search != null) {
+			taskDefinitions = repository.findByTaskNameContains(search, pageable);
 		} else if (description != null) {
 			taskDefinitions = repository.findByDescriptionContains(description, pageable);
-		} else if( dslText != null){
+		} else if (dslText != null) {
 			taskDefinitions = repository.findByDslTextContains(dslText, pageable);
 		} else {
 			taskDefinitions = repository.findAll(pageable);
