@@ -22,7 +22,7 @@ fi
 if [ "$6" != "" ]; then
     SA=$6
 else
-    SA=$NS-sa
+    SA=scdf-sa
 fi
 if [ ! -f "$VALUES_FILE" ]; then
     echo "Cannot find $VALUES_FILE"

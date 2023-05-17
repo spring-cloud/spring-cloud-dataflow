@@ -14,7 +14,6 @@ else
     echo "Namespace $NS exists"
 fi
 
-SA=$NS-sa
 if [ "$SCDF_TYPE" == "" ]; then
     echo "SCDF_TYPE must be set to one of oss or pro."
 fi
