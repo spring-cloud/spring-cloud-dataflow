@@ -174,7 +174,7 @@ public class TaskDefinitionController {
 		final Page<TaskDefinition> taskDefinitions;
 
 		if (Stream.of(taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
-			throw new TaskQueryParamException(new String[]{"taskName", "description", "dslText"});
+			throw new TaskQueryParamException(new String[]{"taskName (or search)", "description", "dslText"});
 		}
 
 		if (taskName != null) {
