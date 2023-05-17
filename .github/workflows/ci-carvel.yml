@@ -52,13 +52,8 @@ jobs:
       run: npm test
     - uses: jvalkeal/setup-maven@v1
       with:
-        maven-version: 3.8.4
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Login dockerhub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - name: Configure Env
       run: |
         pushd target
@@ -67,6 +62,11 @@ jobs:
           echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
           echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
         popd
+    - name: Login dockerhub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     # Builds a package bundle
     - name: Build Package Bundle
       id: build-package-bundle
