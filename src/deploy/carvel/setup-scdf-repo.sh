@@ -22,23 +22,30 @@ check_env DOCKER_HUB_PASSWORD
 $SCDIR/carvel-prepare-namespaces.sh $NS
 # Credentials for docker.io
 
-
 case $SCDF_TYPE in
 "pro")
     if [ "$PACKAGE_VERSION" = "" ]; then
         PACKAGE_VERSION=1.6.0-SNAPSHOT
     fi
     PACKAGE_NAME=scdf-pro.tanzu.vmware.com
-    REGISTRY_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
-    REPO_NAME="scdf-pro-repo"
+    if [ "$PACKAGE_REPO" = "" ]; then
+        PACKAGE_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
+    fi
+    if [ "$REPO_NAME" = "" ]; then
+        REPO_NAME="scdf-pro-repo"
+    fi
     ;;
 "oss")
     if [ "$PACKAGE_VERSION" = "" ]; then
         PACKAGE_VERSION=2.11.0-SNAPSHOT
     fi
     PACKAGE_NAME=scdf-oss.tanzu.vmware.com
-    REGISTRY_REPO="index.docker.io/springcloud"
-    REPO_NAME="scdf-oss-repo"
+    if [ "$PACKAGE_REPO" = "" ]; then
+        PACKAGE_REPO="index.docker.io/springcloud"
+    fi
+    if [ "$REPO_NAME" = "" ]; then
+        REPO_NAME="scdf-oss-repo"
+    fi
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
@@ -47,10 +54,9 @@ esac
 if [ "$REGISTRY" != "" ]; then
     PACKAGE="$REGISTRY/$REPO_NAME:$PACKAGE_VERSION"
 else
-    PACKAGE="$REGISTRY_REPO/$REPO_NAME:$PACKAGE_VERSION"
-    echo "Adding repository for SCDF $SCDF_TYPE: $PACKAGE_VERSION"
+    PACKAGE="$PACKAGE_REPO/$REPO_NAME:$PACKAGE_VERSION"
 fi
-
+echo "Adding repository for $PACKAGE"
 $SCDIR/carvel-add-package.sh "$PACKAGE" "$PACKAGE_NAME" "$NS"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
