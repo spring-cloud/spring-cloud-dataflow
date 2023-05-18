@@ -92,7 +92,7 @@ apiVersion: secretgen.carvel.dev/v1alpha1
 kind: SecretExport
 metadata:
   name: $SECRET_NAME
-  namespace: $SECRET_NAME
+  namespace: $DATABASE
 spec:
   toNamespace: '*'
 EOF
