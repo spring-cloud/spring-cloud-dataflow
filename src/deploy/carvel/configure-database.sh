@@ -67,24 +67,37 @@ if [ "$JDBC_DRIVER_CLASS" != "" ]; then
     yq ".scdf.${APP}.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
 fi
 
-SECRET_NAME=$4
-if [ "$5" != "" ]; then
-    SECRET_USERNAME_KEY="$5"
-else
-    SECRET_USERNAME_KEY=username
-fi
 if [ "$6" != "" ]; then
+    SECRET_NAME=$4
+    SECRET_USERNAME_KEY="$5"
     SECRET_PASSWORD_KEY="$6"
+elif [ "$5" != "" ]; then
+    USERNAME="$4"
+    PASSWORD="$5"
 else
+    SECRET_NAME=$4
+    SECRET_USERNAME_KEY=username
     SECRET_PASSWORD_KEY=password
 fi
-
-if [ "$DEBUG" == "true" ]; then
-    echo "DEBUG: SECRET_NAME=$SECRET_NAME"
+if [ "$SECRET_NAME" != "" ]; then
+    if [ "$DEBUG" == "true" ]; then
+        echo "DEBUG: SECRET_NAME=$SECRET_NAME, SECRET_USERNAME_KEY=$SECRET_USERNAME_KEY, SECRET_PASSWORD_KEY=$SECRET_PASSWORD_KEY"
+    fi
+    yq ".scdf.${APP}.database.secretName=\"$SECRET_NAME\"" -i ./scdf-values.yml
+    yq ".scdf.${APP}.database.secretUsernameKey=\"$SECRET_USERNAME_KEY\"" -i ./scdf-values.yml
+    yq ".scdf.${APP}.database.secretPasswordKey=\"$SECRET_PASSWORD_KEY\"" -i ./scdf-values.yml
+else
+    if [ "$USERNAME" = "" ]; then
+        echo "Expected $USERNAME"
+        exit 1
+    fi
+    if [ "$PASSWORD" = "" ]; then
+        echo "Expected $PASSWORD"
+        exit 1
+    fi
+    yq ".scdf.${APP}.database.username=\"$USERNAME\"" -i ./scdf-values.yml
+    yq ".scdf.${APP}.database.password=\"$PASSWORD\"" -i ./scdf-values.yml
 fi
-yq ".scdf.${APP}.database.secretName=\"$SECRET_NAME\"" -i ./scdf-values.yml
-yq ".scdf.${APP}.database.secretUsernameKey=\"$SECRET_USERNAME_KEY\"" -i ./scdf-values.yml
-yq ".scdf.${APP}.database.secretPasswordKey=\"$SECRET_PASSWORD_KEY\"" -i ./scdf-values.yml
 
 echo "Set ${APP} JDBC url: $JDBC_URL"
 echo "Set ${APP} JDBC class: $JDBC_DRIVER_CLASS"
