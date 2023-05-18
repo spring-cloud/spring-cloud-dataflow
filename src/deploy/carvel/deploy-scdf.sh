@@ -31,7 +31,7 @@ case $SCDF_TYPE in
     if [ "$PACKAGE_VERSION" = "" ]; then
         PACKAGE_VERSION=2.11.0-SNAPSHOT
     fi
-    PACKAGE_NAME=scdf-oss.tanzu.vmware.com
+    PACKAGE_NAME=scdf.tanzu.vmware.com
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
