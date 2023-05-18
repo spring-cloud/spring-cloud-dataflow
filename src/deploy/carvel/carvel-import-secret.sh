@@ -22,19 +22,6 @@ fi
 FILE="$(mktemp).yml"
 cat >$FILE <<EOF
 apiVersion: secretgen.carvel.dev/v1alpha1
-kind: SecretExport
-metadata:
-  name: $SECRET_NAME
-  namespace: $FROM_NAMESPACE
-spec:
-  toNamespace: $NAMESPACE
-EOF
-
-echo "Create SecretExport $SECRET_NAME to $NS"
-cat $FILE
-kubectl apply -f $FILE
-cat >$FILE <<EOF
-apiVersion: secretgen.carvel.dev/v1alpha1
 kind: SecretImport
 metadata:
   name: $SECRET_NAME
