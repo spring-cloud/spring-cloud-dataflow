@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -93,7 +92,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/scale/{streamName}/{appName}/instances/{count}", "timelog", "log", 1)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(pathParameters(
 						parameterWithName("streamName")
@@ -148,7 +146,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/{timelog}", "timelog")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
@@ -163,13 +160,11 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/{timelog1}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
 								.description("The name of an existing stream definition (required)"))
 				));
-		Thread.sleep(30000);
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest();
 		updateStreamRequest.setReleaseName("timelog1");
 		Map<String, String> updateProperties = new HashMap<>();
@@ -186,13 +181,11 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/update/{timelog1}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(convertObjectToJson(updateStreamRequest)))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
 								.description("The name of an existing stream definition (required)"))
 				));
-		Thread.sleep(30000);
 	}
 
 	@Test
@@ -202,13 +195,11 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				post("/streams/deployments/rollback/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
 										.description("The name of an existing stream definition (required)"),
 								parameterWithName("version").description("The version to rollback to"))));
-		Thread.sleep(30000);
 	}
 
 	@Test
@@ -219,7 +210,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/streams/deployments/history/{name}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
@@ -231,7 +221,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/streams/deployments/manifest/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
@@ -244,7 +233,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/streams/deployments/platform/list")
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 

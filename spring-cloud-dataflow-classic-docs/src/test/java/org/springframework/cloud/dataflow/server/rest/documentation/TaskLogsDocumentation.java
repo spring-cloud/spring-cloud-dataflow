@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.awaitility.Awaitility;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
+
+import java.time.Duration;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -34,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the {@code /tasks/logs} endpoint.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Glenn Renfro
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskLogsDocumentation extends BaseDocumentation {
@@ -53,7 +58,9 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated());
 		TaskDeploymentRepository taskDeploymentRepository =
 				springDataflowServer.getWebApplicationContext().getBean(TaskDeploymentRepository.class);
-		Thread.sleep(30000);
+		TaskExecutionService service = this.springDataflowServer.getWebApplicationContext().getBean(TaskExecutionService.class);
+		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> service.getLog("default",
+				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId()).length() > 0);
 		this.mockMvc.perform(
 				get("/tasks/logs/"+taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName)
 						.getTaskDeploymentId()).param("platformName", "default"))
