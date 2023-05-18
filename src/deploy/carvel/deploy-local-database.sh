@@ -21,10 +21,28 @@ esac
 K8S=$(realpath $SCDIR/../../kubernetes)
 set +e
 $SCDIR/prepare-local-namespace.sh "$DATABASE-sa" $DATABASE
+
 kubectl create --namespace $DATABASE -f $K8S/$DATABASE/
 set -e
 kubectl rollout status deployment --namespace "$DATABASE" $DATABASE
 set +e
+
+FILE="$(mktemp).yml"
+cat >$FILE <<EOF
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretExport
+metadata:
+  name: $DATABASE
+  namespace: $DATABASE
+spec:
+  toNamespace: '*'
+EOF
+echo "Create SecretExport $SECRET_NAME to $NS"
+if [ "$DEBUG" = "true" ]; then
+    cat $FILE
+fi
+kubectl apply -f $FILE
+
 JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
 $SCDIR/configure-database.sh dataflow $DATABASE "$JDBC_URL" $DATABASE database-username database-password
 $SCDIR/configure-database.sh skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password

@@ -86,20 +86,6 @@ yq ".scdf.${APP}.database.secretName=\"$SECRET_NAME\"" -i ./scdf-values.yml
 yq ".scdf.${APP}.database.secretUsernameKey=\"$SECRET_USERNAME_KEY\"" -i ./scdf-values.yml
 yq ".scdf.${APP}.database.secretPasswordKey=\"$SECRET_PASSWORD_KEY\"" -i ./scdf-values.yml
 
-FILE="$(mktemp).yml"
-cat >$FILE <<EOF
-apiVersion: secretgen.carvel.dev/v1alpha1
-kind: SecretExport
-metadata:
-  name: $SECRET_NAME
-  namespace: $DATABASE
-spec:
-  toNamespace: '*'
-EOF
-echo "Create SecretExport $SECRET_NAME to $NS"
-cat $FILE
-kubectl apply -f $FILE
-
 echo "Set ${APP} JDBC url: $JDBC_URL"
 echo "Set ${APP} JDBC class: $JDBC_DRIVER_CLASS"
 echo "Configured ${APP} $DATABASE"
