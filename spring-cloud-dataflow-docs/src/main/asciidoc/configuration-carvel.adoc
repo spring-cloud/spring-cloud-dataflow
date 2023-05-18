@@ -32,7 +32,7 @@ NOTE: Some of these utilities are not installed in macOS or *nix by default but 
 
 These scripts assume you are connected to a Kubernetes cluster and `kubectl` is available.
 
-[cols="3m,3,6"]
+[cols="3m,3,6a"]
 |===
 |Name | Arguments |Descriptions
 
@@ -55,6 +55,17 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 | configure-prometheus-proxy.sh
 | <host> <port> [step]
 | Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default `step` is 10s
+
+| configure-database.sh
+| <app> <database> <url> <username/secret-name>  [password/secret-username-key] [secret-password-key]
+| If only _secret-name_ is provided then _secret-username-key_ defaults to `username` and _secret-password-key_ defaults to `password`.
+
+The following 3 combinations are allowed after the _url_:
+
+* <secret-name>
+* <secret-name> <username-key>
+<password-key>
+* <username> <password>
 
 | deploy-scdf.sh
 | [app-name]

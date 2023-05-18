@@ -5,7 +5,8 @@ fi
 
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$4" = "" ]; then
-    echo "<app> <database> <url> <secret-name> [secret-username-key] [secret-password-key]"
+    echo "<app> <database> <url> <username/secret-name> [password/secret-username-key] [secret-password-key]"
+    echo "  If username / password is provided it will be assigned to the values file."
     exit 1
 fi
 
