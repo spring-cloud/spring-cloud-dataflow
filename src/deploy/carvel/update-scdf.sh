@@ -14,11 +14,11 @@ fi
 
 case $SCDF_TYPE in
 "pro")
-    APP_NAME=scdf-pro
+    APP_NAME=scdf-pro-app
     PACKAGE_VERSION=1.5.3-SNAPSHOT
     ;;
 "oss")
-    APP_NAME=scdf-oss
+    APP_NAME=scdf-oss-app
     PACKAGE_VERSION=2.11.0-SNAPSHOT
     ;;
 *)
