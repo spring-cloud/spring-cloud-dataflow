@@ -30,6 +30,11 @@ spec:
   fromNamespace: $FROM_NAMESPACE
 EOF
 echo "Create SecretImport $SECRET_NAME from $FROM_NAMESPACE to $NAMESPACE"
-cat $FILE
+if [ "$DEBUG" = "true" ]; then
+    cat $FILE
+fi
 kubectl apply -f $FILE
 rm -f $FILE
+if [ "$DEBUG" = "true" ]; then
+    kubectl describe secret $SECRET_NAME --namespace $NAMESPACE
+fi
