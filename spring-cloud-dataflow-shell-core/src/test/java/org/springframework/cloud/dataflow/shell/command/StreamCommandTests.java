@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,13 +54,13 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(StreamCommandTests.class);
 
-	@Before
+	@BeforeEach
 	public void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
-	@After
+	@AfterEach
 	public void destroyStreams() {
 		stream().destroyCreatedStreams();
 	}

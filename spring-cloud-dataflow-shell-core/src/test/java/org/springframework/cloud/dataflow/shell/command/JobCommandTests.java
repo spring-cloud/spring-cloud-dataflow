@@ -24,9 +24,9 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +77,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws Exception {
 		Thread.sleep(2000);
 		DataSource dataSource = applicationContext.getBean(DataSource.class);
@@ -93,7 +93,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOOBAR, 2));
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() {
 		if (applicationContext == null) {
 			logger.warn("Application context was null (probably due to setup failure) - not performing tearDown");

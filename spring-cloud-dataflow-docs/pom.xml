@@ -12,7 +12,7 @@
 	<description>Spring Cloud Data Flow Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
-		<docs.resources.version>0.2.1.RELEASE</docs.resources.version>
+		<docs.resources.version>0.2.5</docs.resources.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>

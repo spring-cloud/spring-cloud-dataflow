@@ -67,7 +67,7 @@ public class RuntimeCommandsTests {
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);
 		DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(dataFlowOperations);

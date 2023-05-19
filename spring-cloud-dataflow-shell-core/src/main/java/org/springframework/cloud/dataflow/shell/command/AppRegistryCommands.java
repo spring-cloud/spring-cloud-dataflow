@@ -143,6 +143,9 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 				if (info.getShortDescription() != null) {
 					result.addHeader(info.getShortDescription());
 				}
+				if (info.getBootVersion() != null) {
+					result.addHeader(String.format("Boot version: %s:", info.getBootVersion().getBootVersion()));
+				}
 				if (options == null) {
 					result.addHeader("Application options metadata is not available");
 				}

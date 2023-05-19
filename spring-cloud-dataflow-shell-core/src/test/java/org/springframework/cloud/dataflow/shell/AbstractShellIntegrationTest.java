@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.shell;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,10 +100,14 @@ public abstract class AbstractShellIntegrationTest {
 	/**
 	 * Used to capture currently executing test method.
 	 */
-	@Rule
-	public TestName name = new TestName();
+	public TestInfo testInfo;
 
-	@BeforeClass
+	@BeforeEach
+	void prepareTest(TestInfo testInfo) {
+		this.testInfo = testInfo;
+	}
+
+	@BeforeAll
 	public static void startUp() {
 		if (applicationContext == null) {
 			shutdownAfterRun = Boolean.parseBoolean(System.getProperty(SHUTDOWN_AFTER_RUN, "false"));
@@ -124,7 +128,7 @@ public abstract class AbstractShellIntegrationTest {
 		}
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void shutdown() {
 		if (shutdownAfterRun && applicationContext != null) {
 			logger.info("Stopping Data Flow Server");
@@ -215,7 +219,8 @@ public abstract class AbstractShellIntegrationTest {
 	 * @return unique random stream/task name
 	 */
 	protected String generateUniqueStreamOrTaskName() {
-		return generateUniqueStreamOrTaskName(name.getMethodName().replace('[', '-').replace("]", ""));
+		return generateUniqueStreamOrTaskName(testInfo.getTestMethod().get().getName()
+				.replace('[', '-').replace("]", ""));
 	}
 
 }
