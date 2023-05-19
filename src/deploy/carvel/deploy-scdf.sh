@@ -18,6 +18,8 @@ if [ "$SCDF_TYPE" == "" ]; then
 fi
 check_env NS
 check_env PACKAGE_VERSION
+check_env SCDF_TYPE
+
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
