@@ -36,9 +36,9 @@ public class AuthorizationProperties {
 
 	private String dashboardUrl = "/dashboard";
 
-	private String loginUrl = "/#/login";
+	private String loginUrl = "/login";
 
-	private String loginProcessingUrl = "/login";
+	private String loginSuccessUrl = dashboardUrl;
 
 	private String logoutUrl = "/logout";
 
@@ -91,12 +91,12 @@ public class AuthorizationProperties {
 		this.loginUrl = loginUrl;
 	}
 
-	public String getLoginProcessingUrl() {
-		return loginProcessingUrl;
+	public String getLoginSuccessUrl() {
+		return loginSuccessUrl;
 	}
 
-	public void setLoginProcessingUrl(String loginProcessingUrl) {
-		this.loginProcessingUrl = loginProcessingUrl;
+	public void setLoginSuccessUrl(String loginSuccessUrl) {
+		this.loginSuccessUrl = loginSuccessUrl;
 	}
 
 	public String getLogoutUrl() {

@@ -216,27 +216,22 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		this.authorizationProperties.getAuthenticatedPaths().add("/");
-		this.authorizationProperties.getAuthenticatedPaths()
-				.add(dashboard(authorizationProperties, "/**"));
-		this.authorizationProperties.getAuthenticatedPaths()
-				.add(this.authorizationProperties.getDashboardUrl());
-		this.authorizationProperties.getPermitAllPaths()
-				.add(this.authorizationProperties.getDashboardUrl());
-		this.authorizationProperties.getPermitAllPaths()
-				.add(dashboard(authorizationProperties, "/**"));
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
+		//this.authorizationProperties.getAuthenticatedPaths().add("/");
+		//this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
+		//this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/**"));
 
+		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
+		this.authorizationProperties.getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
+		this.authorizationProperties.getPermitAllPaths().add(authorizationProperties.getLoginUrl());
+
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths()
-								.toArray(new String[0]))
+						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
 						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths()
-								.toArray(new String[0]))
+						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
 						.authenticated();
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
-
 
 		http.httpBasic().and()
 				.logout()
@@ -248,11 +243,13 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
 						new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"))
 				.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginProcessingUrl()),
+						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginUrl()),
 						textHtmlMatcher)
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 
-		http.oauth2Login().userInfoEndpoint()
+		http.oauth2Login()
+				.defaultSuccessUrl(authorizationProperties.getLoginSuccessUrl())
+				.userInfoEndpoint()
 				.userService(this.plainOauth2UserService)
 				.oidcUserService(this.oidcUserService);
 

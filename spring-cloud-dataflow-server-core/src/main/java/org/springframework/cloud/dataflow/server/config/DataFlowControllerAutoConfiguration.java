@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.annotation.Nullable;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -140,7 +143,6 @@ import org.springframework.hateoas.server.EntityLinks;
 import org.springframework.hateoas.server.core.AnnotationLinkRelationProvider;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ForkJoinPoolFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
@@ -198,9 +200,11 @@ public class DataFlowControllerAutoConfiguration {
 										   FeaturesProperties featuresProperties,
 										   VersionInfoProperties versionInfoProperties,
 										   SecurityStateBean securityStateBean,
-										   DataflowMetricsProperties monitoringDashboardInfoProperties) {
+										   DataflowMetricsProperties monitoringDashboardInfoProperties,
+	                                       @Nullable OAuth2ClientProperties oAuth2ClientProperties) {
 		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
-				featuresProperties, versionInfoProperties, securityStateBean, monitoringDashboardInfoProperties);
+				featuresProperties, versionInfoProperties, securityStateBean, monitoringDashboardInfoProperties,
+				oAuth2ClientProperties);
 	}
 
 	@Bean
@@ -542,8 +546,9 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public SecurityController securityController(SecurityStateBean securityStateBean) {
-			return new SecurityController(securityStateBean);
+		public SecurityController securityController(SecurityStateBean securityStateBean,
+													 @Nullable OAuth2ClientProperties oAuth2ClientProperties) {
+			return new SecurityController(securityStateBean, oAuth2ClientProperties);
 		}
 
 		@Bean

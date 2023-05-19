@@ -17,6 +17,10 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -25,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -53,6 +58,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -88,6 +94,8 @@ public class AboutController {
 
 	private final SecurityStateBean securityStateBean;
 
+	private final OAuth2ClientProperties oAuth2ClientProperties;
+
 	@Value("${security.oauth2.client.client-id:#{null}}")
 	private String oauthClientId;
 
@@ -102,13 +110,15 @@ public class AboutController {
 	private DataflowMetricsProperties dataflowMetricsProperties;
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties) {
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties,
+			@Nullable OAuth2ClientProperties oAuth2ClientProperties) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
 		this.dataflowMetricsProperties = monitoringProperties;
+		this.oAuth2ClientProperties = oAuth2ClientProperties;
 	}
 
 	/**
@@ -146,6 +156,16 @@ public class AboutController {
 					final GrantedAuthority grantedAuthority = (GrantedAuthority) authority;
 					securityInfo.addRole(grantedAuthority.getAuthority());
 				}
+			}
+
+			// Apply all client registrations to security infos which are based on authorization_code
+			if(oAuth2ClientProperties != null) {
+				List<String> authorizationCodeBasedClientRegistrations = oAuth2ClientProperties.getRegistration()
+						.entrySet()
+						.stream()
+						.filter(entry -> AuthorizationGrantType.AUTHORIZATION_CODE.getValue().equals(entry.getValue().getAuthorizationGrantType()))
+						.map(Map.Entry::getKey).collect(Collectors.toList());
+				securityInfo.setClientRegistrations(authorizationCodeBasedClientRegistrations);
 			}
 		}
 
