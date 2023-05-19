@@ -12,25 +12,21 @@ function check_env() {
   fi
 }
 check_env NS
-
-if [ "$SCDF_TYPE" == "" ]; then
-    SCDF_TYPE=pro
-fi
+check_env PACKAGE_VERSION
 if [ "$1" != "" ]; then
   SCDF_TYPE=$1
 fi
+check_env SCDF_TYPE
 
 case $SCDF_TYPE in
 "pro")
   APP_NAME=scdf-pro-app
-  PACKAGE_VERSION=1.5.3-SNAPSHOT
   PACKAGE_NAME=scdf-pro.tanzu.vmware.com
   REGISTRY=dev.registry.pivotal.io
   REPO_NAME="p-scdf-for-kubernetes/scdf-pro-repo"
   ;;
 "oss")
   APP_NAME=scdf-oss-app
-  PACKAGE_VERSION=2.11.0-SNAPSHOT
   PACKAGE_NAME=scdf.tanzu.vmware.com
   REGISTRY=index.docker.io
   REPO_NAME="springcloud/scdf-oss-repo"

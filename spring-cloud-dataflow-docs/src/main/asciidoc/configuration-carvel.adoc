@@ -1,6 +1,7 @@
-:source-highlighter: rouge
 [[configuration-carvel]]
 == Deployment using Carvel
+
+Deployment of a carvel package requires the installation of tools and specific Kubernetes controllers. Then you will add the package repository to the cluster and install the application.
 
 == Required Tools
 
@@ -37,8 +38,8 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 |Name | Arguments |Descriptions
 
 | start-deploy.sh
-| <broker> [scdf-type] [namespace]
-| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The namespace will be created if it doesn't exist by `setup-scdf-repo.sh`. The default `SCDF_TYPE` is `oss`
+| <broker> [scdf-type] [namespace] [release\|snapshot]
+| Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The namespace will be created if it doesn't exist by `setup-scdf-repo.sh`. The default `SCDF_TYPE` is `oss`. _release\|snapshot_ and _scdf-type_ will determine the value of `PACKAGE_VERSION` set.
 
 | prepare-cluster.sh
 | N/A
@@ -95,7 +96,7 @@ Executing the following script will configure the environmental variables needed
 
 [source,shell]
 ....
-source ./start-deploy.sh <broker> <namespace> [scdf-type]
+source ./start-deploy.sh <broker> <namespace> [scdf-type] [release\|snapshot]
 ....
 
 Where:
@@ -103,6 +104,7 @@ Where:
 * `broker` is one of rabbitmq or kafka
 * `namespace` A valid Kubernetes namespace other than `default`
 * `scdf-type` One of oss or pro. oss is the default.
+* `release\|snapshot` and `scdf-type` will determine the value of `PACKAGE_VERSION`.
 
 
 The environmental variables can also be configured manually to override the values.

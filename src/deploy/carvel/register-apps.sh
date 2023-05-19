@@ -1,4 +1,7 @@
 #!/bin/bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 function register_app() {

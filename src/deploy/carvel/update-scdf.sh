@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
@@ -6,20 +9,22 @@ if [ "$NS" = "" ]; then
     echo "Expected env var NS"
     exit 1
 fi
-SA=$NS-sa
+
 if [ "$SCDF_TYPE" == "" ]; then
     echo "Environmental variable SCDF_TYPE must defined."
+    exit 1
+fi
+if [ "$PACKAGE_VERSION" == "" ]; then
+    echo "Environmental variable PACKAGE_VERSION must defined."
     exit 1
 fi
 
 case $SCDF_TYPE in
 "pro")
     APP_NAME=scdf-pro-app
-    PACKAGE_VERSION=1.5.3-SNAPSHOT
     ;;
 "oss")
     APP_NAME=scdf-oss-app
-    PACKAGE_VERSION=2.11.0-SNAPSHOT
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"

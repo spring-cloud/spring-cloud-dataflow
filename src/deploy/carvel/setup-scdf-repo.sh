@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 function check_env() {
     eval ev='$'$1
     if [ "$ev" == "" ]; then
@@ -16,6 +19,7 @@ start_time=$(date +%s)
 # the following names are your choice.
 check_env NS
 check_env SCDF_TYPE
+check_env PACKAGE_VERSION
 check_env DOCKER_HUB_USERNAME
 check_env DOCKER_HUB_PASSWORD
 
@@ -24,9 +28,6 @@ $SCDIR/carvel-prepare-namespaces.sh $NS
 
 case $SCDF_TYPE in
 "pro")
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=1.6.0-SNAPSHOT
-    fi
     PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     if [ "$PACKAGE_REPO" = "" ]; then
         PACKAGE_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
@@ -36,9 +37,6 @@ case $SCDF_TYPE in
     fi
     ;;
 "oss")
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=2.11.0-SNAPSHOT
-    fi
     PACKAGE_NAME=scdf.tanzu.vmware.com
     if [ "$PACKAGE_REPO" = "" ]; then
         PACKAGE_REPO="index.docker.io/springcloud"

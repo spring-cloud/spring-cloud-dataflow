@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 function count_kind() {
     jq --arg kind $1 --arg name $2 '.items | .[] | select(.kind == $kind) | .metadata | select(.name == $name) | .name' | grep -c -F "$2"
 }
@@ -22,8 +25,10 @@ case $BROKER in
     exit 1
     ;;
 esac
-
-K8S=$(realpath $SCDIR/../../kubernetes)
+K8S=$(realpath $SCDIR/../kubernetes)
+if [ ! -d "$K8S" ]; then
+  K8S=$(realpath $SCDIR/../../kubernetes)
+fi
 $SCDIR/prepare-local-namespace.sh "$BROKER-sa" $BROKER
 kubectl create --namespace $BROKER -f $K8S/$BROKER/
 if [ "$BROKER" = "rabbitmq" ]; then
@@ -39,7 +44,7 @@ export BROKER
 yq ".scdf.binder.type=\"$BINDER_NAME\"" -i ./scdf-values.yml
 
 if [ "$BROKER" = "rabbitmq" ]; then
-    yq ".scdf.binder.rabbit.host=\"rabbitmq\"" -i ./scdf-values.yml
+    yq ".scdf.binder.rabbit.host=\"rabbitmq.rabbitmq\"" -i ./scdf-values.yml
     yq ".scdf.binder.rabbit.port=5672" -i ./scdf-values.yml
 else
     yq ".scdf.binder.type=\"kafka\"" -i ./scdf-values.yml

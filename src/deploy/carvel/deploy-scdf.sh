@@ -1,11 +1,27 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
+function check_env() {
+  eval ev='$'$1
+  if [ "$ev" == "" ]; then
+    echo "env var $1 not defined"
+    if ((sourced != 0)); then
+      return 1
+    else
+      exit 1
+    fi
+  fi
+}
+if [ "$SCDF_TYPE" == "" ]; then
+    echo "Environmental variable SCDF_TYPE must be set to one of oss or pro."
+fi
+check_env NS
+check_env PACKAGE_VERSION
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
-if [ "$NS" = "" ]; then
-    echo "Expected env var NS"
-    exit 1
-fi
+
 COUNT=$(kubectl get namespace $NS | grep -c "$NS")
 if ((COUNT == 0)); then
     echo "Expected namespace $NS"
@@ -14,23 +30,13 @@ else
     echo "Namespace $NS exists"
 fi
 
-if [ "$SCDF_TYPE" == "" ]; then
-    echo "SCDF_TYPE must be set to one of oss or pro."
-fi
-
 case $SCDF_TYPE in
 "pro")
     APP_NAME=scdf-pro-app
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=1.6.0-SNAPSHOT
-    fi
     PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     ;;
 "oss")
     APP_NAME=scdf-oss-app
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=2.11.0-SNAPSHOT
-    fi
     PACKAGE_NAME=scdf.tanzu.vmware.com
     ;;
 *)

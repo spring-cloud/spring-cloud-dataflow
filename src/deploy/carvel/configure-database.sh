@@ -2,7 +2,6 @@
 if [ "$DEBUG" == "true" ]; then
     echo "DEBUG: configure-database.sh $*"
 fi
-
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$4" = "" ]; then
     echo "<app> <database> <url> <username/secret-name> [password/secret-username-key] [secret-password-key]"

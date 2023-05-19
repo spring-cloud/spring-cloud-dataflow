@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 CM_VERSION=v1.11.1
 SGC_VER=v0.14.2
 KC_VER=v0.45.0
