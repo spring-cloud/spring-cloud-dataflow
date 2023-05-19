@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import java.io.IOException;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws InterruptedException {
 		Thread.sleep(2000);
 	}

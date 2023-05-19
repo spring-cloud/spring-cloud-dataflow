@@ -21,11 +21,11 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static JdbcTemplate template;
 
-	@BeforeClass
+	@BeforeAll
 	public static void setUp() throws InterruptedException{
 		Thread.sleep(2000);
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
@@ -97,7 +97,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
@@ -106,7 +106,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		template.execute(String.format(TASK_EXECUTION_FORMAT, TASK_EXECUTION_ID));
 	}
 
-	@Before
+	@BeforeEach
 	public void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
@@ -121,7 +121,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	@Ignore
+	@Disabled
 	public void testTaskLaunchCTRUsingAltCtrName() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();

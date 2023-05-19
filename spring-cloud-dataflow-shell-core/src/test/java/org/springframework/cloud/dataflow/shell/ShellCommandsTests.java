@@ -24,9 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -57,8 +57,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ShellCommandsTests extends AbstractShellIntegrationTest {
 
-	@After
-	@Before
+	@AfterEach
+	@BeforeEach
 	public void unregisterAll() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		for (AppRegistration appReg : registry.findAll()) {

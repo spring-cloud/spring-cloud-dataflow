@@ -77,7 +77,7 @@ public class ConfigCommandTests {
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 
 		dataFlowShell = new DataFlowShell();
 
