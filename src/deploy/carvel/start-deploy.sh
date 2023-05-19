@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
@@ -7,36 +8,24 @@ if [ "$sourced" = "0" ]; then
     echo "This script must be invoked using: source $0 $*"
     exit 1
 fi
+
+SCDF_TYPE=$(yq '.default.scdf-type' $SCDIR/versions.yaml)
+SCDF_REL=$(yq '.default.version' $SCDIR/versions.yaml)
+NS=scdf
 if [ "$1" = "" ]; then
     echo "Usage: <broker> [scdf-type] [namespace] [release|snapshot]"
     echo "Where:"
     echo "  broker is one of kafka or rabbitmq"
-    echo "  scdf-type is one of oss or pro. The default is 'oss'"
-    echo "  namespace is a valid k8s namespace other than 'default'. The default is 'scdf'."
-    echo "  release or snapshot and scdf-type will determine PACKAGE_VERSION. The default is latest snapshot."
+    echo "  scdf-type is one of oss or pro. The default is '$SCDF_TYPE'"
+    echo "  namespace is a valid k8s namespace other than 'default'. The default is '$NS'."
+    echo "  release or snapshot and scdf-type will determine PACKAGE_VERSION. The default is $SCDF_REL."
     return 0
 fi
 
-SCDF_TYPE=oss
-NS=scdf
-
 while [ "$1" != "" ]; do
     case $1 in
-    "snapshot")
-        if [ "$SCDF_TYPE" = "oss" ]; then
-            PACKAGE_VERSION=2.11.0-SNAPSHOT
-        else
-            PACKAGE_VERSION=1.6.0-SNAPSHOT
-        fi
-        export PACKAGE_VERSION
-        ;;
-    "release")
-        if [ "$SCDF_TYPE" = "oss" ]; then
-            PACKAGE_VERSION=2.10.3
-        else
-            PACKAGE_VERSION=1.5.3
-        fi
-        export PACKAGE_VERSION
+    "snapshot" | "release")
+        SCDF_REL=$1
         ;;
     "rabbitmq" | "rabbit")
         BROKER=rabbitmq
@@ -61,7 +50,11 @@ if [ "$BROKER" = "" ]; then
     echo "Broker must be provided"
     return 0
 fi
-
+if [ "$DEBUG" = "true" ]; then
+    echo "yq '.scdf-type.$SCDF_TYPE.$SCDF_REL' $SCDIR/versions.yaml"
+fi
+PACKAGE_VERSION="$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/versions.yaml")"
+export PACKAGE_VERSION
 export BROKER
 export SCDF_TYPE
 export NS

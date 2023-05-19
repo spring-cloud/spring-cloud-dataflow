@@ -96,7 +96,7 @@ Executing the following script will configure the environmental variables needed
 
 [source,shell]
 ....
-source ./start-deploy.sh <broker> <namespace> [scdf-type] [release\|snapshot]
+source ./start-deploy.sh <broker> <namespace> [scdf-type] [release|snapshot]
 ....
 
 Where:
@@ -104,7 +104,7 @@ Where:
 * `broker` is one of rabbitmq or kafka
 * `namespace` A valid Kubernetes namespace other than `default`
 * `scdf-type` One of oss or pro. oss is the default.
-* `release\|snapshot` and `scdf-type` will determine the value of `PACKAGE_VERSION`.
+* `release|snapshot` and `scdf-type` will determine the value of `PACKAGE_VERSION`.
 
 
 The environmental variables can also be configured manually to override the values.

@@ -2,20 +2,20 @@
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
-CM_VERSION=v1.11.1
-SGC_VER=v0.14.2
-KC_VER=v0.45.0
+CERT_MANAGER_VERSION=v1.11.2
+SECRETGEN_CONTROLLER_VERSION=v0.14.3
+KAPP_CONTROLLER_VERSION=v0.45.1
 start_time=$(date +%s)
-echo "Deploying cert-manager $CM_VERSION"
+echo "Deploying cert-manager $CERT_MANAGER_VERSION"
 kapp deploy --yes --wait --wait-check-interval 10s --app cert-manager \
-    --file https://github.com/cert-manager/cert-manager/releases/download/$CM_VERSION/cert-manager.yaml
-echo "Deployed cert-manager $CM_VERSION"
-echo "Deploying secretgen-controller $SGC_VER"
+    --file https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml
+echo "Deployed cert-manager $CERT_MANAGER_VERSION"
+echo "Deploying secretgen-controller $SECRETGEN_CONTROLLER_VERSION"
 kapp deploy --yes --wait --wait-check-interval 10s --app secretgen-controller \
-    --file https://github.com/carvel-dev/secretgen-controller/releases/download/$SGC_VER/release.yml
+    --file https://github.com/carvel-dev/secretgen-controller/releases/download/$SECRETGEN_CONTROLLER_VERSION/release.yml
 echo "Deployed secretgen-controller"
-echo "Deploying kapp-controller $KC_VER"
-kapp deploy --yes --wait --wait-check-interval 10s --app kapp-controller --file https://github.com/carvel-dev/kapp-controller/releases/download/$KC_VER/release.yml
+echo "Deploying kapp-controller $KAPP_CONTROLLER_VERSION"
+kapp deploy --yes --wait --wait-check-interval 10s --app kapp-controller --file https://github.com/carvel-dev/kapp-controller/releases/download/$KAPP_CONTROLLER_VERSION/release.yml
 echo "Deployed kapp-controller"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
