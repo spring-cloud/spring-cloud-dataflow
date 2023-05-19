@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,26 +136,28 @@ public class AppRegistryCommandsTests extends AbstractShellIntegrationTest {
 
 		@Test
 		void noBootVersion() {
-			AppRegistration registration = registerTimeSource("time1", "3.2.1", "", false);
-			assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.defaultVersion());
-			TablesInfo info = invokeAppInfoCommand("time1", ApplicationType.source);
-			assertResultHasBootVersion(info, AppBootSchemaVersion.defaultVersion());
+			registerAppAndVerifyInfoCommand("time1", "", AppBootSchemaVersion.defaultVersion());
 		}
 
-		@Test
-		void bootVersion2() {
-			AppRegistration registration = registerTimeSource("time2", "3.2.1", "--bootVersion 2", false);
-			assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT2);
-			TablesInfo info = invokeAppInfoCommand("time2", ApplicationType.source);
-			assertResultHasBootVersion(info, AppBootSchemaVersion.BOOT2);
+		@ParameterizedTest
+		@ValueSource(booleans = { true, false })
+		void bootVersion2(boolean useLongBootVersionCommandArg) {
+			String bootVersionCommandArg = useLongBootVersionCommandArg ? "--bootVersion 2" : "-b 2";
+			registerAppAndVerifyInfoCommand("time2", bootVersionCommandArg, AppBootSchemaVersion.BOOT2);
 		}
 
-		@Test
-		void bootVersion3() {
-			AppRegistration registration = registerTimeSource("time3", "3.2.1", "--bootVersion 3", false);
-			assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
-			TablesInfo info = invokeAppInfoCommand("time3", ApplicationType.source);
-			assertResultHasBootVersion(info, AppBootSchemaVersion.BOOT3);
+		@ParameterizedTest
+		@ValueSource(booleans = { true, false })
+		void bootVersion3(boolean useLongBootVersionCommandArg) {
+			String bootVersionCommandArg = useLongBootVersionCommandArg ? "--bootVersion 3" : "-b 3";
+			registerAppAndVerifyInfoCommand("time2", bootVersionCommandArg, AppBootSchemaVersion.BOOT3);
+		}
+
+		private void registerAppAndVerifyInfoCommand(String appName, String bootVersionCommandArg, AppBootSchemaVersion expectedBootVersion) {
+			AppRegistration registration = registerTimeSource(appName, "3.2.1", bootVersionCommandArg, false);
+			assertThat(registration.getBootVersion()).isEqualTo(expectedBootVersion);
+			TablesInfo info = invokeAppInfoCommand(appName, ApplicationType.source);
+			assertResultHasBootVersion(info, expectedBootVersion);
 		}
 
 		private TablesInfo invokeAppInfoCommand(String name, ApplicationType type) {
