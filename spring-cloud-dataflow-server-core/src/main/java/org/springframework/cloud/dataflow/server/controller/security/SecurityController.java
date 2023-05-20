@@ -85,7 +85,7 @@ public class SecurityController {
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			if (!(authentication instanceof AnonymousAuthenticationToken) && authentication != null) {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 

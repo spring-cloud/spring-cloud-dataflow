@@ -48,6 +48,8 @@ public class AuthorizationProperties {
 
 	private List<String> authenticatedPaths = new ArrayList<>();
 
+	private List<String> anonymousPaths = new ArrayList<>(0);
+
 	/**
 	 * Role-mapping configuration per OAuth2 provider.
 	 */
@@ -129,6 +131,14 @@ public class AuthorizationProperties {
 
 	public void setAuthenticatedPaths(List<String> authenticatedPaths) {
 		this.authenticatedPaths = authenticatedPaths;
+	}
+
+	public List<String> getAnonymousPaths() {
+		return anonymousPaths;
+	}
+
+	public void setAnonymousPaths(List<String> anonymousPaths) {
+		this.anonymousPaths = anonymousPaths;
 	}
 
 	public void setDefaultProviderId(String defaultProviderId) {

@@ -216,16 +216,22 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		//this.authorizationProperties.getAuthenticatedPaths().add("/");
-		//this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
-		//this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/**"));
+		// Anonymous paths for the login page
+		this.authorizationProperties.getAnonymousPaths().add(authorizationProperties.getLoginUrl());
 
+		// All paths should be available only for authenticated users
+		this.authorizationProperties.getAuthenticatedPaths().add("/");
+		this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
+		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/*/**"));
+
+		// Permit for all users as the visibility is managed through roles
 		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
 		this.authorizationProperties.getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
-		this.authorizationProperties.getPermitAllPaths().add(authorizationProperties.getLoginUrl());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 				http.authorizeRequests()
+						.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+						.anonymous()
 						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
 						.permitAll()
 						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
