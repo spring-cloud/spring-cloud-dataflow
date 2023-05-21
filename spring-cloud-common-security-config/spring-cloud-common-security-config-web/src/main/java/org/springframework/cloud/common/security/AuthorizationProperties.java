@@ -30,6 +30,7 @@ import java.util.Map;
  */
 public class AuthorizationProperties {
 
+	public static final String FRONTEND_LOGIN_URL = "/dashboard/index.html#/authentication-required";
 	private String externalAuthoritiesUrl;
 
 	private List<String> rules = new ArrayList<>();

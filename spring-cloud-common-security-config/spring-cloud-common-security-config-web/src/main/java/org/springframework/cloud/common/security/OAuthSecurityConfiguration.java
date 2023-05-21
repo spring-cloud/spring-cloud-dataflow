@@ -218,6 +218,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		// Anonymous paths for the login page
 		this.authorizationProperties.getAnonymousPaths().add(authorizationProperties.getLoginUrl());
+		this.authorizationProperties.getAnonymousPaths().add("/login");
 
 		// All paths should be available only for authenticated users
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
@@ -228,14 +229,29 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
 		this.authorizationProperties.getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
-				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
-						.authenticated()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
-						.permitAll()
-						.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
-						.anonymous();
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security;
+
+		if (AuthorizationProperties.FRONTEND_LOGIN_URL.equals(this.authorizationProperties.getLoginUrl())) {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+
+		} else {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+		}
+
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
 
@@ -249,7 +265,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
 						new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"))
 				.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginUrl()),
+						new LoginUrlAuthenticationEntryPoint(authorizationProperties.getLoginUrl()),
 						textHtmlMatcher)
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 

@@ -73,14 +73,29 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 		getAuthorizationProperties().getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
 		getAuthorizationProperties().getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
-				http.authorizeRequests()
-						.antMatchers(getAuthorizationProperties().getAuthenticatedPaths().toArray(new String[0]))
-						.authenticated()
-						.antMatchers(getAuthorizationProperties().getPermitAllPaths().toArray(new String[0]))
-						.permitAll()
-						.antMatchers(getAuthorizationProperties().getAnonymousPaths().toArray(new String[0]))
-						.anonymous();
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security;
+
+		if (AuthorizationProperties.FRONTEND_LOGIN_URL.equals(this.authorizationProperties.getLoginUrl())) {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+
+		} else {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+		}
+
 		security = SecurityConfigUtils.configureSimpleSecurity(security, getAuthorizationProperties());
 		security.anyRequest().denyAll();
 
