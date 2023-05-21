@@ -42,7 +42,7 @@ public class AuthorizationProperties {
 
 	private String logoutUrl = "/logout";
 
-	private String logoutSuccessUrl = "/logout-success.html";
+	private String logoutSuccessUrl = dashboardUrl + "/logout-success-oauth.html";
 
 	private List<String> permitAllPaths = new ArrayList<>();
 

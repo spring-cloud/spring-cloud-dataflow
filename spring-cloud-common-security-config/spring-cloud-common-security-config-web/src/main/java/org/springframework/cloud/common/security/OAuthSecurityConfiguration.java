@@ -404,7 +404,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				OAuth2TokenUtilsService oauth2TokenUtilsService) {
 			AccessTokenClearingLogoutSuccessHandler logoutSuccessHandler =
 					new AccessTokenClearingLogoutSuccessHandler(oauth2TokenUtilsService);
-			logoutSuccessHandler.setDefaultTargetUrl(dashboard(authorizationProperties, "/logout-success-oauth.html"));
+			logoutSuccessHandler.setDefaultTargetUrl(authorizationProperties.getLogoutSuccessUrl());
 			return logoutSuccessHandler;
 		}
 	}
