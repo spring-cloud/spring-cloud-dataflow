@@ -222,7 +222,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		// All paths should be available only for authenticated users
 		this.authorizationProperties.getAuthenticatedPaths().add("/");
 		this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
-		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/*/**"));
+		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/**"));
 
 		// Permit for all users as the visibility is managed through roles
 		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
@@ -230,12 +230,12 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
-						.anonymous()
+						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+						.authenticated()
 						.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
 						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
-						.authenticated();
+						.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+						.anonymous();
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
 
