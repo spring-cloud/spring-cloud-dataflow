@@ -77,15 +77,15 @@ jobs:
     uses: ./.github/workflows/common-carvel.yml
     with:
       package-name: 'scdf'
-      package-version: ${{ needs.prepare.package-version }}
+      package-version: ${{ needs.prepare.outputs.package-version }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
-      dataflow-version: ${{ needs.prepare.dataflow-version }}
-      dataflow-version-no-postfix: ${{ needs.prepare.dataflow-version-no-postfix }}
-      server-version: ${{ needs.prepare.dataflow-version }}
-      ctr-version: ${{ needs.prepare.dataflow-version }}
-      skipper-version: ${{ needs.prepare.skipper.version }}
+      dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}
+      dataflow-version-no-postfix: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
+      server-version: ${{ needs.prepare.outputs.dataflow-version }}
+      ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
+      skipper-version: ${{ needs.prepare.outputs.skipper.version }}
       prerelease: 'SNAPSHOT'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
