@@ -64,7 +64,7 @@ jobs:
           if [ "${{ inputs.package_version }}" != "" ]; then
             echo PACKAGE_VERSION=${{ inputs.package_version }} >> $GITHUB_ENV
           else
-            echo PACKAGE_VERSION=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
+            echo PACKAGE_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
           fi
         popd
     outputs:
