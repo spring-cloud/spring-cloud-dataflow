@@ -60,22 +60,29 @@ jobs:
           echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
           echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
           echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
+          if [ "${{ inputs.package_version }}" != "" ]; then
+            echo PACKAGE_VERSION=${{ inputs.package_version }} >> $GITHUB_ENV
+          else
+            echo PACKAGE_VERSION=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
+          fi
         popd
     outputs:
       dataflow-version: '${{ env.DATAFLOW_VERSION }}'
       skipper-version: '${{ env.SKIPPER_VERSION }}'
       dataflow-version-no-postfix: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
+      package-version: '${{ env.PACKAGE_VERSION }}'
   publish:
     needs:
       - prepare
-    uses: ./.github/workflow/common-carvel.yml
+    uses: ./.github/workflows/common-carvel.yml
     with:
       package-name: 'scdf'
-      package-version: ${{ needs.prepare.dataflow-version-no-postfix }}
+      package-version: ${{ needs.prepare.package-version }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.dataflow-version }}
+      dataflow-version-no-postfix: ${{ needs.prepare.dataflow-version-no-postfix }}
       server-version: ${{ needs.prepare.server-version }}
       ctr-version: ${{ needs.prepare.dataflow-version }}
       skipper-version: ${{ needs.prepare.skipper.version }}

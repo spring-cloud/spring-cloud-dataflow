@@ -39,6 +39,10 @@ on:
         type: string
         description: 'Composed Task Runner Container Version'
         required: true
+      server-repository:
+        type: string
+        description: 'Docker repo for Data Flow Server'
+        required: true
       prerelease:
         type: string
         description: 'Empty for release'
@@ -107,7 +111,7 @@ jobs:
         path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.package-bundle }}
         version: ${{ inputs.package-version }}
-        prerelease: '${{ inputs.prerelease && inputs.prerelease || '' }}'
+        prerelease: ${{ inputs.prerelease && inputs.prerelease || '' }}
 
     # Builds a repository bundle
     - name: Build Repository Bundle
@@ -127,4 +131,4 @@ jobs:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.repository-bundle }}
         version: ${{ inputs.package-version }}
-        prerelease: '${{ inputs.prerelease && inputs.prerelease || '' }}'
+        prerelease: ${{ inputs.prerelease && inputs.prerelease || '' }}

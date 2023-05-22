@@ -36,7 +36,7 @@ jobs:
     name: Publish
     needs:
       - prepare
-    uses: ./.github/workflow/common-carvel.yml
+    uses: ./.github/workflows/common-carvel.yml
     with:
       package-name: 'scdf'
       package-version: ${{ needs.prepare.dataflow-version-no-postfix }}
