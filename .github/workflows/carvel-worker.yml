@@ -8,26 +8,13 @@ on:
         required: true
 
 jobs:
-  publish:
-    name: Publish
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           ref: 'main'
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ inputs.branch && inputs.branch || github.ref }}
-          path: 'target'
-      - uses: carvel-dev/setup-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login dockerhub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       # zoo extract and ensure
       - name: Extract Zoo Context Properties
         uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -38,54 +25,33 @@ jobs:
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease
             BUILD_ZOO_HANDLER_spring_cloud_skipper_version
-
-      # Builds a package bundle
-      - name: Build Package Bundle
-        id: build-package-bundle
-        uses: ./.github/actions/build-package-bundle
-        with:
-          dataflow-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-          skipper-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}'
-          server-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-          server-repository: 'springcloud/spring-cloud-dataflow-server'
-          ctr-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-          package-name: 'scdf'
-          package-bundle-template: 'src/carvel/templates/bundle/package'
-          imgpkg-lock-template: 'src/carvel/templates/imgpkg'
-          config: 'src/carvel/config'
-
-      # Publishes scdf package bundle as it needs to be in place
-      # before repository bundle can be created.
-      - name: Publish Package Bundle
-        id: publish-package-bundle
-        uses: ./.github/actions/publish-bundle
-        with:
-          path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
-          repository: 'springcloud/scdf-oss-package'
-          version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
-          prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
-
-      # Builds a repository bundle
-      - name: Build Repository Bundle
-        id: build-repository-bundle
-        uses: ./.github/actions/build-repository-bundle
-        with:
-          version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-          repo-bundle-template: 'src/carvel/templates/bundle/repo'
-          package-bundle-repository: 'springcloud/scdf-oss-package'
-          package-name: 'scdf'
-
-
-      # Publishes scdf repo bundle
-      - name: Publish Repository Bundle
-        id: publish-repository-bundle
-        uses: ./.github/actions/publish-bundle
-        with:
-          path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
-          repository: 'springcloud/scdf-oss-repo'
-          version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
-          prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
-
+    outputs:
+      dataflow-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
+      skipper-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}'
+      server-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
+      server-repository: 'springcloud/spring-cloud-dataflow-server'
+      ctr-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
+      prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
+  publish:
+    name: Publish
+    needs:
+      - prepare
+    uses: ./.github/workflow/common-carvel.yml
+    with:
+      package-name: 'scdf'
+      package-version: ${{ needs.prepare.dataflow-version-no-postfix }}
+      package-bundle: 'springcloud/scdf-oss-package'
+      repository-bundle: 'springcloud/scdf-oss-repo'
+      dataflow-version: ${{ needs.prepare.dataflow-version }}
+      server-version: ${{ needs.prepare.server-version }}
+      ctr-version: ${{ needs.prepare.dataflow-version }}
+      skipper-version: ${{ needs.prepare.skipper.version }}
+      prerelease: ${{ needs.prepare.prerelease }}
+      server-repository: 'springcloud/spring-cloud-dataflow-server'
+  finalize:
+    name: Finalize
+    runs-on: ubuntu-latest
+    steps:
       # zoo success
       - name: Notify Build Success Zoo Handler Controller
         uses: jvalkeal/build-zoo-handler@v0.0.4

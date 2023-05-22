@@ -14,11 +14,10 @@ on:
         description: 'Package version to publish. If blank will match dataflow version'
         required: false
 
-
 jobs:
   # test templating before publishing a package
-  publish:
-    name: Publish
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -62,53 +61,22 @@ jobs:
           echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
           echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
         popd
-    - name: Login dockerhub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    # Builds a package bundle
-    - name: Build Package Bundle
-      id: build-package-bundle
-      uses: ./.github/actions/build-package-bundle
-      with:
-        dataflow-version: '${{ env.DATAFLOW_VERSION }}'
-        skipper-version: '${{ env.SKIPPER_VERSION }}'
-        server-version: '${{ env.DATAFLOW_VERSION }}'
-        server-repository: 'springcloud/spring-cloud-dataflow-server'
-        ctr-version: '${{ env.DATAFLOW_VERSION }}'
-        package-name: 'scdf'
-        package-bundle-template: 'src/carvel/templates/bundle/package'
-        imgpkg-lock-template: 'src/carvel/templates/imgpkg'
-        config: 'src/carvel/config'
-
-    # Publishes scdf package bundle as it needs to be in place
-    # before repository bundle can be created.
-    - name: Publish Package Bundle
-      id: publish-package-bundle
-      uses: ./.github/actions/publish-bundle
-      with:
-        path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-oss-package'
-        version: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
-        prerelease: 'SNAPSHOT'
-
-    # Builds a repository bundle
-    - name: Build Repository Bundle
-      id: build-repository-bundle
-      uses: ./.github/actions/build-repository-bundle
-      with:
-        version: '${{ env.DATAFLOW_VERSION }}'
-        repo-bundle-template: 'src/carvel/templates/bundle/repo'
-        package-bundle-repository: 'springcloud/scdf-oss-package'
-        package-name: 'scdf'
-
-    # Publishes scdf repo bundle
-    - name: Publish Repository Bundle
-      id: publish-repository-bundle
-      uses: ./.github/actions/publish-bundle
-      with:
-        path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
-        repository: 'springcloud/scdf-oss-repo'
-        version: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
-        prerelease: 'SNAPSHOT'
+    outputs:
+      dataflow-version: '${{ env.DATAFLOW_VERSION }}'
+      skipper-version: '${{ env.SKIPPER_VERSION }}'
+      dataflow-version-no-postfix: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
+  publish:
+    needs:
+      - prepare
+    uses: ./.github/workflow/common-carvel.yml
+    with:
+      package-name: 'scdf'
+      package-version: ${{ needs.prepare.dataflow-version-no-postfix }}
+      server-repository: 'springcloud/spring-cloud-dataflow-server'
+      package-bundle: 'springcloud/scdf-oss-package'
+      repository-bundle: 'springcloud/scdf-oss-repo'
+      dataflow-version: ${{ needs.prepare.dataflow-version }}
+      server-version: ${{ needs.prepare.server-version }}
+      ctr-version: ${{ needs.prepare.dataflow-version }}
+      skipper-version: ${{ needs.prepare.skipper.version }}
+      prerelease: 'SNAPSHOT'
