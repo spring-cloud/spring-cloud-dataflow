@@ -26,7 +26,6 @@ else
     SA=scdf-sa
 fi
 check_env NS
-
 kubectl create namespace $NS
 kubectl create namespace secrets-ns
 $SCDIR/add-roles.sh "system:aggregate-to-edit" "system:aggregate-to-admin" "system:aggregate-to-view"
