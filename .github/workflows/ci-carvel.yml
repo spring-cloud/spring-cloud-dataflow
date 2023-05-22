@@ -86,7 +86,7 @@ jobs:
       dataflow-version-no-postfix: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
       server-version: ${{ needs.prepare.outputs.dataflow-version }}
       ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
-      skipper-version: ${{ needs.prepare.outputs.skipper.version }}
+      skipper-version: ${{ needs.prepare.outputs.skipper-version }}
       prerelease: 'SNAPSHOT'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

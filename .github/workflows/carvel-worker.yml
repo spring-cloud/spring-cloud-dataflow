@@ -45,7 +45,7 @@ jobs:
       dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}
       server-version: ${{ needs.prepare.outputs.server-version }}
       ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
-      skipper-version: ${{ needs.prepare.outputs.skipper.version }}
+      skipper-version: ${{ needs.prepare.outputs.skipper-version }}
       prerelease: ${{ needs.prepare.outputs.prerelease }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
     secrets:
