@@ -87,3 +87,6 @@ jobs:
       ctr-version: ${{ needs.prepare.dataflow-version }}
       skipper-version: ${{ needs.prepare.skipper.version }}
       prerelease: 'SNAPSHOT'
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

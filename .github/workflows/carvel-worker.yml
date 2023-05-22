@@ -48,6 +48,9 @@ jobs:
       skipper-version: ${{ needs.prepare.skipper.version }}
       prerelease: ${{ needs.prepare.prerelease }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   finalize:
     name: Finalize
     runs-on: ubuntu-latest
