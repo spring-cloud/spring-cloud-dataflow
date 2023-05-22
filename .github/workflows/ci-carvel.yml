@@ -73,6 +73,7 @@ jobs:
       dataflow-version-no-postfix: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
       package-version: '${{ env.PACKAGE_VERSION }}'
   publish:
+    name: Publish
     needs:
       - prepare
     uses: ./.github/workflows/common-carvel.yml

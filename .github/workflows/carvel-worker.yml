@@ -27,9 +27,9 @@ jobs:
             BUILD_ZOO_HANDLER_spring_cloud_skipper_version
     outputs:
       dataflow-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
+      dataflow-version-no-postfix: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
       skipper-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}'
       server-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-      server-repository: 'springcloud/spring-cloud-dataflow-server'
       ctr-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
       prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
   publish:
@@ -39,7 +39,8 @@ jobs:
     uses: ./.github/workflows/common-carvel.yml
     with:
       package-name: 'scdf'
-      package-version: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
+      package-version: ${{ needs.prepare.outputs.server-version }}
+      dataflow-version-no-postfix: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}
