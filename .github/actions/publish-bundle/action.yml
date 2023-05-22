@@ -32,8 +32,10 @@ runs:
     run: |
       imgpkg push --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
       docker pull $REPOSITORY:$VERSION-RANDOM.$RTAG
-
-      POSTFIX=$VERSION${PRERELEASE:+"-$PRERELEASE"}
-
+      if [[ "$VERSION" = *"SNAPSHOT"* ]]; then
+        POSTFIX=$VERSION
+      else
+        POSTFIX=$VERSION${PRERELEASE:+"-$PRERELEASE"}
+      fi
       docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$POSTFIX
       docker push $REPOSITORY:$POSTFIX
