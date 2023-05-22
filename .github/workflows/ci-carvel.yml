@@ -62,8 +62,9 @@ jobs:
           maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
       - name: Configure Env
         run: |
+          ROOT=$(realpath $PWD)
           pushd target
-            source .github/workflows/export-app-versions.sh        
+            source $ROOT/.github/workflows/export-app-versions.sh
             echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
             echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
             echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
