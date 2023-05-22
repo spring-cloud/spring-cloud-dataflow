@@ -83,7 +83,7 @@ jobs:
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.dataflow-version }}
       dataflow-version-no-postfix: ${{ needs.prepare.dataflow-version-no-postfix }}
-      server-version: ${{ needs.prepare.server-version }}
+      server-version: ${{ needs.prepare.dataflow-version }}
       ctr-version: ${{ needs.prepare.dataflow-version }}
       skipper-version: ${{ needs.prepare.skipper.version }}
       prerelease: 'SNAPSHOT'
