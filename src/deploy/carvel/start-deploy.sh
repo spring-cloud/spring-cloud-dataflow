@@ -12,20 +12,25 @@ fi
 SCDF_TYPE=$(yq '.default.scdf-type' $SCDIR/../versions.yaml)
 SCDF_REL=$(yq '.default.version' $SCDIR/../versions.yaml)
 NS=scdf
+DEFAULT_PACKAGE_VERSION=$(yq ".default.package-version" "$SCDIR/../versions.yaml")
+if [ "$DEFAULT_PACKAGE_VERSION" = "" ] || [ "$DEFAULT_PACKAGE_VERSION" = "null" ]; then
+    DEFAULT_PACKAGE_VERSION=$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/../versions.yaml")
+fi
 if [ "$1" = "" ]; then
-    echo "Usage: <broker> [scdf-type] [namespace] [release|snapshot]"
+    echo "Usage: <broker> [scdf-type] [namespace] [release|snapshot|ga-snapshot]"
     echo "Where:"
     echo "  broker is one of kafka or rabbitmq"
     echo "  scdf-type is one of oss or pro. The default is '$SCDF_TYPE'"
     echo "  namespace is a valid k8s namespace other than 'default'. The default is '$NS'."
-    echo "  release or snapshot and scdf-type will determine PACKAGE_VERSION. The default is $SCDF_REL."
+    echo "  release, snapshot or ga-snapshot and scdf-type will determine PACKAGE_VERSION. The default is $DEFAULT_PACKAGE_VERSION."
     return 0
 fi
 
 while [ "$1" != "" ]; do
     case $1 in
-    "snapshot" | "release")
+    "snapshot" | "release" | "ga-snapshot")
         SCDF_REL=$1
+        export PACKAGE_VERSION=
         ;;
     "rabbitmq" | "rabbit")
         BROKER=rabbitmq
@@ -35,6 +40,7 @@ while [ "$1" != "" ]; do
         ;;
     "pro" | "oss")
         SCDF_TYPE=$1
+        export PACKAGE_VERSION=
         ;;
     *)
         NS=$1
