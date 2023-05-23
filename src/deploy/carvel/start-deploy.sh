@@ -9,8 +9,8 @@ if [ "$sourced" = "0" ]; then
     exit 1
 fi
 
-SCDF_TYPE=$(yq '.default.scdf-type' $SCDIR/versions.yaml)
-SCDF_REL=$(yq '.default.version' $SCDIR/versions.yaml)
+SCDF_TYPE=$(yq '.default.scdf-type' $SCDIR/../versions.yaml)
+SCDF_REL=$(yq '.default.version' $SCDIR/../versions.yaml)
 NS=scdf
 if [ "$1" = "" ]; then
     echo "Usage: <broker> [scdf-type] [namespace] [release|snapshot]"
@@ -51,9 +51,9 @@ if [ "$BROKER" = "" ]; then
     return 0
 fi
 if [ "$DEBUG" = "true" ]; then
-    echo "yq '.scdf-type.$SCDF_TYPE.$SCDF_REL' $SCDIR/versions.yaml"
+    echo "yq '.scdf-type.$SCDF_TYPE.$SCDF_REL' $SCDIR/../versions.yaml"
 fi
-PACKAGE_VERSION="$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/versions.yaml")"
+PACKAGE_VERSION="$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/../versions.yaml")"
 export PACKAGE_VERSION
 export BROKER
 export SCDF_TYPE
