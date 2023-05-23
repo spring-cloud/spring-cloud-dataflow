@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class SpringDocJsonDecodeFilter implements Filter {
         // Replaces all escaped quotes
         content = StringEscapeUtils.unescapeJson(content);
         // Replaces first and last quote
-		if (StringUtils.hasText(content)) {
+		if (StringUtils.hasText(content) && content.startsWith("\"") && content.endsWith("\"")) {
 			content = content.substring(1, content.length() - 1);
 		}
         if (LOG.isTraceEnabled()) {

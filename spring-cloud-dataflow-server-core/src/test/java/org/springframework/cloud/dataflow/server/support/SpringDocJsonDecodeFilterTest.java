@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.web.MockFilterChain;
@@ -33,7 +34,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is a test for {@link SpringDocJsonDecodeFilter} to check if the json content is decoded correctly.
+ *
  * @author Tobias Soloschenko
+ * @author Glenn Renfro
  */
 public class SpringDocJsonDecodeFilterTest {
 
@@ -41,10 +44,18 @@ public class SpringDocJsonDecodeFilterTest {
 
     private static final String OPENAPI_JSON_UNESCAPED_CONTENT = "{\"openapi:\"3.0.1\",\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"}}";
 
+	private MockHttpServletResponse mockHttpServletResponse;
+
+	private MockHttpServletRequest mockHttpServletRequest;
+
+	@BeforeEach
+	public void setup() {
+		this.mockHttpServletResponse = new MockHttpServletResponse();
+		this.mockHttpServletRequest = new MockHttpServletRequest();
+	}
     @Test
-    public void doFilterTest() throws ServletException, IOException {
-        MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
-        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+    public void doFilterTestEscaped() throws ServletException, IOException {
+
         MockFilterChain mockFilterChain = new MockFilterChain() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
@@ -52,8 +63,20 @@ public class SpringDocJsonDecodeFilterTest {
                 super.doFilter(request, response);
             }
         };
-        new SpringDocJsonDecodeFilter().doFilter(mockHttpServletRequest, mockHttpServletResponse, mockFilterChain);
-        assertThat(mockHttpServletResponse.getContentAsString()).isEqualTo(OPENAPI_JSON_UNESCAPED_CONTENT);
+        new SpringDocJsonDecodeFilter().doFilter(this.mockHttpServletRequest, this.mockHttpServletResponse, mockFilterChain);
+        assertThat(this.mockHttpServletResponse.getContentAsString()).isEqualTo(OPENAPI_JSON_UNESCAPED_CONTENT);
     }
+	@Test
+	public void doFilterTestUnEscaped() throws ServletException, IOException {
+		MockFilterChain mockFilterChain = new MockFilterChain() {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+				response.getOutputStream().write(OPENAPI_JSON_UNESCAPED_CONTENT.getBytes(StandardCharsets.UTF_8));
+				super.doFilter(request, response);
+			}
+		};
+		new SpringDocJsonDecodeFilter().doFilter(this.mockHttpServletRequest, this.mockHttpServletResponse, mockFilterChain);
+		assertThat(this.mockHttpServletResponse.getContentAsString()).isEqualTo(OPENAPI_JSON_UNESCAPED_CONTENT);
+	}
 
 }
