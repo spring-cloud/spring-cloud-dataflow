@@ -53,7 +53,12 @@ fi
 if [ "$DEBUG" = "true" ]; then
     echo "yq '.scdf-type.$SCDF_TYPE.$SCDF_REL' $SCDIR/../versions.yaml"
 fi
-PACKAGE_VERSION="$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/../versions.yaml")"
+if [ "$PACKAGE_VERSION" = "" ]; then
+    PACKAGE_VERSION=$(yq ".default.package-version" "$SCDIR/../versions.yaml")
+fi
+if [ "$PACKAGE_VERSION" = "null" ] || [ "$PACKAGE_VERSION" = "" ]; then
+    PACKAGE_VERSION="$(yq ".scdf-type.$SCDF_TYPE.$SCDF_REL" "$SCDIR/../versions.yaml")"
+fi
 export PACKAGE_VERSION
 export BROKER
 export SCDF_TYPE

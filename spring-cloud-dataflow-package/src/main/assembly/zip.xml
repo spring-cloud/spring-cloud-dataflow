@@ -11,7 +11,8 @@
 			<directory>${project.basedir}/../src/deploy</directory>
 			<outputDirectory>deploy</outputDirectory>
 			<excludes>
-				<exclude>*.adoc</exclude>
+				<exclude>**/*.adoc</exclude>
+				<exclude>**/*.jar</exclude>
 			</excludes>
 		</fileSet>
 		<fileSet>

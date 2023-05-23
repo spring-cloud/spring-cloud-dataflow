@@ -9,4 +9,4 @@ scdf-type:
     ga-snapshot: '1.5.4-SNAPSHOT'
 default:
   scdf-type: 'oss'
-  version: 'snapshot'
+  version: 'release'
