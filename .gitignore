@@ -57,3 +57,4 @@ yagni/
 workspace/
 *.sh.txt
 *.yml.txt
+/src/deploy/shell/*.jar

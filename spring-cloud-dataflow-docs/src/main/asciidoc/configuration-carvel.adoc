@@ -37,27 +37,27 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 |===
 |Name | Arguments |Descriptions
 
-| start-deploy.sh
+| carvel/start-deploy.sh
 | <broker> [scdf-type] [namespace] [release\|snapshot]
 | Configures environmental variables needs for the rest of the scripts. `BROKER`, `NS` and `SCDF_TYPE` are set. The default `NS` is `scdf`. The namespace will be created if it doesn't exist by `setup-scdf-repo.sh`. The default `SCDF_TYPE` is `oss`. _release\|snapshot_ and _scdf-type_ will determine the value of `PACKAGE_VERSION` set.
 
-| prepare-cluster.sh
+| carvel/prepare-cluster.sh
 | N/A
 | Installs cert-manager, secretgen-controller and kapp-controller
 
-| carvel-use-template.sh
+| carvel/carvel-use-template.sh
 | [scdf-type] (oss, pro)
 | Creates `scdf-values.yml` in current directory based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
 
-| setup-scdf-repo.sh
+| carvel/setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
 | Creates the namespace and installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.
 
-| configure-prometheus-proxy.sh
+| carvel/configure-prometheus-proxy.sh
 | <host> <port> [step]
 | Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default `step` is 10s
 
-| configure-database.sh
+| carvel/configure-database.sh
 | <app> <database> <url> <username/secret-name>  [password/secret-username-key] [secret-password-key]
 | If only _secret-name_ is provided then _secret-username-key_ defaults to `username` and _secret-password-key_ defaults to `password`.
 
@@ -68,21 +68,21 @@ The following 3 combinations are allowed after the _url_:
 <password-key>
 * <username> <password>
 
-| deploy-scdf.sh
+| carvel/deploy-scdf.sh
 | [app-name]
 | Deploys the application using the package and `scdf-values.yml` in the current directory.
 The default _app-name_ is `scdf-${SCDF_TYPE}`.
 
-| update-scdf.sh
+| carvel/update-scdf.sh
 | [app-name]
 | Updated the deployed application using a modified values file.
 The default _app-name_ is `scdf-${SCDF_TYPE}`.
 
-| export-dataflow-ip.sh
+| carvel/export-dataflow-ip.sh
 | N/A
 | Will print the URL to access dataflow. If you use `source ./export-dataflow-ip.sh` it will export `DATAFLOW_URL` to be used by `register-apps.sh`
 
-| register-apps.sh
+| carvel/register-apps.sh
 | <broker> [stream-application-version]
 | _broker_ must be one of rabbit or kafka.
 _stream-application-version_ is optional and will install the latest version. The latest version is 2021.1.2
@@ -96,7 +96,7 @@ Executing the following script will configure the environmental variables needed
 
 [source,shell]
 ....
-source ./start-deploy.sh <broker> <namespace> [scdf-type] [release|snapshot]
+source ./carvel/start-deploy.sh <broker> <namespace> [scdf-type] [release|snapshot]
 ....
 
 Where:
@@ -153,7 +153,7 @@ Create a file name `scdf-values.yml` by executing:
 
 [source,shell]
 ....
-./carvel-use-template.sh
+./carvel/carvel-use-template.sh
 ....
 
 Edit the file as needed to configure the deployment. The `deploy-local-` scripts will
@@ -181,13 +181,13 @@ Install carvel kapp-controller, secretgen-controller and certmanager
 
 [source,shell]
 ....
-./prepare-cluster.sh
+./carvel/prepare-cluster.sh
 ....
 
 Load scdf repo package for the _scdf-type_
 [source,shell]
 ....
-./setup-scdf-repo.sh
+./carvel/setup-scdf-repo.sh
 ....
 
 == Install supporting services
@@ -200,7 +200,7 @@ For local development or demonstration the following can be used to install data
 
 [source,shell]
 ....
-./deploy-local-database.sh <database>  # <1>
+./carvel/deploy-local-database.sh <database>  # <1>
 ....
 <1> `database` must be one of `postgresql` or `mariadb`. Default is postgresql or configure in `DATABASE` using `start-deploy.sh`.
 
@@ -209,13 +209,13 @@ NOTE: This script updates `scdf-values.yml` with the correct secret name.
 === Deploy local message broker.
 [source,shell]
 ....
-./deploy-local-broker.sh
+./carvel/deploy-local-broker.sh
 ....
 
 === Deploy local Prometheus and proxy.
 [source,shell]
 ....
-./deploy-local-prometheus.sh
+./carvel/deploy-local-prometheus.sh
 ....
 
 _This script also configures the Grafana endpoint in `scdf-values.yml`_
@@ -226,19 +226,19 @@ In the case where and existing prometheus and prometheus proxy is deployed the p
 
 [source,shell]
 ....
-./configure-prometheus-proxy.sh <host> <port> [step]
+./carvel/configure-prometheus-proxy.sh <host> <port> [step]
 ....
 
 == Deploy Spring Cloud Data Flow
 
 [source,shell]
 ....
-./deploy-scdf.sh
-# This should display Dataflow URL: <url-to-access-dataflow>
-source ./export-dataflow-ip.sh
-./register-apps.sh
+./carvel/deploy-scdf.sh
+source ./carvel/export-dataflow-ip.sh
+# expected output: Dataflow URL: <url-to-access-dataflow>
+./carvel/register-apps.sh
 ....
 
 == Update deployed application.
 
-You can modify the values file used during installation and then update the deployment using `update-scdf.sh`
+You can modify the values file used during installation and then update the deployment using `./carvel/update-scdf.sh`

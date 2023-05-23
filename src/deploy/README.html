@@ -536,42 +536,42 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>start-deploy.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/start-deploy.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [scdf-type] [namespace] [release|snapshot]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Configures environmental variables needs for the rest of the scripts. <code>BROKER</code>, <code>NS</code> and <code>SCDF_TYPE</code> are set. The default <code>NS</code> is <code>scdf</code>. The namespace will be created if it doesn&#8217;t exist by <code>setup-scdf-repo.sh</code>. The default <code>SCDF_TYPE</code> is <code>oss</code>. <em>release|snapshot</em> and <em>scdf-type</em> will determine the value of <code>PACKAGE_VERSION</code> set.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>prepare-cluster.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/prepare-cluster.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Installs cert-manager, secretgen-controller and kapp-controller</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel-use-template.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/carvel-use-template.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Creates <code>scdf-values.yml</code> in current directory based on <code>scdf-pro-values.yml</code> or <code>scdf-oss-values.yml</code></p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>setup-scdf-repo.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/setup-scdf-repo.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-prometheus-proxy.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/configure-prometheus-proxy.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;host&gt; &lt;port&gt; [step]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-database.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/configure-database.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</p>
@@ -595,7 +595,7 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deploy-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/deploy-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
@@ -603,7 +603,7 @@ The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/update-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Updated the deployed application using a modified values file.
@@ -611,14 +611,14 @@ The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-dataflow-ip.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/export-dataflow-ip.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register-apps.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/register-apps.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [stream-application-version]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p><em>broker</em> must be one of rabbit or kafka.
@@ -650,7 +650,7 @@ Take note that the registration of application in the <em>pro</em> version can t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">source ./start-deploy.sh &lt;broker&gt; &lt;namespace&gt; [scdf-type] [release|snapshot]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">source ./carvel/start-deploy.sh &lt;broker&gt; &lt;namespace&gt; [scdf-type] [release|snapshot]</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -741,7 +741,7 @@ Take note that the registration of application in the <em>pro</em> version can t
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./carvel-use-template.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/carvel-use-template.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -776,7 +776,7 @@ docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD ind
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./prepare-cluster.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/prepare-cluster.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -784,7 +784,7 @@ docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD ind
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./setup-scdf-repo.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/setup-scdf-repo.sh</code></pre>
 </div>
 </div>
 </div>
@@ -802,7 +802,7 @@ docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD ind
 <h3 id="_deploy_local_database">Deploy local database.</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./deploy-local-database.sh &lt;database&gt;  # <b class="conum">(1)</b></code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-database.sh &lt;database&gt;  # <b class="conum">(1)</b></code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -829,7 +829,7 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 <h3 id="_deploy_local_message_broker">Deploy local message broker.</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./deploy-local-broker.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-broker.sh</code></pre>
 </div>
 </div>
 </div>
@@ -837,7 +837,7 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 <h3 id="_deploy_local_prometheus_and_proxy">Deploy local Prometheus and proxy.</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./deploy-local-prometheus.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-prometheus.sh</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -851,7 +851,7 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./configure-prometheus-proxy.sh &lt;host&gt; &lt;port&gt; [step]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/configure-prometheus-proxy.sh &lt;host&gt; &lt;port&gt; [step]</code></pre>
 </div>
 </div>
 </div>
@@ -862,10 +862,10 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./deploy-scdf.sh
-# This should display Dataflow URL: &lt;url-to-access-dataflow&gt;
-source ./export-dataflow-ip.sh
-./register-apps.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-scdf.sh
+source ./carvel/export-dataflow-ip.sh
+# expected output: Dataflow URL: &lt;url-to-access-dataflow&gt;
+./carvel/register-apps.sh</code></pre>
 </div>
 </div>
 </div>
@@ -874,7 +874,7 @@ source ./export-dataflow-ip.sh
 <h2 id="_update_deployed_application">Update deployed application.</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can modify the values file used during installation and then update the deployment using <code>update-scdf.sh</code></p>
+<p>You can modify the values file used during installation and then update the deployment using <code>./carvel/update-scdf.sh</code></p>
 </div>
 <div class="sect2">
 <h3 id="local-k8s-development">Configure Kubernetes for local development or testing</h3>
@@ -884,7 +884,7 @@ source ./export-dataflow-ip.sh
 <p>You will need to install kubectl and then kind or minikube for a local cluster.</p>
 </div>
 <div class="paragraph">
-<p>All the examples assume you have cloned the <code>spring-cloud-dataflow</code> repository and are executing the scripts from <code>src/local/k8s</code>.</p>
+<p>All the examples assume you have cloned the <code>spring-cloud-dataflow</code> repository and are executing the scripts from <code>deploy/k8s</code>.</p>
 </div>
 <div class="paragraph">
 <p>On macOS you may need to install <code>realpath</code> from <a href="https://ports.macports.org/port/realpath/">Macports</a> or <code>brew install realpath</code></p>
@@ -1001,7 +1001,7 @@ Delete existing Minikube installation if you have any. <code>minikube delete</co
 <p>For local development you need control of the containers used in the local environment.</p>
 </div>
 <div class="paragraph">
-<p>In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke <code>./pull-dataflow.sh</code> and <code>./pull-skipper.sh</code> or if you want to use a locally built application you can invoke <code>./build-skipper-image.sh</code> and <code>./build-dataflow.sh</code></p>
+<p>In order to ensure to manage the specific versions of data flow and skipper containers you can set SKIPPER_VERSION and DATAFLOW_VERSION environmental variable and then invoke <code>./images/pull-dataflow.sh</code> and <code>./images/pull-skipper.sh</code> or if you want to use a locally built application you can invoke <code>./images/build-skipper-image.sh</code> and <code>./images/build-dataflow.sh</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -1011,12 +1011,12 @@ Delete existing Minikube installation if you have any. <code>minikube delete</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">use-kind.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
-use-mk-docker.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
-use-mk-kvm2.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
-use-mk.sh &lt;driver&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;] # <b class="conum">(1)</b>
-use-tmc.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
-use-gke.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./k8s/use-kind.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
+./k8s/use-mk-docker.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
+./k8s/use-mk-kvm2.sh [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
+./k8s/use-mk.sh &lt;driver&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;] # <b class="conum">(1)</b>
+./k8s/use-tmc.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]
+./k8s/use-gke.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;broker&gt;]</code></pre>
 </div>
 </div>
 <div class="colist arabic">
@@ -1043,13 +1043,13 @@ use-gke.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;brok
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">source ./use-mk-docker.sh test-ns postgresql rabbitmq</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">source ./k8s/use-mk-docker.sh test-ns postgresql rabbitmq</code></pre>
 </div>
 </div>
 <div class="sect4">
 <h5 id="_tmc_or_gke_cluster_in_cloud">TMC or GKE Cluster in Cloud</h5>
 <div class="paragraph">
-<p>The cluster must exist before use and you should use the relevant cli to login before executing <code>source ./use-gke.sh</code></p>
+<p>The cluster must exist before use and you should use the relevant cli to login before executing <code>source ./k8s/use-gke.sh</code></p>
 </div>
 </div>
 <div class="sect4">
@@ -1061,13 +1061,13 @@ use-gke.sh &lt;cluster-name&gt; [&lt;namespace&gt;] [&lt;database&gt;] [&lt;brok
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell"># Optionally add to control cpu and memory allocation.
 export MK_ARGS=&quot;--cpus=8 --memory=12g&quot;
-./configure-k8s.sh</code></pre>
+./k8s/configure-k8s.sh</code></pre>
 </div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>For <strong>kind</strong> follow instruction to update <code>src/local/k8s/yaml/metallb-configmap.yaml</code> and then apply using <code>kubectl apply -f src/local/k8s/yaml/metallb-configmap.yaml</code></p>
+<p>For <strong>kind</strong> follow instruction to update <code>./k8s/yaml/metallb-configmap.yaml</code> and then apply using <code>kubectl apply -f ./k8s/yaml/metallb-configmap.yaml</code></p>
 </li>
 <li>
 <p>For <strong>minikube</strong> launch a new shell and execute <code>minikube tunnel</code></p>
@@ -1120,8 +1120,8 @@ This is still optional and PostgreSQL support isn&#8217;t available yet but will
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./install-scdf.sh
-source ./export-dataflow-ip.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./k8s/install-scdf.sh
+source ./k8s/export-dataflow-ip.sh</code></pre>
 </div>
 </div>
 </div>
@@ -1130,7 +1130,7 @@ source ./export-dataflow-ip.sh</code></pre>
 <h5 id="_delete_the_deployment_from_the_cluster">Delete the deployment from the cluster.</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./delete-scdf.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./k8s/delete-scdf.sh</code></pre>
 </div>
 </div>
 </div>
@@ -1141,7 +1141,7 @@ source ./export-dataflow-ip.sh</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">./destroy-k8s.sh</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">./k8s/destroy-k8s.sh</code></pre>
 </div>
 </div>
 </div>
@@ -1204,7 +1204,7 @@ source ./export-dataflow-ip.sh</code></pre>
 <div class="sect3">
 <h4 id="_scripts_2">Scripts</h4>
 <div class="paragraph">
-<p>Some of the scripts apply to local containers as well and can be found in <code>src/local</code>, the Kubernetes specific scripts are in <code>src/local/k8s</code></p>
+<p>Some of the scripts apply to local containers as well and can be found in <code>src/local</code>, the Kubernetes specific scripts are in <code>deploy/k8s</code></p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
@@ -1219,75 +1219,75 @@ source ./export-dataflow-ip.sh</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build-app-images.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/build-app-images.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Build all images of Restaurant Sample Stream Apps</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull-app-images.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/pull-app-images.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pull all images of Restaurant Sample Stream Apps from Docker Hub</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull-dataflow.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/pull-dataflow.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pull dataflow from DockerHub based on <code>DATAFLOW_VERSION</code>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull-scdf-pro.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/pull-scdf-pro.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pull Dataflow Pro from Tanzu Network based on <code>SCDF_PRO_VERSION</code>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pull-skipper.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/pull-skipper.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Pull Skipper from DockerHub base on the <code>SKIPPER_VERSION</code>.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build-dataflow-image.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/build-dataflow-image.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Build a docker image from the local repo of Dataflow</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build-scdf-pro-image.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/build-scdf-pro-image.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Build a docker image from the local repo of Dataflow Pro. Set <code>USE_PRO=true</code> in environment to use Dataflow Pro</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>build-skipper-image.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./images/build-skipper-image.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Build a docker image from the local repo of Skipper.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-k8s.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/configure-k8s.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Configure the Kubernetes environment based on your configuration of K8S_DRIVER.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>delete-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/delete-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Delete all Kubernetes resources create by the deployment.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>destroy-k8s.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/destroy-k8s.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Delete cluster, kind or minikube.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-dataflow-ip.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/export-dataflow-ip.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Export the url of the data flow server to <code>DATAFLOW_IP</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-http-url.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/export-http-url.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Export the url of an http source of a specific flow by name to <code>HTTP_APP_URL</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>install-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/install-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Configure and deploy all the containers for Spring Cloud Dataflow</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>load-images.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/load-images.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Load all container images required by tests into kind or minikube to ensure you have control over what is used.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>load-image.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/load-image.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Load a specific container image into local kind or minikube.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>local-k8s-acceptance-tests.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>src/local/local-k8s-acceptance-tests.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Execute acceptance tests against cluster where <code>DATAFLOW_IP</code> is pointing.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register-apps.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/register-apps.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Register the Task and Stream apps used by the unit tests.</p></td>
 </tr>
 </tbody>
@@ -1311,7 +1311,7 @@ Please report any errors with the scripts along with detail information about th
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-19 15:50:30 +0200
+Last updated 2023-05-23 10:02:45 +0200
 </div>
 </div>
 </body>
