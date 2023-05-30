@@ -113,6 +113,9 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
+		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_main, TagNames.DATAFLOW_main);
+		assertSkipperServerRunning(this.dataflowCluster);
+		assertDataflowServerRunning(this.dataflowCluster);
 
 	}
 }
