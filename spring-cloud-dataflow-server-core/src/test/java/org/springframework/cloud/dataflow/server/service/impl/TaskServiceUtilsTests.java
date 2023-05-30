@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -37,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -390,24 +390,18 @@ public class TaskServiceUtilsTests {
 
 	@Test
 	public void testConvertCommandLineArgsToCTRFormatWithNull() {
-		IllegalArgumentException thrown = Assertions.assertThrows(IllegalArgumentException.class,
-				() -> {
-					List<String> exceptionTestArgs = new ArrayList<>();
-					exceptionTestArgs.add(null);
-					TaskServiceUtils.convertCommandLineArgsToCTRFormat(exceptionTestArgs);
-				}
-		);
-		assertThat(thrown.getMessage()).isEqualTo("Command line Arguments for ComposedTaskRunner contain a null entry.");
-
+		assertThatIllegalArgumentException().isThrownBy(() ->
+						TaskServiceUtils.convertCommandLineArgsToCTRFormat(Collections.singletonList(null)))
+				.withMessage("Command line Arguments for ComposedTaskRunner contain a null entry.");
 	}
 
 	@Test
 	public void testConvertMultipleCommandLineArgsToCTRFormat() {
-		ArrayList<String> originalList = new ArrayList<>();
+		List<String> originalList = new ArrayList<>();
 		originalList.add("app.a.0=foo=bar");
 		originalList.add("app.b.0=baz=boo");
 		originalList.add("app.c.0=val=buz");
-		ArrayList<String> expectedList = new ArrayList<>();
+		List<String> expectedList = new ArrayList<>();
 		expectedList.add("--composed-task-app-arguments.base64_YXBwLmEuMA=foo=bar");
 		expectedList.add("--composed-task-app-arguments.base64_YXBwLmIuMA=baz=boo");
 		expectedList.add("--composed-task-app-arguments.base64_YXBwLmMuMA=val=buz");
@@ -422,10 +416,7 @@ public class TaskServiceUtilsTests {
 	}
 
 	private void validateCTRArgs(List<String> expectedList, List<String> resultList) {
-		assertThat(resultList.size()).isEqualTo(expectedList.size());
-		expectedList.stream().forEach(arg -> {
-			assertThat(resultList).contains(arg);
-		});
+		assertThat(resultList).containsExactlyInAnyOrderElementsOf(expectedList);
 	}
 
 	private TaskNode parse(String dsltext) {
