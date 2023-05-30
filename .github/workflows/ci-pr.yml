@@ -27,10 +27,26 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    # jfrog cli
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.46.4
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+      # setup frog cli
+    - name: Configure JFrog Cli
+      run: |
+        jfrog rt mvnc \
+          --server-id-resolve=repo.spring.io \
+          --server-id-deploy=repo.spring.io \
+          --repo-resolve-releases=libs-milestone \
+          --repo-resolve-snapshots=libs-snapshot \
+          --repo-deploy-releases=libs-release-local \
+          --repo-deploy-snapshots=libs-snapshot-local
     # build
     - name: Build
       run: |
-        mvn -B -s .github/settings.xml $MAVEN_THREADS clean package
+        jfrog rt mvn -B -s .github/settings.xml $MAVEN_THREADS clean package
     # clean m2 cache
     - name: Clean cache
       run: |
