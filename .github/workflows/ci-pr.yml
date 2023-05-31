@@ -30,13 +30,10 @@ jobs:
     # build
     - name: Build
       env:
-        FOO: 'bar'
         ARTIFACTORY_USERNAME: ${{ secrets.TEMP_ARTIFACTORY_USERNAME }}
         ARTIFACTORY_PASSWORD: ${{ secrets.TEMP_ARTIFACTORY_PASSWORD }}
       run: |
-        echo $FOO
-        FOO=$FOO mvn -B -s .github/settings.xml $MAVEN_THREADS clean package
-
+        mvn -B -s .github/settings.xml $MAVEN_THREADS clean package
     # clean m2 cache
     - name: Clean cache
       run: |
