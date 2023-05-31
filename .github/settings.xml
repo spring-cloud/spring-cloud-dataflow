@@ -1,4 +1,11 @@
 <settings>
+	<servers>
+		<server>
+			<id>spring-releases</id>
+			<username>${env.TEMP_ARTIFACTORY_USERNAME}</username>
+			<password>${env.TEMP_ARTIFACTORY_PASSWORD}</password>
+		</server>
+	</servers>
 	<profiles>
 		<profile>
 			<id>pr</id>
