@@ -85,8 +85,7 @@
 			<artifactId>spring-doc-resources</artifactId>
 			<version>0.2.5</version>
 			<type>zip</type>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/../../lib/spring-doc-resources-0.2.5.zip</systemPath>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 	<profiles>
