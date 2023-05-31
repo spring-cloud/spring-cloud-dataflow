@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.boot.autoconfigure.transaction.TransactionManagerCust
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
@@ -153,7 +154,8 @@ import static org.mockito.Mockito.when;
 @EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableJpaRepositories(basePackages = {
 		"org.springframework.cloud.dataflow.registry.repository",
-		"org.springframework.cloud.dataflow.server.repository"
+		"org.springframework.cloud.dataflow.server.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
 @EnableJpaAuditing
 @EnableTransactionManagement
@@ -234,8 +236,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	}
 
 	@Bean
-	public AuditRecordService auditRecordService() {
-		return mock(DefaultAuditRecordService.class);
+	public AuditRecordService auditRecordService(AuditRecordRepository repository) {
+		return new DefaultAuditRecordService(repository);
 	}
 
 	@Bean
