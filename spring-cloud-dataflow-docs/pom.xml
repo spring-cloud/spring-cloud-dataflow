@@ -14,6 +14,7 @@
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.resources.version>0.2.5</docs.resources.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
+		<rootDir>${basedir}/..</rootDir>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -66,7 +67,8 @@
 			<artifactId>spring-doc-resources</artifactId>
 			<version>${docs.resources.version}</version>
 			<type>zip</type>
-			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${rootDir}/lib/spring-doc-resources-0.2.5.zip</systemPath>
 		</dependency>
 	</dependencies>
 	<profiles>

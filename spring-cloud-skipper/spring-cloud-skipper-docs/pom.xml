@@ -14,6 +14,7 @@
 	<description>Spring Cloud Skipper Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
+		<rootDir>${basedir}/../..</rootDir>
 	</properties>
 	<repositories>
 		<repository>
@@ -85,7 +86,8 @@
 			<artifactId>spring-doc-resources</artifactId>
 			<version>0.2.5</version>
 			<type>zip</type>
-			<optional>true</optional>
+			<scope>system</scope>
+			<systemPath>${rootDir}/lib/spring-doc-resources-0.2.5.zip</systemPath>
 		</dependency>
 	</dependencies>
 	<profiles>
