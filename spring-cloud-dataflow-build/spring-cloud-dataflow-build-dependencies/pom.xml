@@ -27,7 +27,7 @@
 		<commons-io.version>2.7</commons-io.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<postgresql.version>42.4.3</postgresql.version>
-		<prometheus-rsocket-spring.version>1.3.0</prometheus-rsocket-spring.version>
+		<prometheus-rsocket.version>1.5.1</prometheus-rsocket.version>
 		<java-cfenv.version>2.3.0</java-cfenv.version>
 		<spring-cloud-services-starter-config-client.version>3.5.4</spring-cloud-services-starter-config-client.version>
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
@@ -93,7 +93,12 @@
 			<dependency>
 				<groupId>io.micrometer.prometheus</groupId>
 				<artifactId>prometheus-rsocket-spring</artifactId>
-				<version>${prometheus-rsocket-spring.version}</version>
+				<version>${prometheus-rsocket.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer.prometheus</groupId>
+				<artifactId>prometheus-rsocket-client</artifactId>
+				<version>${prometheus-rsocket.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.pivotal.cfenv</groupId>
