@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +26,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
-import org.springframework.cloud.dataflow.server.support.LogTestNameRule;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -40,7 +38,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Glenn Renfro
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
@@ -70,13 +68,10 @@ public class AboutControllerTests {
 
 	private MockMvc mockMvc;
 
-	@Rule
-	public LogTestNameRule logTestName = new LogTestNameRule();
-
 	@Autowired
 	private WebApplicationContext wac;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -99,14 +94,14 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 				.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
 				.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
-				.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+				.andExpect(jsonPath("$.securityInfo.username", is(emptyOrNullString())))
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.schedulesEnabled", is(false)))
-				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(isEmptyOrNullString())));
+				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(emptyOrNullString())));
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -120,13 +115,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -144,7 +136,7 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -157,13 +149,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -174,14 +163,14 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.0-SNAPSHOT/spring-cloud-dataflow-shell-2.7.2-SNAPSHOT.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.0-SNAPSHOT/spring-cloud-dataflow-shell-2.11.0-SNAPSHOT.jar")))
 					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.0-SNAPSHOT")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -194,13 +183,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -219,7 +205,7 @@ public class AboutControllerTests {
 	}
 
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -232,13 +218,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -256,7 +239,7 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -272,7 +255,7 @@ public class AboutControllerTests {
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -290,11 +273,11 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.RELEASE",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
@@ -303,13 +286,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -320,14 +300,14 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3.RELEASE/spring-cloud-dataflow-shell-1.2.3.RELEASE.jar")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.RELEASE")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.maven.apache.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/1.2.3/spring-cloud-dataflow-shell-1.2.3.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -342,13 +322,10 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -365,7 +342,7 @@ public class AboutControllerTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@ExtendWith(SpringExtension.class)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -388,16 +365,13 @@ public class AboutControllerTests {
 
 		private MockMvc mockMvc;
 
-		@Rule
-		public LogTestNameRule logTestName = new LogTestNameRule();
-
 		@Autowired
 		private WebApplicationContext wac;
 
 		@Autowired
 		private SkipperClient skipperClient;
 
-		@Before
+		@BeforeEach
 		public void setupMocks() {
 			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -420,7 +394,7 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
-					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
+					.andExpect(jsonPath("$.securityInfo.username", is(emptyOrNullString())))
 					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")))
 					.andExpect(jsonPath("$.monitoringDashboardInfo.url", is("http://localhost:3001")))
 					.andExpect(jsonPath("$.monitoringDashboardInfo.dashboardType", is("GRAFANA")))
@@ -449,8 +423,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
 					.andExpect(jsonPath("$.securityInfo.authenticated", is(false)))
-					.andExpect(jsonPath("$.securityInfo.username", isEmptyOrNullString()))
-					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", isEmptyOrNullString())); // Connection to Skipper is lost!
+					.andExpect(jsonPath("$.securityInfo.username", is(emptyOrNullString())))
+					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is(emptyOrNullString()))); // Connection to Skipper is lost!
 		}
 	}
 }
