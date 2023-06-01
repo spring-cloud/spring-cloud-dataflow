@@ -301,7 +301,6 @@ public class AboutController {
 	private String repoSelector(String version) {
 		final String REPO_SNAPSHOT_ROOT = "https://repo.spring.io/snapshot";
 		final String REPO_MILESTONE_ROOT = "https://repo.spring.io/milestone";
-		final String REPO_RELEASE_ROOT = "https://repo.spring.io/release";
 		final String MAVEN_ROOT = "https://repo.maven.apache.org/maven2";
 
 		String result = MAVEN_ROOT;
@@ -313,9 +312,6 @@ public class AboutController {
 		}
 		else if (version.contains(".RC")) {
 			result = REPO_MILESTONE_ROOT;
-		}
-		else if (version.contains(".RELEASE")) {
-			result = REPO_RELEASE_ROOT;
 		}
 		return result;
 	}
