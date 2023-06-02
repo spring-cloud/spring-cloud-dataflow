@@ -28,7 +28,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -59,26 +61,17 @@ public class AppResourceCommonTests {
 	@Test
 	public void testInvalidURIPath() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT");
-		try {
-			appResourceCommon.getUrlResourceVersion(urlResource);
-			fail("Excepted IllegalArgumentException for an invalid URI path");
-		}
-		catch (Exception e) {
-			assertThat(e.getMessage().equals("URI path doesn't exist"));
-		}
+		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
+				.hasMessage("URI path doesn't exist");
 	}
 
 	@Test
 	public void testInvalidUriSchema() {
-		try {
-			appResourceCommon.getResource("springcloud/polyglot-python-processor:0.1");
-			fail("Excepted IllegalArgumentException for an invalid URI schema prefix");
-		}
-		catch (IllegalArgumentException iae) {
-			assertThat(iae.getMessage().equals("Invalid URI schema for resource: " +
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				appResourceCommon.getResource("springcloud/polyglot-python-processor:0.1"))
+				.withMessage("Invalid URI schema for resource: " +
 					"springcloud/polyglot-python-processor:0.1 Expected URI schema prefix like file://, " +
-					"http:// or classpath:// but got none"));
-		}
+					"http:// or classpath:// but got none");
 	}
 
 	@Test
@@ -100,7 +93,7 @@ public class AppResourceCommonTests {
 	public void testJarMetadataUriDockerApp() throws Exception {
 		String appUri = "docker:springcloudstream/log-sink-rabbit:3.2.1";
 		String metadataUri = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit-3.2.1.jar";
-		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
+		appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
 		verify(resourceLoader).getResource(eq(metadataUri));
 	}
 
@@ -123,25 +116,15 @@ public class AppResourceCommonTests {
 	@Test
 	public void testResourceURIWithMissingFileNameExtension() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test");
-		try {
-			appResourceCommon.getUrlResourceVersion(urlResource);
-			fail("Excepted IllegalArgumentException for an invalid URI path");
-		}
-		catch (Exception e) {
-			assertThat(e.getMessage().equals("URI file name extension doesn't exist"));
-		}
+		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
+				.hasMessage("URI file name extension doesn't exist");
 	}
 
 	@Test
 	public void testInvalidUrlResourceURI() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test.zip");
-		try {
-			appResourceCommon.getUrlResourceVersion(urlResource);
-			fail("Excepted IllegalArgumentException for an invalid URL resource URI");
-		}
-		catch (Exception e) {
-			assertThat(e.getMessage().equals("Could not parse version from https://com.com-0.0.2-SNAPSHOT/test.zip, expected format is <artifactId>-<version>.jar"));
-		}
+		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
+				.hasMessageStartingWith("Could not parse version from https://com.com-0.0.2-SNAPSHOT/test.zip, expected format is <artifactId>-<version>.jar");
 	}
 
 	@Test
