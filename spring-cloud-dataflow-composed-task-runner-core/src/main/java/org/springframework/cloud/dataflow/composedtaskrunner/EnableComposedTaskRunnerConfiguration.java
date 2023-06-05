@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,24 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * Accepts a composed task DSL via the command line args and executes the
- * tasks based on the DSL.
+ * Configuration for {@link EnableComposedTaskRunner} which adds a marker bean which
+ * auto-config classes can use to conditionally check if auto configuration should be
+ * activated.
+ *
+ * @author Tobias Soloschenko
  */
-@SpringBootApplication (exclude = {DataFlowClientAutoConfiguration.class})
-public class ComposedTaskRunner {
+@Configuration
+public class EnableComposedTaskRunnerConfiguration {
 
-	public static void main(String[] args) {
-		SpringApplication.run(org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunner.class, args);
+	@Bean
+	public Marker enableConfigServerMarker() {
+		return new Marker();
 	}
 
+	class Marker {
+	}
 }

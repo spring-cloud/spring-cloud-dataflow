@@ -1,0 +1,5 @@
+org.springframework.context.ApplicationListener=\
+  org.springframework.cloud.dataflow.composedtaskrunner.support.CfServiceBindingPropertySourceInitializer
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerAutoConfiguration
