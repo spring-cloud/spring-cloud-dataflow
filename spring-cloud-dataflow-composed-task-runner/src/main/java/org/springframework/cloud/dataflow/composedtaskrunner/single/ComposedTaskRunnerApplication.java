@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoC
  * Accepts a composed task DSL via the command line args and executes the
  * tasks based on the DSL.
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataFlowClientAutoConfiguration.class})
 @EnableComposedTaskRunner
 public class ComposedTaskRunnerApplication {
 
