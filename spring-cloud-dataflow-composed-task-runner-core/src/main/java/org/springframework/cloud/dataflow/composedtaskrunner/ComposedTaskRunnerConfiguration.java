@@ -41,7 +41,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableBatchProcessing
 @EnableTask
 @EnableConfigurationProperties(ComposedTaskProperties.class)
-@Configuration
+@Configuration(
+		proxyBeanMethods = false
+)
 @Import(StepBeanDefinitionRegistrar.class)
 public class ComposedTaskRunnerConfiguration {
 

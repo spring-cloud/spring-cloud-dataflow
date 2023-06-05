@@ -31,6 +31,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @AutoConfigureBefore({JacksonAutoConfiguration.class})
 @ConditionalOnBean(EnableComposedTaskRunnerConfiguration.Marker.class)
-@Import(ComposedTaskRunnerConfiguration.class)
+@Import({ComposedTaskRunnerConfiguration.class, ComposedTaskRunnerOAuth2Configuration.class})
 public class ComposedTaskRunnerAutoConfiguration {
 }
