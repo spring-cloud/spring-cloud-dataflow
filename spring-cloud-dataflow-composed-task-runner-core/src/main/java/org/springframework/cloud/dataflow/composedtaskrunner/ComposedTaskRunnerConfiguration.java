@@ -22,6 +22,7 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -42,18 +43,17 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableTask
 @EnableConfigurationProperties(ComposedTaskProperties.class)
 @Configuration
-@Import(org.springframework.cloud.dataflow.composedtaskrunner.StepBeanDefinitionRegistrar.class)
+@Import(StepBeanDefinitionRegistrar.class)
 public class ComposedTaskRunnerConfiguration {
 
 	@Bean
 	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorer taskExplorer){
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorer);
+		return new ComposedTaskStepExecutionListener(taskExplorer);
 	}
 
 	@Bean
-	public org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory composedTaskJob(ComposedTaskProperties properties) {
-
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory(properties);
+	public ComposedRunnerJobFactory composedTaskJob(ComposedTaskProperties properties) {
+		return new ComposedRunnerJobFactory(properties);
 	}
 
 	@Bean
