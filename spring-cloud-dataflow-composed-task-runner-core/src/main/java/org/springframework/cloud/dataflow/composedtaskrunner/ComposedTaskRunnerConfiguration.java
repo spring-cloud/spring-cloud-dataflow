@@ -73,7 +73,7 @@ public class ComposedTaskRunnerConfiguration {
 	public BatchConfigurer getComposedBatchConfigurer(BatchProperties properties,
 			DataSource dataSource, TransactionManagerCustomizers transactionManagerCustomizers,
 			ComposedTaskProperties composedTaskProperties) {
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedBatchConfigurer(properties,
-				dataSource, transactionManagerCustomizers, composedTaskProperties);
+		return new ComposedBatchConfigurer(properties, dataSource,
+				transactionManagerCustomizers, composedTaskProperties);
 	}
 }

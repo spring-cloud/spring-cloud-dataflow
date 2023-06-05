@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.composedtaskrunner.single;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerAutoConfiguration;
+import org.springframework.cloud.dataflow.composedtaskrunner.EnableComposedTaskRunner;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 
 /**
@@ -26,6 +27,7 @@ import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoC
  * tasks based on the DSL.
  */
 @SpringBootApplication
+@EnableComposedTaskRunner
 public class ComposedTaskRunnerApplication {
 
 	public static void main(String[] args) {
