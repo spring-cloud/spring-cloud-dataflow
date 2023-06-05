@@ -35,9 +35,12 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  */
-@Configuration
+@Configuration(
+		proxyBeanMethods = false
+)
 @Conditional(OnOAuth2ClientCredentialsEnabled.class)
-public class DataFlowConfiguration {
+public class ComposedTaskRunnerOAuth2Configuration {
+
 	@Bean
 	public InMemoryClientRegistrationRepository clientRegistrationRepository(
 			ComposedTaskProperties properties) {

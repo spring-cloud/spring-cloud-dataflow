@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.composedtaskrunner;
+package org.springframework.cloud.dataflow.composedtaskrunner.single;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 
 /**
  * Accepts a composed task DSL via the command line args and executes the
  * tasks based on the DSL.
  */
-@SpringBootApplication (exclude = {DataFlowClientAutoConfiguration.class})
-public class ComposedTaskRunner {
+@SpringBootApplication
+public class ComposedTaskRunnerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunner.class, args);
+		SpringApplication.run(ComposedTaskRunnerApplication.class, args);
 	}
 
 }
