@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,12 +74,6 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 
 	private static final String CONFIGURATION_METADATA_PATTERN = "classpath*:/META-INF/spring-configuration-metadata.json";
 
-	// this is superseded by name prefixed with dataflow and will get removed in future
-	private static final String DEPRECATED_SPRING_CONFIGURATION_PROPERTIES = "classpath*:/META-INF/spring-configuration-metadata-whitelist.properties";
-
-	// this is superseded by VISIBLE_PROPERTIES
-	private static final String DEPRECATED_DATAFLOW_CONFIGURATION_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata-whitelist.properties";
-
 	private static final String VISIBLE_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-metadata.properties";
 
 	private static final String PORT_MAPPING_PROPERTIES = "classpath*:/META-INF/dataflow-configuration-port-mapping.properties";
@@ -130,25 +124,9 @@ public class BootApplicationConfigurationMetadataResolver extends ApplicationCon
 	private static Resource[] visibleConfigurationMetadataResources(ClassLoader classLoader) throws IOException {
 		ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver(classLoader);
 		Resource[] configurationResources = resourcePatternResolver.getResources(VISIBLE_PROPERTIES);
-
-		Resource[] deprecatedSpringConfigurationResources = resourcePatternResolver
-				.getResources(DEPRECATED_SPRING_CONFIGURATION_PROPERTIES);
-		if (deprecatedSpringConfigurationResources.length > 0) {
-			logger.warn("The use of " + DEPRECATED_SPRING_CONFIGURATION_PROPERTIES + " is a deprecated. Please use "
-					+ VISIBLE_PROPERTIES + " instead.");
-		}
-		Resource[] deprecatedDataflowConfigurationResources = resourcePatternResolver
-				.getResources(DEPRECATED_DATAFLOW_CONFIGURATION_PROPERTIES);
-		if (deprecatedDataflowConfigurationResources.length > 0) {
-			logger.warn("The use of " + DEPRECATED_DATAFLOW_CONFIGURATION_PROPERTIES
-					+ " is a deprecated. Please use " + VISIBLE_PROPERTIES + " instead.");
-		}
-
 		Resource[] portMappingResources = resourcePatternResolver.getResources(PORT_MAPPING_PROPERTIES);
 		Resource[] groupingResources = resourcePatternResolver.getResources(OPTION_GROUPS_PROPERTIES);
-		return concatArrays(configurationResources, deprecatedSpringConfigurationResources,
-				deprecatedDataflowConfigurationResources, portMappingResources, groupingResources);
-
+		return concatArrays(configurationResources, portMappingResources, groupingResources);
 	}
 
 	private static Resource[] concatArrays(final Resource[]... arrays) {
