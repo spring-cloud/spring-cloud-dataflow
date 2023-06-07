@@ -23,21 +23,23 @@ For all Data Flow server installations, the following list of remote Maven repos
 
 If the default is already explicitly configured (exact match on the repo url) then it will not be included.
 
-If the applications exist on another remote repository, besides the pre-configured ones, that remote repository must be configured explicitly.
+If the applications exist on another remote repository, besides the pre-configured ones, that remote repository must be configured explicitly and will be added to the pre-configured default list.
 
 TIP: To skip the automatic default repositories behavior altogether, set the `maven.include-default-remote-repos` property to `false`.
 
 To pass the properties as command-line options, run the server with a command similar to the following:
 
 ====
-[source,bash]
+[source,shell]
 ----
-$ java -jar <dataflow-server>.jar --maven.localRepository=mylocal
---maven.remote-repositories.repo1.url=https://repo1
---maven.remote-repositories.repo1.auth.username=repo1user
---maven.remote-repositories.repo1.auth.password=repo1pass
---maven.remote-repositories.repo2.url=https://repo2 --maven.proxy.host=proxyhost
---maven.proxy.port=9018 --maven.proxy.auth.username=proxyuser
+java -jar <dataflow-server>.jar --maven.localRepoitory=mylocal \
+--maven.remote-repositories.repo1.url=https://repo1 \
+--maven.remote-repositories.repo1.auth.username=repo1user \
+--maven.remote-repositories.repo1.auth.password=repo1pass \
+--maven.remote-repositories.repo2.url=https://repo2 \
+--maven.proxy.host=proxyhost \
+--maven.proxy.port=9018 \
+--maven.proxy.auth.username=proxyuser \
 --maven.proxy.auth.password=proxypass
 ----
 ====
@@ -85,7 +87,7 @@ SPRING_APPLICATION_JSON='{
 ----
 ====
 
-You can also use the set the properties as individual environment variables:
+You can also set the properties as individual environment variables:
 
 ====
 [source,bash]
@@ -115,4 +117,4 @@ include::appendix-local-k8s-development.adoc[]
 In this section, we review the frequently asked questions for Spring Cloud Data Flow.
 See the https://dataflow.spring.io/docs/resources/faq/[Frequently Asked Questions] section of the microsite for more information.
 
-// TODO move the FAG to reference guide.
+// TODO move the FAQ to reference guide.
