@@ -83,9 +83,6 @@ spec:
               # Provide the Skipper service location
             - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
               value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
-              # Add Maven repo for metadata artifact resolution for all stream apps
-            - name: SPRING_APPLICATION_JSON
-              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

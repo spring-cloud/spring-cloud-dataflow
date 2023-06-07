@@ -28,11 +28,6 @@ spring:
               name: Spring Cloud Skipper Shell
               version: fake-shell-version
 
-
-maven:
-  remoteRepositories:
-    springRepo: https://repo.spring.io/snapshot
-
 logging:
   level:
     org.springframework.beans: 'WARN'

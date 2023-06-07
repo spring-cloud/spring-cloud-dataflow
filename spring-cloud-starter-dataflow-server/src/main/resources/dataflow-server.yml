@@ -6,11 +6,6 @@ info:
     description: "@project.name@"
     version: "@project.version@"
 
-maven:
-  remoteRepositories:
-    springRepo:
-      url: https://repo.spring.io/snapshot
-
 spring:
   application:
     name: spring-cloud-dataflow-server
