@@ -53,12 +53,6 @@ SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar
 ----
 
-[#add-custom-driver]
-==== Adding a Custom JDBC Driver
-You may require the addition of dependencies to Spring Cloud Data Flow that are not provided by default to support specific databases (for example, Oracle).
-Spring Cloud Data Flow provides a method to extend the classpath such that a user can add these drivers as need.
-The following section discusses how to  <<appendix-extend-classpath.adoc#extend-classpath, extend Spring Cloud Data Flow's classpath>>.
-
 [[configuration-local-rdbms-schema]]
 ==== Schema Handling
 On default database schema is managed with _Flyway_ which is convenient if it's
