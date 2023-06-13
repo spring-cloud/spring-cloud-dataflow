@@ -127,6 +127,8 @@ public class DefaultTaskJobServiceTests {
 		template.execute("DELETE FROM TASK_TASK_BATCH");
 		template.execute("DELETE FROM task_execution_metadata");
 		template.execute("DELETE FROM TASK_EXECUTION;");
+		template.execute("ALTER SEQUENCE task_execution_metadata_seq RESTART WITH 50");
+		template.execute("ALTER SEQUENCE task_seq RESTART WITH 1");
 		initializeSuccessfulRegistry(this.appRegistry);
 		template.execute("INSERT INTO TASK_EXECUTION (TASK_EXECUTION_ID, TASK_NAME) VALUES (0, 'myTask_ORIG');");
 		reset(this.taskLauncher);
@@ -184,8 +186,7 @@ public class DefaultTaskJobServiceTests {
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.emptyList(), null);
 		JobExecution jobExecution;
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
-		template.execute("ALTER SEQUENCE task_execution_metadata_seq RESTART WITH 50");
-		template.execute("ALTER SEQUENCE task_seq RESTART WITH 1");
+
 		if (insertTaskExecutionMetadata) {
 			template.execute(String.format("INSERT INTO task_execution_metadata (id, task_execution_id, task_execution_manifest) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
