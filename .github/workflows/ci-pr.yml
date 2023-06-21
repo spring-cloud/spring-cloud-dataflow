@@ -30,7 +30,7 @@ jobs:
     # build
     - name: Build
       run: |
-        mvn -B -s .github/settings.xml $MAVEN_THREADS clean package
+        mvn -B -s .github/settings.xml $MAVEN_THREADS clean install
     # clean m2 cache
     - name: Clean cache
       run: |

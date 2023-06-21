@@ -194,4 +194,14 @@ public class V7__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 				SqlCommand.from(CREATE_BATCH_JOB_EXECUTION_SEQUENCE),
 				SqlCommand.from(CREATE_BATCH_JOB_SEQUENCE));
 	}
+	@Override
+	public List<SqlCommand> createAggregateViews() {
+		return Arrays.asList(
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_PARAMS_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_BATCH_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_INSTANCE_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_STEP_EXECUTION_VIEW));
+	}
 }

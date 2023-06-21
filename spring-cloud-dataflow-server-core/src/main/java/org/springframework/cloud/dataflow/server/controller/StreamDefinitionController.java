@@ -92,16 +92,16 @@ public class StreamDefinitionController {
 	/**
 	 * Create a {@code StreamDefinitionController} that delegates to {@link StreamService}.
 	 *
-	 * @param streamService the stream service to use
-	 * @param streamDefinitionService the stream definition service to use
-	 * @param appRegistryService the app registry service to use
+	 * @param streamService                     the stream service to use
+	 * @param streamDefinitionService           the stream definition service to use
+	 * @param appRegistryService                the app registry service to use
 	 * @param streamDefinitionAssemblerProvider the stream definition assembler provider to use
-	 * @param appRegistrationAssemblerProvider the app registry assembler provider to use
-	 * */
+	 * @param appRegistrationAssemblerProvider  the app registry assembler provider to use
+	 */
 	public StreamDefinitionController(StreamService streamService, StreamDefinitionService streamDefinitionService,
-			AppRegistryService appRegistryService,
-			StreamDefinitionAssemblerProvider<? extends StreamDefinitionResource> streamDefinitionAssemblerProvider,
-			AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
+									  AppRegistryService appRegistryService,
+									  StreamDefinitionAssemblerProvider<? extends StreamDefinitionResource> streamDefinitionAssemblerProvider,
+									  AppRegistrationAssemblerProvider<? extends AppRegistrationResource> appRegistrationAssemblerProvider) {
 		Assert.notNull(streamService, "StreamService must not be null");
 		Assert.notNull(streamDefinitionService, "StreamDefinitionService must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
@@ -117,15 +117,18 @@ public class StreamDefinitionController {
 	/**
 	 * Return a page-able list of {@link StreamDefinitionResource} defined streams.
 	 *
-	 * @param pageable Pagination information
+	 * @param pageable  Pagination information
 	 * @param assembler assembler for {@link StreamDefinition}
-	 * @param search optional findByTaskNameContains parameter
+	 * @param search    optional findByTaskNameContains parameter
 	 * @return list of stream definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<? extends StreamDefinitionResource> list(Pageable pageable,
-			@RequestParam(required = false) String search, PagedResourcesAssembler<StreamDefinition> assembler) {
+	public PagedModel<? extends StreamDefinitionResource> list(
+			Pageable pageable,
+			@RequestParam(required = false) String search,
+			PagedResourcesAssembler<StreamDefinition> assembler
+	) {
 		Page<StreamDefinition> streamDefinitions = this.streamService.findDefinitionByNameContains(pageable, search);
 		return assembler.toModel(streamDefinitions,
 				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(streamDefinitions.getContent()));
@@ -137,23 +140,25 @@ public class StreamDefinitionController {
 	 * Differs from {@link #saveWithDeployProps} by accepting deployment properties and consuming
 	 * {@link MediaType#APPLICATION_FORM_URLENCODED} request content (required by the Dataflow Shell).
 	 *
-	 * @param name stream name
-	 * @param dsl DSL definition for stream
-	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
-	 * {@code false})
+	 * @param name        stream name
+	 * @param dsl         DSL definition for stream
+	 * @param deploy      if {@code true}, the stream is deployed upon creation (default is
+	 *                    {@code false})
 	 * @param description description of the stream definition
 	 * @return the created stream definition
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
-	 * already exists
-	 * @throws InvalidStreamDefinitionException if there are errors parsing the stream DSL,
-	 * resolving the name, or type of applications in the stream
+	 *                                            already exists
+	 * @throws InvalidStreamDefinitionException   if there are errors parsing the stream DSL,
+	 *                                            resolving the name, or type of applications in the stream
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public StreamDefinitionResource save(@RequestParam("name") String name,
-										 @RequestParam("definition") String dsl,
-										 @RequestParam(value = "description", defaultValue = "") String description,
-										 @RequestParam(value = "deploy", defaultValue = "false") boolean deploy) {
+	public StreamDefinitionResource save(
+			@RequestParam("name") String name,
+			@RequestParam("definition") String dsl,
+			@RequestParam(value = "description", defaultValue = "") String description,
+			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy
+	) {
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, null);
 		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
 				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
@@ -165,25 +170,27 @@ public class StreamDefinitionController {
 	 * Differs from {@link #save} by accepting deployment properties and consuming
 	 * {@link MediaType#APPLICATION_JSON} request content.
 	 *
-	 * @param name stream name
-	 * @param dsl DSL definition for stream
-	 * @param deploy if {@code true}, the stream is deployed upon creation (default is
-	 * {@code false})
+	 * @param name                 stream name
+	 * @param dsl                  DSL definition for stream
+	 * @param deploy               if {@code true}, the stream is deployed upon creation (default is
+	 *                             {@code false})
 	 * @param deploymentProperties the optional deployment properties to use when the stream is deployed upon creation
-	 * @param description description of the stream definition
+	 * @param description          description of the stream definition
 	 * @return the created stream definition
 	 * @throws DuplicateStreamDefinitionException if a stream definition with the same name
-	 * already exists
-	 * @throws InvalidStreamDefinitionException if there are errors parsing the stream DSL,
-	 * resolving the name, or type of applications in the stream
+	 *                                            already exists
+	 * @throws InvalidStreamDefinitionException   if there are errors parsing the stream DSL,
+	 *                                            resolving the name, or type of applications in the stream
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
-	public StreamDefinitionResource saveWithDeployProps(@RequestParam("name") String name,
-										 @RequestParam("definition") String dsl,
-										 @RequestParam(value = "description", defaultValue = "") String description,
-										 @RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
-										 @RequestBody(required = false) Map<String, String> deploymentProperties) {
+	public StreamDefinitionResource saveWithDeployProps(
+			@RequestParam("name") String name,
+			@RequestParam("definition") String dsl,
+			@RequestParam(value = "description", defaultValue = "") String description,
+			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
+			@RequestBody(required = false) Map<String, String> deploymentProperties
+	) {
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, deploymentProperties);
 		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
 				this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition))).toModel(streamDefinition);
@@ -204,18 +211,20 @@ public class StreamDefinitionController {
 	 * Return a list of related stream definition resources based on the given stream name.
 	 * Related streams include the main stream and the tap stream(s) on the main stream.
 	 *
-	 * @param pageable Pagination information
-	 * @param name the name of an existing stream definition (required)
-	 * @param nested if should recursively findByTaskNameContains for related stream definitions
+	 * @param pageable  Pagination information
+	 * @param name      the name of an existing stream definition (required)
+	 * @param nested    if should recursively findByTaskNameContains for related stream definitions
 	 * @param assembler resource assembler for stream definition
 	 * @return a list of related stream definitions
 	 */
 	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<? extends StreamDefinitionResource> listRelated(Pageable pageable,
+	public PagedModel<? extends StreamDefinitionResource> listRelated(
+			Pageable pageable,
 			@PathVariable("name") String name,
 			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
-			PagedResourcesAssembler<StreamDefinition> assembler) {
+			PagedResourcesAssembler<StreamDefinition> assembler
+	) {
 		List<StreamDefinition> result = this.streamService.findRelatedStreams(name, nested);
 		Page<StreamDefinition> page = new PageImpl<>(result, pageable, result.size());
 		return assembler.toModel(page,
@@ -243,7 +252,7 @@ public class StreamDefinitionController {
 		StreamDefinition definition = this.streamService.findOne(name);
 		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(definition);
 		List<AppRegistrationResource> appRegistrations = new ArrayList<>();
-		for (StreamAppDefinition streamAppDefinition: streamAppDefinitions) {
+		for (StreamAppDefinition streamAppDefinition : streamAppDefinitions) {
 			AppRegistrationResource appRegistrationResource = this.appRegistryAssembler.toModel(this.appRegistryService.find(streamAppDefinition.getRegisteredAppName(),
 					streamAppDefinition.getApplicationType()));
 			appRegistrationResource.setLabel(streamAppDefinition.getName());

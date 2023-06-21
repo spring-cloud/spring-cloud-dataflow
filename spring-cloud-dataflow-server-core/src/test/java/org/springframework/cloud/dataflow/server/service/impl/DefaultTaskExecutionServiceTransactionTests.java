@@ -36,6 +36,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -44,13 +45,18 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -59,8 +65,6 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
-import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +72,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -93,7 +98,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
 	@Autowired
-	TaskRepository taskRepository;
+	TaskRepositoryContainer taskRepositoryContainer;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -123,7 +128,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
 	@Autowired
-	TaskExplorer taskExplorer;
+	AggregateTaskExplorer taskExplorer;
 
 	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
@@ -132,25 +137,47 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Autowired
-	DataflowTaskExecutionDao dataflowTaskExecutionDao;
+	DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+
+	@Autowired
+	DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
 
 	private TaskExecutionService transactionTaskService;
 
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
+
 	@Before
 	public void setupMocks() {
-		this.launcherRepository.save(new Launcher("default", "local", new TaskLauncherStub(dataSource)));
+		assertThat(this.launcherRepository.findByName("default")).isNull();
+		this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new TaskLauncherStub(dataSource)));
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		this.taskDefinitionRepository.findAll();
 		this.transactionTaskService = new DefaultTaskExecutionService(
-				launcherRepository, auditRecordService, taskRepository,
-				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-				mock(OAuth2TokenUtilsService.class), this.taskSaveService, this.taskConfigurationProperties,
-				this.composedTaskRunnerConfigurationProperties);
+				launcherRepository,
+				auditRecordService,
+				taskRepositoryContainer,
+				taskExecutionInfoService,
+				mock(TaskDeploymentRepository.class),
+				taskDefinitionRepository,
+				taskDefinitionReader,
+				taskExecutionRepositoryService,
+				taskAppDeploymentRequestCreator,
+				taskExplorer,
+				dataflowTaskExecutionDaoContainer,
+				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionQueryDao,
+				mock(OAuth2TokenUtilsService.class),
+				taskSaveService,
+				taskConfigurationProperties,
+				aggregateExecutionSupport
+		);
 	}
 
 	@Test

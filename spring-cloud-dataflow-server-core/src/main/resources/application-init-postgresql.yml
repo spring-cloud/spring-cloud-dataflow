@@ -14,3 +14,4 @@ spring:
         - classpath*:/schemas/postgresql/V5-dataflow.sql
         - classpath*:/schemas/postgresql/V6-dataflow.sql
         - classpath*:/schemas/postgresql/V7-dataflow.sql
+        - classpath*:/schemas/postgresql/V8-dataflow.sql

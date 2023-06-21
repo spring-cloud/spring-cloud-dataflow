@@ -213,6 +213,7 @@ public class V7__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 			"select *\n" +
 			"from (select 0 as ID, '0' as UNIQUE_KEY) as tmp\n" +
 			"where not exists(select * from BOOT3_BATCH_JOB_SEQ)";
+
 	@Override
 	public List<SqlCommand> createTask3Tables() {
 		return Arrays.asList(
@@ -239,5 +240,15 @@ public class V7__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 				SqlCommand.from(INIT_BATCH_STEP_EXECUTION_SEQ),
 				SqlCommand.from(INIT_BATCH_JOB_EXECUTION_SEQ),
 				SqlCommand.from(INIT_BATCH_JOB_SEQ));
+	}
+	@Override
+	public List<SqlCommand> createAggregateViews() {
+		return Arrays.asList(
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_PARAMS_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_BATCH_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_INSTANCE_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_STEP_EXECUTION_VIEW));
 	}
 }

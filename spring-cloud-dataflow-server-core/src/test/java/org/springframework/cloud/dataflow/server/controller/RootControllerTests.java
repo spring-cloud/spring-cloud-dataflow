@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -72,7 +74,6 @@ public class RootControllerTests {
 
 		Resource resource = new DefaultResourceLoader().getResource("classpath:/root-controller-result.json");
 		String expectedResult = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
-		ObjectMapper mapper = new ObjectMapper();
-		assertEquals(mapper.readTree(expectedResult), mapper.readTree(mvcResult));
+		JSONAssert.assertEquals(expectedResult, mvcResult, JSONCompareMode.STRICT);
 	}
 }

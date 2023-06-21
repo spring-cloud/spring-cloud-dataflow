@@ -27,9 +27,11 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.core.io.UrlResource;
 
 import static org.junit.Assert.assertEquals;
@@ -45,60 +47,75 @@ import static org.junit.Assert.assertNull;
 public class TaskExecutionResourceTests {
 
 	@Test
-	public void testTaskExecutionStatusWithNoTaskExecutionSet()  {
+	public void testTaskExecutionStatusWithNoTaskExecutionSet() {
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource();
 		assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
 	}
 
 	@Test
-	public void testTaskExecutionStatusWithNoStartTime()  {
-		final TaskExecution taskExecution = new TaskExecution();
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-		assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
+	public void testTaskExecutionStatusWithNoStartTime() {
+		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
+			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
+			final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
+			taskExecution.setSchemaTarget(target.getName());
+			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
+			assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
+		}
 	}
 
 	@Test
-	public void testTaskExecutionStatusWithRunningTaskExecution()  {
-		final TaskExecution taskExecution = new TaskExecution();
-		taskExecution.setStartTime(new Date());
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-		assertEquals(TaskExecutionStatus.RUNNING, taskExecutionResource.getTaskExecutionStatus());
-		assertNull(taskExecutionResource.getExitCode());
+	public void testTaskExecutionStatusWithRunningTaskExecution() {
+		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
+			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
+			final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
+			taskExecution.setSchemaTarget(target.getName());
+			taskExecution.setStartTime(new Date());
+			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
+			assertEquals(TaskExecutionStatus.RUNNING, taskExecutionResource.getTaskExecutionStatus());
+			assertNull(taskExecutionResource.getExitCode());
+		}
 	}
 
 	@Test
-	public void testTaskExecutionStatusWithSuccessfulTaskExecution()  {
-		final TaskExecution taskExecution = getDefaultTaskExecution();
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+	public void testTaskExecutionStatusWithSuccessfulTaskExecution() {
+		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
+			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
+			final AggregateTaskExecution taskExecution = getDefaultTaskExecution(target.getName());
+			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
+			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+		}
 	}
 
 	@Test
-	public void testCTRExecutionStatusWithSuccessfulJobExecution()  {
-		final TaskExecution taskExecution = getDefaultTaskExecution();
-		JobExecution jobExecution = new JobExecution(1L);
-		jobExecution.setExitStatus(ExitStatus.COMPLETED);
-		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true);
-		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
-		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+	public void testCTRExecutionStatusWithSuccessfulJobExecution() {
+		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
+			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
+			final AggregateTaskExecution taskExecution = getDefaultTaskExecution(target.getName());
+			JobExecution jobExecution = new JobExecution(1L);
+			jobExecution.setExitStatus(ExitStatus.COMPLETED);
+			TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true, target.getName());
+			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
+			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+		}
 	}
 
 	@Test
-	public void testCTRExecutionStatusWithFailedJobExecution()  {
-		final TaskExecution taskExecution = new TaskExecution();
+	public void testCTRExecutionStatusWithFailedJobExecution() {
+		final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(0);
 		JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setExitStatus(ExitStatus.FAILED);
-		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true);
+		final String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true, defaultSchemaTarget);
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
 		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
 	}
 
 	@Test
-	public void testTaskExecutionStatusWithFailedTaskExecution()  {
-		final TaskExecution taskExecution = new TaskExecution();
+	public void testTaskExecutionStatusWithFailedTaskExecution() {
+		final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(123);
@@ -107,40 +124,45 @@ public class TaskExecutionResourceTests {
 	}
 
 	@Test
-	public void testTaskExecutionForTaskExecutionRel() throws Exception{
-		final TaskExecution taskExecution = getDefaultTaskExecution();
-		TaskManifest taskManifest = new TaskManifest();
-		taskManifest.setPlatformName("testplatform");
-		taskManifest.setTaskDeploymentRequest(new AppDeploymentRequest(new AppDefinition("testapp", Collections.emptyMap()), new UrlResource("http://foo")));
-		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), taskManifest, null);
-		TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-		assertEquals("testplatform", taskExecutionResource.getPlatformName());
-		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
-		taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, null);
-		taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-		assertNull(taskExecutionResource.getPlatformName());
-		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
-		JobExecution jobExecution = new JobExecution(1L, null, "foo");
-		jobExecution.setExitStatus(ExitStatus.FAILED);
+	public void testTaskExecutionForTaskExecutionRel() throws Exception {
+		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
+			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
 
-		TaskJobExecution ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true);
-		taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
-		taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-		assertNull(taskExecutionResource.getPlatformName());
-		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
-		jobExecution.setExitStatus(ExitStatus.COMPLETED);
-		ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true);
-		taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
-		taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-		assertNull(taskExecutionResource.getPlatformName());
-		assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			final AggregateTaskExecution taskExecution = getDefaultTaskExecution(target.getName());
+			TaskManifest taskManifest = new TaskManifest();
+			taskManifest.setPlatformName("testplatform");
+			taskManifest.setTaskDeploymentRequest(new AppDeploymentRequest(new AppDefinition("testapp", Collections.emptyMap()), new UrlResource("http://foo")));
+			TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), taskManifest, null);
+			TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+			assertEquals("testplatform", taskExecutionResource.getPlatformName());
+			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, null);
+			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+			assertNull(taskExecutionResource.getPlatformName());
+			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			JobExecution jobExecution = new JobExecution(1L, null, "foo");
+			jobExecution.setExitStatus(ExitStatus.FAILED);
+
+			TaskJobExecution ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true, target.getName());
+			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
+			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+			assertNull(taskExecutionResource.getPlatformName());
+			assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
+			jobExecution.setExitStatus(ExitStatus.COMPLETED);
+			ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true, target.getName());
+			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
+			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
+			assertNull(taskExecutionResource.getPlatformName());
+			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+		}
 	}
 
-	private TaskExecution getDefaultTaskExecution() {
-		final TaskExecution taskExecution = new TaskExecution();
+	private AggregateTaskExecution getDefaultTaskExecution(String schemaTarget) {
+		final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(0);
+		taskExecution.setSchemaTarget(schemaTarget);
 		return taskExecution;
 	}
 

@@ -37,15 +37,21 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -57,8 +63,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -87,36 +95,43 @@ public class TasksInfoControllerTests {
     private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
     @Autowired
-    private TaskExecutionDao dao;
+    TaskExecutionDaoContainer daoContainer;
 
     @Autowired
-    private JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
     @Autowired
-    private TaskDefinitionRepository taskDefinitionRepository;
+    TaskDefinitionRepository taskDefinitionRepository;
 
     @Autowired
-    private TaskBatchDao taskBatchDao;
+    private TaskBatchDaoContainer taskBatchDaoContainer;
 
     private MockMvc mockMvc;
 
     @Autowired
-    private WebApplicationContext wac;
+    WebApplicationContext wac;
 
     @Autowired
-    private TaskLauncher taskLauncher;
+    TaskLauncher taskLauncher;
 
     @Autowired
-    private LauncherRepository launcherRepository;
+    LauncherRepository launcherRepository;
 
     @Autowired
-    private TaskPlatform taskPlatform;
+    TaskPlatform taskPlatform;
 
     @Autowired
-    private TaskDeploymentRepository taskDeploymentRepository;
+    TaskDeploymentRepository taskDeploymentRepository;
 
-    @Before
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
+
+	@Before
     public void setupMockMVC() {
+		assertThat(this.launcherRepository.findByName("default")).isNull();
         Launcher launcher = new Launcher("default", "local", taskLauncher);
         launcherRepository.save(launcher);
         taskPlatform.setLaunchers(Collections.singletonList(launcher));
@@ -144,6 +159,10 @@ public class TasksInfoControllerTests {
             SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
             taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+
+			SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget("demo", taskDefinitionReader);
+			TaskExecutionDao dao = daoContainer.get(target.getName());
+
             TaskExecution taskExecution1 =
                     dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
 
@@ -151,8 +170,10 @@ public class TasksInfoControllerTests {
             dao.createTaskExecution(TASK_NAME_FOO, new Date(), SAMPLE_ARGUMENT_LIST, null);
             TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), SAMPLE_ARGUMENT_LIST,
                     null);
+			JobRepository jobRepository = jobRepositoryContainer.get(target.getName());
             JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
             JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(target.getName());
             taskBatchDao.saveRelationship(taskExecution, jobExecution);
             TaskDeployment taskDeployment = new TaskDeployment();
             taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);
@@ -167,9 +188,11 @@ public class TasksInfoControllerTests {
     @Test
     public void testGetAllTaskExecutions() throws Exception {
         mockMvc.perform(get("/tasks/info/executions").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalExecutions", is(4)));
         mockMvc.perform(get("/tasks/info/executions?completed=true").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalExecutions", is(0)));
     }

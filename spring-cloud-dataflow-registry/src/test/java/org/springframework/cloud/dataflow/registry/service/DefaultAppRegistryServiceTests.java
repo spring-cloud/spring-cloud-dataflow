@@ -28,11 +28,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;

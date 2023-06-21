@@ -12,7 +12,6 @@
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
-		<forkCount>0.5C</forkCount>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -34,6 +33,16 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-micrometer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-schema</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-aggregate-task</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -164,7 +173,6 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-task-batch</artifactId>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.skyscreamer</groupId>

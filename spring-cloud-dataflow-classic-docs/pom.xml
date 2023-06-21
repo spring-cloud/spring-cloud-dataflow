@@ -127,6 +127,8 @@
 							</dependency>
 						</dependencies>
 						<configuration>
+							<threadCount>1</threadCount>
+							<forkCount>1</forkCount>
 							<failIfNoTests>true</failIfNoTests>
 							<skipTests>false</skipTests>
 							<includes>

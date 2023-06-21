@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import java.util.Set;
@@ -25,10 +23,10 @@ import java.util.TreeSet;
 
 import javax.sql.DataSource;
 
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.util.Assert;
@@ -42,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
@@ -104,7 +103,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	public int deleteTaskExecutionsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskExecutionIds", taskExecutionIds);
-		final String query = getQuery(DELETE_TASK_EXECUTIONS);
+		final String query = SchemaUtilities.getQuery(DELETE_TASK_EXECUTIONS, this.taskProperties.getTablePrefix());
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
@@ -112,7 +111,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	public int deleteTaskExecutionParamsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskExecutionIds", taskExecutionIds);
-		final String query = getQuery(DELETE_TASK_EXECUTION_PARAMS);
+		final String query = SchemaUtilities.getQuery(DELETE_TASK_EXECUTION_PARAMS, this.taskProperties.getTablePrefix());
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
@@ -120,13 +119,11 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	public int deleteTaskTaskBatchRelationshipsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskExecutionIds", taskExecutionIds);
-		final String query = getQuery(DELETE_TASK_TASK_BATCH);
+		final String query = SchemaUtilities.getQuery(DELETE_TASK_TASK_BATCH, this.taskProperties.getTablePrefix());
 		return this.jdbcTemplate.update(query, queryParameters);
 	}
 
-	private String getQuery(String base) {
-		return StringUtils.replace(base, "%PREFIX%", this.taskProperties.getTablePrefix());
-	}
+
 
 	@Override
 	public Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds) {
@@ -136,11 +133,9 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 		Set<Long> childTaskExecutionIds;
 		try {
 			childTaskExecutionIds = this.jdbcTemplate.query(
-					getQuery(SELECT_CHILD_TASK_EXECUTION_IDS), queryParameters,
-					new ResultSetExtractor<Set<Long>>() {
-						@Override
-						public Set<Long> extractData(ResultSet resultSet)
-								throws SQLException, DataAccessException {
+					SchemaUtilities.getQuery(SELECT_CHILD_TASK_EXECUTION_IDS, this.taskProperties.getTablePrefix()),
+					queryParameters,
+					resultSet -> {
 
 							Set<Long> jobExecutionIds = new TreeSet<>();
 
@@ -150,7 +145,6 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 							}
 
 							return jobExecutionIds;
-						}
 					});
 		}
 		catch (DataAccessException e) {
@@ -171,11 +165,10 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 				.addValue("taskName", taskName, Types.VARCHAR);
 
 		try {
-			return this.jdbcTemplate.query(getQuery(FIND_TASK_EXECUTION_IDS_BY_TASK_NAME),
-					queryParameters, new ResultSetExtractor<Set<Long>>() {
-						@Override
-						public Set<Long> extractData(ResultSet resultSet)
-								throws SQLException, DataAccessException {
+			return this.jdbcTemplate.query(
+					SchemaUtilities.getQuery(FIND_TASK_EXECUTION_IDS_BY_TASK_NAME, this.taskProperties.getTablePrefix()),
+					queryParameters,
+					resultSet -> {
 							Set<Long> taskExecutionIds = new TreeSet<>();
 
 							while (resultSet.next()) {
@@ -183,7 +176,6 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 										.add(resultSet.getLong("TASK_EXECUTION_ID"));
 							}
 							return taskExecutionIds;
-						}
 					});
 		}
 		catch (DataAccessException e) {
@@ -194,59 +186,53 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
 		String QUERY = null;
-		MapSqlParameterSource queryParameters = null;
+		MapSqlParameterSource queryParameters = new MapSqlParameterSource();
 		if (StringUtils.hasText(taskName)) {
-			queryParameters = new MapSqlParameterSource()
-					.addValue("taskName", taskName, Types.VARCHAR);
+			queryParameters.addValue("taskName", taskName, Types.VARCHAR);
 			QUERY = (onlyCompleted) ? GET_COMPLETED_TASK_EXECUTIONS_COUNT_BY_TASK_NAME : GET_ALL_TASK_EXECUTIONS_COUNT_BY_TASK_NAME;
 		}
 		else {
 			QUERY = (onlyCompleted) ? GET_COMPLETED_TASK_EXECUTIONS_COUNT: GET_ALL_TASK_EXECUTIONS_COUNT;
 		}
 		try {
-			return this.jdbcTemplate.query(getQuery(QUERY),
-					queryParameters, new ResultSetExtractor<Integer>() {
-						@Override
-						public Integer extractData(ResultSet resultSet)
-								throws SQLException, DataAccessException {
+			return this.jdbcTemplate.query(
+					SchemaUtilities.getQuery(QUERY, this.taskProperties.getTablePrefix()),
+					queryParameters,
+					resultSet -> {
 							if (resultSet.next()) {
 								return resultSet.getInt("count");
 							}
-							return Integer.valueOf(0);
-						}
+						return 0;
 					});
 		}
 		catch (DataAccessException e) {
-			return Integer.valueOf(0);
+			return 0;
 		}
 	}
 
 	@Override
 	public Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName) {
 
-		String QUERY = null;
-		MapSqlParameterSource queryParameters = null;
+		String QUERY;
+		MapSqlParameterSource queryParameters = new MapSqlParameterSource();
 		if (StringUtils.hasText(taskName)) {
-			queryParameters = new MapSqlParameterSource()
-					.addValue("taskName", taskName, Types.VARCHAR);
+			queryParameters.addValue("taskName", taskName, Types.VARCHAR);
 			QUERY = (onlyCompleted) ? FIND_ALL_COMPLETED_TASK_EXECUTION_IDS_BY_TASK_NAME : FIND_ALL_TASK_EXECUTION_IDS_BY_TASK_NAME;
 		}
 		else {
 			QUERY = (onlyCompleted) ? FIND_ALL_COMPLETED_TASK_EXECUTION_IDS : FIND_ALL_TASK_EXECUTION_IDS;
 		}
 		try {
-			return this.jdbcTemplate.query(getQuery(QUERY), queryParameters, new ResultSetExtractor<Set<Long>>() {
-				@Override
-				public Set<Long> extractData(ResultSet resultSet)
-						throws SQLException, DataAccessException {
+			return this.jdbcTemplate.query(
+					SchemaUtilities.getQuery(QUERY, this.taskProperties.getTablePrefix()),
+					queryParameters,
+					resultSet -> {
 					Set<Long> taskExecutionIds = new TreeSet<>();
 
 					while (resultSet.next()) {
-						taskExecutionIds
-								.add(resultSet.getLong("TASK_EXECUTION_ID"));
+							taskExecutionIds.add(resultSet.getLong("TASK_EXECUTION_ID"));
 					}
 					return taskExecutionIds;
-				}
 			});
 		}
 		catch (DataAccessException e) {

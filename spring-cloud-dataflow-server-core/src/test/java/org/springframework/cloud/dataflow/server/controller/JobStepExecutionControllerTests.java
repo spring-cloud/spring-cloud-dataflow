@@ -37,10 +37,16 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -92,21 +98,27 @@ public class JobStepExecutionControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	private TaskExecutionDao dao;
+	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	TaskBatchDaoContainer taskBatchDaoContainer;
 
 	private MockMvc mockMvc;
 
 	@Autowired
-	private WebApplicationContext wac;
+	WebApplicationContext wac;
 
 	@Autowired
-	private RequestMappingHandlerAdapter adapter;
+	RequestMappingHandlerAdapter adapter;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setupMockMVC() {
@@ -175,6 +187,8 @@ public class JobStepExecutionControllerTests {
 	}
 
 	private void createStepExecution(String jobName, String... stepNames) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
+		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
 		for (String stepName : stepNames) {
@@ -185,7 +199,9 @@ public class JobStepExecutionControllerTests {
 			stepExecution.setExecutionContext(context);
 			jobRepository.add(stepExecution);
 		}
+		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }

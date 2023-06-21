@@ -23,11 +23,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
@@ -37,12 +39,18 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
+import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -95,7 +103,11 @@ public class TaskExecutionController {
 
 	private final TaskDeleteService taskDeleteService;
 
-	private final TaskExplorer explorer;
+	private final AggregateTaskExplorer explorer;
+
+	private final AggregateExecutionSupport aggregateExecutionSupport;
+
+	private final TaskDefinitionReader taskDefinitionReader;
 
 	private final TaskJobService taskJobService;
 
@@ -105,6 +117,9 @@ public class TaskExecutionController {
 
 	private final Logger logger = LoggerFactory.getLogger(TaskExecutionController.class);
 
+
+	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
+
 	private static final List<String> allowedSorts = Arrays.asList("TASK_EXECUTION_ID", "START_TIME", "END_TIME",
 			"TASK_NAME", "EXIT_CODE", "EXIT_MESSAGE", "ERROR_MESSAGE", "LAST_UPDATED", "EXTERNAL_EXECUTION_ID",
 			"PARENT_EXECUTION_ID");
@@ -113,17 +128,24 @@ public class TaskExecutionController {
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
 	 * from a the {@link TaskExplorer}
 	 *
-	 * @param explorer the explorer this controller will use for retrieving task execution
-	 *     information.
-	 * @param taskExecutionService used to launch tasks
-	 * @param taskDefinitionRepository the task definition repository
-	 * @param taskExecutionInfoService the task execution information service
-	 * @param taskDeleteService the task deletion service
-	 * @param taskJobService the task job service
+	 * @param explorer                  the explorer this controller will use for retrieving task execution
+	 *                                  information.
+	 * @param aggregateExecutionSupport provides schemaTarget for a task by name.
+	 * @param taskExecutionService      used to launch tasks
+	 * @param taskDefinitionRepository  the task definition repository
+	 * @param taskDefinitionReader      uses task definition repository to provide Task Definition to aggregateExecutionSupport
+	 * @param taskExecutionInfoService  the task execution information service
+	 * @param taskDeleteService         the task deletion service
+	 * @param taskJobService            the task job service
 	 */
-	public TaskExecutionController(TaskExplorer explorer, TaskExecutionService taskExecutionService,
-			TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeleteService taskDeleteService, TaskJobService taskJobService) {
+	public TaskExecutionController(AggregateTaskExplorer explorer,
+								   AggregateExecutionSupport aggregateExecutionSupport,
+								   TaskExecutionService taskExecutionService,
+								   TaskDefinitionRepository taskDefinitionRepository,
+								   TaskDefinitionReader taskDefinitionReader, TaskExecutionInfoService taskExecutionInfoService,
+								   TaskDeleteService taskDeleteService,
+								   TaskJobService taskJobService) {
+		this.taskDefinitionReader = taskDefinitionReader;
 		Assert.notNull(explorer, "explorer must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
@@ -132,6 +154,7 @@ public class TaskExecutionController {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskExecutionService = taskExecutionService;
 		this.explorer = explorer;
+		this.aggregateExecutionSupport = aggregateExecutionSupport;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.taskDeleteService = taskDeleteService;
@@ -141,16 +164,16 @@ public class TaskExecutionController {
 	/**
 	 * Return a page-able list of {@link TaskExecutionResource} defined tasks.
 	 *
-	 * @param pageable page-able collection of {@code TaskExecution}s.
+	 * @param pageable  page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return a list of task executions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionResource> list(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+												  PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
 		validatePageable(pageable);
-		Page<TaskExecution> taskExecutions = this.explorer.findAll(pageable);
+		Page<AggregateTaskExecution> taskExecutions = this.explorer.findAll(pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toModel(result, this.taskAssembler);
 	}
@@ -158,19 +181,22 @@ public class TaskExecutionController {
 	/**
 	 * Retrieve all task executions with the task name specified
 	 *
-	 * @param taskName name of the task
-	 * @param pageable page-able collection of {@code TaskExecution}s.
+	 * @param taskName  name of the task
+	 * @param pageable  page-able collection of {@code TaskExecution}s.
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return the paged list of task executions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<TaskExecutionResource> retrieveTasksByName(@RequestParam("name") String taskName,
-			Pageable pageable, PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
+	public PagedModel<TaskExecutionResource> retrieveTasksByName(
+			@RequestParam("name") String taskName,
+			Pageable pageable,
+			PagedResourcesAssembler<TaskJobExecutionRel> assembler
+	) {
 		validatePageable(pageable);
 		this.taskDefinitionRepository.findById(taskName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
-		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
+		Page<AggregateTaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toModel(result, this.taskAssembler);
 	}
@@ -180,17 +206,19 @@ public class TaskExecutionController {
 	 * if `spring.cloud.dataflow.task.auto-create-task-definitions` is true.
 	 * The name must be included in the path.
 	 *
-	 * @param taskName the name of the task to be executed (required)
+	 * @param taskName   the name of the task to be executed (required)
 	 * @param properties the runtime properties for the task, as a comma-delimited list of
-	 *     key=value pairs
-	 * @param arguments the runtime commandline arguments
+	 *                   key=value pairs
+	 * @param arguments  the runtime commandline arguments
 	 * @return the taskExecutionId for the executed task
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
-	public long launch(@RequestParam("name") String taskName,
+	public long launch(
+			@RequestParam("name") String taskName,
 			@RequestParam(required = false) String properties,
-			@RequestParam(required = false) String arguments) {
+			@RequestParam(required = false) String arguments
+	) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 
@@ -205,16 +233,17 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	// TODO add schemaVersionTarget queryParam
-	public TaskExecutionResource view(@PathVariable("id") long id) {
-		TaskExecution taskExecution = this.explorer.getTaskExecution(id);
+	public TaskExecutionResource view(
+			@PathVariable("id") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) {
+		AggregateTaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecution(id, schemaTarget));
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
 		}
-		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
-		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id);
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id, schemaTarget);
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
-		List<Long> jobExecutionIds = new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
+		List<Long> jobExecutionIds = new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), schemaTarget));
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				jobExecutionIds,
 				taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds));
@@ -230,7 +259,7 @@ public class TaskExecutionController {
 
 		executionInformation.forEach(platformTaskExecutionInformation -> {
 			CurrentTaskExecutionsResource currentTaskExecutionsResource =
-			CurrentTaskExecutionsResource.fromTaskExecutionInformation(platformTaskExecutionInformation);
+					CurrentTaskExecutionsResource.fromTaskExecutionInformation(platformTaskExecutionInformation);
 			resources.add(currentTaskExecutionsResource);
 		});
 
@@ -242,16 +271,18 @@ public class TaskExecutionController {
 	 * optional {@code actions} parameter can be used to not only clean up task execution resources,
 	 * but can also trigger the deletion of task execution and job data in the persistence store.
 	 *
-	 * @param ids The id of the {@link TaskExecution}s to clean up
+	 * @param ids     The id of the {@link TaskExecution}s to clean up
 	 * @param actions Defaults to "CLEANUP" if not specified
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	// TODO add schemaVersionTarget queryParam
-	public void cleanup(@PathVariable("id") Set<Long> ids,
-			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions) {
+	public void cleanup(
+			@PathVariable("id") Set<Long> ids,
+			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) {
 		final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>(Arrays.asList(actions));
-		this.taskDeleteService.cleanupExecutions(actionsAsSet, ids);
+		this.taskDeleteService.cleanupExecutions(actionsAsSet, ids, schemaTarget);
 	}
 
 	/**
@@ -259,60 +290,72 @@ public class TaskExecutionController {
 	 * optional {@code actions} and {@code completed} parameters can be used to not only clean up task execution resources,
 	 * but can also trigger the deletion of task execution and job data in the persistence store.
 	 *
-	 * @param actions Defaults to "CLEANUP" if not specified
+	 * @param actions   Defaults to "CLEANUP" if not specified
 	 * @param completed Defaults to cleanup only completed task executions
-	 * @param taskName Optional name of task to clean up.
+	 * @param taskName  Optional name of task to clean up.
 	 */
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
 	public void cleanupAll(
-			@RequestParam(defaultValue = "CLEANUP", name="action") TaskExecutionControllerDeleteAction[] actions,
-			@RequestParam(defaultValue = "false", name="completed") boolean completed,
-			@RequestParam(defaultValue = "", name="name") String taskName) {
-
+			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
+			@RequestParam(defaultValue = "false", name = "completed") boolean completed,
+			@RequestParam(defaultValue = "", name = "name") String taskName
+	) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 		this.taskDeleteService.cleanupExecutions(new HashSet<>(Arrays.asList(actions)),
-				this.taskExecutionService.getAllTaskExecutionIds(completed, taskName));
+				this.taskExecutionService.getAllTaskExecutionIds(completed, taskName), schemaVersionTarget.getName());
 	}
 
 	/**
 	 * Stop a set of task executions.
 	 *
-	 * @param ids the ids of the {@link TaskExecution}s to stop
+	 * @param ids      the ids of the {@link TaskExecution}s to stop
 	 * @param platform the platform name
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	// TODO add schemaVersionTarget queryParam
-	public void stop(@PathVariable("id") Set<Long> ids,
-	@RequestParam(defaultValue = "", name="platform") String platform) {
-		this.taskExecutionService.stopTaskExecution(ids, platform);
+	public void stop(
+			@PathVariable("id") Set<Long> ids,
+			@RequestParam(defaultValue = "", name = "platform") String platform,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) {
+		this.taskExecutionService.stopTaskExecution(ids, schemaTarget, platform);
 	}
 
-	private Page<TaskJobExecutionRel> getPageableRelationships(Page<TaskExecution> taskExecutions, Pageable pageable) {
+	private Page<TaskJobExecutionRel> getPageableRelationships(Page<AggregateTaskExecution> taskExecutions, Pageable pageable) {
 		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
-		for (TaskExecution taskExecution : taskExecutions.getContent()) {
-			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+		for (AggregateTaskExecution taskExecution : taskExecutions.getContent()) {
+			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
 			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 			List<Long> jobExecutionIds = new ArrayList<>(
-					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId()));
+					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), taskExecution.getSchemaTarget()));
 			taskJobExecutionRels
-					.add(new TaskJobExecutionRel(this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution),
+					.add(new TaskJobExecutionRel(sanitizeTaskExecutionArguments(taskExecution),
 							jobExecutionIds,
 							taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds)));
 		}
 		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
 	}
 
-	private TaskJobExecution getCtrTaskJobExecution(TaskExecution taskExecution, List<Long> jobExecutionIds) {
+
+	private AggregateTaskExecution sanitizeTaskExecutionArguments(AggregateTaskExecution taskExecution) {
+		if (taskExecution != null) {
+			List<String> args = taskExecution.getArguments().stream()
+					.map(this.argumentSanitizer::sanitize).collect(Collectors.toList());
+			taskExecution.setArguments(args);
+		}
+		return taskExecution;
+	}
+
+	private TaskJobExecution getCtrTaskJobExecution(AggregateTaskExecution taskExecution, List<Long> jobExecutionIds) {
 		TaskJobExecution taskJobExecution = null;
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findByTaskName(taskExecution.getTaskName());
-		if(taskDefinition != null) {
-			TaskParser parser = new TaskParser(taskExecution.getTaskName(), taskDefinition.getDslText(),true, false);
-			if(jobExecutionIds.size() > 0 && parser.parse().isComposed()) {
+		if (taskDefinition != null) {
+			TaskParser parser = new TaskParser(taskExecution.getTaskName(), taskDefinition.getDslText(), true, false);
+			if (jobExecutionIds.size() > 0 && parser.parse().isComposed()) {
 				try {
-					taskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0]);
-				}
-				catch(NoSuchJobExecutionException noSuchJobExecutionException) {
+					taskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0], taskExecution.getSchemaTarget());
+				} catch (NoSuchJobExecutionException noSuchJobExecutionException) {
 					this.logger.warn("Job Execution for Task Execution {} could not be found.",
 							taskExecution.getExecutionId());
 				}
@@ -349,18 +392,22 @@ public class TaskExecutionController {
 		public TaskExecutionResource toModel(TaskJobExecutionRel taskJobExecutionRel) {
 			// TODO add schemaVersionTarget queryParam to self
 			TaskExecutionResource resource = createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
-			if(!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+			if (!resource.getLink("tasks/logs").isPresent()) {
+				resource.add(
+						linkTo(
+								methodOn(TaskLogsController.class)
+										.getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getSchemaTarget())
+						).withRel("tasks/logs")
+				);
 			}
 			return resource;
 		}
 
 		@Override
 		public TaskExecutionResource instantiateModel(TaskJobExecutionRel taskJobExecutionRel) {
-			// TODO add schemaVersionTarget queryParam
 			TaskExecutionResource resource = new TaskExecutionResource(taskJobExecutionRel);
-			if(!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName())).withRel("tasks/logs"));
+			if (!resource.getLink("tasks/logs").isPresent()) {
+				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getSchemaTarget())).withRel("tasks/logs"));
 			}
 			return resource;
 		}

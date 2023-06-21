@@ -145,10 +145,10 @@ public class RuntimeAppsControllerTests {
 		releases.add(release4);
 		when(this.skipperClient.list(any())).thenReturn(releases);
 
-		when(this.skipperClient.statuses(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamsInfo);
-		when(this.skipperClient.states(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamDeploymentStates);
-		when(this.skipperClient.states(new String[] {"ticktock3"})).thenReturn(streamDeploymentStates);
-		when(this.skipperClient.states(new String[] {"ticktock4"})).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.statuses("ticktock3", "ticktock4")).thenReturn(streamsInfo);
+		when(this.skipperClient.states("ticktock3", "ticktock4")).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.states("ticktock3")).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.states("ticktock4")).thenReturn(streamDeploymentStates);
 		when(this.skipperClient.status("ticktock3")).thenReturn(ticktock3Info);
 		when(this.skipperClient.status("ticktock4")).thenReturn(ticktock4Info);
 		when(this.skipperClient.statuses("ticktock3")).thenReturn(t3streamsInfo);

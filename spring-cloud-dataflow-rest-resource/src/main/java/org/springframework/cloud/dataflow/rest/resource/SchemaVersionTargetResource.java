@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
- * Resource for {@link org.springframework.cloud.dataflow.core.SchemaVersionTarget}
+ * Resource for {@link org.springframework.cloud.dataflow.schema.SchemaVersionTarget}
  * @author Corneil du Plessis
  */
 public class SchemaVersionTargetResource extends RepresentationModel<SchemaVersionTargetResource> {

@@ -25,11 +25,11 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;

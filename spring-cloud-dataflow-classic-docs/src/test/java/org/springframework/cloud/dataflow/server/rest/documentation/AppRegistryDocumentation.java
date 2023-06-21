@@ -70,7 +70,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
     public void registeringAnApplicationVersion() throws Exception {
         this.mockMvc.perform(
             post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.1.0.RELEASE")
-                .param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE"))
+                .param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+				.queryParam("bootVersion", "2"))
             .andExpect(status().isCreated())
             .andDo(
                 this.documentationHandler.document(
@@ -85,7 +86,9 @@ public class AppRegistryDocumentation extends BaseDocumentation {
                         parameterWithName("metadata-uri").optional()
                             .description("URI where the application metadata jar can be found"),
                         parameterWithName("force").optional()
-                            .description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
+                            .description("Must be true if a registration with the same name and type already exists, otherwise an error will occur"),
+						parameterWithName("bootVersion").optional()
+								.description("Spring Boot version. Value of 2 or 3. Must be supplied of greater than 2.")
                     )
                 )
             );

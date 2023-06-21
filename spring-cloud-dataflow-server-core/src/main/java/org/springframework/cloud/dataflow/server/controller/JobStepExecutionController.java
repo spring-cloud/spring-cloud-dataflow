@@ -27,6 +27,7 @@ import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +40,12 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Glenn Renfro
@@ -50,21 +55,20 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StepExecutionResource.class)
 public class JobStepExecutionController {
 
-	private final JobService jobService;
+	private final JobServiceContainer jobServiceContainer;
 
-	private final Assembler stepAssembler = new Assembler();
 
 	/**
 	 * Creates a {@code JobStepExecutionsController} that retrieves Job Step Execution
-	 * information from a the {@link JobService}
+	 * information from a the {@link JobServiceContainer}
 	 *
-	 * @param jobService the service this controller will use for retrieving job step
+	 * @param jobServiceContainer A container of Jobservices for each schema target that this controller will use for retrieving job step
 	 * execution information.
 	 */
 	@Autowired
-	public JobStepExecutionController(JobService jobService) {
-		Assert.notNull(jobService, "repository must not be null");
-		this.jobService = jobService;
+	public JobStepExecutionController(JobServiceContainer jobServiceContainer) {
+		Assert.notNull(jobServiceContainer, "repository must not be null");
+		this.jobServiceContainer = jobServiceContainer;
 	}
 
 	/**
@@ -79,11 +83,16 @@ public class JobStepExecutionController {
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<StepExecutionResource> stepExecutions(@PathVariable("jobExecutionId") long id,
-			Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException {
-		List<StepExecution> result;
-		result = new ArrayList<>(jobService.getStepExecutions(id));
+	public PagedModel<StepExecutionResource> stepExecutions(
+			@PathVariable("jobExecutionId") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget,
+			Pageable pageable,
+			PagedResourcesAssembler<StepExecution> assembler
+	) throws NoSuchJobExecutionException {
+		JobService jobService = jobServiceContainer.get(schemaTarget);
+		List<StepExecution> result = new ArrayList<>(jobService.getStepExecutions(id));
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
+		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return assembler.toModel(page, stepAssembler);
 	}
 
@@ -99,30 +108,35 @@ public class JobStepExecutionController {
 	 */
 	@RequestMapping(value = { "/{stepExecutionId}" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StepExecutionResource getStepExecution(@PathVariable("jobExecutionId") Long id,
-			@PathVariable("stepExecutionId") Long stepId)
+	public StepExecutionResource getStepExecution(
+			@PathVariable("jobExecutionId") Long id,
+			@PathVariable("stepExecutionId") Long stepId,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget)
 			throws NoSuchStepExecutionException, NoSuchJobExecutionException {
+		JobService jobService = jobServiceContainer.get(schemaTarget);
+		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return stepAssembler.toModel(jobService.getStepExecution(id, stepId));
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link StepExecution}s to {@link StepExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<StepExecution, StepExecutionResource> {
-
-		public Assembler() {
+		private final String schemaTarget;
+		public Assembler(String schemaTarget) {
 			super(JobStepExecutionController.class, StepExecutionResource.class);
+			this.schemaTarget = schemaTarget;
 		}
 
 		@Override
 		public StepExecutionResource toModel(StepExecution stepExecution) {
-			return createModelWithId(stepExecution.getId(), stepExecution, stepExecution.getJobExecution().getId());
+			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
 		}
 
 		@Override
 		public StepExecutionResource instantiateModel(StepExecution stepExecution) {
-			return StepExecutionResourceBuilder.toModel(stepExecution);
+			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
 		}
 	}
 }

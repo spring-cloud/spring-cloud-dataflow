@@ -93,19 +93,9 @@ public class JobExecutionController {
 			@RequestParam(value = "name", required = false) String jobName,
 			@RequestParam(value = "status", required = false) BatchStatus status,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException, NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions;
-		Page<TaskJobExecution> page;
-
-		if (jobName == null && status == null) {
-			jobExecutions = taskJobService.listJobExecutions(pageable);
-			page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
-		} else {
-			jobExecutions = taskJobService.listJobExecutionsForJob(pageable, jobName, status);
-			page = new PageImpl<>(jobExecutions, pageable,
-					taskJobService.countJobExecutionsForJob(jobName, status));
-		}
-
-		return assembler.toModel(page, jobAssembler);
+		Page<TaskJobExecution> jobExecutions = jobName == null && status == null ? taskJobService.listJobExecutions(pageable)
+				: taskJobService.listJobExecutionsForJob(pageable, jobName, status);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
 	/**
@@ -118,8 +108,11 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException {
-		TaskJobExecution jobExecution = taskJobService.getJobExecution(id);
+	public JobExecutionResource view(
+			@PathVariable("id") long id,
+			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchJobExecutionException {
+		TaskJobExecution jobExecution = taskJobService.getJobExecution(id, schemaTarget);
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits", id));
 		}
@@ -137,9 +130,11 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
 	@ResponseStatus(HttpStatus.OK)
-	public void stopJobExecution(@PathVariable("executionId") long jobExecutionId)
-			throws NoSuchJobExecutionException, JobExecutionNotRunningException {
-		taskJobService.stopJobExecution(jobExecutionId);
+	public void stopJobExecution(
+			@PathVariable("executionId") long jobExecutionId,
+			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+		taskJobService.stopJobExecution(jobExecutionId, schemaTarget);
 	}
 
 	/**
@@ -152,9 +147,11 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
-	public void restartJobExecution(@PathVariable("executionId") long jobExecutionId)
-			throws NoSuchJobExecutionException {
-		taskJobService.restartJobExecution(jobExecutionId);
+	public void restartJobExecution(
+			@PathVariable("executionId") long jobExecutionId,
+			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchJobExecutionException {
+		taskJobService.restartJobExecution(jobExecutionId, schemaTarget);
 	}
 
 	/**

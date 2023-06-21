@@ -162,6 +162,8 @@ public class V6__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 	public final static String CREATE_BATCH_JOB_SEQUENCE =
 			"CREATE SEQUENCE BOOT3_BATCH_JOB_SEQ START WITH 1 MINVALUE 1 MAXVALUE 9223372036854775806 INCREMENT BY 1 NOCACHE NOCYCLE";
 
+
+
 	@Override
 	public List<SqlCommand> createTask3Tables() {
 		return Arrays.asList(
@@ -184,5 +186,16 @@ public class V6__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 				SqlCommand.from(CREATE_BATCH_STEP_EXECUTION_SEQUENCE),
 				SqlCommand.from(CREATE_BATCH_JOB_EXECUTION_SEQUENCE),
 				SqlCommand.from(CREATE_BATCH_JOB_SEQUENCE));
+	}
+
+	@Override
+	public List<SqlCommand> createAggregateViews() {
+		return Arrays.asList(
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_EXECUTION_PARAMS_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_TASK_BATCH_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_EXECUTION_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_JOB_INSTANCE_VIEW),
+				SqlCommand.from(CREATE_AGGREGATE_STEP_EXECUTION_VIEW));
 	}
 }

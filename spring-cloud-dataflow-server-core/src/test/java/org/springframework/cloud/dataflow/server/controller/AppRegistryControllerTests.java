@@ -29,12 +29,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;

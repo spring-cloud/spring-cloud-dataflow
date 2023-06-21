@@ -19,8 +19,13 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
@@ -33,13 +38,13 @@ import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -61,7 +66,7 @@ import org.springframework.util.Assert;
  * @author Daniel Serleg
  */
 public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService {
-
+	private final static Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionInfoService.class);
 	private final DataSourceProperties dataSourceProperties;
 
 	/**
@@ -72,7 +77,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	/**
 	 * Used to read TaskExecutions.
 	 */
-	private final TaskExplorer taskExplorer;
+	private final AggregateTaskExplorer taskExplorer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -99,13 +104,19 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	@Deprecated
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
 										   AppRegistryService appRegistryService,
-										   TaskExplorer taskExplorer,
+										   AggregateTaskExplorer taskExplorer,
 										   TaskDefinitionRepository taskDefinitionRepository,
 										   TaskConfigurationProperties taskConfigurationProperties,
 										   LauncherRepository launcherRepository,
 										   List<TaskPlatform> taskPlatforms) {
-		this(dataSourceProperties, appRegistryService, taskExplorer, taskDefinitionRepository,
-				taskConfigurationProperties, launcherRepository, taskPlatforms, null);
+		this(dataSourceProperties,
+				appRegistryService,
+				taskExplorer,
+				taskDefinitionRepository,
+				taskConfigurationProperties,
+				launcherRepository,
+				taskPlatforms,
+				null);
 	}
 
 	/**
@@ -123,7 +134,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 */
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
 										   AppRegistryService appRegistryService,
-										   TaskExplorer taskExplorer,
+										   AggregateTaskExplorer taskExplorer,
 										   TaskDefinitionRepository taskDefinitionRepository,
 										   TaskConfigurationProperties taskConfigurationProperties,
 										   LauncherRepository launcherRepository,
@@ -226,6 +237,35 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		return taskExecutionInformation;
 	}
 
+	@Override
+	public Set<String> composedTaskChildNames(String taskName) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findByTaskName(taskName);
+		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
+		Set<String> result = new HashSet<>();
+		TaskNode taskNode = taskParser.parse();
+		if(taskNode.isComposed()) {
+			for(TaskApp subTask : taskNode.getTaskApps()) {
+				TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
+				if(subTaskDefinition != null) {
+					result.add(subTaskDefinition.getRegisteredAppName());
+					TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDefinition.getDslText(), true, true);
+					TaskNode subTaskNode = subTaskParser.parse();
+					if(subTaskNode != null && subTaskNode.getTaskApp() != null) {
+						for(TaskApp subSubTask : subTaskNode.getTaskApps()) {
+							TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getTaskName());
+							if (subSubTaskDefinition != null) {
+								result.add(subSubTaskDefinition.getRegisteredAppName());
+							}
+						}
+					}
+				} else {
+					result.add(subTask.getName());
+				}
+			}
+		}
+		return result;
+	}
+	@Override
 	public List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		TaskParser taskParser = new TaskParser(taskName, dslText, true, true);

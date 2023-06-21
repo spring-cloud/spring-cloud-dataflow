@@ -31,14 +31,21 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateExecutionSupport;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -62,6 +69,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.junit.Assert.*;
 /**
  * Documentation for the /jobs/executions endpoint.
  *
@@ -75,10 +83,14 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private final static String JOB_NAME = "DOCJOB";
 
 	private static boolean initialized;
-	private JobRepository jobRepository;
-	private TaskExecutionDao dao;
-	private TaskBatchDao taskBatchDao;
+	private JobRepositoryContainer jobRepositoryContainer;
+	private TaskExecutionDaoContainer daoContainer;
+	private TaskBatchDaoContainer taskBatchDaoContainer;
 	private JdbcTemplate jdbcTemplate;
+	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	private AggregateExecutionSupport aggregateExecutionSupport;
+
+	private TaskDefinitionReader taskDefinitionReader;
 
 
 	@Before
@@ -332,29 +344,32 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	private void initialize() throws Exception {
-		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-		repositoryFactoryBean.setDataSource(this.dataSource);
-		repositoryFactoryBean.setTransactionManager(new DataSourceTransactionManager(this.dataSource));
-		this.jobRepository = repositoryFactoryBean.getObject();
-		this.dao = (new TaskExecutionDaoFactoryBean(this.dataSource)).getObject();
-		this.taskBatchDao = new JdbcTaskBatchDao(this.dataSource);
+		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
+		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
+		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
+		this.dataflowTaskExecutionMetadataDaoContainer = context.getBean(DataflowTaskExecutionMetadataDaoContainer.class);
+		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
+		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
+
 	}
 
 	private void createJobExecution(String name, BatchStatus status) {
-		TaskExecution taskExecution = this.dao.createTaskExecution(name, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
+		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
+		TaskExecution taskExecution = dao.createTaskExecution(name, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
-		JobExecution jobExecution = this.jobRepository.createJobExecution(this.jobRepository.createJobInstance(name, new JobParameters()), jobParameters, null);
-		this.taskBatchDao.saveRelationship(taskExecution, jobExecution);
+		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
+		JobExecution jobExecution = jobRepository.createJobExecution(jobRepository.createJobInstance(name, new JobParameters()), jobParameters, null);
+		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
+		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
-		this.jobRepository.update(jobExecution);
-		TaskManifest manifest = new TaskManifest();
+		jobRepository.update(jobExecution);
+		final TaskManifest manifest = new TaskManifest();
 		manifest.setPlatformName("default");
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
-
-		DataflowTaskExecutionMetadataDao metadataDao = new JdbcDataflowTaskExecutionMetadataDao(
-				dataSource, incrementerFactory.getIncrementer("h2", "task_execution_metadata_seq"));
+		DataflowTaskExecutionMetadataDao metadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+		assertNotNull("expected metadataDao for " + name, metadataDao);
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName("default");
 		metadataDao.save(taskExecution, taskManifest);

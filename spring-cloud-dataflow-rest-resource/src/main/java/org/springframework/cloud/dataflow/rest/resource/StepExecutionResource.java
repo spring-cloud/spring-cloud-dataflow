@@ -32,6 +32,8 @@ public class StepExecutionResource extends RepresentationModel<StepExecutionReso
 
 	private final String stepType;
 
+	private final String schemaTarget;
+
 	/**
 	 * Create a new StepExecutionResource
 	 *
@@ -39,13 +41,14 @@ public class StepExecutionResource extends RepresentationModel<StepExecutionReso
 	 * @param stepExecution the step execution, must not be null
 	 * @param stepType the step type
 	 */
-	public StepExecutionResource(Long jobExecutionId, StepExecution stepExecution, String stepType) {
+	public StepExecutionResource(Long jobExecutionId, StepExecution stepExecution, String stepType, String schemaTarget) {
 
 		Assert.notNull(jobExecutionId, "jobExecutionId must not be null.");
 		Assert.notNull(stepExecution, "stepExecution must not be null.");
 
 		this.stepExecution = stepExecution;
 		this.jobExecutionId = jobExecutionId;
+		this.schemaTarget = schemaTarget;
 		this.stepType = stepType;
 	}
 
@@ -56,6 +59,7 @@ public class StepExecutionResource extends RepresentationModel<StepExecutionReso
 		this.stepExecution = null;
 		this.jobExecutionId = null;
 		this.stepType = null;
+		this.schemaTarget = null;
 	}
 
 	/**
@@ -74,6 +78,10 @@ public class StepExecutionResource extends RepresentationModel<StepExecutionReso
 
 	public String getStepType() {
 		return this.stepType;
+	}
+
+	public String getSchemaTarget() {
+		return schemaTarget;
 	}
 
 	public static class Page extends PagedModel<StepExecutionResource> {

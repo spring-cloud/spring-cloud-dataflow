@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.autoconfigure.local;
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
@@ -30,6 +29,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
@@ -40,6 +41,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christian Tzolov
@@ -58,7 +61,14 @@ public abstract class AbstractSchedulerPerPlatformTest {
 			CloudFoundryDeployerAutoConfiguration.class, SecurityAutoConfiguration.class,
 			SecurityFilterAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
 	public static class AutoConfigurationApplication {
-
+		@Bean
+		public AppRegistryService appRegistryService() {
+			return mock(AppRegistryService.class);
+		}
+		@Bean
+		public TaskDefinitionReader taskDefinitionReader() {
+			return mock(TaskDefinitionReader.class);
+		}
 		@Configuration
 		@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 		public static class CloudFoundryMockConfig {
@@ -68,25 +78,25 @@ public abstract class AbstractSchedulerPerPlatformTest {
 			@Bean
 			@Primary
 			public ReactorSchedulerClient reactorSchedulerClient() {
-				return Mockito.mock(ReactorSchedulerClient.class);
+				return mock(ReactorSchedulerClient.class);
 			}
 
 			@Bean
 			@Primary
 			public CloudFoundryOperations cloudFoundryOperations() {
-				return Mockito.mock(CloudFoundryOperations.class);
+				return mock(CloudFoundryOperations.class);
 			}
 
 			@Bean
 			@Primary
 			public CloudFoundryConnectionProperties cloudFoundryConnectionProperties() {
-				return Mockito.mock(CloudFoundryConnectionProperties.class);
+				return mock(CloudFoundryConnectionProperties.class);
 			}
 
 			@Bean
 			@Primary
 			public CloudFoundryTaskLauncher CloudFoundryTaskLauncher() {
-				return Mockito.mock(CloudFoundryTaskLauncher.class);
+				return mock(CloudFoundryTaskLauncher.class);
 			}
 		}
 	}

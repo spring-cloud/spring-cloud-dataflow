@@ -30,8 +30,10 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
@@ -43,7 +45,6 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -65,13 +66,22 @@ public class DataFlowServerConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withAllowBeanDefinitionOverriding(true)
-			.withUserConfiguration(DataFlowServerConfigurationTests.TestConfiguration.class,
-					SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
-					DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
-					DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-					RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
-					SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-					ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
+			.withUserConfiguration(
+					DataFlowServerConfigurationTests.TestConfiguration.class,
+					SecurityAutoConfiguration.class,
+					DataFlowServerAutoConfiguration.class,
+					DataFlowControllerAutoConfiguration.class,
+					DataSourceAutoConfiguration.class,
+					DataFlowServerConfiguration.class,
+					PropertyPlaceholderAutoConfiguration.class,
+					RestTemplateAutoConfiguration.class,
+					HibernateJpaAutoConfiguration.class,
+					SchedulerConfiguration.class,
+					JacksonAutoConfiguration.class,
+					SimpleTaskAutoConfiguration.class,
+					ResourceLoadingAutoConfiguration.class,
+					ComposedTaskRunnerConfigurationProperties.class
+			);
 
 	/**
 	 * Verify that embedded server starts if h2 url is specified with default properties.
@@ -135,8 +145,8 @@ public class DataFlowServerConfigurationTests {
 		}
 
 		@Bean
-		public TaskRepository taskRepository() {
-			return mock(TaskRepository.class);
+		public TaskRepositoryContainer taskRepositoryContainer() {
+			return mock(DefaultTaskRepositoryContainer.class);
 		}
 
 		@Bean

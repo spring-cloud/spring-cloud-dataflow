@@ -1,0 +1,209 @@
+package org.springframework.cloud.dataflow.schema;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+
+import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.util.Assert;
+
+public class AggregateTaskExecution {
+	/**
+	 * The unique id associated with the task execution.
+	 */
+	private long executionId;
+
+	/**
+	 * The parent task execution id.
+	 */
+	private Long parentExecutionId;
+
+	/**
+	 * The recorded exit code for the task.
+	 */
+	private Integer exitCode;
+
+	/**
+	 * User defined name for the task.
+	 */
+	private String taskName;
+
+	/**
+	 * Time of when the task was started.
+	 */
+	private Date startTime;
+
+	/**
+	 * Timestamp of when the task was completed/terminated.
+	 */
+	private Date endTime;
+
+	/**
+	 * Message returned from the task or stacktrace.
+	 */
+	private String exitMessage;
+
+	/**
+	 * Id assigned to the task by the platform.
+	 *
+	 * @since 1.1.0
+	 */
+	private String externalExecutionId;
+
+	/**
+	 * Error information available upon the failure of a task.
+	 *
+	 * @since 1.1.0
+	 */
+	private String errorMessage;
+	private String schemaTarget;
+
+	/**
+	 * The arguments that were used for this task execution.
+	 */
+	private List<String> arguments;
+
+	public AggregateTaskExecution() {
+		this.arguments = new ArrayList<>();
+	}
+
+	public AggregateTaskExecution(long executionId, Integer exitCode, String taskName,
+								  Date startTime, Date endTime, String exitMessage, List<String> arguments,
+								  String errorMessage, String externalExecutionId, Long parentExecutionId, String schemaTarget) {
+
+		Assert.notNull(arguments, "arguments must not be null");
+		this.executionId = executionId;
+		this.exitCode = exitCode;
+		this.taskName = taskName;
+		this.exitMessage = exitMessage;
+		this.arguments = new ArrayList<>(arguments);
+		this.startTime = (startTime != null) ? (Date) startTime.clone() : null;
+		this.endTime = (endTime != null) ? (Date) endTime.clone() : null;
+		this.errorMessage = errorMessage;
+		this.externalExecutionId = externalExecutionId;
+		this.parentExecutionId = parentExecutionId;
+		this.schemaTarget = schemaTarget;
+	}
+
+	public AggregateTaskExecution(long executionId, Integer exitCode, String taskName,
+								  Date startTime, Date endTime, String exitMessage, List<String> arguments,
+								  String errorMessage, String externalExecutionId, String schemaTarget) {
+
+		this(executionId, exitCode, taskName, startTime, endTime, exitMessage, arguments,
+				errorMessage, externalExecutionId, null, schemaTarget);
+	}
+
+	public long getExecutionId() {
+		return this.executionId;
+	}
+
+	public Integer getExitCode() {
+		return this.exitCode;
+	}
+
+	public void setExitCode(Integer exitCode) {
+		this.exitCode = exitCode;
+	}
+
+	public String getTaskName() {
+		return this.taskName;
+	}
+
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
+	}
+
+	public Date getStartTime() {
+		return (this.startTime != null) ? (Date) this.startTime.clone() : null;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = (startTime != null) ? (Date) startTime.clone() : null;
+	}
+
+	public Date getEndTime() {
+		return (this.endTime != null) ? (Date) this.endTime.clone() : null;
+	}
+
+	public void setEndTime(Date endTime) {
+		this.endTime = (endTime != null) ? (Date) endTime.clone() : null;
+	}
+
+	public String getExitMessage() {
+		return this.exitMessage;
+	}
+
+	public void setExitMessage(String exitMessage) {
+		this.exitMessage = exitMessage;
+	}
+
+	public List<String> getArguments() {
+		return this.arguments;
+	}
+
+	public void setArguments(List<String> arguments) {
+		this.arguments = new ArrayList<>(arguments);
+	}
+
+	public String getErrorMessage() {
+		return this.errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
+	public String getExternalExecutionId() {
+		return this.externalExecutionId;
+	}
+
+	public void setExternalExecutionId(String externalExecutionId) {
+		this.externalExecutionId = externalExecutionId;
+	}
+
+	public Long getParentExecutionId() {
+		return this.parentExecutionId;
+	}
+
+	public void setParentExecutionId(Long parentExecutionId) {
+		this.parentExecutionId = parentExecutionId;
+	}
+
+	public String getSchemaTarget() {
+		return schemaTarget;
+	}
+
+	public void setSchemaTarget(String schemaTarget) {
+		this.schemaTarget = schemaTarget;
+	}
+
+	@Override
+	public String toString() {
+		return "TaskExecution{" + "executionId=" + this.executionId
+				+ ", parentExecutionId=" + this.parentExecutionId
+				+ ", exitCode=" + this.exitCode
+				+ ", taskName='" + this.taskName + '\''
+				+ ", startTime=" + this.startTime
+				+ ", endTime=" + this.endTime
+				+ ", exitMessage='" + this.exitMessage + '\''
+				+ ", externalExecutionId='" + this.externalExecutionId + '\''
+				+ ", schemaTarget='" + schemaTarget + '\''
+				+ ", errorMessage='" + this.errorMessage + '\''
+				+ ", arguments=" + this.arguments + '}';
+	}
+
+	public TaskExecution toTaskExecution() {
+		return new TaskExecution(executionId,
+				exitCode,
+				taskName,
+				startTime,
+				endTime,
+				exitMessage,
+				arguments,
+				errorMessage,
+				externalExecutionId,
+				parentExecutionId
+		);
+	}
+}

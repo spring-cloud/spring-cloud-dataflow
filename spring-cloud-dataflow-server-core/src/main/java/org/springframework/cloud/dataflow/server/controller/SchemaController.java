@@ -19,12 +19,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersions;
-import org.springframework.cloud.dataflow.core.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.core.SchemaVersionTargets;
 import org.springframework.cloud.dataflow.rest.resource.SchemaVersionTargetResource;
 import org.springframework.cloud.dataflow.rest.resource.SchemaVersionTargetsResource;
-import org.springframework.cloud.dataflow.server.service.SchemaService;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersions;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTargets;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
@@ -65,12 +65,12 @@ public class SchemaController {
 		return targetsAssembler.toModel(schemaService.getTargets());
 	}
 
-	@RequestMapping(value = "/targets/{schemaTargetName}", method = RequestMethod.GET)
+	@RequestMapping(value = "/targets/{schemaTarget}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public SchemaVersionTargetResource getTarget(@PathVariable("schemaTargetName") String schemaTargetName) {
-		SchemaVersionTarget target = schemaService.getTarget(schemaTargetName);
+	public SchemaVersionTargetResource getTarget(@PathVariable("schemaTarget") String schemaTarget) {
+		SchemaVersionTarget target = schemaService.getTarget(schemaTarget);
 		if (target == null) {
-			throw new NoSuchSchemaTargetException(schemaTargetName);
+			throw new NoSuchSchemaTargetException(schemaTarget);
 		}
 		return targetAssembler.toModel(target);
 	}

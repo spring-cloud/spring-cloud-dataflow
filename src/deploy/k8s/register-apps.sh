@@ -40,7 +40,7 @@ else
     BROKER_NAME=$BROKER
 fi
 if [ "$STREAM_APPS_VERSION" = "" ]; then
-    # export STREAM_APPS_VERSION=4.0.0-SNAPSHOT
+    # export STREAM_APPS_VERSION=2022.0.0-SNAPSHOT
     export STREAM_APPS_VERSION=2021.1.2 # release
 fi
 echo "STREAM_APPS_VERSION=$STREAM_APPS_VERSION"
@@ -50,7 +50,7 @@ else
     TYPE=docker
 fi
 
-if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
+if [[ "$STREAM_APPS_VERSION" = *"-SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
     META_DATA="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
     echo "Downloading $META_DATA"
@@ -59,7 +59,15 @@ if [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
     DESCRIPTORS="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
-    DESCRIPTORS="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    REL_TYPE=
+    if [[ "$STREAM_APPS_VERSION" = *"-M"* ]] || [[ "$STREAM_APPS_VERSION" = *"-RC"* ]]; then
+        REL_TYPE=milestone
+    fi
+    if [ "$REL_TYPE" != "" ]; then
+        DESCRIPTORS="https://repo.spring.io/$REL_TYPE/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    else
+        DESCRIPTORS="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    fi
 fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"

@@ -90,9 +90,8 @@ public class JobExecutionThinController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> listJobsOnly(Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, taskJobService.countJobExecutions());
-		return assembler.toModel(page, jobAssembler);
+		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 	/**
 	 * Retrieve all task job executions with the task name specified
@@ -105,12 +104,12 @@ public class JobExecutionThinController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobExecutionThinResource> retrieveJobsByName(@RequestParam("name") String jobName,
-			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable,
-				taskJobService.countJobExecutionsForJob(jobName, null));
-		return assembler.toModel(page, jobAssembler);
+	public PagedModel<JobExecutionThinResource> retrieveJobsByName(
+			@RequestParam("name") String jobName,
+			Pageable pageable,
+			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
+		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, jobName);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
 	/**
@@ -129,11 +128,11 @@ public class JobExecutionThinController {
 	public PagedModel<JobExecutionThinResource> retrieveJobsByDateRange(
 			@RequestParam("fromDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date fromDate,
 			@RequestParam("toDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date toDate,
-			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, fromDate,
-				toDate);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, jobExecutions.size());
-		return assembler.toModel(page, jobAssembler);
+			Pageable pageable,
+			PagedResourcesAssembler<TaskJobExecution> assembler
+	) throws NoSuchJobException {
+		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCount(pageable, fromDate, toDate);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
 	/**
@@ -148,12 +147,13 @@ public class JobExecutionThinController {
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "jobInstanceId", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByJobInstanceId(
-			@RequestParam("jobInstanceId") int jobInstanceId, Pageable pageable,
+			@RequestParam("jobInstanceId") int jobInstanceId,
+			@RequestParam(value = "schemaTarget", required = false) String schemaTarget,
+			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService
-				.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(pageable, jobInstanceId);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, jobExecutions.size());
-		return assembler.toModel(page, jobAssembler);
+		Page<TaskJobExecution> jobExecutions = taskJobService
+				.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(pageable, jobInstanceId, schemaTarget);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
 	/**
@@ -168,16 +168,20 @@ public class JobExecutionThinController {
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "taskExecutionId", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByTaskExecutionId(
-			@RequestParam("taskExecutionId") int taskExecutionId, Pageable pageable,
+			@RequestParam("taskExecutionId") int taskExecutionId,
+			@RequestParam(value = "schemaTarget", required = false) String schemaTarget,
+			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		List<TaskJobExecution> jobExecutions = taskJobService
-				.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(pageable, taskExecutionId);
-		Page<TaskJobExecution> page = new PageImpl<>(jobExecutions, pageable, jobExecutions.size());
-		return assembler.toModel(page, jobAssembler);
+		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
+				pageable,
+				taskExecutionId,
+				schemaTarget
+		);
+		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link JobExecution}s to {@link JobExecutionThinResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecution, JobExecutionThinResource> {

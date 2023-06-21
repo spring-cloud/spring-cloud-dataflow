@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 

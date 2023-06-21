@@ -28,8 +28,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
-import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -48,20 +52,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class JdbcDataflowTaskExecutionDaoTests {
 
 	@Autowired
-	private DataflowTaskExecutionDao dataflowTaskExecutionDao;
+	private DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
 
 	@Autowired
-	private TaskRepository taskRepository;
+	private TaskRepositoryContainer taskRepositoryContainer;
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
+	@Autowired
+	private TaskDefinitionReader taskDefinitionReader;
 
 	@Test
 	@DirtiesContext
 	public void testGetTaskExecutionIdsByTaskName() {
 		String taskName = UUID.randomUUID().toString();
-		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName, 4);
-		for (TaskExecution taskExecution : taskExecutions) {
-			this.taskRepository.createTaskExecution(taskExecution);
+		List<AggregateTaskExecution> taskExecutions = createSampleTaskExecutions(taskName, 4);
+		for (AggregateTaskExecution taskExecution : taskExecutions) {
+			TaskRepository taskRepository = taskRepositoryContainer.get(taskExecution.getSchemaTarget());
+			taskRepository.createTaskExecution(taskExecution.toTaskExecution());
 		}
-		Set<Long> taskExecutionIds = this.dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(taskName);
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
+		DataflowTaskExecutionDao dataflowTaskExecutionDao =  dataflowTaskExecutionDaoContainer.get(schemaVersionTarget.getName());
+		assertThat(dataflowTaskExecutionDao).isNotNull();
+		Set<Long> taskExecutionIds = dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(taskName);
 		assertThat(taskExecutionIds.size()).isEqualTo(4);
 	}
 
@@ -69,29 +81,33 @@ public class JdbcDataflowTaskExecutionDaoTests {
 	@DirtiesContext
 	public void testGetAllTaskExecutionIds() {
 		String taskName1 = UUID.randomUUID().toString();
-		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName1, 4);
+		List<AggregateTaskExecution> taskExecutions = createSampleTaskExecutions(taskName1, 4);
 		String taskName2 = UUID.randomUUID().toString();
 		taskExecutions.addAll(createSampleTaskExecutions(taskName2, 2));
-		for (TaskExecution taskExecution : taskExecutions) {
-			this.taskRepository.createTaskExecution(taskExecution);
+		for (AggregateTaskExecution aggregateTaskExecution : taskExecutions) {
+			TaskRepository taskRepository = taskRepositoryContainer.get(aggregateTaskExecution.getSchemaTarget());
+			taskRepository.createTaskExecution(aggregateTaskExecution.toTaskExecution());
 		}
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(true, null)).isEqualTo(0);
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionIds(true, null).size()).isEqualTo(0);
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, null)).isEqualTo(6);
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionIds(false, null).size()).isEqualTo(6);
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName1)).isEqualTo(4);
-		assertThat(this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName2)).isEqualTo(2);
+		DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(dataflowTaskExecutionDao).isNotNull();
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(true, null)).isEqualTo(0);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(true, null).size()).isEqualTo(0);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, null)).isEqualTo(6);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(false, null).size()).isEqualTo(6);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName1)).isEqualTo(4);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName2)).isEqualTo(2);
 	}
 
-	private List<TaskExecution> createSampleTaskExecutions(String taskName, int numExecutions) {
+	private List<AggregateTaskExecution> createSampleTaskExecutions(String taskName, int numExecutions) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 		Date startTime = new Date();
 		String externalExecutionId = UUID.randomUUID().toString();
 		Random randomGenerator = new Random();
-		List<TaskExecution> taskExecutions = new ArrayList<>();
+		List<AggregateTaskExecution> taskExecutions = new ArrayList<>();
 		for (int i = 0; i < numExecutions; i++) {
 			long executionId = randomGenerator.nextLong();
-			taskExecutions.add(new TaskExecution(executionId, null, taskName, startTime,
-					null, null, new ArrayList<>(), null, externalExecutionId));
+			taskExecutions.add(new AggregateTaskExecution(executionId, null, taskName, startTime,
+					null, null, new ArrayList<>(), null, externalExecutionId, schemaVersionTarget.getName()));
 		}
 		return taskExecutions;
 	}

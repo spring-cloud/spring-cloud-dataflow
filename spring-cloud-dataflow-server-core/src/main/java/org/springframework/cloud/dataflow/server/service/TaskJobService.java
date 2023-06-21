@@ -32,7 +32,9 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Repository that retrieves Tasks and JobExecutions/Instances and the associations
@@ -52,7 +54,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException in the event that a job execution id specified is
 	 *     not present when looking up stepExecutions for the result.
 	 */
-	List<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException;
+	Page<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
@@ -63,8 +65,7 @@ public interface TaskJobService {
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName)
-			throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName) throws NoSuchJobException;
 
 	/**
 	 * Retrieves a JobExecution from the JobRepository and matches it with a task id.
@@ -74,7 +75,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
 	 *     exist.
 	 */
-	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
+	TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository with a
@@ -85,8 +86,7 @@ public interface TaskJobService {
 	 * @return List containing {@link JobInstanceExecutions}.
 	 * @throws NoSuchJobException if the job for the jobName specified does not exist.
 	 */
-	List<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable, String jobName)
-			throws NoSuchJobException;
+	Page<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable, String jobName) throws NoSuchJobException;
 
 	/**
 	 * Retrieves a {@link JobInstance} from the JobRepository and matches it with the
@@ -97,33 +97,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobInstanceException if job instance id does not exist.
 	 * @throws NoSuchJobException if the job for the job instance does not exist.
 	 */
-	JobInstanceExecutions getJobInstance(long id) throws NoSuchJobInstanceException, NoSuchJobException;
-
-	/**
-	 * Retrieves the total number of job instances for a job name.
-	 *
-	 * @param jobName the name of the job instance.
-	 * @return the number of job instances associated with the jobName.
-	 * @throws NoSuchJobException if the job for jobName specified does not exist.
-	 */
-	int countJobInstances(String jobName) throws NoSuchJobException;
-
-	/**
-	 * Retrieves the total number of the job executions.
-	 *
-	 * @return the total number of job executions.
-	 */
-	int countJobExecutions();
-
-	/**
-	 * Retrieves the total number {@link JobExecution} that match a specific job name.
-	 *
-	 * @param jobName the job name to findByTaskNameContains.
-	 * @param status the status of the job execution
-	 * @return the number of {@link JobExecution}s that match the job name.
-	 * @throws NoSuchJobException if the job for the jobName does not exist.
-	 */
-	int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException;
+	JobInstanceExecutions getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException, NoSuchJobException;
 
 	/**
 	 * Restarts a {@link JobExecution} IF the respective {@link JobExecution} is actually
@@ -133,7 +107,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
 	 *     exist.
 	 */
-	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
+	void restartJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException;
 
 	/**
 	 * Requests a {@link JobExecution} to stop.
@@ -150,7 +124,7 @@ public interface TaskJobService {
 	 *     not running.
 	 * @see org.springframework.cloud.dataflow.server.batch.JobService#stop(Long)
 	 */
-	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
+	void stopJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount}s from the JobRepository
@@ -162,7 +136,7 @@ public interface TaskJobService {
 	 * @throws NoSuchJobExecutionException thrown if the job execution specified does not
 	 *     exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException;
+	Page<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecution} from the JobRepository with a specific
@@ -174,8 +148,7 @@ public interface TaskJobService {
 	 * @return List containing {@link TaskJobExecution}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status)
-			throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
@@ -187,8 +160,7 @@ public interface TaskJobService {
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, Date fromDate, Date toDate)
-			throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, Date fromDate, Date toDate) throws NoSuchJobException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
@@ -199,8 +171,7 @@ public interface TaskJobService {
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(Pageable pageable, int jobInstanceId)
-			throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(Pageable pageable, int jobInstanceId, String schemaTarget) throws NoSuchJobException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
@@ -211,6 +182,5 @@ public interface TaskJobService {
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	List<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(Pageable pageable, int taskExecutionId)
-			throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(Pageable pageable, int taskExecutionId, String schemaTarget) throws NoSuchJobException;
 }

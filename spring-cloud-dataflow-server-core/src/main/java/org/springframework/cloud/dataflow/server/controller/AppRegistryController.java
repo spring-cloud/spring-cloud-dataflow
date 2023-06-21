@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -48,6 +47,7 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;

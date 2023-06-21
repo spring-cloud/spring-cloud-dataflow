@@ -86,6 +86,8 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private TimeZone timeZone;
 
+	private String schemaTarget;
+
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
@@ -108,6 +110,7 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 		this.jobParametersString = fromJobParameters(
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
+		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();

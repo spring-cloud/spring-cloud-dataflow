@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.dataflow.core.Launcher;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -59,6 +60,7 @@ import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -173,10 +175,12 @@ public class LocalDataflowResource extends ExternalResource {
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
 		LauncherRepository launcherRepository = configurableApplicationContext.getBean(LauncherRepository.class);
-		launcherRepository.save(new Launcher("default", "local", new LocalTaskLauncher(new LocalDeployerProperties())));
+		if(launcherRepository.findByName("default") == null) {
+			launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new LocalTaskLauncher(new LocalDeployerProperties())));
+		}
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
-				.addFilters(filters.toArray(new Filter[filters.size()])).build();
+				.addFilters(filters.toArray(new Filter[0])).build();
 		dataflowPort = configurableApplicationContext.getEnvironment().resolvePlaceholders("${server.port}");
 	}
 

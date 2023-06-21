@@ -32,9 +32,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
@@ -64,13 +69,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class JobExecutionThinControllerTests {
 
 	@Autowired
-	private TaskExecutionDao dao;
+	private TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	private JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	private TaskBatchDaoContainer taskBatchDaoContainer;
 
 	private MockMvc mockMvc;
 
@@ -78,12 +83,24 @@ public class JobExecutionThinControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private RequestMappingHandlerAdapter adapter;
+	RequestMappingHandlerAdapter adapter;
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setupMockMVC() {
-		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(jobRepository, taskBatchDao,
-				dao, wac, adapter);
+		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
+				jobRepositoryContainer,
+				taskBatchDaoContainer,
+				daoContainer,
+				aggregateExecutionSupport,
+				taskDefinitionReader,
+				wac,
+				adapter
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

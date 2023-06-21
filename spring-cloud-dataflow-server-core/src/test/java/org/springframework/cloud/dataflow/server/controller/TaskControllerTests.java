@@ -29,6 +29,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.hamcrest.MatcherAssert;
+import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,17 +41,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -58,7 +69,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -125,7 +136,7 @@ public class TaskControllerTests {
 	private LauncherRepository launcherRepository;
 
 	@Autowired
-	private TaskExplorer taskExplorer;
+	private AggregateTaskExplorer taskExplorer;
 
 	@Autowired
 	private TaskSaveService taskSaveService;
@@ -134,13 +145,22 @@ public class TaskControllerTests {
 	private TaskDeleteService taskDeleteService;
 
 	@Autowired
-	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+
+	@Autowired
+	private TaskExecutionDaoContainer taskExecutionDaoContainer;
 
 	@Autowired
 	private TaskExecutionCreationService taskExecutionCreationService;
 
 	@Autowired
 	private CommonApplicationProperties appsProperties;
+
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	private TaskDefinitionReader taskDefinitionReader;
 
 	private boolean initialized = false;
 
@@ -175,37 +195,37 @@ public class TaskControllerTests {
 		taskManifest.setTaskDeploymentRequest(request);
 		taskManifest.setPlatformName("test");
 
-		final TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
+		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
 		taskExecutionRunning.setStartTime(new Date());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
-		when(taskExplorer.getTaskExecution(taskExecutionRunning.getExecutionId())).thenReturn(taskExecutionRunning);
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
 
-		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
-		taskExecutionComplete.setTaskName("myTask2");
-		taskExecutionComplete.setStartTime(new Date());
-		taskExecutionComplete.setEndTime(new Date());
-		taskExecutionComplete.setExitCode(0);
-		taskExecutionComplete.setArguments(SAMPLE_ARGUMENT_LIST);
+		TaskExecutionDao taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget.getName());
+		taskExecutionDao.startTaskExecution(taskExecutionRunning.getExecutionId(), taskExecutionRunning.getTaskName(), new Date(), SAMPLE_ARGUMENT_LIST, Long.toString(taskExecutionRunning.getExecutionId()));
+		taskExecutionRunning = taskExecutionDao.getTaskExecution(taskExecutionRunning.getExecutionId());
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
-				.thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
+		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
+		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
+		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
+		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(), taskExecutionComplete.getTaskName(), new Date(), SAMPLE_ARGUMENT_LIST, Long.toString(taskExecutionComplete.getExecutionId()));
+		taskExecutionDao.completeTaskExecution(taskExecutionComplete.getExecutionId(), 0, new Date(), null);
+		taskExecutionComplete = taskExecutionDao.getTaskExecution(taskExecutionComplete.getExecutionId());
+		dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget2.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
 	@Test
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
+				new TaskDefinitionController(this.taskExplorer, null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
+				new TaskDefinitionController(null, this.repository, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
@@ -265,7 +285,7 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(1);
 
-		TaskDefinition myTask = repository.findById("myTask").get();
+		TaskDefinition myTask = repository.findById("myTask").orElseThrow(() -> new AssertionFailure("Expected myTask"));
 
 		assertThat(myTask.getProperties().get("foo")).isEqualTo("bar");
 		assertThat(myTask.getProperties().get("bar")).isEqualTo("baz");
@@ -623,7 +643,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertEquals(4, request.getCommandlineArguments().size());
+		assertEquals(6, request.getCommandlineArguments().size());
 		// don't assume order in a list
 		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
@@ -715,19 +735,17 @@ public class TaskControllerTests {
 
 	@Test
 	public void testTaskLaunchNoManifest() throws Exception {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("myTask3", taskDefinitionReader);
 		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3");
 		taskExecutionComplete.setTaskName("myTask3");
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
 		taskExecutionComplete.setExitCode(0);
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask3")).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
-				.thenReturn(Arrays.asList(taskExecutionComplete, taskExecutionComplete));
 		repository.save(new TaskDefinition("myTask3", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
 		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk());
 

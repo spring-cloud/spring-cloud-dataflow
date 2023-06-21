@@ -27,6 +27,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +38,7 @@ import org.springframework.util.Assert;
  * @author Christian Tzolov
  * @author Vinicius Carvalho
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @Entity
 @Table(name = "AppRegistration")
@@ -228,7 +230,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 		return "AppRegistration{" + "name='" + this.getName() + '\'' + ", type='" + this.getType()
 				+ '\'' + ", version='" + this.getVersion() + '\'' + ", uri=" + this.getUri()
 				+ ", metadataUri=" + this.getMetadataUri() +
-				", bootVersion=\'" + this.getBootVersion().getBootVersion() + '}';
+				", bootVersion='" + this.getBootVersion().getBootVersion() + '}';
 	}
 
 	@Override

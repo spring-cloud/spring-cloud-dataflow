@@ -119,6 +119,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),
+								fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
 								subsectionWithPath("appProperties").description("The application properties of the task execution"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task exectuion"),

@@ -87,12 +87,12 @@ public class JobInstanceController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobInstanceResource> list(@RequestParam("name") String jobName, Pageable pageable,
+	public PagedModel<JobInstanceResource> list(
+			@RequestParam("name") String jobName,
+			Pageable pageable,
 			PagedResourcesAssembler<JobInstanceExecutions> assembler) throws NoSuchJobException {
-		List<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
-		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable,
-				taskJobService.countJobInstances(jobName));
-		return assembler.toModel(page, jobAssembler);
+		Page<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
+		return assembler.toModel(jobInstances, jobAssembler);
 	}
 
 	/**
@@ -105,8 +105,11 @@ public class JobInstanceController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public JobInstanceResource view(@PathVariable("id") long id) throws NoSuchJobInstanceException, NoSuchJobException {
-		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
+	public JobInstanceResource view(
+			@PathVariable("id") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchJobInstanceException, NoSuchJobException {
+		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
 		return jobAssembler.toModel(jobInstance);
 	}
 

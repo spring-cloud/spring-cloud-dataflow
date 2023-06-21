@@ -35,6 +35,9 @@ import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -84,7 +87,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String TASK_EXECUTION_ID_FILTER =
 			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
 
-	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "TASK_TASK_BATCH B";
+	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%PREFIX%TASK_BATCH B";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
@@ -274,8 +277,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCountFilteredByTaskExecutionId(
 			int taskExecutionId, int start, int count) {
+		// TODO find schemaVersionTarget for the taskExecutionId
 		if (start <= 0) {
-			return getJdbcTemplate().query(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+			return getJdbcTemplate().query(SchemaUtilities.getQuery(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					SchemaVersionTarget.defaultTarget().getName()),
 					new JobExecutionStepCountRowMapper(), taskExecutionId);
 		}
 		try {
