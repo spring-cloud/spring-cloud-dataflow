@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.schema;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -25,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link AppBootSchemaVersion}.
@@ -55,7 +55,7 @@ public class AppBootSchemaVersionTests {
 	@NullAndEmptySource
 	@ValueSource(strings = { "Boot2", "boot2", "BOOT2", "foo", "Boot3", "boot3", "BOOT3" })
 	void fromBootVersionWithInvalidValues(String invalidBootVersion) {
-		Assertions.assertThatIllegalArgumentException()
+		assertThatIllegalArgumentException()
 				.isThrownBy(() -> AppBootSchemaVersion.fromBootVersion(invalidBootVersion))
 				.withMessage("Invalid AppBootSchemaVersion: %s", invalidBootVersion);
 	}

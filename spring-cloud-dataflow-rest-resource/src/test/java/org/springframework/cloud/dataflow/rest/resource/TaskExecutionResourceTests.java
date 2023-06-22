@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -34,8 +34,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.UrlResource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Provides tests for the {@link TaskExecutionResourceTests} class.
@@ -43,13 +42,14 @@ import static org.junit.Assert.assertNull;
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class TaskExecutionResourceTests {
 
 	@Test
 	public void testTaskExecutionStatusWithNoTaskExecutionSet() {
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource();
-		assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
+		assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.UNKNOWN);
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class TaskExecutionResourceTests {
 			final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
 			taskExecution.setSchemaTarget(target.getName());
 			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-			assertEquals(TaskExecutionStatus.UNKNOWN, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.UNKNOWN);
 		}
 	}
 
@@ -71,8 +71,8 @@ public class TaskExecutionResourceTests {
 			taskExecution.setSchemaTarget(target.getName());
 			taskExecution.setStartTime(new Date());
 			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-			assertEquals(TaskExecutionStatus.RUNNING, taskExecutionResource.getTaskExecutionStatus());
-			assertNull(taskExecutionResource.getExitCode());
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.RUNNING);
+			assertThat(taskExecutionResource.getExitCode()).isNull();
 		}
 	}
 
@@ -82,7 +82,7 @@ public class TaskExecutionResourceTests {
 			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
 			final AggregateTaskExecution taskExecution = getDefaultTaskExecution(target.getName());
 			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
 		}
 	}
 
@@ -95,7 +95,8 @@ public class TaskExecutionResourceTests {
 			jobExecution.setExitStatus(ExitStatus.COMPLETED);
 			TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true, target.getName());
 			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
-			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
+
 		}
 	}
 
@@ -110,7 +111,7 @@ public class TaskExecutionResourceTests {
 		final String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		TaskJobExecution taskJobExecution = new TaskJobExecution(taskExecution.getExecutionId(), jobExecution, true, defaultSchemaTarget);
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, taskJobExecution);
-		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
+		assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.ERROR);
 	}
 
 	@Test
@@ -120,7 +121,7 @@ public class TaskExecutionResourceTests {
 		taskExecution.setEndTime(new Date());
 		taskExecution.setExitCode(123);
 		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-		assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
+		assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.ERROR);
 	}
 
 	@Test
@@ -134,26 +135,26 @@ public class TaskExecutionResourceTests {
 			taskManifest.setTaskDeploymentRequest(new AppDeploymentRequest(new AppDefinition("testapp", Collections.emptyMap()), new UrlResource("http://foo")));
 			TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), taskManifest, null);
 			TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-			assertEquals("testplatform", taskExecutionResource.getPlatformName());
-			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getPlatformName()).isEqualTo("testplatform");
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
 			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, null);
 			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-			assertNull(taskExecutionResource.getPlatformName());
-			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getPlatformName()).isNull();
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
 			JobExecution jobExecution = new JobExecution(1L, null, "foo");
 			jobExecution.setExitStatus(ExitStatus.FAILED);
 
 			TaskJobExecution ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true, target.getName());
 			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
 			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-			assertNull(taskExecutionResource.getPlatformName());
-			assertEquals(TaskExecutionStatus.ERROR, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getPlatformName()).isNull();
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.ERROR);
 			jobExecution.setExitStatus(ExitStatus.COMPLETED);
 			ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true, target.getName());
 			taskJobExecutionRel = new TaskJobExecutionRel(taskExecution, new ArrayList<>(), null, ctrTaskJobExecution);
 			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
-			assertNull(taskExecutionResource.getPlatformName());
-			assertEquals(TaskExecutionStatus.COMPLETE, taskExecutionResource.getTaskExecutionStatus());
+			assertThat(taskExecutionResource.getPlatformName()).isNull();
+			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
 		}
 	}
 

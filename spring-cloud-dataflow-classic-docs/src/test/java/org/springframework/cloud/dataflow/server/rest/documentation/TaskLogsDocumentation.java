@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskLogsDocumentation extends BaseDocumentation {
