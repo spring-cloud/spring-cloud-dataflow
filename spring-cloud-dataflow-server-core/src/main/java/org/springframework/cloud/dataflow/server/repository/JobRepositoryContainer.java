@@ -24,6 +24,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
 import org.springframework.transaction.PlatformTransactionManager;
 
 public class JobRepositoryContainer {
@@ -48,6 +49,9 @@ public class JobRepositoryContainer {
 	public JobRepository get(String schemaTarget) {
 		if(schemaTarget == null) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
+		if(!container.containsKey(schemaTarget)) {
+			throw new NoSuchSchemaTargetException(schemaTarget);
 		}
 		return container.get(schemaTarget);
 	}
