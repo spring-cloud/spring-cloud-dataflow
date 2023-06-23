@@ -226,7 +226,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
-			validateBasicProperties(Collections.emptyMap(), argument, "default", 1L);
+			validateBasicProperties(Collections.emptyMap(), argument, "default");
 		}
 
 		@Test
@@ -238,7 +238,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", K8_PLATFORM);
-			validateBasicProperties(taskDeploymentProperties, argument, K8_PLATFORM, 1L);
+			validateBasicProperties(taskDeploymentProperties, argument, K8_PLATFORM);
 		}
 
 		@Test
@@ -261,11 +261,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE);
-			validateBasicProperties(taskDeploymentProperties, argument, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, 2L);
+			validateBasicProperties(taskDeploymentProperties, argument, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE);
 
 		}
 
-		private void validateBasicProperties(Map<String, String> taskDeploymentProperties, ArgumentCaptor<AppDeploymentRequest> argument, String platform, long numberOfRunningTasks) {
+		private void validateBasicProperties(Map<String, String> taskDeploymentProperties, ArgumentCaptor<AppDeploymentRequest> argument, String platform) {
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertThat(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username")).isTrue();
