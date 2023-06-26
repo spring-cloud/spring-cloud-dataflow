@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Date;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +43,6 @@ import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
-import org.springframework.cloud.task.batch.listener.TaskBatchDao;
-import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -63,6 +60,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Glenn Renfro
@@ -112,9 +111,9 @@ public class JobExecutionControllerTests {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testJobExecutionControllerConstructorMissingRepository() {
-		new JobExecutionController(null);
+		assertThatIllegalArgumentException().isThrownBy(() ->new JobExecutionController(null));
 	}
 
 	@Test
@@ -154,6 +153,14 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testStopStartedJobExecutionWithInvalidSchema() throws Exception {
+		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true").param("schemaTarget", "foo"))
+				.andDo(print())
+				.andExpect(status().is4xxClientError());
+	}
+
+
+	@Test
 	public void testStopStartedJobExecutionTwice() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
@@ -162,9 +169,9 @@ public class JobExecutionControllerTests {
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
 				new JobParameters());
-		Assert.assertNotNull(jobExecution);
-		Assert.assertEquals(Long.valueOf(6), jobExecution.getId());
-		Assert.assertEquals(BatchStatus.STOPPING, jobExecution.getStatus());
+		assertThat(jobExecution).isNotNull();
+		assertThat(jobExecution.getId()).isEqualTo(Long.valueOf(6));
+		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
@@ -180,9 +187,9 @@ public class JobExecutionControllerTests {
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
 				new JobParameters());
-		Assert.assertNotNull(jobExecution);
-		Assert.assertEquals(Long.valueOf(7), jobExecution.getId());
-		Assert.assertEquals(BatchStatus.STOPPED, jobExecution.getStatus());
+		assertThat(jobExecution).isNotNull();
+		assertThat(jobExecution.getId()).isEqualTo(Long.valueOf(7));
+		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPED);
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,16 +45,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -78,7 +77,7 @@ public class TaskExecutionExplorerTests {
 	@Autowired
 	private TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		template = new JdbcTemplate(dataSource);
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
@@ -88,18 +87,18 @@ public class TaskExecutionExplorerTests {
 	}
 
 	@Test
-	public void testInitializer() throws Exception {
+	public void testInitializer() {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			String prefix = target.getTaskPrefix();
 			int actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION", prefix), Integer.class);
-		assertEquals("expected 0 entries returned from task_execution", 0, actual);
+			assertThat(actual).isEqualTo(0);
 			actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION_PARAMS", prefix), Integer.class);
-		assertEquals("expected 0 entries returned from task_execution_params", 0, actual);
-	}
+			assertThat(actual).isEqualTo(0);
+		}
 	}
 
 	@Test
-	public void testExplorerFindAll() throws Exception {
+	public void testExplorerFindAll(){
 		final int ENTRY_COUNT = 4;
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "foo");
@@ -107,8 +106,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
 		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
-		assertEquals(String.format("expected %s entries returned from task_execution", ENTRY_COUNT), ENTRY_COUNT,
-				resultList.size());
+		assertThat(resultList.size()).isEqualTo(ENTRY_COUNT);
 		Map<String, AggregateTaskExecution> actual = new HashMap<>();
 		for (AggregateTaskExecution taskExecution : resultList) {
 			String key = String.format("%d:%s", taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
@@ -117,10 +115,10 @@ public class TaskExecutionExplorerTests {
 		Set<String> allKeys = new HashSet<>();
 		for (AggregateTaskExecution execution : actual.values()) {
 			String key = String.format("%d:%s", execution.getExecutionId(), execution.getSchemaTarget());
-			assertFalse("expected key id does not match actual", allKeys.contains(key));
+			assertThat(allKeys.contains(key)).isFalse();
 			allKeys.add(key);
 		}
-		assertEquals(allKeys.size(), actual.size());
+		assertThat(actual.size()).isEqualTo(allKeys.size());
 	}
 
 	@Test
@@ -131,10 +129,10 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
 		List<AggregateTaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
-		assertEquals("expected 1 entries returned from task_execution", 1, resultList.size());
+		assertThat(resultList.size()).isEqualTo(1);
 		AggregateTaskExecution taskExecution = resultList.get(0);
-		assertEquals("expected execution id does not match actual", 0, taskExecution.getExecutionId());
-		assertEquals("expected taskName does not match actual", "fee", taskExecution.getTaskName());
+		assertThat(taskExecution.getExecutionId()).isEqualTo(0);
+		assertThat(taskExecution.getTaskName()).isEqualTo("fee");
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {
