@@ -56,7 +56,7 @@ public class CloudFoundryPlatformPropertiesTests {
 		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
 		assertThat(cfAccounts.get("dev").getDeployment().getAppNamePrefix().equals("dev1"));
 		assertThat(cfAccounts.get("dev").getDeployment().getServices())
-				.containsExactly("rabbit", "mysql");
+				.containsOnly("rabbit", "mysql");
 
 		assertThat(cfAccounts.get("qa").getConnection().getOrg()).isEqualTo("myOrgQA");
 		assertThat(cfAccounts.get("qa").getConnection().getClientId()).isEqualTo("id2");
@@ -66,7 +66,7 @@ public class CloudFoundryPlatformPropertiesTests {
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
 		assertThat(cfAccounts.get("qa").getDeployment().getAppNamePrefix().equals("qa1"));
 		assertThat(cfAccounts.get("qa").getDeployment().getServices())
-				.containsExactly("rabbitQA", "mysqlQA");
+				.containsOnly("rabbitQA", "mysqlQA");
 	}
 
 	@Configuration
