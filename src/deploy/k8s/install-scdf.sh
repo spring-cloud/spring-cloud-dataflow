@@ -25,13 +25,8 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
 
-if [ "$DATABASE" = "mariadb" ]; then
-    echo "Waiting for mariadb"
-    kubectl rollout status deployment --namespace "$NS" mariadb
-else
-    echo "Waiting for PostgreSQL"
-    kubectl rollout status deployment --namespace "$NS" postgresql
-fi
+
+kubectl rollout status deployment --namespace "$NS" $DATABASE
 
 if [ "$BROKER" = "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"

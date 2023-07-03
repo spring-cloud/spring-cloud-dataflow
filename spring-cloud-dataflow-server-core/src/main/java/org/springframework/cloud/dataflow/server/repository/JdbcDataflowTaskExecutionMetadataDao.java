@@ -62,15 +62,12 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	private static final String INSERT_SQL = "INSERT INTO %PREFIX%EXECUTION_METADATA (ID, TASK_EXECUTION_ID, " +
 			"TASK_EXECUTION_MANIFEST) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
 
-	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "SELECT M.TASK_EXECUTION_MANIFEST AS %PREFIX%EXECUTION_MANIFEST " +
+	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "SELECT M.TASK_EXECUTION_MANIFEST AS TASK_EXECUTION_MANIFEST " +
 			"FROM %PREFIX%EXECUTION_METADATA M INNER JOIN " +
 			"%PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID " +
 			"WHERE E.TASK_EXECUTION_ID = :taskExecutionId";
 
-	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
-			"DELETE FROM %PREFIX%EXECUTION_METADATA " +
-					"WHERE TASK_EXECUTION_ID " +
-			"IN (:taskExecutionIds)";
+	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS = "DELETE FROM %PREFIX%EXECUTION_METADATA WHERE TASK_EXECUTION_ID IN (:taskExecutionIds)";
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -124,14 +121,14 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	@Override
 	public TaskManifest getLatestManifest(String taskName) {
 		Map<String, Order> sortKeys = new HashMap<>(1);
-		sortKeys.put("e.TASK_EXECUTION_ID", Order.DESCENDING);
+		sortKeys.put("E.TASK_EXECUTION_ID", Order.DESCENDING);
 
 		SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
 
 		sqlPagingQueryProviderFactoryBean.setDataSource(this.dataSource);
 		sqlPagingQueryProviderFactoryBean.setSelectClause("TASK_EXECUTION_MANIFEST");
 		sqlPagingQueryProviderFactoryBean.setFromClause(SchemaUtilities.getQuery("%PREFIX%EXECUTION_METADATA M INNER JOIN %PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID", tablePrefix));
-		sqlPagingQueryProviderFactoryBean.setWhereClause("e.TASK_NAME = :taskName");
+		sqlPagingQueryProviderFactoryBean.setWhereClause("E.TASK_NAME = :taskName");
 		sqlPagingQueryProviderFactoryBean.setSortKeys(sortKeys);
 
 		try {
@@ -145,7 +142,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			return this.jdbcTemplate.queryForObject(queryProvider.getPageQuery(PageRequest.of(0, 1)),
 					queryParameters, (resultSet, i) -> {
 						try {
-							return objectMapper.readValue(resultSet.getString("task_execution_manifest"), TaskManifest.class);
+							return objectMapper.readValue(resultSet.getString("TASK_EXECUTION_MANIFEST"), TaskManifest.class);
 						} catch (IOException e) {
 							throw new IllegalArgumentException("Unable to deserialize manifest", e);
 						}
@@ -167,7 +164,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 					queryParameters,
 					(resultSet, i) -> {
 						try {
-							return objectMapper.readValue(resultSet.getString("task_execution_manifest"), TaskManifest.class);
+							return objectMapper.readValue(resultSet.getString("TASK_EXECUTION_MANIFEST"), TaskManifest.class);
 						} catch (IOException e) {
 							throw new IllegalArgumentException("Unable to deserialize manifest", e);
 						}

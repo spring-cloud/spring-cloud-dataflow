@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.repository;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 public class DataflowJobExecutionDaoContainer {
 	private final Map<String, DataflowJobExecutionDao> jobExecutionDaos = new HashMap<>();
@@ -31,9 +33,12 @@ public class DataflowJobExecutionDaoContainer {
 		jobExecutionDaos.put(name, jobExecutionDao);
 	}
 
-	public DataflowJobExecutionDao get(String name) {
-		DataflowJobExecutionDao result = jobExecutionDaos.get(name);
-		Assert.notNull(result, "Expected to find jobExecutionDao for " + name);
+	public DataflowJobExecutionDao get(String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
+		DataflowJobExecutionDao result = jobExecutionDaos.get(schemaTarget);
+		Assert.notNull(result, "Expected to find jobExecutionDao for " + schemaTarget);
 		return result;
 	}
 }

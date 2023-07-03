@@ -31,6 +31,7 @@ import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfigurat
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.Assert;
 
 /**
  * Configuration for aggregate task related components.
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.Import;
 @Import(SchemaServiceConfiguration.class)
 public class AggregateTaskConfiguration {
 	private static final Logger logger = LoggerFactory.getLogger(AggregateTaskConfiguration.class);
+
 
 	@Bean
 	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
@@ -72,13 +74,21 @@ public class AggregateTaskConfiguration {
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
 			SchemaService schemaService,
 			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
+			TaskDefinitionReader taskDefinitionReader,
+			TaskDeploymentReader taskDeploymentReader
 	) {
+		Assert.notNull(dataSource, "dataSource required");
+		Assert.notNull(taskExecutionQueryDao, "taskExecutionQueryDao required");
+		Assert.notNull(schemaService, "schemaService required");
+		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport required");
+		Assert.notNull(taskDefinitionReader, "taskDefinitionReader required");
+		Assert.notNull(taskDeploymentReader, "taskDeploymentReader required");
 		return new DefaultAggregateTaskExplorer(dataSource,
 				taskExecutionQueryDao,
 				schemaService,
 				aggregateExecutionSupport,
-				taskDefinitionReader);
+				taskDefinitionReader,
+				taskDeploymentReader);
 	}
 
 	@PostConstruct

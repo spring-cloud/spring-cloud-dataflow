@@ -6,7 +6,7 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.5.3-SNAPSHOT
+  DATAFLOW_PRO_VERSION=1.6.0-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
   export DATAFLOW_VERSION=2.11.0-SNAPSHOT
@@ -81,7 +81,7 @@ if [ "$SKIPPER_VERSION" = "" ]; then
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-    SCDF_PRO_VERSION=1.5.3-SNAPSHOT
+    SCDF_PRO_VERSION=1.6.0-SNAPSHOT
 fi
 YAML_PATH=$(realpath $SCDIR/yaml)
 
@@ -96,7 +96,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         sh "$SCDIR/load-image.sh" "mariadb" "10.4"
         ;;
     "postgresql")
-        sh "$SCDIR/load-image.sh" "postgres" "10"
+        sh "$SCDIR/load-image.sh" "postgres" "12"
         ;;
     *)
         echo "DATABASE=$DATABASE not supported"
@@ -129,6 +129,7 @@ pushd "$PARENT" >/dev/null
 
 case $BROKER in
 "kafka")
+
     kubectl create --namespace "$NS" -f src/kubernetes/kafka/
     ;;
 "rabbit" | "rabbitmq")
@@ -138,7 +139,6 @@ case $BROKER in
     echo "BROKER=$BROKER not supported"
     ;;
 esac
-
 kubectl create --namespace "$NS" -f src/kubernetes/$DATABASE/
 
 if [ "$PROMETHEUS" = "true" ]; then

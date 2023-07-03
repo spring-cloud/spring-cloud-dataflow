@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.List;
 import java.util.TimeZone;
 
 import org.springframework.batch.core.BatchStatus;
@@ -32,13 +31,13 @@ import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +45,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller for operations on {@link org.springframework.batch.core.JobExecution}. This
@@ -68,7 +70,7 @@ public class JobExecutionController {
 	 * a the {@link JobService}
 	 *
 	 * @param taskJobService the service this controller will use for retrieving job execution
-	 *     information. Must not be null.
+	 *                       information. Must not be null.
 	 */
 	public JobExecutionController(TaskJobService taskJobService) {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
@@ -78,13 +80,13 @@ public class JobExecutionController {
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName name of the job. SQL server specific wildcards are enabled (eg.: myJob%,
-	 *     m_Job, ...)
-	 * @param status Optional status criteria.
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param jobName   name of the job. SQL server specific wildcards are enabled (eg.: myJob%,
+	 *                  m_Job, ...)
+	 * @param status    Optional status criteria.
+	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
-	 * @throws NoSuchJobException if the job with the given name does not exist.
+	 * @throws NoSuchJobException          if the job with the given name does not exist.
 	 * @throws NoSuchJobExecutionException if the job execution doesn't exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
@@ -104,7 +106,7 @@ public class JobExecutionController {
 	 * @param id the id of the requested {@link JobExecution}
 	 * @return the {@link JobExecution}
 	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
-	 *     exist.
+	 *                                     exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
@@ -125,16 +127,17 @@ public class JobExecutionController {
 	 *
 	 * @param jobExecutionId the executionId of the job execution to stop.
 	 * @throws JobExecutionNotRunningException if a stop is requested on a job that is not
-	 *     running.
-	 * @throws NoSuchJobExecutionException if the job execution id specified does not exist.
+	 *                                         running.
+	 * @throws NoSuchJobExecutionException     if the job execution id specified does not exist.
 	 */
-	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "stop=true")
-	@ResponseStatus(HttpStatus.OK)
-	public void stopJobExecution(
+	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "stop=true")
+
+	public ResponseEntity<Void> stopJobExecution(
 			@PathVariable("executionId") long jobExecutionId,
 			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
 	) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
 		taskJobService.stopJobExecution(jobExecutionId, schemaTarget);
+		return ResponseEntity.ok().build();
 	}
 
 	/**
@@ -143,9 +146,9 @@ public class JobExecutionController {
 	 *
 	 * @param jobExecutionId the executionId of the job execution to restart
 	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId
-	 *     specified does not exist.
+	 *                                     specified does not exist.
 	 */
-	@RequestMapping(value = { "/{executionId}" }, method = RequestMethod.PUT, params = "restart=true")
+	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
 	public void restartJobExecution(
 			@PathVariable("executionId") long jobExecutionId,
@@ -177,12 +180,19 @@ public class JobExecutionController {
 
 		@Override
 		public JobExecutionResource toModel(TaskJobExecution taskJobExecution) {
-			return createModelWithId(taskJobExecution.getJobExecution().getId(), taskJobExecution);
+			return instantiateModel(taskJobExecution);
 		}
 
 		@Override
 		public JobExecutionResource instantiateModel(TaskJobExecution taskJobExecution) {
-			return new JobExecutionResource(taskJobExecution, timeZone);
+			JobExecutionResource resource = new JobExecutionResource(taskJobExecution, timeZone);
+			try {
+				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget())).withSelfRel());
+				resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+				throw new RuntimeException(e);
+			}
+			return resource;
 		}
 	}
 }

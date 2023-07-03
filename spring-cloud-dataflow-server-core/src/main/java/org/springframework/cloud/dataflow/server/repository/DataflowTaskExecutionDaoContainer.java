@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 public class DataflowTaskExecutionDaoContainer {
 	private final Map<String, DataflowTaskExecutionDao> taskExecutionContainer = new HashMap<>();
@@ -33,7 +34,7 @@ public class DataflowTaskExecutionDaoContainer {
 	}
 
 	public DataflowTaskExecutionDao get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		DataflowTaskExecutionDao result = taskExecutionContainer.get(schemaTarget);

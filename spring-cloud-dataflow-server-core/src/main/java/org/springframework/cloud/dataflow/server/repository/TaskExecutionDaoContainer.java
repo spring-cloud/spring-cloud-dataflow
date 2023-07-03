@@ -20,17 +20,19 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
+import org.springframework.util.StringUtils;
 
 public class TaskExecutionDaoContainer {
 	private final Map<String, TaskExecutionDao> taskExecutionDaoContainer = new HashMap<>();
 
 	public TaskExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		for(SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			TaskExecutionDaoFactoryBean factoryBean = new TaskExecutionDaoFactoryBean(dataSource, target.getTaskPrefix());
+			TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, target.getTaskPrefix());
 			try {
 				this.taskExecutionDaoContainer.put(target.getName(), factoryBean.getObject());
 			} catch (Throwable x) {
@@ -40,7 +42,7 @@ public class TaskExecutionDaoContainer {
 	}
 
 	public TaskExecutionDao get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return taskExecutionDaoContainer.get(schemaTarget);

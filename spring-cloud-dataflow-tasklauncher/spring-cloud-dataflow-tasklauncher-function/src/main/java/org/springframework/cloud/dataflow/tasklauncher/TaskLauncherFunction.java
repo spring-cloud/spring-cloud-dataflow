@@ -29,7 +29,9 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -42,7 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author David Turanski
  **/
-public class TaskLauncherFunction implements Function<LaunchRequest, Optional<Long>>, InitializingBean {
+public class TaskLauncherFunction implements Function<LaunchRequest, Optional<LaunchResponse>>, InitializingBean {
 	private static final Log log = LogFactory.getLog(TaskLauncherFunction.class);
 
 	static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
@@ -63,7 +65,7 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<Lo
 	 * empty otherwise.
 	 */
 	@Override
-	public Optional<Long> apply(LaunchRequest launchRequest) {
+	public Optional<LaunchResponse> apply(LaunchRequest launchRequest) {
 		if (platformIsAcceptingNewTasks()) {
 			return Optional.of(launchTask(launchRequest));
 		}
@@ -105,7 +107,7 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<Lo
 
 	}
 
-	private long launchTask(LaunchRequest request) {
+	private LaunchResponse launchTask(LaunchRequest request) {
 		String requestPlatformName = request.getDeploymentProperties().get(TASK_PLATFORM_NAME);
 		if (StringUtils.hasText(requestPlatformName) && !platformName.equals(requestPlatformName)) {
 			throw new IllegalStateException(
@@ -118,11 +120,11 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<Lo
 							platformName));
 		}
 		log.info(String.format("Launching Task %s on platform %s", request.getTaskName(), platformName));
-		long taskId = taskOperations.launch(request.getTaskName(),
+		LaunchResponseResource response = taskOperations.launch(request.getTaskName(),
 				enrichDeploymentProperties(request.getDeploymentProperties()),
 				request.getCommandlineArguments());
-		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), taskId));
-		return taskId;
+		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getTaskId()));
+		return new LaunchResponse(response.getTaskId(), response.getSchemaTarget());
 	}
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {

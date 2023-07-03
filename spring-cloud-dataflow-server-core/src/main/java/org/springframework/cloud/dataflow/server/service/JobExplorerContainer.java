@@ -9,6 +9,7 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
+import org.springframework.util.StringUtils;
 
 public class JobExplorerContainer {
 	private final Map<String, JobExplorer> container = new HashMap<>();
@@ -28,7 +29,7 @@ public class JobExplorerContainer {
 	}
 
 	public JobExplorer get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		if(!container.containsKey(schemaTarget)) {

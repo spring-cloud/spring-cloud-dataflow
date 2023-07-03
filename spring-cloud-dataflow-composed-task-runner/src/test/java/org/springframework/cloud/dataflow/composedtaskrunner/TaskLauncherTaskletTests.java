@@ -23,6 +23,9 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +49,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -63,6 +68,7 @@ import org.springframework.cloud.task.repository.support.TaskRepositoryInitializ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
@@ -107,15 +113,23 @@ public class TaskLauncherTaskletTests {
 
 	private TaskExplorer taskExplorer;
 
+	private ObjectMapper mapper;
+
 
 	@BeforeEach
 	public void setup() throws Exception{
+		if (this.mapper == null) {
+			this.mapper = new ObjectMapper();
+			this.mapper.registerModule(new Jdk8Module());
+			this.mapper.registerModule(new Jackson2HalModule());
+			this.mapper.registerModule(new JavaTimeModule());
+			this.mapper.registerModule(new Jackson2DataflowModule());
+		}
 		this.taskRepositoryInitializer.setDataSource(this.dataSource);
-
 		this.taskRepositoryInitializer.afterPropertiesSet();
 		this.taskOperations = mock(TaskOperations.class);
 		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean =
-				new TaskExecutionDaoFactoryBean(this.dataSource);
+				new MultiSchemaTaskExecutionDaoFactoryBean(this.dataSource, "TASK_");
 		this.taskRepository = new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 		this.taskExplorer = new SimpleTaskExplorer(taskExecutionDaoFactoryBean);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(500);
@@ -149,7 +163,7 @@ public class TaskLauncherTaskletTests {
 	public void testInvalidTaskOperations() {
 		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(null, null,
 				this.taskExplorer, this.composedTaskProperties,
-				TASK_NAME, new TaskProperties());
+				TASK_NAME, new TaskProperties(), mapper);
 		Exception exception = assertThrows(ComposedTaskException.class, () -> {
 			execute(taskLauncherTasklet, null, chunkContext());
 		});
@@ -314,7 +328,7 @@ public class TaskLauncherTaskletTests {
 
 			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 					this.taskExplorer, composedTaskProperties,
-					TASK_NAME, new TaskProperties());
+					TASK_NAME, new TaskProperties(), mapper);
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
@@ -397,7 +411,7 @@ public class TaskLauncherTaskletTests {
 
 			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 					this.taskExplorer, composedTaskProperties,
-					TASK_NAME, new TaskProperties());
+					TASK_NAME, new TaskProperties(), mapper);
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
@@ -433,7 +447,7 @@ public class TaskLauncherTaskletTests {
 	private TaskLauncherTasklet getTaskExecutionTasklet(TaskProperties taskProperties) {
 		TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 				this.taskExplorer, this.composedTaskProperties,
-				TASK_NAME, taskProperties);
+				TASK_NAME, taskProperties, mapper);
 		ReflectionTestUtils.setField(taskLauncherTasklet, "taskOperations", this.taskOperations);
 		return taskLauncherTasklet;
 	}
@@ -480,8 +494,9 @@ public class TaskLauncherTaskletTests {
 				OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
 				TaskExplorer taskExplorer,
 				ComposedTaskProperties composedTaskProperties, String taskName,
-				TaskProperties taskProperties) {
-			super(clientRegistrations, clientCredentialsTokenResponseClient,taskExplorer,composedTaskProperties,taskName,taskProperties);
+				TaskProperties taskProperties,
+				ObjectMapper mapper) {
+			super(clientRegistrations, clientCredentialsTokenResponseClient,taskExplorer,composedTaskProperties,taskName,taskProperties, mapper);
 		}
 
 		@Override

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
@@ -126,8 +128,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 *
 	 * @param baseURI Must not be null
 	 */
-	public DataFlowTemplate(URI baseURI) {
-		this(baseURI, getDefaultDataflowRestTemplate());
+	public DataFlowTemplate(URI baseURI, ObjectMapper mapper) {
+		this(baseURI, getDefaultDataflowRestTemplate(), mapper);
 	}
 
 	/**
@@ -138,7 +140,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * @param baseURI Must not be null
 	 * @param restTemplate Must not be null
 	 */
-	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate) {
+	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate, ObjectMapper mapper) {
 
 		Assert.notNull(baseURI, "The provided baseURI must not be null.");
 		Assert.notNull(restTemplate, "The provided restTemplate must not be null.");
@@ -176,7 +178,14 @@ public class DataFlowTemplate implements DataFlowOperations {
 				this.runtimeOperations = null;
 			}
 			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
-				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion());
+				if(mapper == null) {
+					mapper = new ObjectMapper();
+					mapper.registerModule(new Jdk8Module());
+					mapper.registerModule(new Jackson2HalModule());
+					mapper.registerModule(new JavaTimeModule());
+					mapper.registerModule(new Jackson2DataflowModule());
+				}
+				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion(), mapper);
 				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
 				if(resourceSupport.hasLink(SchedulerTemplate.SCHEDULES_RELATION)) {
 					this.schedulerOperations = new SchedulerTemplate(restTemplate, resourceSupport);

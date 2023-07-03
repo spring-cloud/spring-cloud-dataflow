@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
@@ -66,6 +67,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -95,7 +97,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TaskExecutionController {
 
 	private final Assembler taskAssembler = new Assembler();
-
+	private final LaunchResponseAssembler launcherResponseAssembler = new LaunchResponseAssembler();
 	private final TaskExecutionService taskExecutionService;
 
 	private final TaskExecutionInfoService taskExecutionInfoService;
@@ -141,7 +143,8 @@ public class TaskExecutionController {
 								   AggregateExecutionSupport aggregateExecutionSupport,
 								   TaskExecutionService taskExecutionService,
 								   TaskDefinitionRepository taskDefinitionRepository,
-								   TaskDefinitionReader taskDefinitionReader, TaskExecutionInfoService taskExecutionInfoService,
+								   TaskDefinitionReader taskDefinitionReader,
+								   TaskExecutionInfoService taskExecutionInfoService,
 								   TaskDeleteService taskDeleteService,
 								   TaskJobService taskJobService) {
 		this.taskDefinitionReader = taskDefinitionReader;
@@ -213,15 +216,16 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
-	public long launch(
+	public LaunchResponseResource launch(
 			@RequestParam("name") String taskName,
 			@RequestParam(required = false) String properties,
 			@RequestParam(required = false) String arguments
 	) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
+		AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 
-		return this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
+		return this.launcherResponseAssembler.toModel(taskExecution);
 	}
 
 	/**
@@ -230,10 +234,10 @@ public class TaskExecutionController {
 	 * @param id the id of the requested {@link TaskExecution}
 	 * @return the {@link TaskExecution}
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET, params = "schemaTarget")
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(
-			@PathVariable("id") long id,
+			@PathVariable("id") Long id,
 			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
 	) {
 		AggregateTaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecution(id, schemaTarget));
@@ -389,16 +393,20 @@ public class TaskExecutionController {
 
 		@Override
 		public TaskExecutionResource toModel(TaskJobExecutionRel taskJobExecutionRel) {
-			// TODO add schemaVersionTarget queryParam to self
-			TaskExecutionResource resource = createModelWithId(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel);
-			if (!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(
-						linkTo(
-								methodOn(TaskLogsController.class)
-										.getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getSchemaTarget())
-						).withRel("tasks/logs")
-				);
-			}
+
+			TaskExecutionResource resource = new TaskExecutionResource(taskJobExecutionRel);
+			resource.add(
+					linkTo(
+							methodOn(TaskLogsController.class)
+									.getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getSchemaTarget())
+					).withRel("tasks/logs")
+			);
+
+			resource.add(
+					linkTo(
+							methodOn(TaskExecutionController.class)
+									.view(taskJobExecutionRel.getTaskExecution().getExecutionId(), taskJobExecutionRel.getTaskExecution().getSchemaTarget())
+					).withSelfRel());
 			return resource;
 		}
 
@@ -435,5 +443,19 @@ public class TaskExecutionController {
 			return taskExecutionsInfoResource;
 		}
 	}
+	private static class LaunchResponseAssembler extends RepresentationModelAssemblerSupport<AggregateTaskExecution, LaunchResponseResource> {
+		public LaunchResponseAssembler() {
+			super(TaskExecutionController.class, LaunchResponseResource.class);
+		}
 
+		@Override
+		public LaunchResponseResource toModel(AggregateTaskExecution entity) {
+			LaunchResponseResource resource = new LaunchResponseResource(entity.getExecutionId(), entity.getSchemaTarget());
+			resource.add(linkTo(methodOn(TaskExecutionController.class).view(entity.getExecutionId(), entity.getSchemaTarget())).withSelfRel());
+			if(StringUtils.hasText(entity.getPlatformName())) {
+				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(entity.getExternalExecutionId(), entity.getPlatformName(), resource.getSchemaTarget())).withRel("tasks/logs"));
+			}
+			return resource;
+		}
+	}
 }

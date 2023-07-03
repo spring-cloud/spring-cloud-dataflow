@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
@@ -185,7 +186,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@DirtiesContext
 	public void executeSingleTaskTransactionTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
-		assertEquals(1L, this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+		AggregateTaskExecution taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		assertEquals(1L, taskExecution.getExecutionId());
+		assertEquals("boot2", taskExecution.getSchemaTarget());
 	}
 
 	private static class TaskLauncherStub implements TaskLauncher {

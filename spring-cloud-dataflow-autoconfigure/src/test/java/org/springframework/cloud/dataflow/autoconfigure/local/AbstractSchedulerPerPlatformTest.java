@@ -30,6 +30,7 @@ import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
@@ -57,18 +58,25 @@ public abstract class AbstractSchedulerPerPlatformTest {
 	protected ApplicationContext context;
 
 	@Configuration
-	@EnableAutoConfiguration(exclude = { LocalDataFlowServerAutoConfiguration.class,
+	@EnableAutoConfiguration(exclude = {LocalDataFlowServerAutoConfiguration.class,
 			CloudFoundryDeployerAutoConfiguration.class, SecurityAutoConfiguration.class,
-			SecurityFilterAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class })
+			SecurityFilterAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 	public static class AutoConfigurationApplication {
 		@Bean
 		public AppRegistryService appRegistryService() {
 			return mock(AppRegistryService.class);
 		}
+
 		@Bean
 		public TaskDefinitionReader taskDefinitionReader() {
 			return mock(TaskDefinitionReader.class);
 		}
+
+		@Bean
+		public TaskDeploymentReader taskDeploymentReader() {
+			return mock(TaskDeploymentReader.class);
+		}
+
 		@Configuration
 		@ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
 		public static class CloudFoundryMockConfig {

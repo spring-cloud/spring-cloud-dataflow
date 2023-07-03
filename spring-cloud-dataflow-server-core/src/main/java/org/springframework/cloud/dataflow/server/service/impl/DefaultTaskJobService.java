@@ -62,6 +62,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Repository that retrieves Tasks and JobExecutions/Instances and the associations
@@ -171,6 +172,9 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		JobService jobService = jobServiceContainer.get(schemaTarget);
 		JobExecution jobExecution = jobService.getJobExecution(id);
 		return getTaskJobExecution(jobExecution, schemaTarget);
@@ -268,6 +272,9 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public void stopJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		JobService jobService = jobServiceContainer.get(schemaTarget);
 		BatchStatus status = jobService.stop(jobExecutionId).getStatus();
 		logger.info("stopped:{}:{}:status={}", jobExecutionId, schemaTarget, status);
@@ -333,10 +340,9 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	private boolean isTaskDefined(JobExecution jobExecution) {
-		// TODO find schemaTarget for jobExecution
-		SchemaVersionTarget versionTarget = SchemaVersionTarget.createDefault(AppBootSchemaVersion.defaultVersion());
-		AggregateTaskExecution taskExecution = taskExplorer
-				.getTaskExecution(taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), versionTarget.getName()), versionTarget.getName());
+		SchemaVersionTarget versionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobExecution.getJobInstance().getJobName(), taskDefinitionReader);
+		Long executionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), versionTarget.getName());
+		AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(executionId, versionTarget.getName());
 		return taskDefinitionRepository.findById(taskExecution.getTaskName()).isPresent();
 	}
 }

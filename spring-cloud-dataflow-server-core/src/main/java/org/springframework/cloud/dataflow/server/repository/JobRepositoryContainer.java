@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.StringUtils;
 
 public class JobRepositoryContainer {
 	private final Map<String, JobRepository> container = new HashMap<>();
@@ -47,7 +48,7 @@ public class JobRepositoryContainer {
 	}
 
 	public JobRepository get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		if(!container.containsKey(schemaTarget)) {

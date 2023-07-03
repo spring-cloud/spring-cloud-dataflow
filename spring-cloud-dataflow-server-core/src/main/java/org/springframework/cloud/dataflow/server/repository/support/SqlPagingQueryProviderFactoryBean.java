@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -47,16 +49,19 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 
 	private Map<String, Order> sortKeys;
 
-	private Map<DatabaseType, AbstractSqlPagingQueryProvider> providers = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
+	private final static Map<DatabaseType, AbstractSqlPagingQueryProvider> providers;
 
-	{
-		providers.put(DatabaseType.HSQL, new HsqlPagingQueryProvider());
-		providers.put(DatabaseType.H2, new H2PagingQueryProvider());
-		providers.put(DatabaseType.MYSQL, new MySqlPagingQueryProvider());
-		providers.put(DatabaseType.POSTGRES, new PostgresPagingQueryProvider());
-		providers.put(DatabaseType.ORACLE, new OraclePagingQueryProvider());
-		providers.put(DatabaseType.SQLSERVER, new SqlServerPagingQueryProvider());
-		providers.put(DatabaseType.DB2, new Db2PagingQueryProvider());
+	static {
+		 Map<DatabaseType, AbstractSqlPagingQueryProvider> providerMap = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
+		providerMap.put(DatabaseType.HSQL, new HsqlPagingQueryProvider());
+		providerMap.put(DatabaseType.H2, new H2PagingQueryProvider());
+		providerMap.put(DatabaseType.MYSQL, new MySqlPagingQueryProvider());
+		providerMap.put(DatabaseType.MARIADB, new MariaDBPagingQueryProvider());
+		providerMap.put(DatabaseType.POSTGRES, new PostgresPagingQueryProvider());
+		providerMap.put(DatabaseType.ORACLE, new OraclePagingQueryProvider());
+		providerMap.put(DatabaseType.SQLSERVER, new SqlServerPagingQueryProvider());
+		providerMap.put(DatabaseType.DB2, new Db2PagingQueryProvider());
+		providers = Collections.unmodifiableMap(providerMap);
 	}
 
 	/**

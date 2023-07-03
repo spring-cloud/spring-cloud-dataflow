@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.aggregate.task;
 
 import org.springframework.cloud.dataflow.core.AppRegistration;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -33,7 +34,7 @@ public interface AggregateExecutionSupport {
 	 * @param taskDefinitionReader {@link TaskDefinitionReader} that will be used to find the {@link SchemaVersionTarget} for the task execution.
 	 * @return The {@link AggregateTaskExecution} containing the {@link SchemaVersionTarget} for the TaskExecution.
 	 */
-	AggregateTaskExecution from(TaskExecution execution, TaskDefinitionReader taskDefinitionReader);
+	AggregateTaskExecution from(TaskExecution execution, TaskDefinitionReader taskDefinitionReader, TaskDeploymentReader taskDeploymentReader);
 
 	/**
 	 * Retrieves the {@link SchemaVersionTarget} for the task name.
@@ -42,6 +43,7 @@ public interface AggregateExecutionSupport {
 	 * @return The {@link SchemaVersionTarget} for the taskName specified.
 	 */
 	SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinitionReader taskDefinitionReader);
+	SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinition taskDefinition);
 
 	/**
 	 * Retrieve the {@link AppRegistration} for the registeredName.
@@ -51,5 +53,5 @@ public interface AggregateExecutionSupport {
 	/**
 	 * Return the {@link AggregateTaskExecution} for the {@link TaskExecution} and Schema Target name specified.
 	 */
-	AggregateTaskExecution from(TaskExecution execution, String schemaTarget);
+	AggregateTaskExecution from(TaskExecution execution, String schemaTarget, String platformName);
 }

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 
 /**
  * Provides Task related services.
@@ -43,7 +44,7 @@ public interface TaskExecutionService {
 	 * @param commandLineArgs Optional runtime commandline argument
 	 * @return the taskExecutionId for the executed task.
 	 */
-	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
+	AggregateTaskExecution executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 	/**
 	 * Retrieve logs for the task application.

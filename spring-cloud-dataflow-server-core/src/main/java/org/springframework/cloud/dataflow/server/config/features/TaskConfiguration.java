@@ -30,6 +30,7 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfigurat
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -45,6 +46,7 @@ import org.springframework.cloud.dataflow.server.repository.DataflowJobExecution
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -125,6 +127,12 @@ public class TaskConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public TaskDeploymentReader taskDeploymentReader(TaskDeploymentRepository repository) {
+		return new DefaultTaskDeploymentReader(repository);
+	}
+
+	@Bean
 	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
 			TaskConfigurationProperties taskConfigurationProperties) {
 		return new DeployerConfigurationMetadataResolver(taskConfigurationProperties.getDeployerProperties());
@@ -141,15 +149,15 @@ public class TaskConfiguration {
 	/**
 	 * The default profile is active when no other profiles are active. This is configured so
 	 * that several tests will pass without having to explicitly enable the local profile.
-	 * @param localPlatformProperties the local platform properties
-	 * @param localScheduler the local scheduler
 	 *
+	 * @param localPlatformProperties the local platform properties
+	 * @param localScheduler          the local scheduler
 	 * @return the task platform
 	 */
-	@Profile({ "local", "default" })
+	@Profile({"local", "default"})
 	@Bean
 	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties,
-			@Nullable Scheduler localScheduler) {
+										  @Nullable Scheduler localScheduler) {
 		TaskPlatform taskPlatform = new LocalTaskPlatformFactory(localPlatformProperties, localScheduler)
 				.createTaskPlatform();
 		taskPlatform.setPrimary(true);
@@ -173,7 +181,7 @@ public class TaskConfiguration {
 
 	@Bean
 	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
-			AuditRecordService auditRecordService, AppRegistryService registry) {
+										   AuditRecordService auditRecordService, AppRegistryService registry) {
 		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
 	}
 
@@ -270,18 +278,18 @@ public class TaskConfiguration {
 	public static class TaskDeleteServiceConfig {
 		@Bean
 		public TaskDeleteService deleteTaskService(
-			AggregateTaskExplorer taskExplorer,
-			LauncherRepository launcherRepository,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDeploymentRepository taskDeploymentRepository,
+				AggregateTaskExplorer taskExplorer,
+				LauncherRepository launcherRepository,
+				TaskDefinitionRepository taskDefinitionRepository,
+				TaskDeploymentRepository taskDeploymentRepository,
 				AuditRecordService auditRecordService,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+				DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
+				DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
+				DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
 				TaskConfigurationProperties taskConfigurationProperties,
 				DataSource dataSource,
-			SchemaService schemaService,
-			@Autowired(required = false) SchedulerService schedulerService
+				SchemaService schemaService,
+				@Autowired(required = false) SchedulerService schedulerService
 		) {
 			return new DefaultTaskDeleteService(
 					taskExplorer,

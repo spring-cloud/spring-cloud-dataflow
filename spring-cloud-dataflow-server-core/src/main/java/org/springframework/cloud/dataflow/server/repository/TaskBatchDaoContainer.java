@@ -24,6 +24,7 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
+import org.springframework.util.StringUtils;
 
 public class TaskBatchDaoContainer {
 	private final Map<String, TaskBatchDao> taskBatchDaoContainer = new HashMap<>();
@@ -34,7 +35,7 @@ public class TaskBatchDaoContainer {
 		}
 	}
 	public TaskBatchDao get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return taskBatchDaoContainer.get(schemaTarget);

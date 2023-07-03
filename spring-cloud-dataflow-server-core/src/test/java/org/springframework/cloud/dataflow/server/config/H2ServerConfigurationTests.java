@@ -42,7 +42,7 @@ public class H2ServerConfigurationTests {
 	@Test
 	void serverStartsWhenUrlIsH2AndEmbeddedPropertyTrue() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(assertServerStarted(19092));
 	}
@@ -50,14 +50,14 @@ public class H2ServerConfigurationTests {
 	@Test
 	void serverStartsWhenUrlIsH2AndEmbeddedPropertyNotSet() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow")
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE")
 				.run(assertServerStarted(19092));
 	}
 
 	@Test
 	void serverStopsWhenContextClosed() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow")
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE")
 				.run(assertServerStarted(19092))
 				.run(context -> {
 					Server server = context.getBean("h2TcpServer", Server.class);
@@ -81,7 +81,7 @@ public class H2ServerConfigurationTests {
 	@Test
 	void serverDoesNotStartWhenEmbeddedPropertyFalse() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=false")
 				.run(context -> assertThat(context).hasNotFailed().doesNotHaveBean("h2TcpServer"));
 	}
@@ -89,21 +89,21 @@ public class H2ServerConfigurationTests {
 	@Test
 	void serverDoesNotStartWhenUrlIsH2ButInvalidForm() {
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:-1/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:-1/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
 						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessageMatching("DataSource URL .* does not match regex pattern: .*"));
 
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:port/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:port/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
 						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessageMatching("DataSource URL .* does not match regex pattern: .*"));
 
 		runner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:99999/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:99999/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
 						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
@@ -114,7 +114,7 @@ public class H2ServerConfigurationTests {
 	void serverDoesNotStartWhenH2NotOnClasspath() {
 		runner.withClassLoader(new FilteredClassLoader(Server.class)).
 				withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context).hasNotFailed().doesNotHaveBean("h2TcpServer"));
 	}

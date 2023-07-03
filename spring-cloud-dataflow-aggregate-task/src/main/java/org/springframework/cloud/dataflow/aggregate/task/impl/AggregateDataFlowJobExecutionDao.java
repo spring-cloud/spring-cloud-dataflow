@@ -288,7 +288,8 @@ public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQu
 	public long getTaskExecutionCount() {
 
 		try {
-			return this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT, new MapSqlParameterSource(), Long.class);
+			Long count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT, new MapSqlParameterSource(), Long.class);
+			return count != null ? count : 0;
 		} catch (EmptyResultDataAccessException e) {
 			return 0;
 		}
@@ -395,6 +396,7 @@ public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQu
 					rs.getString("ERROR_MESSAGE"),
 					rs.getString("EXTERNAL_EXECUTION_ID"),
 					parentExecutionId,
+					null,
 					schemaTarget
 			);
 		}

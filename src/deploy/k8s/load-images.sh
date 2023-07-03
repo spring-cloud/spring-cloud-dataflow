@@ -40,5 +40,7 @@ sh "$SCDIR/load-image.sh" "springcloudstream/time-source-$BROKER_NAME" "$STREAM_
 
 # Task Apps
 echo "Loading Task Apps images"
-sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-task" "2.0.1" false
-sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-batch-task" "2.0.1" false
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-task" "2.0.2" false
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-task" "3.0.0" false
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-batch-task" "2.0.2" false
+sh "$SCDIR/load-image.sh" "springcloudtask/timestamp-batch-task" "3.0.0" false

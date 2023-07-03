@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,6 +32,7 @@ import org.springframework.cloud.dataflow.rest.client.JobOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
@@ -39,7 +42,7 @@ import org.springframework.util.StringUtils;
 /**
  * Represents a Task defined on DataFlow server. New Task can be defined with the help of a fluent style builder
  * pattern or use the {@link Task} static utility methods to retrieve existing tasks already defined in DataFlow.
- *
+ * <p>
  * For for instance you can define a new task like this:
  * <pre>
  *     {@code
@@ -50,7 +53,7 @@ import org.springframework.util.StringUtils;
  *              .build();
  *     }
  * </pre>
- *
+ * <p>
  * Next you can launch the task and inspect the executions result. Mind that the task is run asynchronously.
  * <pre>
  *     import org.awaitility.Awaitility;
@@ -65,7 +68,7 @@ import org.springframework.util.StringUtils;
  *          task.executions().forEach( execution -> System.out.println(execution.getExitCode()));
  *     }
  * </pre>
- *
+ * <p>
  * Use <pre>{@code close()}</pre> to destroy the task manually. Since tasks are auto-closable you can use the
  * Java try block instead:
  * <pre>
@@ -82,7 +85,7 @@ import org.springframework.util.StringUtils;
  *          } // Task is destroyed.
  *     }
  * </pre>
- *
+ * <p>
  * Use the {@link TaskBuilder#allTasks()} and {@link TaskBuilder#findByName(String)}
  * static helper methods to list or retrieve existing tasks defined in DataFlow.
  *
@@ -90,8 +93,11 @@ import org.springframework.util.StringUtils;
  */
 public class Task implements AutoCloseable {
 	private final String taskName;
+
 	private final TaskOperations taskOperations;
+
 	private final JobOperations jobOperations;
+
 	private final DataFlowOperations dataFlowOperations;
 
 	Task(String taskName, DataFlowOperations dataFlowOperations) {
@@ -107,6 +113,7 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Fluent API method to create a {@link TaskBuilder}.
+	 *
 	 * @param dataFlowOperations {@link DataFlowOperations} Data Flow Rest client instance.
 	 * @return A fluent style builder to create tasks.
 	 */
@@ -116,28 +123,31 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Launch a task without properties or arguments.
+	 *
 	 * @return long containing the TaskExecutionId
 	 */
-	public long launch() {
-		return this.launch(Collections.EMPTY_LIST);
+	public LaunchResponseResource launch() {
+		return this.launch(Collections.emptyList());
 	}
 
 	/**
 	 * Launch a task with command line arguments.
+	 *
 	 * @param arguments the command line arguments.
 	 * @return long containing the TaskExecutionId
 	 */
-	public long launch(List<String> arguments) {
-		return this.launch(Collections.EMPTY_MAP, arguments);
+	public LaunchResponseResource launch(List<String> arguments) {
+		return this.launch(Collections.emptyMap(), arguments);
 	}
 
 	/**
 	 * Launch a task with deployment properties and command line arguments.
+	 *
 	 * @param properties the deployment properties.
-	 * @param arguments the command line arguments.
+	 * @param arguments  the command line arguments.
 	 * @return long containing the TaskExecutionId
 	 */
-	public long launch(Map<String, String> properties, List<String> arguments) {
+	public LaunchResponseResource launch(Map<String, String> properties, List<String> arguments) {
 		if (properties == null) {
 			throw new IllegalArgumentException("Task properties can't be null!");
 		}
@@ -146,33 +156,35 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Stop all Tasks' running {@link org.springframework.cloud.task.repository.TaskExecution}s.
-	 *
+	 * <p>
 	 * Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
 	 */
 	public void stop() {
-		String commaSeparatedIds = executions().stream()
+		Map<String, Set<TaskExecutionResource>> idTargets = executions().stream()
 				.filter(Objects::nonNull)
 				.filter(e -> e.getTaskExecutionStatus() == TaskExecutionStatus.RUNNING)
-				.map(TaskExecutionResource::getExecutionId)
-				.map(String::valueOf)
-				.collect(Collectors.joining(","));
-		if (StringUtils.hasText(commaSeparatedIds)) {
-			this.taskOperations.stop(commaSeparatedIds);
-		}
+				.collect(Collectors.groupingBy(TaskExecutionResource::getSchemaTarget, Collectors.toSet()));
+		idTargets.forEach((schemaTarget, tasks) -> {
+			String ids = tasks.stream()
+					.map(taskExecutionResource -> String.valueOf(taskExecutionResource.getExecutionId()))
+					.collect(Collectors.joining(","));
+			this.taskOperations.stop(ids, schemaTarget);
+		});
 	}
 
 	/**
 	 * Stop a list of {@link org.springframework.cloud.task.repository.TaskExecution}s.
-	 * @param taskExecutionIds List of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
 	 *
-	 * Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
+	 * @param taskExecutionIds List of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 *                         <p>
+	 *                         Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
 	 */
-	public void stop(long... taskExecutionIds) {
+	public void stop(String schemaTarget, long... taskExecutionIds) {
 		String commaSeparatedIds = Stream.of(taskExecutionIds)
 				.map(String::valueOf)
 				.collect(Collectors.joining(","));
 		if (StringUtils.hasText(commaSeparatedIds)) {
-			this.taskOperations.stop(commaSeparatedIds);
+			this.taskOperations.stop(commaSeparatedIds, schemaTarget);
 		}
 	}
 
@@ -189,6 +201,7 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * List task executions for this task.
+	 *
 	 * @return List of task executions for the given task.
 	 */
 	public Collection<TaskExecutionResource> executions() {
@@ -197,35 +210,35 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Retrieve task execution by Id.
+	 *
 	 * @param executionId Task execution Id
 	 * @return Task executions for the given task execution id.
 	 */
-	public Optional<TaskExecutionResource> execution(long executionId) {
-		return this.executions().stream()
-				.filter(Objects::nonNull)
-				.filter(e -> e.getExecutionId() == executionId)
-				.findFirst();
+	public Optional<TaskExecutionResource> execution(long executionId, String schemaTarget) {
+		return Optional.ofNullable(this.taskOperations.taskExecutionStatus(executionId, schemaTarget));
 	}
 
 	/**
 	 * Find {@link TaskExecutionResource} by a parent execution id.
+	 *
 	 * @param parentExecutionId parent task execution id.
 	 * @return Return TaskExecutionResource
 	 */
-	public Optional<TaskExecutionResource> executionByParentExecutionId(long parentExecutionId) {
+	public Optional<TaskExecutionResource> executionByParentExecutionId(long parentExecutionId, String schemaTarget) {
 		return this.executions().stream()
 				.filter(Objects::nonNull)
-				.filter(e -> e.getParentExecutionId() == parentExecutionId)
+				.filter(e -> e.getParentExecutionId() == parentExecutionId && e.getSchemaTarget().equals(schemaTarget))
 				.findFirst();
 	}
 
 	/**
 	 * Task execution status
+	 *
 	 * @param executionId execution Id
 	 * @return returns the task execution status.
 	 */
-	public TaskExecutionStatus executionStatus(long executionId) {
-		return this.execution(executionId)
+	public TaskExecutionStatus executionStatus(long executionId, String schemaTarget) {
+		return this.execution(executionId, schemaTarget)
 				.map(TaskExecutionResource::getTaskExecutionStatus)
 				.orElse(TaskExecutionStatus.UNKNOWN);
 	}
@@ -311,10 +324,11 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Remove specified task execution for the specified task execution id.
+	 *
 	 * @param taskExecutionId the id of the task execution to be removed.
 	 */
-	public void cleanupTaskExecution(long taskExecutionId) {
-		this.taskOperations.cleanup(taskExecutionId, true);
+	public void cleanupTaskExecution(long taskExecutionId, String schemaTarget) {
+		this.taskOperations.cleanup(taskExecutionId, schemaTarget, true);
 	}
 
 	/**
@@ -326,12 +340,13 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * Retrieve task executions for child task name associated with this task's instance.
+	 *
 	 * @param childTaskName to be used to search for the associated task executions.
 	 * @return List of task executions for the given child task.
 	 */
 	public Optional<TaskExecutionResource> composedTaskChildExecution(String childTaskName) {
 		Collection taskExecutions = taskOperations.executionListByTaskName(this.taskName + "-" + childTaskName).getContent();
-		return (taskExecutions.size() == 1) ? Optional.of((TaskExecutionResource) taskExecutions.stream().toArray()[0]): Optional.empty();
+		return (taskExecutions.size() == 1) ? Optional.of((TaskExecutionResource) taskExecutions.stream().toArray()[0]) : Optional.empty();
 	}
 
 }

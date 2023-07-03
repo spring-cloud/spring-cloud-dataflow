@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.server.repository.support;
+package org.springframework.cloud.dataflow.core.database.support;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,9 @@ public enum DatabaseType {
 	HSQL("HSQL Database Engine"),
 	H2("H2"),
 	ORACLE("Oracle"),
+	MARIADB("MariaDB"),
 	MYSQL("MySQL"),
+
 	POSTGRES("PostgreSQL"),
 	SQLSERVER("Microsoft SQL Server"),
 	DB2("DB2");
@@ -73,12 +75,10 @@ public enum DatabaseType {
 					.toString();
 			if (!databaseProductVersion.startsWith("SQL")) {
 				databaseProductName = "DB2ZOS";
-			}
-			else {
+			} else {
 				databaseProductName = JdbcUtils.commonDatabaseName(databaseProductName);
 			}
-		}
-		else {
+		} else if(!databaseProductName.equals("MariaDB")) {
 			databaseProductName = JdbcUtils.commonDatabaseName(databaseProductName);
 		}
 		return fromProductName(databaseProductName);

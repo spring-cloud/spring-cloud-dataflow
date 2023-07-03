@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -147,7 +147,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private OAuth2TokenUtilsService oauth2TokenUtilsService;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
+
 	private final TaskDefinitionReader taskDefinitionReader;
+
 	private final Map<String, List<String>> tasksBeingUpgraded = new ConcurrentHashMap<>();
 
 	private final TaskAnalyzer taskAnalyzer = new TaskAnalyzer();
@@ -177,8 +179,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param auditRecordService                        the audit record service
 	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
 	 * @param taskDeploymentRepository                  the repository to track task deployment
-	 * @param taskDefinitionRepository					the repository to query the task definition
-	 * @param taskDefinitionReader						use task definition repository to retrieve definition
+	 * @param taskDefinitionRepository                  the repository to query the task definition
+	 * @param taskDefinitionReader                      use task definition repository to retrieve definition
 	 * @param taskExecutionInfoService                  the service used to setup a task execution
 	 * @param taskExecutionRepositoryService            the service used to create the task execution
 	 * @param taskAppDeploymentRequestCreator           the task app deployment request creator
@@ -239,8 +241,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
 	 * @param taskExecutionInfoService                  the task execution info service
 	 * @param taskDeploymentRepository                  the repository to track task deployment
-	 * @param taskDefinitionRepository					the repository to query the task definition
-	 * @param taskDefinitionReader						uses task definition repository to retrieve definition
+	 * @param taskDefinitionRepository                  the repository to query the task definition
+	 * @param taskDefinitionReader                      uses task definition repository to retrieve definition
 	 * @param taskExecutionRepositoryService            the service used to create the task execution
 	 * @param taskAppDeploymentRequestCreator           the task app deployment request creator
 	 * @param taskExplorer                              the task explorer
@@ -319,7 +321,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @return the task execution ID.
 	 */
 	@Override
-	public long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
+	public AggregateTaskExecution executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
 		String platformType = StreamSupport.stream(launcherRepository.findAll().spliterator(), true)
@@ -365,7 +367,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String taskAppName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinitionReader);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
-		addPrefixProperties(schemaVersionTarget, "", deploymentProperties, commandLineArguments);
+		addPrefixCommandLineArgs(schemaVersionTarget, "", commandLineArguments);
+		addPrefixProperties(schemaVersionTarget, "", deploymentProperties);
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		// Get the previous manifest
 		TaskManifest previousManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
@@ -385,10 +388,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
 			logger.info("composedTask:appNames:{}", appNames);
-			for(String appName : appNames) {
+			for (String appName : appNames) {
 				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(appName, taskDefinitionReader);
 				logger.debug("ctr:appName:{}:{}={}", taskName, appName, appSchemaTarget.getName());
-				addPrefixProperties(appSchemaTarget, "app." + appName + ".", deploymentProperties, commandLineArguments);
+				addPrefixProperties(appSchemaTarget, "app." + appName + ".", deploymentProperties);
 			}
 			commandLineArguments = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArguments);
 		} else {
@@ -396,7 +399,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();
 			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
 			commandLineArguments = commandLineArguments.stream()
-					.map(arg ->  arg.replaceFirst(regex, ""))
+					.map(arg -> arg.replaceFirst(regex, ""))
 					.collect(Collectors.toList());
 		}
 
@@ -481,26 +484,44 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						request.getCommandlineArguments()
 				), platformName);
 
-		return taskExecution.getExecutionId();
+		return new AggregateTaskExecution(
+				taskExecution.getExecutionId(),
+				taskExecution.getExitCode(),
+				taskExecution.getTaskName(),
+				taskExecution.getStartTime(),
+				taskExecution.getEndTime(),
+				taskExecution.getExitMessage(),
+				taskExecution.getArguments(),
+				taskExecution.getErrorMessage(),
+				taskExecution.getExternalExecutionId(),
+				taskExecution.getParentExecutionId(),
+				taskDeployment.getPlatformName(),
+				schemaVersionTarget.getName()
+		);
 	}
-	private static void addCmdLineArgIfNotPresent(String property, String value, List<String> commandLineArgs, Map<String, String> properties) {
+
+	private static void addProperty(String property, String value, Map<String, String> properties) {
 		if (properties.containsKey(property)) {
-			logger.info("exists:{}}={}", property, properties.get(property));
+			logger.info("overriding:{}}={}", property, properties.get(property));
 		} else {
-			String propertyArg = "--" + property.replace('.', '-');
-			String arg = commandLineArgs.stream().filter(s -> s.startsWith(propertyArg)).findFirst().orElse("");
-			if(StringUtils.hasText(arg)) {
-				logger.info("exists:{}", arg);
-			} else {
-				String newArg = propertyArg + "=" + value;
-				logger.info("adding:{}", newArg);
-				commandLineArgs.add(newArg);
-			}
+			logger.info("adding:{}={}", property, value);
 		}
+		properties.put(property, value);
 	}
-	private static void addPrefixProperties(SchemaVersionTarget schemaVersionTarget, String prefix, Map<String, String> deploymentProperties, List<String> commandLineArgs) {
-		addCmdLineArgIfNotPresent(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs, deploymentProperties);
-		addCmdLineArgIfNotPresent(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs, deploymentProperties);
+
+	private static void addPrefixProperties(SchemaVersionTarget schemaVersionTarget, String prefix, Map<String, String> deploymentProperties) {
+		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
+		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
+	}
+	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
+		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
+		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);
+	}
+
+	private static void addCommandLine(String property, String value, List<String> commandLineArgs) {
+		String argPrefix = "--" + property + "=";
+		commandLineArgs.removeIf(item -> item.startsWith(argPrefix));
+		commandLineArgs.add(argPrefix + value);
 	}
 
 	private void validateTaskName(String taskName, Launcher launcher) {
@@ -594,6 +615,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskExecution.getTaskName(), taskDefinitionReader);
 		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId, schemaVersionTarget.getName());
+		taskExecution.setExternalExecutionId(taskDeploymentId);
 	}
 
 	/**
@@ -726,7 +748,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			logger.debug("Unable to obtain URIs from resources to be compared in debug log statement", e);
 		}
 
-		if(previousResource.equals(newResource)) {
+		if (previousResource.equals(newResource)) {
 			Map<String, String> previousAppProperties = previousManifest.getTaskDeploymentRequest().getDefinition().getProperties();
 			Map<String, String> newAppProperties = newManifest.getTaskDeploymentRequest().getDefinition().getProperties();
 			if (previousAppProperties.equals(newAppProperties)) {
@@ -948,8 +970,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
 		return (int) (
-			onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-					: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
+				onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
+						: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
 		);
 	}
 }

@@ -148,6 +148,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
 		this.schemaTarget = taskJobExecutionRel.getTaskExecution().getSchemaTarget();
+		this.platformName = taskJobExecutionRel.getTaskExecution().getPlatformName();
 		if (taskJobExecutionRel.getJobExecutionIds() == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}

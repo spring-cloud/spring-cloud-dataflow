@@ -15,6 +15,7 @@ import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBe
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.StringUtils;
 
 public class JobServiceContainer {
 	private final static Logger logger = LoggerFactory.getLogger(JobServiceContainer.class);
@@ -45,7 +46,7 @@ public class JobServiceContainer {
 		}
 	}
 	public JobService get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 			logger.info("get:default={}", schemaTarget);
 		}

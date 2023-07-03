@@ -23,23 +23,29 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.util.StringUtils;
 
 /**
  * Provides support for access to SchemaVersionTarget information and conversion of execution data to composite executions.
+ *
  * @author Corneil du Plessis
  */
 
 public class DefaultAggregateExecutionSupport implements AggregateExecutionSupport {
 	private static Logger logger = LoggerFactory.getLogger(AggregateExecutionSupport.class);
+
 	private final AppRegistryService registryService;
+
 	private final SchemaService schemaService;
 
 	public DefaultAggregateExecutionSupport(
@@ -49,16 +55,35 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 		this.registryService = registryService;
 		this.schemaService = schemaService;
 	}
-	@Override public AggregateTaskExecution from(TaskExecution execution, TaskDefinitionReader taskDefinitionReader) {
-		SchemaVersionTarget versionTarget = findSchemaVersionTarget(execution.getTaskName(), taskDefinitionReader);
-		return from(execution, versionTarget.getName());
+
+	@Override
+	public AggregateTaskExecution from(TaskExecution execution, TaskDefinitionReader taskDefinitionReader, TaskDeploymentReader taskDeploymentReader) {
+		TaskDefinition taskDefinition = taskDefinitionReader.findTaskDefinition(execution.getTaskName());
+		TaskDeployment deployment = null;
+		if (StringUtils.hasText(execution.getExternalExecutionId())) {
+			deployment = taskDeploymentReader.getDeployment(execution.getExternalExecutionId());
+		} else {
+			if(taskDefinition == null) {
+				logger.warn("TaskDefinition not found for " + execution.getTaskName());
+			} else {
+				deployment = taskDeploymentReader.findByDefinitionName(taskDefinition.getName());
+			}
+		}
+		SchemaVersionTarget versionTarget = findSchemaVersionTarget(execution.getTaskName(), taskDefinition);
+		return from(execution, versionTarget.getName(), deployment != null ? deployment.getPlatformName() : null);
 	}
 
-	@Override public SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinitionReader taskDefinitionReader) {
+	@Override
+	public SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinitionReader taskDefinitionReader) {
 		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
-		String registeredName = definition != null ? definition.getRegisteredAppName() : taskName;
+		return findSchemaVersionTarget(taskName, definition);
+	}
+
+	@Override
+	public SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinition taskDefinition) {
+		String registeredName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
 		AppRegistration registration = findTaskAppRegistration(registeredName);
-		if(registration == null) {
+		if (registration == null) {
 			logger.warn("Cannot find AppRegistration for {}", taskName);
 			return SchemaVersionTarget.defaultTarget();
 		}
@@ -77,16 +102,18 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 		return versionTargets.get(0);
 	}
 
-	@Override public AppRegistration findTaskAppRegistration(String registeredAppName) {
+	@Override
+	public AppRegistration findTaskAppRegistration(String registeredAppName) {
 		AppRegistration registration = registryService.find(registeredAppName, ApplicationType.task);
-		if(registration == null) {
+		if (registration == null) {
 			registration = registryService.find(registeredAppName, ApplicationType.app);
 		}
 		return registration;
 	}
 
-	@Override public AggregateTaskExecution from(TaskExecution execution, String schemaTarget) {
-		if(execution != null) {
+	@Override
+	public AggregateTaskExecution from(TaskExecution execution, String schemaTarget, String platformName) {
+		if (execution != null) {
 			return new AggregateTaskExecution(
 					execution.getExecutionId(),
 					execution.getExitCode(),
@@ -98,6 +125,7 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 					execution.getErrorMessage(),
 					execution.getExternalExecutionId(),
 					execution.getParentExecutionId(),
+					platformName,
 					schemaTarget);
 		}
 		return null;

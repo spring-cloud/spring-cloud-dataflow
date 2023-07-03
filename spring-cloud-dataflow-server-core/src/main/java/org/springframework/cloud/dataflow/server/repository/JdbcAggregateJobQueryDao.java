@@ -315,12 +315,18 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private int countJobExecutionsByInstanceId(int jobInstanceId, String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		logger.debug("countJobExecutionsByInstanceId:{}:{}:{}", jobInstanceId, schemaTarget, GET_COUNT_BY_JOB_INSTANCE_ID);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_INSTANCE_ID, Integer.class, jobInstanceId, schemaTarget);
 		return count != null ? count : 0;
 	}
 
 	private int countJobExecutionsByTaskExecutionId(int taskExecutionId, String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		logger.debug("countJobExecutionsByTaskExecutionId:{}:{}:{}", taskExecutionId, schemaTarget, GET_COUNT_BY_TASK_EXECUTION_ID);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_TASK_EXECUTION_ID, Integer.class, taskExecutionId, schemaTarget);
 		return count != null ? count : 0;
@@ -332,7 +338,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			int start,
 			int count
 	) {
-		if (schemaTarget == null) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return queryForProvider(
@@ -351,7 +357,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			int start,
 			int count
 	) {
-		if (schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return queryForProvider(

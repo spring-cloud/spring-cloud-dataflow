@@ -77,8 +77,10 @@ public class AggregateTaskExecution {
 	 * @since 1.1.0
 	 */
 	private String errorMessage;
+
 	private String schemaTarget;
 
+	private String platformName;
 	/**
 	 * The arguments that were used for this task execution.
 	 */
@@ -90,7 +92,7 @@ public class AggregateTaskExecution {
 
 	public AggregateTaskExecution(long executionId, Integer exitCode, String taskName,
 								  Date startTime, Date endTime, String exitMessage, List<String> arguments,
-								  String errorMessage, String externalExecutionId, Long parentExecutionId, String schemaTarget) {
+								  String errorMessage, String externalExecutionId, Long parentExecutionId, String platformName, String schemaTarget) {
 
 		Assert.notNull(arguments, "arguments must not be null");
 		this.executionId = executionId;
@@ -104,14 +106,15 @@ public class AggregateTaskExecution {
 		this.externalExecutionId = externalExecutionId;
 		this.parentExecutionId = parentExecutionId;
 		this.schemaTarget = schemaTarget;
+		this.platformName = platformName;
 	}
 
 	public AggregateTaskExecution(long executionId, Integer exitCode, String taskName,
 								  Date startTime, Date endTime, String exitMessage, List<String> arguments,
-								  String errorMessage, String externalExecutionId, String schemaTarget) {
+								  String errorMessage, String externalExecutionId, String platformName, String schemaTarget) {
 
 		this(executionId, exitCode, taskName, startTime, endTime, exitMessage, arguments,
-				errorMessage, externalExecutionId, null, schemaTarget);
+				errorMessage, externalExecutionId, null, platformName, schemaTarget);
 	}
 
 	public long getExecutionId() {
@@ -198,19 +201,30 @@ public class AggregateTaskExecution {
 		this.schemaTarget = schemaTarget;
 	}
 
+	public String getPlatformName() {
+		return platformName;
+	}
+
+	public void setPlatformName(String platformName) {
+		this.platformName = platformName;
+	}
+
 	@Override
 	public String toString() {
-		return "TaskExecution{" + "executionId=" + this.executionId
-				+ ", parentExecutionId=" + this.parentExecutionId
-				+ ", exitCode=" + this.exitCode
-				+ ", taskName='" + this.taskName + '\''
-				+ ", startTime=" + this.startTime
-				+ ", endTime=" + this.endTime
-				+ ", exitMessage='" + this.exitMessage + '\''
-				+ ", externalExecutionId='" + this.externalExecutionId + '\''
-				+ ", schemaTarget='" + schemaTarget + '\''
-				+ ", errorMessage='" + this.errorMessage + '\''
-				+ ", arguments=" + this.arguments + '}';
+		return "AggregateTaskExecution{" +
+				"executionId=" + executionId +
+				", parentExecutionId=" + parentExecutionId +
+				", exitCode=" + exitCode +
+				", taskName='" + taskName + '\'' +
+				", startTime=" + startTime +
+				", endTime=" + endTime +
+				", exitMessage='" + exitMessage + '\'' +
+				", externalExecutionId='" + externalExecutionId + '\'' +
+				", errorMessage='" + errorMessage + '\'' +
+				", schemaTarget='" + schemaTarget + '\'' +
+				", platformName='" + platformName + '\'' +
+				", arguments=" + arguments +
+				'}';
 	}
 
 	public TaskExecution toTaskExecution() {

@@ -108,7 +108,7 @@ public class JdbcDataflowTaskExecutionDaoTests {
 		for (int i = 0; i < numExecutions; i++) {
 			long executionId = randomGenerator.nextLong();
 			taskExecutions.add(new AggregateTaskExecution(executionId, null, taskName, startTime,
-					null, null, new ArrayList<>(), null, externalExecutionId, schemaVersionTarget.getName()));
+					null, null, new ArrayList<>(), null, externalExecutionId, schemaVersionTarget.getName(), null));
 		}
 		return taskExecutions;
 	}

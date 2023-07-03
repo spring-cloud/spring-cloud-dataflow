@@ -25,12 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * This class manages a collection of TaskRepositories for all schemas.
@@ -45,7 +46,7 @@ public class DefaultTaskRepositoryContainer implements TaskRepositoryContainer {
 
 	public DefaultTaskRepositoryContainer(DataSource dataSource, SchemaService schemaService) {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource, target.getTaskPrefix());
+			MultiSchemaTaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, target.getTaskPrefix());
 			add(target.getName(), new SimpleTaskRepository(taskExecutionDaoFactoryBean));
 		}
 	}
@@ -56,6 +57,9 @@ public class DefaultTaskRepositoryContainer implements TaskRepositoryContainer {
 
 	@Override
 	public TaskRepository get(String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		TaskRepository repository = taskRepositories.get(schemaTarget);
 		Assert.notNull(repository, "Expected TaskRepository for " + schemaTarget);
 		return repository;

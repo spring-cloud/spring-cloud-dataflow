@@ -39,6 +39,7 @@ import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueI
 import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
@@ -187,7 +188,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		jdbcTemplate = new JdbcTemplate(dataSource);
 
 		if (incrementerFactory == null) {
-			incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+			incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 		}
 
 		if (databaseType == null) {

@@ -24,6 +24,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
@@ -37,6 +38,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -89,6 +91,9 @@ public class JobStepExecutionController {
 			Pageable pageable,
 			PagedResourcesAssembler<StepExecution> assembler
 	) throws NoSuchJobExecutionException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		JobService jobService = jobServiceContainer.get(schemaTarget);
 		List<StepExecution> result = new ArrayList<>(jobService.getStepExecutions(id));
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
@@ -113,6 +118,9 @@ public class JobStepExecutionController {
 			@PathVariable("stepExecutionId") Long stepId,
 			@RequestParam(name = "schemaTarget", required = false) String schemaTarget)
 			throws NoSuchStepExecutionException, NoSuchJobExecutionException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		JobService jobService = jobServiceContainer.get(schemaTarget);
 		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return stepAssembler.toModel(jobService.getStepExecution(id, stepId));

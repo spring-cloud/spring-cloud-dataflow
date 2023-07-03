@@ -26,6 +26,7 @@ import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
+import org.springframework.util.StringUtils;
 
 public class JobExecutionDaoContainer {
 	private final Map<String, SearchableJobExecutionDao> container = new HashMap<>();
@@ -45,7 +46,7 @@ public class JobExecutionDaoContainer {
 	}
 
 	public SearchableJobExecutionDao get(String schemaTarget) {
-		if(schemaTarget == null) {
+		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		if(!container.containsKey(schemaTarget)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
@@ -33,16 +33,16 @@ import org.springframework.util.StringUtils;
  * exit code.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupport {
+	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskStepExecutionListener.class);
 
-	private TaskExplorer taskExplorer;
+	private final TaskExplorerContainer taskExplorerContainer;
 
-	private static final Log logger = LogFactory.getLog(org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener.class);
-
-	public ComposedTaskStepExecutionListener(TaskExplorer taskExplorer) {
-		Assert.notNull(taskExplorer, "taskExplorer must not be null.");
-		this.taskExplorer = taskExplorer;
+	public ComposedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
+		Assert.notNull(taskExplorerContainer, "taskExplorerContainer must not be null.");
+		this.taskExplorerContainer = taskExplorerContainer;
 	}
 
 	/**
@@ -54,6 +54,7 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 	 * returned.  If no exit message is set or
 	 * {@link TaskLauncherTasklet#IGNORE_EXIT_MESSAGE_PROPERTY} is set to true as a task property
 	 * and the exit code of the task is zero then the ExitStatus of COMPLETED is returned.
+	 *
 	 * @param stepExecution The stepExecution that kicked of the Task.
 	 * @return ExitStatus of COMPLETED else FAILED.
 	 */
@@ -62,25 +63,24 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 		ExitStatus result = ExitStatus.COMPLETED;
 		logger.info(String.format("AfterStep processing for stepExecution %s",
 				stepExecution.getStepName()));
+		String taskName = stepExecution.getStepName();
+		TaskExplorer taskExplorer = this.taskExplorerContainer.get(taskName);
 
 		Long executionId = (Long) stepExecution.getExecutionContext().get("task-execution-id");
 		Assert.notNull(executionId, "TaskLauncherTasklet did not " +
 				"return a task-execution-id.  Check to see if task " +
 				"exists.");
 
-		TaskExecution resultExecution = this.taskExplorer.getTaskExecution(executionId);
+		TaskExecution resultExecution = taskExplorer.getTaskExecution(executionId);
 
 		if (!stepExecution.getExecutionContext().containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE) &&
 				StringUtils.hasText(resultExecution.getExitMessage())) {
 			result = new ExitStatus(resultExecution.getExitMessage());
-		}
-		else if (resultExecution.getExitCode() != 0) {
+		} else if (resultExecution.getExitCode() != 0) {
 			result = ExitStatus.FAILED;
 		}
 
-		logger.info(String.format("AfterStep processing complete for " +
-						"stepExecution %s with taskExecution %s",
-				stepExecution.getStepName(), executionId));
+		logger.info("AfterStep processing complete for stepExecution {} with taskExecution {}", stepExecution.getStepName(), executionId);
 		return result;
 	}
 

@@ -33,6 +33,8 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.UrlResource;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -159,6 +161,9 @@ public class TaskExecutionResourceTests {
 	}
 
 	private AggregateTaskExecution getDefaultTaskExecution(String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		final AggregateTaskExecution taskExecution = new AggregateTaskExecution();
 		taskExecution.setStartTime(new Date());
 		taskExecution.setEndTime(new Date());

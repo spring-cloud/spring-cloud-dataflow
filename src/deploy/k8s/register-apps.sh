@@ -73,8 +73,10 @@ echo "DATAFLOW_IP=$DATAFLOW_IP"
 dataflow_post "uri=$DESCRIPTORS" "$DATAFLOW_IP/apps"
 
 if [ "$TYPE" = "docker" ]; then
-    dataflow_post "uri=docker:springcloudtask/timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
-    dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
+    dataflow_post "uri=docker:springcloudtask/timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp"
+    dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch"
+    dataflow_post "uri=docker:springcloudtask/timestamp-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp3?bootVersion=3"
+    dataflow_post "uri=docker:springcloudtask/timestamp-batch-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp-batch3?bootVersion=3"
     dataflow_post "uri=docker:springcloudtask/scenario-task:0.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/scenario/0.0.1-SNAPSHOT"
     dataflow_post "uri=docker:springcloud/batch-remote-partition:0.0.2-SNAPSHOT" "$DATAFLOW_IP/apps/task/batch-remote-partition/0.0.2-SNAPSHOT"
     dataflow_post "uri=docker:springcloudstream/log-sink-$BROKER_NAME:3.0.1" "$DATAFLOW_IP/apps/sink/ver-log/3.0.1"
@@ -82,7 +84,9 @@ if [ "$TYPE" = "docker" ]; then
     dataflow_post "uri=docker:springcloudtask/task-demo-metrics-prometheus:2.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/task-demo-metrics-prometheus/2.0.1-SNAPSHOT"
 else
     dataflow_post "uri=maven:io.spring:timestamp-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp/2.0.2"
+    dataflow_post "uri=maven:io.spring:timestamp-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp3?bootVersion=3"
     dataflow_post "uri=maven:io.spring:timestamp-batch-task:2.0.2" "$DATAFLOW_IP/apps/task/timestamp-batch/2.0.2"
+    dataflow_post "uri=maven:io.spring:timestamp-batch-task:3.0.0" "$DATAFLOW_IP/apps/task/timestamp-batch3?bootVersion=3"
     dataflow_post "uri=maven:io.spring:scenario-task:0.0.1-SNAPSHOT" "$DATAFLOW_IP/apps/task/scenario/0.0.1-SNAPSHOT"
     dataflow_post "uri=maven:org.springframework.cloud.dataflow.acceptence.tests:batch-remote-partition:0.0.2-SNAPSHOT" "$DATAFLOW_IP/apps/task/batch-remote-partition/0.0.2-SNAPSHOT"
     dataflow_post "uri=maven:org.springframework.cloud.stream.app:log-sink-$BROKER_NAME:3.0.1" "$DATAFLOW_IP/apps/sink/ver-log/3.0.1"

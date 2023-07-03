@@ -26,6 +26,8 @@ import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueI
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -36,6 +38,7 @@ import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutio
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
@@ -44,6 +47,7 @@ import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoConta
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.dataflow.server.service.JobExplorerContainer;
@@ -89,7 +93,7 @@ public class AggregateDataFlowTaskConfiguration {
 
 	@Bean
 	public DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDao(DataSource dataSource, SchemaService schemaService) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -119,10 +123,12 @@ public class AggregateDataFlowTaskConfiguration {
 	public JobRepositoryContainer jobRepositoryContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager, SchemaService schemaService) {
 		return new JobRepositoryContainer(dataSource, platformTransactionManager, schemaService);
 	}
+
 	@Bean
 	public JobExplorerContainer jobExplorerContainer(DataSource dataSource, SchemaService schemaService) {
 		return new JobExplorerContainer(dataSource, schemaService);
 	}
+
 	@Bean
 	public JobServiceContainer jobServiceContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager, SchemaService schemaService, JobRepositoryContainer jobRepositoryContainer, JobExplorerContainer jobExplorerContainer) {
 		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer, jobExplorerContainer);
@@ -132,19 +138,29 @@ public class AggregateDataFlowTaskConfiguration {
 	public JobExecutionDaoContainer jobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		return new JobExecutionDaoContainer(dataSource, schemaService);
 	}
+
 	@Bean
 	@ConditionalOnMissingBean
 	public TaskDefinitionReader taskDefinitionReader(TaskDefinitionRepository repository) {
 		return new DefaultTaskDefinitionReader(repository);
 	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public TaskDeploymentReader taskDeploymentReader(TaskDeploymentRepository repository) {
+		return new DefaultTaskDeploymentReader(repository);
+	}
+
 	@Bean
 	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService) throws Exception {
 		return new JdbcAggregateJobQueryDao(dataSource, schemaService);
 	}
+
 	@Bean
 	public TaskBatchDaoContainer taskBatchDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		return new TaskBatchDaoContainer(dataSource, schemaService);
 	}
+
 	@PostConstruct
 	public void setup() {
 		logger.info("created: org.springframework.cloud.dataflow.server.config.AggregateDataFlowContainerConfiguration");

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -95,7 +96,7 @@ public class DataFlowClientAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(DataFlowOperations.class)
-	public DataFlowOperations dataFlowOperations() throws Exception{
+	public DataFlowOperations dataFlowOperations(@Nullable ObjectMapper mapper) throws Exception{
 		RestTemplate template = DataFlowTemplate.prepareRestTemplate(restTemplate);
 		final HttpClientConfigurer httpClientConfigurer = HttpClientConfigurer.create(new URI(properties.getServerUri()))
 				.skipTlsCertificateVerification(properties.isSkipSslValidation());
@@ -130,7 +131,7 @@ public class DataFlowClientAutoConfiguration {
 			logger.debug("Not configuring security for accessing the Data Flow Server");
 		}
 
-		return new DataFlowTemplate(new URI(properties.getServerUri()), template);
+		return new DataFlowTemplate(new URI(properties.getServerUri()), template, mapper);
 	}
 
 	@Bean

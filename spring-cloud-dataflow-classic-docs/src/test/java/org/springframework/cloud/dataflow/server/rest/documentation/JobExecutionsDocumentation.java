@@ -307,7 +307,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 					fieldWithPath("timeZone").description("The time zone of the job execution"),
 					subsectionWithPath("jobExecution").description("The details of the job execution"),
 					subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
-					subsectionWithPath("_links.self").description("Link to the stream definition resource")
+					subsectionWithPath("_links.self").description("Link to the stream definition resource"),
+					subsectionWithPath("_links.stop").description("Link to stopping the job")
 				)
 			));
 	}

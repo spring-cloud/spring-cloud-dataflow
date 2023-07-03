@@ -16,12 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,12 +43,18 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -52,7 +64,6 @@ import org.springframework.cloud.dataflow.server.repository.JobRepositoryContain
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
@@ -62,6 +73,7 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -76,10 +88,12 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -123,6 +137,9 @@ public class TaskExecutionControllerTests {
 
 	@Autowired
 	private TaskBatchDaoContainer taskBatchDaoContainer;
+
+	@Autowired
+	private AppRegistryService appRegistryService;
 
 	private MockMvc mockMvc;
 
@@ -352,6 +369,96 @@ public class TaskExecutionControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
+
+	}
+
+	@Test
+	public void testBoot3Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp3", ApplicationType.task, "3.0.0", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT3);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions")
+								.queryParam("name", "timestamp3")
+								.queryParam("properties","app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isCreated());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.registerModule(new Jdk8Module());
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new Jackson2DataflowModule());
+		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
+		resultActions = mockMvc.perform(
+				get("/tasks/executions/" + resource.getTaskId())
+						.accept(MediaType.APPLICATION_JSON)
+						.queryParam("schemaTarget", resource.getSchemaTarget())
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().json("{taskName: \"timestamp3\"}"));
+		response = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("response=" + response);
+		JsonNode json;
+		try (JsonParser parser = new ObjectMapper().createParser(response)) {
+			json = parser.readValueAs(JsonNode.class);
+		}
+		System.out.println("json=" + json.toPrettyString());
+		assertThat(json.findValue("deploymentProperties")).isNotNull();
+		JsonNode deploymentProperties = json.findValue("deploymentProperties");
+		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
+		assertThat(deploymentProperties.hasNonNull("spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("spring.cloud.task.tablePrefix").asText()).isEqualTo("BOOT3_TASK_");
+	}
+	@Test
+	public void testBoot2Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp2", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp2", ApplicationType.task, "2.0.1", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT2);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp2", "timestamp2"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions")
+								.queryParam("name", "timestamp2")
+								.queryParam("properties","app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isCreated());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.registerModule(new Jdk8Module());
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new Jackson2DataflowModule());
+		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
+		resultActions = mockMvc.perform(
+						get("/tasks/executions/" + resource.getTaskId())
+								.accept(MediaType.APPLICATION_JSON)
+								.queryParam("schemaTarget", resource.getSchemaTarget())
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().json("{taskName: \"timestamp2\"}"));
+		response = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("response=" + response);
+		JsonNode json;
+		try (JsonParser parser = new ObjectMapper().createParser(response)) {
+			json = parser.readValueAs(JsonNode.class);
+		}
+		System.out.println("json=" + json.toPrettyString());
+		assertThat(json.findValue("deploymentProperties")).isNotNull();
+		JsonNode deploymentProperties = json.findValue("deploymentProperties");
+		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
+		assertThat(deploymentProperties.hasNonNull("spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("spring.cloud.task.tablePrefix").asText()).isEqualTo("TASK_");
 
 	}
 

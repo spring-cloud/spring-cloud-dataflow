@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,10 +43,14 @@ import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecuti
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -79,6 +86,7 @@ public class TaskLauncherTasklet implements Tasklet {
 	private static final Log logger = LogFactory.getLog(org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTasklet.class);
 
 	private Long executionId;
+	private String schemaTarget;
 
 	private long timeout;
 
@@ -90,12 +98,24 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	TaskProperties taskProperties;
 
+	private final ObjectMapper mapper;
+
 	public TaskLauncherTasklet(
 			ClientRegistrationRepository clientRegistrations,
 			OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
 			TaskExplorer taskExplorer,
-			ComposedTaskProperties composedTaskProperties, String taskName,
-			TaskProperties taskProperties) {
+			ComposedTaskProperties composedTaskProperties,
+			String taskName,
+			TaskProperties taskProperties,
+			@Nullable ObjectMapper mapper) {
+		if(mapper == null) {
+			mapper = new ObjectMapper();
+			mapper.registerModule(new Jdk8Module());
+			mapper.registerModule(new Jackson2HalModule());
+			mapper.registerModule(new JavaTimeModule());
+			mapper.registerModule(new Jackson2DataflowModule());
+		}
+		this.mapper = mapper;
 		Assert.hasText(taskName, "taskName must not be empty nor null.");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null.");
 		Assert.notNull(composedTaskProperties,
@@ -174,9 +194,10 @@ public class TaskLauncherTasklet implements Tasklet {
 			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
-			this.executionId = taskOperations.launch(tmpTaskName,
+			LaunchResponseResource response = taskOperations.launch(tmpTaskName,
 					this.properties, args);
-
+			this.executionId = response.getTaskId();
+			this.schemaTarget = response.getSchemaTarget();
 			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
 			if (ignoreExitMessage != null) {
 				stepExecutionContext.put(IGNORE_EXIT_MESSAGE, ignoreExitMessage);
@@ -294,7 +315,7 @@ public class TaskLauncherTasklet implements Tasklet {
 			restTemplate.setRequestFactory(clientHttpRequestFactoryBuilder.buildClientHttpRequestFactory());
 		}
 
-		return new DataFlowTemplate(this.composedTaskProperties.getDataflowServerUri(), restTemplate);
+		return new DataFlowTemplate(this.composedTaskProperties.getDataflowServerUri(), restTemplate, mapper);
 	}
 
 	private void validateUsernamePassword(String userName, String password) {

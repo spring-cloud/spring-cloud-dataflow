@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
  */
 public class ComposedTaskStepExecutionListenerTests {
 
+	private TaskExplorerContainer taskExplorerContainer;
 	private TaskExplorer taskExplorer;
 
 	private StepExecution stepExecution;
@@ -47,10 +49,9 @@ public class ComposedTaskStepExecutionListenerTests {
 	@BeforeEach
 	public void setup() {
 		this.taskExplorer = mock(TaskExplorer.class);
+		this.taskExplorerContainer = new TaskExplorerContainer(Collections.emptyMap(), taskExplorer);
 		this.stepExecution = getStepExecution();
-		this.taskListener =
-				new ComposedTaskStepExecutionListener(this.taskExplorer);
-		ReflectionTestUtils.setField(this.taskListener, "taskExplorer", this.taskExplorer);
+		this.taskListener = new ComposedTaskStepExecutionListener(this.taskExplorerContainer);
 	}
 
 	@Test

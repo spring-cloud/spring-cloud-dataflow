@@ -150,8 +150,7 @@ public class RootController {
 			root.add(Link.of(taskTemplated).withRel("tasks/executions/name"));
 			root.add(linkTo(methodOn(TaskExecutionController.class)
 					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
-			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskExecutionResource.class, "{id}")
-					.withRel("tasks/executions/execution")));
+			root.add(unescapeTemplateVariables(linkTo(methodOn(TaskExecutionController.class).view(null,null)).withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
 			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null)).withRel("tasks/info/executions"));

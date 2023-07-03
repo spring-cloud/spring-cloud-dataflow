@@ -78,7 +78,6 @@ public class DataFlowServerConfigurationTests {
 					HibernateJpaAutoConfiguration.class,
 					SchedulerConfiguration.class,
 					JacksonAutoConfiguration.class,
-					SimpleTaskAutoConfiguration.class,
 					ResourceLoadingAutoConfiguration.class,
 					ComposedTaskRunnerConfigurationProperties.class
 			);
@@ -89,7 +88,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	public void testStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> {
 					assertTrue(context.containsBean("h2TcpServer"));
@@ -109,7 +108,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	public void testDoNotStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=false",
 						"spring.jpa.database=H2"
 				)

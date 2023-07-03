@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,6 +33,7 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.task.configuration.TaskConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
@@ -46,15 +49,16 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})
+@ContextConfiguration(classes = {org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})
 public class ComposedTaskRunnerStepFactoryTests {
 
 	@Autowired
 	ComposedTaskRunnerStepFactory stepFactory;
 
 	@Test
-	public void testStep() throws Exception{
+	public void testStep() throws Exception {
 		Step step = stepFactory.getObject();
+		assertThat(step).isNotNull();
 		assertThat(step.getName()).isEqualTo("FOOBAR");
 		assertThat(step.getStartLimit()).isEqualTo(Integer.MAX_VALUE);
 	}
@@ -69,6 +73,12 @@ public class ComposedTaskRunnerStepFactoryTests {
 		public TaskOperations taskOperations;
 
 		@Bean
+		public TaskExplorerContainer taskExplorerContainer() {
+			TaskExplorer taskExplorer = mock(TaskExplorer.class);
+			return new TaskExplorerContainer(Collections.emptyMap(), taskExplorer);
+		}
+
+		@Bean
 		public ComposedTaskProperties composedTaskProperties() {
 			return new ComposedTaskProperties();
 		}
@@ -79,7 +89,7 @@ public class ComposedTaskRunnerStepFactoryTests {
 		}
 
 		@Bean
-		public StepBuilderFactory steps(){
+		public StepBuilderFactory steps() {
 			return new StepBuilderFactory(mock(JobRepository.class), mock(PlatformTransactionManager.class));
 		}
 
