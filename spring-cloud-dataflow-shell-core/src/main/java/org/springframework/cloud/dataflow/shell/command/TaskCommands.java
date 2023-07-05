@@ -241,7 +241,7 @@ public class TaskCommands {
 	public String stop(
 			@ShellOption(value = {"", "--ids"}, help = "the task execution id") String ids,
 			@ShellOption(value = "--platformName", help = "the name of the platform where the task is executing", defaultValue = ShellOption.NULL) String platform,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task.", defaultValue = ShellOption.NULL) String schemaTarget) {
+			@ShellOption(value = "--schemaTarget", help = "the schema target of the task.") String schemaTarget) {
 
 		String message = null;
 		if (StringUtils.hasText(platform)) {
@@ -261,7 +261,7 @@ public class TaskCommands {
 			@ShellOption(value = {"", "--id"}, help = "the task execution id", defaultValue = ShellOption.NULL) Long id,
 			@ShellOption(value = {"", "--externalExecutionId"}, help = "the task external execution id", defaultValue = ShellOption.NULL) String externalExecutionId,
 			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task.", defaultValue = ShellOption.NULL) String schemaTarget) {
+			@ShellOption(value = "--schemaTarget", help = "the schema target of the task") String schemaTarget) {
 		if(externalExecutionId == null) {
 			TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id, schemaTarget);
 			externalExecutionId = taskExecutionResource.getExternalExecutionId();
@@ -320,7 +320,7 @@ public class TaskCommands {
 	@ShellMethod(key = TASK_EXECUTION_STATUS, value = "Display the details of a specific task execution")
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table display(@ShellOption(value = {"", "--id"}, help = "the task execution id") long id,
-						 @ShellOption(value = "--schemaTarget", help = "the schema target of the task.", defaultValue = ShellOption.NULL) String schemaTarget) {
+						 @ShellOption(value = "--schemaTarget", help = "the schema target of the task") String schemaTarget) {
 
 		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id, schemaTarget);
 
@@ -374,7 +374,7 @@ public class TaskCommands {
 			@ShellOption(help = "all task execution IDs", defaultValue = "false") boolean all,
 			@ShellOption(help = "include non-completed task executions", defaultValue = "false") boolean includeNonCompleted,
 			@ShellOption(value = "--task-name", help = "the name of the task to cleanup", defaultValue = ShellOption.NULL) String taskName,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task.", defaultValue = ShellOption.NULL) String schemaTarget,
+			@ShellOption(value = "--schemaTarget", help = "the schema target of the task") String schemaTarget,
 			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)),
 				"`taskName`, `id` and `all` options are mutually exclusive.");

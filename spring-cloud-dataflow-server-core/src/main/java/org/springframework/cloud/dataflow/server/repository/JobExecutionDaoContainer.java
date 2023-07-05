@@ -21,13 +21,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
+import org.springframework.cloud.dataflow.server.repository.support.JdbcParameterUtils;
+import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
+/**
+ * Provides a container of {@link SearchableJobExecutionDao} for each schema target.
+ * @author Corneil du Plessis
+ */
 public class JobExecutionDaoContainer {
 	private final Map<String, SearchableJobExecutionDao> container = new HashMap<>();
 

@@ -27,6 +27,10 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.util.StringUtils;
 
+/**
+ * Provides a container of {@link TaskExecutionDao} for each schema target.
+ * @author Corneil du Plessis
+ */
 public class TaskExecutionDaoContainer {
 	private final Map<String, TaskExecutionDao> taskExecutionDaoContainer = new HashMap<>();
 

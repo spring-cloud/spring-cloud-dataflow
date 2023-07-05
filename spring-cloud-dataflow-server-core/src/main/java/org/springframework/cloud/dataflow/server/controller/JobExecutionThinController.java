@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,6 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -48,11 +47,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 /**
  * Controller for retrieving {@link JobExecution}s where the step executions are
  * not included in the results that are returned.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  *
  * @since 2.0
  */
@@ -70,7 +73,7 @@ public class JobExecutionThinController {
 	 * from a the {@link JobService}
 	 *
 	 * @param taskJobService the service this controller will use for retrieving job
-	 * execution information. Must not be null.
+	 *                       execution information. Must not be null.
 	 */
 	@Autowired
 	public JobExecutionThinController(TaskJobService taskJobService) {
@@ -82,24 +85,25 @@ public class JobExecutionThinController {
 	 * Return a page-able list of {@link JobExecutionThinResource} defined jobs that
 	 * do not contain step execution detail.
 	 *
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return a list of Task/Job executions(job executions do not contain step executions.
 	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
-	 * is not present when looking up stepExecutions for the result.
+	 *                                     is not present when looking up stepExecutions for the result.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> listJobsOnly(Pageable pageable,
-			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
+															 PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
 		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(pageable);
 		return assembler.toModel(jobExecutions, jobAssembler);
 	}
+
 	/**
 	 * Retrieve all task job executions with the task name specified
 	 *
-	 * @param jobName name of the job
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param jobName   name of the job
+	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
@@ -117,15 +121,15 @@ public class JobExecutionThinController {
 	/**
 	 * Retrieve all task job executions filtered with the date range specified
 	 *
-	 * @param fromDate the date which start date must be greater than.
-	 * @param toDate the date which start date must be less than.
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
+	 * @param fromDate  the date which start date must be greater than.
+	 * @param toDate    the date which start date must be less than.
+	 * @param pageable  page-able collection of {@code TaskJobExecution}s.
 	 * @param assembler for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = { "fromDate",
-			"toDate" }, produces = "application/json")
+	@RequestMapping(value = "", method = RequestMethod.GET, params = {"fromDate",
+			"toDate"}, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByDateRange(
 			@RequestParam("fromDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date fromDate,
@@ -141,8 +145,8 @@ public class JobExecutionThinController {
 	 * Retrieve all task job executions filtered with the job instance id specified
 	 *
 	 * @param jobInstanceId the job instance id associated with the execution.
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
-	 * @param assembler for the {@link TaskJobExecution}s
+	 * @param pageable      page-able collection of {@code TaskJobExecution}s.
+	 * @param assembler     for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
@@ -153,7 +157,7 @@ public class JobExecutionThinController {
 			@RequestParam(value = "schemaTarget", required = false) String schemaTarget,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		Page<TaskJobExecution> jobExecutions = taskJobService
@@ -165,8 +169,8 @@ public class JobExecutionThinController {
 	 * Retrieve all task job executions filtered with the task execution id specified
 	 *
 	 * @param taskExecutionId the task execution id associated with the execution.
-	 * @param pageable page-able collection of {@code TaskJobExecution}s.
-	 * @param assembler for the {@link TaskJobExecution}s
+	 * @param pageable        page-able collection of {@code TaskJobExecution}s.
+	 * @param assembler       for the {@link TaskJobExecution}s
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
@@ -177,7 +181,7 @@ public class JobExecutionThinController {
 			@RequestParam(value = "schemaTarget", required = false) String schemaTarget,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
@@ -211,12 +215,24 @@ public class JobExecutionThinController {
 
 		@Override
 		public JobExecutionThinResource toModel(TaskJobExecution taskJobExecution) {
-			return createModelWithId(taskJobExecution.getJobExecution().getId(), taskJobExecution);
+			return instantiateModel(taskJobExecution);
 		}
 
 		@Override
 		public JobExecutionThinResource instantiateModel(TaskJobExecution taskJobExecution) {
-			return new JobExecutionThinResource(taskJobExecution, timeZone);
+			JobExecutionThinResource resource = new JobExecutionThinResource(taskJobExecution, timeZone);
+			try {
+				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget())).withSelfRel());
+				if (taskJobExecution.getJobExecution().isRunning()) {
+					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+				}
+				if (taskJobExecution.getJobExecution().getEndTime() != null && !taskJobExecution.getJobExecution().isRunning()) {
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("restart"));
+				}
+			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
+				throw new RuntimeException(e);
+			}
+			return resource;
 		}
 	}
 }

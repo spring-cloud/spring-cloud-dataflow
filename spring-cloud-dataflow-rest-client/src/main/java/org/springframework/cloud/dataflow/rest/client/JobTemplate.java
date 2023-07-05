@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.time.temporal.ValueRange;
+
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -25,6 +27,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -97,11 +102,15 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public void executionRestart(long id) {
+	public void executionRestart(long id, String schemaTarget) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		if(schemaTarget != null) {
+			values.add("schemaTarget", schemaTarget);
+		}
+		values.add("restart", "true");
 		String uriTemplate = executionLink.expand(id).getHref();
-		uriTemplate = uriTemplate + "?restart=true";
 
-		restTemplate.put(uriTemplate, null);
+		restTemplate.put(uriTemplate, null, values);
 	}
 
 	@Override
@@ -130,25 +139,41 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public JobExecutionResource jobExecution(long id) {
-		return restTemplate.getForObject(executionLink.expand(id).getHref(), JobExecutionResource.class);
+	public JobExecutionResource jobExecution(long id, String schemaTarget) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		if(StringUtils.hasText(schemaTarget)) {
+			values.add("schemaTarget", schemaTarget);
+		}
+		return restTemplate.getForObject(executionLink.expand(id).getHref(), JobExecutionResource.class, values);
 	}
 
 	@Override
-	public JobInstanceResource jobInstance(long id) {
-		return restTemplate.getForObject(instanceLink.expand(id).getHref(), JobInstanceResource.class);
+	public JobInstanceResource jobInstance(long id, String schemaTarget) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		if(StringUtils.hasText(schemaTarget)) {
+			values.add("schemaTarget", schemaTarget);
+		}
+		return restTemplate.getForObject(instanceLink.expand(id).getHref(), JobInstanceResource.class, values);
 	}
 
 	@Override
-	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId) {
+	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		if(StringUtils.hasText(schemaTarget)) {
+			values.add("schemaTarget", schemaTarget);
+		}
 		return restTemplate.getForObject(stepExecutionsLink.expand(jobExecutionId).getHref(),
-				StepExecutionResource.Page.class);
+				StepExecutionResource.Page.class, values);
 	}
 
 	@Override
-	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId) {
+	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget) {
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
+		if(StringUtils.hasText(schemaTarget)) {
+			values.add("schemaTarget", schemaTarget);
+		}
 		return restTemplate.getForObject(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref(),
-				StepExecutionProgressInfoResource.class);
+				StepExecutionProgressInfoResource.class, values);
 	}
 
 }

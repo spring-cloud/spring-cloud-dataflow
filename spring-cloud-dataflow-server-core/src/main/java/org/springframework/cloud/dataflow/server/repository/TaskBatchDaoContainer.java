@@ -26,6 +26,10 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.util.StringUtils;
 
+/**
+ * Provides a container of {@link TaskBatchDao} for each schema target
+ * @author Corneil du Plessis
+ */
 public class TaskBatchDaoContainer {
 	private final Map<String, TaskBatchDao> taskBatchDaoContainer = new HashMap<>();
 

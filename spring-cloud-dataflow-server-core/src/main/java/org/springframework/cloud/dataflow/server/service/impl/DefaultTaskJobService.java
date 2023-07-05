@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ import org.springframework.util.StringUtils;
  * @author Gunnar Hillert
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @Transactional
 public class DefaultTaskJobService implements TaskJobService {
@@ -172,12 +173,11 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException {
-		if(!StringUtils.hasText(schemaTarget)) {
+		logger.info("getJobExecution:{}:{}", id, schemaTarget);
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
-		JobExecution jobExecution = jobService.getJobExecution(id);
-		return getTaskJobExecution(jobExecution, schemaTarget);
+		return aggregateJobQueryDao.getJobExecution(id, schemaTarget);
 	}
 
 	@Override
@@ -189,8 +189,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public JobInstanceExecutions getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException, NoSuchJobException {
-		JobService jobService = jobServiceContainer.get(schemaTarget);
-		return getJobInstanceExecution(jobService.getJobInstance(id));
+		return aggregateJobQueryDao.getJobInstanceExecutions(id, schemaTarget);
 	}
 
 	@Override
@@ -272,7 +271,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public void stopJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		JobService jobService = jobServiceContainer.get(schemaTarget);
@@ -283,7 +282,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution, String schemaTarget) {
 		return new TaskJobExecution(
-				getTaskExecutionId(jobExecution),
+				getTaskExecutionId(jobExecution, schemaTarget),
 				jobExecution,
 				isTaskDefined(jobExecution),
 				jobExecution.getStepExecutions().size(),
@@ -303,7 +302,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionWithStepCount jobExecutionWithStepCount) {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobExecutionWithStepCount.getJobConfigurationName(), taskDefinitionReader);
 		return new TaskJobExecution(
-				getTaskExecutionId(jobExecutionWithStepCount),
+				getTaskExecutionId(jobExecutionWithStepCount, schemaVersionTarget.getName()),
 				jobExecutionWithStepCount,
 				isTaskDefined(jobExecutionWithStepCount),
 				jobExecutionWithStepCount.getStepCount(),
@@ -311,10 +310,10 @@ public class DefaultTaskJobService implements TaskJobService {
 		);
 	}
 
-	private Long getTaskExecutionId(JobExecution jobExecution) {
+	private Long getTaskExecutionId(JobExecution jobExecution, String schemaTarget) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
-		// TODO find SchemaTargetVersion for JobExecution
-		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), SchemaVersionTarget.createDefault(AppBootSchemaVersion.defaultVersion()).getName());
+
+		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), schemaTarget);
 		if (taskExecutionId == null) {
 			String message = String.format("No corresponding taskExecutionId " +
 					"for jobExecutionId %s.  This indicates that Spring " +

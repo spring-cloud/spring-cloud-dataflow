@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016=2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  *
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/jobs/executions")
@@ -116,7 +117,7 @@ public class JobExecutionController {
 	) throws NoSuchJobExecutionException {
 		TaskJobExecution jobExecution = taskJobService.getJobExecution(id, schemaTarget);
 		if (jobExecution == null) {
-			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits", id));
+			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits for schema target %s", id, schemaTarget));
 		}
 		return jobAssembler.toModel(jobExecution);
 	}
@@ -150,11 +151,12 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
-	public void restartJobExecution(
+	public ResponseEntity<Void> restartJobExecution(
 			@PathVariable("executionId") long jobExecutionId,
 			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
 	) throws NoSuchJobExecutionException {
 		taskJobService.restartJobExecution(jobExecutionId, schemaTarget);
+		return ResponseEntity.ok().build();
 	}
 
 	/**
@@ -188,7 +190,12 @@ public class JobExecutionController {
 			JobExecutionResource resource = new JobExecutionResource(taskJobExecution, timeZone);
 			try {
 				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget())).withSelfRel());
-				resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+				if (taskJobExecution.getJobExecution().isRunning()) {
+					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+				}
+				if (!taskJobExecution.getJobExecution().getStatus().equals(BatchStatus.COMPLETED)) {
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("restart"));
+				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);
 			}

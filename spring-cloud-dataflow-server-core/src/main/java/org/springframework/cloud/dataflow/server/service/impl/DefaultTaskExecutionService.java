@@ -367,8 +367,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		String taskAppName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinitionReader);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
-		addPrefixCommandLineArgs(schemaVersionTarget, "", commandLineArguments);
-		addPrefixProperties(schemaVersionTarget, "", deploymentProperties);
+
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		// Get the previous manifest
 		TaskManifest previousManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
@@ -381,6 +380,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation = findOrCreateTaskExecutionInformation(taskName,
 				deploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
+
 		// pre prosess command-line args
 		// moving things like app.<label> = arg
 		// into deployment properties if ctr and removing
@@ -388,6 +388,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
 			logger.info("composedTask:appNames:{}", appNames);
+			addPrefixCommandLineArgs(schemaVersionTarget, "app.composed-task-runner.", commandLineArguments);
 			for (String appName : appNames) {
 				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(appName, taskDefinitionReader);
 				logger.debug("ctr:appName:{}:{}={}", taskName, appName, appSchemaTarget.getName());
@@ -395,8 +396,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			}
 			commandLineArguments = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArguments);
 		} else {
+
 			// remove argument prefix for simple task
 			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();
+			addPrefixCommandLineArgs(schemaVersionTarget, "app." + registeredAppName + ".", commandLineArguments);
+			addPrefixProperties(schemaVersionTarget, "app." + registeredAppName + ".", deploymentProperties);
 			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
 			commandLineArguments = commandLineArguments.stream()
 					.map(arg -> arg.replaceFirst(regex, ""))

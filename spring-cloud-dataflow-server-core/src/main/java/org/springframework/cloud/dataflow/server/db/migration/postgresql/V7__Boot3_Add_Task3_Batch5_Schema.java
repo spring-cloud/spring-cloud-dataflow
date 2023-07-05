@@ -129,7 +129,7 @@ public class V7__Boot3_Add_Task3_Batch5_Schema extends AbstractBoot3InitialSetup
 					"  STEP_NAME VARCHAR(100) NOT NULL,\n" +
 					"  JOB_EXECUTION_ID BIGINT NOT NULL,\n" +
 					"  CREATE_TIME TIMESTAMP NOT NULL,\n" +
-					"  START_TIME TIMESTAMP NOT NULL,\n" +
+					"  START_TIME TIMESTAMP DEFAULT NULL,\n" +
 					"  END_TIME TIMESTAMP DEFAULT NULL,\n" +
 					"  STATUS VARCHAR(10),\n" +
 					"  COMMIT_COUNT BIGINT,\n" +

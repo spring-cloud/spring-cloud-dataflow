@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,16 +136,18 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private static final String FIND_PARAMS_FROM_ID3 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING, 'boot3' as SCHEMA_TARGET" +
 			" from %PREFIX%JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID = ?";
-
-	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = "SELECT I.JOB_INSTANCE_ID as JOB_INSTANCE_ID, I.JOB_NAME as JOB_NAME, I.SCHEMA_TARGET as SCHEMA_TARGET," +
+	private static final String FIND_JOB_BY = "SELECT I.JOB_INSTANCE_ID as JOB_INSTANCE_ID, I.JOB_NAME as JOB_NAME, I.SCHEMA_TARGET as SCHEMA_TARGET," +
 			" E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME, E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE, E.CREATE_TIME as CREATE_TIME," +
 			" E.LAST_UPDATED as LAST_UPDATED, E.VERSION as VERSION, T.TASK_EXECUTION_ID as TASK_EXECUTION_ID," +
 			" (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND S.SCHEMA_TARGET = E.SCHEMA_TARGET) as STEP_COUNT" +
 			" from AGGREGATE_JOB_INSTANCE I" +
 			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID = E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET = E.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
-			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET" +
+			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
+	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
 			" where I.JOB_NAME = ? AND I.JOB_INSTANCE_ID = ?";
+	private static final String FIND_JOB_BY_INSTANCE_ID_SCHEMA = FIND_JOB_BY +
+			" where I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
 
 	private static final String FIND_JOBS_FIELDS = "I.JOB_INSTANCE_ID as JOB_INSTANCE_ID, I.JOB_NAME as JOB_NAME, I.SCHEMA_TARGET as SCHEMA_TARGET," +
 			" E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME, E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE, E.CREATE_TIME as CREATE_TIME," +
@@ -158,6 +160,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
 
 	private static final String FIND_JOBS_WHERE = "I.JOB_NAME = ?";
+
+	private static final String FIND_BY_ID_SCHEMA = "E.JOB_EXECUTION_ID = ? AND E.SCHEMA_TARGET = ?";
 
 	private final PagingQueryProvider allExecutionsPagingQueryProvider;
 
@@ -180,6 +184,9 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private final PagingQueryProvider allExecutionsPagingQueryProviderNoStepCount;
 
 	private final PagingQueryProvider byJobNamePagingQueryProvider;
+
+	private final PagingQueryProvider byJobExecutionIdAndSchemaPagingQueryProvider;
+
 
 	private final DataSource dataSource;
 
@@ -206,6 +213,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
 		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("JOB_INSTANCE_ID", Order.DESCENDING));
+		byJobExecutionIdAndSchemaPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
 
 	}
 
@@ -227,6 +235,16 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		return executions.get(0);
 	}
 
+	@Override
+	public JobInstanceExecutions getJobInstanceExecutions(long jobInstanceId, String schemaTarget) {
+		List<JobInstanceExecutions> executions = jdbcTemplate.query(FIND_JOB_BY_INSTANCE_ID_SCHEMA, new JobInstanceExecutionsExtractor(true), jobInstanceId, schemaTarget);
+		if (executions == null || executions.isEmpty()) {
+			return null;
+		} else if (executions.size() > 1) {
+			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
+		}
+		return executions.get(0);
+	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) {
@@ -272,6 +290,29 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		return new PageImpl<>(jobExecutions, pageable, countJobExecutions(jobName));
 	}
 
+	@Override
+	public TaskJobExecution getJobExecution(long jobExecutionId, String schemaTarget) {
+		List<TaskJobExecution> jobExecutions = getJobExecutionPage(jobExecutionId, schemaTarget);
+		if (jobExecutions.isEmpty()) {
+			return null;
+		}
+		if (jobExecutions.size() > 1) {
+			logger.debug("Too many job executions:{}", jobExecutions);
+			logger.warn("Expected only 1 job for {}: not {}", jobExecutionId, jobExecutions.size());
+		}
+		return jobExecutions.get(0);
+	}
+
+	private List<TaskJobExecution> getJobExecutionPage(long jobExecutionId, String schemaTarget) {
+		return queryForProvider(
+				byJobExecutionIdAndSchemaPagingQueryProvider,
+				new JobExecutionRowMapper(true),
+				0,
+				2,
+				jobExecutionId,
+				schemaTarget
+		);
+	}
 
 	private int countJobExecutions() {
 		logger.debug("countJobExecutions:{}", GET_COUNT);
@@ -315,7 +356,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private int countJobExecutionsByInstanceId(int jobInstanceId, String schemaTarget) {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		logger.debug("countJobExecutionsByInstanceId:{}:{}:{}", jobInstanceId, schemaTarget, GET_COUNT_BY_JOB_INSTANCE_ID);
@@ -324,7 +365,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private int countJobExecutionsByTaskExecutionId(int taskExecutionId, String schemaTarget) {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		logger.debug("countJobExecutionsByTaskExecutionId:{}:{}:{}", taskExecutionId, schemaTarget, GET_COUNT_BY_TASK_EXECUTION_ID);
@@ -357,7 +398,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			int start,
 			int count
 	) {
-		if(!StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return queryForProvider(

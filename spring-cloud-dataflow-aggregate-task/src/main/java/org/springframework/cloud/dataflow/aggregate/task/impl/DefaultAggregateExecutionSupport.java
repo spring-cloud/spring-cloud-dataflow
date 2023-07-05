@@ -75,6 +75,7 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 
 	@Override
 	public SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinitionReader taskDefinitionReader) {
+		logger.debug("findSchemaVersionTarget:{}", taskName);
 		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
 		return findSchemaVersionTarget(taskName, definition);
 	}
@@ -99,7 +100,9 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 		if (versionTargets.size() > 1) {
 			throw new IllegalStateException("Multiple SchemaVersionTargets for " + registration.getBootVersion());
 		}
-		return versionTargets.get(0);
+		SchemaVersionTarget schemaVersionTarget = versionTargets.get(0);
+		logger.debug("findSchemaVersionTarget:{}={},{}", taskName, registeredName, schemaVersionTarget);
+		return schemaVersionTarget;
 	}
 
 	@Override

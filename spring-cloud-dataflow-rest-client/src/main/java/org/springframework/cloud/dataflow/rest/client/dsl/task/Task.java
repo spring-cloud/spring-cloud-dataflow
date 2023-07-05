@@ -288,8 +288,8 @@ public class Task implements AutoCloseable {
 	 * @param jobExecutionId the job execution id.
 	 * @return Returns list of {@link StepExecutionResource} belonging to the job.
 	 */
-	public Collection<StepExecutionResource> jobStepExecutions(long jobExecutionId) {
-		return this.jobOperations.stepExecutionList(jobExecutionId).getContent();
+	public Collection<StepExecutionResource> jobStepExecutions(long jobExecutionId, String schemaTarget) {
+		return this.jobOperations.stepExecutionList(jobExecutionId, schemaTarget).getContent();
 	}
 
 	/**

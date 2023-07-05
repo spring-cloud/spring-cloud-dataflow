@@ -1406,7 +1406,7 @@ public class DataFlowIT {
 			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
 				Exception exception = assertThrows(DataFlowClientException.class, () -> {
-					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget());
 				});
 				assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
 			});
@@ -1576,7 +1576,7 @@ public class DataFlowIT {
 			assertThat(task.executions().size()).isEqualTo(1);
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
-			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget());
 
 			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max()
 					.getAsLong();
@@ -1700,7 +1700,7 @@ public class DataFlowIT {
 			assertThat(task.executions().size()).isEqualTo(1);
 			List<Long> jobExecutionIds = task.executions().stream().findFirst().get().getJobExecutionIds();
 			assertThat(jobExecutionIds.size()).isEqualTo(1);
-			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+			dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget());
 
 			long launchId2 = task.executions().stream().mapToLong(TaskExecutionResource::getExecutionId).max()
 					.getAsLong();
@@ -1781,7 +1781,7 @@ public class DataFlowIT {
 		task.jobExecutionResources().stream().filter(
 				jobExecution -> jobExecution.getName().equals(task.getTaskName())).forEach(jobExecutionResource -> {
 			assertThat(jobExecutionResource.getStepExecutionCount()).isEqualTo(1);
-			task.jobStepExecutions(jobExecutionResource.getExecutionId()).forEach(stepExecutionResource -> {
+			task.jobStepExecutions(jobExecutionResource.getExecutionId(), jobExecutionResource.getSchemaTarget()).forEach(stepExecutionResource -> {
 				assertThat(stepExecutionResource.getStepExecution().getStepName()).isEqualTo(stepName);
 			});
 		});
@@ -1817,7 +1817,7 @@ public class DataFlowIT {
 			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
 				Exception exception = assertThrows(DataFlowClientException.class, () -> {
-					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+					dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget());
 				});
 				assertTrue(exception.getMessage().contains(" and state 'COMPLETED' is not restartable"));
 			});
@@ -1851,7 +1851,7 @@ public class DataFlowIT {
 			// The Exception thrown by the 2.6.x servers can not be deserialized by the
 			// VndErrorResponseErrorHandler in 2.8+ clients.
 			Assumptions.assumingThat(runtimeApps.dataflowServerVersionEqualOrGreaterThan("2.7.0"), () -> {
-				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0));
+				dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget());
 				// Wait for job to start
 				Awaitility.await().until(() -> task.jobExecutionResources().size() == 2);
 				// Wait for task for the job to complete
@@ -2272,7 +2272,7 @@ public class DataFlowIT {
 
 			Awaitility.await().until(() -> task.executionStatus(resource.getTaskId(), resource.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
-			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executions().size()).isEqualTo(1);
 			assertThat(
 					(int) task.executions()
 							.stream()
@@ -2538,7 +2538,7 @@ public class DataFlowIT {
 
 			safeCleanupTaskExecution(task, resource.getTaskId());
 			verifyAllSpecifiedTaskExecutions(task, launchIds, false);
-			assertThatThrownBy(() -> task.jobStepExecutions(jobExecutionIds.get(0)))
+			assertThatThrownBy(() -> task.jobStepExecutions(jobExecutionIds.get(0), resource.getSchemaTarget()))
 					.isInstanceOf(DataFlowClientException.class).hasMessageContaining("No JobExecution with id=");
 		}
 	}
@@ -2562,7 +2562,7 @@ public class DataFlowIT {
 			assertThat(jobExecutionIds.size()).isEqualTo(2);
 
 			safeCleanupTaskExecution(task, launchIds.get(0));
-			assertThatThrownBy(() -> this.dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0)))
+			assertThatThrownBy(() -> this.dataFlowOperations.jobOperations().executionRestart(jobExecutionIds.get(0), resource.getSchemaTarget()))
 					.isInstanceOf(DataFlowClientException.class)
 					.hasMessageContaining("There is no JobExecution with id=");
 		}
