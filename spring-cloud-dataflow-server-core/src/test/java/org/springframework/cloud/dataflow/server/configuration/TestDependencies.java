@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.configuration;
 
 
-import javax.sql.DataSource;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -193,7 +193,6 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author David Turanski
  * @author Glenn Renfro
- * @author Corneil du Plessis
  */
 @Configuration
 @EnableSpringDataWebSupport

@@ -199,11 +199,6 @@ spring:
   mustache:
     check-template-location: false
 
-maven:
-  remoteRepositories:
-    springRepo:
-      url: https://repo.spring.io/snapshot
-
 logging:
   level:
     org.springframework.beans: 'WARN'
