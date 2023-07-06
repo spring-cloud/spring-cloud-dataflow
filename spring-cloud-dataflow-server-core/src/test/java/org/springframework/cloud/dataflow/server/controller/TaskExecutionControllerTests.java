@@ -413,8 +413,8 @@ public class TaskExecutionControllerTests {
 		assertThat(json.findValue("deploymentProperties")).isNotNull();
 		JsonNode deploymentProperties = json.findValue("deploymentProperties");
 		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
-		assertThat(deploymentProperties.hasNonNull("spring.cloud.task.tablePrefix")).isTrue();
-		assertThat(deploymentProperties.get("spring.cloud.task.tablePrefix").asText()).isEqualTo("BOOT3_TASK_");
+		assertThat(deploymentProperties.hasNonNull("app.timestamp3.spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("app.timestamp3.spring.cloud.task.tablePrefix").asText()).isEqualTo("BOOT3_TASK_");
 	}
 	@Test
 	public void testBoot2Execution() throws Exception {
@@ -427,7 +427,7 @@ public class TaskExecutionControllerTests {
 		ResultActions resultActions = mockMvc.perform(
 						post("/tasks/executions")
 								.queryParam("name", "timestamp2")
-								.queryParam("properties","app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
+								.queryParam("properties","app.timestamp2.foo3=bar3,app.timestamp2.bar3=3foo")
 								.accept(MediaType.APPLICATION_JSON)
 				).andDo(print())
 				.andExpect(status().isCreated());
@@ -457,8 +457,8 @@ public class TaskExecutionControllerTests {
 		assertThat(json.findValue("deploymentProperties")).isNotNull();
 		JsonNode deploymentProperties = json.findValue("deploymentProperties");
 		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
-		assertThat(deploymentProperties.hasNonNull("spring.cloud.task.tablePrefix")).isTrue();
-		assertThat(deploymentProperties.get("spring.cloud.task.tablePrefix").asText()).isEqualTo("TASK_");
+		assertThat(deploymentProperties.hasNonNull("app.timestamp2.spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("app.timestamp2.spring.cloud.task.tablePrefix").asText()).isEqualTo("TASK_");
 
 	}
 

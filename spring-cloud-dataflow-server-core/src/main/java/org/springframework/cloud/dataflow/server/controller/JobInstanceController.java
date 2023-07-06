@@ -68,7 +68,7 @@ public class JobInstanceController {
 	 * Creates a {@code JobInstanceController} that retrieves Job Instance information.
 	 *
 	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance
-	 * data.
+	 *                       data.
 	 */
 	@Autowired
 	public JobInstanceController(TaskJobService taskJobService) {
@@ -79,8 +79,8 @@ public class JobInstanceController {
 	/**
 	 * Return a page-able list of {@link JobInstanceResource} defined jobs.
 	 *
-	 * @param jobName the name of the job
-	 * @param pageable page-able collection of {@link JobInstance}s.
+	 * @param jobName   the name of the job
+	 * @param pageable  page-able collection of {@link JobInstance}s.
 	 * @param assembler for the {@link JobInstance}s
 	 * @return a list of Job Instance
 	 * @throws NoSuchJobException if the job for jobName specified does not exist.
@@ -101,7 +101,7 @@ public class JobInstanceController {
 	 * @param id the id of the requested {@link JobInstance}
 	 * @return the {@link JobInstance}
 	 * @throws NoSuchJobInstanceException if job instance for the id does not exist.
-	 * @throws NoSuchJobException if the job for the job instance does not exist.
+	 * @throws NoSuchJobException         if the job for the job instance does not exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
@@ -110,6 +110,9 @@ public class JobInstanceController {
 			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
 	) throws NoSuchJobInstanceException, NoSuchJobException {
 		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
+		if (jobInstance == null) {
+			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d' and schema target '%s'", id, schemaTarget));
+		}
 		return jobAssembler.toModel(jobInstance);
 	}
 

@@ -67,6 +67,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService {
 	private final static Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionInfoService.class);
+
 	private final DataSourceProperties dataSourceProperties;
 
 	/**
@@ -92,14 +93,14 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	/**
 	 * Initializes the {@link DefaultTaskExecutionInfoService}.
 	 *
-	 * @param dataSourceProperties the data source properties.
-	 * @param appRegistryService URI registry this service will use to look up app URIs.
-	 * @param taskExplorer the explorer this service will use to lookup task executions
-	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
-	 *     use for task CRUD operations.
+	 * @param dataSourceProperties        the data source properties.
+	 * @param appRegistryService          URI registry this service will use to look up app URIs.
+	 * @param taskExplorer                the explorer this service will use to lookup task executions
+	 * @param taskDefinitionRepository    the {@link TaskDefinitionRepository} this service will
+	 *                                    use for task CRUD operations.
 	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
-	 * @param launcherRepository the launcher repository
-	 * @param taskPlatforms the task platforms
+	 * @param launcherRepository          the launcher repository
+	 * @param taskPlatforms               the task platforms
 	 */
 	@Deprecated
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
@@ -122,14 +123,14 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	/**
 	 * Initializes the {@link DefaultTaskExecutionInfoService}.
 	 *
-	 * @param dataSourceProperties the data source properties.
-	 * @param appRegistryService URI registry this service will use to look up app URIs.
-	 * @param taskExplorer the explorer this service will use to lookup task executions
-	 * @param taskDefinitionRepository the {@link TaskDefinitionRepository} this service will
-	 *     use for task CRUD operations.
-	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
-	 * @param launcherRepository the launcher repository
-	 * @param taskPlatforms the task platforms
+	 * @param dataSourceProperties                      the data source properties.
+	 * @param appRegistryService                        URI registry this service will use to look up app URIs.
+	 * @param taskExplorer                              the explorer this service will use to lookup task executions
+	 * @param taskDefinitionRepository                  the {@link TaskDefinitionRepository} this service will
+	 *                                                  use for task CRUD operations.
+	 * @param taskConfigurationProperties               the properties used to define the behavior of tasks
+	 * @param launcherRepository                        the launcher repository
+	 * @param taskPlatforms                             the task platforms
 	 * @param composedTaskRunnerConfigurationProperties the properties used to define the behavior of CTR
 	 */
 	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
@@ -160,7 +161,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 
 	@Override
 	public TaskExecutionInformation findTaskExecutionInformation(String taskName,
-			Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials, Map<String, String> previousTaskDeploymentProperties) {
+																 Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials, Map<String, String> previousTaskDeploymentProperties) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
@@ -191,13 +192,11 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 						ApplicationType.task,
 						new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
 								this.composedTaskRunnerConfigurationProperties)));
-			}
-			catch (URISyntaxException e) {
+			} catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 			}
 
-		}
-		else {
+		} else {
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(originalTaskDefinition,
 					dataSourceProperties, addDatabaseCredentials);
 
@@ -206,8 +205,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 				TaskAppNode taskAppNode = taskNode.getTaskApp();
 				if (taskAppNode.getLabel() != null) {
 					label = taskAppNode.getLabel().stringValue();
-				}
-				else {
+				} else {
 					label = taskAppNode.getName();
 				}
 			}
@@ -220,8 +218,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			if (version == null) {
 				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
 						ApplicationType.task);
-			}
-			else {
+			} else {
 				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
 						ApplicationType.task, version);
 			}
@@ -243,28 +240,35 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
 		Set<String> result = new HashSet<>();
 		TaskNode taskNode = taskParser.parse();
-		if(taskNode.isComposed()) {
-			for(TaskApp subTask : taskNode.getTaskApps()) {
+		if (taskNode.isComposed()) {
+			for (TaskApp subTask : taskNode.getTaskApps()) {
+				logger.debug("subTask:{}:{}:{}", subTask.getName(), subTask.getTaskName(), subTask);
 				TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
-				if(subTaskDefinition != null) {
-					result.add(subTaskDefinition.getRegisteredAppName());
+				if (subTaskDefinition != null) {
+					result.add(subTaskDefinition.getRegisteredAppName() + "," + subTask.getLabel());
 					TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDefinition.getDslText(), true, true);
 					TaskNode subTaskNode = subTaskParser.parse();
-					if(subTaskNode != null && subTaskNode.getTaskApp() != null) {
-						for(TaskApp subSubTask : subTaskNode.getTaskApps()) {
-							TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getTaskName());
+					if (subTaskNode != null && subTaskNode.getTaskApp() != null) {
+						for (TaskApp subSubTask : subTaskNode.getTaskApps()) {
+							logger.debug("subSubTask:{}:{}:{}", subSubTask.getName(), subSubTask.getTaskName(), subSubTask);
+							TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getName());
 							if (subSubTaskDefinition != null) {
-								result.add(subSubTaskDefinition.getRegisteredAppName());
+								result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
 							}
 						}
 					}
 				} else {
-					result.add(subTask.getName());
+					if(subTask.getLabel() == null || subTask.getLabel().equals(subTask.getName())) {
+						result.add(subTask.getName());
+					} else {
+						result.add(subTask.getName() + "," + subTask.getLabel());
+					}
 				}
 			}
 		}
 		return result;
 	}
+
 	@Override
 	public List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
@@ -294,6 +298,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		}
 		return appDeploymentRequests;
 	}
+
 	@Override
 	public AllPlatformsTaskExecutionInformation findAllPlatformTaskExecutionInformation() {
 		return new AllPlatformsTaskExecutionInformation(this.taskPlatforms);

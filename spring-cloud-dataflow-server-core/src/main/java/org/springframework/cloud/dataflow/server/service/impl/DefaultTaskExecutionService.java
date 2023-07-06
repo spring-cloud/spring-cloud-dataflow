@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -386,14 +387,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		// into deployment properties if ctr and removing
 		// prefix if simple task.
 		if (taskExecutionInformation.isComposed()) {
-			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
-			logger.info("composedTask:appNames:{}", appNames);
-			addPrefixCommandLineArgs(schemaVersionTarget, "app.composed-task-runner.", commandLineArguments);
-			for (String appName : appNames) {
-				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(appName, taskDefinitionReader);
-				logger.debug("ctr:appName:{}:{}={}", taskName, appName, appSchemaTarget.getName());
-				addPrefixProperties(appSchemaTarget, "app." + appName + ".", deploymentProperties);
-			}
 			commandLineArguments = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArguments);
 		} else {
 
@@ -410,6 +403,21 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 
 		if (taskExecutionInformation.isComposed()) {
+			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
+			logger.info("composedTask:appNames:{}", appNames);
+			// addPrefixCommandLineArgs(schemaVersionTarget, "", commandLineArguments);
+			addPrefixProperties(schemaVersionTarget, "app.composed-task-runner.", deploymentProperties);
+			addPrefixProperties(schemaVersionTarget, "app." + taskName + ".", deploymentProperties);
+			for (String appName : appNames) {
+				List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
+				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(names.get(0), taskDefinitionReader);
+				logger.debug("ctr:appName:{}:{}={}", taskName, names, appSchemaTarget.getName());
+				for(String name : names) {
+					addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + name + ".", deploymentProperties);
+					addPrefixProperties(appSchemaTarget, "app." + name + ".", deploymentProperties);
+					// addPrefixCommandLineArgs(appSchemaTarget, "app." + name + ".", commandLineArguments);
+				}
+			}
 			handleAccessToken(commandLineArguments, taskExecutionInformation);
 			TaskServiceUtils.addImagePullSecretProperty(deploymentProperties,
 					this.composedTaskRunnerConfigurationProperties);
@@ -517,6 +525,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
 		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
 	}
+
 	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
 		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
 		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);

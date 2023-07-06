@@ -517,7 +517,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 			}
 			Long startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
-			List<Object> args = Arrays.asList(arguments);
+			List<Object> args = new ArrayList<>(Arrays.asList(arguments));
 			args.add(startValue);
 			String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
 			if (logger.isDebugEnabled()) {
@@ -540,7 +540,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 			}
 			Long startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
-			List<Object> args = Arrays.asList(arguments);
+			List<Object> args = new ArrayList<>(Arrays.asList(arguments));
 			args.add(startValue);
 			String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
 			if (logger.isDebugEnabled()) {
@@ -706,7 +706,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 		factory.setSelectClause(fields);
 		if (sortKeys.isEmpty()) {
-			sortKeys = Collections.singletonMap("JOB_EXECUTION_ID", Order.DESCENDING);
+			sortKeys = Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING);
 		}
 		factory.setSortKeys(sortKeys);
 		factory.setWhereClause(whereClause);

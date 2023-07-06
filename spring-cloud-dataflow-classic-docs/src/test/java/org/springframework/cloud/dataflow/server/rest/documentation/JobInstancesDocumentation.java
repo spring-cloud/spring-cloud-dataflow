@@ -109,7 +109,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	@Test
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/instances/{id}", "1"))
+				get("/jobs/instances/{id}", "1").queryParam("schemaTarget", "boot2"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(

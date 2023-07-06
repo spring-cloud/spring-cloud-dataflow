@@ -63,8 +63,7 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 		ExitStatus result = ExitStatus.COMPLETED;
 		logger.info(String.format("AfterStep processing for stepExecution %s",
 				stepExecution.getStepName()));
-		String taskName = stepExecution.getStepName();
-		TaskExplorer taskExplorer = this.taskExplorerContainer.get(taskName);
+		TaskExplorer taskExplorer = this.taskExplorerContainer.get(stepExecution.getJobExecution().getJobConfigurationName());
 
 		Long executionId = (Long) stepExecution.getExecutionContext().get("task-execution-id");
 		Assert.notNull(executionId, "TaskLauncherTasklet did not " +

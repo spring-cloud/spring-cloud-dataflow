@@ -24,17 +24,22 @@ The API version can be seen at the end of the home page of Spring Cloud Data Flo
 ====
 [source,json]
 ----
-{"_links":
-    {"dashboard":{"href":"http://localhost:9393/dashboard"}
-    ...
-    },
-"api.revision":14}
+{
+  "_links": {
+      "dashboard": { "href" : "http://localhost:9393/dashboard" },
+      ...
+  },
+  "api.revision":15
+}
 ----
 ====
 The table below shows the SCDF Release version and its current RESTful API version.
 
 |===
 | SCDF Version | API Version
+
+| 2.11.x
+| 15
 
 | 2.10.x
 | 14

@@ -2278,13 +2278,10 @@ public class DataFlowIT {
 							.stream()
 							.filter(execution -> execution.getArguments().contains(argument)).count()
 			).isEqualTo(1);
-			TaskExecutionResource taskExecutionResource = task.executions()
-					.stream()
-					.filter(execution -> execution.getDeploymentProperties().containsKey("spring.cloud.task.tablePrefix"))
-					.findFirst().orElse(null);
+			TaskExecutionResource taskExecutionResource = task.execution(resource.getTaskId(), resource.getSchemaTarget()).orElse(null);
 			assertThat(taskExecutionResource).isNotNull();
 			assertThat(taskExecutionResource.getDeploymentProperties()).isNotNull();
-			assertThat(taskExecutionResource.getDeploymentProperties().get("spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
+			assertThat(taskExecutionResource.getDeploymentProperties().get("app.testtimestamp3.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
 		}
 	}
 
@@ -2309,19 +2306,24 @@ public class DataFlowIT {
 			validateSuccessfulTaskLaunch(task, resource.getTaskId(), resource.getSchemaTarget());
 			Awaitility.await().until(() -> task.executionStatus(resource.getTaskId(), resource.getSchemaTarget()) == TaskExecutionStatus.COMPLETE);
 
-			assertThat(task.executions().size()).isEqualTo(2);
+			assertThat(task.executions().size()).isEqualTo(1);
 			assertThat(
 					(int) task.executions()
 							.stream()
 							.filter(execution -> execution.getArguments().contains(argument)).count()
 			).isEqualTo(1);
-			TaskExecutionResource taskExecutionResource = task.executions()
-					.stream()
-					.filter(execution -> execution.getDeploymentProperties().containsKey("spring.cloud.task.tablePrefix"))
-					.findFirst().orElse(null);
+			TaskExecutionResource taskExecutionResource = task.execution(resource.getTaskId(), resource.getSchemaTarget()).orElse(null);
 			assertThat(taskExecutionResource).isNotNull();
 			assertThat(taskExecutionResource.getDeploymentProperties()).isNotNull();
-			assertThat(taskExecutionResource.getDeploymentProperties().get("spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
+			assertThat(taskExecutionResource.getDeploymentProperties().get("app.testtimestamp-batch3.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
+
+			PagedModel<JobExecutionResource> jobExecutions = this.dataFlowOperations.jobOperations().executionList();
+			Optional<JobExecutionResource> jobExecutionResource = jobExecutions.getContent().stream().findFirst();
+			assertThat(jobExecutionResource.isPresent()).isTrue();
+			assertThat(jobExecutionResource.get().getSchemaTarget()).isNotNull();
+			JobExecutionResource jobExecution = this.dataFlowOperations.jobOperations().jobExecution(jobExecutionResource.get().getExecutionId(), jobExecutionResource.get().getSchemaTarget());
+			assertThat(jobExecution).isNotNull();
+			assertThat(jobExecution.getSchemaTarget()).isEqualTo(jobExecutionResource.get().getSchemaTarget());
 		}
 	}
 	@Test

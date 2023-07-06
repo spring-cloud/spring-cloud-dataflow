@@ -128,7 +128,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		TaskLauncherTasklet taskLauncherTasklet = new TaskLauncherTasklet(
 				this.clientRegistrations,
 				this.clientCredentialsTokenResponseClient,
-				this.taskExplorerContainer.get(this.taskName),
+				this.taskExplorerContainer.get(this.taskNameId),
 				this.composedTaskPropertiesFromEnv,
 				this.taskName,
 				taskProperties,

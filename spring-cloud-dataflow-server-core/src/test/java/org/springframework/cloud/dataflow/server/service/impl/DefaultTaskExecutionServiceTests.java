@@ -1299,8 +1299,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
 
-			assertEquals("BOOT3_TASK_", cmdProps.get("spring.cloud.task.tablePrefix"));
-			assertEquals("BOOT3_BATCH_", cmdProps.get("spring.batch.jdbc.table-prefix"));
+			assertEquals("BOOT3_TASK_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.cloud.task.tablePrefix"));
+			assertEquals("BOOT3_BATCH_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.batch.jdbc.table-prefix"));
 		}
 
 		@Test
@@ -1319,8 +1319,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
 
-			assertEquals("BOOT3_TASK_", cmdProps.get("spring.cloud.task.tablePrefix"));
-			assertEquals("BOOT3_BATCH_", cmdProps.get("spring.batch.jdbc.table-prefix"));
+			assertEquals("BOOT3_TASK_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.cloud.task.tablePrefix"));
+			assertEquals("BOOT3_BATCH_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.batch.jdbc.table-prefix"));
 		}
 	}
 
@@ -1555,7 +1555,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
 			assertThat(request.getDefinition().getProperties()).containsKey("composed-task-properties");
 			assertThat(request.getCommandlineArguments()).contains("--spring.cloud.data.flow.taskappname=composed-task-runner");
-			assertThat(request.getCommandlineArguments()).contains("--spring.cloud.task.tablePrefix=TASK_");
+			assertThat(request.getDeploymentProperties().get("app.composed-task-runner.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertThat(request.getDeploymentProperties().get("app.AAA.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertThat(request.getDeploymentProperties().get("app.BBB.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertEquals("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m", request.getDefinition().getProperties().get("composed-task-properties"));
@@ -1569,7 +1569,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		@Test
 		@DirtiesContext
 		public void executeComposedTaskWithUserCTRNameBoot3Task() {
-			String dsl = "AAA && BBB";
+			String dsl = "a1: AAA && b2: BBB";
 			when(appRegistry.find(eq("AAA"), eq(ApplicationType.task))).thenReturn(new AppRegistration("AAA", ApplicationType.task, "3.0.0", URI.create("https://helloworld"), null, AppBootSchemaVersion.BOOT3));
 			when(appRegistry.find(not(eq("AAA")), any(ApplicationType.class))).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 			try {
@@ -1595,15 +1595,23 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			AppDeploymentRequest request = argumentCaptor.getValue();
 			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
-			assertThat(request.getDefinition().getProperties()).containsKey("composed-task-properties");
+
 			assertThat(request.getCommandlineArguments()).contains("--spring.cloud.data.flow.taskappname=composed-task-runner");
-			assertThat(request.getCommandlineArguments()).contains("--spring.cloud.task.tablePrefix=TASK_");
-			assertThat(request.getCommandlineArguments()).contains("--spring.batch.jdbc.table-prefix=BATCH_");
+			assertThat(request.getDeploymentProperties().get("app.composed-task-runner.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
+			assertThat(request.getDeploymentProperties().get("app.composed-task-runner.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
+			System.out.println("deploymentProperties:" + request.getDeploymentProperties());
 			assertThat(request.getDeploymentProperties().get("app.AAA.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
 			assertThat(request.getDeploymentProperties().get("app.AAA.spring.batch.jdbc.table-prefix")).isEqualTo("BOOT3_BATCH_");
+			assertThat(request.getDeploymentProperties().get("app.a1.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
+			assertThat(request.getDeploymentProperties().get("app.a1.spring.batch.jdbc.table-prefix")).isEqualTo("BOOT3_BATCH_");
 			assertThat(request.getDeploymentProperties().get("app.BBB.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertThat(request.getDeploymentProperties().get("app.BBB.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
-			assertEquals("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m", request.getDefinition().getProperties().get("composed-task-properties"));
+			assertThat(request.getDeploymentProperties().get("app.b2.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
+			assertThat(request.getDeploymentProperties().get("app.b2.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
+			// assertThat(request.getDefinition().getProperties().get("composed-task-properties")).isEqualTo("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m");
+			assertThat(request.getDeploymentProperties().get("app.seqTask.AAA.timestamp.format")).isEqualTo("YYYY");
+			assertThat(request.getDeploymentProperties().get("deployer.seqTask.AAA.memory")).isEqualTo("1240m");
+			System.out.println("definitionProperties:" + request.getDefinition().getProperties());
 			assertThat(request.getDefinition().getProperties()).containsKey("interval-time-between-checks");
 			assertEquals("1000", request.getDefinition().getProperties().get("interval-time-between-checks"));
 			assertThat(request.getDefinition().getProperties()).doesNotContainKey("app.foo");
@@ -1678,11 +1686,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 			AppDeploymentRequest request = argumentCaptor.getValue();
-			assertEquals("seqTask", request.getDefinition().getProperties().get("spring.cloud.task.name"));
-			String keyWithEncoding = "composed-task-app-properties." + Base64Utils.encode("app.t1.timestamp.format");
-			assertEquals("YYYY", request.getDefinition().getProperties().get(keyWithEncoding));
+			System.out.println("request.definition.properties:" + request.getDefinition().getProperties());
+			System.out.println("request.commandLineArguments:" + request.getCommandlineArguments());
+			assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("seqTask");
+			assertThat(
+					request.getDefinition().getProperties().get("composed-task-app-properties." + Base64Utils.encode("app.t1.timestamp.format"))
+			).isEqualTo("YYYY");
 			assertThat(request.getCommandlineArguments()).contains("--composed-task-app-arguments." + Base64Utils.encode("app.t1.0") + "=foo1");
 			assertThat(request.getCommandlineArguments()).contains("--composed-task-app-arguments." + Base64Utils.encode("app.*.0") + "=foo2");
+
 		}
 
 		@Test

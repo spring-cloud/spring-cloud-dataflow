@@ -71,18 +71,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
+@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
 public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
 	private static boolean initialized;
+
 	private JobRepositoryContainer jobRepositoryContainer;
+
 	private TaskExecutionDaoContainer daoContainer;
+
 	private TaskBatchDaoContainer taskBatchDaoContainer;
+
 	private JdbcTemplate jdbcTemplate;
+
 	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+
 	private AggregateExecutionSupport aggregateExecutionSupport;
 
 	private TaskDefinitionReader taskDefinitionReader;
@@ -105,9 +111,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 					1, 1, "2", JOB_NAME + "_1", "default", new Date());
 
 			documentation.dontDocument(() -> this.mockMvc.perform(
-					post("/tasks/definitions")
-							.param("name", "DOCJOB1")
-							.param("definition", "timestamp --format='YYYY MM DD'"))
+							post("/tasks/definitions")
+									.param("name", "DOCJOB1")
+									.param("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
 
 			initialized = true;
@@ -117,226 +123,244 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void listJobExecutions() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions")
-						.param("page", "0")
-						.param("size", "10"))
+						get("/jobs/executions")
+								.param("page", "0")
+								.param("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionResourceList")
-								.description("Contains a collection of Job Executions/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionResourceList")
+										.description("Contains a collection of Job Executions/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
 						)));
 	}
 
 	@Test
 	public void listThinJobExecutions() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/thinexecutions")
-						.param("page", "0")
-						.param("size", "10"))
+						get("/jobs/thinexecutions")
+								.param("page", "0")
+								.param("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionThinResourceList")
-								.description("Contains a collection of Job Executions without step executions included/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
-				)));
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionThinResourceList")
+										.description("Contains a collection of Job Executions without step executions included/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
+						)));
 	}
 
 	@Test
 	public void listThinJobExecutionsByJobInstanceId() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/thinexecutions")
-						.param("page", "0")
-						.param("size", "10")
-						.param("jobInstanceId", "1"))
+						get("/jobs/thinexecutions")
+								.param("page", "0")
+								.param("size", "10")
+								.param("jobInstanceId", "1"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)"),
-						parameterWithName("jobInstanceId")
-								.description("Filter result by the job instance id")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionThinResourceList")
-								.description("Contains a collection of Job Executions without step executions included/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
-				)));
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("jobInstanceId")
+										.description("Filter result by the job instance id")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionThinResourceList")
+										.description("Contains a collection of Job Executions without step executions included/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
+						)));
 	}
 
 	@Test
 	public void listThinJobExecutionsByTaskExecutionId() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/thinexecutions")
-						.param("page", "0")
-						.param("size", "10")
-						.param("taskExecutionId", "1"))
+						get("/jobs/thinexecutions")
+								.param("page", "0")
+								.param("size", "10")
+								.param("taskExecutionId", "1"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)"),
-						parameterWithName("taskExecutionId")
-								.description("Filter result by the task execution id")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionThinResourceList")
-								.description("Contains a collection of Job Executions without step executions included/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
-				)));
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("taskExecutionId")
+										.description("Filter result by the task execution id")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionThinResourceList")
+										.description("Contains a collection of Job Executions without step executions included/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
+						)));
 	}
 
 	@Test
 	public void listThinJobExecutionsByDate() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/thinexecutions")
-						.param("page", "0")
-						.param("size", "10")
-						.param("fromDate", "2000-09-24T17:00:45,000")
-						.param("toDate", "2050-09-24T18:00:45,000"))
+						get("/jobs/thinexecutions")
+								.param("page", "0")
+								.param("size", "10")
+								.param("fromDate", "2000-09-24T17:00:45,000")
+								.param("toDate", "2050-09-24T18:00:45,000"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)"),
-						parameterWithName("fromDate")
-								.description("Filter result from a starting date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'"),
-						parameterWithName("toDate")
-								.description("Filter result up to the `to` date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionThinResourceList")
-								.description("Contains a collection of Job Executions without step executions included/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
-				)));
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("fromDate")
+										.description("Filter result from a starting date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'"),
+								parameterWithName("toDate")
+										.description("Filter result up to the `to` date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionThinResourceList")
+										.description("Contains a collection of Job Executions without step executions included/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
+						)));
 	}
 
 	@Test
 	public void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/executions")
-						.param("name", JOB_NAME)
-						.param("page", "0")
-						.param("size", "10"))
+						get("/jobs/executions")
+								.param("name", JOB_NAME)
+								.param("page", "0")
+								.param("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)"),
-						parameterWithName("name")
-								.description("The name associated with the job execution")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionResourceList")
-								.description("Contains a collection of Job Executions/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("name")
+										.description("The name associated with the job execution")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionResourceList")
+										.description("Contains a collection of Job Executions/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
 						)));
 	}
 
 	@Test
 	public void listThinJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/thinexecutions")
-						.param("name", JOB_NAME)
-						.param("page", "0")
-						.param("size", "10"))
+						get("/jobs/thinexecutions")
+								.param("name", JOB_NAME)
+								.param("page", "0")
+								.param("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
-						parameterWithName("page")
-								.description("The zero-based page number (optional)"),
-						parameterWithName("size")
-								.description("The requested page size (optional)"),
-						parameterWithName("name")
-								.description("The name associated with the job execution")),
-				responseFields(
-						subsectionWithPath("_embedded.jobExecutionThinResourceList")
-								.description("Contains a collection of Job Executions without step executions included/"),
-						subsectionWithPath("_links.self").description("Link to the job execution resource"),
-						subsectionWithPath("page").description("Pagination properties")
-				)));
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("name")
+										.description("The name associated with the job execution")),
+						responseFields(
+								subsectionWithPath("_embedded.jobExecutionThinResourceList")
+										.description("Contains a collection of Job Executions without step executions included/"),
+								subsectionWithPath("_links.self").description("Link to the job execution resource"),
+								subsectionWithPath("page").description("Pagination properties")
+						)));
 	}
 
 	@Test
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-			get("/jobs/executions/{id}", "2"))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(this.documentationHandler.document(
-				pathParameters(
-					parameterWithName("id").description("The id of an existing job execution (required)")
-				),
-				responseFields(
-					fieldWithPath("executionId").description("The execution ID of the job execution"),
-					fieldWithPath("stepExecutionCount").description("the number of step of the job execution"),
-					fieldWithPath("jobId").description("The job ID of the job execution"),
-					fieldWithPath("taskExecutionId").description("The task execution ID of the job execution"),
-					fieldWithPath("name").description("The name of the job execution"),
-					fieldWithPath("startDate").description("The start date of the job execution"),
-					fieldWithPath("startTime").description("The start time of the job execution"),
-					fieldWithPath("duration").description("The duration of the job execution"),
-					fieldWithPath("jobParameters").description("The parameters of the job execution"),
-					fieldWithPath("jobParametersString").description("The parameters string of the job execution"),
-					fieldWithPath("restartable").description("The status restartable of the job execution"),
-					fieldWithPath("abandonable").description("The status abandonable of the job execution"),
-					fieldWithPath("stoppable").description("The status stoppable of the job execution"),
-					fieldWithPath("defined").description("The status defined of the job execution"),
-					fieldWithPath("timeZone").description("The time zone of the job execution"),
-					subsectionWithPath("jobExecution").description("The details of the job execution"),
-					subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
-					subsectionWithPath("_links.self").description("Link to the stream definition resource"),
-					subsectionWithPath("_links.stop").description("Link to stopping the job")
+						get("/jobs/executions/{id}", "2")
+								.queryParam("schemaTarget", "boot2")
 				)
-			));
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("id").description("The id of an existing job execution (required)")
+						),
+						requestParameters(
+								parameterWithName("schemaTarget").description("Schema Target to the Job.")
+						),
+						responseFields(
+								fieldWithPath("executionId").description("The execution ID of the job execution"),
+								fieldWithPath("stepExecutionCount").description("the number of step of the job execution"),
+								fieldWithPath("jobId").description("The job ID of the job execution"),
+								fieldWithPath("taskExecutionId").description("The task execution ID of the job execution"),
+								fieldWithPath("name").description("The name of the job execution"),
+								fieldWithPath("startDate").description("The start date of the job execution"),
+								fieldWithPath("startTime").description("The start time of the job execution"),
+								fieldWithPath("duration").description("The duration of the job execution"),
+								fieldWithPath("jobParameters").description("The parameters of the job execution"),
+								fieldWithPath("jobParametersString").description("The parameters string of the job execution"),
+								fieldWithPath("restartable").description("The status restartable of the job execution"),
+								fieldWithPath("abandonable").description("The status abandonable of the job execution"),
+								fieldWithPath("stoppable").description("The status stoppable of the job execution"),
+								fieldWithPath("defined").description("The status defined of the job execution"),
+								fieldWithPath("timeZone").description("The time zone of the job execution"),
+								fieldWithPath("schemaTarget").description("The schema target of the job execution"),
+								subsectionWithPath("jobExecution").description("The details of the job execution"),
+								subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
+								subsectionWithPath("_links.self").description("Link to the stream definition resource"),
+								subsectionWithPath("_links.stop").description("Link to stopping the job"),
+								subsectionWithPath("_links.restart").description("Link to restarting the job")
+						)
+				));
 	}
 
 	@Test
 	public void jobStop() throws Exception {
-		this.mockMvc.perform(put("/jobs/executions/{id}", "1").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
+		this.mockMvc.perform(put("/jobs/executions/{id}", "1")
+						.param("stop", "true")
+						.queryParam("schemaTarget", "boot2")
+				)
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("id")
 								.description("The id of an existing job execution (required)"))
 						, requestParameters(
+								parameterWithName("schemaTarget").description("The schema target of the job execution"),
 								parameterWithName("stop")
 										.description("Sends signal to stop the job if set to true"))));
 	}
 
 	@Test
 	public void jobRestart() throws Exception {
-		this.mockMvc.perform(put("/jobs/executions/{id}", "2").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
+		this.mockMvc.perform(put("/jobs/executions/{id}", "2")
+						.param("restart", "true")
+						.queryParam("schemaTarget", "boot2")
+				)
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)"))
-						, requestParameters(
-								parameterWithName("restart")
-										.description("Sends signal to restart the job if set to true"))));
+								pathParameters(parameterWithName("id")
+										.description("The id of an existing job execution (required)"))
+								, requestParameters(
+										parameterWithName("schemaTarget").description("The schema target of the job execution"),
+										parameterWithName("restart")
+												.description("Sends signal to restart the job if set to true")
+								)
+						)
+				);
 	}
 
 	private void initialize() throws Exception {

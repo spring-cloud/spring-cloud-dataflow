@@ -54,8 +54,10 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
-
+		executeTask("taskA");
+		executeTask("taskB");
 	}
+
 
 	@After
 	public void tearDown() throws Exception {
@@ -251,13 +253,17 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
 		this.mockMvc.perform(
-						delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
+						delete("/tasks/executions/{ids}?schemaTarget=boot2&action=CLEANUP,REMOVE_DATA", "1,2"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously.")),
+						requestParameters(
+								parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously."),
+								parameterWithName("schemaTarget").description("Schema Target for Task.")
+						),
 						pathParameters(parameterWithName("ids")
-								.description("Providing 2 comma separated task execution id values."))
+								.description("Providing 2 comma separated task execution id values.")
+						)
 				));
 
 	}
@@ -274,5 +280,15 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						delete("/tasks/definitions/{name}", taskName))
 				.andExpect(status().isOk()));
+	}
+
+	private void executeTask(String taskName) throws Exception {
+		documentation.dontDocument(() ->
+				this.mockMvc.perform(
+						post("/tasks/executions")
+								.param("name", taskName)
+								.param("arguments", "--server.port=8080 --foo=bar")
+				).andExpect(status().isCreated())
+		);
 	}
 }
