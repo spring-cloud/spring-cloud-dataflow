@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.configuration;
 
 
-
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -657,6 +657,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				aggregateExecutionSupport,
 				composedTaskRunnerConfigurationProperties);
 	}
+
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,

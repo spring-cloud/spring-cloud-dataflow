@@ -69,7 +69,7 @@ public class SkipperServerPlatformConfigurationTests {
 
 		@Test
 		public void allPlatformsConfiguredTest() {
-			assertThat(platforms).extracting("name").containsExactly("Local", "Test");
+			assertThat(platforms).extracting("name").containsExactlyInAnyOrder("Local", "Test");
 		}
 	}
 

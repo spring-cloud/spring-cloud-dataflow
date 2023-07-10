@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,10 +36,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -52,21 +56,17 @@ import org.springframework.cloud.dataflow.core.dsl.visitor.ComposedTaskRunnerVis
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionMissingExternalIdException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -322,7 +322,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @return the task execution ID.
 	 */
 	@Override
-	public AggregateTaskExecution executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
+	public LaunchResponse executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs) {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
 		String platformType = StreamSupport.stream(launcherRepository.findAll().spliterator(), true)
@@ -412,7 +412,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
 				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(names.get(0), taskDefinitionReader);
 				logger.debug("ctr:appName:{}:{}={}", taskName, names, appSchemaTarget.getName());
-				for(String name : names) {
+				for (String name : names) {
 					addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + name + ".", deploymentProperties);
 					addPrefixProperties(appSchemaTarget, "app." + name + ".", deploymentProperties);
 					// addPrefixCommandLineArgs(appSchemaTarget, "app." + name + ".", commandLineArguments);
@@ -496,20 +496,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 						request.getCommandlineArguments()
 				), platformName);
 
-		return new AggregateTaskExecution(
-				taskExecution.getExecutionId(),
-				taskExecution.getExitCode(),
-				taskExecution.getTaskName(),
-				taskExecution.getStartTime(),
-				taskExecution.getEndTime(),
-				taskExecution.getExitMessage(),
-				taskExecution.getArguments(),
-				taskExecution.getErrorMessage(),
-				taskExecution.getExternalExecutionId(),
-				taskExecution.getParentExecutionId(),
-				taskDeployment.getPlatformName(),
-				schemaVersionTarget.getName()
-		);
+		return new LaunchResponse(taskExecution.getExecutionId(), schemaVersionTarget.getName());
 	}
 
 	private static void addProperty(String property, String value, Map<String, String> properties) {

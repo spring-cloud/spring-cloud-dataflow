@@ -13,25 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
+package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
-
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.Db2Container;
 
 
 /**
- * Basic database schema and JPA tests for MS SQL Server.
+ * Basic database schema and JPA tests for DB2.
  *
  * @author Corneil du Plessis
  */
-public class SqlServerSmokeTest extends AbstractSmokeTest {
+public class DB2SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MSSQLServerContainer<>(DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag(MSSQLServerContainer.DEFAULT_TAG)).acceptLicense();
+		container = new Db2Container().acceptLicense();
 		container.start();
 	}
 }

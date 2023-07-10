@@ -49,11 +49,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -462,9 +465,11 @@ public class TaskLauncherTaskletTests {
 		StepContext stepContext = new StepContext(stepExecution);
 		return new ChunkContext(stepContext);
 	}
-
 	private void mockReturnValForTaskExecution(long executionId) {
-		Mockito.doReturn(executionId)
+		mockReturnValForTaskExecution(executionId, SchemaVersionTarget.defaultTarget().getName());
+	}
+	private void mockReturnValForTaskExecution(long executionId, String schemaTarget) {
+		Mockito.doReturn(new LaunchResponseResource(executionId, schemaTarget))
 				.when(this.taskOperations)
 				.launch(ArgumentMatchers.anyString(),
 						ArgumentMatchers.any(),

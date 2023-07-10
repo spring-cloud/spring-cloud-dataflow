@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
@@ -67,7 +68,6 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -223,7 +223,7 @@ public class TaskExecutionController {
 	) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
-		AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
+		LaunchResponse taskExecution = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 
 		return this.launcherResponseAssembler.toModel(taskExecution);
 	}
@@ -443,18 +443,15 @@ public class TaskExecutionController {
 			return taskExecutionsInfoResource;
 		}
 	}
-	private static class LaunchResponseAssembler extends RepresentationModelAssemblerSupport<AggregateTaskExecution, LaunchResponseResource> {
+	private static class LaunchResponseAssembler extends RepresentationModelAssemblerSupport<LaunchResponse, LaunchResponseResource> {
 		public LaunchResponseAssembler() {
 			super(TaskExecutionController.class, LaunchResponseResource.class);
 		}
 
 		@Override
-		public LaunchResponseResource toModel(AggregateTaskExecution entity) {
+		public LaunchResponseResource toModel(LaunchResponse entity) {
 			LaunchResponseResource resource = new LaunchResponseResource(entity.getExecutionId(), entity.getSchemaTarget());
 			resource.add(linkTo(methodOn(TaskExecutionController.class).view(entity.getExecutionId(), entity.getSchemaTarget())).withSelfRel());
-			if(StringUtils.hasText(entity.getPlatformName())) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(entity.getExternalExecutionId(), entity.getPlatformName(), resource.getSchemaTarget())).withRel("tasks/logs"));
-			}
 			return resource;
 		}
 	}

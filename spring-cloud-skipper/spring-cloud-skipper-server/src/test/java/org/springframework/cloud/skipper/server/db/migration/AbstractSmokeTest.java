@@ -13,32 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
+package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
-import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
+import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
+import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
+import org.springframework.cloud.skipper.server.EnableSkipperServer;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Provides for testing some basic database schema and JPA tests to catch potential issues with specific databases early.
  *
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = {DataFlowServerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("local")
 public abstract class AbstractSmokeTest {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
+
 	protected static JdbcDatabaseContainer<?> container;
+
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", container::getJdbcUrl);
@@ -46,21 +52,22 @@ public abstract class AbstractSmokeTest {
 		registry.add("spring.datasource.password", container::getPassword);
 		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
 	}
-	@Autowired
-	SchemaService schemaService;
-
-	@Autowired
-	TaskRepositoryContainer taskRepositoryContainer;
-
-	@Autowired
-	protected AggregateTaskExplorer taskExplorer;
 
 	@Test
-	public void testTaskCreation() {
-		for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
-			taskRepository.createTaskExecution(schemaVersionTarget.getName() + "_test_task");
+	public void testStart() {
+		logger.info("started:{}", getClass().getSimpleName());
+	}
+
+	@SpringBootApplication(exclude = {CloudFoundryDeployerAutoConfiguration.class,
+			LocalDeployerAutoConfiguration.class,
+			KubernetesAutoConfiguration.class,
+			SessionAutoConfiguration.class,
+			CommonSecurityAutoConfiguration.class
+	})
+	@EnableSkipperServer
+	public static class LocalTestSkipperServer {
+		public static void main(String[] args) {
+			SpringApplication.run(LocalTestSkipperServer.class, args);
 		}
-		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(2);
 	}
 }

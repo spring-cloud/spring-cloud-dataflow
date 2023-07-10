@@ -43,12 +43,12 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
@@ -186,7 +186,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@DirtiesContext
 	public void executeSingleTaskTransactionTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
-		AggregateTaskExecution taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		LaunchResponse taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		assertEquals(1L, taskExecution.getExecutionId());
 		assertEquals("boot2", taskExecution.getSchemaTarget());
 	}

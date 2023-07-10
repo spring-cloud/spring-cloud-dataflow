@@ -29,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -53,6 +52,7 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Base64Utils;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
@@ -60,7 +60,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
@@ -315,10 +314,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(argument.capture())).thenReturn("0");
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("spring.cloud.dataflow.task.platformName", K8_PLATFORM);
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			AppDeploymentRequest appDeploymentRequest = argument.getValue();
 			assertThat(appDeploymentRequest.getDefinition().getProperties().containsKey("spring.datasource.username")).isFalse();
+			AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
 			assertThat(taskDeployment).isNotNull();
 			assertEquals("0", taskDeployment.getTaskDeploymentId());
@@ -415,12 +415,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			Map<String, String> properties = new HashMap<>(1);
 			properties.put("app.demo.foo", "bar");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
-			long firstTaskExecutionId = taskExecution.getExecutionId();
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(taskExecution.getSchemaTarget());
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			long firstTaskExecutionId = launchResponse.getExecutionId();
+			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(taskExecution.getSchemaTarget());
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -441,11 +441,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> properties = new HashMap<>(1);
 			properties.put("version.timestamp", "1.0.1");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
-			long firstTaskExecutionId = taskExecution.getExecutionId();
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(taskExecution.getSchemaTarget());
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
+			long firstTaskExecutionId = launchResponse.getExecutionId();
+			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(taskExecution.getSchemaTarget());
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -466,11 +466,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> properties = new HashMap<>(1);
 			properties.put("version.timestamp", "1.0.1");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
-			long firstTaskExecutionId = taskExecution.getExecutionId();
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(taskExecution.getSchemaTarget());
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
+			long firstTaskExecutionId = launchResponse.getExecutionId();
+			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(taskExecution.getSchemaTarget());
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -479,12 +479,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
 
 			properties.clear();
-			AggregateTaskExecution taskExecution2 = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
-			long secondTaskExecutionId = taskExecution2.getExecutionId();
+			LaunchResponse launchResponse2 = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
+			long secondTaskExecutionId = launchResponse2.getExecutionId();
 
-			taskRepository = taskRepositoryContainer.get(taskExecution2.getSchemaTarget());
+			taskRepository = taskRepositoryContainer.get(launchResponse2.getSchemaTarget());
 			taskRepository.completeTaskExecution(secondTaskExecutionId, 0, new Date(), "all done");
-			dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(taskExecution2.getSchemaTarget());
+			dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse2.getSchemaTarget());
 			lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 			// without passing version, we should not get back to default app, in this case foo-task100
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -505,8 +505,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> properties = new HashMap<>(1);
 			properties.put("version.l1", "1.0.1");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("t2", properties, new LinkedList<>());
-			long firstTaskExecutionId = taskExecution.getExecutionId();
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("t2", properties, new LinkedList<>());
+			long firstTaskExecutionId = launchResponse.getExecutionId();
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("t2", taskDefinitionReader);
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
@@ -531,12 +531,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> properties = new HashMap<>(1);
 			properties.put("deployer.demo.memory", "100000g");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
-			long firstTaskExecutionId = taskExecution.getExecutionId();
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(taskExecution.getSchemaTarget());
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
+			long firstTaskExecutionId = launchResponse.getExecutionId();
+			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
-			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(taskExecution.getSchemaTarget());
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -636,8 +636,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> deploymentProperties = new HashMap<>(1);
 			deploymentProperties.put("deployer.demo.memory", "10000g");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
-			long taskExecutionId = taskExecution.getExecutionId();
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
+			long taskExecutionId = launchResponse.getExecutionId();
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.findManifestById(taskExecutionId);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
@@ -765,14 +765,14 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> deploymentProperties = new HashMap<>(1);
 			deploymentProperties.put("app.demo.foo", "bar");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
-			assertThat(taskExecution.getSchemaTarget()).isEqualTo(schemaVersionTarget.getName());
-			long taskExecutionId = taskExecution.getExecutionId();
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>());
+			assertThat(launchResponse.getSchemaTarget()).isEqualTo(schemaVersionTarget.getName());
+			long taskExecutionId = launchResponse.getExecutionId();
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.findManifestById(taskExecutionId);
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(7, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
+			assertEquals(9, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
 		}
 
@@ -844,8 +844,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeSingleTaskTest(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertEquals(1L, taskExecution.getExecutionId());
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertEquals(1L, launchResponse.getExecutionId());
+			AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
 			assertThat(taskDeployment).isNotNull();
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
@@ -864,8 +865,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(any())).thenReturn("0");
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("app.demo.format", "yyyy");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, taskDeploymentProperties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
+			AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
 			assertThat(taskDeployment).isNotNull();
 			assertEquals(TASK_NAME_ORIG, taskDeployment.getTaskDefinitionName());
@@ -886,9 +888,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			Map<String, String> taskDeploymentProperties = new HashMap<>();
 			taskDeploymentProperties.put("app.l2.format", "yyyy");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG2, taskDeploymentProperties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
-
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG2, taskDeploymentProperties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
+			AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(launchResponse.getExecutionId(), launchResponse.getSchemaTarget());
 			TaskDeployment taskDeployment = taskDeploymentRepository.findByTaskDeploymentId(taskExecution.getExternalExecutionId());
 			assertThat(taskDeployment).isNotNull();
 			assertEquals(TASK_NAME_ORIG2, taskDeployment.getTaskDefinitionName());
@@ -904,8 +906,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeStopTaskTest(CapturedOutput outputCapture) {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 			assertThat(schemaVersionTarget).isNotNull();
 			Set<Long> executionIds = new HashSet<>(1);
@@ -922,8 +924,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(any())).thenReturn("0");
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
-			AggregateTaskExecution taskExecution1 = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution1.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", 1L);
 			taskRepository.createTaskExecution(taskExecution);
 			Set<Long> executionIds = new HashSet<>(1);
@@ -939,15 +941,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
 
-			AggregateTaskExecution taskExecution1 = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution1.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", null);
-			TaskRepository taskRepository = taskRepositoryContainer.get(taskExecution1.getSchemaTarget());
+			TaskRepository taskRepository = taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.createTaskExecution(taskExecution);
 			Set<Long> executionIds = new HashSet<>(1);
 			executionIds.add(2L);
 			assertThatThrownBy(() -> {
-				taskExecutionService.stopTaskExecution(executionIds, taskExecution1.getSchemaTarget());
+				taskExecutionService.stopTaskExecution(executionIds, launchResponse.getSchemaTarget());
 			}).isInstanceOf(TaskExecutionException.class).hasMessageContaining("No platform could be found for task execution id 2");
 		}
 
@@ -958,11 +960,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.delete(this.launcherRepository.findByName("default"));
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
-			AggregateTaskExecution taskExecution1 = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution1.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			Set<Long> executionIds = new HashSet<>(1);
 			executionIds.add(1L);
-			taskExecutionService.stopTaskExecution(executionIds, taskExecution1.getSchemaTarget(), "MyPlatform");
+			taskExecutionService.stopTaskExecution(executionIds, launchResponse.getSchemaTarget(), "MyPlatform");
 			String logEntries = outputCapture.toString();
 			assertThat(logEntries).contains("Task execution stop request for id 1 for platform MyPlatform has been submitted");
 		}
@@ -972,13 +974,13 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeStopTaskWithNoChildExternalIdTest() {
 			initializeSuccessfulRegistry(this.appRegistry);
 			when(this.taskLauncher.launch(any())).thenReturn("0");
-			AggregateTaskExecution taskExecution1 = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution1.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(taskExecution1.getSchemaTarget());
+			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			TaskExecution taskExecution = taskRepository.createTaskExecution();
 			taskRepository.startTaskExecution(taskExecution.getExecutionId(), "invalidChildTaskExecution", new Date(), Collections.emptyList(), null, 1L);
-			validateFailedTaskStop(2, taskExecution1.getSchemaTarget());
+			validateFailedTaskStop(2, launchResponse.getSchemaTarget());
 		}
 
 		@Test
@@ -1005,12 +1007,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertThatThrownBy(() -> {
 				initializeSuccessfulRegistry(appRegistry);
 				when(taskLauncher.launch(any())).thenReturn("0");
-				AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-				assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+				LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+				assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 				Set<Long> executionIds = new HashSet<>(2);
 				executionIds.add(1L);
 				executionIds.add(5L);
-				taskExecutionService.stopTaskExecution(executionIds, taskExecution.getSchemaTarget());
+				taskExecutionService.stopTaskExecution(executionIds, launchResponse.getSchemaTarget());
 			}).isInstanceOf(NoSuchTaskExecutionException.class);
 		}
 
@@ -1019,10 +1021,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void executeMultipleTasksTest() {
 			initializeSuccessfulRegistry(appRegistry);
 			when(taskLauncher.launch(any())).thenReturn("0");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
-			taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(2L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
+			launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(2L);
 		}
 
 		@Test
@@ -1117,8 +1119,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			}
 			when(taskLauncher.launch(any())).thenReturn("0");
 
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			Map<String, String> deploymentProperties = new HashMap<>();
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, "anotherPlatform");
 			assertThatThrownBy(() -> this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, new LinkedList<>())).isInstanceOf(IllegalStateException.class).hasMessageContaining("Task definition [" + TASK_NAME_ORIG + "] has already been deployed on platform [default].  Requested to deploy on platform [anotherPlatform].");
@@ -1397,8 +1399,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			}
 			properties.put("version.t1", "1.0.0");
 			properties.put("version.t2", "1.0.1");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 			return argumentCaptor.getValue();
@@ -1434,8 +1436,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
 			properties.put("deployer.seqTask.AAA.memory", "1240m");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 			return argumentCaptor.getValue();
@@ -1546,8 +1548,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
 			properties.put("deployer.seqTask.AAA.memory", "1240m");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1588,8 +1590,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			properties.put("app.seqTask.AAA.timestamp.format", "YYYY");
 			properties.put("deployer.seqTask.AAA.memory", "1240m");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1630,8 +1632,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.t1.timestamp.format", "YYYY");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("transitionTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("transitionTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1653,8 +1655,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			Map<String, String> properties = new HashMap<>();
 			properties.put("app.seqTask.t1.timestamp.format", "YYYY");
 			properties.put("app.composed-task-runner.interval-time-between-checks", "1000");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1680,8 +1682,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			List<String> arguments = new ArrayList<>();
 			arguments.add("app.t1.0=foo1");
 			arguments.add("app.*.0=foo2");
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, arguments);
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, arguments);
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 			ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
@@ -1747,8 +1749,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncher.launch(any())).thenReturn("0");
 			when(appRegistry.appExist(anyString(), any(ApplicationType.class))).thenReturn(true);
 			Map<String, String> properties = new HashMap<>();
-			AggregateTaskExecution taskExecution = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
-			assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+			LaunchResponse launchResponse = this.taskExecutionService.executeTask("seqTask", properties, new LinkedList<>());
+			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 
 			initializeSuccessfulRegistry(appRegistry);
 			dsl = "<AAA||BBB||CCC>&&<AAA1||BBB1||CCC1||DDD1 --foo=bar||DDD2||DDD3||DDD4||DDD5||DDD6||" + "DDD7||DDD8||DDD9||DDD10||DDD11||DDD12||DDD13||DDD14||DDD15||DDD16||" + "DDD17||DDD18>&&<AAA2||BBB2>";
@@ -1942,8 +1944,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 	}
 
 	static AppDeploymentRequest getAppDeploymentRequestForToken(Map<String, String> taskDeploymentProperties, List<String> commandLineArgs, TaskExecutionService taskExecutionService, TaskLauncher taskLauncher) {
-		AggregateTaskExecution taskExecution = taskExecutionService.executeTask("seqTask", taskDeploymentProperties, commandLineArgs);
-		assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
+		LaunchResponse launchResponse = taskExecutionService.executeTask("seqTask", taskDeploymentProperties, commandLineArgs);
+		assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(taskLauncher, atLeast(1)).launch(argumentCaptor.capture());

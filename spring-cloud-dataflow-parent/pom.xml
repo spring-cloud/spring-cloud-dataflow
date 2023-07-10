@@ -11,8 +11,8 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-		<spring-boot.version>2.7.12</spring-boot.version>
-		<spring.version>5.3.27</spring.version>
+		<spring-boot.version>2.7.13</spring-boot.version>
+		<spring.version>5.3.28</spring.version>
 		<spring-cloud-dataflow-ui.version>3.3.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<dataflow.version>2.11.0-SNAPSHOT</dataflow.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
@@ -21,7 +21,7 @@
 		<spring-cloud-deployer-cloudfoundry.version>2.9.0-SNAPSHOT</spring-cloud-deployer-cloudfoundry.version>
 		<spring-cloud-deployer-kubernetes.version>2.9.0-SNAPSHOT</spring-cloud-deployer-kubernetes.version>
 		<spring-cloud-skipper.version>2.11.0-SNAPSHOT</spring-cloud-skipper.version>
-		<spring-cloud-task.version>2.4.5</spring-cloud-task.version>
+		<spring-cloud-task.version>2.4.6</spring-cloud-task.version>
 		<spring-cloud-common-security-config.version>${dataflow.version}</spring-cloud-common-security-config.version>
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
@@ -36,13 +36,13 @@
 		<aws-java-sdk-ecr.version>1.11.731</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.17.5</testcontainers.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
-		<stream-applications.version>3.0.2</stream-applications.version>
-		<wavefront-spring-boot-bom.version>2.2.0</wavefront-spring-boot-bom.version>
+		<stream-applications.version>4.0.0-SNAPSHOT</stream-applications.version>
+		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.7</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
-		<spring-security.version>5.7.7</spring-security.version>
+		<spring-security.version>5.7.9</spring-security.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

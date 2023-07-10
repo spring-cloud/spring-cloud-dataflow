@@ -15,10 +15,10 @@
  */
 package org.springframework.cloud.skipper.server;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
+import org.awaitility.Awaitility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,45 +26,25 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.InstallProperties;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 public abstract class AbstractAssertReleaseDeployedTest {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	protected void assertReleaseIsDeployedSuccessfully(String releaseName, int releaseVersion)
-			throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(1);
-		long startTime = System.currentTimeMillis();
-		while (!isDeployed(releaseName, releaseVersion)) {
-			if ((System.currentTimeMillis() - startTime) > 180000) {
-				logger.info("Stopping polling for deployed status after 3 minutes for release={} version={}",
-						releaseName, releaseVersion);
-				fail("Could not determine if release " + releaseName + "-v" + releaseVersion +
-						" was deployed successfully, timed out polling after 3 minutes.");
-			}
-			Thread.sleep(10000);
-		}
-		if (isDeployed(releaseName, releaseVersion)) {
-			logger.info("Deployed! release={} version={}", releaseName, releaseVersion);
-			latch.countDown();
-		}
-		assertThat(latch.await(1, TimeUnit.SECONDS)).describedAs("Status check timed out").isTrue();
+	protected void assertReleaseIsDeployedSuccessfully(String releaseName, int releaseVersion) {
+		logger.info("Awaiting release={} version={}", releaseName, releaseVersion);
+		Awaitility.await("Release " + releaseName + "-v" + releaseVersion)
+				.atMost(Duration.ofMinutes(5))
+				.pollInterval(Duration.ofSeconds(10))
+				.until(() -> isDeployed(releaseName, releaseVersion));
 	}
 
 	protected boolean allAppsDeployed(List<AppStatus> appStatusList) {
-		boolean allDeployed = true;
-		for (AppStatus appStatus : appStatusList) {
-			if (appStatus.getState() != DeploymentState.deployed) {
-				allDeployed = false;
-				break;
-			}
-		}
-		return allDeployed;
+		return appStatusList.stream()
+				.allMatch(appStatus -> appStatus.getState() == DeploymentState.deployed);
 	}
 
 	protected abstract boolean isDeployed(String releaseName, int releaseVersion);
