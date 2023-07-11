@@ -559,7 +559,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private TaskJobExecution createJobExecutionFromResultSet(ResultSet rs, int row, boolean readStepCount) throws SQLException {
-		long id = rs.getLong("JOB_EXECUTION_ID");
+		long id = rs.getLong("TASK_EXECUTION_ID");
 
 		JobExecution jobExecution;
 		String schemaTarget = rs.getString("SCHEMA_TARGET");
