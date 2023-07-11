@@ -211,7 +211,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void stop(String ids, String schemaTarget) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if(schemaTarget != null) {
+		if(StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
@@ -221,7 +221,7 @@ public class TaskTemplate implements TaskOperations {
 	public void stop(String ids, String schemaTarget, String platform) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("platform", platform);
-		if(schemaTarget != null) {
+		if(StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
@@ -258,7 +258,7 @@ public class TaskTemplate implements TaskOperations {
 	public TaskExecutionResource taskExecutionStatus(long id, String schemaTarget) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("id", id);
-		if(schemaTarget != null) {
+		if(StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		String url = executionLink.expand(values).getHref();
@@ -295,7 +295,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void cleanup(long id, String schemaTarget, boolean removeData) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if(schemaTarget != null) {
+		if(StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		String uriTemplate = executionLink.expand(id).getHref();

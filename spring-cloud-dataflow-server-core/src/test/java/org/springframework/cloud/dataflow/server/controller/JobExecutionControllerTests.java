@@ -154,7 +154,9 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testStopStartedJobExecutionWithInvalidSchema() throws Exception {
-		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true").param("schemaTarget", "foo"))
+		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON)
+						.param("stop", "true")
+						.queryParam("schemaTarget", "foo"))
 				.andDo(print())
 				.andExpect(status().is4xxClientError());
 	}

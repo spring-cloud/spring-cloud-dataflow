@@ -116,6 +116,9 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 					pathParameters(
 						parameterWithName("id").description("The id of an existing job instance (required)")
 					),
+					requestParameters(
+							parameterWithName("schemaTarget").description("Schema target").optional()
+					),
 					responseFields(
 						fieldWithPath("jobName").description("The name of the job instance"),
 						fieldWithPath("jobInstanceId").description("The ID of the job instance"),

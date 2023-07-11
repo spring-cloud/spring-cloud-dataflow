@@ -120,12 +120,15 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void stepDetail() throws Exception {
 		this.mockMvc.perform(
-						get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
+						get("/jobs/executions/{id}/steps/{stepid}", "1", "1").queryParam("schemaTarget", "boot2"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing job execution (required)"),
 								parameterWithName("stepid")
 										.description("The id of an existing step execution for a specific job execution (required)")
+						),
+						requestParameters(
+								parameterWithName("schemaTarget").description("Schema target").optional()
 						),
 						responseFields(
 								fieldWithPath("jobExecutionId").description("The ID of the job step execution"),

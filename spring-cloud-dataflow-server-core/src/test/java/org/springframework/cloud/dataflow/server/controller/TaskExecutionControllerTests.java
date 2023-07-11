@@ -381,7 +381,7 @@ public class TaskExecutionControllerTests {
 		when(taskLauncher.launch(any())).thenReturn("abc");
 
 		ResultActions resultActions = mockMvc.perform(
-						post("/tasks/executions")
+						post("/tasks/executions/launch")
 								.queryParam("name", "timestamp3")
 								.queryParam("properties","app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
 								.accept(MediaType.APPLICATION_JSON)
@@ -415,6 +415,24 @@ public class TaskExecutionControllerTests {
 		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
 		assertThat(deploymentProperties.hasNonNull("app.timestamp3.spring.cloud.task.tablePrefix")).isTrue();
 		assertThat(deploymentProperties.get("app.timestamp3.spring.cloud.task.tablePrefix").asText()).isEqualTo("BOOT3_TASK_");
+	}
+	@Test
+	public void testInvalidBoot3Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp3", ApplicationType.task, "3.0.0", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT3);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions")
+								.queryParam("name", "timestamp3")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isBadRequest());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		assertThat(response).contains("cannot be launched for");
 	}
 	@Test
 	public void testBoot2Execution() throws Exception {

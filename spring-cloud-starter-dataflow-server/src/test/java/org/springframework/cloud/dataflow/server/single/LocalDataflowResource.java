@@ -175,9 +175,19 @@ public class LocalDataflowResource extends ExternalResource {
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
 		LauncherRepository launcherRepository = configurableApplicationContext.getBean(LauncherRepository.class);
-		if(launcherRepository.findByName("default") == null) {
-			launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new LocalTaskLauncher(new LocalDeployerProperties())));
+		Launcher launcher = launcherRepository.findByName("default");
+		LocalDeployerProperties properties = new LocalDeployerProperties();
+		properties.setMaximumConcurrentTasks(50);
+		if(launcher == null) {
+
+			launcher = new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new LocalTaskLauncher(properties));
+			launcherRepository.save(launcher);
 		}
+		if(launcher.getType().equals(TaskPlatformFactory.LOCAL_PLATFORM_TYPE)) {
+			launcher.setTaskLauncher(new LocalTaskLauncher(properties));
+		}
+		int maximumConcurrentTasks = launcher.getTaskLauncher().getMaximumConcurrentTasks();
+		logger.info("launcher:{}:maximumConcurrentTasks={}", launcher.getName(), maximumConcurrentTasks);
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
 				.addFilters(filters.toArray(new Filter[0])).build();

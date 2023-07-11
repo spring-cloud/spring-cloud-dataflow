@@ -109,7 +109,7 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public String executionRestart(
 			@ShellOption(help = "the job execution id") long id,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
 	) {
 		jobOperations().executionRestart(id, schemaTarget);
 		return String.format("Restart request has been sent for job execution '%s', schema target '%s'", id, schemaTarget);
@@ -119,7 +119,7 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table executionDisplay(
 			@ShellOption(help = "the job execution id") long id,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
 	) {
 
 		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id, schemaTarget);
@@ -171,7 +171,7 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table instanceDisplay(
 			@ShellOption(help = "the job instance id") long id,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
 	) {
 
 		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id, schemaTarget);
@@ -198,7 +198,7 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table stepExecutionList(
 			@ShellOption(help = "the job execution id to be used as a filter") long id,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
 	) {
 
 		final PagedModel<StepExecutionResource> steps = jobOperations().stepExecutionList(id, schemaTarget);
@@ -225,7 +225,7 @@ public class JobCommands {
 	public Table stepProgressDisplay(
 			@ShellOption(help = "the step execution id") long id,
 			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget) {
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget) {
 
 		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(
 				jobExecutionId,
@@ -251,7 +251,7 @@ public class JobCommands {
 	public Table stepExecutionDisplay(
 			@ShellOption(help = "the step execution id") long id,
 			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId,
-			@ShellOption(value = "--schemaTarget", help = "schema target") String schemaTarget
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
 	) {
 
 		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(

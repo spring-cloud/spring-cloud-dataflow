@@ -1869,17 +1869,16 @@ The following topics provide more details:
 
 
 [[api-guide-resources-task-executions-launching]]
-==== Launching a Task
+==== Launching a Task (Legacy)
 
-Launching a task is done by requesting the creation of a new task execution.
+Launching a task is done by requesting the creation of a new task execution. This endpoint will fail if the task is registered as a Spring Boot 3 application.
+
 The following topics provide more details:
 
 * <<api-guide-resources-task-executions-launching-request-structure>>
 * <<api-guide-resources-task-executions-launching-request-parameters>>
 * <<api-guide-resources-task-executions-launching-example-request>>
 * <<api-guide-resources-task-executions-launching-response-structure>>
-
-
 
 [[api-guide-resources-task-executions-launching-request-structure]]
 ===== Request Structure
@@ -1905,6 +1904,45 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 ===== Response Structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
+
+[[api-guide-resources-task-executions-launching-boot3]]
+==== Launching a Task
+
+Launching a task is done by requesting the creation of a new task execution. The response will contain an execution id and a schema target.
+
+The following topics provide more details:
+
+* <<api-guide-resources-task-executions-launching-boot3-request-structure>>
+* <<api-guide-resources-task-executions-launching-boot3-request-parameters>>
+* <<api-guide-resources-task-executions-launching-boot3-example-request>>
+* <<api-guide-resources-task-executions-launching-boot3-response-structure>>
+
+
+[[api-guide-resources-task-executions-launching-boot3-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-executions-launching-boot3-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-executions-launching-boot3-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/curl-request.adoc[]
+
+
+[[api-guide-resources-task-executions-launching-boot3-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/http-response.adoc[]
+
 
 [[api-guide-resources-task-executions-stopping]]
 ==== Stopping a Task

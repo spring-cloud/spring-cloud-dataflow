@@ -298,7 +298,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								parameterWithName("id").description("The id of an existing job execution (required)")
 						),
 						requestParameters(
-								parameterWithName("schemaTarget").description("Schema Target to the Job.")
+								parameterWithName("schemaTarget").description("Schema Target to the Job.").optional()
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The execution ID of the job execution"),
@@ -338,7 +338,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						pathParameters(parameterWithName("id")
 								.description("The id of an existing job execution (required)"))
 						, requestParameters(
-								parameterWithName("schemaTarget").description("The schema target of the job execution"),
+								parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
 								parameterWithName("stop")
 										.description("Sends signal to stop the job if set to true"))));
 	}
@@ -355,7 +355,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								pathParameters(parameterWithName("id")
 										.description("The id of an existing job execution (required)"))
 								, requestParameters(
-										parameterWithName("schemaTarget").description("The schema target of the job execution"),
+										parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
 										parameterWithName("restart")
 												.description("Sends signal to restart the job if set to true")
 								)

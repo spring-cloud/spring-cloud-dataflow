@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -111,10 +113,11 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public JobExecutionResource view(
-			@PathVariable("id") long id,
-			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
-	) throws NoSuchJobExecutionException {
+	public JobExecutionResource view(@PathVariable("id") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget) throws NoSuchJobExecutionException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		TaskJobExecution jobExecution = taskJobService.getJobExecution(id, schemaTarget);
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits for schema target %s", id, schemaTarget));

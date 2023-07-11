@@ -63,11 +63,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -216,16 +218,33 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
-	public LaunchResponseResource launch(
+	public long launch(
 			@RequestParam("name") String taskName,
 			@RequestParam(required = false) String properties,
 			@RequestParam(required = false) String arguments
 	) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
+		if(!schemaVersionTarget.equals(SchemaVersionTarget.defaultTarget())) {
+			Link link = linkTo(methodOn(TaskExecutionController.class).launchBoot3(taskName, properties, arguments)).withRel("launch");
+			throw new ApiNotSupportedException(String.format("Task: %s cannot be launched for %s. Use %s", taskName, SchemaVersionTarget.defaultTarget().getName(), link.getHref()));
+		}
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
-		LaunchResponse taskExecution = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
-
-		return this.launcherResponseAssembler.toModel(taskExecution);
+		LaunchResponse launchResponse = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
+		return launchResponse.getExecutionId();
+	}
+	@RequestMapping(value = "/launch", method = RequestMethod.POST, params = "name")
+	@ResponseStatus(HttpStatus.CREATED)
+	public LaunchResponseResource launchBoot3(
+			@RequestParam("name") String taskName,
+			@RequestParam(required = false) String properties,
+			@RequestParam(required = false) String arguments
+	) {
+		// TODO update docs and root
+		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
+		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
+		LaunchResponse launchResponse = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
+		return this.launcherResponseAssembler.toModel(launchResponse);
 	}
 
 	/**
@@ -234,12 +253,14 @@ public class TaskExecutionController {
 	 * @param id the id of the requested {@link TaskExecution}
 	 * @return the {@link TaskExecution}
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, params = "schemaTarget")
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(
-			@PathVariable("id") Long id,
-			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
-	) {
+			@PathVariable(name = "id") Long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget) {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		AggregateTaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecution(id, schemaTarget));
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);

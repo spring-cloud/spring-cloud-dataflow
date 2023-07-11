@@ -31,9 +31,9 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
@@ -41,6 +41,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -109,6 +110,9 @@ public class JobInstanceController {
 			@PathVariable("id") long id,
 			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
 	) throws NoSuchJobInstanceException, NoSuchJobException {
+		if (!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
 		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
 		if (jobInstance == null) {
 			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d' and schema target '%s'", id, schemaTarget));
