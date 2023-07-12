@@ -1,0 +1,37 @@
+= Spring Boot 3.x Support
+
+== Stream Applications
+Spring Cloud Data Flow supports both Spring Boot `2.x` and `3.x` based Stream applications.
+
+=== Differences in 3.x
+Be aware of the following areas that have changed across versions.
+
+==== Metrics Configuration Properties
+IMPORTANT: The following does **NOT** apply when configuring metrics for the Dataflow or Skipper server as they both run on Spring Boot 2.x. It is only applicable to applications managed by Dataflow.
+
+The naming of the metrics registry-specific properties differ as follows:
+
+* `2.x`: `management.metrics.export.<meter-registry>.<property-path>`
+* `3.x`: `management.<meter-registry>.metrics.export.<property-path>`
+
+.Example:
+* `2.x`: `management.metrics.export.prometheus.enabled=true`
+* `3.x`: `management.prometheus.metrics.export.enabled=true`
+
+NOTE: One exception to this rule is the Prometheus RSocket Proxy which still runs on Spring Boot `2.x` and therefore expects the properties in the `management.metrics.export.prometheus.rsocket.*` format.
+
+Be sure that you use the `2.x` format when configuring `2.x` based stream apps and the `3.x` format when configuring `3.x` based stream apps.
+
+===== Dataflow Metrics Property Replication
+By default, Dataflow replicates relevant metrics properties that it has been configured with to all launched stream and task applications.
+This replication has been updated to target both the `2.x` and `3.x` expected formats.
+In other words, if your `2.x` stream apps are currently inheriting the Dataflow metrics configuration, they will continue to do so for your `3.x` stream apps.
+
+
+=== Pre-packaged Stream Applications
+The default <<ootb-stream-apps,pre-packaged stream applications>> are based on Spring Boot `2.x`.
+To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manually register the apps by pointing to the `3.x` specific coordinates.
+See the section on https://dataflow.spring.io/docs/applications/pre-packaged/[pre-packaged apps] in the Dataflow Microsite for details.
+
+
+== Spring Cloud Task / Batch Applications

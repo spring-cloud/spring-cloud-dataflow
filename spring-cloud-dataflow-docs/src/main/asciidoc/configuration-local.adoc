@@ -53,46 +53,6 @@ SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar
 ----
 
-[#add-custom-driver]
-==== Adding a Custom JDBC Driver
-To add a custom driver for the database (for example, Oracle), you should rebuild the Data Flow Server and add the dependency to the Maven `pom.xml` file.
-You need to modify the maven `pom.xml` of `spring-cloud-dataflow-server` module.
-There are GA release tags in GitHub repository, so you can switch to desired GA tags to add the drivers on the production-ready codebase.
-
-To add a custom JDBC driver dependency for the Spring Cloud Data Flow server:
-
-. Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
-. Edit the spring-cloud-dataflow-server/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
-
-[source,xml]
-----
-<dependencies>
-...
-  <dependency>
-    <groupId>com.oracle.jdbc</groupId>
-    <artifactId>ojdbc8</artifactId>
-    <version>12.2.0.1</version>
-  </dependency>
-...
-</dependencies>
-----
-
-[start=3]
-. Build the application as described in <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
-
-You can also provide default values when rebuilding the server by adding the necessary properties to the dataflow-server.yml file,
-as shown in the following example for PostgreSQL:
-
-[source]
-----
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: myuser
-    password: mypass
-    driver-class-name:org.postgresql.Driver
-----
-
 [[configuration-local-rdbms-schema]]
 ==== Schema Handling
 On default database schema is managed with _Flyway_ which is convenient if it's

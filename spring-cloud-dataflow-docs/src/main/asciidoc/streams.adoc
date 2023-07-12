@@ -331,6 +331,7 @@ You can point to this file and import all the application-URIs in bulk.
 Otherwise, as explained previously, you can register them individually or have your own  custom property file with only the required application-URIs in it.
 We recommend, however, having a "`focused`" list of desired application-URIs in a custom property file.
 
+[[ootb-stream-apps]]
 ===== Out-of-the-Box Stream Applications
 The following table includes the `dataflow.spring.io` links to the stream applications based on Spring Cloud Stream `3.2.x` and Spring Boot `2.7.x`.
 
