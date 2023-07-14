@@ -31,6 +31,8 @@ import org.springframework.data.domain.Pageable;
 public interface AggregateTaskExplorer {
 	AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget);
 
+	AggregateTaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform);
+
 	/**
 	 * Retrieve a collection of taskExecutions that have the task name provided.
 	 * @param taskName the name of the task

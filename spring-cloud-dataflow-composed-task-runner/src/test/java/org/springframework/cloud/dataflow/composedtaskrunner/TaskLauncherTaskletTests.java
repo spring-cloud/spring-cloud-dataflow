@@ -150,6 +150,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 
 		mockReturnValForTaskExecution(2L);
 		chunkContext = chunkContext();
@@ -159,6 +162,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 	}
 
 	@Test
@@ -189,6 +195,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
@@ -212,6 +221,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
@@ -237,6 +249,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(((List) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
@@ -355,6 +370,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
@@ -374,6 +392,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
@@ -394,6 +415,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		boolean value = chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);

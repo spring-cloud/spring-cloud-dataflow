@@ -509,11 +509,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	private static void addPrefixProperties(SchemaVersionTarget schemaVersionTarget, String prefix, Map<String, String> deploymentProperties) {
+		addProperty(prefix + "spring.cloud.task.initialize-enabled", "false", deploymentProperties);
 		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
 		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
 	}
 
 	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
+		addCommandLine(prefix + "spring.cloud.task.initialize-enabled", "false", commandLineArgs);
 		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
 		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);
 	}
@@ -939,9 +941,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		if (!nonExistingTaskExecutions.isEmpty()) {
 			if (nonExistingTaskExecutions.size() == 1) {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first(), schemaTarget);
 			} else {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions, schemaTarget);
 			}
 		}
 		return taskExecutions;

@@ -106,7 +106,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" E.SCHEMA_TARGET as SCHEMA_TARGET";
 
 	private static final String FIELDS_WITH_STEP_COUNT = FIELDS +
-			", (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID) as STEP_COUNT";
+			", (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND S.SCHEMA_TARGET = E.SCHEMA_TARGET) as STEP_COUNT";
 
 
 	private static final String GET_RUNNING_EXECUTIONS = "SELECT " + FIELDS +
@@ -559,15 +559,15 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private TaskJobExecution createJobExecutionFromResultSet(ResultSet rs, int row, boolean readStepCount) throws SQLException {
-		long id = rs.getLong("TASK_EXECUTION_ID");
-
+		long taskExecutionId = rs.getLong("TASK_EXECUTION_ID");
+		Long jobExecutionId = rs.getLong("JOB_EXECUTION_ID");
 		JobExecution jobExecution;
 		String schemaTarget = rs.getString("SCHEMA_TARGET");
-		JobParameters jobParameters = getJobParameters(id, schemaTarget);
+		JobParameters jobParameters = getJobParameters(jobExecutionId, schemaTarget);
 
 		JobInstance jobInstance = new JobInstance(rs.getLong("JOB_INSTANCE_ID"), rs.getString("JOB_NAME"));
 		jobExecution = new JobExecution(jobInstance, jobParameters);
-		jobExecution.setId(id);
+		jobExecution.setId(jobExecutionId);
 
 		jobExecution.setStartTime(rs.getTimestamp("START_TIME"));
 		jobExecution.setEndTime(rs.getTimestamp("END_TIME"));
@@ -578,8 +578,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		jobExecution.setVersion(rs.getInt("VERSION"));
 
 		return readStepCount ?
-				new TaskJobExecution(id, jobExecution, true, rs.getInt("STEP_COUNT"), schemaTarget) :
-				new TaskJobExecution(id, jobExecution, true, schemaTarget);
+				new TaskJobExecution(taskExecutionId, jobExecution, true, rs.getInt("STEP_COUNT"), schemaTarget) :
+				new TaskJobExecution(taskExecutionId, jobExecution, true, schemaTarget);
 	}
 
 	private List<TaskJobExecution> getTaskJobExecutionsByDate(Date startDate, Date endDate, int start, int count) {

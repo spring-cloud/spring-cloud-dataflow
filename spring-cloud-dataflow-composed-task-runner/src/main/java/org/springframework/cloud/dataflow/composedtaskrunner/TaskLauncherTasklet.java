@@ -196,14 +196,17 @@ public class TaskLauncherTasklet implements Tasklet {
 			}
 			LaunchResponseResource response = taskOperations.launch(tmpTaskName,
 					this.properties, args);
-			this.executionId = response.getTaskId();
+
+			this.executionId = response.getExecutionId();
 			this.schemaTarget = response.getSchemaTarget();
+			stepExecutionContext.put("task-execution-id", response.getExecutionId());
+			stepExecutionContext.put("schema-target", response.getSchemaTarget());
+			stepExecutionContext.put("task-name", tmpTaskName);
+			stepExecutionContext.put("task-arguments", args);
 			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
 			if (ignoreExitMessage != null) {
 				stepExecutionContext.put(IGNORE_EXIT_MESSAGE, ignoreExitMessage);
 			}
-			stepExecutionContext.put("task-execution-id", executionId);
-			stepExecutionContext.put("task-arguments", args);
 		}
 		else {
 			try {
@@ -214,8 +217,7 @@ public class TaskLauncherTasklet implements Tasklet {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 
-			TaskExecution taskExecution =
-					this.taskExplorer.getTaskExecution(this.executionId);
+			TaskExecution taskExecution = this.taskExplorer.getTaskExecution(this.executionId);
 			if (taskExecution != null && taskExecution.getEndTime() != null) {
 				if (taskExecution.getExitCode() == null) {
 					throw new UnexpectedJobExecutionException("Task returned a null exit code.");

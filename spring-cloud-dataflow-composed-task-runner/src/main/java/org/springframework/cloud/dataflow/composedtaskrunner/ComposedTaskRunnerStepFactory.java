@@ -162,7 +162,6 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		logger.debug("Properties to use {}", propertiesToUse);
 
 		String stepName = this.taskName;
-
 		return this.steps.get(stepName)
 				.tasklet(taskLauncherTasklet)
 				.transactionAttribute(getTransactionAttribute())

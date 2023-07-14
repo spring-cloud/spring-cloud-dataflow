@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,5 +52,8 @@ public class TaskExplorerContainer {
 			result = defaultTaskExplorer;
 		}
 		return result;
+	}
+	public Set<String> getKeys() {
+		return taskExplorers.keySet();
 	}
 }

@@ -43,6 +43,7 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 	public ComposedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
 		Assert.notNull(taskExplorerContainer, "taskExplorerContainer must not be null.");
 		this.taskExplorerContainer = taskExplorerContainer;
+		logger.info("ComposedTaskStepExecutionListener supporting {}", taskExplorerContainer.getKeys());
 	}
 
 	/**
@@ -60,27 +61,40 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 	 */
 	@Override
 	public ExitStatus afterStep(StepExecution stepExecution) {
+		logger.info("AfterStep processing for stepExecution {}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId());
 		ExitStatus result = ExitStatus.COMPLETED;
-		logger.info(String.format("AfterStep processing for stepExecution %s",
-				stepExecution.getStepName()));
-		TaskExplorer taskExplorer = this.taskExplorerContainer.get(stepExecution.getJobExecution().getJobConfigurationName());
-
 		Long executionId = (Long) stepExecution.getExecutionContext().get("task-execution-id");
-		Assert.notNull(executionId, "TaskLauncherTasklet did not " +
-				"return a task-execution-id.  Check to see if task " +
-				"exists.");
-
+		Assert.notNull(executionId, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
+				" did not return a task-execution-id. Check to see if task exists.");
+		String schemaTarget = stepExecution.getExecutionContext().getString("schema-target");
+		String taskName = stepExecution.getExecutionContext().getString("task-name");
+		Assert.notNull(taskName, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
+				" did not return a task-name. Check to see if task exists.");
+		String explorerName = taskName;
+		if (!this.taskExplorerContainer.getKeys().contains(taskName)) {
+			Assert.notNull(schemaTarget, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
+					" did not return a schema-target. Check to see if task exists.");
+			explorerName = schemaTarget;
+		}
+		logger.info("AfterStep for {}:{}:{}:{}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId(), taskName, executionId, schemaTarget);
+		TaskExplorer taskExplorer = this.taskExplorerContainer.get(explorerName);
 		TaskExecution resultExecution = taskExplorer.getTaskExecution(executionId);
-
 		if (!stepExecution.getExecutionContext().containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE) &&
 				StringUtils.hasText(resultExecution.getExitMessage())) {
 			result = new ExitStatus(resultExecution.getExitMessage());
 		} else if (resultExecution.getExitCode() != 0) {
 			result = ExitStatus.FAILED;
 		}
-
-		logger.info("AfterStep processing complete for stepExecution {} with taskExecution {}", stepExecution.getStepName(), executionId);
+		logger.info("AfterStep processing complete for stepExecution {} with taskExecution {}:{}:{}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId(), taskName, executionId, schemaTarget);
 		return result;
 	}
 
+	@Override
+	public void beforeStep(StepExecution stepExecution) {
+		logger.info("beforeStep:{}:{}>>>>", stepExecution.getStepName(), stepExecution.getJobExecutionId());
+		super.beforeStep(stepExecution);
+		logger.debug("beforeStep:{}", stepExecution.getExecutionContext());
+		logger.info("beforeStep:{}:{}<<<", stepExecution.getStepName(), stepExecution.getJobExecutionId());
+
+	}
 }

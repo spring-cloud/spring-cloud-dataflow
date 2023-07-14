@@ -145,6 +145,7 @@ public class RootController {
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskDefinitionResource.class, "{name}")
 					.withRel("tasks/definitions/definition")));
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
+			root.add(linkTo(methodOn(TaskExecutionController.class).viewByExternal(null,null)).withRel("tasks/executions/external"));
 			root.add(linkTo(methodOn(TaskExecutionController.class).launchBoot3(null,null,null)).withRel("tasks/executions/launch"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
 					+ "{?name}";

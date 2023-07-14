@@ -114,6 +114,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/validation").description("Provides the validation for a task definition"),
 				linkWithRel("tasks/executions").description("Returns Task executions"),
 				linkWithRel("tasks/executions/launch").description("Provides for launching a Task execution"),
+				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
@@ -221,6 +222,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/executions/current.href").description("Link to the tasks/executions/current"),
 						fieldWithPath("_links.tasks/executions/execution.href").description("Link to the tasks/executions/execution"),
 						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/execution is templated"),
+						fieldWithPath("_links.tasks/executions/external.href").description("Link to the tasks/executions/external"),
+						fieldWithPath("_links.tasks/executions/external.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/external is templated"),
+
 						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
 						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),
 

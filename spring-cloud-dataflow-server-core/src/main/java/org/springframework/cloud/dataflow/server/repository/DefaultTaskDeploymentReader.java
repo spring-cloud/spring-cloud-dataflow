@@ -35,6 +35,11 @@ public class DefaultTaskDeploymentReader implements TaskDeploymentReader {
 	}
 
 	@Override
+	public TaskDeployment getDeployment(String externalTaskId, String platform) {
+		return taskDeploymentRepository.findByTaskDeploymentIdAndPlatformName(externalTaskId, platform);
+	}
+
+	@Override
 	public TaskDeployment findByDefinitionName(String definitionName) {
 		return taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(definitionName);
 	}

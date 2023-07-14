@@ -45,4 +45,5 @@ public interface TaskDefinitionRepository extends KeyValueRepository<TaskDefinit
 	 * @return The task definition instance or {@link NoSuchTaskDefinitionException} if not found.
 	 */
 	TaskDefinition findByTaskName(String name);
+
 }

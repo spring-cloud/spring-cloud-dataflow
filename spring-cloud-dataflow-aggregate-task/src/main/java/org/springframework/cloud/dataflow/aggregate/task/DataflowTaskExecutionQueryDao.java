@@ -142,5 +142,6 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @see #getLatestTaskExecutionsByTaskNames(String...)
 	 */
 	AggregateTaskExecution getLatestTaskExecutionForTaskName(String taskName);
+	AggregateTaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
 
 }

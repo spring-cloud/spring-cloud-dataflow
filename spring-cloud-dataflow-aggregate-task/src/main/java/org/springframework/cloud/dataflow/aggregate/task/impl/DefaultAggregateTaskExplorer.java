@@ -110,6 +110,15 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
+	public AggregateTaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform) {
+		TaskDeployment deployment = taskDeploymentReader.getDeployment(externalExecutionId, platform);
+		if(deployment != null) {
+			return this.taskExecutionQueryDao.geTaskExecutionByExecutionId(externalExecutionId, deployment.getTaskDefinitionName());
+		}
+		return null;
+	}
+
+	@Override
 	public Page<AggregateTaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable) {
 		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 		Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
@@ -210,7 +219,7 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 
 	@Override
 	public Set<Long> getJobExecutionIdsByTaskExecutionId(long taskExecutionId, String schemaTarget) {
-		if (StringUtils.hasText(schemaTarget)) {
+		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		TaskExplorer taskExplorer = taskExplorers.get(schemaTarget);

@@ -21,7 +21,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowJobExecutionDao;
+import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
@@ -49,7 +49,7 @@ public class AggregateTaskConfiguration {
 			DataSource dataSource,
 			SchemaService schemaService
 	) {
-		return new AggregateDataFlowJobExecutionDao(dataSource, schemaService);
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
 	}
 
 	@Bean

@@ -33,7 +33,6 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.task.configuration.TaskConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
-import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +46,7 @@ import static org.mockito.Mockito.mock;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})

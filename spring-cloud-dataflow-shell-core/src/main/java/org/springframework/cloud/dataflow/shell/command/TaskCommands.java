@@ -233,7 +233,7 @@ public class TaskCommands {
 			propertiesToUse.put("spring.cloud.dataflow.task.platformName", platformName);
 		}
 		LaunchResponseResource response = taskOperations().launch(name, propertiesToUse, argumentsToUse);
-		return String.format("Launched task '%s' with execution id %d, schemaTarget %s", name, response.getTaskId(), response.getSchemaTarget());
+		return String.format("Launched task '%s' with execution id %d, schemaTarget %s", name, response.getExecutionId(), response.getSchemaTarget());
 	}
 
 	@ShellMethod(key = STOP, value = "Stop executing tasks")

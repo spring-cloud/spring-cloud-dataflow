@@ -263,14 +263,37 @@ public class TaskExecutionController {
 		}
 		AggregateTaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecution(id, schemaTarget));
 		if (taskExecution == null) {
-			throw new NoSuchTaskExecutionException(id);
+			throw new NoSuchTaskExecutionException(id, schemaTarget);
 		}
 		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(id, schemaTarget);
 		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		List<Long> jobExecutionIds = new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), schemaTarget));
 		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(taskExecution,
 				jobExecutionIds,
-				taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds));
+				taskManifest,
+				getCtrTaskJobExecution(taskExecution, jobExecutionIds)
+		);
+		return this.taskAssembler.toModel(taskJobExecutionRel);
+	}
+	@RequestMapping(value = "/external/{externalExecutionId}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	public TaskExecutionResource viewByExternal(
+			@PathVariable(name = "externalExecutionId") String externalExecutionId,
+			@RequestParam(name = "platform", required = false) String platform
+	) {
+		AggregateTaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecutionByExternalExecutionId(externalExecutionId, platform));
+		if (taskExecution == null) {
+			throw new NoSuchTaskExecutionException(externalExecutionId, platform);
+		}
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
+		taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+		List<Long> jobExecutionIds = new ArrayList<>(this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), taskExecution.getSchemaTarget()));
+		TaskJobExecutionRel taskJobExecutionRel = new TaskJobExecutionRel(
+				taskExecution,
+				jobExecutionIds,
+				taskManifest,
+				getCtrTaskJobExecution(taskExecution, jobExecutionIds)
+		);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 

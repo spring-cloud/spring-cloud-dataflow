@@ -181,6 +181,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
+		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();
@@ -206,6 +207,7 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
+		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();

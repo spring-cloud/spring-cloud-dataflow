@@ -74,6 +74,7 @@ public class TaskTemplate implements TaskOperations {
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
+	private static final String EXECUTION_LAUNCH_RELATION = "tasks/executions/launch";
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
 
@@ -94,6 +95,8 @@ public class TaskTemplate implements TaskOperations {
 	private final Link executionsLink;
 
 	private final Link executionLink;
+
+	private final Link executionLaunchLink;
 
 	private final Link executionByNameLink;
 
@@ -120,6 +123,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
+		Assert.notNull(resources.getLink(EXECUTION_LAUNCH_RELATION), "Execution launch relation is required");
 		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
@@ -143,6 +147,7 @@ public class TaskTemplate implements TaskOperations {
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
+		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
@@ -180,32 +185,14 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		values.add("properties", DeploymentPropertiesUtils.format(properties));
-		values.add("arguments", StringUtils.collectionToDelimitedString(arguments, " "));
-		String url = executionByNameLink.expand(name).getHref();
-		HttpEntity<?> request = new HttpEntity<>(values);
-		ResponseEntity<String> response = null;
-		try {
-			response = restTemplate.exchange(new URI(url), HttpMethod.POST, request, String.class);
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("Exception creating URI from:" + url + ":" + e, e);
-		}
-		if (response.getStatusCode().is2xxSuccessful()) {
-			String body = response.getBody();
-			Assert.notNull(body, "Expected body from response:" + response);
-			try {
-				long executionId = Long.parseLong(body);
-				return new LaunchResponseResource(executionId, SchemaVersionTarget.defaultTarget().getName());
-			} catch (Throwable x) {
-				try {
-					return mapper.readValue(body, LaunchResponseResource.class);
-				} catch (JsonProcessingException e) {
-					throw new RuntimeException("Exception parsing response:" + e, e);
-				}
-			}
-		} else {
-			throw new RuntimeException("Response Error:" + response.getStatusCodeValue() + ":" + response.getStatusCode().name() + ":" + response.getBody());
-		}
+		String formattedProperties = DeploymentPropertiesUtils.format(properties);
+		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");
+		values.add("properties", formattedProperties);
+		values.add("arguments", commandLineArguments);
+		values.add("name", name);
+		String url = executionLaunchLink.expand(values).getHref();
+		values.remove("name");
+		return restTemplate.postForObject(url, values, LaunchResponseResource.class, name, formattedProperties, commandLineArguments);
 	}
 
 	@Override

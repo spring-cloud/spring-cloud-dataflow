@@ -396,7 +396,7 @@ public class TaskExecutionControllerTests {
 		mapper.registerModule(new Jackson2DataflowModule());
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
-				get("/tasks/executions/" + resource.getTaskId())
+				get("/tasks/executions/" + resource.getExecutionId())
 						.accept(MediaType.APPLICATION_JSON)
 						.queryParam("schemaTarget", resource.getSchemaTarget())
 				)
@@ -458,7 +458,7 @@ public class TaskExecutionControllerTests {
 		mapper.registerModule(new Jackson2DataflowModule());
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
-						get("/tasks/executions/" + resource.getTaskId())
+						get("/tasks/executions/" + resource.getExecutionId())
 								.accept(MediaType.APPLICATION_JSON)
 								.queryParam("schemaTarget", resource.getSchemaTarget())
 				)

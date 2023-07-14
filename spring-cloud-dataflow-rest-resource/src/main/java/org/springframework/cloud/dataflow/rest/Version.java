@@ -27,7 +27,7 @@ public class Version {
 	 * Should be incremented each time the API evolves whether it's a breaking change or
 	 * not.
 	 */
-	public static final int REVISION = 15;
+	public static final int REVISION = 14;
 
 	public static final String REVISION_KEY = "api.revision";
 

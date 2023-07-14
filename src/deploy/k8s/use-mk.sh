@@ -12,7 +12,7 @@ fi
 export USE_PRO=false
 export K8S_DRIVER=$1
 export KUBECONFIG=
-export NS=default
+export NS=scdf
 shift
 while [ "$1" != "" ]; do
     case "$1" in

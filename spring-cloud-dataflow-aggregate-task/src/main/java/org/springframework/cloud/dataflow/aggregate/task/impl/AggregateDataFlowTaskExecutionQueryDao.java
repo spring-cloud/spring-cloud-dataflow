@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.database.Order;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.repository.database.PagingQueryProvider;
 import org.springframework.cloud.task.repository.database.support.SqlPagingQueryProviderFactoryBean;
@@ -50,13 +50,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Provide aggregate data for Boot 3 and Boot <3 TaskExecutions.
+ * Provide aggregate data for Boot 3 and Boot <=2 TaskExecutions.
  *
  * @author Corneil du Plessis
  */
 
-public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQueryDao {
-	private final static Logger logger = LoggerFactory.getLogger(AggregateDataFlowJobExecutionDao.class);
+public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecutionQueryDao {
+	private final static Logger logger = LoggerFactory.getLogger(AggregateDataFlowTaskExecutionQueryDao.class);
 
 	/**
 	 * SELECT clause for task execution.
@@ -90,13 +90,21 @@ public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQu
 			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
 			+ " from AGGREGATE_TASK_EXECUTION where TASK_EXECUTION_ID = :taskExecutionId and SCHEMA_TARGET = :schemaTarget";
 
+	private static final String GET_EXECUTION_BY_EXTERNAL_EXECUTION_ID = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where EXTERNAL_EXECUTION_ID = :externalExecutionId and TASK_NAME = :taskName";
+
 	private static final String TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION ";
+
 	private static final String TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName";
 
 	private static final String COMPLETED_TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME IS NOT NULL";
+
 	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL ";
 
@@ -147,7 +155,7 @@ public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQu
 	 *
 	 * @param dataSource used by the dao to execute queries and update the tables.
 	 */
-	public AggregateDataFlowJobExecutionDao(DataSource dataSource, SchemaService schemaService) {
+	public AggregateDataFlowTaskExecutionQueryDao(DataSource dataSource, SchemaService schemaService) {
 		Assert.notNull(dataSource, "The dataSource must not be null.");
 		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		this.dataSource = dataSource;
@@ -157,6 +165,22 @@ public class AggregateDataFlowJobExecutionDao implements DataflowTaskExecutionQu
 		this.orderMap.put("TASK_EXECUTION_ID", Order.DESCENDING);
 	}
 
+	@Override
+	public AggregateTaskExecution geTaskExecutionByExecutionId(String externalExecutionId, String taskName) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("externalExecutionId", externalExecutionId)
+				.addValue("taskName", taskName);
+
+		try {
+			return this.jdbcTemplate.queryForObject(
+					GET_EXECUTION_BY_EXTERNAL_EXECUTION_ID,
+					queryParameters,
+					new CompositeTaskExecutionRowMapper()
+			);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 
 	@Override
 	public AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget) {

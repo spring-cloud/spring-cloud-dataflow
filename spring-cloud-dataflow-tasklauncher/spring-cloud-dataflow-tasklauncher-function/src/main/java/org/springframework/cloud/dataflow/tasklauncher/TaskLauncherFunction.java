@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -123,8 +122,8 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 		LaunchResponseResource response = taskOperations.launch(request.getTaskName(),
 				enrichDeploymentProperties(request.getDeploymentProperties()),
 				request.getCommandlineArguments());
-		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getTaskId()));
-		return new LaunchResponse(response.getTaskId(), response.getSchemaTarget());
+		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
+		return new LaunchResponse(response.getExecutionId(), response.getSchemaTarget());
 	}
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {
