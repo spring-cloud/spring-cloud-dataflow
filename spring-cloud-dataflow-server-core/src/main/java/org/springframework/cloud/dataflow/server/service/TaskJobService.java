@@ -148,7 +148,7 @@ public interface TaskJobService {
 	 * @return List containing {@link TaskJobExecution}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	Page<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException;
+	Page<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException, NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository

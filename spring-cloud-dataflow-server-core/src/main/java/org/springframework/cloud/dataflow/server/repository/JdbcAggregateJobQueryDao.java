@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,7 +39,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
+import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
@@ -49,10 +51,13 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -78,26 +83,32 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private static final String GET_COUNT_BY_DATE = "SELECT COUNT(1) from AGGREGATE_JOB_EXECUTION WHERE START_TIME BETWEEN ? AND ?";
 
-	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from AGGREGATE_JOB_EXECUTION E" +
-			" JOIN AGGREGATE_JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID AND E.SCHEMA_TARGET=I.SCHEMA_TARGET" +
-			" WHERE I.JOB_NAME=?";
+	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(E.JOB_EXECUTION_ID) from AGGREGATE_JOB_INSTANCE I" +
+			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID=E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET=E.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET" +
+			" WHERE I.JOB_NAME LIKE ?";
 
-	private static final String GET_COUNT_BY_STATUS = "SELECT COUNT(1) FROM AGGREGATE_JOB_EXECUTION E" +
-			" JOIN AGGREGATE_JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID" +
+	private static final String GET_COUNT_BY_STATUS = "SELECT COUNT(E.JOB_EXECUTION_ID) from AGGREGATE_JOB_INSTANCE I" +
+			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID=E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET=E.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET" +
 			" WHERE E.STATUS = ?";
 
-	private static final String GET_COUNT_BY_JOB_INSTANCE_ID = "SELECT COUNT(1) FROM AGGREGATE_JOB_EXECUTION E" +
-			" WHERE E.JOB_INSTANCE_ID = ? AND E.SCHEMA_TARGET = ?";
+	private static final String GET_COUNT_BY_JOB_INSTANCE_ID = "SELECT COUNT(E.JOB_EXECUTION_ID) from AGGREGATE_JOB_INSTANCE I" +
+			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID=E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET=E.SCHEMA_TARGET" +
+			" WHERE I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
 
-	private static final String GET_COUNT_BY_TASK_EXECUTION_ID = "SELECT COUNT(1) FROM AGGREGATE_JOB_EXECUTION E" +
+	private static final String GET_COUNT_BY_TASK_EXECUTION_ID = "SELECT COUNT(T.TASK_EXECUTION_ID) FROM AGGREGATE_JOB_EXECUTION E" +
 			" JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
 			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET" +
 			" WHERE T.TASK_EXECUTION_ID = ? AND T.SCHEMA_TARGET = ?";
 
-	private static final String GET_COUNT_BY_JOB_NAME_AND_STATUS = "SELECT COUNT(1) FROM AGGREGATE_JOB_INSTANCE I" +
-			" JOIN AGGREGATE_JOB_EXECUTION E ON E.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID AND E.SCHEMA_TARGET = I.SCHEMA_TARGET" +
-			" LEFT OUTER JOIN AGGREGATE_TASK_BATCH T ON E.JOB_EXECUTION_ID = T.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = T.SCHEMA_TARGET" +
-			" WHERE I.JOB_NAME=? AND E.STATUS = ?";
+	private static final String GET_COUNT_BY_JOB_NAME_AND_STATUS = "SELECT COUNT(E.JOB_EXECUTION_ID) FROM AGGREGATE_JOB_INSTANCE I" +
+			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID = E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET = E.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
+			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET" +
+			" WHERE I.JOB_NAME LIKE ? AND E.STATUS = ?";
 
 	private static final String FIELDS = "E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME," +
 			" E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE," +
@@ -136,6 +147,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private static final String FIND_PARAMS_FROM_ID3 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING, 'boot3' as SCHEMA_TARGET" +
 			" from %PREFIX%JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID = ?";
+
 	private static final String FIND_JOB_BY = "SELECT I.JOB_INSTANCE_ID as JOB_INSTANCE_ID, I.JOB_NAME as JOB_NAME, I.SCHEMA_TARGET as SCHEMA_TARGET," +
 			" E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME, E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE, E.CREATE_TIME as CREATE_TIME," +
 			" E.LAST_UPDATED as LAST_UPDATED, E.VERSION as VERSION, T.TASK_EXECUTION_ID as TASK_EXECUTION_ID," +
@@ -144,8 +156,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID = E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET = E.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
+
 	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
 			" where I.JOB_NAME = ? AND I.JOB_INSTANCE_ID = ?";
+
 	private static final String FIND_JOB_BY_INSTANCE_ID_SCHEMA = FIND_JOB_BY +
 			" where I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
 
@@ -159,7 +173,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private static final String FIND_JOBS_FROM = "LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
 
-	private static final String FIND_JOBS_WHERE = "I.JOB_NAME = ?";
+	private static final String FIND_JOBS_WHERE = "I.JOB_NAME LIKE ?";
 
 	private static final String FIND_BY_ID_SCHEMA = "E.JOB_EXECUTION_ID = ? AND E.SCHEMA_TARGET = ?";
 
@@ -194,13 +208,18 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private final SchemaService schemaService;
 
+	private final JobServiceContainer jobServiceContainer;
+
 	private final ConfigurableConversionService conversionService = new DefaultConversionService();
 
+	private final Map<String, StepExecutionDao> stepExecutionDaoContainer = new HashMap<>();
 
-	public JdbcAggregateJobQueryDao(DataSource dataSource, SchemaService schemaService) throws Exception {
+	public JdbcAggregateJobQueryDao(DataSource dataSource, SchemaService schemaService, JobServiceContainer jobServiceContainer) throws Exception {
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.schemaService = schemaService;
+		this.jobServiceContainer = jobServiceContainer;
+
 		allExecutionsPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, null);
 
 		executionsByDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, DATE_RANGE_FILTER);
@@ -219,7 +238,11 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	@Override
 	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) {
-		return new PageImpl<>(getTaskJobInstancesForJobName(jobName, pageable), pageable, countJobExecutions(jobName));
+		int total = countJobExecutions(jobName);
+		List<JobInstanceExecutions> taskJobInstancesForJobName = total > 0
+				? getTaskJobInstancesForJobName(jobName, pageable)
+				: Collections.emptyList();
+		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
 
 	}
 
@@ -247,60 +270,87 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	@Override
-	public Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) {
+	public Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) throws NoSuchJobExecutionException {
+		int total = countJobExecutions(jobName, status);
 		List<TaskJobExecution> executions = getJobExecutions(jobName, status, getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(executions, pageable, countJobExecutions(jobName, status));
+		Assert.isTrue(total >= executions.size(), () -> "Expected total at least " + executions.size() + " not " + total);
+		return new PageImpl<>(executions, pageable, total);
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsBetween(Date fromDate, Date toDate, Pageable pageable) {
-		List<TaskJobExecution> executions = getTaskJobExecutionsByDate(fromDate, toDate, getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(executions, pageable, countJobExecutionsByDate(fromDate, toDate));
+		int total = countJobExecutionsByDate(fromDate, toDate);
+		List<TaskJobExecution> executions = total > 0
+				? getTaskJobExecutionsByDate(fromDate, toDate, getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(executions, pageable, total);
 	}
 
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsWithSteps(Pageable pageable) {
-		List<TaskJobExecution> jobExecutions = getJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(jobExecutions, pageable, countJobExecutions());
+		int total = countJobExecutions();
+		List<TaskJobExecution> jobExecutions = total > 0
+				? getJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) {
-		List<TaskJobExecution> jobExecutions = getJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(jobExecutions, pageable, countJobExecutions());
+		int total = countJobExecutions();
+		List<TaskJobExecution> jobExecutions = total > 0
+				? getJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, String schemaTarget, Pageable pageable) {
-		List<TaskJobExecution> jobExecutions = getJobExecutionsWithStepCountFilteredByJobInstanceId(jobInstanceId, schemaTarget, getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(jobExecutions, pageable, countJobExecutionsByInstanceId(jobInstanceId, schemaTarget));
+		int total = countJobExecutionsByInstanceId(jobInstanceId, schemaTarget);
+		List<TaskJobExecution> jobExecutions = total > 0
+				? getJobExecutionsWithStepCountFilteredByJobInstanceId(jobInstanceId, schemaTarget, getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, String schemaTarget, Pageable pageable) {
-		List<TaskJobExecution> jobExecutions = getJobExecutionsWithStepCountFilteredByTaskExecutionId(taskExecutionId, schemaTarget, getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(jobExecutions, pageable, countJobExecutionsByTaskExecutionId(taskExecutionId, schemaTarget));
+		int total = countJobExecutionsByTaskExecutionId(taskExecutionId, schemaTarget);
+		List<TaskJobExecution> jobExecutions = total > 0
+				? getJobExecutionsWithStepCountFilteredByTaskExecutionId(taskExecutionId, schemaTarget, getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 	@Override
-	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable) {
-		List<TaskJobExecution> jobExecutions = getJobExecutionsWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize());
-		return new PageImpl<>(jobExecutions, pageable, countJobExecutions(jobName));
+	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable) throws NoSuchJobException {
+		int total = countJobExecutions(jobName);
+		if(total == 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+		}
+		List<TaskJobExecution> jobExecutions = total > 0
+				? getJobExecutionsWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize())
+				: Collections.emptyList();
+		return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 	@Override
-	public TaskJobExecution getJobExecution(long jobExecutionId, String schemaTarget) {
+	public TaskJobExecution getJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException {
 		List<TaskJobExecution> jobExecutions = getJobExecutionPage(jobExecutionId, schemaTarget);
 		if (jobExecutions.isEmpty()) {
-			return null;
+			throw new NoSuchJobExecutionException(String.format("Job id %s for schema target %s not found", jobExecutionId, schemaTarget));
 		}
 		if (jobExecutions.size() > 1) {
 			logger.debug("Too many job executions:{}", jobExecutions);
 			logger.warn("Expected only 1 job for {}: not {}", jobExecutionId, jobExecutions.size());
 		}
-		return jobExecutions.get(0);
+
+		TaskJobExecution taskJobExecution = jobExecutions.get(0);
+		JobService jobService = jobServiceContainer.get(taskJobExecution.getSchemaTarget());
+		taskJobExecution.getJobExecution().addStepExecutions(new ArrayList<>(jobService.getStepExecutions(jobExecutionId)));
+		return taskJobExecution;
 	}
 
 	private List<TaskJobExecution> getJobExecutionPage(long jobExecutionId, String schemaTarget) {
@@ -341,13 +391,16 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private int countJobExecutions(String jobName, BatchStatus status) {
-		logger.debug("countJobExecutions:{}:{}:{}", jobName, status, GET_COUNT_BY_JOB_NAME_AND_STATUS);
+		logger.debug("countJobExecutions:{}:{}", jobName, status);
 		Integer count;
-		if (jobName != null && status != null) {
+		if (StringUtils.hasText(jobName) && status != null) {
+			logger.debug("countJobExecutions:{}:{}:{}", jobName, status, GET_COUNT_BY_JOB_NAME_AND_STATUS);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_NAME_AND_STATUS, Integer.class, jobName, status.name());
 		} else if (status != null) {
+			logger.debug("countJobExecutions:{}:{}", status, GET_COUNT_BY_STATUS);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_STATUS, Integer.class, status.name());
-		} else if (jobName != null) {
+		} else if (StringUtils.hasText(jobName)) {
+			logger.debug("countJobExecutions:{}:{}", jobName, GET_COUNT_BY_JOB_NAME);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_NAME, Integer.class, jobName);
 		} else {
 			count = jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
@@ -411,12 +464,12 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		);
 	}
 
-	private List<TaskJobExecution> getJobExecutions(String jobName, BatchStatus status, int start, int count) {
-		if (jobName != null && status != null) {
+	private List<TaskJobExecution> getJobExecutions(String jobName, BatchStatus status, int start, int count) throws NoSuchJobExecutionException {
+		if (StringUtils.hasText(jobName) && status != null) {
 			return queryForProvider(byJobNameAndStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName, status.name());
 		} else if (status != null) {
 			return queryForProvider(byStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, status.name());
-		} else if (jobName != null) {
+		} else if (StringUtils.hasText(jobName)) {
 			return queryForProvider(byJobNamePagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName);
 		}
 		return queryForProvider(allExecutionsPagingQueryProviderNoStepCount, new JobExecutionRowMapper(false), start, count);
@@ -512,18 +565,23 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			}
 			return jdbcTemplate.query(sql, mapper, arguments);
 		} else {
-			String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
+			try {
+				String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
+				if (logger.isDebugEnabled()) {
+					logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
+				}
+				Long startValue;
+				startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
+				List<Object> args = new ArrayList<>(Arrays.asList(arguments));
+				args.add(startValue);
+				String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
+				if (logger.isDebugEnabled()) {
+					logger.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
+				}
+				return jdbcTemplate.query(sql, mapper, args.toArray());
+			} catch (IncorrectResultSizeDataAccessException x) {
+				return Collections.emptyList();
 			}
-			Long startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
-			List<Object> args = new ArrayList<>(Arrays.asList(arguments));
-			args.add(startValue);
-			String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
-			}
-			return jdbcTemplate.query(sql, mapper, args.toArray());
 		}
 	}
 

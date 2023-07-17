@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.data.domain.Page;
@@ -33,7 +35,7 @@ import org.springframework.data.domain.Pageable;
 public interface AggregateJobQueryDao {
 	Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable);
 
-	Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable);
+	Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) throws NoSuchJobExecutionException;
 
 	Page<TaskJobExecution> listJobExecutionsBetween(Date fromDate, Date toDate, Pageable pageable);
 
@@ -45,9 +47,9 @@ public interface AggregateJobQueryDao {
 
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, String schemaTarget, Pageable pageable);
 
-	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable);
+	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable) throws NoSuchJobException;
 
-	TaskJobExecution getJobExecution(long id, String schemaTarget);
+	TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException;
 
 	JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId);
 

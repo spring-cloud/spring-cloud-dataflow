@@ -200,16 +200,18 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(content().json("{executionId: " + 1 + "}"));
+				.andExpect(jsonPath("$.executionId", is(1)))
+				.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1)));
 	}
 
 	@Test
 	public void testGetAllExecutionsFailed() throws Exception {
 		createDirtyJob();
-
+		// expecting to ignore dirty job
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
-				.andExpect(status().isNotFound());
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)));
 	}
 
 	@Test
@@ -217,8 +219,8 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 2, 1)))
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)))
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
 	@Test

@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
@@ -152,8 +151,8 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService) throws Exception {
-		return new JdbcAggregateJobQueryDao(dataSource, schemaService);
+	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService, JobServiceContainer jobServiceContainer) throws Exception {
+		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobServiceContainer);
 	}
 
 	@Bean
