@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
@@ -40,6 +39,7 @@ import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenP
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.UnexpectedTaskExecutionException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
@@ -234,10 +234,12 @@ public class TaskLauncherTasklet implements Tasklet {
 			TaskExecution taskExecution = this.taskExplorer.getTaskExecution(this.executionId);
 			if (taskExecution != null && taskExecution.getEndTime() != null) {
 				if (taskExecution.getExitCode() == null) {
-					throw new UnexpectedJobExecutionException("Task returned a null exit code.");
-				} else if (taskExecution.getExitCode() != 0) {
-					throw new UnexpectedJobExecutionException("Task returned a non zero exit code.");
-				} else {
+					throw new UnexpectedTaskExecutionException("Task returned a null exit code.", taskExecution);
+				}
+				else if (taskExecution.getExitCode() != 0) {
+					throw new UnexpectedTaskExecutionException("Task returned a non zero exit code.", taskExecution);
+				}
+				else {
 					return RepeatStatus.FINISHED;
 				}
 			}

@@ -40,7 +40,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
@@ -52,6 +51,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
+import org.springframework.cloud.dataflow.composedtaskrunner.support.UnexpectedTaskExecutionException;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
@@ -318,10 +318,14 @@ public class TaskLauncherTaskletTests {
 		mockReturnValForTaskExecution(1L);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		createCompleteTaskExecution(1);
-		Throwable exception = assertThrows(UnexpectedJobExecutionException.class,
+		createCompleteTaskExecution(1, "This is the exit message of the task itself.");
+		UnexpectedTaskExecutionException exception = assertThrows(UnexpectedTaskExecutionException.class,
 				() -> execute(taskLauncherTasklet, null, chunkContext));
 		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
+		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
+		Assertions.assertThat(exception.getExitCode()).isEqualTo(1);
+		Assertions.assertThat(exception.getExitMessage()).isEqualTo("This is the exit message of the task itself.");
+		Assertions.assertThat(exception.getEndTime()).isNotNull();
 	}
 
 	private RepeatStatus execute(TaskLauncherTasklet taskLauncherTasklet, StepContribution contribution,
@@ -341,7 +345,7 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		getCompleteTaskExecutionWithNull();
-		Throwable exception = assertThrows(UnexpectedJobExecutionException.class,
+		Throwable exception = assertThrows(UnexpectedTaskExecutionException.class,
 				() -> execute(taskLauncherTasklet, null, chunkContext));
 		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a null exit code.");
 	}
@@ -455,10 +459,10 @@ public class TaskLauncherTaskletTests {
 		}
 		fail("Expected an IllegalArgumentException to be thrown");
 	}
-	private void createCompleteTaskExecution(int exitCode) {
+	private void createCompleteTaskExecution(int exitCode, String... message) {
 		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
 		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
-				exitCode, new Date(), "");
+				exitCode, new Date(),  message != null && message.length > 0 ? message[0] : "");
 	}
 
 	private void createAndStartCompleteTaskExecution(int exitCode, JobExecution jobExecution) {
