@@ -142,7 +142,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTasklet() throws Exception{
+	public void testTaskLauncherTasklet() {
 		createCompleteTaskExecution(0);
 		TaskLauncherTasklet taskLauncherTasklet =
 				getTaskExecutionTasklet();
@@ -182,9 +182,10 @@ public class TaskLauncherTaskletTests {
 				environment,
 				mapper
 		);
-		Exception exception = assertThrows(ComposedTaskException.class, () -> {
-			execute(taskLauncherTasklet, null, chunkContext());
-		});
+		Exception exception = assertThrows(
+				ComposedTaskException.class,
+				() -> execute(taskLauncherTasklet, null, chunkContext())
+		);
 		AssertionsForClassTypes.assertThat(exception.getMessage()).isEqualTo(
 				"Unable to connect to Data Flow Server to execute task operations. " +
 						"Verify that Data Flow Server's tasks/definitions endpoint can be accessed.");
@@ -207,7 +208,7 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
@@ -233,7 +234,7 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
 	}
@@ -261,7 +262,7 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
@@ -293,7 +294,8 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		Throwable exception = assertThrows(DataFlowClientException.class,
-				() -> taskLauncherTasklet.execute(null, chunkContext));
+				() -> taskLauncherTasklet.execute(null, chunkContext)
+		);
 		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
 	}
 

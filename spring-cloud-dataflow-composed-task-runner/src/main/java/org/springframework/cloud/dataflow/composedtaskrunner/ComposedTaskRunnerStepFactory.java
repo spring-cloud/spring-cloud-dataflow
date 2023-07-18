@@ -98,7 +98,8 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	private Environment environment;
 
 	public ComposedTaskRunnerStepFactory(
-			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId) {
+			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId
+	) {
 		Assert.notNull(composedTaskPropertiesFromEnv,
 				"composedTaskProperties must not be null");
 		Assert.hasText(taskName, "taskName must not be empty nor null");
@@ -121,7 +122,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	}
 
 	@Override
-	public Step getObject() throws Exception {
+	public Step getObject() {
 		if (this.mapper == null) {
 			this.mapper = new ObjectMapper();
 			this.mapper.registerModule(new Jdk8Module());
@@ -156,7 +157,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 				.decodeMap(this.composedTaskProperties.getComposedTaskAppProperties()).entrySet().stream()
 				.filter(e -> e.getKey().startsWith("app." + taskNameId)
 						|| e.getKey().startsWith("deployer." + taskNameId) || e.getKey().startsWith("deployer.*"))
-				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		Map<String, String> propertiesToUse = new HashMap<>();
 		propertiesToUse.putAll(this.taskSpecificProps);
@@ -165,8 +166,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		taskLauncherTasklet.setProperties(propertiesToUse);
 		logger.debug("Properties to use {}", propertiesToUse);
 
-		String stepName = this.taskName;
-		return this.steps.get(stepName)
+		return this.steps.get(this.taskName)
 				.tasklet(taskLauncherTasklet)
 				.transactionAttribute(getTransactionAttribute())
 				.listener(this.composedTaskStepExecutionListener)

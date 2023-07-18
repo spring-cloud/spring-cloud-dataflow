@@ -63,6 +63,7 @@ public class ComposedTaskRunnerConfiguration {
 	public TaskExecutionListener taskExecutionListener() {
 		return new ComposedTaskRunnerTaskListener();
 	}
+
 	@Bean
 	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
 		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorerContainer);
@@ -90,7 +91,13 @@ public class ComposedTaskRunnerConfiguration {
 		return new TaskExplorerContainer(explorers, taskExplorer);
 	}
 
-	private static void addTaskExplorer(DataSource dataSource, ComposedTaskProperties properties, Environment env, Map<String, TaskExplorer> explorers, String taskName) {
+	private static void addTaskExplorer(
+			DataSource dataSource,
+			ComposedTaskProperties properties,
+			Environment env,
+			Map<String, TaskExplorer> explorers,
+			String taskName
+	) {
 		logger.debug("addTaskExplorer:{}", taskName);
 		String propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", taskName);
 		String prefix = properties.getComposedTaskAppProperties().get(propertyName);
@@ -107,9 +114,8 @@ public class ComposedTaskRunnerConfiguration {
 	}
 
 	@Bean
-	public org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory composedTaskJob(ComposedTaskProperties properties) {
-
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedRunnerJobFactory(properties);
+	public ComposedRunnerJobFactory composedTaskJob(ComposedTaskProperties properties) {
+		return new ComposedRunnerJobFactory(properties);
 	}
 
 	@Bean
@@ -127,10 +133,17 @@ public class ComposedTaskRunnerConfiguration {
 	}
 
 	@Bean
-	public BatchConfigurer getComposedBatchConfigurer(BatchProperties properties,
-													  DataSource dataSource, TransactionManagerCustomizers transactionManagerCustomizers,
-													  ComposedTaskProperties composedTaskProperties) {
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedBatchConfigurer(properties,
-				dataSource, transactionManagerCustomizers, composedTaskProperties);
+	public BatchConfigurer getComposedBatchConfigurer(
+			BatchProperties properties,
+			DataSource dataSource,
+			TransactionManagerCustomizers transactionManagerCustomizers,
+			ComposedTaskProperties composedTaskProperties
+	) {
+		return new ComposedBatchConfigurer(
+				properties,
+				dataSource,
+				transactionManagerCustomizers,
+				composedTaskProperties
+		);
 	}
 }

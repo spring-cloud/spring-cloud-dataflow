@@ -16,17 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import javax.naming.OperationNotSupportedException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.naming.OperationNotSupportedException;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Objects;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -37,13 +32,10 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -74,6 +66,7 @@ public class TaskTemplate implements TaskOperations {
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
+
 	private static final String EXECUTION_LAUNCH_RELATION = "tasks/executions/launch";
 
 	private static final String EXECUTION_RELATION_BY_NAME = "tasks/executions/name";
@@ -112,21 +105,18 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link retrieveLogLink;
 
-	private final ObjectMapper mapper;
-
-	TaskTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion, ObjectMapper mapper) {
-		this.mapper = mapper;
+	TaskTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
 		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
 		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_LAUNCH_RELATION), "Execution launch relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
+		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_RELATION).isPresent(), "Execution relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent(), "Execution launch relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
-		Assert.notNull(resources.getLink(RETRIEVE_LOG), "Log relation is required");
+		Assert.isTrue(resources.getLink(RETRIEVE_LOG).isPresent(), "Log relation is required");
 
 		this.dataFlowServerVersion = dataFlowServerVersion;
 
@@ -174,7 +164,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskDefinitionResource create(String name, String definition, String description) {
-		MultiValueMap<String, Object> values = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("name", name);
 		values.add("definition", definition);
 		values.add("description", description);
@@ -198,7 +188,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void stop(String ids, String schemaTarget) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if(StringUtils.hasText(schemaTarget)) {
+		if (StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
@@ -208,7 +198,7 @@ public class TaskTemplate implements TaskOperations {
 	public void stop(String ids, String schemaTarget, String platform) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("platform", platform);
-		if(StringUtils.hasText(schemaTarget)) {
+		if (StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
@@ -245,7 +235,7 @@ public class TaskTemplate implements TaskOperations {
 	public TaskExecutionResource taskExecutionStatus(long id, String schemaTarget) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("id", id);
-		if(StringUtils.hasText(schemaTarget)) {
+		if (StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		String url = executionLink.expand(values).getHref();
@@ -282,7 +272,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void cleanup(long id, String schemaTarget, boolean removeData) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if(StringUtils.hasText(schemaTarget)) {
+		if (StringUtils.hasText(schemaTarget)) {
 			values.add("schemaTarget", schemaTarget);
 		}
 		String uriTemplate = executionLink.expand(id).getHref();
@@ -310,9 +300,9 @@ public class TaskTemplate implements TaskOperations {
 		map.put("completed", String.valueOf(completed));
 		map.put("name", StringUtils.hasText(taskName) ? taskName : "");
 		if (this.executionsInfoLink != null) {
-			return restTemplate
-					.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class)
-					.getTotalExecutions();
+			return Objects.requireNonNull(
+					restTemplate.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class)
+			).getTotalExecutions();
 		}
 		// for backwards-compatibility return zero count
 		return 0;

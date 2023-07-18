@@ -145,7 +145,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
 
-	private OAuth2TokenUtilsService oauth2TokenUtilsService;
+	private final OAuth2TokenUtilsService oauth2TokenUtilsService;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -159,9 +159,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private boolean autoCreateTaskDefinitions;
 
-	private TaskConfigurationProperties taskConfigurationProperties;
+	private final TaskConfigurationProperties taskConfigurationProperties;
 
-	private ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
+	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	private final AggregateExecutionSupport aggregateExecutionSupport;
 
@@ -463,7 +463,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				taskExecutionInformation, commandLineArguments, platformName, launcher.getType());
 
 		TaskManifest taskManifest = createTaskManifest(platformName, request, mergedTaskUnqualifiedDeploymentProperties);
-		String taskDeploymentId = null;
+		String taskDeploymentId;
 
 		try {
 			if (launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE) && !isAppDeploymentSame(previousManifest, taskManifest)) {
@@ -598,6 +598,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
 			if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
 				containsAccessToken = true;
+				break;
 			}
 		}
 		if (TaskServiceUtils.isUseUserAccessToken(this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties)) {
@@ -661,8 +662,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			if (launchState.equals(LaunchState.running) || launchState.equals(LaunchState.launching)) {
 				throw new IllegalStateException("Unable to update application due to currently running applications");
 			} else {
-				logger.warn("Task repository shows a running task execution for task {} but the actual state is {}."
-						+ launchState.toString(), taskName, launchState);
+				logger.warn("Task repository shows a running task execution for task {} but the actual state is {}.", taskName, launchState);
 			}
 		}
 	}
@@ -742,7 +742,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @return {@code true} if no upgrade is required, {@code false} if an upgrade is required.
 	 */
 	private boolean isAppDeploymentSame(TaskManifest previousManifest, TaskManifest newManifest) {
-		boolean same;
 
 		if (previousManifest == null) {
 			return true;
@@ -826,10 +825,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		for (AggregateTaskExecution taskExecution : taskExecutions) {
 			cancelTaskExecution(taskExecution, platform);
 		}
-		childTaskExecutions.forEach(childTaskExecution -> {
-			cancelTaskExecution(childTaskExecution, platform);
-		});
-
+		childTaskExecutions.forEach(childTaskExecution -> cancelTaskExecution(childTaskExecution, platform));
 		updateAuditInfoForTaskStops(taskExecutions.size() + childTaskExecutions.size());
 	}
 
