@@ -23,12 +23,14 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +39,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +50,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Glenn Renfro
@@ -57,20 +59,19 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @ExposesResourceFor(StepExecutionResource.class)
 public class JobStepExecutionController {
 
-	private final JobServiceContainer jobServiceContainer;
 
+	private final TaskJobService taskJobService;
 
 	/**
 	 * Creates a {@code JobStepExecutionsController} that retrieves Job Step Execution
 	 * information from a the {@link JobServiceContainer}
 	 *
-	 * @param jobServiceContainer A container of Jobservices for each schema target that this controller will use for retrieving job step
-	 * execution information.
+	 * @param taskJobService TaskJobService can query all schemas.
 	 */
 	@Autowired
-	public JobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		Assert.notNull(jobServiceContainer, "repository must not be null");
-		this.jobServiceContainer = jobServiceContainer;
+	public JobStepExecutionController(TaskJobService taskJobService) {
+		Assert.notNull(taskJobService, "taskJobService required");
+		this.taskJobService = taskJobService;
 	}
 
 	/**
@@ -94,8 +95,8 @@ public class JobStepExecutionController {
 		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
-		List<StepExecution> result = new ArrayList<>(jobService.getStepExecutions(id));
+		TaskJobExecution taskJobExecution = taskJobService.getJobExecution(id, schemaTarget);
+		List<StepExecution> result = new ArrayList<>(taskJobExecution.getJobExecution().getStepExecutions());
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
 		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return assembler.toModel(page, stepAssembler);
@@ -121,9 +122,14 @@ public class JobStepExecutionController {
 		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
+		TaskJobExecution taskJobExecution = taskJobService.getJobExecution(id, schemaTarget);
 		final Assembler stepAssembler = new Assembler(schemaTarget);
-		return stepAssembler.toModel(jobService.getStepExecution(id, stepId));
+		StepExecution stepExecution = taskJobExecution.getJobExecution().getStepExecutions()
+				.stream()
+				.filter(s -> s.getId().equals(stepId))
+				.findFirst()
+				.orElseThrow(() -> new NoSuchStepExecutionException("Step " + stepId + " in Job " + id + " not found"));
+		return stepAssembler.toModel(stepExecution);
 	}
 
 	/**

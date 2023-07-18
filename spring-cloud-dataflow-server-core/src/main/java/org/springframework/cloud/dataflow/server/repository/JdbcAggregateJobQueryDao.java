@@ -349,7 +349,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 		TaskJobExecution taskJobExecution = jobExecutions.get(0);
 		JobService jobService = jobServiceContainer.get(taskJobExecution.getSchemaTarget());
-		taskJobExecution.getJobExecution().addStepExecutions(new ArrayList<>(jobService.getStepExecutions(jobExecutionId)));
+		jobService.addStepExecutions(taskJobExecution.getJobExecution());
 		return taskJobExecution;
 	}
 

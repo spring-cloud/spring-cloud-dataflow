@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -116,11 +118,20 @@ public class SimpleJobService implements JobService, DisposableBean {
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException("No JobExecution with id=" + jobExecutionId);
 		}
+		return getStepExecutions(jobExecution);
 
+	}
+
+	@Override
+	public Collection<StepExecution> getStepExecutions(JobExecution jobExecution) {
+		Assert.notNull(jobExecution, "jobExecution required");
 		stepExecutionDao.addStepExecutions(jobExecution);
-
 		return jobExecution.getStepExecutions();
+	}
 
+	@Override
+	public void addStepExecutions(JobExecution jobExecution) {
+		stepExecutionDao.addStepExecutions(jobExecution);
 	}
 
 	/**
@@ -331,7 +342,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException("There is no JobExecution with id=" + jobExecutionId);
 		}
-		jobExecution.setJobInstance(jobInstanceDao.getJobInstance(jobExecution));
+		jobExecution.setJobInstance(Objects.requireNonNull(jobInstanceDao.getJobInstance(jobExecution)));
 		try {
 			jobExecution.setExecutionContext(executionContextDao.getExecutionContext(jobExecution));
 		} catch (Exception e) {
@@ -345,8 +356,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	public Collection<JobExecution> getJobExecutionsForJobInstance(String name, Long jobInstanceId)
 			throws NoSuchJobException {
 		checkJobExists(name);
-		List<JobExecution> jobExecutions = jobExecutionDao.findJobExecutions(jobInstanceDao
-				.getJobInstance(jobInstanceId));
+		List<JobExecution> jobExecutions = jobExecutionDao.findJobExecutions(Objects.requireNonNull(jobInstanceDao.getJobInstance(jobInstanceId)));
 		for (JobExecution jobExecution : jobExecutions) {
 			stepExecutionDao.addStepExecutions(jobExecution);
 		}
@@ -357,9 +367,14 @@ public class SimpleJobService implements JobService, DisposableBean {
 	public StepExecution getStepExecution(Long jobExecutionId, Long stepExecutionId)
 			throws NoSuchJobExecutionException, NoSuchStepExecutionException {
 		JobExecution jobExecution = getJobExecution(jobExecutionId);
+		return getStepExecution(jobExecution, stepExecutionId);
+	}
+
+	@Override
+	public StepExecution getStepExecution(JobExecution jobExecution, Long stepExecutionId) throws NoSuchStepExecutionException {
 		StepExecution stepExecution = stepExecutionDao.getStepExecution(jobExecution, stepExecutionId);
 		if (stepExecution == null) {
-			throw new NoSuchStepExecutionException("There is no StepExecution with jobExecutionId=" + jobExecutionId
+			throw new NoSuchStepExecutionException("There is no StepExecution with jobExecutionId=" + jobExecution.getId()
 					+ " and id=" + stepExecutionId);
 		}
 		try {

@@ -47,6 +47,7 @@ import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -121,6 +122,9 @@ public class JobStepExecutionControllerTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
+	@Autowired
+	TaskJobService taskJobService;
+
 	@Before
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
@@ -162,9 +166,11 @@ public class JobStepExecutionControllerTests {
 	}
 
 	private void validateStepDetail(int jobId, int stepId, String contextValue) throws Exception{
-		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json(String.format("{jobExecutionId: %d}", jobId)))
-				.andExpect(content().string(Matchers.containsString(String.format("{\"stepval\":\"%s\"}", contextValue))));
+		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.jobExecutionId", is(jobId)))
+				.andExpect(jsonPath("$.stepExecution.stepName", is(contextValue)));
 	}
 
 	@Test

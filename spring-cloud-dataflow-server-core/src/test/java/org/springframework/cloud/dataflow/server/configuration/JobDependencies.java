@@ -196,13 +196,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		return new JobStepExecutionController(jobServiceContainer);
+	public JobStepExecutionController jobStepExecutionController(TaskJobService taskJobService) {
+		return new JobStepExecutionController(taskJobService);
 	}
 
 	@Bean
-	public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer) {
-		return new JobStepExecutionProgressController(jobServiceContainer);
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
+		return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
 	}
 
 	@Bean

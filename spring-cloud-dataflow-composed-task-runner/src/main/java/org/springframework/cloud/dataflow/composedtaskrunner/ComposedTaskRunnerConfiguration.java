@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +32,6 @@ import org.springframework.boot.autoconfigure.transaction.TransactionManagerCust
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
-import org.springframework.cloud.dataflow.core.dsl.TaskApp;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -67,42 +65,44 @@ public class ComposedTaskRunnerConfiguration {
 
 	@Bean
 	TaskExplorerContainer taskExplorerContainer(TaskExplorer taskExplorer, DataSource dataSource, ComposedTaskProperties properties, Environment env) {
+		logger.debug("taskExplorerContainer:composedTaskProperties:{}", properties.getComposedTaskProperties());
+		logger.debug("taskExplorerContainer:composedTaskArguments:{}", properties.getComposedTaskArguments());
+		logger.debug("taskExplorerContainer:composedTaskAppProperties:{}", properties.getComposedTaskAppProperties());
+		logger.debug("taskExplorerContainer:composedTaskAppArguments:{}", properties.getComposedTaskAppArguments());
 		Map<String, TaskExplorer> explorers = new HashMap<>();
 		String ctrName = env.getProperty("spring.cloud.task.name");
-		if(ctrName == null) {
-			throw  new IllegalStateException("spring.cloud.task.name property must have a value.");
+		if (ctrName == null) {
+			throw new IllegalStateException("spring.cloud.task.name property must have a value.");
 		}
 		TaskParser parser = new TaskParser("ctr", properties.getGraph(), false, true);
 		StepBeanDefinitionRegistrar.TaskAppsMapCollector collector = new StepBeanDefinitionRegistrar.TaskAppsMapCollector();
 		parser.parse().accept(collector);
 		Set<String> taskNames = collector.getTaskApps().keySet();
+		logger.debug("taskExplorerContainer:taskNames:{}", taskNames);
 		for (String taskName : taskNames) {
-
-			String propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", taskName);
-			String prefix = properties.getComposedTaskAppProperties().get(propertyName);
-			if(prefix == null) {
-				prefix = env.getProperty(propertyName);
-			}
-			if (prefix != null) {
-				TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, prefix);
-				explorers.put(taskName, new SimpleTaskExplorer(factoryBean));
-			} else {
-				logger.warn("Cannot find {} in {} ", propertyName, properties.getComposedTaskAppProperties());
-			}
+			addTaskExplorer(dataSource, properties, env, explorers, taskName);
 			String appName = taskName.replace(ctrName + "-", "");
-			propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", appName);
-			prefix = properties.getComposedTaskAppProperties().get(propertyName);
-			if(prefix == null) {
-				prefix = env.getProperty(propertyName);
-			}
-			if (prefix != null) {
-				TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, prefix);
-				explorers.put(taskName, new SimpleTaskExplorer(factoryBean));
-			} else {
-				logger.warn("Cannot find {} in {} ", propertyName, properties.getComposedTaskAppProperties());
-			}
+			addTaskExplorer(dataSource, properties, env, explorers, appName);
+			String shortTaskName = taskName.substring(ctrName.length() + 1);
+			addTaskExplorer(dataSource, properties, env, explorers, shortTaskName);
 		}
 		return new TaskExplorerContainer(explorers, taskExplorer);
+	}
+
+	private static void addTaskExplorer(DataSource dataSource, ComposedTaskProperties properties, Environment env, Map<String, TaskExplorer> explorers, String taskName) {
+		logger.debug("addTaskExplorer:{}", taskName);
+		String propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", taskName);
+		String prefix = properties.getComposedTaskAppProperties().get(propertyName);
+		if (prefix == null) {
+			prefix = env.getProperty(propertyName);
+		}
+		if (prefix != null) {
+			TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, prefix);
+			logger.debug("taskExplorerContainer:adding:{}:{}", taskName, prefix);
+			explorers.put(taskName, new SimpleTaskExplorer(factoryBean));
+		} else {
+			logger.warn("Cannot find {} in {} ", propertyName, properties.getComposedTaskAppProperties());
+		}
 	}
 
 	@Bean

@@ -410,14 +410,19 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			addPrefixProperties(schemaVersionTarget, "app." + taskName + ".", deploymentProperties);
 			for (String appName : appNames) {
 				List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
-				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(names.get(0), taskDefinitionReader);
-				logger.debug("ctr:appName:{}:{}={}", taskName, names, appSchemaTarget.getName());
-				for (String name : names) {
-					addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + name + ".", deploymentProperties);
-					addPrefixProperties(appSchemaTarget, "app." + name + ".", deploymentProperties);
-					// addPrefixCommandLineArgs(appSchemaTarget, "app." + name + ".", commandLineArguments);
+				String registeredName = names.get(0);
+				String appId = registeredName;
+				if (names.size() > 1) {
+					appId = names.get(1);
 				}
+				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, taskDefinitionReader);
+				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
+				addPrefixProperties(appSchemaTarget, "app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".", deploymentProperties);
+				addPrefixProperties(appSchemaTarget, "app.composed-task-runner.composed-task-app-properties.app." + appId + ".", deploymentProperties);
+				addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + appId + ".", deploymentProperties);
+				addPrefixProperties(appSchemaTarget, "app." + registeredName + ".", deploymentProperties);
 			}
+			logger.debug("ctr:added:{}:{}", taskName, deploymentProperties);
 			handleAccessToken(commandLineArguments, taskExecutionInformation);
 			TaskServiceUtils.addImagePullSecretProperty(deploymentProperties,
 					this.composedTaskRunnerConfigurationProperties);

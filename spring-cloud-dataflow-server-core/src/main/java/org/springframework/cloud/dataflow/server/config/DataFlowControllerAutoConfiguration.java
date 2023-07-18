@@ -57,7 +57,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
-import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnStreamsEnabled;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
@@ -336,13 +335,13 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-			return new JobStepExecutionController(jobServiceContainer);
+		public JobStepExecutionController jobStepExecutionController(TaskJobService taskJobService) {
+			return new JobStepExecutionController(taskJobService);
 		}
 
 		@Bean
-		public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer) {
-			return new JobStepExecutionProgressController(jobServiceContainer);
+		public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
+			return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
 		}
 
 		@Bean
