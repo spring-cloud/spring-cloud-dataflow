@@ -20,17 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.web.client.RestTemplate;
 
 import static org.mockito.Mockito.mock;
@@ -45,15 +40,10 @@ public class TaskTemplateTests {
 	private static final String CURRENT_TASK_EXECUTION_LINK = "tasks/executions/current";
 
 	private RestTemplate restTemplate;
-	private ObjectMapper mapper;
+
 	@Before
 	public void setup() {
 		restTemplate = mock(RestTemplate.class);
-		mapper = new ObjectMapper();
-		mapper.registerModule(new Jdk8Module());
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.registerModule(new JavaTimeModule());
-		mapper.registerModule(new Jackson2DataflowModule());
 	}
 
 	@Test
@@ -76,20 +66,21 @@ public class TaskTemplateTests {
 
 	private void validateExecutionLinkPresent(String dataFlowVersion) {
 		TestResource testResource = new TestResource();
-		new TaskTemplate(this.restTemplate, testResource, dataFlowVersion, mapper);
+		new TaskTemplate(this.restTemplate, testResource, dataFlowVersion);
 		Assert.assertTrue(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
 	private void validateExecutionLinkNotPresent(String version) {
 		TestResource testResource = new TestResource();
-		new TaskTemplate(this.restTemplate, testResource, version, mapper);
+		new TaskTemplate(this.restTemplate, testResource, version);
 		Assert.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
-	public static class TestResource extends RepresentationModel {
+	public static class TestResource extends RepresentationModel<TestResource> {
 
-		private Map<String, Long> linksRequested = new HashMap<>();
+		private final Map<String, Long> linksRequested = new HashMap<>();
 
+		@Override
 		public Optional<Link> getLink(String rel) {
 			if (this.linksRequested.containsKey(rel)) {
 				Long count = this.linksRequested.get(rel);

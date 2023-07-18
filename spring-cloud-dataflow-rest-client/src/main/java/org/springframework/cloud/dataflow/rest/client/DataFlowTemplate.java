@@ -67,7 +67,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	/**
 	 * Holds discovered URLs of the API.
 	 */
-	protected final Map<String, UriTemplate> resources = new HashMap<String, UriTemplate>();
+	protected final Map<String, UriTemplate> resources = new HashMap<>();
 
 	/**
 	 * REST client for stream operations.
@@ -137,7 +137,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * missing Mixins for Jackson will be added implicitly. For more information, please
 	 * see {@link #prepareRestTemplate(RestTemplate)}.
 	 *
-	 * @param baseURI Must not be null
+	 * @param baseURI      Must not be null
 	 * @param restTemplate Must not be null
 	 */
 	public DataFlowTemplate(URI baseURI, RestTemplate restTemplate, ObjectMapper mapper) {
@@ -172,38 +172,37 @@ public class DataFlowTemplate implements DataFlowOperations {
 			if (resourceSupport.hasLink(StreamTemplate.DEFINITIONS_REL)) {
 				this.streamOperations = new StreamTemplate(restTemplate, resourceSupport, getVersion());
 				this.runtimeOperations = new RuntimeTemplate(restTemplate, resourceSupport);
-			}
-			else {
+			} else {
 				this.streamOperations = null;
 				this.runtimeOperations = null;
 			}
 			if (resourceSupport.hasLink(TaskTemplate.DEFINITIONS_RELATION)) {
-				if(mapper == null) {
+				if (mapper == null) {
 					mapper = new ObjectMapper();
 					mapper.registerModule(new Jdk8Module());
 					mapper.registerModule(new Jackson2HalModule());
 					mapper.registerModule(new JavaTimeModule());
 					mapper.registerModule(new Jackson2DataflowModule());
 				}
-				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion(), mapper);
+				this.taskOperations = new TaskTemplate(restTemplate, resourceSupport, getVersion());
 				this.jobOperations = new JobTemplate(restTemplate, resourceSupport);
-				if(resourceSupport.hasLink(SchedulerTemplate.SCHEDULES_RELATION)) {
+				if (resourceSupport.hasLink(SchedulerTemplate.SCHEDULES_RELATION)) {
 					this.schedulerOperations = new SchedulerTemplate(restTemplate, resourceSupport);
-				}
-				else {
+				} else {
 					schedulerOperations = null;
 				}
-			}
-			else {
+			} else {
 				this.taskOperations = null;
 				this.jobOperations = null;
 				this.schedulerOperations = null;
 			}
 			this.appRegistryOperations = new AppRegistryTemplate(restTemplate, resourceSupport);
-			this.completionOperations = new CompletionTemplate(restTemplate,
-					resourceSupport.getLink("completions/stream").get(), resourceSupport.getLink("completions/task").get());
-		}
-		else {
+			this.completionOperations = new CompletionTemplate(
+					restTemplate,
+					resourceSupport.getLink("completions/stream").get(),
+					resourceSupport.getLink("completions/task").get()
+			);
+		} else {
 			this.aboutOperations = null;
 			this.streamOperations = null;
 			this.runtimeOperations = null;
@@ -218,7 +217,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	private String getVersion() {
 		String version = "";
 		AboutResource aboutResource = this.aboutOperations.get();
-		if(aboutResource != null) {
+		if (aboutResource != null) {
 			version = aboutResource.getVersionInfo().getCore().getVersion();
 		}
 		return version;
@@ -237,7 +236,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	 * <li>{@link ExecutionContextJacksonMixIn}
 	 * <li>{@link StepExecutionHistoryJacksonMixIn}
 	 * </ul>
-	 *
+	 * <p>
 	 * Furthermore, this method will also register the {@link Jackson2HalModule}
 	 *
 	 * @param restTemplate Can be null. Instantiates a new {@link RestTemplate} if null
@@ -277,7 +276,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	public static ObjectMapper prepareObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "The objectMapper must not be null.");
 		return objectMapper
-			.registerModules(new Jackson2HalModule(), new Jackson2DataflowModule());
+				.registerModules(new Jackson2HalModule(), new Jackson2DataflowModule());
 	}
 
 	/**
@@ -290,12 +289,9 @@ public class DataFlowTemplate implements DataFlowOperations {
 	}
 
 	public Link getLink(RepresentationModel<?> resourceSupport, String rel) {
-		Link link = resourceSupport.getLink(rel).get();
-		if (link == null) {
-			throw new DataFlowServerException(
-					"Server did not return a link for '" + rel + "', links: '" + resourceSupport + "'");
-		}
-		return link;
+		return resourceSupport.getLink(rel).orElseThrow(() ->
+				new DataFlowServerException("Server did not return a link for '" + rel + "', links: '" + resourceSupport + "'")
+		);
 	}
 
 	@Override
