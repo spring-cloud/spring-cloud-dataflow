@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.task.configuration.EnableTask;
+import org.springframework.cloud.task.listener.TaskExecutionListener;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
@@ -59,16 +60,16 @@ public class ComposedTaskRunnerConfiguration {
 	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskRunnerConfiguration.class);
 
 	@Bean
+	public TaskExecutionListener taskExecutionListener() {
+		return new ComposedTaskRunnerTaskListener();
+	}
+	@Bean
 	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
 		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorerContainer);
 	}
 
 	@Bean
 	TaskExplorerContainer taskExplorerContainer(TaskExplorer taskExplorer, DataSource dataSource, ComposedTaskProperties properties, Environment env) {
-		logger.debug("taskExplorerContainer:composedTaskProperties:{}", properties.getComposedTaskProperties());
-		logger.debug("taskExplorerContainer:composedTaskArguments:{}", properties.getComposedTaskArguments());
-		logger.debug("taskExplorerContainer:composedTaskAppProperties:{}", properties.getComposedTaskAppProperties());
-		logger.debug("taskExplorerContainer:composedTaskAppArguments:{}", properties.getComposedTaskAppArguments());
 		Map<String, TaskExplorer> explorers = new HashMap<>();
 		String ctrName = env.getProperty("spring.cloud.task.name");
 		if (ctrName == null) {

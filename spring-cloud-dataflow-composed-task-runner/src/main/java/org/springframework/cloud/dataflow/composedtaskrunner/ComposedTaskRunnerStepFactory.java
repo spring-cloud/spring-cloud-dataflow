@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
@@ -93,6 +94,9 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	@Autowired(required = false)
 	private ObjectMapper mapper;
 
+	@Autowired
+	private Environment environment;
+
 	public ComposedTaskRunnerStepFactory(
 			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId) {
 		Assert.notNull(composedTaskPropertiesFromEnv,
@@ -132,7 +136,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 				this.composedTaskPropertiesFromEnv,
 				this.taskName,
 				taskProperties,
-				this.mapper);
+				environment, this.mapper);
 
 		List<String> argumentsFromAppProperties = Base64Utils.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments())
 				.entrySet()

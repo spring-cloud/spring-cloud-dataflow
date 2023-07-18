@@ -190,9 +190,9 @@ public class TaskTemplate implements TaskOperations {
 		values.add("properties", formattedProperties);
 		values.add("arguments", commandLineArguments);
 		values.add("name", name);
-		String url = executionLaunchLink.expand(values).getHref();
+		String url = executionLaunchLink.expand(name).getHref();
 		values.remove("name");
-		return restTemplate.postForObject(url, values, LaunchResponseResource.class, name, formattedProperties, commandLineArguments);
+		return restTemplate.postForObject(url, values, LaunchResponseResource.class);
 	}
 
 	@Override

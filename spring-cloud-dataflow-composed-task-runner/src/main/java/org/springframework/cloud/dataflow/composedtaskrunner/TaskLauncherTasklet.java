@@ -24,8 +24,8 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.UnexpectedJobExecutionException;
@@ -49,6 +49,7 @@ import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
@@ -83,7 +84,7 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	private String taskName;
 
-	private static final Log logger = LogFactory.getLog(org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTasklet.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskLauncherTasklet.class);
 
 	private Long executionId;
 	private String schemaTarget;
@@ -100,6 +101,7 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	private final ObjectMapper mapper;
 
+	private final Environment environment;
 	public TaskLauncherTasklet(
 			ClientRegistrationRepository clientRegistrations,
 			OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
@@ -107,7 +109,9 @@ public class TaskLauncherTasklet implements Tasklet {
 			ComposedTaskProperties composedTaskProperties,
 			String taskName,
 			TaskProperties taskProperties,
-			@Nullable ObjectMapper mapper) {
+			Environment environment,
+			@Nullable ObjectMapper mapper
+	) {
 		if(mapper == null) {
 			mapper = new ObjectMapper();
 			mapper.registerModule(new Jdk8Module());
@@ -121,6 +125,7 @@ public class TaskLauncherTasklet implements Tasklet {
 		Assert.notNull(composedTaskProperties,
 				"composedTaskProperties must not be null");
 
+		this.environment = environment;
 		this.taskName = taskName;
 		this.taskExplorer = taskExplorer;
 		this.composedTaskProperties = composedTaskProperties;
@@ -180,7 +185,7 @@ public class TaskLauncherTasklet implements Tasklet {
 			List<String> cleansedArgs = new ArrayList<>();
 			if(args != null) {
 				for(String argument : args) {
-					if(!argument.startsWith("--spring.cloud.task.parent-execution-id=")) {
+					if(!argument.startsWith("--spring.cloud.task.parent-execution-id=") && !argument.startsWith("--spring.cloud.task.parent-execution-id%")) {
 						cleansedArgs.add(argument);
 					}
 				}
@@ -189,11 +194,14 @@ public class TaskLauncherTasklet implements Tasklet {
 			String parentTaskExecutionId = getParentTaskExecutionId(contribution);
 			if(parentTaskExecutionId != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
+			} else {
+				logger.error("Cannot find task execution id");
 			}
 
 			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
+			logger.debug("execute:{}:{}:{}", tmpTaskName, this.properties, args);
 			LaunchResponseResource response = taskOperations.launch(tmpTaskName,
 					this.properties, args);
 
@@ -201,6 +209,10 @@ public class TaskLauncherTasklet implements Tasklet {
 			this.schemaTarget = response.getSchemaTarget();
 			stepExecutionContext.put("task-execution-id", response.getExecutionId());
 			stepExecutionContext.put("schema-target", response.getSchemaTarget());
+			String ctrSchemaTarget = environment.getProperty("schemaTarget");
+			if(StringUtils.hasText(ctrSchemaTarget)) {
+				stepExecutionContext.put("parent-schema-target", ctrSchemaTarget);
+			}
 			stepExecutionContext.put("task-name", tmpTaskName);
 			stepExecutionContext.put("task-arguments", args);
 			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
@@ -243,9 +255,10 @@ public class TaskLauncherTasklet implements Tasklet {
 		Long result = null;
 		if (this.taskProperties.getExecutionid() != null) {
 			result = this.taskProperties.getExecutionid();
-		}
-		else if (stepContribution != null) {
-			result = this.taskExplorer.getTaskExecutionIdByJobExecutionId(stepContribution.getStepExecution().getJobExecutionId());
+			logger.debug("getParentTaskExecutionId:taskProperties.executionId={}", result);
+		} else if (ComposedTaskRunnerTaskListener.getExecutionId() != null) {
+			result = Long.valueOf(String.valueOf(ComposedTaskRunnerTaskListener.getExecutionId()));
+			logger.debug("getParentTaskExecutionId:ComposedTaskRunnerTaskListener.executionId={}", result);
 		}
 		return result != null ? String.valueOf(result) : null;
 	}

@@ -517,12 +517,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		addProperty(prefix + "spring.cloud.task.initialize-enabled", "false", deploymentProperties);
 		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
 		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
+		addProperty(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), deploymentProperties);
 	}
 
 	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
 		addCommandLine(prefix + "spring.cloud.task.initialize-enabled", "false", commandLineArgs);
 		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
 		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);
+		addCommandLine(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), commandLineArgs);
 	}
 
 	private static void addCommandLine(String property, String value, List<String> commandLineArgs) {
