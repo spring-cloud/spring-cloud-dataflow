@@ -417,8 +417,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				}
 				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, taskDefinitionReader);
 				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
-				addPrefixProperties(appSchemaTarget, "app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".", deploymentProperties);
-				addPrefixProperties(appSchemaTarget, "app.composed-task-runner.composed-task-app-properties.app." + appId + ".", deploymentProperties);
+				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".spring.cloud.task.tablePrefix", appSchemaTarget.getTaskPrefix());
+				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + appId + ".spring.cloud.task.tablePrefix", appSchemaTarget.getTaskPrefix());
 				addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + appId + ".", deploymentProperties);
 				addPrefixProperties(appSchemaTarget, "app." + registeredName + ".", deploymentProperties);
 			}
