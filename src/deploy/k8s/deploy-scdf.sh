@@ -146,7 +146,7 @@ if [ "$PROMETHEUS" = "true" ]; then
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.11.0-SNAPSHOT" false
         sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
-        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
+        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "1.5.2"
     fi
     kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
     kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
