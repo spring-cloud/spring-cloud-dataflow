@@ -151,7 +151,6 @@ public class TaskCommands {
 		headers.put("dslText", "Task Definition");
 		headers.put("description", "description");
 		headers.put("status", "Task Status");
-		headers.put("schemaTarget", "Schema Target");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
 		return DataFlowTables.applyStyle(builder).build();
 	}
