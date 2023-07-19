@@ -134,10 +134,6 @@ public class TaskLauncherTasklet implements Tasklet {
 		this.ctrSchemaTarget = environment.getProperty("spring.cloud.task.schemaTarget");
 	}
 
-	public String getCtrSchemaTarget() {
-		return ctrSchemaTarget;
-	}
-
 	public void setProperties(Map<String, String> properties) {
 		if (properties != null) {
 			this.properties = properties;
@@ -198,6 +194,9 @@ public class TaskLauncherTasklet implements Tasklet {
 			Long parentTaskExecutionId = getParentTaskExecutionId();
 			if (parentTaskExecutionId != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
+				String parentSchemaTarget = StringUtils.hasText(ctrSchemaTarget) ? ctrSchemaTarget : "boot2";
+				args.add("--spring.cloud.task.parent-schema-target=" + parentSchemaTarget);
+
 			} else {
 				logger.error("Cannot find task execution id");
 			}
@@ -212,9 +211,7 @@ public class TaskLauncherTasklet implements Tasklet {
 
 			stepExecutionContext.put("task-execution-id", response.getExecutionId());
 			stepExecutionContext.put("schema-target", response.getSchemaTarget());
-			if (StringUtils.hasText(ctrSchemaTarget)) {
-				stepExecutionContext.put("parent-schema-target", ctrSchemaTarget);
-			}
+
 			stepExecutionContext.put("task-name", tmpTaskName);
 			if (!args.isEmpty()) {
 				stepExecutionContext.put("task-arguments", args);
@@ -305,7 +302,6 @@ public class TaskLauncherTasklet implements Tasklet {
 			logger.debug("Configured OAuth2 Access Token for accessing the Data Flow Server");
 		} else if (StringUtils.hasText(this.composedTaskProperties.getDataflowServerUsername())
 				&& StringUtils.hasText(this.composedTaskProperties.getDataflowServerPassword())) {
-			accessTokenValue = null;
 			clientHttpRequestFactoryBuilder.basicAuthCredentials(composedTaskProperties.getDataflowServerUsername(),
 					composedTaskProperties.getDataflowServerPassword());
 			logger.debug("Configured basic security for accessing the Data Flow Server");

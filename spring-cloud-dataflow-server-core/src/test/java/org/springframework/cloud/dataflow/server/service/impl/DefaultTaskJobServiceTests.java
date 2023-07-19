@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,8 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -163,7 +162,7 @@ public class DefaultTaskJobServiceTests {
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
-		appDeploymentRequest.getCommandlineArguments().contains("--spring.cloud.data.flow.platformname=demo");
+
 		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
 	}
 
@@ -237,8 +236,8 @@ public class DefaultTaskJobServiceTests {
 
 	private void clearLaunchers() {
 		List<Launcher> launchers = new ArrayList<>();
-		this.launcherRepository.findAll().forEach(launcher1 -> launchers.add(launcher1));
-		launchers.stream().forEach(launcher -> this.launcherRepository.delete(launcher));
+		this.launcherRepository.findAll().forEach(launchers::add);
+		this.launcherRepository.deleteAll(launchers);
 	}
 
 	private void createBaseLaunchers() {

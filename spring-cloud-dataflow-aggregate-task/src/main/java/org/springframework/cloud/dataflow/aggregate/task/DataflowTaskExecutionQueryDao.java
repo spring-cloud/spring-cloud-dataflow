@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
@@ -40,6 +41,33 @@ public interface DataflowTaskExecutionQueryDao {
 	AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget);
 
 	/**
+	 * Retrieves a list of task executions where the provided execution id and schemaTarget represents the parent of task execution.
+	 *
+	 * @param executionId  parent task execution id
+	 * @param schemaTarget parent task schema target
+	 * @return the task executions
+	 */
+	List<AggregateTaskExecution> findChildTaskExecutions(long executionId, String schemaTarget);
+
+	/**
+	 * Retrieves a list of task executions where the provided execution ids and schemaTarget represents the parents of task executions.
+	 *
+	 * @param parentIds    parent task execution ids
+	 * @param schemaTarget parent task schema target
+	 * @return the task executions
+	 */
+	List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget);
+
+	/**
+	 * Retrieves a subset of task executions by task name and execution status.
+	 *
+	 * @param taskName  the name of the task to search for in the repository.
+	 * @param completed indicator to retrieve only completed task executions.
+	 * @return a list that contains task executions.
+	 */
+	List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed);
+
+	/**
 	 * Retrieves current number of task executions for a taskName.
 	 *
 	 * @param taskName the name of the task to search for in the repository.
@@ -49,8 +77,9 @@ public interface DataflowTaskExecutionQueryDao {
 
 	/**
 	 * Retrieves the number of task execution that have completed.
+	 *
 	 * @param taskName the name of the task to search
-	 * @return
+	 * @return the number of completed task executions
 	 */
 	long getCompletedTaskExecutionCountByTaskName(String taskName);
 
@@ -142,6 +171,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @see #getLatestTaskExecutionsByTaskNames(String...)
 	 */
 	AggregateTaskExecution getLatestTaskExecutionForTaskName(String taskName);
+
 	AggregateTaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
 
 }

@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.aggregate.task.impl;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +73,8 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 			SchemaService schemaService,
 			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader,
-			TaskDeploymentReader taskDeploymentReader) {
+			TaskDeploymentReader taskDeploymentReader
+	) {
 		this.taskExecutionQueryDao = taskExecutionQueryDao;
 		this.aggregateExecutionSupport = aggregateExecutionSupport;
 		this.taskDefinitionReader = taskDefinitionReader;
@@ -94,7 +96,7 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		Assert.notNull(taskExplorer, "Expected taskExplorer for " + schemaTarget);
 		TaskExecution taskExecution = taskExplorer.getTaskExecution(executionId);
 		TaskDeployment deployment = null;
-		if(taskExecution != null) {
+		if (taskExecution != null) {
 			if (StringUtils.hasText(taskExecution.getExternalExecutionId())) {
 				deployment = taskDeploymentReader.getDeployment(taskExecution.getExternalExecutionId());
 			} else {
@@ -112,10 +114,20 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	@Override
 	public AggregateTaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform) {
 		TaskDeployment deployment = taskDeploymentReader.getDeployment(externalExecutionId, platform);
-		if(deployment != null) {
+		if (deployment != null) {
 			return this.taskExecutionQueryDao.geTaskExecutionByExecutionId(externalExecutionId, deployment.getTaskDefinitionName());
 		}
 		return null;
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findChildTaskExecutions(long executionId, String schemaTarget) {
+		return this.taskExecutionQueryDao.findChildTaskExecutions(executionId, schemaTarget);
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget) {
+		return this.taskExecutionQueryDao.findChildTaskExecutions(parentIds, schemaTarget);
 	}
 
 	@Override
@@ -125,7 +137,7 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		TaskExplorer taskExplorer = taskExplorers.get(target.getName());
 		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
 		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
-		if(definition == null) {
+		if (definition == null) {
 			logger.warn("Cannot find TaskDefinition for " + taskName);
 		}
 		TaskDeployment deployment = definition != null ? taskDeploymentReader.findByDefinitionName(definition.getName()) : null;
@@ -172,6 +184,11 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 			result += explorer.getRunningTaskExecutionCount();
 		}
 		return result;
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed) {
+		return this.taskExecutionQueryDao.findTaskExecutionsByName(taskName, completed);
 	}
 
 	@Override
