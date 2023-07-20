@@ -13,6 +13,7 @@ export USE_PRO=false
 export K8S_DRIVER=$1
 export KUBECONFIG=
 export NS=scdf
+export METRICS=
 shift
 while [ "$1" != "" ]; do
     case "$1" in
@@ -27,6 +28,9 @@ while [ "$1" != "" ]; do
         ;;
     "kafka")
         export  BROKER=kafka
+        ;;
+    "prometheus" | "grafana")
+        export METRICS=prometheus
         ;;
     "--pro")
         export USE_PRO=true

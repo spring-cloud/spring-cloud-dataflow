@@ -18,10 +18,14 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.sql.Types;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.task.configuration.TaskProperties;
@@ -43,20 +47,20 @@ import org.springframework.util.StringUtils;
  * @author Corneil du Plessis
  */
 public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
-
+	private final static Logger logger = LoggerFactory.getLogger(JdbcDataflowTaskExecutionDao.class);
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
 	private static final String DELETE_TASK_EXECUTIONS = "DELETE FROM %PREFIX%EXECUTION "
-			+ "WHERE task_execution_id in (:taskExecutionIds)";
+			+ "WHERE TASK_EXECUTION_ID in (:taskExecutionIds)";
 
 	private static final String DELETE_TASK_EXECUTION_PARAMS = "DELETE FROM %PREFIX%EXECUTION_PARAMS "
-			+ "WHERE task_execution_id in (:taskExecutionIds)";
+			+ "WHERE TASK_EXECUTION_ID in (:taskExecutionIds)";
 
 	private static final String DELETE_TASK_TASK_BATCH = "DELETE FROM %PREFIX%TASK_BATCH "
-			+ "WHERE task_execution_id in (:taskExecutionIds)";
+			+ "WHERE TASK_EXECUTION_ID in (:taskExecutionIds)";
 
-	private static final String SELECT_CHILD_TASK_EXECUTION_IDS = "SELECT task_execution_id FROM %PREFIX%EXECUTION "
-			+ "WHERE parent_execution_id in (:parentTaskExecutionIds)";
+	private static final String SELECT_CHILD_TASK_EXECUTION_IDS = "SELECT TASK_EXECUTION_ID FROM %PREFIX%EXECUTION "
+			+ "WHERE PARENT_EXECUTION_ID in (:parentTaskExecutionIds)";
 
 	private static final String FIND_TASK_EXECUTION_IDS_BY_TASK_NAME = "SELECT TASK_EXECUTION_ID "
 			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
@@ -86,7 +90,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 			+ "from %PREFIX%EXECUTION where TASK_NAME = :taskName";
 
 
-	private TaskProperties taskProperties;
+	private final TaskProperties taskProperties;
 
 	/**
 	 * @param dataSource  used by the dao to execute queries and updates the tables.
@@ -127,6 +131,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	@Override
 	public Set<Long> findChildTaskExecutionIds(Set<Long> taskExecutionIds) {
+		logger.debug("findChildTaskExecutionIds:{}", taskExecutionIds);
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("parentTaskExecutionIds", taskExecutionIds);
 
@@ -146,17 +151,20 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 							return jobExecutionIds;
 					});
+			Assert.notNull(childTaskExecutionIds, "Expected childTaskExecutionIds");
 		}
 		catch (DataAccessException e) {
 			childTaskExecutionIds = Collections.emptySet();
 		}
-
 		if (!childTaskExecutionIds.isEmpty()) {
-			childTaskExecutionIds.addAll(this.findChildTaskExecutionIds(childTaskExecutionIds));
+			Set<Long> newChildren = new HashSet<>(childTaskExecutionIds);
+			newChildren.removeAll(taskExecutionIds);
+			if(!newChildren.isEmpty()) {
+				childTaskExecutionIds.addAll(this.findChildTaskExecutionIds(newChildren));
+			}
 		}
-
+		logger.debug("findChildTaskExecutionIds:childTaskExecutionIds={}", childTaskExecutionIds);
 		return childTaskExecutionIds;
-
 	}
 
 	@Override
@@ -185,7 +193,7 @@ public class JdbcDataflowTaskExecutionDao implements DataflowTaskExecutionDao {
 
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
-		String QUERY = null;
+		String QUERY;
 		MapSqlParameterSource queryParameters = new MapSqlParameterSource();
 		if (StringUtils.hasText(taskName)) {
 			queryParameters.addValue("taskName", taskName, Types.VARCHAR);

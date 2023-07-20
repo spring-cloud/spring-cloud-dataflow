@@ -36,6 +36,14 @@ else
   echo "Waiting for rabbitmq"
   kubectl rollout status deployment --namespace "$NS" rabbitmq
 fi
+if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
+    echo "Waiting for prometheus"
+    kubectl rollout status deployment --namespace "$NS" prometheus
+    echo "Waiting for grafana"
+    kubectl rollout status deployment --namespace "$NS" grafana
+    echo "Waiting for prometheus-rsocket-proxy"
+    kubectl rollout status deployment --namespace "$NS" prometheus-rsocket-proxy
+fi
 echo "Waiting for skipper"
 kubectl rollout status deployment --namespace "$NS" skipper
 echo "Waiting for dataflow"
