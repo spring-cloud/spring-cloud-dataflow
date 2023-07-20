@@ -110,6 +110,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		List<String> args = new ArrayList<>(2);
 		args.add("--baz=boo --foo=bar");
 		args.add("--spring.cloud.task.parent-execution-id=1");
+		args.add("--spring.cloud.task.parent-schema-target=boot2");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(taskOperations).launch("ComposedTest-AAA", props, args);
 	}

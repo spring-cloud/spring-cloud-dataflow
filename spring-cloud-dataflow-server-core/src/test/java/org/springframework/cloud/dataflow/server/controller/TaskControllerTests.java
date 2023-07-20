@@ -639,7 +639,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertEquals(6, request.getCommandlineArguments().size());
+		assertEquals(8, request.getCommandlineArguments().size());
 		// don't assume order in a list
 		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
 		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));

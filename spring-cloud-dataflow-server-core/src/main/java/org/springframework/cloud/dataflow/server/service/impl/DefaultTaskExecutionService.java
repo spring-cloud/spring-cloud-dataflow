@@ -404,7 +404,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
-			logger.info("composedTask:appNames:{}", appNames);
+			logger.info("composedTask:dsl={}:appNames:{}", taskDefinition.getDslText(), appNames);
 			// addPrefixCommandLineArgs(schemaVersionTarget, "", commandLineArguments);
 			addPrefixProperties(schemaVersionTarget, "app.composed-task-runner.", deploymentProperties);
 			addPrefixProperties(schemaVersionTarget, "app." + taskName + ".", deploymentProperties);

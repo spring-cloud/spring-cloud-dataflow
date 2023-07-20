@@ -44,6 +44,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.StringUtils;
 
 /**
  * Configures the Job that will execute the Composed Task Execution.
@@ -73,7 +74,7 @@ public class ComposedTaskRunnerConfiguration {
 	TaskExplorerContainer taskExplorerContainer(TaskExplorer taskExplorer, DataSource dataSource, ComposedTaskProperties properties, Environment env) {
 		Map<String, TaskExplorer> explorers = new HashMap<>();
 		String ctrName = env.getProperty("spring.cloud.task.name");
-		if (ctrName == null) {
+		if (!StringUtils.hasText(ctrName)) {
 			throw new IllegalStateException("spring.cloud.task.name property must have a value.");
 		}
 		TaskParser parser = new TaskParser("ctr", properties.getGraph(), false, true);
@@ -85,8 +86,10 @@ public class ComposedTaskRunnerConfiguration {
 			addTaskExplorer(dataSource, properties, env, explorers, taskName);
 			String appName = taskName.replace(ctrName + "-", "");
 			addTaskExplorer(dataSource, properties, env, explorers, appName);
-			String shortTaskName = taskName.substring(ctrName.length() + 1);
-			addTaskExplorer(dataSource, properties, env, explorers, shortTaskName);
+			if(taskName.length() > ctrName.length()) {
+				String shortTaskName = taskName.substring(ctrName.length() + 1);
+				addTaskExplorer(dataSource, properties, env, explorers, shortTaskName);
+			}
 		}
 		return new TaskExplorerContainer(explorers, taskExplorer);
 	}

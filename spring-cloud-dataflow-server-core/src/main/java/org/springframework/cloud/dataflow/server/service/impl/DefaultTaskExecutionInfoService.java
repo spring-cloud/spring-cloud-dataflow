@@ -253,15 +253,25 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 							logger.debug("subSubTask:{}:{}:{}", subSubTask.getName(), subSubTask.getTaskName(), subSubTask);
 							TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getName());
 							if (subSubTaskDefinition != null) {
-								result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
+								if(!subTask.getLabel().contains("$")) {
+									result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
+								} else {
+									result.add(subSubTaskDefinition.getRegisteredAppName());
+								}
 							}
 						}
 					}
 				} else {
-					if(subTask.getLabel() == null || subTask.getLabel().equals(subTask.getName())) {
+					if((subTask.getLabel() == null || subTask.getLabel().equals(subTask.getName())) && !subTask.getName().contains("$")) {
 						result.add(subTask.getName());
 					} else {
-						result.add(subTask.getName() + "," + subTask.getLabel());
+						if(!subTask.getName().contains("$") && !subTask.getLabel().contains("$")) {
+							result.add(subTask.getName() + "," + subTask.getLabel());
+						} else if(!subTask.getName().contains("$")) {
+							result.add(subTask.getName());
+						} else if(!subTask.getTaskName().contains("$")) {
+							result.add(subTask.getTaskName());
+						}
 					}
 				}
 			}

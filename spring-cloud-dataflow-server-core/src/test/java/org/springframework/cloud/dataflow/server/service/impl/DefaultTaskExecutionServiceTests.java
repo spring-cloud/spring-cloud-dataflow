@@ -425,7 +425,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("app.demo.foo"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
@@ -450,7 +450,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
@@ -475,7 +475,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
 
 			properties.clear();
@@ -489,7 +489,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			// without passing version, we should not get back to default app, in this case foo-task100
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.timestamp"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
@@ -515,7 +515,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task101", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("1.0.1", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("version.l1"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
@@ -541,7 +541,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("100000g", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
 
 			verify(this.taskLauncher, never()).destroy(TASK_NAME_ORIG);
@@ -642,7 +642,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getDeploymentProperties().size());
 			assertEquals("10000g", lastManifest.getTaskDeploymentRequest().getDeploymentProperties().get("deployer.demo.memory"));
 
 		}
@@ -697,12 +697,12 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("--foo=bar"));
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			assertEquals(4, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals(6, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.emptyList());
 			lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 		}
 
 		@Test
@@ -734,7 +734,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, deploymentProperties, Collections.singletonList("app.demo.1=--foo=bar"));
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
-			assertEquals(4, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals(6, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			assertEquals("--foo=bar", lastManifest.getTaskDeploymentRequest().getCommandlineArguments().get(0));
 		}
 
@@ -772,7 +772,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
-			assertEquals(9, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
+			assertEquals(11, lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().size());
 			assertEquals("bar", lastManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("foo"));
 		}
 
@@ -1298,7 +1298,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			System.out.println("cmdLine:" + lastManifest.getTaskDeploymentRequest().getCommandlineArguments());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
 
 			assertEquals("BOOT3_TASK_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.cloud.task.tablePrefix"));
@@ -1318,7 +1318,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("file:src/test/resources/apps/foo-task", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
 			assertEquals("default", lastManifest.getPlatformName());
 			System.out.println("cmdLine:" + lastManifest.getTaskDeploymentRequest().getCommandlineArguments());
-			assertEquals(3, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			assertEquals(5, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
 			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
 
 			assertEquals("BOOT3_TASK_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.cloud.task.tablePrefix"));
@@ -1326,7 +1326,10 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 	}
 
-	@TestPropertySource(properties = {"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue", "spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"})
+	@TestPropertySource(properties = {
+			"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue",
+			"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"
+	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 
 	public static class ComposedTaskTests extends DefaultTaskExecutionServiceTests {
@@ -1601,15 +1604,15 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertThat(request.getCommandlineArguments()).contains("--spring.cloud.data.flow.taskappname=composed-task-runner");
 			assertThat(request.getDeploymentProperties().get("app.composed-task-runner.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertThat(request.getDeploymentProperties().get("app.composed-task-runner.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
-			System.out.println("deploymentProperties:" + request.getDeploymentProperties());
+			System.out.println("deploymentProperties:" + StringUtils.collectionToDelimitedString(request.getDeploymentProperties().entrySet(), "\n"));
 			assertThat(request.getDeploymentProperties().get("app.AAA.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
 			assertThat(request.getDeploymentProperties().get("app.AAA.spring.batch.jdbc.table-prefix")).isEqualTo("BOOT3_BATCH_");
-			assertThat(request.getDeploymentProperties().get("app.a1.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
-			assertThat(request.getDeploymentProperties().get("app.a1.spring.batch.jdbc.table-prefix")).isEqualTo("BOOT3_BATCH_");
+			assertThat(request.getDeploymentProperties().get("app.seqTask-a1.spring.cloud.task.tablePrefix")).isEqualTo("BOOT3_TASK_");
+			assertThat(request.getDeploymentProperties().get("app.seqTask-a1.spring.batch.jdbc.table-prefix")).isEqualTo("BOOT3_BATCH_");
 			assertThat(request.getDeploymentProperties().get("app.BBB.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
 			assertThat(request.getDeploymentProperties().get("app.BBB.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
-			assertThat(request.getDeploymentProperties().get("app.b2.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
-			assertThat(request.getDeploymentProperties().get("app.b2.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
+			assertThat(request.getDeploymentProperties().get("app.seqTask-b2.spring.cloud.task.tablePrefix")).isEqualTo("TASK_");
+			assertThat(request.getDeploymentProperties().get("app.seqTask-b2.spring.batch.jdbc.table-prefix")).isEqualTo("BATCH_");
 			// assertThat(request.getDefinition().getProperties().get("composed-task-properties")).isEqualTo("app.seqTask-AAA.app.AAA.timestamp.format=YYYY, deployer.seqTask-AAA.deployer.AAA.memory=1240m");
 			assertThat(request.getDeploymentProperties().get("app.seqTask.AAA.timestamp.format")).isEqualTo("YYYY");
 			assertThat(request.getDeploymentProperties().get("deployer.seqTask.AAA.memory")).isEqualTo("1240m");
