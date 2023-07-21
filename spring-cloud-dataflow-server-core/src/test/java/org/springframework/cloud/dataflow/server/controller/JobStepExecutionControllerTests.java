@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,17 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -64,6 +71,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
@@ -92,21 +100,30 @@ public class JobStepExecutionControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	private TaskExecutionDao dao;
+	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	TaskBatchDaoContainer taskBatchDaoContainer;
 
 	private MockMvc mockMvc;
 
 	@Autowired
-	private WebApplicationContext wac;
+	WebApplicationContext wac;
 
 	@Autowired
-	private RequestMappingHandlerAdapter adapter;
+	RequestMappingHandlerAdapter adapter;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
+
+	@Autowired
+	TaskJobService taskJobService;
 
 	@Before
 	public void setupMockMVC() {
@@ -149,9 +166,11 @@ public class JobStepExecutionControllerTests {
 	}
 
 	private void validateStepDetail(int jobId, int stepId, String contextValue) throws Exception{
-		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().json(String.format("{jobExecutionId: %d}", jobId)))
-				.andExpect(content().string(Matchers.containsString(String.format("{\"stepval\":\"%s\"}", contextValue))));
+		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.jobExecutionId", is(jobId)))
+				.andExpect(jsonPath("$.stepExecution.stepName", is(contextValue)));
 	}
 
 	@Test
@@ -175,6 +194,8 @@ public class JobStepExecutionControllerTests {
 	}
 
 	private void createStepExecution(String jobName, String... stepNames) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
+		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
 		for (String stepName : stepNames) {
@@ -185,7 +206,9 @@ public class JobStepExecutionControllerTests {
 			stepExecution.setExecutionContext(context);
 			jobRepository.add(stepExecution);
 		}
+		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }

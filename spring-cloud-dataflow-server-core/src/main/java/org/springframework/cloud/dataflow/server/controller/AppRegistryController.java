@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -48,6 +47,7 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -235,7 +235,7 @@ public class AppRegistryController {
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
 			@PathVariable("version") String version,
-			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
+			@RequestParam(name = "bootVersion", required = false) String bootVersion,
 			@RequestParam("uri") String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
@@ -246,9 +246,15 @@ public class AppRegistryController {
 			throw new AppAlreadyRegisteredException(previous);
 		}
 		try {
-			AppRegistration registration = this.appRegistryService.save(name, type, version, new URI(uri),
-					metadataUri != null ? new URI(metadataUri) : null, bootVersion);
-			prefetchMetadata(Arrays.asList(registration));
+			AppRegistration registration = this.appRegistryService.save(
+					name,
+					type,
+					version,
+					new URI(uri),
+					metadataUri != null ? new URI(metadataUri) : null,
+					bootVersion != null ? AppBootSchemaVersion.fromBootVersion(bootVersion) : AppBootSchemaVersion.defaultVersion()
+			);
+			prefetchMetadata(Collections.singletonList(registration));
 		}
 		catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
@@ -261,12 +267,20 @@ public class AppRegistryController {
 	public void register(
 			@PathVariable("type") ApplicationType type,
 			@PathVariable("name") String name,
-			@RequestParam(name = "bootVersion", required = false) AppBootSchemaVersion bootVersion,
+			@RequestParam(name = "bootVersion", required = false) String bootVersion,
 			@RequestParam("uri") String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(value = "force", defaultValue = "false") boolean force) {
 		String version = this.appRegistryService.getResourceVersion(uri);
-		this.register(type, name, version, bootVersion, uri, metadataUri, force);
+		this.register(
+				type,
+				name,
+				version,
+				bootVersion,
+				uri,
+				metadataUri,
+				force
+		);
 	}
 
 	/**

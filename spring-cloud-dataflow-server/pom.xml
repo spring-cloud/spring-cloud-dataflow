@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>3.1.2</version>
+			<version>[3.1.2,)</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -136,6 +136,29 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.ibm.db2</groupId>
+			<artifactId>jcc</artifactId>
+			<version>11.5.8.0</version>
+			<scope>test</scope>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.oracle.database.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>21.9.0.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.33</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -164,6 +187,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<threadCount>1</threadCount>
+					<forkCount>1</forkCount>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
@@ -223,6 +250,8 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>3.0.0</version>
 						<configuration>
+							<threadCount>1</threadCount>
+							<forkCount>1</forkCount>
 							<skipTests>true</skipTests>
 							<failIfNoTests>false</failIfNoTests>
 						</configuration>

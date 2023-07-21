@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -55,6 +56,7 @@ public class Status extends NonVersionedAbstractEntity {
 
 	// Status from the underlying platform
 	@Lob
+	@Column(columnDefinition = "text")
 	private String platformStatus;
 
 	public Status() {

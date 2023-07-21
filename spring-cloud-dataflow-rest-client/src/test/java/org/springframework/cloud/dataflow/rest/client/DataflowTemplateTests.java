@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +39,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
@@ -60,8 +64,14 @@ import static org.mockito.Mockito.when;
  */
 public class DataflowTemplateTests {
 
+	private ObjectMapper mapper;
+
 	@Before
 	public void setup() {
+		mapper.registerModule(new Jdk8Module());
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new JavaTimeModule());
+		mapper.registerModule(new Jackson2DataflowModule());
 		System.setProperty("sun.net.client.defaultConnectTimeout", String.valueOf(100));
 	}
 
@@ -74,7 +84,7 @@ public class DataflowTemplateTests {
 	public void testDataFlowTemplateContructorWithNullUri() throws URISyntaxException {
 
 		try {
-			new DataFlowTemplate(null);
+			new DataFlowTemplate(null, mapper);
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("The provided baseURI must not be null.", e.getMessage());
@@ -86,7 +96,7 @@ public class DataflowTemplateTests {
 
 	@Test(expected = ResourceAccessException.class)
 	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-		new DataFlowTemplate(new URI("https://doesnotexist:1234"));
+		new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
 	}
 
 	@Test
@@ -259,6 +269,6 @@ public class DataflowTemplateTests {
 		converters.add(new MappingJackson2HttpMessageConverter());
 		when(restTemplate.getMessageConverters()).thenReturn(converters);
 		URI uri = new URI("foo");
-		return new DataFlowTemplate(uri, restTemplate);
+		return new DataFlowTemplate(uri, restTemplate, mapper);
 	}
 }

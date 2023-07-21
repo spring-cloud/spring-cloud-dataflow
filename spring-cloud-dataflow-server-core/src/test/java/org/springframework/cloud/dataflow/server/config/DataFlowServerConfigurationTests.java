@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
@@ -43,7 +45,6 @@ import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
@@ -65,13 +66,21 @@ public class DataFlowServerConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withAllowBeanDefinitionOverriding(true)
-			.withUserConfiguration(DataFlowServerConfigurationTests.TestConfiguration.class,
-					SecurityAutoConfiguration.class, DataFlowServerAutoConfiguration.class,
-					DataFlowControllerAutoConfiguration.class, DataSourceAutoConfiguration.class,
-					DataFlowServerConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
-					RestTemplateAutoConfiguration.class, HibernateJpaAutoConfiguration.class,
-					SchedulerConfiguration.class, JacksonAutoConfiguration.class, SimpleTaskAutoConfiguration.class,
-					ResourceLoadingAutoConfiguration.class, ComposedTaskRunnerConfigurationProperties.class);
+			.withUserConfiguration(
+					DataFlowServerConfigurationTests.TestConfiguration.class,
+					SecurityAutoConfiguration.class,
+					DataFlowServerAutoConfiguration.class,
+					DataFlowControllerAutoConfiguration.class,
+					DataSourceAutoConfiguration.class,
+					DataFlowServerConfiguration.class,
+					PropertyPlaceholderAutoConfiguration.class,
+					RestTemplateAutoConfiguration.class,
+					HibernateJpaAutoConfiguration.class,
+					SchedulerConfiguration.class,
+					JacksonAutoConfiguration.class,
+					ResourceLoadingAutoConfiguration.class,
+					ComposedTaskRunnerConfigurationProperties.class
+			);
 
 	/**
 	 * Verify that embedded server starts if h2 url is specified with default properties.
@@ -79,7 +88,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	public void testStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> {
 					assertTrue(context.containsBean("h2TcpServer"));
@@ -99,7 +108,7 @@ public class DataFlowServerConfigurationTests {
 	@Test
 	public void testDoNotStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
-						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow",
+						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=false",
 						"spring.jpa.database=H2"
 				)
@@ -135,8 +144,8 @@ public class DataFlowServerConfigurationTests {
 		}
 
 		@Bean
-		public TaskRepository taskRepository() {
-			return mock(TaskRepository.class);
+		public TaskRepositoryContainer taskRepositoryContainer() {
+			return mock(DefaultTaskRepositoryContainer.class);
 		}
 
 		@Bean

@@ -82,7 +82,7 @@ public class LocalPlatformTests {
 		TaskPlatform taskPlatform = taskPlatforms.values().iterator().next();
 		assertThat(taskPlatform.getName()).isEqualTo("Local");
 		assertThat(taskPlatform.getLaunchers()).hasSize(2);
-		assertThat(taskPlatform.getLaunchers()).extracting("type").containsExactly("Local","Local");
+		assertThat(taskPlatform.getLaunchers()).extracting("type").containsExactlyInAnyOrder("Local","Local");
 		assertThat(taskPlatform.getLaunchers()).extracting("name").containsExactlyInAnyOrder("big", "small");
 	}
 

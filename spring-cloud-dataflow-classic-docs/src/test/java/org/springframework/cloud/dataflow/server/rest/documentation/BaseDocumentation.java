@@ -16,14 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
-import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -33,7 +32,14 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
@@ -48,8 +54,11 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.cloud.task.repository.support.DatabaseType;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.restdocs.JUnitRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -81,9 +90,10 @@ public abstract class BaseDocumentation {
 
 	@ClassRule
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
-				"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
+			"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
+
 	@Before
-	public void setupMocks() throws Exception{
+	public void setupMocks() throws Exception {
 		reset(springDataflowServer.getSkipperClient());
 
 		AboutResource about = new AboutResource();
@@ -120,13 +130,16 @@ public abstract class BaseDocumentation {
 
 	protected DataSource dataSource;
 
-	protected void prepareDocumentationTests(WebApplicationContext context) throws Exception{
+	protected ApplicationContext context;
+
+	protected void prepareDocumentationTests(WebApplicationContext context) throws Exception {
+		this.context = context;
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.documentation = new ToggleableResultHandler(documentationHandler);
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
 				.apply(documentationConfiguration(this.restDocumentation).uris().withPort(9393))
-				.alwaysDo((ToggleableResultHandler)this.documentation).build();
+				.alwaysDo((ToggleableResultHandler) this.documentation).build();
 
 		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
 		TaskSchedulerController controller = this.springDataflowServer.getWebApplicationContext().getBean(TaskSchedulerController.class);
@@ -138,8 +151,9 @@ public abstract class BaseDocumentation {
 
 	/**
 	 * Can be used by subclasses to easily register dummy apps, as most endpoints require apps to be effective
-	 * @param type the type of app to register
-	 * @param name the name of the app to register
+	 *
+	 * @param type    the type of app to register
+	 * @param name    the name of the app to register
 	 * @param version the version to register
 	 */
 	void registerApp(ApplicationType type, String name, String version) throws Exception {
@@ -148,47 +162,69 @@ public abstract class BaseDocumentation {
 
 		documentation.dontDocument(
 				() -> this.mockMvc.perform(
-						post(String.format("/apps/%s/%s/%s", type, name, version))
-								.param("uri", String.format("maven://%s:%s-%s%s:%s", group, name, type, binder, version)))
+								post(String.format("/apps/%s/%s/%s", type, name, version))
+										.param("uri", String.format("maven://%s:%s-%s%s:%s", group, name, type, binder, version)))
 						.andExpect(status().isCreated())
 		);
 	}
 
 	void unregisterApp(ApplicationType type, String name) throws Exception {
 		documentation.dontDocument(
-			() -> this.mockMvc.perform(
-					delete(String.format("/apps/%s/%s", type, name))
-				)
-				.andExpect(status().isOk())
+				() -> this.mockMvc.perform(
+								delete(String.format("/apps/%s/%s", type, name))
+						)
+						.andExpect(status().isOk())
 		);
 	}
 
 	void unregisterApp(ApplicationType type, String name, String version) throws Exception {
 		documentation.dontDocument(
-			() -> this.mockMvc.perform(
-					delete(String.format("/apps/%s/%s/%s", type, name, version))
-				)
-				.andExpect(status().isOk())
+				() -> this.mockMvc.perform(
+								delete(String.format("/apps/%s/%s/%s", type, name, version))
+						)
+						.andExpect(status().isOk())
 		);
 	}
 
-	void createStream(String name, String definition, boolean deploy) throws Exception{
+	void createStream(String name, String definition, boolean deploy) throws Exception {
 		documentation.dontDocument(
-			() -> this.mockMvc.perform(
-				post("/streams/definitions")
-				.param("name", name)
-				.param("definition", definition)
-				.param("deploy", String.valueOf(deploy)))
-				.andExpect(status().isCreated())
+				() -> this.mockMvc.perform(
+								post("/streams/definitions")
+										.param("name", name)
+										.param("definition", definition)
+										.param("deploy", String.valueOf(deploy)))
+						.andExpect(status().isCreated())
 		);
 	}
 
-	void destroyStream(String name) throws Exception{
+	void destroyStream(String name) throws Exception {
 		documentation.dontDocument(
-			() -> this.mockMvc.perform(
-				delete("/streams/definitions/{name}", name))
-				.andExpect(status().isOk())
+				() -> this.mockMvc.perform(
+								delete("/streams/definitions/{name}", name))
+						.andExpect(status().isOk())
 		);
+	}
+
+	protected DataflowTaskExecutionMetadataDaoContainer createDataFlowTaskExecutionMetadataDaoContainer(SchemaService schemaService) {
+		DataflowTaskExecutionMetadataDaoContainer result = new DataflowTaskExecutionMetadataDaoContainer();
+		MultiSchemaIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
+		String databaseType;
+		try {
+			databaseType = DatabaseType.fromMetaData(dataSource).name();
+		} catch (MetaDataAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
+			DataflowTaskExecutionMetadataDao dao = new JdbcDataflowTaskExecutionMetadataDao(
+					dataSource,
+					incrementerFactory.getIncrementer(databaseType,
+							SchemaUtilities.getQuery("%PREFIX%EXECUTION_METADATA_SEQ", target.getTaskPrefix())
+					),
+					target.getTaskPrefix()
+			);
+			result.add(target.getName(), dao);
+		}
+		return result;
 	}
 
 	/**
@@ -241,8 +277,8 @@ public abstract class BaseDocumentation {
 		return new SchedulerService() {
 			@Override
 			public void schedule(String scheduleName, String taskDefinitionName,
-					Map<String, String> taskProperties, List<String> commandLineArgs,
-					String platformName) {
+								 Map<String, String> taskProperties, List<String> commandLineArgs,
+								 String platformName) {
 			}
 
 			@Override
@@ -265,7 +301,7 @@ public abstract class BaseDocumentation {
 
 			@Override
 			public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName,
-					String platformName) {
+										   String platformName) {
 				return null;
 			}
 
@@ -346,4 +382,4 @@ public abstract class BaseDocumentation {
 			}
 		};
 	}
-	}
+}

@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.domain;
 import java.io.IOException;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -70,12 +71,14 @@ public class Release extends AbstractEntity {
 	private Long repositoryId;
 
 	@Lob
+	@Column(columnDefinition = "text")
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
 	@Lob
+	@Column(columnDefinition = "text")
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })

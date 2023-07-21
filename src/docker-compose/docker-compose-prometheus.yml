@@ -23,7 +23,7 @@ services:
 
   prometheus-rsocket-proxy:
     platform: linux/amd64
-    image: micrometermetrics/prometheus-rsocket-proxy:1.5.0
+    image: micrometermetrics/prometheus-rsocket-proxy:1.5.2
     container_name: prometheus-rsocket-proxy
     expose:
       - '9096'

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,7 +217,7 @@ public class DefaultStreamServiceTests {
 		StreamDefinition streamDefinition = new StreamDefinition("myStream", "time|log");
 		Map<StreamDefinition, DeploymentState> streamSates = new HashMap<>();
 		streamSates.put(streamDefinition, DeploymentState.deployed);
-		when(this.skipperStreamDeployer.streamsStates(eq(Arrays.asList(streamDefinition)))).thenReturn(streamSates);
+		when(this.skipperStreamDeployer.streamsStates(eq(Collections.singletonList(streamDefinition)))).thenReturn(streamSates);
 
 		Map<StreamDefinition, DeploymentState> resultStates = this.defaultStreamService
 				.state(Arrays.asList(streamDefinition));
@@ -232,7 +233,7 @@ public class DefaultStreamServiceTests {
 	public void verifyStreamHistory() {
 		Release release = new Release();
 		release.setName("RELEASE666");
-		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Arrays.asList(release));
+		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Collections.singletonList(release));
 
 		Collection<Release> releases = this.defaultStreamService.history("myStream");
 
@@ -246,7 +247,7 @@ public class DefaultStreamServiceTests {
 	@Test
 	public void verifyStreamPlatformList() {
 		Deployer deployer = new Deployer("testDeployer", "testType", null, mock(ActuatorOperations.class));
-		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(deployer));
+		when(this.skipperStreamDeployer.platformList()).thenReturn(Collections.singletonList(deployer));
 		Collection<Deployer> deployers = this.defaultStreamService.platformList();
 
 		verify(this.skipperStreamDeployer, times(1)).platformList();

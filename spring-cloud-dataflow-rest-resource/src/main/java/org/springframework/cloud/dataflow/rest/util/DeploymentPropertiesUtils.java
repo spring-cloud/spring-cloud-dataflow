@@ -113,23 +113,25 @@ public final class DeploymentPropertiesUtils {
 		// get raw candidates as simple comma split
 		String[] candidates = StringUtils.delimitedListToStringArray(s, delimiter);
 		for (int i = 0; i < candidates.length; i++) {
-			if (i > 0 && !candidates[i].contains("=") || (i > 0 && candidates[i].contains("=") && !startsWithDeploymentPropertyPrefix(candidates[i]))) {
-				// we don't have '=' so this has to be latter parts of
-				// a comma delimited value, append it to previously added
-				// key/value pair.
-				// we skip first as we would not have anything to append to. this
-				// would happen if dep prop string is malformed and first given
-				// key/value pair is not actually a key/value.
-				pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidates[i]);
-			}
-			else {
-				// we have a key/value pair having '=', or malformed first pair
-				if (!startsWithDeploymentPropertyPrefix(candidates[i])) {
-					throw new IllegalArgumentException(
-							"Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.'" +
-									" allowed.");
+			String candidate = candidates[i];
+			if(StringUtils.hasText(candidate)) {
+				if (i > 0 && !candidate.contains("=") || (i > 0 && candidate.contains("=") && !startsWithDeploymentPropertyPrefix(candidate))) {
+					// we don't have '=' so this has to be latter parts of
+					// a comma delimited value, append it to previously added
+					// key/value pair.
+					// we skip first as we would not have anything to append to. this
+					// would happen if dep prop string is malformed and first given
+					// key/value pair is not actually a key/value.
+					pairs.set(pairs.size() - 1, pairs.get(pairs.size() - 1) + delimiter + candidate);
+				} else {
+					// we have a key/value pair having '=', or malformed first pair
+					if (!startsWithDeploymentPropertyPrefix(candidate)) {
+						throw new IllegalArgumentException(
+								"Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.'" +
+										" allowed. Not " + candidate);
+					}
+					pairs.add(candidate);
 				}
-				pairs.add(candidates[i]);
 			}
 		}
 

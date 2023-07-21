@@ -24,17 +24,22 @@ The API version can be seen at the end of the home page of Spring Cloud Data Flo
 ====
 [source,json]
 ----
-{"_links":
-    {"dashboard":{"href":"http://localhost:9393/dashboard"}
-    ...
-    },
-"api.revision":14}
+{
+  "_links": {
+      "dashboard": { "href" : "http://localhost:9393/dashboard" },
+      ...
+  },
+  "api.revision":15
+}
 ----
 ====
 The table below shows the SCDF Release version and its current RESTful API version.
 
 |===
 | SCDF Version | API Version
+
+| 2.11.x
+| 14
 
 | 2.10.x
 | 14
@@ -141,6 +146,7 @@ The API includes the following resources:
 
 * <<api-guide-resources-index>>
 * <<resources-about>>
+* <<api-guide-resources-schema-info>>
 * <<api-guide-resources-audit-records>>
 * <<resources-registered-applications>>
 * <<api-guide-resources-stream-definitions>>
@@ -619,6 +625,67 @@ include::{snippets}/app-registry-documentation/unregistering-all-applications/cu
 
 include::{snippets}/app-registry-documentation/unregistering-all-applications/http-response.adoc[]
 
+[[api-guide-resources-schema-info]]
+=== Schema Information
+
+The schema information endpoint provides information about the supported Spring Boot schema versions for Task and Batch applications and the available Schema Targets.
+
+The following topics provide more details:
+
+* <<api-guide-resources-schema-info-versions>>
+* <<api-guide-resources-schema-info-targets>>
+
+[[api-guide-resources-schema-info-versions]]
+==== List All Schema Versions
+
+The schema endpoint provides for listing supported Spring Boot versions.
+
+The following topics provide more details:
+
+* <<api-guide-resources-schema-info-versions-request-structure>>
+* <<api-guide-resources-schema-info-versions-example-request>>
+* <<api-guide-resources-schema-info-versions-response-structure>>
+
+[[api-guide-resources-schema-info-versions-request-structure]]
+===== Request Structure
+
+include::{snippets}/schema-documentation/schema-versions/http-request.adoc[]
+
+[[api-guide-resources-schema-info-versions-example-request]]
+===== Example Request
+
+include::{snippets}/schema-documentation/schema-versions/curl-request.adoc[]
+
+[[api-guide-resources-schema-info-versions-response-structure]]
+===== Response Structure
+
+include::{snippets}/schema-documentation/schema-versions/http-response.adoc[]
+
+[[api-guide-resources-schema-info-targets]]
+==== List All Schema Targets
+
+The schema endpoint provides for listing supported Schema Targets.
+
+The following topics provide more details:
+
+* <<api-guide-resources-schema-info-targets-request-structure>>
+* <<api-guide-resources-schema-info-targets-example-request>>
+* <<api-guide-resources-schema-info-targets-response-structure>>
+
+[[api-guide-resources-schema-info-targets-request-structure]]
+===== Request Structure
+
+include::{snippets}/schema-documentation/schema-targets/http-request.adoc[]
+
+[[api-guide-resources-schema-info-targets-example-request]]
+===== Example Request
+
+include::{snippets}/schema-documentation/schema-targets/curl-request.adoc[]
+
+[[api-guide-resources-schema-info-targets-response-structure]]
+===== Response Structure
+
+include::{snippets}/schema-documentation/schema-targets/http-response.adoc[]
 
 [[api-guide-resources-audit-records]]
 === Audit Records
@@ -1802,17 +1869,16 @@ The following topics provide more details:
 
 
 [[api-guide-resources-task-executions-launching]]
-==== Launching a Task
+==== Launching a Task (Legacy)
 
-Launching a task is done by requesting the creation of a new task execution.
+Launching a task is done by requesting the creation of a new task execution. This endpoint will fail if the task is registered as a Spring Boot 3 application.
+
 The following topics provide more details:
 
 * <<api-guide-resources-task-executions-launching-request-structure>>
 * <<api-guide-resources-task-executions-launching-request-parameters>>
 * <<api-guide-resources-task-executions-launching-example-request>>
 * <<api-guide-resources-task-executions-launching-response-structure>>
-
-
 
 [[api-guide-resources-task-executions-launching-request-structure]]
 ===== Request Structure
@@ -1838,6 +1904,45 @@ include::{snippets}/task-executions-documentation/launch-task/curl-request.adoc[
 ===== Response Structure
 
 include::{snippets}/task-executions-documentation/launch-task/http-response.adoc[]
+
+[[api-guide-resources-task-executions-launching-boot3]]
+==== Launching a Task
+
+Launching a task is done by requesting the creation of a new task execution. The response will contain an execution id and a schema target.
+
+The following topics provide more details:
+
+* <<api-guide-resources-task-executions-launching-boot3-request-structure>>
+* <<api-guide-resources-task-executions-launching-boot3-request-parameters>>
+* <<api-guide-resources-task-executions-launching-boot3-example-request>>
+* <<api-guide-resources-task-executions-launching-boot3-response-structure>>
+
+
+[[api-guide-resources-task-executions-launching-boot3-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-executions-launching-boot3-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-executions-launching-boot3-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/curl-request.adoc[]
+
+
+[[api-guide-resources-task-executions-launching-boot3-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/launch-task-boot3/http-response.adoc[]
+
 
 [[api-guide-resources-task-executions-stopping]]
 ==== Stopping a Task
@@ -1979,9 +2084,9 @@ The following topics provide more details:
 [[api-guide-resources-task-executions-detail-request-structure]]
 ===== Request Structure
 
-include::{snippets}/task-executions-documentation/launch-task-display-detail/http-request.adoc[]
+include::{snippets}/task-executions-documentation/get-task-display-detail/http-request.adoc[]
 
-include::{snippets}/task-executions-documentation/launch-task-display-detail/path-parameters.adoc[]
+include::{snippets}/task-executions-documentation/get-task-display-detail/path-parameters.adoc[]
 
 
 
@@ -1995,16 +2100,56 @@ There are no request parameters for this endpoint.
 [[api-guide-resources-task-executions-detail-example-request]]
 ===== Example Request
 
-include::{snippets}/task-executions-documentation/launch-task-display-detail/curl-request.adoc[]
+include::{snippets}/task-executions-documentation/get-task-display-detail/curl-request.adoc[]
 
 
 
 [[api-guide-resources-task-executions-detail-response-structure]]
 ===== Response Structure
 
-include::{snippets}/task-executions-documentation/launch-task-display-detail/http-response.adoc[]
+include::{snippets}/task-executions-documentation/get-task-display-detail/http-response.adoc[]
 
 
+[[api-guide-resources-task-executions-detail-by-external-id]]
+==== Task Execution Detail by External Id
+
+The task executions endpoint lets you get the details about a task execution.
+The following topics provide more details:
+
+* <<api-guide-resources-task-executions-detail-by-external-id-request-structure>>
+* <<api-guide-resources-task-executions-detail-by-external-id-request-parameters>>
+* <<api-guide-resources-task-executions-detail-by-external-id-example-request>>
+* <<api-guide-resources-task-executions-detail-by-external-id-response-structure>>
+
+
+
+[[api-guide-resources-task-executions-detail-by-external-id-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/get-task-display-detail-by-external-id/http-request.adoc[]
+
+include::{snippets}/task-executions-documentation/get-task-display-detail-by-external-id/path-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-executions-detail-by-external-id-request-parameters]]
+===== Request Parameters
+
+There are no request parameters for this endpoint.
+
+
+
+[[api-guide-resources-task-executions-detail-by-external-id-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/get-task-display-detail-by-external-id/curl-request.adoc[]
+
+
+
+[[api-guide-resources-task-executions-detail-by-external-id-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/get-task-display-detail-by-external-id/http-response.adoc[]
 
 [[api-guide-resources-task-executions-delete]]
 ==== Delete Task Execution

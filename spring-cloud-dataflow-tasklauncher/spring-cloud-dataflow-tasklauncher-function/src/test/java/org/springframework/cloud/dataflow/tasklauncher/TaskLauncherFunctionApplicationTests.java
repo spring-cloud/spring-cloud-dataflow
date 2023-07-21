@@ -29,7 +29,9 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -60,9 +62,9 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(0);
-		Optional<Long> taskId = taskLauncherFunction.apply(launchRequest);
-		assertThat(taskId.isPresent()).isTrue();
-		assertThat(taskId.get()).isEqualTo(1L);
+		Optional<LaunchResponse> response = taskLauncherFunction.apply(launchRequest);
+		assertThat(response.isPresent()).isTrue();
+		assertThat(response.get().getTaskId()).isEqualTo(1L);
 
 		verify(taskOperations).launch("someTask",
 				Collections.singletonMap(TaskLauncherFunction.TASK_PLATFORM_NAME, "default"),
@@ -74,7 +76,7 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
-		Optional<Long> taskId = taskLauncherFunction.apply(launchRequest);
+		Optional<LaunchResponse> taskId = taskLauncherFunction.apply(launchRequest);
 		assertThat(taskId.isPresent()).isFalse();
 	}
 
@@ -96,7 +98,7 @@ public class TaskLauncherFunctionApplicationTests {
 		currentTaskExecutionsResource.setName("default");
 		when(taskOperations.currentTaskExecutions())
 				.thenReturn(Collections.singletonList(currentTaskExecutionsResource));
-		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(1L);
+		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L, SchemaVersionTarget.defaultTarget().getName()));
 	}
 
 	@Test

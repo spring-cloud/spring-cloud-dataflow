@@ -40,7 +40,7 @@ public interface JobOperations {
 	 *
 	 * @param id job execution id
 	 */
-	void executionRestart(long id);
+	void executionRestart(long id, String schemaTarget);
 
 	/**
 	 * @return the list job executions without step executions known to the system.
@@ -76,7 +76,7 @@ public interface JobOperations {
 	 * @param id identifier of the job execution
 	 * @return {@link JobExecutionResource}
 	 */
-	JobExecutionResource jobExecution(long id);
+	JobExecutionResource jobExecution(long id, String schemaTarget);
 
 	/**
 	 * Return the {@link JobInstanceResource} for the id specified.
@@ -84,7 +84,7 @@ public interface JobOperations {
 	 * @param id identifier of the job instasnce
 	 * @return {@link JobInstanceResource}
 	 */
-	JobInstanceResource jobInstance(long id);
+	JobInstanceResource jobInstance(long id, String schemaTarget);
 
 	/**
 	 * List step executions known for a specific job execution id.
@@ -92,7 +92,7 @@ public interface JobOperations {
 	 * @param jobExecutionId the id of the job execution.
 	 * @return the paged list of step executions
 	 */
-	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId);
+	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget);
 
 	/**
 	 * Return StepExecutionProgressInfoResource for a specific job execution id and step
@@ -102,6 +102,6 @@ public interface JobOperations {
 	 * @param stepExecutionId the id step execution to be returned.
 	 * @return the step execution progress info
 	 */
-	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId);
+	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget);
 
 }

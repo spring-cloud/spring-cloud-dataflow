@@ -69,7 +69,7 @@ public class LocalConfigurationTests {
 	public void testConfig() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		int randomPort = SocketUtils.findAvailableTcpPort();
-		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow", randomPort);
+		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
 		context = app.run(new String[] { "--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl });
 		assertNotNull(context.getBean(AppRegistryService.class));
 		assertNotNull(context.getBean(TaskExecutionController.class));

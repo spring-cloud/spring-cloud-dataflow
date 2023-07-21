@@ -38,6 +38,7 @@ import org.springframework.util.StringUtils;
  * be migrated to Spring Batch itself eventually.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 

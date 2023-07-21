@@ -40,6 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -75,6 +76,7 @@ public class TaskPlatformControllerTests {
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		Launcher cfLauncher = new Launcher("cf", "Cloud Foundry", mock(TaskLauncher.class));
 		Launcher cfLauncherWithScheduler = new Launcher("cfsched", "Cloud Foundry", mock(TaskLauncher.class), mock(Scheduler.class));
+		assertThat(this.launcherRepository.findByName("default")).isNull();
 		this.launcherRepository.save(launcher);
 		this.launcherRepository.save(cfLauncher);
 		this.launcherRepository.save(cfLauncherWithScheduler);

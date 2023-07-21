@@ -1,0 +1,4 @@
+RENAME TABLE task_execution_metadata TO task_execution_metadata_lc;
+RENAME TABLE task_execution_metadata_lc TO TASK_EXECUTION_METADATA;
+RENAME TABLE task_execution_metadata_seq TO task_execution_metadata_seq_lc;
+RENAME TABLE task_execution_metadata_seq_lc TO TASK_EXECUTION_METADATA_SEQ;

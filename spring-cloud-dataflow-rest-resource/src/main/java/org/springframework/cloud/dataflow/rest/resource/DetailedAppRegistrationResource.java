@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 
 /**

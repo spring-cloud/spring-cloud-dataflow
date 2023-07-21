@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.List;
+
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.data.keyvalue.repository.KeyValueRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TaskDeploymentRepository extends KeyValueRepository<TaskDeployment, Long> {
 
 	TaskDeployment findByTaskDeploymentId(String taskDeploymentId);
+
+	TaskDeployment findByTaskDeploymentIdAndPlatformName(String taskDeploymentId, String platform);
 
 	TaskDeployment findTopByTaskDefinitionNameOrderByCreatedOnAsc(String taskDefinitionName);
 }

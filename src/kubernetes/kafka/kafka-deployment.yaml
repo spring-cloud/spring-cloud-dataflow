@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: kafka-broker
-  namespace: kafka
   labels:
     app: kafka
     component: kafka-broker

@@ -23,10 +23,14 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,12 +39,17 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 /**
  * @author Glenn Renfro
@@ -50,21 +59,19 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StepExecutionResource.class)
 public class JobStepExecutionController {
 
-	private final JobService jobService;
 
-	private final Assembler stepAssembler = new Assembler();
+	private final TaskJobService taskJobService;
 
 	/**
 	 * Creates a {@code JobStepExecutionsController} that retrieves Job Step Execution
-	 * information from a the {@link JobService}
+	 * information from a the {@link JobServiceContainer}
 	 *
-	 * @param jobService the service this controller will use for retrieving job step
-	 * execution information.
+	 * @param taskJobService TaskJobService can query all schemas.
 	 */
 	@Autowired
-	public JobStepExecutionController(JobService jobService) {
-		Assert.notNull(jobService, "repository must not be null");
-		this.jobService = jobService;
+	public JobStepExecutionController(TaskJobService taskJobService) {
+		Assert.notNull(taskJobService, "taskJobService required");
+		this.taskJobService = taskJobService;
 	}
 
 	/**
@@ -79,11 +86,19 @@ public class JobStepExecutionController {
 	 */
 	@RequestMapping(value = { "" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<StepExecutionResource> stepExecutions(@PathVariable("jobExecutionId") long id,
-			Pageable pageable, PagedResourcesAssembler<StepExecution> assembler) throws NoSuchJobExecutionException {
-		List<StepExecution> result;
-		result = new ArrayList<>(jobService.getStepExecutions(id));
+	public PagedModel<StepExecutionResource> stepExecutions(
+			@PathVariable("jobExecutionId") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget,
+			Pageable pageable,
+			PagedResourcesAssembler<StepExecution> assembler
+	) throws NoSuchJobExecutionException {
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
+		TaskJobExecution taskJobExecution = taskJobService.getJobExecution(id, schemaTarget);
+		List<StepExecution> result = new ArrayList<>(taskJobExecution.getJobExecution().getStepExecutions());
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
+		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return assembler.toModel(page, stepAssembler);
 	}
 
@@ -99,30 +114,43 @@ public class JobStepExecutionController {
 	 */
 	@RequestMapping(value = { "/{stepExecutionId}" }, method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StepExecutionResource getStepExecution(@PathVariable("jobExecutionId") Long id,
-			@PathVariable("stepExecutionId") Long stepId)
+	public StepExecutionResource getStepExecution(
+			@PathVariable("jobExecutionId") Long id,
+			@PathVariable("stepExecutionId") Long stepId,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget)
 			throws NoSuchStepExecutionException, NoSuchJobExecutionException {
-		return stepAssembler.toModel(jobService.getStepExecution(id, stepId));
+		if(!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
+		TaskJobExecution taskJobExecution = taskJobService.getJobExecution(id, schemaTarget);
+		final Assembler stepAssembler = new Assembler(schemaTarget);
+		StepExecution stepExecution = taskJobExecution.getJobExecution().getStepExecutions()
+				.stream()
+				.filter(s -> s.getId().equals(stepId))
+				.findFirst()
+				.orElseThrow(() -> new NoSuchStepExecutionException("Step " + stepId + " in Job " + id + " not found"));
+		return stepAssembler.toModel(stepExecution);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link StepExecution}s to {@link StepExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<StepExecution, StepExecutionResource> {
-
-		public Assembler() {
+		private final String schemaTarget;
+		public Assembler(String schemaTarget) {
 			super(JobStepExecutionController.class, StepExecutionResource.class);
+			this.schemaTarget = schemaTarget;
 		}
 
 		@Override
 		public StepExecutionResource toModel(StepExecution stepExecution) {
-			return createModelWithId(stepExecution.getId(), stepExecution, stepExecution.getJobExecution().getId());
+			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
 		}
 
 		@Override
 		public StepExecutionResource instantiateModel(StepExecution stepExecution) {
-			return StepExecutionResourceBuilder.toModel(stepExecution);
+			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
 		}
 	}
 }

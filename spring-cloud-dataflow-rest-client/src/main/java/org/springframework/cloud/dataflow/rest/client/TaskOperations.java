@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.naming.OperationNotSupportedException;
 
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
@@ -68,14 +69,14 @@ public interface TaskOperations {
 	 * @param arguments the command line arguments
 	 * @return long containing the TaskExecutionId
 	 */
-	long launch(String name, Map<String, String> properties, List<String> arguments);
+	LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
 	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
 	 */
-	void stop(String ids);
+	void stop(String ids, String schemaTarget);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
@@ -83,7 +84,7 @@ public interface TaskOperations {
 	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
 	 * @param platform the platform name where the task is executing.
 	 */
-	void stop(String ids, String platform);
+	void stop(String ids, String schemaTarget, String platform);
 
 	/**
 	 * Destroy an existing task.
@@ -119,7 +120,7 @@ public interface TaskOperations {
 	 * @param id identifier of the task execution
 	 * @return {@link TaskExecutionResource}
 	 */
-	TaskExecutionResource taskExecutionStatus(long id);
+	TaskExecutionResource taskExecutionStatus(long id, String schemaTarget);
 
 	/**
 	 * Return the task execution log.  The platform from which to retrieve the log will be set to {@code default}.
@@ -150,7 +151,7 @@ public interface TaskOperations {
 	 *
 	 * @param id identifier of the task execution
 	 */
-	void cleanup(long id);
+	void cleanup(long id, String schemaTarget);
 
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.
@@ -158,7 +159,7 @@ public interface TaskOperations {
 	 * @param id identifier of the task execution
 	 * @param removeData delete the history of the execution
 	 */
-	void cleanup(long id, boolean removeData);
+	void cleanup(long id, String schemaTarget, boolean removeData);
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -32,11 +31,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.task.batch.listener.TaskBatchDao;
-import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -54,6 +56,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Glenn Renfro
+ * @author  Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
@@ -64,13 +67,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class JobExecutionThinControllerTests {
 
 	@Autowired
-	private TaskExecutionDao dao;
+	private TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	private JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	private TaskBatchDaoContainer taskBatchDaoContainer;
 
 	private MockMvc mockMvc;
 
@@ -78,12 +81,24 @@ public class JobExecutionThinControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private RequestMappingHandlerAdapter adapter;
+	RequestMappingHandlerAdapter adapter;
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setupMockMVC() {
-		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(jobRepository, taskBatchDao,
-				dao, wac, adapter);
+		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
+				jobRepositoryContainer,
+				taskBatchDaoContainer,
+				daoContainer,
+				aggregateExecutionSupport,
+				taskDefinitionReader,
+				wac,
+				adapter
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

@@ -29,17 +29,17 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -78,7 +78,7 @@ public class TaskDefinitionController {
 
 	private final TaskDeleteService taskDeleteService;
 
-	private final TaskExplorer explorer;
+	private final AggregateTaskExplorer explorer;
 
 	private final TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider;
 
@@ -89,15 +89,15 @@ public class TaskDefinitionController {
 	 * <li>task status checks to the provided {@link TaskLauncher}</li>
 	 * </ul>
 	 *
-	 * @param taskExplorer used to look up TaskExecutions.
-	 * @param repository the repository this controller will use for task CRUD operations.
-	 * @param taskSaveService handles Task saving related operations.
-	 * @param taskDeleteService handles Task deletion related operations.
+	 * @param taskExplorer                    used to look up TaskExecutions.
+	 * @param repository                      the repository this controller will use for task CRUD operations.
+	 * @param taskSaveService                 handles Task saving related operations.
+	 * @param taskDeleteService               handles Task deletion related operations.
 	 * @param taskDefinitionAssemblerProvider the task definition assembler provider to use.
 	 */
-	public TaskDefinitionController(TaskExplorer taskExplorer, TaskDefinitionRepository repository,
-			TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
-			TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
+	public TaskDefinitionController(AggregateTaskExplorer taskExplorer, TaskDefinitionRepository repository,
+									TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+									TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
@@ -113,14 +113,17 @@ public class TaskDefinitionController {
 	/**
 	 * Register a task definition for future execution.
 	 *
-	 * @param name name the name of the task
-	 * @param dsl DSL definition for the task
+	 * @param name        name the name of the task
+	 * @param dsl         DSL definition for the task
 	 * @param description description of the task definition
 	 * @return the task definition
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
-	public TaskDefinitionResource save(@RequestParam("name") String name, @RequestParam("definition") String dsl,
-									   @RequestParam(value = "description", defaultValue = "") String description) {
+	public TaskDefinitionResource save(
+			@RequestParam("name") String name,
+			@RequestParam("definition") String dsl,
+			@RequestParam(value = "description", defaultValue = "") String description
+	) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(taskDefinition);
 		return this.taskDefinitionAssemblerProvider.getTaskDefinitionAssembler(false).toModel(new TaskExecutionAwareTaskDefinition(taskDefinition));
@@ -129,19 +132,21 @@ public class TaskDefinitionController {
 	/**
 	 * Delete the task from the repository so that it can no longer be executed.
 	 *
-	 * @param name name of the task to be deleted
+	 * @param name    name of the task to be deleted
 	 * @param cleanup optional cleanup indicator.
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void destroyTask(@PathVariable("name") String name, @RequestParam(required = false) Boolean cleanup) {
+	public void destroyTask(
+			@PathVariable("name") String name,
+			@RequestParam(required = false) Boolean cleanup
+	) {
 		boolean taskExecutionCleanup = (cleanup != null && cleanup) ? cleanup : false;
 		this.taskDeleteService.deleteTaskDefinition(name, taskExecutionCleanup);
 	}
 
 	/**
 	 * Delete all task from the repository.
-	 *
 	 */
 	@RequestMapping(value = "", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
@@ -152,25 +157,26 @@ public class TaskDefinitionController {
 	/**
 	 * Return a page-able list of {@link TaskDefinitionResource} defined tasks.
 	 *
-	 * @param pageable page-able collection of {@code TaskDefinitionResource}
-	 * @param search optional findByTaskNameContains parameter (Deprecated: please use taskName instead)
-	 * @param taskName optional findByTaskNameContains parameter
-	 * @param dslText optional findByDslText parameter
+	 * @param pageable    page-able collection of {@code TaskDefinitionResource}
+	 * @param search      optional findByTaskNameContains parameter (Deprecated: please use taskName instead)
+	 * @param taskName    optional findByTaskNameContains parameter
+	 * @param dslText     optional findByDslText parameter
 	 * @param description optional findByDescription parameter
-	 * @param manifest optional manifest flag to indicate whether the latest task execution requires task manifest update
-	 * @param assembler assembler for the {@link TaskDefinition}
+	 * @param manifest    optional manifest flag to indicate whether the latest task execution requires task manifest update
+	 * @param assembler   assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<? extends TaskDefinitionResource> list(Pageable pageable,
-															 @RequestParam(required = false) @Deprecated String search,
-															 @RequestParam(required = false) String taskName,
-															 @RequestParam(required = false) String description,
-															 @RequestParam(required = false) boolean manifest,
-															 @RequestParam(required = false) String dslText,
-															 PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler) {
-
+	public PagedModel<? extends TaskDefinitionResource> list(
+			Pageable pageable,
+			@RequestParam(required = false) @Deprecated String search,
+			@RequestParam(required = false) String taskName,
+			@RequestParam(required = false) String description,
+			@RequestParam(required = false) boolean manifest,
+			@RequestParam(required = false) String dslText,
+			PagedResourcesAssembler<TaskExecutionAwareTaskDefinition> assembler
+	) {
 		final Page<TaskDefinition> taskDefinitions;
 
 		if (Stream.of(search, taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
@@ -193,7 +199,7 @@ public class TaskDefinitionController {
 				.stream()
 				.collect(Collectors.toMap(TaskDefinition::getTaskName, Function.identity()));
 
-		List<TaskExecution> taskExecutions = null;
+		List<AggregateTaskExecution> taskExecutions = null;
 		if (!taskDefinitionMap.isEmpty()) {
 			taskExecutions = this.explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[0]));
 		}
@@ -210,12 +216,12 @@ public class TaskDefinitionController {
 
 
 	private Collection<? extends TaskDefinitionResource> updateComposedTaskElement(Collection<? extends TaskDefinitionResource> taskDefinitionResources,
-			Page<TaskDefinition> taskDefinitions) {
+																				   Page<TaskDefinition> taskDefinitions) {
 		Map<String, TaskDefinitionResource> taskNameResources = new HashMap<>();
-		for (TaskDefinitionResource taskDefinitionResource: taskDefinitionResources) {
+		for (TaskDefinitionResource taskDefinitionResource : taskDefinitionResources) {
 			taskNameResources.put(taskDefinitionResource.getName(), taskDefinitionResource);
 		}
-		for (TaskDefinition taskDefinition: taskDefinitions) {
+		for (TaskDefinition taskDefinition : taskDefinitions) {
 			TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 			TaskNode taskNode = taskParser.parse();
 			if (taskNode.isComposed()) {
@@ -232,23 +238,25 @@ public class TaskDefinitionController {
 	/**
 	 * Return a given task definition resource.
 	 *
-	 * @param name the name of an existing task definition (required)
+	 * @param name     the name of an existing task definition (required)
 	 * @param manifest indicator to include manifest in response.
 	 * @return the task definition
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public TaskDefinitionResource display(@PathVariable("name") String name, @RequestParam(required = false, name = "manifest") boolean manifest) {
+	public TaskDefinitionResource display(
+			@PathVariable("name") String name,
+			@RequestParam(required = false, name = "manifest") boolean manifest
+	) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
-		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
+		final AggregateTaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 		final RepresentationModelAssembler<TaskExecutionAwareTaskDefinition, ? extends TaskDefinitionResource> taskAssembler =
 				this.taskDefinitionAssemblerProvider.getTaskDefinitionAssembler(manifest);
 		TaskDefinitionResource taskDefinitionResource;
 		if (taskExecution != null) {
 			taskDefinitionResource = taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition, taskExecution));
-		}
-		else {
+		} else {
 			taskDefinitionResource = taskAssembler.toModel(new TaskExecutionAwareTaskDefinition(definition));
 		}
 		// Identify if the task definition is a composed task element
@@ -269,24 +277,23 @@ public class TaskDefinitionController {
 	}
 
 	class TaskDefinitionConverter implements Function<TaskDefinition, TaskExecutionAwareTaskDefinition> {
-		final Map<String, TaskExecution> taskExecutions;
+		final Map<String, AggregateTaskExecution> taskExecutions;
 
-		public TaskDefinitionConverter(List<TaskExecution> taskExecutions) {
+		public TaskDefinitionConverter(List<AggregateTaskExecution> taskExecutions) {
 			super();
 			if (taskExecutions != null) {
 				this.taskExecutions = new HashMap<>(taskExecutions.size());
-				for (TaskExecution taskExecution : taskExecutions) {
+				for (AggregateTaskExecution taskExecution : taskExecutions) {
 					this.taskExecutions.put(taskExecution.getTaskName(), taskExecution);
 				}
-			}
-			else {
+			} else {
 				this.taskExecutions = null;
 			}
 		}
 
 		@Override
 		public TaskExecutionAwareTaskDefinition apply(TaskDefinition source) {
-			TaskExecution lastTaskExecution = null;
+			AggregateTaskExecution lastTaskExecution = null;
 
 			if (taskExecutions != null) {
 				lastTaskExecution = taskExecutions.get(source.getName());
@@ -294,10 +301,11 @@ public class TaskDefinitionController {
 
 			if (lastTaskExecution != null) {
 				return new TaskExecutionAwareTaskDefinition(source, lastTaskExecution);
-			}
-			else {
+			} else {
 				return new TaskExecutionAwareTaskDefinition(source);
 			}
 		}
-	};
+	}
+
+	;
 }
