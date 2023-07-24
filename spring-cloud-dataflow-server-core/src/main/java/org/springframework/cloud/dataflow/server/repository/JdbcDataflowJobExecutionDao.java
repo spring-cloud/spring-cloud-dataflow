@@ -50,9 +50,9 @@ public class JdbcDataflowJobExecutionDao implements DataflowJobExecutionDao {
 	 */
 	private static final String SELECT_STEP_EXECUTION_IDS =
 			"SELECT SEC.STEP_EXECUTION_ID AS STEP_EXECUTION_ID " +
-			"FROM %PREFIX%STEP_EXECUTION_CONTEXT SEC " +
-			"JOIN %PREFIX%STEP_EXECUTION SE ON SE.STEP_EXECUTION_ID = SEC.STEP_EXECUTION_ID " +
-			"WHERE SE.JOB_EXECUTION_ID in (:jobExecutionIds)";
+			"FROM %PREFIX%STEP_EXECUTION_CONTEXT SEC, %PREFIX%STEP_EXECUTION SE " +
+			"WHERE SE.JOB_EXECUTION_ID in (:jobExecutionIds) " +
+			"AND SE.STEP_EXECUTION_ID = SEC.STEP_EXECUTION_ID";
 
 	/**
 	 * SQL statements for removing the Step Execution Context.
