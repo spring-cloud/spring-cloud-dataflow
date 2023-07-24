@@ -27,6 +27,7 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerA
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
+import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 
 /**
  * Bootstrap class for the Spring Cloud Data Flow Server.
@@ -38,6 +39,7 @@ import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
 @SpringBootApplication(exclude = {
 		MetricsAutoConfiguration.class,
 		SessionAutoConfiguration.class,
+		SimpleTaskAutoConfiguration.class,
 		ManagementWebSecurityAutoConfiguration.class,
 		SecurityAutoConfiguration.class,
 		UserDetailsServiceAutoConfiguration.class,

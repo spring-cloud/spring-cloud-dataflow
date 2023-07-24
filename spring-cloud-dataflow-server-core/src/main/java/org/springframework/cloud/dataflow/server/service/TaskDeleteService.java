@@ -33,7 +33,7 @@ public interface TaskDeleteService {
 	 *
 	 * @param id the execution id
 	 */
-	void cleanupExecution(long id);
+	void cleanupExecution(long id, String schemaTarget);
 
 	/**
 	 *  Cleanup the resources that resulted from running the task with the given execution
@@ -42,14 +42,30 @@ public interface TaskDeleteService {
 	 * @param actionsAsSet the actions
 	 * @param ids the id's
 	 */
-	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids);
+	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids, String schemaTarget);
+
+	/**
+	 * Clean up the resources that resuled from running the task with the given name and actions.
+	 *
+	 * @param actionsAsSet the actions
+	 * @param taskName the task name
+	 * @param completed the completion state of the task executions
+	 */
+	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed);
 
 	/**
 	 * Delete one or more Task executions.
 	 *
 	 * @param ids Collection of task execution ids to delete. Must contain at least 1 id.
 	 */
-	void deleteTaskExecutions(Set<Long> ids);
+	void deleteTaskExecutions(Set<Long> ids, String schemaTarget);
+
+	/**
+	 * Delete task executions by name and execution state.
+	 * @param taskName the name of the task executions
+	 * @param onlyCompleted indicator to delete only completed tasks
+	 */
+	void deleteTaskExecutions(String taskName, boolean onlyCompleted);
 
 	/**
 	 * Destroy the task definition. If it is a Composed Task then the task definitions

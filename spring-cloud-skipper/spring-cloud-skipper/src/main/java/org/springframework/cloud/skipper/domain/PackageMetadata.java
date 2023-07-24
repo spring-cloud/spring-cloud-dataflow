@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.domain;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
@@ -89,12 +90,14 @@ public class PackageMetadata extends AbstractEntity {
 	 * Location to source code for this package.
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String packageSourceUrl;
 
 	/**
 	 * The home page of the package
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String packageHomeUrl;
 
 	/**
@@ -110,6 +113,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * A comma separated list of tags to use for searching
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String tags;
 
 	/**
@@ -121,6 +125,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Brief description of the package. The packages README.md will contain more information.
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String description;
 
 	/**
@@ -132,6 +137,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Url location of a icon.
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String iconUrl;
 
 	public PackageMetadata() {

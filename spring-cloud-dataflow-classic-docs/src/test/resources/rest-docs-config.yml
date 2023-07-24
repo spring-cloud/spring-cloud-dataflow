@@ -8,6 +8,9 @@ spring:
       metrics:
         collector:
           uri: http://localhost:${fakeMetricsCollector.port}
+    deployer:
+      local:
+        maximumConcurrentTasks: 50
   autoconfigure:
     exclude: >-
       org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,

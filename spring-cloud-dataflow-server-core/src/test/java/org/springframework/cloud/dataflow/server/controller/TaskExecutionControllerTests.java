@@ -16,12 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,15 +43,28 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -53,8 +72,8 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -63,15 +82,18 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -84,8 +106,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class TaskExecutionControllerTests {
@@ -105,16 +127,19 @@ public class TaskExecutionControllerTests {
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
 	@Autowired
-	private TaskExecutionDao dao;
+	private TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	private JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	private TaskBatchDaoContainer taskBatchDaoContainer;
+
+	@Autowired
+	private AppRegistryService appRegistryService;
 
 	private MockMvc mockMvc;
 
@@ -122,7 +147,10 @@ public class TaskExecutionControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private TaskExplorer taskExplorer;
+	private AggregateTaskExplorer taskExplorer;
+
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	private TaskExecutionService taskExecutionService;
@@ -148,8 +176,16 @@ public class TaskExecutionControllerTests {
 	@Autowired
 	private TaskJobService taskJobService;
 
+	@Autowired
+	private SchemaService schemaService;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
+
+
 	@Before
 	public void setupMockMVC() {
+		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
 		taskPlatform.setLaunchers(Collections.singletonList(launcher));
@@ -177,15 +213,20 @@ public class TaskExecutionControllerTests {
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
+			TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 			TaskExecution taskExecution1 =
-				dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
+					dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
 
 			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
 			dao.createTaskExecution(TASK_NAME_FOO, new Date(), SAMPLE_ARGUMENT_LIST, null);
 			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), SAMPLE_ARGUMENT_LIST,
 					null);
+			SchemaVersionTarget fooBarTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_FOOBAR, taskDefinitionReader);
+			JobRepository jobRepository = jobRepositoryContainer.get(fooBarTarget.getName());
 			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
 			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(fooBarTarget.getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();
 			taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);
@@ -199,43 +240,84 @@ public class TaskExecutionControllerTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(null, taskExecutionService, taskDefinitionRepository, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		new TaskExecutionController(
+				null,
+				aggregateExecutionSupport,
+				taskExecutionService,
+				taskDefinitionRepository,
+				taskDefinitionReader, taskExecutionInfoService,
+				taskDeleteService,
+				taskJobService
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskService() {
-		new TaskExecutionController(taskExplorer, null, taskDefinitionRepository, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		new TaskExecutionController(
+				taskExplorer,
+				aggregateExecutionSupport,
+				null,
+				taskDefinitionRepository,
+				taskDefinitionReader,
+				taskExecutionInfoService,
+				taskDeleteService,
+				taskJobService
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, null, taskExecutionInfoService,
-				taskDeleteService, taskJobService);
+		new TaskExecutionController(
+				taskExplorer,
+				aggregateExecutionSupport,
+				taskExecutionService,
+				null,
+				taskDefinitionReader, taskExecutionInfoService,
+				taskDeleteService,
+				taskJobService
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository, null,
-				taskDeleteService, taskJobService);
+		new TaskExecutionController(taskExplorer,
+				aggregateExecutionSupport,
+				taskExecutionService,
+				taskDefinitionRepository,
+				taskDefinitionReader, null,
+				taskDeleteService,
+				taskJobService
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingDeleteTaskService() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
-				taskExecutionInfoService, null, taskJobService);
+		new TaskExecutionController(taskExplorer,
+				aggregateExecutionSupport,
+				taskExecutionService,
+				taskDefinitionRepository,
+				taskDefinitionReader, taskExecutionInfoService,
+				null,
+				taskJobService
+		);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testTaskExecutionControllerConstructorMissingDeleteTaskJobService() {
-		new TaskExecutionController(taskExplorer, taskExecutionService, taskDefinitionRepository,
-				taskExecutionInfoService, taskDeleteService, null);
+		new TaskExecutionController(taskExplorer,
+				aggregateExecutionSupport,
+				taskExecutionService,
+				taskDefinitionRepository,
+				taskDefinitionReader, taskExecutionInfoService,
+				taskDeleteService,
+				null
+		);
 	}
 
 	@Test
 	public void testGetExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
@@ -243,6 +325,7 @@ public class TaskExecutionControllerTests {
 	public void testGetExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
 						.andExpect(status().isOk()).andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
 						.andExpect(jsonPath("$.parentExecutionId", is(nullValue())))
 						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
@@ -252,6 +335,7 @@ public class TaskExecutionControllerTests {
 	public void testGetChildTaskExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/2").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
 						.andExpect(status().isOk())
 						.andExpect(jsonPath("$.parentExecutionId", is(1)))
 						.andExpect(jsonPath("jobExecutionIds", hasSize(0))));
@@ -259,9 +343,12 @@ public class TaskExecutionControllerTests {
 
 	@Test
 	public void testGetExecutionForJob() throws Exception {
-		mockMvc.perform(get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"" + TASK_NAME_FOOBAR + "\"}"))
-				.andExpect(jsonPath("jobExecutionIds[0]", is(1))).andExpect(jsonPath("jobExecutionIds", hasSize(1)));
+				.andExpect(jsonPath("jobExecutionIds[0]", is(1)))
+				.andExpect(jsonPath("jobExecutionIds", hasSize(1)));
 	}
 
 	@Test
@@ -279,8 +366,117 @@ public class TaskExecutionControllerTests {
 	public void testGetCurrentExecutions() throws Exception {
 		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
 		mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
+
+	}
+
+	@Test
+	public void testBoot3Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp3", ApplicationType.task, "3.0.0", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT3);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions/launch")
+								.queryParam("name", "timestamp3")
+								.queryParam("properties","app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isCreated());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.registerModule(new Jdk8Module());
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new Jackson2DataflowModule());
+		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
+		resultActions = mockMvc.perform(
+				get("/tasks/executions/" + resource.getExecutionId())
+						.accept(MediaType.APPLICATION_JSON)
+						.queryParam("schemaTarget", resource.getSchemaTarget())
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().json("{taskName: \"timestamp3\"}"));
+		response = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("response=" + response);
+		JsonNode json;
+		try (JsonParser parser = new ObjectMapper().createParser(response)) {
+			json = parser.readValueAs(JsonNode.class);
+		}
+		System.out.println("json=" + json.toPrettyString());
+		assertThat(json.findValue("deploymentProperties")).isNotNull();
+		JsonNode deploymentProperties = json.findValue("deploymentProperties");
+		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
+		assertThat(deploymentProperties.hasNonNull("app.timestamp3.spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("app.timestamp3.spring.cloud.task.tablePrefix").asText()).isEqualTo("BOOT3_TASK_");
+	}
+	@Test
+	public void testInvalidBoot3Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp3", ApplicationType.task, "3.0.0", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT3);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions")
+								.queryParam("name", "timestamp3")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isBadRequest());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		assertThat(response).contains("cannot be launched for");
+	}
+	@Test
+	public void testBoot2Execution() throws Exception {
+		if (appRegistryService.getDefaultApp("timestamp2", ApplicationType.task) == null) {
+			appRegistryService.save("timestamp2", ApplicationType.task, "2.0.1", new URI("file:src/test/resources/apps/foo-task"), null, AppBootSchemaVersion.BOOT2);
+		}
+		taskDefinitionRepository.save(new TaskDefinition("timestamp2", "timestamp2"));
+		when(taskLauncher.launch(any())).thenReturn("abc");
+
+		ResultActions resultActions = mockMvc.perform(
+						post("/tasks/executions")
+								.queryParam("name", "timestamp2")
+								.queryParam("properties","app.timestamp2.foo3=bar3,app.timestamp2.bar3=3foo")
+								.accept(MediaType.APPLICATION_JSON)
+				).andDo(print())
+				.andExpect(status().isCreated());
+
+		String response = resultActions.andReturn().getResponse().getContentAsString();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.registerModule(new Jdk8Module());
+		mapper.registerModule(new Jackson2HalModule());
+		mapper.registerModule(new Jackson2DataflowModule());
+		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
+		resultActions = mockMvc.perform(
+						get("/tasks/executions/" + resource.getExecutionId())
+								.accept(MediaType.APPLICATION_JSON)
+								.queryParam("schemaTarget", resource.getSchemaTarget())
+				)
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().json("{taskName: \"timestamp2\"}"));
+		response = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("response=" + response);
+		JsonNode json;
+		try (JsonParser parser = new ObjectMapper().createParser(response)) {
+			json = parser.readValueAs(JsonNode.class);
+		}
+		System.out.println("json=" + json.toPrettyString());
+		assertThat(json.findValue("deploymentProperties")).isNotNull();
+		JsonNode deploymentProperties = json.findValue("deploymentProperties");
+		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
+		assertThat(deploymentProperties.hasNonNull("app.timestamp2.spring.cloud.task.tablePrefix")).isTrue();
+		assertThat(deploymentProperties.get("app.timestamp2.spring.cloud.task.tablePrefix").asText()).isEqualTo("TASK_");
 
 	}
 
@@ -288,6 +484,7 @@ public class TaskExecutionControllerTests {
 	public void testGetExecutionsByName() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].", mockMvc
 				.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[0].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[1].taskName", is(TASK_NAME_ORIG)))
@@ -299,46 +496,60 @@ public class TaskExecutionControllerTests {
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()
 				.contains("NoSuchTaskException");
 	}
 
 	@Test
 	public void testCleanup() throws Exception {
-		mockMvc.perform(delete("/tasks/executions/1")).andExpect(status().is(200));
+		mockMvc.perform(delete("/tasks/executions/1"))
+				.andDo(print())
+				.andExpect(status().is(200));
 		verify(taskLauncher).cleanup("foobar");
 	}
 
 	@Test
 	public void testCleanupWithActionParam() throws Exception {
-		mockMvc.perform(delete("/tasks/executions/1").param("action", "CLEANUP")).andExpect(status().is(200));
+		mockMvc.perform(delete("/tasks/executions/1").param("action", "CLEANUP"))
+				.andDo(print())
+				.andExpect(status().is(200));
 		verify(taskLauncher).cleanup("foobar");
 	}
 
 	@Test
 	public void testCleanupWithInvalidAction() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
-		.andDo(print())
-		.andExpect(status().is(400))
-		.andExpect(jsonPath("_embedded.errors[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
+				.andDo(print())
+				.andExpect(status().is(400))
+				.andExpect(jsonPath("_embedded.errors[0].message", is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
 	}
 
 	@Test
 	public void testCleanupByIdNotFound() throws Exception {
-		mockMvc.perform(delete("/tasks/executions/10")).andExpect(status().is(404)).andReturn().getResponse()
+		mockMvc.perform(delete("/tasks/executions/10"))
+				.andDo(print())
+				.andExpect(status().is(404))
+				.andReturn()
+				.getResponse()
 				.getContentAsString().contains("NoSuchTaskExecutionException");
 	}
 
 	@Test
 	public void testDeleteSingleTaskExecutionById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
-			mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-					.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
-					.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "REMOVE_DATA"))
-			.andExpect(status().isOk());
+				.andDo(print())
+				.andExpect(status().isOk());
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
-				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3)))
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(2))));
 	}
@@ -347,18 +558,22 @@ public class TaskExecutionControllerTests {
 	 * This test will successfully delete 3 task executions. 2 task executions are specified in the arguments.
 	 * But since the task execution with id `1` is a parent task execution with 1 child, that child task
 	 * execution will be deleted as well.
-	 *
 	 */
 	@Test
 	public void testDeleteThreeTaskExecutionsById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
-			mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-					.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
-					.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
 		mockMvc.perform(delete("/tasks/executions/1,3").param("action", "REMOVE_DATA"))
-			.andExpect(status().isOk());
+				.andDo(print())
+				.andExpect(status().isOk());
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
-				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4)))
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(1))));
 	}
@@ -374,15 +589,19 @@ public class TaskExecutionControllerTests {
 	@Test
 	public void testSorting() throws Exception {
 		mockMvc.perform(get("/tasks/executions").param("sort", "TASK_EXECUTION_ID").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk());
+				.andDo(print())
+				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/executions").param("sort", "task_execution_id").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk());
+				.andDo(print())
+				.andExpect(status().isOk());
 
 		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().is5xxServerError())
-			.andExpect(content().string(containsString("Sorting column WRONG_FIELD not allowed")));
+				.andDo(print())
+				.andExpect(status().is5xxServerError())
+				.andExpect(content().string(containsString("Sorting column WRONG_FIELD not allowed")));
 		mockMvc.perform(get("/tasks/executions").param("sort", "wrong_field").accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().is5xxServerError())
-			.andExpect(content().string(containsString("Sorting column wrong_field not allowed")));
+				.andDo(print())
+				.andExpect(status().is5xxServerError())
+				.andExpect(content().string(containsString("Sorting column wrong_field not allowed")));
 	}
 }

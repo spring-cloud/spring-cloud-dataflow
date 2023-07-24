@@ -82,8 +82,11 @@ public class RuntimeStreamsController {
 	 * @return a paged model for stream statuses
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public PagedModel<StreamStatusResource> status(@RequestParam(value = "names", required = false) String[] names, Pageable pageable,
-			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
+	public PagedModel<StreamStatusResource> status(
+			@RequestParam(value = "names", required = false) String[] names,
+			Pageable pageable,
+			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler
+	) {
 		List<String> streamNames = (names!= null) ? Arrays.asList(names): new ArrayList<>();
 		if (streamNames.isEmpty()) {
 			streamNames = this.streamDeployer.getStreams();

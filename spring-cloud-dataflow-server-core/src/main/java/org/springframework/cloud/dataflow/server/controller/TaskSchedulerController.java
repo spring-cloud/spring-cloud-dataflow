@@ -81,9 +81,11 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<ScheduleInfoResource> list(Pageable pageable,
+	public PagedModel<ScheduleInfoResource> list(
+			Pageable pageable,
 			@RequestParam(value = "platform", required = false) String platform,
-			PagedResourcesAssembler<ScheduleInfo> assembler) {
+			PagedResourcesAssembler<ScheduleInfo> assembler
+	) {
 		List<ScheduleInfo> result = this.schedulerService.listForPlatform(platform);
 		return assembler.toModel(new PageImpl<>(result, pageable, result.size()), taskAssembler);
 	}
@@ -97,8 +99,10 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public ScheduleInfoResource getSchedule(@PathVariable("name") String scheduleName,
-			@RequestParam(value = "platform", required = false) String platform) {
+	public ScheduleInfoResource getSchedule(
+			@PathVariable("name") String scheduleName,
+			@RequestParam(value = "platform", required = false) String platform
+	) {
 		ScheduleInfo schedule = this.schedulerService.getSchedule(scheduleName, platform);
 		if (schedule == null) {
 			throw new NoSuchScheduleException(String.format("Schedule [%s] doesn't exist" , scheduleName));
@@ -116,9 +120,11 @@ public class TaskSchedulerController {
 	 * @return a list of Schedules.
 	 */
 	@RequestMapping("/instances/{taskDefinitionName}")
-	public PagedModel<ScheduleInfoResource> filteredList(@PathVariable String taskDefinitionName,
+	public PagedModel<ScheduleInfoResource> filteredList(
+			@PathVariable String taskDefinitionName,
 			@RequestParam(value = "platform", required = false) String platform,
-			PagedResourcesAssembler<ScheduleInfo> assembler) {
+			PagedResourcesAssembler<ScheduleInfo> assembler
+	) {
 		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName, platform);
 		int resultSize = result.size();
 		Pageable pageable = PageRequest.of(0,
@@ -151,11 +157,13 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
-	public void save(@RequestParam("scheduleName") String scheduleName,
+	public void save(
+			@RequestParam("scheduleName") String scheduleName,
 			@RequestParam("taskDefinitionName") String taskDefinitionName,
 			@RequestParam String properties,
 			@RequestParam(required = false) String arguments,
-			@RequestParam(value = "platform", required = false) String platform) {
+			@RequestParam(value = "platform", required = false) String platform
+	) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
 		this.schedulerService.schedule(StringUtils.trimWhitespace(scheduleName), taskDefinitionName,
@@ -170,8 +178,10 @@ public class TaskSchedulerController {
 	 */
 	@RequestMapping(value = "/{scheduleName}", method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	public void unschedule(@PathVariable("scheduleName") String scheduleName,
-			@RequestParam(value = "platform", required = false) String platform) {
+	public void unschedule(
+			@PathVariable("scheduleName") String scheduleName,
+			@RequestParam(value = "platform", required = false) String platform
+	) {
 		schedulerService.unschedule(scheduleName, platform);
 	}
 

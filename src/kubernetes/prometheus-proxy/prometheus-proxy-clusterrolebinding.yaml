@@ -7,7 +7,6 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: prometheus-rsocket-proxy
-    namespace: prometheus
 roleRef:
   kind: ClusterRole
   name: cluster-admin

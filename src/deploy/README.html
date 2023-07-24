@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.18">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Deployment to Kubernetes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -208,13 +208,10 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
 .exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
 .sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
 .literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
 @media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
 @media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
@@ -393,7 +390,7 @@ b.conum *{color:inherit!important}
 dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
 h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
 p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -454,11 +451,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Deployment of a carvel package requires the installation of tools and specific Kubernetes controllers. Then you will add the package repository to the cluster and install the application.</p>
 </div>
+<div class="paragraph">
+<p>For local minikube or kind cluster you can use: <a href="#local-k8s-development">Configure Kubernetes for local development or testing</a>, and follow the instructions until the section <em>Deploy Spring Cloud Data Flow</em></p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_required_tools">Required Tools</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_required_tools">Required Tools</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -516,6 +513,7 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </tr>
 </table>
 </div>
+</div>
 <div class="sect2">
 <h3 id="_scripts">Scripts</h3>
 <div class="paragraph">
@@ -536,42 +534,42 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/start-deploy.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>start-deploy.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [scdf-type] [namespace] [release|snapshot]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Configures environmental variables needs for the rest of the scripts. <code>BROKER</code>, <code>NS</code> and <code>SCDF_TYPE</code> are set. The default <code>NS</code> is <code>scdf</code>. The namespace will be created if it doesn&#8217;t exist by <code>setup-scdf-repo.sh</code>. The default <code>SCDF_TYPE</code> is <code>oss</code>. <em>release|snapshot</em> and <em>scdf-type</em> will determine the value of <code>PACKAGE_VERSION</code> set.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/prepare-cluster.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>prepare-cluster.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Installs cert-manager, secretgen-controller and kapp-controller</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/carvel-use-template.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel-use-template.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Creates <code>scdf-values.yml</code> in current directory based on <code>scdf-pro-values.yml</code> or <code>scdf-oss-values.yml</code></p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/setup-scdf-repo.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>setup-scdf-repo.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/configure-prometheus-proxy.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-prometheus-proxy.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;host&gt; &lt;port&gt; [step]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/configure-database.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-database.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</p>
@@ -595,7 +593,7 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/deploy-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deploy-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
@@ -603,7 +601,7 @@ The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/update-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update-scdf.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Updated the deployed application using a modified values file.
@@ -611,14 +609,14 @@ The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/export-dataflow-ip.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-dataflow-ip.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel/register-apps.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register-apps.sh</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [stream-application-version]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
 <p><em>broker</em> must be one of rabbit or kafka.
@@ -640,11 +638,14 @@ Take note that the registration of application in the <em>pro</em> version can t
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_preparation">Preparation</h3>
+<div class="paragraph">
+<p>You will need to prepare a values file named scdf-values.yml
+The following steps will provide help.</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_prepare_configuration_parameters">Prepare Configuration parameters</h2>
-<div class="sectionbody">
+<div class="sect3">
+<h4 id="_prepare_configuration_parameters">Prepare Configuration parameters</h4>
 <div class="paragraph">
 <p>Executing the following script will configure the environmental variables needed.</p>
 </div>
@@ -732,10 +733,8 @@ Take note that the registration of application in the <em>pro</em> version can t
 </tbody>
 </table>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_prepare_configuration_file">Prepare Configuration file</h2>
-<div class="sectionbody">
+<div class="sect3">
+<h4 id="_prepare_configuration_file">Prepare Configuration file</h4>
 <div class="paragraph">
 <p>Create a file name <code>scdf-values.yml</code> by executing:</p>
 </div>
@@ -752,9 +751,8 @@ Take note that the registration of application in the <em>pro</em> version can t
 </div>
 </div>
 </div>
-<div class="sect1">
-<h2 id="_prepare_cluster_and_add_repository">Prepare cluster and add repository</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_prepare_cluster_and_add_repository">Prepare cluster and add repository</h3>
 <div class="paragraph">
 <p>Login to docker and optionally registry.pivotal.io for Spring Cloud Data Flow Pro.</p>
 </div>
@@ -788,18 +786,16 @@ docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD ind
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_install_supporting_services">Install supporting services</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_install_supporting_services">Install supporting services</h3>
 <div class="paragraph">
 <p>In a production environment you should be using supported database and broker services or operators along with shared observability tools.</p>
 </div>
 <div class="paragraph">
 <p>For local development or demonstration the following can be used to install database, broker and prometheus.</p>
 </div>
-<div class="sect2">
-<h3 id="_deploy_local_database">Deploy local database.</h3>
+<div class="sect3">
+<h4 id="_deploy_local_database">Deploy local database.</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-database.sh &lt;database&gt;  # <b class="conum">(1)</b></code></pre>
@@ -825,16 +821,16 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_deploy_local_message_broker">Deploy local message broker.</h3>
+<div class="sect3">
+<h4 id="_deploy_local_message_broker">Deploy local message broker.</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-broker.sh</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_deploy_local_prometheus_and_proxy">Deploy local Prometheus and proxy.</h3>
+<div class="sect3">
+<h4 id="_deploy_local_prometheus_and_proxy">Deploy local Prometheus and proxy.</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-local-prometheus.sh</code></pre>
@@ -842,6 +838,7 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 </div>
 <div class="paragraph">
 <p><em>This script also configures the Grafana endpoint in `scdf-values.yml`</em></p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -855,11 +852,8 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 </div>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_deploy_spring_cloud_data_flow">Deploy Spring Cloud Data Flow</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_deploy_spring_cloud_data_flow">Deploy Spring Cloud Data Flow</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-scdf.sh
@@ -869,12 +863,11 @@ source ./carvel/export-dataflow-ip.sh
 </div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_update_deployed_application">Update deployed application.</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_update_deployed_application">Update deployed application.</h3>
 <div class="paragraph">
 <p>You can modify the values file used during installation and then update the deployment using <code>./carvel/update-scdf.sh</code></p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="local-k8s-development">Configure Kubernetes for local development or testing</h3>
@@ -1311,7 +1304,7 @@ Please report any errors with the scripts along with detail information about th
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-23 10:02:45 +0200
+Last updated 2023-06-17 15:04:22 +0200
 </div>
 </div>
 </body>

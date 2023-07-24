@@ -47,7 +47,7 @@ spec:
             periodSeconds: 3
           resources:
             requests:
-              cpu: 0.5
+              cpu: '0.5'
               memory: 1024Mi
           env:
             - name: LANG
@@ -113,16 +113,24 @@ spec:
                 configMapKeyRef:
                   key: SPRING_DATASOURCE_VALIDATION_QUERY
                   name: scdf-datasource
-            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+            - name: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE'
               valueFrom:
                 configMapKeyRef:
-                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
-                  name: scdf-datasource
-            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+                  key: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE'
+                  name: 'scdf-datasource'
+            - name: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING'
               valueFrom:
                 configMapKeyRef:
-                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
-                  name: scdf-datasource
+                  key: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING'
+                  name: 'scdf-datasource'
+            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED'
+              value: 'true'
+            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED'
+              value: 'true'
+            - name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL'
+              value: 'http://localhost:3000'
+            - name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_TYPE'
+              value: 'GRAFANA'
       serviceAccountName: scdf-sa
       volumes:
         - name: config

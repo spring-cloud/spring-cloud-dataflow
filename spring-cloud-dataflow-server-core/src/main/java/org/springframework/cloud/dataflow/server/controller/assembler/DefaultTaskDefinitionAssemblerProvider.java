@@ -16,31 +16,47 @@
 package org.springframework.cloud.dataflow.server.controller.assembler;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
-import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.util.Assert;
 
 /**
  * Default REST resource assembler that returns the {@link TaskDefinitionResource} type.
+ *
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
  */
 public class DefaultTaskDefinitionAssemblerProvider implements TaskDefinitionAssemblerProvider<TaskDefinitionResource> {
 
 	private final TaskExecutionService taskExecutionService;
-	private final TaskExplorer taskExplorer;
+
+	private final AggregateTaskExplorer taskExplorer;
+
 	private final TaskJobService taskJobService;
 
-	public DefaultTaskDefinitionAssemblerProvider(TaskExecutionService taskExecutionService,
-			TaskJobService taskJobService, TaskExplorer taskExplorer) {
+	private final AggregateExecutionSupport aggregateExecutionSupport;
+
+	public DefaultTaskDefinitionAssemblerProvider(
+			TaskExecutionService taskExecutionService,
+			TaskJobService taskJobService,
+			AggregateTaskExplorer taskExplorer,
+			AggregateExecutionSupport aggregateExecutionSupport
+	) {
+		Assert.notNull(taskExecutionService, "taskExecutionService required");
+		Assert.notNull(taskJobService, "taskJobService required");
+		Assert.notNull(taskExplorer, "taskExplorer required");
+		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport required");
 		this.taskExecutionService = taskExecutionService;
 		this.taskJobService = taskJobService;
 		this.taskExplorer = taskExplorer;
+		this.aggregateExecutionSupport = aggregateExecutionSupport;
 	}
 
 	@Override
 	public DefaultTaskDefinitionAssembler getTaskDefinitionAssembler(boolean enableManifest) {
 		return new DefaultTaskDefinitionAssembler(taskExecutionService, enableManifest,
-				TaskDefinitionResource.class, taskJobService, taskExplorer);
+				TaskDefinitionResource.class, taskJobService, taskExplorer, aggregateExecutionSupport);
 	}
 }

@@ -15,7 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.controller.assembler;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +30,14 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
-import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 
 /**
@@ -55,7 +58,7 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 
 	private final TaskJobService taskJobService;
 
-	private final TaskExplorer taskExplorer;
+	private final AggregateTaskExplorer taskExplorer;
 
 	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
@@ -63,34 +66,40 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	public DefaultTaskDefinitionAssembler(TaskExecutionService taskExecutionService, boolean enableManifest,
-			Class<R> classType, TaskJobService taskJobService, TaskExplorer taskExplorer) {
+	private final AggregateExecutionSupport aggregateExecutionSupport;
+
+	public DefaultTaskDefinitionAssembler(
+			TaskExecutionService taskExecutionService,
+			boolean enableManifest,
+			Class<R> classType,
+			TaskJobService taskJobService,
+			AggregateTaskExplorer taskExplorer,
+			AggregateExecutionSupport aggregateExecutionSupport) {
 		super(TaskDefinitionController.class, classType);
 		this.taskExecutionService = taskExecutionService;
 		this.enableManifest = enableManifest;
 		this.taskJobService = taskJobService;
 		this.taskExplorer = taskExplorer;
+		this.aggregateExecutionSupport = aggregateExecutionSupport;
 	}
 
 	TaskDefinitionResource updateTaskExecutionResource(
 			TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition,
 			TaskDefinitionResource taskDefinitionResource, boolean manifest) {
 
-		TaskExecution taskExecution = taskExecutionAwareTaskDefinition.getLatestTaskExecution();
-		taskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
+		AggregateTaskExecution taskExecution = this.sanitizeTaskExecutionArguments(taskExecutionAwareTaskDefinition.getLatestTaskExecution());
 		TaskManifest taskManifest = null;
 		if (manifest) {
-			taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
+			taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
 			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		}
 		TaskJobExecution composedTaskJobExecution = null;
 		if (taskExecution != null && taskDefinitionResource.isComposed()) {
-			Set<Long> jobExecutionIds = this.taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId());
+			Set<Long> jobExecutionIds = this.taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
 			if(jobExecutionIds != null && jobExecutionIds.size() > 0) {
 				try {
-					composedTaskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0]);
-				}
-				catch(NoSuchJobExecutionException noSuchJobExecutionException) {
+					composedTaskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0], taskExecution.getSchemaTarget());
+				} catch (NoSuchJobExecutionException noSuchJobExecutionException) {
 					logger.warn("Job Execution for Task Execution {} could not be found.",
 							taskExecution.getExecutionId());
 				}
@@ -102,7 +111,12 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 		taskDefinitionResource.setLastTaskExecution(taskExecutionResource);
 		return taskDefinitionResource;
 	}
-
+	private AggregateTaskExecution sanitizeTaskExecutionArguments(AggregateTaskExecution taskExecution) {
+		List<String> args = taskExecution.getArguments().stream()
+				.map(this.argumentSanitizer::sanitize).collect(Collectors.toList());
+		taskExecution.setArguments(args);
+		return taskExecution;
+	}
 	@Override
 	public R toModel(TaskExecutionAwareTaskDefinition taskExecutionAwareTaskDefinition) {
 		return createModelWithId(taskExecutionAwareTaskDefinition.getTaskDefinition().getName(),

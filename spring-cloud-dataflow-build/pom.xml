@@ -25,14 +25,13 @@
 		<spring-boot.version>2.7.13</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
-		<spring-doc-resources.version>0.1.0.RELEASE</spring-doc-resources.version>
 		<spring-asciidoctor-extensions.version>0.1.3.RELEASE</spring-asciidoctor-extensions.version>
-		<asciidoctorj-pdf.version>1.5.0-alpha.18</asciidoctorj-pdf.version>
-		<asciidoctorj-diagram.version>1.5.18</asciidoctorj-diagram.version>
+		<asciidoctorj-pdf.version>2.3.7</asciidoctorj-pdf.version>
+		<asciidoctorj-diagram.version>2.2.9</asciidoctorj-diagram.version>
 		<guides-project.version>${project.version}</guides-project.version>
 		<guides-update.phase>deploy</guides-update.phase>
 		<revision>${project.version}</revision>
-		<asciidoctorj.version>1.5.8</asciidoctorj.version>
+		<asciidoctorj.version>2.5.7</asciidoctorj.version>
 		<jruby-complete.version>9.2.7.0</jruby-complete.version>
 
 		<!-- Sonar -->
@@ -61,7 +60,7 @@
 		<maven-enforcer-plugin.version>3.0.0-M2</maven-enforcer-plugin.version>
 		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 		<maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-		<asciidoctor-maven-plugin.version>1.5.8</asciidoctor-maven-plugin.version>
+		<asciidoctor-maven-plugin.version>2.2.4</asciidoctor-maven-plugin.version>
 		<build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
 		<artifactory-maven-plugin.version>2.2.1</artifactory-maven-plugin.version>
 		<license-maven-plugin.version>1.20</license-maven-plugin.version>
@@ -237,6 +236,8 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
+						<threadCount>1</threadCount>
+						<forkCount>1</forkCount>
 						<includes>
 							<include>**/*Tests.java</include>
 							<include>**/*Test.java</include>
@@ -653,6 +654,8 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>${maven-surefire-plugin.version}</version>
 						<configuration>
+							<threadCount>1</threadCount>
+							<forkCount>1</forkCount>
 							<properties>
 								<property>
 									<name>listener</name>

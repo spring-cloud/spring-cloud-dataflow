@@ -88,8 +88,8 @@ public class StreamDeploymentController {
 	 * Construct a new UpdatableStreamDeploymentController, given a
 	 * {@link StreamDeploymentController} and {@link StreamService} and {@link StreamDefinitionService}
 	 *
-	 * @param repository    the repository this controller will use for stream CRUD operations
-	 * @param streamService the underlying UpdatableStreamService to deploy the stream
+	 * @param repository              the repository this controller will use for stream CRUD operations
+	 * @param streamService           the underlying UpdatableStreamService to deploy the stream
 	 * @param streamDefinitionService the StreamDefinitionService
 	 */
 	public StreamDeploymentController(StreamDefinitionRepository repository,
@@ -197,14 +197,16 @@ public class StreamDeploymentController {
 	/**
 	 * Request deployment of an existing stream definition.
 	 *
-	 * @param name the name of an existing stream definition (required)
+	 * @param name                      the name of an existing stream definition (required)
 	 * @param reuseDeploymentProperties Indicator to re-use deployment properties.
 	 * @return The stream deployment
 	 */
 	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StreamDeploymentResource info(@PathVariable("name") String name,
-										 @RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties) {
+	public StreamDeploymentResource info(
+			@PathVariable("name") String name,
+			@RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties
+	) {
 		StreamDefinition streamDefinition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		StreamDeployment streamDeployment = this.streamService.info(name);

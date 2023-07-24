@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Lob;
@@ -46,6 +47,7 @@ public class Repository extends AbstractEntity {
 	 */
 	@NotNull
 	@Lob
+	@Column(columnDefinition = "text")
 	private String url;
 
 	/**
@@ -53,6 +55,7 @@ public class Repository extends AbstractEntity {
 	 * packages.
 	 */
 	@Lob
+	@Column(columnDefinition = "text")
 	private String sourceUrl;
 
 	/**

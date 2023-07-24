@@ -16,9 +16,8 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,12 +50,12 @@ import static org.mockito.Mockito.verify;
  * @author Glenn Renfro
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
-		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
+@ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
+		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
-@TestPropertySource(properties = {"graph=AAA && BBB && CCC","max-wait-time=1000", "spring.cloud.task.name=foo"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
+@TestPropertySource(properties = {"graph=AAA && BBB && CCC", "max-wait-time=1000", "spring.cloud.task.name=foo"})
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Autowired
@@ -83,6 +82,11 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_REPEATABLE_READ");
 
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
-		verify(taskOperations).launch("AAA", new HashMap<>(0), Collections.singletonList("--spring.cloud.task.parent-execution-id=1"));
+
+		verify(taskOperations).launch(
+				"AAA",
+				Collections.emptyMap(),
+				Arrays.asList("--spring.cloud.task.parent-execution-id=1", "--spring.cloud.task.parent-schema-target=boot2")
+		);
 	}
 }

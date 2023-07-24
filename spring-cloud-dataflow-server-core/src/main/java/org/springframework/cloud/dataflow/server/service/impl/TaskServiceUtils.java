@@ -417,8 +417,12 @@ public class TaskServiceUtils {
 			if (arg == null) {
 				throw new IllegalArgumentException("Command line Arguments for ComposedTaskRunner contain a null entry.");
 			}
-			if (arg.startsWith("app.")) {
+			if (arg.startsWith("app.") || arg.startsWith("--app.")) {
+				if(arg.startsWith("--")) {
+					arg = arg.substring(2);
+				}
 				String[] split = arg.split("=", 2);
+				// TODO convert key portion of property / argument to spring commandline format.
 				if (split.length == 2) {
 					composedTaskArguments.add("--composed-task-app-arguments." + Base64Utils.encode(split[0]) + "=" + split[1]);
 				}

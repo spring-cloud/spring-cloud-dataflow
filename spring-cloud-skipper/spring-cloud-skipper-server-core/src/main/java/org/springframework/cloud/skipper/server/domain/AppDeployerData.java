@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -52,6 +53,7 @@ public class AppDeployerData extends AbstractEntity {
 
 	// Store deployment Ids associated with the given release.
 	@Lob
+	@Column(columnDefinition = "text")
 	private String deploymentData;
 
 	public AppDeployerData() {

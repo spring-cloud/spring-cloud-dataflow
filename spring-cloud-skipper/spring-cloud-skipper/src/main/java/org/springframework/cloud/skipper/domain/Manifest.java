@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.domain;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -29,6 +30,7 @@ public class Manifest extends AbstractEntity {
 
 	@NotNull
 	@Lob
+	@Column(columnDefinition = "text")
 	private String data;
 
 	public Manifest() {

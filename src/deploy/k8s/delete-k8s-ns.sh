@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 WAIT=
 CARVEL=false
-NS=default
+if [ "$NS" = "" ]; then
+    NS=scdf
+fi
 while [ "$1" != "" ]; do
     case $1 in
     "--nowait")

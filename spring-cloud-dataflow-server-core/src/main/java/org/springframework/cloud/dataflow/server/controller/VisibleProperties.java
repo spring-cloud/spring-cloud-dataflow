@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.RelaxedNames;
@@ -71,10 +73,18 @@ public class VisibleProperties {
 			String provided = entry.getKey();
 			if (!allProps.contains(provided)) {
 				List<ConfigurationMetadataProperty> longForms = null;
-				for (String relaxed : new RelaxedNames(provided)) {
-					longForms = visible.get(relaxed);
-					if (longForms != null) {
-						break;
+				RelaxedNames relaxedNames = null;
+				try {
+					relaxedNames = new RelaxedNames(provided);
+				} catch (Exception x) {
+					LoggerFactory.getLogger(getClass()).error("Exception determining relaxed name for " + provided, x);
+				}
+				if(relaxedNames != null) {
+					for (String relaxed : relaxedNames) {
+						longForms = visible.get(relaxed);
+						if (longForms != null) {
+							break;
+						}
 					}
 				}
 				if (longForms != null) {

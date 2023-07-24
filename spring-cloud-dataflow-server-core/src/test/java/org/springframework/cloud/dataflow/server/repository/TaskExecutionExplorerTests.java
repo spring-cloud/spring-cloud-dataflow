@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,34 +18,42 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
-import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -56,46 +64,61 @@ public class TaskExecutionExplorerTests {
 	private DataSource dataSource;
 
 	@Autowired
-	private TaskExplorer explorer;
+	private AggregateTaskExplorer explorer;
+
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
 
 	private JdbcTemplate template;
 
-	@Before
+	@Autowired
+	private SchemaService schemaService;
+
+	@Autowired
+	private TaskDefinitionReader taskDefinitionReader;
+
+	@BeforeEach
 	public void setup() throws Exception {
 		template = new JdbcTemplate(dataSource);
-		template.execute("DELETE FROM task_execution");
+		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
+			String prefix = target.getTaskPrefix();
+			template.execute(SchemaUtilities.getQuery("DELETE FROM %PREFIX%EXECUTION", prefix));
+		}
 	}
 
 	@Test
-	public void testInitializer() throws Exception {
-		int actual = template.queryForObject("SELECT COUNT(*) from TASK_EXECUTION", Integer.class);
-		assertEquals("expected 0 entries returned from task_execution", 0, actual);
-		actual = template.queryForObject("SELECT COUNT(*) from TASK_EXECUTION_PARAMS", Integer.class);
-		assertEquals("expected 0 entries returned from task_execution_params", 0, actual);
+	public void testInitializer() {
+		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
+			String prefix = target.getTaskPrefix();
+			int actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION", prefix), Integer.class);
+			assertThat(actual).isEqualTo(0);
+			actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION_PARAMS", prefix), Integer.class);
+			assertThat(actual).isEqualTo(0);
+		}
 	}
 
 	@Test
-	public void testExplorerFindAll() throws Exception {
+	public void testExplorerFindAll(){
 		final int ENTRY_COUNT = 4;
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "foo");
 		insertTestExecutionDataIntoRepo(template, 1L, "foo");
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
-		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
-		assertEquals(String.format("expected %s entries returned from task_execution", ENTRY_COUNT), ENTRY_COUNT,
-				resultList.size());
-		Map<Long, TaskExecution> actual = new HashMap<>();
-		for (int executionId = 0; executionId < ENTRY_COUNT; executionId++) {
-			TaskExecution taskExecution = resultList.get(executionId);
-			actual.put(taskExecution.getExecutionId(), taskExecution);
+		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
+		assertThat(resultList.size()).isEqualTo(ENTRY_COUNT);
+		Map<String, AggregateTaskExecution> actual = new HashMap<>();
+		for (AggregateTaskExecution taskExecution : resultList) {
+			String key = String.format("%d:%s", taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
+			actual.put(key, taskExecution);
 		}
-		for (long executionId = 0; executionId < ENTRY_COUNT; executionId++) {
-			TaskExecution taskExecution = actual.get(executionId);
-			assertEquals("expected execution id does not match actual", executionId, taskExecution.getExecutionId());
-			assertEquals("expected taskName does not match actual", "foo", taskExecution.getTaskName());
+		Set<String> allKeys = new HashSet<>();
+		for (AggregateTaskExecution execution : actual.values()) {
+			String key = String.format("%d:%s", execution.getExecutionId(), execution.getSchemaTarget());
+			assertThat(allKeys.contains(key)).isFalse();
+			allKeys.add(key);
 		}
-
+		assertThat(actual.size()).isEqualTo(allKeys.size());
 	}
 
 	@Test
@@ -105,17 +128,18 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<TaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
-		assertEquals("expected 1 entries returned from task_execution", 1, resultList.size());
-		TaskExecution taskExecution = resultList.get(0);
-		assertEquals("expected execution id does not match actual", 0, taskExecution.getExecutionId());
-		assertEquals("expected taskName does not match actual", "fee", taskExecution.getTaskName());
+		List<AggregateTaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
+		assertThat(resultList.size()).isEqualTo(1);
+		AggregateTaskExecution taskExecution = resultList.get(0);
+		assertThat(taskExecution.getExecutionId()).isEqualTo(0);
+		assertThat(taskExecution.getTaskName()).isEqualTo("fee");
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {
-		final String INSERT_STATEMENT = "INSERT INTO task_execution (task_execution_id, "
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
+		final String INSERT_STATEMENT = SchemaUtilities.getQuery("INSERT INTO %PREFIX%EXECUTION (task_execution_id, "
 				+ "start_time, end_time, task_name, " + "exit_code,exit_message,last_updated) "
-				+ "VALUES (?,?,?,?,?,?,?)";
+				+ "VALUES (?,?,?,?,?,?,?)", schemaVersionTarget.getTaskPrefix());
 		Object[] param = new Object[] { id, new Date(id), new Date(), taskName, 0, null, new Date() };
 		template.update(INSERT_STATEMENT, param);
 	}

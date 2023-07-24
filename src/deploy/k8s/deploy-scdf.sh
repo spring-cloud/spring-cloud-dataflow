@@ -4,9 +4,13 @@ if [ "$NS" = "" ]; then
     exit 0
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+K8S=$(realpath $SCDIR/../kubernetes)
+if [ ! -d "$K8S" ]; then
+  K8S=$(realpath $SCDIR/../../kubernetes)
+fi
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.5.3-SNAPSHOT
+  DATAFLOW_PRO_VERSION=1.6.0-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
   export DATAFLOW_VERSION=2.11.0-SNAPSHOT
@@ -81,7 +85,7 @@ if [ "$SKIPPER_VERSION" = "" ]; then
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
-    SCDF_PRO_VERSION=1.5.3-SNAPSHOT
+    SCDF_PRO_VERSION=1.6.0-SNAPSHOT
 fi
 YAML_PATH=$(realpath $SCDIR/yaml)
 
@@ -96,7 +100,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         sh "$SCDIR/load-image.sh" "mariadb" "10.4"
         ;;
     "postgresql")
-        sh "$SCDIR/load-image.sh" "postgres" "10"
+        sh "$SCDIR/load-image.sh" "postgres" "12"
         ;;
     *)
         echo "DATABASE=$DATABASE not supported"
@@ -129,40 +133,41 @@ pushd "$PARENT" >/dev/null
 
 case $BROKER in
 "kafka")
-    kubectl create --namespace "$NS" -f src/kubernetes/kafka/
+
+    kubectl create --namespace "$NS" -f $K8S/kafka/
     ;;
 "rabbit" | "rabbitmq")
-    kubectl create --namespace "$NS" -f src/kubernetes/rabbitmq/
+    kubectl create --namespace "$NS" -f $K8S/rabbitmq/
     ;;
 *)
     echo "BROKER=$BROKER not supported"
     ;;
 esac
+kubectl create --namespace "$NS" -f $K8S/$DATABASE/
 
-kubectl create --namespace "$NS" -f src/kubernetes/$DATABASE/
 
-if [ "$PROMETHEUS" = "true" ]; then
+if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
     echo "Loading Prometheus and Grafana"
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.11.0-SNAPSHOT" false
-        sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.12.0"
-        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "0.11.0"
+        sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.37.8"
+        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "1.5.2"
     fi
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterroles.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-clusterrolebinding.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-serviceaccount.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus-proxy/
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-configmap.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-deployment.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/prometheus/prometheus-service.yaml
-    kubectl create --namespace "$NS" -f src/kubernetes/grafana/
+    set +e
+    kubectl create --namespace "$NS" serviceaccount prometheus-rsocket-proxy
+    kubectl create --namespace "$NS" serviceaccount prometheus
+    kubectl create --namespace "$NS" clusterrolebinding prometheus --clusterrole prometheus --user=prometheus
+    kubectl create --namespace "$NS" clusterrolebinding prometheus-rsocket-proxy --clusterrole cluster-admin --user=prometheus-rsocket-proxy
+    kubectl create --namespace "$NS" -f $K8S/prometheus/
+    kubectl create --namespace "$NS" -f $K8S/prometheus-proxy/
+    kubectl create --namespace "$NS" -f $K8S/grafana/
 fi
 
 # Deploy Spring Cloud Dataflow
 set +e
-kubectl create --namespace "$NS" -f src/kubernetes/server/server-roles.yaml
-kubectl create --namespace "$NS" -f src/kubernetes/server/server-rolebinding.yaml
-kubectl create --namespace "$NS" -f src/kubernetes/server/service-account.yaml
+kubectl create --namespace "$NS" -f $K8S/server/server-roles.yaml
+kubectl create --namespace "$NS" -f $K8S/server/server-rolebinding.yaml
+kubectl create --namespace "$NS" -f $K8S/server/service-account.yaml
 
 kubectl create --namespace "$NS" -f "$YAML_PATH/datasource-config-$DATABASE.yaml"
 

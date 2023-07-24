@@ -272,7 +272,8 @@ public interface JobService {
 	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
 	 */
 	Collection<StepExecution> getStepExecutions(Long jobExecutionId) throws NoSuchJobExecutionException;
-
+	Collection<StepExecution> getStepExecutions(JobExecution jobExecution) throws NoSuchJobExecutionException;
+	void addStepExecutions(JobExecution jobExecution);
 	/**
 	 * List the {@link StepExecution step executions} for a step in descending order of
 	 * creation (usually close to execution order).
@@ -319,6 +320,7 @@ public interface JobService {
 	 */
 	StepExecution getStepExecution(Long jobExecutionId, Long stepExecutionId) throws NoSuchStepExecutionException,
 			NoSuchJobExecutionException;
+	StepExecution getStepExecution(JobExecution jobExecution, Long stepExecutionId) throws NoSuchStepExecutionException;
 
 	/**
 	 * Send a stop signal to all running job executions.

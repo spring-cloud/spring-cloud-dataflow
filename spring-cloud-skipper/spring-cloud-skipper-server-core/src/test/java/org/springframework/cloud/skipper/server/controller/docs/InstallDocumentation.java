@@ -17,6 +17,7 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
@@ -135,7 +136,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		final InstallProperties installProperties2 = createInstallProperties(releaseName2);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		when(this.skipperStateMachineService.installRelease(any(Long.class), any(InstallProperties.class)))
 				.thenReturn(createTestRelease(releaseName, StatusCode.DEPLOYED));
