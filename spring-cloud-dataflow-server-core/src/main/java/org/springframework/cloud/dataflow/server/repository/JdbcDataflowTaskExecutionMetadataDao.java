@@ -61,9 +61,9 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			"task_execution_manifest) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
 
 	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "select m.task_execution_manifest as task_execution_manifest " +
-			"from task_execution_metadata m inner join " +
-			"TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID " +
-			"where e.TASK_EXECUTION_ID = :taskExecutionId";
+			"from task_execution_metadata m, TASK_EXECUTION e " +
+			"where m.task_execution_id = e.TASK_EXECUTION_ID " +
+			"and e.TASK_EXECUTION_ID = :taskExecutionId";
 
 	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
 			"DELETE FROM task_execution_metadata " +
