@@ -1070,6 +1070,9 @@ export MK_ARGS=&quot;--cpus=8 --memory=12g&quot;
 </div>
 <div class="sect4">
 <h5 id="_deploy_spring_cloud_data_flow_2">Deploy Spring Cloud Data Flow.</h5>
+<div class="paragraph">
+<p>The <code>use-*</code> scripts will configure the values of BROKER and DATABASE.</p>
+</div>
 <div class="sect5">
 <h6 id="_configure_broker">Configure Broker</h6>
 <div class="listingblock">
@@ -1099,17 +1102,36 @@ export MK_ARGS=&quot;--cpus=8 --memory=12g&quot;
 </li>
 </ol>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-This is still optional and PostgreSQL support isn&#8217;t available yet but will follow soon.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>Docker credentials need to be configured for Kubernetes to pull the various container images.</p>
+</div>
+<div class="paragraph">
+<p>For Docker Hub you can create a personal free account and use a personal access token as your password.</p>
+</div>
+<div class="paragraph">
+<p>Test your docker login using <code>./k8s/docker-login.sh</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">export DOCKER_SERVER=https://docker.io
+export DOCKER_USER=&lt;docker-userid&gt;
+export DOCKER_PASSWORD=&lt;docker-password&gt;
+export DOCKER_EMAIL=&lt;email-of-docker-use&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.</p>
+</div>
+<div class="paragraph">
+<p>Use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">./images/pull-app-images.sh
+./images/pull-dataflow.sh
+./images/pull-skipper.sh
+./images/pull-composed-task-runner.sh</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1304,7 +1326,7 @@ Please report any errors with the scripts along with detail information about th
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-17 15:04:22 +0200
+Last updated 2023-07-24 11:10:18 +0200
 </div>
 </div>
 </body>
