@@ -24,16 +24,16 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.util.Assert;
 
 /**
- * A {@link ResourceAssembler}/{@link ResourcesAssembler} that focuses purely on the domain type,
- * returning back {@link Resource} and {@link Resources} for that type instead of
- * {@link org.springframework.hateoas.ResourceSupport}.
+ * A {@link RepresentationModelAssembler}/{@link ResourcesAssembler} that focuses purely on the domain type,
+ * returning back {@link org.springframework.hateoas.RepresentationModel} and {@link EntityModel} for that type instead of
+ * {@link org.springframework.hateoas.RepresentationModel}.
  *
  * @author Greg Turnquist
  */
 public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<T, EntityModel<T>>, ResourcesAssembler<T, EntityModel<T>> {
 
 	/**
-	 * Converts the given entity into a {@link Resource}.
+	 * Converts the given entity into a {@link org.springframework.hateoas.RepresentationModel}.
 	 *
 	 * @param entity the entity
 	 * @return a resource for the entity.
@@ -53,12 +53,12 @@ public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<
 	 *
 	 * @see #toModel(Object)
 	 * @param entities must not be {@literal null}.
-	 * @return {@link Resources} containing {@link Resource} of {@code T}.
+	 * @return {@link CollectionModel} containing {@link EntityModel} of {@code T}.
 	 */
 	public CollectionModel<EntityModel<T>> toCollectionModel(Iterable<? extends T> entities) {
 
 		Assert.notNull(entities, "Entities must not be null!");
-		List<EntityModel<T>> result = new ArrayList<EntityModel<T>>();
+		List<EntityModel<T>> result = new ArrayList<>();
 
 		for (T entity : entities) {
 			result.add(toModel(entity));
@@ -72,7 +72,7 @@ public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<
 	}
 
 	/**
-	 * Define links to add to every individual {@link Resource}.
+	 * Define links to add to every individual {@link EntityModel}.
 	 *
 	 * @param resource
 	 */
@@ -81,7 +81,7 @@ public class SimpleResourceAssembler<T> implements RepresentationModelAssembler<
 	}
 
 	/**
-	 * Define links to add to the {@link Resources} collection.
+	 * Define links to add to the {@link CollectionModel} collection.
 	 *
 	 * @param resources
 	 */

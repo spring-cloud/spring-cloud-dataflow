@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("NewClassNamingConvention")
 @DirtiesContext
 public class RuntimeAppsDocumentation extends BaseDocumentation {
 

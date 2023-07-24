@@ -41,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("NewClassNamingConvention")
 public class ApiDocumentation extends BaseDocumentation {
 
 	@Test

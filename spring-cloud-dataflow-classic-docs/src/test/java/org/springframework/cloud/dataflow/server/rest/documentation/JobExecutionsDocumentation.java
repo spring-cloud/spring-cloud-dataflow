@@ -45,7 +45,6 @@ import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoCont
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -70,6 +69,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
+@SuppressWarnings("NewClassNamingConvention")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
@@ -363,7 +363,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 				);
 	}
 
-	private void initialize() throws Exception {
+	private void initialize() {
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
 		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
 		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
