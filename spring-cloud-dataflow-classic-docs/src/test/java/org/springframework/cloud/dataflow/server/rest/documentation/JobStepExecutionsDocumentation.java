@@ -59,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
+@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
@@ -165,7 +166,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	}
 
 
-	private void initialize() throws Exception {
+	private void initialize() {
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
 		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);

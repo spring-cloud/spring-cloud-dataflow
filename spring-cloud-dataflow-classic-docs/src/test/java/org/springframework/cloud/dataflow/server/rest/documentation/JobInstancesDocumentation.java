@@ -59,6 +59,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
+@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
 @DirtiesContext

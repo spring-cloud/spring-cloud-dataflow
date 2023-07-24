@@ -50,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskExecutionsDocumentation extends BaseDocumentation {
 
@@ -58,8 +59,8 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
-		executeTask("taskA", "timestamp");
-		executeTask("taskB", "timestamp");
+		executeTask("taskA");
+		executeTask("taskB");
 	}
 
 
@@ -89,7 +90,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 										parameterWithName("arguments")
 												.description("Command line arguments to pass to the task. (optional)")),
 								responseFields(
-										fieldWithPath("taskId").description("The id of the task execution"),
+										fieldWithPath("executionId").description("The id of the task execution"),
 										fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 										subsectionWithPath("_links.self").description("Link to the task execution resource"),
 										subsectionWithPath("_links.tasks/logs").type(fieldWithPath("_links.tasks/logs").ignored().optional()).description("Link to the task execution logs").optional()
@@ -167,7 +168,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
 								subsectionWithPath("appProperties").description("The application properties of the task execution"),
-								subsectionWithPath("deploymentProperties").description("The deployment properties of the task exectuion"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task execution"),
 								subsectionWithPath("platformName").description("The platform selected for the task execution"),
 								subsectionWithPath("_links.self").description("Link to the task execution resource"),
@@ -223,7 +223,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
 								subsectionWithPath("appProperties").description("The application properties of the task execution"),
-								subsectionWithPath("deploymentProperties").description("The deployment properties of the task exectuion"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task execution"),
 								subsectionWithPath("platformName").description("The platform selected for the task execution"),
 								subsectionWithPath("_links.self").description("Link to the task execution resource"),
@@ -372,7 +371,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk()));
 	}
 
-	private void executeTask(String taskName, String registeredName) throws Exception {
+	private void executeTask(String taskName) throws Exception {
 		documentation.dontDocument(() ->
 				this.mockMvc.perform(
 						post("/tasks/executions")
