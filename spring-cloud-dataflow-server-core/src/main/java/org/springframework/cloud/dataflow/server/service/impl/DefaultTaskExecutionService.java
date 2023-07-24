@@ -405,7 +405,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
 			logger.info("composedTask:dsl={}:appNames:{}", taskDefinition.getDslText(), appNames);
-			// addPrefixCommandLineArgs(schemaVersionTarget, "", commandLineArguments);
 			addPrefixProperties(schemaVersionTarget, "app.composed-task-runner.", deploymentProperties);
 			addPrefixProperties(schemaVersionTarget, "app." + taskName + ".", deploymentProperties);
 			for (String appName : appNames) {
@@ -419,8 +418,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
 				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".spring.cloud.task.tablePrefix", appSchemaTarget.getTaskPrefix());
 				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + appId + ".spring.cloud.task.tablePrefix", appSchemaTarget.getTaskPrefix());
-				addPrefixProperties(appSchemaTarget, "app." + taskName + "-" + appId + ".", deploymentProperties);
-				addPrefixProperties(appSchemaTarget, "app." + registeredName + ".", deploymentProperties);
+				deploymentProperties.put("app." + taskName + "-" + appId  + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
+				deploymentProperties.put("app." + registeredName  + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
 			}
 			logger.debug("ctr:added:{}:{}", taskName, deploymentProperties);
 			handleAccessToken(commandLineArguments, taskExecutionInformation);
