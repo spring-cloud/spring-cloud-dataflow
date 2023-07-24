@@ -68,6 +68,7 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -344,6 +345,7 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
+	@Async
 	public void cleanupAll(
 			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
 			@RequestParam(defaultValue = "false", name = "completed") boolean completed,
