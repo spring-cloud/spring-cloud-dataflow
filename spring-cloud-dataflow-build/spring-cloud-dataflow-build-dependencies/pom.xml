@@ -14,13 +14,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<version>2.7.13</version>
+		<version>2.7.14</version>
 		<relativePath/>
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.13</spring-boot.version>
+		<spring-boot.version>2.7.14</spring-boot.version>
 		<spring-cloud.version>2021.0.8</spring-cloud.version>
 		<spring-shell.version>2.1.5</spring-shell.version>
 		<junit.version>4.13.1</junit.version>

@@ -1,5 +1,4 @@
-#!/bin/bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 bold="\033[1m"
 dim="\033[2m"

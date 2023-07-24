@@ -1,6 +1,6 @@
 #!/bin/bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-
+SCDIR=$(realpath $SCDIR)
 echo "Deploying Metal LoadBalancer"
 sh "$SCDIR/load-image.sh" "quay.io/metallb/speaker" "v0.12.1"
 sh "$SCDIR/load-image.sh" "quay.io/metallb/controller" "v0.12.1"
