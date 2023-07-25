@@ -6,7 +6,6 @@ if [ "$2" == "" ]; then
   echo "Arguments: <docker-image> <tag> [<dont-pull>]"
   exit 1
 fi
-set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   DONT_PULL=$3
   if [[ "$2" = "" ]]; then
@@ -16,9 +15,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   TAG=$2
   NAME=$1
   IMAGE="$NAME:$TAG"
-  set +e
   COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
-  set -e
   if [ "$DONT_PULL" = "true" ]; then
     if ((COUNT == 0)); then
       echo "ERROR:Image not found $IMAGE" >&2
@@ -34,9 +31,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
       echo "Exists:$IMAGE"
     fi
   fi
-  set +e
   COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
-  set -e
   if ((COUNT == 0)); then
     echo "WARN:Image Not found:$IMAGE"
     exit 0
@@ -84,4 +79,3 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   esac
   echo "Loaded:$IMAGE"
 fi
-

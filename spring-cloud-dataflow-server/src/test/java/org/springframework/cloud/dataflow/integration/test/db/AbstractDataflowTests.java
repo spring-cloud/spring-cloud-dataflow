@@ -69,8 +69,6 @@ public abstract class AbstractDataflowTests {
 			);
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
-			ClusterContainer.from(TagNames.MARIADB_10_2, "mariadb:10.2", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_3, "mariadb:10.3", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),

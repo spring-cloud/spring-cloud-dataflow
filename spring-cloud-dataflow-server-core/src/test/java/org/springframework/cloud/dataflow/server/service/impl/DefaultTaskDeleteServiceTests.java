@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersIncrementer;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -41,20 +39,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -64,6 +69,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
@@ -80,7 +86,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	private final static String JOB_NAME = "testjob";
 
 	@Autowired
-	TaskRepository taskRepository;
+	TaskRepositoryContainer taskRepositoryContainer;
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
@@ -98,7 +104,10 @@ public abstract class DefaultTaskDeleteServiceTests {
 	TaskDefinitionRepository taskDefinitionRepository;
 
 	@Autowired
-	TaskExplorer taskExplorer;
+	AggregateTaskExplorer taskExplorer;
+
+	@Autowired
+	SchemaService schemaService;
 
 	@Autowired
 	TaskDeleteService taskDeleteService;
@@ -107,15 +116,21 @@ public abstract class DefaultTaskDeleteServiceTests {
 	TaskExecutionService taskExecutionService;
 
 	@Autowired
-	JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	TaskBatchDao taskBatchDao;
+	TaskBatchDaoContainer taskBatchDaoContainer;
 
 	@Autowired
-	JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
+	JobExecutionDaoContainer jobExecutionDaoContainer;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
 
 	JobLauncherTestUtils jobLauncherTestUtils;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
 	public void setup() {
@@ -127,9 +142,16 @@ public abstract class DefaultTaskDeleteServiceTests {
 	public void deleteAllTest() throws Exception{
 		createTaskExecutions(50);
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(50);
-		this.taskDeleteService.deleteTaskExecutions(this.taskExecutionService.getAllTaskExecutionIds(true, null));
+		Collection<String> taskNames = this.taskExplorer.getTaskNames();
+
+		for(String taskName : taskNames) {
+			this.taskDeleteService.deleteTaskExecutions(taskName, true);
+		}
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(0);
-		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(0);
+		for(SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
+			SearchableJobExecutionDao searchableJobExecutionDao = jobExecutionDaoContainer.get(target.getName());
+			assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(0);
+		}
 
 	}
 
@@ -138,22 +160,28 @@ public abstract class DefaultTaskDeleteServiceTests {
 	public void deleteSetTest() throws Exception{
 		createTaskExecutions(50);
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(50);
-		this.taskDeleteService.deleteTaskExecutions(Collections.singleton(taskExplorer.getLatestTaskExecutionForTaskName(TASK_NAME_ORIG).getExecutionId()));
+		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
+		assertThat(target).isNotNull();
+		this.taskDeleteService.deleteTaskExecutions(Collections.singleton(taskExplorer.getLatestTaskExecutionForTaskName(TASK_NAME_ORIG).getExecutionId()), target.getName());
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(49);
-		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(49);
+		SearchableJobExecutionDao searchableJobExecutionDao = jobExecutionDaoContainer.get(target.getName());
+		assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(49);
 	}
 
 	private void createTaskExecutions(int numberOfExecutions) throws Exception{
 		List<String> args = new ArrayList<>();
 		args.add("test=value");
 		args.add("anothertest=anotherValue");
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
+		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 		for (int i = 1; i <= numberOfExecutions; i++) {
-			TaskExecution taskExecution = this.taskRepository.createTaskExecution(new TaskExecution(i, 0, TASK_NAME_ORIG,
+			TaskExecution taskExecution = taskRepository.createTaskExecution(new TaskExecution(i, 0, TASK_NAME_ORIG,
 					new Date(), new Date(), "", args, "", null,
 					null));
-			this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, new Date(), "complete");
+			taskRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, new Date(), "complete");
 			JobExecution jobExecution = this.jobLauncherTestUtils.launchJob();
-			this.taskBatchDao.saveRelationship(taskExecution, jobExecution);
+			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(SchemaVersionTarget.defaultTarget().getName());
+			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		}
 	}
 
@@ -167,6 +195,12 @@ public abstract class DefaultTaskDeleteServiceTests {
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION_PARAMS");
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION_CONTEXT;");
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION");
+		template.execute("DELETE FROM BOOT3_TASK_EXECUTION_PARAMS");
+		template.execute("DELETE FROM BOOT3_TASK_TASK_BATCH;");
+		template.execute("DELETE FROM BOOT3_TASK_EXECUTION;");
+		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION_PARAMS");
+		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION_CONTEXT;");
+		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION");
 	}
 
 	@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
@@ -183,18 +217,16 @@ public abstract class DefaultTaskDeleteServiceTests {
 	JobLauncher jobLauncher(JobRepository jobRepository) {
 		SimpleJobLauncher launcher = new SimpleJobLauncher();
 		launcher.setJobRepository(jobRepository);
-		launcher.setTaskExecutor(new TaskExecutor() {
-			@Override
-			public void execute(Runnable task) {
-			}
+		launcher.setTaskExecutor(task -> {
 		});
 		return launcher;
 	}
 
 	public JobLauncherTestUtils jobLauncherTestUtils() {
 		JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
-		jobLauncherTestUtils.setJobRepository(this.jobRepository);
-		jobLauncherTestUtils.setJobLauncher(jobLauncher(this.jobRepository));
+		JobRepository jobRepository = jobRepositoryContainer.get(SchemaVersionTarget.defaultTarget().getName());
+		jobLauncherTestUtils.setJobRepository(jobRepository);
+		jobLauncherTestUtils.setJobLauncher(jobLauncher(jobRepository));
 		jobLauncherTestUtils.setJob(new Job() {
 			@Override
 			public String getName() {
@@ -218,10 +250,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 
 			@Override
 			public JobParametersValidator getJobParametersValidator() {
-				return new JobParametersValidator() {
-					@Override
-					public void validate(JobParameters parameters) throws JobParametersInvalidException {
-					}
+				return parameters -> {
 				};
 			}
 		});

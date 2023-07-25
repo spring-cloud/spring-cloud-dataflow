@@ -89,7 +89,7 @@ public class DataFlowClientPropertiesTests {
 				assertThat(properties.getAuthentication().getClientId()).isEqualTo("id1");
 				assertThat(properties.getAuthentication().getClientSecret()).isEqualTo("secret1");
 				assertThat(properties.getAuthentication().getTokenUri()).isEqualTo("uri1");
-				assertThat(properties.getAuthentication().getScope()).containsExactly("s1", "s2");
+				assertThat(properties.getAuthentication().getScope()).containsExactlyInAnyOrder("s1", "s2");
 			});
 	}
 

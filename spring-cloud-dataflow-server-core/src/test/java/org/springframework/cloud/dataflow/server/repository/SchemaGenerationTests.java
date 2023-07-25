@@ -78,6 +78,7 @@ public class SchemaGenerationTests {
 		supportedHibernateDialects.add("H2");
 		supportedHibernateDialects.add("HSQL");
 		supportedHibernateDialects.add("MySQL5");
+		supportedHibernateDialects.add("MariaDB106");
 		supportedHibernateDialects.add("Oracle10g");
 		supportedHibernateDialects.add("PostgreSQL94");
 		supportedHibernateDialects.add("DB2");

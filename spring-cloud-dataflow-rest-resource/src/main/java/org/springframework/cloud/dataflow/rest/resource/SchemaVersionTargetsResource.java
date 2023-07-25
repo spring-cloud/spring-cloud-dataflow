@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
- * Resource for {@link org.springframework.cloud.dataflow.core.SchemaVersionTargets}
+ * Resource for {@link org.springframework.cloud.dataflow.schema.SchemaVersionTargets}
  * @author Corneil du Plessis
  */
 public class SchemaVersionTargetsResource extends RepresentationModel<SchemaVersionTargetsResource> {

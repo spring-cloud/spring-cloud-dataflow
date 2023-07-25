@@ -21,7 +21,6 @@ version: '3'
 services:
   dataflow-server:
     user: root
-    platform: linux/amd64
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
@@ -45,15 +44,13 @@ services:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
 
   app-import-stream:
-    platform: linux/amd64
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-stream
     depends_on:
       - dataflow-server
 
   app-import-task:
-    platform: linux/amd64
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-task
     depends_on:
       - dataflow-server
@@ -61,13 +58,14 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-maven-latest&force=true}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/timestamp3' --no-check-certificate --post-data='bootVersion=3&uri=maven://uri=maven:io.spring:timestamp-task:3.0.0';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/timestamp-batch3' --no-check-certificate --post-data='bootVersion=3&uri=maven://uri=maven:io.spring:timestamp-batch:3.0.0';
         echo 'Maven Task apps imported'"
 
   skipper-server:
     user: root
-    platform: linux/amd64
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
-    container_name: skipper
+    container_name: skipper-server
     ports:
       - "7577:7577"
       - ${APPS_PORT_RANGE:-20000-20195:20000-20195}
@@ -75,6 +73,7 @@ services:
       - LANG=en_US.utf8
       - LC_ALL=en_US.utf8
       - JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
+      - SERVER_PORT=7577
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20190
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR

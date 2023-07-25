@@ -36,7 +36,7 @@ import org.springframework.cloud.skipper.domain.AbstractEntity;
 /**
  * Entity that contains deployment data for the given release identified by the release
  * name and version.
- *
+ * <p>
  * The deployment data is a JSON serialized Map containing the application name and
  * deployment id.
  *
@@ -89,22 +89,21 @@ public class AppDeployerData extends AbstractEntity {
 			};
 			return (this.deploymentData != null) ? mapper.readValue(this.deploymentData, typeRef) :
 					Collections.EMPTY_MAP;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new SkipperException("Could not parse appNameDeploymentIdMap JSON:" + this.deploymentData, e);
 		}
 	}
 
 	/**
 	 * Convenience method to save the Deployment Data Map.
+	 *
 	 * @param appNameDeploymentIdMap Map that has the application name as a key and the deployment as a value.
 	 */
 	public void setDeploymentDataUsingMap(Map<String, String> appNameDeploymentIdMap) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			setDeploymentData(objectMapper.writeValueAsString(appNameDeploymentIdMap));
-		}
-		catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) {
 			throw new SkipperException("Could not serialize appNameDeploymentIdMap", e);
 		}
 	}
@@ -113,8 +112,7 @@ public class AppDeployerData extends AbstractEntity {
 		if (this.deploymentData != null) {
 			Map<String, String> appNameDeploymentIdMap = this.getDeploymentDataAsMap();
 			return appNameDeploymentIdMap.values().stream().collect(Collectors.toList());
-		}
-		else {
+		} else {
 			return new ArrayList<>();
 		}
 	}

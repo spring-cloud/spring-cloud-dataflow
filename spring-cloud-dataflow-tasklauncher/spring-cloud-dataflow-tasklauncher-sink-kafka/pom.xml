@@ -101,6 +101,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<threadCount>1</threadCount>
+					<forkCount>1</forkCount>
 					<skipTests>${skipTests}</skipTests>
 				</configuration>
 			</plugin>

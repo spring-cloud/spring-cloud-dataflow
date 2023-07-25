@@ -897,5 +897,5 @@ By using the `token_format` parameter, you can request the token to be either:
 
 include::configuration-local.adoc[]
 include::configuration-cloudfoundry.adoc[]
-include::configuration-carvel.adoc[]
 include::configuration-kubernetes.adoc[]
+include::configuration-carvel.adoc[]

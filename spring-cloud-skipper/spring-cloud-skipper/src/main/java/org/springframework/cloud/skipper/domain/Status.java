@@ -25,6 +25,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
@@ -55,6 +56,7 @@ public class Status extends NonVersionedAbstractEntity {
 
 	// Status from the underlying platform
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String platformStatus;
 
 	public Status() {

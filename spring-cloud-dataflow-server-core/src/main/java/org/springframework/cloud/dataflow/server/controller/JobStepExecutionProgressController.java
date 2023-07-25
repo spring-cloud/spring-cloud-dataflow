@@ -21,19 +21,27 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
+import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionProgressInfo;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
+import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Glenn Renfro
@@ -43,54 +51,65 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StepExecutionProgressInfoResource.class)
 public class JobStepExecutionProgressController {
 
-	private final JobService jobService;
+	private final TaskJobService taskJobService;
 
-	private final Assembler stepAssembler = new Assembler();
+	private final JobServiceContainer jobServiceContainer;
 
 	/**
 	 * Creates a {@code JobStepProgressInfoExecutionsController} that retrieves Job Step
-	 * Progress Execution information from a the {@link JobService}
+	 * Progress Execution information from a the {@link JobServiceContainer}
 	 *
-	 * @param jobService the service this controller will use for retrieving job step
-	 * progress execution information.
+	 * @param jobServiceContainer A container of JobServices that this controller will use for retrieving job step
+	 *                            progress execution information.
+	 * @param taskJobService      Queries both schemas.
 	 */
 	@Autowired
-	public JobStepExecutionProgressController(JobService jobService) {
-		Assert.notNull(jobService, "repository must not be null");
-		this.jobService = jobService;
+	public JobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
+		this.taskJobService = taskJobService;
+		this.jobServiceContainer = jobServiceContainer;
 	}
 
 	/**
 	 * Get the step execution progress for the given jobExecutions step.
 	 *
-	 * @param jobExecutionId Id of the {@link JobExecution}, must not be null
+	 * @param jobExecutionId  Id of the {@link JobExecution}, must not be null
 	 * @param stepExecutionId Id of the {@link StepExecution}, must not be null
 	 * @return {@link StepExecutionProgressInfoResource} that has the progress info on the
 	 * given {@link StepExecution}.
-	 * @throws NoSuchJobExecutionException Thrown if the respective {@link JobExecution}
-	 * does not exist
+	 * @throws NoSuchJobExecutionException  Thrown if the respective {@link JobExecution}
+	 *                                      does not exist
 	 * @throws NoSuchStepExecutionException Thrown if the respective {@link StepExecution}
-	 * does not exist
+	 *                                      does not exist
 	 */
 	@RequestMapping(value = "/{stepExecutionId}/progress", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public StepExecutionProgressInfoResource progress(@PathVariable long jobExecutionId,
-			@PathVariable long stepExecutionId) throws NoSuchStepExecutionException, NoSuchJobExecutionException {
+	public StepExecutionProgressInfoResource progress(
+			@PathVariable long jobExecutionId,
+			@PathVariable long stepExecutionId,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchStepExecutionException, NoSuchJobExecutionException {
 		try {
-			StepExecution stepExecution = jobService.getStepExecution(jobExecutionId, stepExecutionId);
+			if (!StringUtils.hasText(schemaTarget)) {
+				schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+			}
+			TaskJobExecution taskJobExecution = taskJobService.getJobExecution(jobExecutionId, schemaTarget);
+			StepExecution stepExecution = taskJobExecution.getJobExecution().getStepExecutions()
+					.stream()
+					.filter(s -> s.getId().equals(stepExecutionId))
+					.findFirst()
+					.orElseThrow(() -> new NoSuchStepExecutionException("Step execution " + stepExecutionId + " for Job " + jobExecutionId + " not found"));
 			String stepName = stepExecution.getStepName();
 			if (stepName.contains(":partition")) {
 				// assume we want to compare all partitions
 				stepName = stepName.replaceAll("(:partition).*", "$1*");
 			}
 			String jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
-			StepExecutionHistory stepExecutionHistory = computeHistory(jobName, stepName);
+			StepExecutionHistory stepExecutionHistory = computeHistory(jobName, stepName, schemaTarget);
+			final Assembler stepAssembler = new Assembler(schemaTarget);
 			return stepAssembler.toModel(new StepExecutionProgressInfo(stepExecution, stepExecutionHistory));
-		}
-		catch (NoSuchStepExecutionException e) {
+		} catch (NoSuchStepExecutionException e) {
 			throw new NoSuchStepExecutionException(String.valueOf(stepExecutionId));
-		}
-		catch (NoSuchJobExecutionException e) {
+		} catch (NoSuchJobExecutionException e) {
 			throw new NoSuchJobExecutionException(String.valueOf(jobExecutionId));
 		}
 	}
@@ -98,11 +117,12 @@ public class JobStepExecutionProgressController {
 	/**
 	 * Compute step execution history for the given jobs step.
 	 *
-	 * @param jobName the name of the job
+	 * @param jobName  the name of the job
 	 * @param stepName the name of the step
 	 * @return the step execution history for the given step
 	 */
-	private StepExecutionHistory computeHistory(String jobName, String stepName) {
+	private StepExecutionHistory computeHistory(String jobName, String stepName, String schemaTarget) {
+		JobService jobService = jobServiceContainer.get(schemaTarget);
 		int total = jobService.countStepExecutionsForStep(jobName, stepName);
 		StepExecutionHistory stepExecutionHistory = new StepExecutionHistory(stepName);
 		for (int i = 0; i < total; i += 1000) {
@@ -114,14 +134,16 @@ public class JobStepExecutionProgressController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link org.springframework.hateoas.server.RepresentationModelAssembler} implementation that converts
 	 * {@link StepExecutionProgressInfo}s to a {@link StepExecutionProgressInfoResource}.
 	 */
 	private static class Assembler
 			extends RepresentationModelAssemblerSupport<StepExecutionProgressInfo, StepExecutionProgressInfoResource> {
+		private final String schemaTarget;
 
-		public Assembler() {
+		public Assembler(String schemaTarget) {
 			super(JobStepExecutionProgressController.class, StepExecutionProgressInfoResource.class);
+			this.schemaTarget = schemaTarget;
 		}
 
 		@Override
@@ -132,8 +154,23 @@ public class JobStepExecutionProgressController {
 
 		@Override
 		protected StepExecutionProgressInfoResource instantiateModel(StepExecutionProgressInfo entity) {
-			return new StepExecutionProgressInfoResource(entity.getStepExecution(), entity.getStepExecutionHistory(),
+			StepExecutionProgressInfoResource resource = new StepExecutionProgressInfoResource(entity.getStepExecution(), entity.getStepExecutionHistory(),
 					entity.getEstimatedPercentComplete(), entity.isFinished(), entity.getDuration());
+			addLink(resource);
+			return resource;
+		}
+
+		private void addLink(StepExecutionProgressInfoResource resource) {
+			try {
+				resource.add(
+						linkTo(
+								methodOn(JobStepExecutionProgressController.class)
+										.progress(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId(), schemaTarget)
+						).withRel("progress")
+				);
+			} catch (NoSuchStepExecutionException | NoSuchJobExecutionException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 }

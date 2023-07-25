@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.UnexpectedJobExecutionException;
@@ -40,10 +43,15 @@ import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecuti
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.core.env.Environment;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
+import org.springframework.lang.Nullable;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -56,7 +64,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Executes task launch request using Spring Cloud Data Flow's Restful API
  * then returns the execution id once the task launched.
- *
+ * <p>
  * Note: This class is not thread-safe and as such should not be used as a singleton.
  *
  * @author Glenn Renfro
@@ -66,36 +74,52 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	final static String IGNORE_EXIT_MESSAGE_PROPERTY = "ignore-exit-message";
 
-	private ComposedTaskProperties composedTaskProperties;
+	private final ComposedTaskProperties composedTaskProperties;
 
-	private TaskExplorer taskExplorer;
+	private final TaskExplorer taskExplorer;
 
 	private Map<String, String> properties;
 
 	private List<String> arguments;
 
-	private String taskName;
+	private final String taskName;
 
-	private static final Log logger = LogFactory.getLog(org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTasklet.class);
+	private static final Logger logger = LoggerFactory.getLogger(TaskLauncherTasklet.class);
 
 	private Long executionId;
 
+	private final String ctrSchemaTarget;
+
 	private long timeout;
 
-	private ClientRegistrationRepository clientRegistrations;
+	private final ClientRegistrationRepository clientRegistrations;
 
-	private OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient;
+	private final OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient;
 
 	private TaskOperations taskOperations;
 
 	TaskProperties taskProperties;
 
+	private final ObjectMapper mapper;
+
 	public TaskLauncherTasklet(
 			ClientRegistrationRepository clientRegistrations,
 			OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
 			TaskExplorer taskExplorer,
-			ComposedTaskProperties composedTaskProperties, String taskName,
-			TaskProperties taskProperties) {
+			ComposedTaskProperties composedTaskProperties,
+			String taskName,
+			TaskProperties taskProperties,
+			Environment environment,
+			@Nullable ObjectMapper mapper
+	) {
+		if (mapper == null) {
+			mapper = new ObjectMapper();
+			mapper.registerModule(new Jdk8Module());
+			mapper.registerModule(new Jackson2HalModule());
+			mapper.registerModule(new JavaTimeModule());
+			mapper.registerModule(new Jackson2DataflowModule());
+		}
+		this.mapper = mapper;
 		Assert.hasText(taskName, "taskName must not be empty nor null.");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null.");
 		Assert.notNull(composedTaskProperties,
@@ -107,22 +131,21 @@ public class TaskLauncherTasklet implements Tasklet {
 		this.taskProperties = taskProperties;
 		this.clientRegistrations = clientRegistrations;
 		this.clientCredentialsTokenResponseClient = clientCredentialsTokenResponseClient;
+		this.ctrSchemaTarget = environment.getProperty("spring.cloud.task.schemaTarget");
 	}
 
 	public void setProperties(Map<String, String> properties) {
-		if(properties != null) {
+		if (properties != null) {
 			this.properties = properties;
-		}
-		else {
+		} else {
 			this.properties = new HashMap<>(0);
 		}
 	}
 
 	public void setArguments(List<String> arguments) {
-		if(arguments != null) {
+		if (arguments != null) {
 			this.arguments = arguments;
-		}
-		else {
+		} else {
 			this.arguments = new ArrayList<>(0);
 		}
 	}
@@ -136,8 +159,7 @@ public class TaskLauncherTasklet implements Tasklet {
 	 * @return Repeat status of FINISHED.
 	 */
 	@Override
-	public RepeatStatus execute(StepContribution contribution,
-			ChunkContext chunkContext) {
+	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
 		TaskOperations taskOperations = taskOperations();
 		if (this.executionId == null) {
 			this.timeout = System.currentTimeMillis() +
@@ -158,51 +180,61 @@ public class TaskLauncherTasklet implements Tasklet {
 				args = (List<String>) stepExecutionContext.get("task-arguments");
 			}
 			List<String> cleansedArgs = new ArrayList<>();
-			if(args != null) {
-				for(String argument : args) {
-					if(!argument.startsWith("--spring.cloud.task.parent-execution-id=")) {
+			if (args != null) {
+				for (String argument : args) {
+					if (!argument.startsWith("--spring.cloud.task.parent-execution-id=") && !argument.startsWith("--spring.cloud.task.parent-execution-id%")) {
 						cleansedArgs.add(argument);
 					}
 				}
 				args = cleansedArgs;
 			}
-			String parentTaskExecutionId = getParentTaskExecutionId(contribution);
-			if(parentTaskExecutionId != null) {
+			if (args == null) {
+				args = new ArrayList<>();
+			}
+			Long parentTaskExecutionId = getParentTaskExecutionId();
+			if (parentTaskExecutionId != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
+				String parentSchemaTarget = StringUtils.hasText(ctrSchemaTarget) ? ctrSchemaTarget : "boot2";
+				args.add("--spring.cloud.task.parent-schema-target=" + parentSchemaTarget);
+
+			} else {
+				logger.error("Cannot find task execution id");
 			}
 
-			if(StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
+			if (StringUtils.hasText(this.composedTaskProperties.getPlatformName())) {
 				properties.put("spring.cloud.dataflow.task.platformName", this.composedTaskProperties.getPlatformName());
 			}
-			this.executionId = taskOperations.launch(tmpTaskName,
-					this.properties, args);
+			logger.debug("execute:{}:{}:{}", tmpTaskName, this.properties, args);
+			LaunchResponseResource response = taskOperations.launch(tmpTaskName, this.properties, args);
 
+			this.executionId = response.getExecutionId();
+
+			stepExecutionContext.put("task-execution-id", response.getExecutionId());
+			stepExecutionContext.put("schema-target", response.getSchemaTarget());
+
+			stepExecutionContext.put("task-name", tmpTaskName);
+			if (!args.isEmpty()) {
+				stepExecutionContext.put("task-arguments", args);
+			}
 			Boolean ignoreExitMessage = isIgnoreExitMessage(args, this.properties);
 			if (ignoreExitMessage != null) {
 				stepExecutionContext.put(IGNORE_EXIT_MESSAGE, ignoreExitMessage);
 			}
-			stepExecutionContext.put("task-execution-id", executionId);
-			stepExecutionContext.put("task-arguments", args);
-		}
-		else {
+		} else {
 			try {
 				Thread.sleep(this.composedTaskProperties.getIntervalTimeBetweenChecks());
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 
-			TaskExecution taskExecution =
-					this.taskExplorer.getTaskExecution(this.executionId);
+			TaskExecution taskExecution = this.taskExplorer.getTaskExecution(this.executionId);
 			if (taskExecution != null && taskExecution.getEndTime() != null) {
 				if (taskExecution.getExitCode() == null) {
 					throw new UnexpectedJobExecutionException("Task returned a null exit code.");
-				}
-				else if (taskExecution.getExitCode() != 0) {
+				} else if (taskExecution.getExitCode() != 0) {
 					throw new UnexpectedJobExecutionException("Task returned a non zero exit code.");
-				}
-				else {
+				} else {
 					return RepeatStatus.FINISHED;
 				}
 			}
@@ -216,19 +248,20 @@ public class TaskLauncherTasklet implements Tasklet {
 		return RepeatStatus.CONTINUABLE;
 	}
 
-	public String getParentTaskExecutionId(StepContribution stepContribution) {
+	public Long getParentTaskExecutionId() {
 		Long result = null;
 		if (this.taskProperties.getExecutionid() != null) {
 			result = this.taskProperties.getExecutionid();
+			logger.debug("getParentTaskExecutionId:taskProperties.executionId={}", result);
+		} else if (ComposedTaskRunnerTaskListener.getExecutionId() != null) {
+			result = ComposedTaskRunnerTaskListener.getExecutionId();
+			logger.debug("getParentTaskExecutionId:ComposedTaskRunnerTaskListener.executionId={}", result);
 		}
-		else if (stepContribution != null) {
-			result = this.taskExplorer.getTaskExecutionIdByJobExecutionId(stepContribution.getStepExecution().getJobExecutionId());
-		}
-		return result != null ? String.valueOf(result) : null;
+		return result;
 	}
 
 	public TaskOperations taskOperations() {
-		if(this.taskOperations == null) {
+		if (this.taskOperations == null) {
 			this.taskOperations = dataFlowOperations().taskOperations();
 			if (taskOperations == null) {
 				throw new ComposedTaskException("Unable to connect to Data Flow " +
@@ -264,18 +297,15 @@ public class TaskLauncherTasklet implements Tasklet {
 			final OAuth2AccessTokenResponse res = this.clientCredentialsTokenResponseClient.getTokenResponse(grantRequest);
 			accessTokenValue = res.getAccessToken().getTokenValue();
 			logger.debug("Configured OAuth2 Client Credentials for accessing the Data Flow Server");
-		}
-		else if (StringUtils.hasText(this.composedTaskProperties.getDataflowServerAccessToken())) {
+		} else if (StringUtils.hasText(this.composedTaskProperties.getDataflowServerAccessToken())) {
 			accessTokenValue = this.composedTaskProperties.getDataflowServerAccessToken();
 			logger.debug("Configured OAuth2 Access Token for accessing the Data Flow Server");
-		}
-		else if (StringUtils.hasText(this.composedTaskProperties.getDataflowServerUsername())
+		} else if (StringUtils.hasText(this.composedTaskProperties.getDataflowServerUsername())
 				&& StringUtils.hasText(this.composedTaskProperties.getDataflowServerPassword())) {
-			accessTokenValue = null;
-			clientHttpRequestFactoryBuilder.basicAuthCredentials(composedTaskProperties.getDataflowServerUsername(), composedTaskProperties.getDataflowServerPassword());
+			clientHttpRequestFactoryBuilder.basicAuthCredentials(composedTaskProperties.getDataflowServerUsername(),
+					composedTaskProperties.getDataflowServerPassword());
 			logger.debug("Configured basic security for accessing the Data Flow Server");
-		}
-		else {
+		} else {
 			logger.debug("Not configuring basic security for accessing the Data Flow Server");
 		}
 
@@ -294,7 +324,7 @@ public class TaskLauncherTasklet implements Tasklet {
 			restTemplate.setRequestFactory(clientHttpRequestFactoryBuilder.buildClientHttpRequestFactory());
 		}
 
-		return new DataFlowTemplate(this.composedTaskProperties.getDataflowServerUri(), restTemplate);
+		return new DataFlowTemplate(this.composedTaskProperties.getDataflowServerUri(), restTemplate, mapper);
 	}
 
 	private void validateUsernamePassword(String userName, String password) {
@@ -311,10 +341,9 @@ public class TaskLauncherTasklet implements Tasklet {
 
 		if (properties != null) {
 			MapConfigurationPropertySource mapConfigurationPropertySource = new MapConfigurationPropertySource();
-			properties.entrySet().forEach(entrySet -> {
-				String key = entrySet.getKey();
+			properties.forEach((key, value) -> {
 				key = key.substring(key.lastIndexOf(".") + 1);
-				mapConfigurationPropertySource.put(key, entrySet.getValue());
+				mapConfigurationPropertySource.put(key, value);
 			});
 			result = isIgnoreMessagePresent(mapConfigurationPropertySource);
 		}

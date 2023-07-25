@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
@@ -170,7 +172,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		Map<String, String> updateProperties = new HashMap<>();
 		updateProperties.put("app.time.timestamp.format", "YYYYMMDD");
 		updateStreamRequest.setUpdateProperties(updateProperties);
-		final String releaseName = "myLogRelease";
+
 		final PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("timelog1");
 		packageIdentifier.setPackageVersion("1.0.0");
@@ -190,7 +192,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void rollback() throws Exception {
-		RollbackRequest rollbackRequest = new RollbackRequest();
+		final RollbackRequest rollbackRequest = new RollbackRequest();
 		rollbackRequest.setReleaseName("timelog1");
 		this.mockMvc.perform(
 				post("/streams/deployments/rollback/{name}/{version}", "timelog1", 1)
@@ -204,8 +206,8 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void history() throws Exception {
-		when(this.springDataflowServer.getSkipperClient().history(anyString()))
-				.thenReturn(Arrays.asList(new Release()));
+		when(springDataflowServer.getSkipperClient().history(anyString()))
+				.thenReturn(Collections.singletonList(new Release()));
 
 		this.mockMvc.perform(
 				get("/streams/deployments/history/{name}", "timelog1")
@@ -239,8 +241,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	public static String convertObjectToJson(Object object) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		String json = mapper.writeValueAsString(object);
-		return json;
+		return mapper.writeValueAsString(object);
 	}
 
 }

@@ -95,14 +95,20 @@ public class RestControllerAdvice {
 	 *
 	 * @param e one of the exceptions, {@link AppAlreadyRegisteredException},
 	 * {@link DuplicateStreamDefinitionException}, {@link DuplicateTaskException},
-	 * {@link StreamAlreadyDeployedException}, {@link StreamAlreadyDeployingException}, or
-	 * {@link StreamAlreadyDeployingException}
+	 * {@link StreamAlreadyDeployedException}, {@link StreamAlreadyDeployingException},
+	 * {@link StreamAlreadyDeployingException}, or {@link ApiNotSupportedException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ AppAlreadyRegisteredException.class, DuplicateStreamDefinitionException.class,
-			DuplicateTaskException.class, StreamAlreadyDeployedException.class, StreamAlreadyDeployingException.class,
-			UnregisterAppException.class, InvalidCTRLaunchRequestException.class})
+	@ExceptionHandler({
+			AppAlreadyRegisteredException.class,
+			DuplicateStreamDefinitionException.class,
+			DuplicateTaskException.class,
+			StreamAlreadyDeployedException.class,
+			StreamAlreadyDeployingException.class,
+			UnregisterAppException.class,
+			InvalidCTRLaunchRequestException.class
+	})
 	@ResponseStatus(HttpStatus.CONFLICT)
 	@ResponseBody
 	public VndErrors onConflictException(Exception e) {
@@ -182,7 +188,7 @@ public class RestControllerAdvice {
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
-	@ExceptionHandler({ MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
+	@ExceptionHandler({ ApiNotSupportedException.class,MissingServletRequestParameterException.class, HttpMessageNotReadableException.class,
 			UnsatisfiedServletRequestParameterException.class, MethodArgumentTypeMismatchException.class,
 			InvalidDateRangeException.class, CannotDeleteNonParentTaskExecutionException.class,
 			InvalidStreamDefinitionException.class, CreateScheduleException.class, OffsetOutOfBoundsException.class,

@@ -25,13 +25,8 @@ if [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
 
-if [ "$DATABASE" = "mariadb" ]; then
-    echo "Waiting for mariadb"
-    kubectl rollout status deployment --namespace "$NS" mariadb
-else
-    echo "Waiting for PostgreSQL"
-    kubectl rollout status deployment --namespace "$NS" postgresql
-fi
+
+kubectl rollout status deployment --namespace "$NS" $DATABASE
 
 if [ "$BROKER" = "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
@@ -40,6 +35,14 @@ if [ "$BROKER" = "kafka" ]; then
 else
   echo "Waiting for rabbitmq"
   kubectl rollout status deployment --namespace "$NS" rabbitmq
+fi
+if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
+    echo "Waiting for prometheus"
+    kubectl rollout status deployment --namespace "$NS" prometheus
+    echo "Waiting for grafana"
+    kubectl rollout status deployment --namespace "$NS" grafana
+    echo "Waiting for prometheus-rsocket-proxy"
+    kubectl rollout status deployment --namespace "$NS" prometheus-rsocket-proxy
 fi
 echo "Waiting for skipper"
 kubectl rollout status deployment --namespace "$NS" skipper

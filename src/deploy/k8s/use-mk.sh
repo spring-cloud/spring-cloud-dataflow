@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 (return 0 2>/dev/null) && sourced=1 || sourced=0
 if [ "$sourced" = "0" ]; then
   echo "This script must be invoked using: source $0 $*"
@@ -12,7 +12,8 @@ fi
 export USE_PRO=false
 export K8S_DRIVER=$1
 export KUBECONFIG=
-export NS=default
+export NS=scdf
+export METRICS=
 shift
 while [ "$1" != "" ]; do
     case "$1" in
@@ -27,6 +28,9 @@ while [ "$1" != "" ]; do
         ;;
     "kafka")
         export  BROKER=kafka
+        ;;
+    "prometheus" | "grafana")
+        export METRICS=prometheus
         ;;
     "--pro")
         export USE_PRO=true

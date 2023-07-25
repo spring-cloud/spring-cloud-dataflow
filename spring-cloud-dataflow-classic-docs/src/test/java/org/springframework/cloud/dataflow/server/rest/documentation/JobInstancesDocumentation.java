@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,19 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
-import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -54,7 +57,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the /jobs/instances endpoint.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
+@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
 @DirtiesContext
@@ -63,9 +68,11 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	private final static String JOB_NAME = "DOCJOB";
 
 	private static boolean initialized;
-	private JobRepository jobRepository;
-	private TaskExecutionDao dao;
-	private TaskBatchDao taskBatchDao;
+	private JobRepositoryContainer jobRepositoryContainer;
+	private TaskExecutionDaoContainer daoContainer;
+	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private AggregateExecutionSupport aggregateExecutionSupport;
+	private TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setup() throws Exception {
@@ -103,12 +110,15 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	@Test
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/instances/{id}", "1"))
+				get("/jobs/instances/{id}", "1").queryParam("schemaTarget", "boot2"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					pathParameters(
 						parameterWithName("id").description("The id of an existing job instance (required)")
+					),
+					requestParameters(
+							parameterWithName("schemaTarget").description("Schema target").optional()
 					),
 					responseFields(
 						fieldWithPath("jobName").description("The name of the job instance"),
@@ -120,21 +130,24 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	}
 
 
-	private void initialize() throws Exception {
-		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-		repositoryFactoryBean.setDataSource(this.dataSource);
-		repositoryFactoryBean.setTransactionManager(new DataSourceTransactionManager(this.dataSource));
-		this.jobRepository = repositoryFactoryBean.getObject();
-		this.dao = (new TaskExecutionDaoFactoryBean(this.dataSource)).getObject();
-		this.taskBatchDao = new JdbcTaskBatchDao(this.dataSource);
+	private void initialize() {
+		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
+		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
+		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
+		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
+		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
 	}
 
 	private void createJobExecution(String name, BatchStatus status) {
-		TaskExecution taskExecution = this.dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
-		JobExecution jobExecution = this.jobRepository.createJobExecution(this.jobRepository.createJobInstance(name, new JobParameters()), new JobParameters(), null);
-		this.taskBatchDao.saveRelationship(taskExecution, jobExecution);
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
+		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
+		TaskExecution taskExecution = dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
+		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
+		JobExecution jobExecution = jobRepository.createJobExecution(jobRepository.createJobInstance(name, new JobParameters()), new JobParameters(), null);
+		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
+		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
-		this.jobRepository.update(jobExecution);
+		jobRepository.update(jobExecution);
 	}
 }

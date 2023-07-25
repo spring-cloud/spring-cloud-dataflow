@@ -23,6 +23,9 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,9 +49,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -62,7 +69,9 @@ import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactory
 import org.springframework.cloud.task.repository.support.TaskRepositoryInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
@@ -101,21 +110,31 @@ public class TaskLauncherTaskletTests {
 	@Autowired
 	private JdbcTaskExecutionDao taskExecutionDao;
 
+	@Autowired
+	private Environment environment;
 	private TaskOperations taskOperations;
 
 	private TaskRepository taskRepository;
 
 	private TaskExplorer taskExplorer;
 
+	private ObjectMapper mapper;
+
 
 	@BeforeEach
 	public void setup() throws Exception{
+		if (this.mapper == null) {
+			this.mapper = new ObjectMapper();
+			this.mapper.registerModule(new Jdk8Module());
+			this.mapper.registerModule(new Jackson2HalModule());
+			this.mapper.registerModule(new JavaTimeModule());
+			this.mapper.registerModule(new Jackson2DataflowModule());
+		}
 		this.taskRepositoryInitializer.setDataSource(this.dataSource);
-
 		this.taskRepositoryInitializer.afterPropertiesSet();
 		this.taskOperations = mock(TaskOperations.class);
 		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean =
-				new TaskExecutionDaoFactoryBean(this.dataSource);
+				new MultiSchemaTaskExecutionDaoFactoryBean(this.dataSource, "TASK_");
 		this.taskRepository = new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 		this.taskExplorer = new SimpleTaskExplorer(taskExecutionDaoFactoryBean);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(500);
@@ -123,7 +142,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTasklet() throws Exception{
+	public void testTaskLauncherTasklet() {
 		createCompleteTaskExecution(0);
 		TaskLauncherTasklet taskLauncherTasklet =
 				getTaskExecutionTasklet();
@@ -133,6 +152,9 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 
 		mockReturnValForTaskExecution(2L);
 		chunkContext = chunkContext();
@@ -142,17 +164,28 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testInvalidTaskOperations() {
-		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(null, null,
-				this.taskExplorer, this.composedTaskProperties,
-				TASK_NAME, new TaskProperties());
-		Exception exception = assertThrows(ComposedTaskException.class, () -> {
-			execute(taskLauncherTasklet, null, chunkContext());
-		});
+		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(
+				null,
+				null,
+				this.taskExplorer,
+				this.composedTaskProperties,
+				TASK_NAME,
+				new TaskProperties(),
+				environment,
+				mapper
+		);
+		Exception exception = assertThrows(
+				ComposedTaskException.class,
+				() -> execute(taskLauncherTasklet, null, chunkContext())
+		);
 		AssertionsForClassTypes.assertThat(exception.getMessage()).isEqualTo(
 				"Unable to connect to Data Flow Server to execute task operations. " +
 						"Verify that Data Flow Server's tasks/definitions endpoint can be accessed.");
@@ -172,7 +205,10 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
@@ -195,7 +231,10 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
 	}
@@ -220,7 +259,10 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(((List) chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
@@ -252,7 +294,8 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		Throwable exception = assertThrows(DataFlowClientException.class,
-				() -> taskLauncherTasklet.execute(null, chunkContext));
+				() -> taskLauncherTasklet.execute(null, chunkContext)
+		);
 		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
 	}
 
@@ -314,7 +357,7 @@ public class TaskLauncherTaskletTests {
 
 			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 					this.taskExplorer, composedTaskProperties,
-					TASK_NAME, new TaskProperties());
+					TASK_NAME, new TaskProperties(), environment, mapper);
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
@@ -338,6 +381,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
@@ -357,6 +403,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
@@ -377,6 +426,9 @@ public class TaskLauncherTaskletTests {
 		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
+		assertThat(chunkContext.getStepContext()
+				.getStepExecution().getExecutionContext()
+				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		boolean value = chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);
@@ -397,7 +449,7 @@ public class TaskLauncherTaskletTests {
 
 			TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 					this.taskExplorer, composedTaskProperties,
-					TASK_NAME, new TaskProperties());
+					TASK_NAME, new TaskProperties(), environment, mapper);
 			taskLauncherTasklet.taskOperations();
 		}
 		catch (IllegalArgumentException e) {
@@ -433,7 +485,7 @@ public class TaskLauncherTaskletTests {
 	private TaskLauncherTasklet getTaskExecutionTasklet(TaskProperties taskProperties) {
 		TaskLauncherTasklet taskLauncherTasklet = new  TaskLauncherTasklet(null, null,
 				this.taskExplorer, this.composedTaskProperties,
-				TASK_NAME, taskProperties);
+				TASK_NAME, taskProperties, environment, mapper);
 		ReflectionTestUtils.setField(taskLauncherTasklet, "taskOperations", this.taskOperations);
 		return taskLauncherTasklet;
 	}
@@ -448,9 +500,11 @@ public class TaskLauncherTaskletTests {
 		StepContext stepContext = new StepContext(stepExecution);
 		return new ChunkContext(stepContext);
 	}
-
 	private void mockReturnValForTaskExecution(long executionId) {
-		Mockito.doReturn(executionId)
+		mockReturnValForTaskExecution(executionId, SchemaVersionTarget.defaultTarget().getName());
+	}
+	private void mockReturnValForTaskExecution(long executionId, String schemaTarget) {
+		Mockito.doReturn(new LaunchResponseResource(executionId, schemaTarget))
 				.when(this.taskOperations)
 				.launch(ArgumentMatchers.anyString(),
 						ArgumentMatchers.any(),
@@ -480,8 +534,10 @@ public class TaskLauncherTaskletTests {
 				OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient,
 				TaskExplorer taskExplorer,
 				ComposedTaskProperties composedTaskProperties, String taskName,
-				TaskProperties taskProperties) {
-			super(clientRegistrations, clientCredentialsTokenResponseClient,taskExplorer,composedTaskProperties,taskName,taskProperties);
+				TaskProperties taskProperties,
+				Environment environment,
+				ObjectMapper mapper) {
+			super(clientRegistrations, clientCredentialsTokenResponseClient,taskExplorer,composedTaskProperties,taskName,taskProperties, environment, mapper);
 		}
 
 		@Override

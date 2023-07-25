@@ -21,7 +21,10 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 
@@ -39,7 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskLogsDocumentation extends BaseDocumentation {
 
@@ -58,9 +63,13 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated());
 		TaskDeploymentRepository taskDeploymentRepository =
 				springDataflowServer.getWebApplicationContext().getBean(TaskDeploymentRepository.class);
-		TaskExecutionService service = this.springDataflowServer.getWebApplicationContext().getBean(TaskExecutionService.class);
+		TaskExecutionService service = springDataflowServer.getWebApplicationContext().getBean(TaskExecutionService.class);
+		AggregateExecutionSupport aggregateExecutionSupport = springDataflowServer.getWebApplicationContext().getBean(AggregateExecutionSupport.class);
+		TaskDefinitionReader taskDefinitionReader = springDataflowServer.getWebApplicationContext().getBean(TaskDefinitionReader.class);
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> service.getLog("default",
-				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId()).length() > 0);
+				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId(),
+				schemaVersionTarget.getName()).length() > 0);
 		this.mockMvc.perform(
 				get("/tasks/logs/"+taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName)
 						.getTaskDeploymentId()).param("platformName", "default"))

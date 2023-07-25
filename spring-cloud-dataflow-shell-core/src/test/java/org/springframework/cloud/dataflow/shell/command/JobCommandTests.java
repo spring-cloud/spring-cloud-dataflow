@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,15 +35,17 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
-import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,27 +68,29 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobCommandTests.class);
 
-	private static TaskExecutionDao dao;
+	private static TaskExecutionDaoContainer daoContainer;
 
-	private static JobRepository jobRepository;
+	private static JobRepositoryContainer jobRepositoryContainer;
 
-	private static TaskBatchDao taskBatchDao;
+	private static TaskBatchDaoContainer taskBatchDaoContainer;
+
+	private static AggregateExecutionSupport aggregateExecutionSupport;
 
 	private static List<JobInstance> jobInstances = new ArrayList<>();
 
 	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
+	private static TaskDefinitionReader taskDefinitionReader;
+
 	@BeforeAll
 	public static void setUp() throws Exception {
 		Thread.sleep(2000);
-		DataSource dataSource = applicationContext.getBean(DataSource.class);
-		taskBatchDao = new JdbcTaskBatchDao(dataSource);
-		JobRepositoryFactoryBean repositoryFactoryBean = new JobRepositoryFactoryBean();
-		repositoryFactoryBean.setDataSource(dataSource);
-		repositoryFactoryBean.setTransactionManager(new DataSourceTransactionManager(dataSource));
-		jobRepository = repositoryFactoryBean.getObject();
-		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource);
-		dao = taskExecutionDaoFactoryBean.getObject();
+		taskDefinitionReader = applicationContext.getBean(TaskDefinitionReader.class);
+		aggregateExecutionSupport = applicationContext.getBean(AggregateExecutionSupport.class);
+		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
+		jobRepositoryContainer = applicationContext.getBean(JobRepositoryContainer.class);
+		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
+
 		taskExecutionIds.add(createSampleJob(JOB_NAME_ORIG, 1));
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOO, 1));
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOOBAR, 2));
@@ -111,14 +114,18 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	private static long createSampleJob(String jobName, int jobExecutionCount) {
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
+		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
+		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<>(), null);
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("foo", new JobParameter("FOO", true));
 		jobParameterMap.put("bar", new JobParameter("BAR", false));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution;
+		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(instance, jobParameters, null);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);

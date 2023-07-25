@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -24,8 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,15 +43,22 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -73,8 +79,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TaskServiceDependencies.class, JobDependencies.class, BatchProperties.class}, properties = {
-		"spring.main.allow-bean-definition-overriding=true"})
+@SpringBootTest(classes = {
+		TaskServiceDependencies.class,
+		JobDependencies.class,
+		BatchProperties.class
+}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"}
+)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class DefaultTaskJobServiceTests {
 
@@ -103,18 +114,24 @@ public class DefaultTaskJobServiceTests {
 	DataSourceProperties dataSourceProperties;
 
 	@Autowired
-	JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	TaskBatchDao taskBatchDao;
+	TaskBatchDaoContainer taskBatchDaoContainer;
 
 	@Autowired
-	TaskExecutionDao taskExecutionDao;
+	TaskExecutionDaoContainer taskExecutionDaoContainer;
 
 	@Autowired
 	TaskJobService taskJobService;
 
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
 	private JobParameters jobParameters;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setup() {
@@ -125,10 +142,10 @@ public class DefaultTaskJobServiceTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 		template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
 		template.execute("DELETE FROM TASK_TASK_BATCH");
-		template.execute("DELETE FROM task_execution_metadata");
+		template.execute("DELETE FROM TASK_EXECUTION_METADATA");
 		template.execute("DELETE FROM TASK_EXECUTION;");
-		template.execute("ALTER SEQUENCE task_execution_metadata_seq RESTART WITH 50");
-		template.execute("ALTER SEQUENCE task_seq RESTART WITH 1");
+		template.execute("ALTER SEQUENCE TASK_EXECUTION_METADATA_SEQ RESTART WITH 50");
+		template.execute("ALTER SEQUENCE TASK_SEQ RESTART WITH 1");
 		initializeSuccessfulRegistry(this.appRegistry);
 		template.execute("INSERT INTO TASK_EXECUTION (TASK_EXECUTION_ID, TASK_NAME) VALUES (0, 'myTask_ORIG');");
 		reset(this.taskLauncher);
@@ -141,11 +158,11 @@ public class DefaultTaskJobServiceTests {
 		createBaseLaunchers();
 		initializeJobs(true);
 
-		this.taskJobService.restartJobExecution(jobInstanceCount);
+		this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
-		appDeploymentRequest.getCommandlineArguments().contains("--spring.cloud.data.flow.platformname=demo");
+
 		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
 	}
 
@@ -154,17 +171,17 @@ public class DefaultTaskJobServiceTests {
 		createBaseLaunchers();
 		initializeJobs(false);
 		Exception exception = assertThrows(IllegalStateException.class, () -> {
-			this.taskJobService.restartJobExecution(jobInstanceCount);
+			this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
 		});
 		assertTrue(exception.getMessage().contains("Did not find platform for taskName=[myJob_ORIG"));
 	}
 
 	@Test
 	public void testRestartOnePlatform() throws Exception {
-		this.launcherRepository.save(new Launcher("demo", "local", this.taskLauncher));
+		this.launcherRepository.save(new Launcher("demo", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, this.taskLauncher));
 
 		initializeJobs(false);
-		this.taskJobService.restartJobExecution(jobInstanceCount);
+		this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
@@ -173,22 +190,38 @@ public class DefaultTaskJobServiceTests {
 
 	private void initializeJobs(boolean insertTaskExecutionMetadata) {
 		this.taskDefinitionRepository.save(new TaskDefinition(JOB_NAME_ORIG + jobInstanceCount, "some-name"));
-		createSampleJob(this.jobRepository, this.taskBatchDao, this.taskExecutionDao,
-				JOB_NAME_ORIG + jobInstanceCount, BatchStatus.FAILED, insertTaskExecutionMetadata);
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("some-name", taskDefinitionReader);
+		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
+		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
+		TaskExecutionDao taskExecutionDao = taskExecutionDaoContainer.get(schemaVersionTarget.getName());
+		createSampleJob(
+				jobRepository,
+				taskBatchDao,
+				taskExecutionDao,
+				JOB_NAME_ORIG + jobInstanceCount,
+				BatchStatus.FAILED,
+				insertTaskExecutionMetadata
+		);
 		jobInstanceCount++;
 
 	}
 
-	private void createSampleJob(JobRepository jobRepository, TaskBatchDao taskBatchDao,
-			TaskExecutionDao taskExecutionDao, String jobName,
-			BatchStatus status, boolean insertTaskExecutionMetadata) {
+	private void createSampleJob(
+			JobRepository jobRepository,
+			TaskBatchDao taskBatchDao,
+			TaskExecutionDao taskExecutionDao,
+			String jobName,
+			BatchStatus status,
+			boolean insertTaskExecutionMetadata
+	) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
+
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.emptyList(), null);
 		JobExecution jobExecution;
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 		if (insertTaskExecutionMetadata) {
-			template.execute(String.format("INSERT INTO task_execution_metadata (id, task_execution_id, task_execution_manifest) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
+			template.execute(String.format("INSERT INTO TASK_EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
 		jobExecution = jobRepository.createJobExecution(instance,
 				this.jobParameters, null);
@@ -203,15 +236,15 @@ public class DefaultTaskJobServiceTests {
 
 	private void clearLaunchers() {
 		List<Launcher> launchers = new ArrayList<>();
-		this.launcherRepository.findAll().forEach(launcher1 -> launchers.add(launcher1));
-		launchers.stream().forEach(launcher -> this.launcherRepository.delete(launcher));
+		this.launcherRepository.findAll().forEach(launchers::add);
+		this.launcherRepository.deleteAll(launchers);
 	}
 
 	private void createBaseLaunchers() {
 		// not adding platform name as default as we want to check that this only one
 		// gets replaced
-		this.launcherRepository.save(new Launcher("fakeplatformname", "local", this.taskLauncher));
-		this.launcherRepository.save(new Launcher("demo", "local", this.taskLauncher));
+		this.launcherRepository.save(new Launcher("fakeplatformname", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, this.taskLauncher));
+		this.launcherRepository.save(new Launcher("demo", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, this.taskLauncher));
 	}
 
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {

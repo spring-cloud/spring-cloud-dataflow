@@ -22,8 +22,7 @@ services:
       #- SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
 
   prometheus-rsocket-proxy:
-    platform: linux/amd64
-    image: micrometermetrics/prometheus-rsocket-proxy:1.5.0
+    image: micrometermetrics/prometheus-rsocket-proxy:1.5.2
     container_name: prometheus-rsocket-proxy
     expose:
       - '9096'
@@ -39,14 +38,12 @@ services:
       - micrometer.prometheus-proxy.tcp-port=7001
 
   grafana:
-    platform: linux/amd64
     image: springcloud/spring-cloud-dataflow-grafana-prometheus:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}
     container_name: grafana
     ports:
       - '3000:3000'
 
   prometheus:
-    platform: linux/amd64
     image: springcloud/spring-cloud-dataflow-prometheus-local:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}
     container_name: prometheus
     ports:

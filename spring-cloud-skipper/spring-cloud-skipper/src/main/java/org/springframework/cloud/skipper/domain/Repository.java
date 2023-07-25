@@ -46,6 +46,7 @@ public class Repository extends AbstractEntity {
 	 */
 	@NotNull
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String url;
 
 	/**
@@ -53,6 +54,7 @@ public class Repository extends AbstractEntity {
 	 * packages.
 	 */
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String sourceUrl;
 
 	/**

@@ -29,6 +29,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -70,12 +71,14 @@ public class Release extends AbstractEntity {
 	private Long repositoryId;
 
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })

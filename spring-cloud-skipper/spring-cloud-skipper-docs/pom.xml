@@ -73,14 +73,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-client</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.spring.docresources</groupId>
-			<artifactId>spring-doc-resources</artifactId>
-			<version>0.2.5</version>
-			<type>zip</type>
-			<scope>system</scope>
-			<systemPath>${rootDir}/lib/spring-doc-resources-0.2.5.zip</systemPath>
-		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
@@ -118,26 +110,6 @@
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>unpack-doc-resources</id>
-								<goals>
-									<goal>unpack-dependencies</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<includeGroupIds>io.spring.docresources</includeGroupIds>
-									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
-									<includeTypes>zip</includeTypes>
-									<excludeTransitive>true</excludeTransitive>
-									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-resources-plugin</artifactId>
 						<version>${maven-resources-plugin.version}</version>
 						<executions>
@@ -169,6 +141,11 @@
 								<artifactId>asciidoctorj-pdf</artifactId>
 								<version>${asciidoctorj-pdf.version}</version>
 							</dependency>
+							<dependency>
+								<groupId>io.spring.asciidoctor.backends</groupId>
+								<artifactId>spring-asciidoctor-backends</artifactId>
+								<version>0.0.5</version>
+							</dependency>
 						</dependencies>
 						<configuration>
 							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
@@ -195,7 +172,7 @@
 									<goal>process-asciidoc</goal>
 								</goals>
 								<configuration>
-									<backend>html5</backend>
+									<backend>spring-html</backend>
 									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<doctype>book</doctype>
 									<attributes>
@@ -327,7 +304,7 @@
 											<file>
 												${project.build.directory}/${project.artifactId}-${project.version}.zip
 											</file>
-											<type>zip;zip.type=docs;zip.deployed=false</type>
+											<type>zip</type>
 										</artifact>
 									</artifacts>
 								</configuration>

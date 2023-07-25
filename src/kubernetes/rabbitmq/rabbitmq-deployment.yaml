@@ -15,7 +15,7 @@ spec:
         app: rabbitmq
     spec:
       containers:
-      - image: rabbitmq:3.6.10
+      - image: rabbitmq:3.8
         name: rabbitmq
         imagePullPolicy: IfNotPresent
         env:

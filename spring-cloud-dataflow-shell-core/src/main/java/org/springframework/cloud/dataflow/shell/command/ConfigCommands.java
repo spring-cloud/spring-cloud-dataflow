@@ -26,6 +26,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
 import org.springframework.cloud.dataflow.rest.client.DataFlowServerException;
@@ -37,6 +41,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboar
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ProcessOutputResource;
@@ -48,6 +53,7 @@ import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -110,19 +116,36 @@ public class ConfigCommands {
 
 	private OAuth2ClientProperties oauth2ClientProperties;
 
-	ConfigCommands(DataFlowShell shell, DataFlowShellProperties shellProperties, ConsoleUserInput userInput,
-			TargetHolder targetHolder, RestTemplate restTemplate, @Nullable OAuth2ClientProperties oauth2ClientProperties) {
+	private final ObjectMapper mapper;
+
+	ConfigCommands(
+			DataFlowShell shell,
+			DataFlowShellProperties shellProperties,
+			ConsoleUserInput userInput,
+			TargetHolder targetHolder,
+			RestTemplate restTemplate,
+			@Nullable OAuth2ClientProperties oauth2ClientProperties,
+			@Nullable ObjectMapper mapper
+	) {
 		this.shell = shell;
 		this.shellProperties = shellProperties;
 		this.userInput = userInput;
 		this.targetHolder = targetHolder;
 		this.restTemplate = restTemplate;
 		this.oauth2ClientProperties = oauth2ClientProperties;
+		if (mapper == null) {
+			mapper = new ObjectMapper();
+			mapper.registerModule(new Jdk8Module());
+			mapper.registerModule(new Jackson2HalModule());
+			mapper.registerModule(new JavaTimeModule());
+			mapper.registerModule(new Jackson2DataflowModule());
+		}
+		this.mapper = mapper;
 	}
 
 	@ShellMethod(key = "dataflow config server", value = "Configure the Spring Cloud Data Flow REST server to use")
 	public String target(
-			@ShellOption(value = { "", "--uri" }, help = "the location of the Spring Cloud Data Flow REST endpoint", defaultValue = Target.DEFAULT_TARGET) String uri,
+			@ShellOption(value = {"", "--uri"}, help = "the location of the Spring Cloud Data Flow REST endpoint", defaultValue = Target.DEFAULT_TARGET) String uri,
 			@ShellOption(help = "the username for authenticated access to the Admin REST endpoint", defaultValue = ShellOption.NULL) String username,
 			@ShellOption(help = "the password for authenticated access to the Admin REST endpoint (valid only with a "
 					+ "username)", defaultValue = ShellOption.NULL) String password,
@@ -186,16 +209,14 @@ public class ConfigCommands {
 				ClientHttpRequestInterceptor bearerTokenResolvingInterceptor = bearerTokenResolvingInterceptor(
 						oauth2ClientProperties, username, password, clientRegistrationId);
 				this.restTemplate.getInterceptors().add(bearerTokenResolvingInterceptor);
-			}
-
-			else if (authenticationEnabled && StringUtils.hasText(username) && StringUtils.hasText(password)) {
+			} else if (authenticationEnabled && StringUtils.hasText(username) && StringUtils.hasText(password)) {
 				httpClientConfigurer.basicAuthCredentials(username, password);
 			}
 
 			this.restTemplate.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
 
 			this.shell.setDataFlowOperations(
-					new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate));
+					new DataFlowTemplate(targetHolder.getTarget().getTargetUri(), this.restTemplate, this.mapper));
 			this.targetHolder.getTarget()
 					.setTargetResultMessage(String.format("Successfully targeted %s", uri));
 
@@ -215,8 +236,7 @@ public class ConfigCommands {
 			this.targetHolder.getTarget().setTargetResultMessage(String.format("Successfully targeted %s", uri));
 
 			return this.targetHolder.getTarget().getTargetResultMessage();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			this.targetHolder.getTarget().setTargetException(e);
 			this.shell.setDataFlowOperations(null);
 			throw e;
@@ -242,7 +262,7 @@ public class ConfigCommands {
 				this.shellProperties.getProxy().getPassword());
 	}
 
-	@ShellMethod(key = "dataflow config info" ,  value = "Show the Dataflow server being used")
+	@ShellMethod(key = "dataflow config info", value = "Show the Dataflow server being used")
 	@SuppressWarnings("unchecked")
 	public TablesInfo info() {
 		Target target = targetHolder.getTarget();

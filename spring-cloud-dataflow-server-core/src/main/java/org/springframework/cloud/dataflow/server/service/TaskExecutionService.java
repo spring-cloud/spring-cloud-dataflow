@@ -19,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.TaskManifest;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 
 /**
  * Provides Task related services.
@@ -43,7 +45,7 @@ public interface TaskExecutionService {
 	 * @param commandLineArgs Optional runtime commandline argument
 	 * @return the taskExecutionId for the executed task.
 	 */
-	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
+	LaunchResponse executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 	/**
 	 * Retrieve logs for the task application.
@@ -52,14 +54,14 @@ public interface TaskExecutionService {
 	 * @param taskId the ID that uniquely identifies the task
 	 * @return the logs of the task application.
 	 */
-	String getLog(String platformName, String taskId);
+	String getLog(String platformName, String taskId, String schemaTarget);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
 	 * @param ids a set of ids for the task executions to be stopped.
 	 */
-	void stopTaskExecution(Set<Long> ids);
+	void stopTaskExecution(Set<Long> ids, String schemaTarget);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
@@ -67,14 +69,14 @@ public interface TaskExecutionService {
 	 * @param ids a set of ids for the task executions to be stopped.
 	 * @param platform The name of the platform where the tasks are executing.
 	 */
-	void stopTaskExecution(Set<Long> ids, String platform);
+	void stopTaskExecution(Set<Long> ids, String schemaTarget, String platform);
 
 	/**
 	 * Retrieve the TaskManifest for the execution id provided
 	 * @param id task exectution id
 	 * @return {@code TaskManifest} or null if not found.
 	 */
-	TaskManifest findTaskManifestById(Long id);
+	TaskManifest findTaskManifestById(Long id, String schemaTarget);
 
 	/**
 	 * Returns all the task execution IDs with the option to include only the completed task executions.

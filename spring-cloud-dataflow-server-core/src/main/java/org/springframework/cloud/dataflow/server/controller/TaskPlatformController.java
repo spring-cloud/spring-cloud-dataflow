@@ -58,9 +58,11 @@ public class TaskPlatformController {
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<LauncherResource> list(Pageable pageable,
+	public PagedModel<LauncherResource> list(
+			Pageable pageable,
 			@RequestParam(value = "schedulesEnabled", required = false) String schedulesEnabled,
-			PagedResourcesAssembler<Launcher> assembler) {
+			PagedResourcesAssembler<Launcher> assembler
+	) {
 		PagedModel<LauncherResource> result;
 		if(StringUtils.hasText(schedulesEnabled) && schedulesEnabled.toLowerCase().equals("true")) {
 			result = assembler.toModel(this.launcherService.getLaunchersWithSchedules(pageable), this.launcherAssembler);

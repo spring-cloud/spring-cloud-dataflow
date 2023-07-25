@@ -82,21 +82,21 @@ public class JobCommands {
 		final PagedModel<JobExecutionThinResource> jobs;
 		if (name == null) {
 			jobs = jobOperations().executionThinList();
-		}
-		else {
+		} else {
 			jobs = jobOperations().executionThinListByJobName(name);
 		}
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
 		modelBuilder.addRow().addValue("ID ").addValue("Task ID").addValue("Job Name ").addValue("Start Time ")
-				.addValue("Step Execution Count ").addValue("Definition Status ");
+				.addValue("Step Execution Count ").addValue("Definition Status ").addValue("Schema Target");
 		for (JobExecutionThinResource job : jobs) {
 			modelBuilder.addRow().addValue(job.getExecutionId()).addValue(job.getTaskExecutionId())
 					.addValue(job.getName())
 					.addValue(job.getStartDateTime())
 					.addValue(job.getStepExecutionCount())
-					.addValue(job.isDefined() ? "Created" : "Destroyed");
+					.addValue(job.isDefined() ? "Created" : "Destroyed")
+					.addValue(job.getSchemaTarget());
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
 
@@ -108,18 +108,21 @@ public class JobCommands {
 	@ShellMethod(key = EXECUTION_RESTART, value = "Restart a failed job by jobExecutionId")
 	@ShellMethodAvailability("availableWithViewRole")
 	public String executionRestart(
-			@ShellOption(help = "the job execution id") long id) {
-		jobOperations().executionRestart(id);
-
-		return String.format("Restart request has been sent for job execution '%s'", id);
+			@ShellOption(help = "the job execution id") long id,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
+	) {
+		jobOperations().executionRestart(id, schemaTarget);
+		return String.format("Restart request has been sent for job execution '%s', schema target '%s'", id, schemaTarget);
 	}
 
 	@ShellMethod(key = EXECUTION_DISPLAY, value = "Display the details of a specific job execution")
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table executionDisplay(
-			@ShellOption(help = "the job execution id") long id) {
+			@ShellOption(help = "the job execution id") long id,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
+	) {
 
-		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id);
+		JobExecutionResource jobExecutionResource = jobOperations().jobExecution(id, schemaTarget);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
@@ -145,6 +148,7 @@ public class JobCommands {
 				.addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitDescription());
 		modelBuilder.addRow().addValue("Definition Status ")
 				.addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
+		modelBuilder.addRow().addValue("Schema Target").addValue(jobExecutionResource.getSchemaTarget());
 		modelBuilder.addRow().addValue("Job Parameters ").addValue("");
 		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution()
 				.getJobParameters().getParameters().entrySet()) {
@@ -165,16 +169,23 @@ public class JobCommands {
 
 	@ShellMethod(key = INSTANCE_DISPLAY, value = "Display the job executions for a specific job instance.")
 	@ShellMethodAvailability("availableWithViewRole")
-	public Table instanceDisplay(@ShellOption(help = "the job instance id") long id) {
+	public Table instanceDisplay(
+			@ShellOption(help = "the job instance id") long id,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
+	) {
 
-		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id);
+		JobInstanceResource jobInstanceResource = jobOperations().jobInstance(id, schemaTarget);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Name ").addValue("Execution ID ").addValue("Step Execution Count ")
-				.addValue("Status ").addValue("Job Parameters ");
+				.addValue("Status ").addValue("Schema Target").addValue("Job Parameters ");
 		for (JobExecutionResource job : jobInstanceResource.getJobExecutions()) {
-			modelBuilder.addRow().addValue(jobInstanceResource.getJobName()).addValue(job.getExecutionId())
-					.addValue(job.getStepExecutionCount()).addValue(job.getJobExecution().getStatus().name())
+			modelBuilder.addRow()
+					.addValue(jobInstanceResource.getJobName())
+					.addValue(job.getExecutionId())
+					.addValue(job.getStepExecutionCount())
+					.addValue(job.getJobExecution().getStatus().name())
+					.addValue(job.getSchemaTarget())
 					.addValue(job.getJobParametersString());
 		}
 		TableBuilder builder = new TableBuilder(modelBuilder.build());
@@ -185,9 +196,12 @@ public class JobCommands {
 
 	@ShellMethod(key = STEP_EXECUTION_LIST, value = "List step executions filtered by jobExecutionId")
 	@ShellMethodAvailability("availableWithViewRole")
-	public Table stepExecutionList(@ShellOption(help = "the job execution id to be used as a filter") long id) {
+	public Table stepExecutionList(
+			@ShellOption(help = "the job execution id to be used as a filter") long id,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
+	) {
 
-		final PagedModel<StepExecutionResource> steps = jobOperations().stepExecutionList(id);
+		final PagedModel<StepExecutionResource> steps = jobOperations().stepExecutionList(id, schemaTarget);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
@@ -210,10 +224,13 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table stepProgressDisplay(
 			@ShellOption(help = "the step execution id") long id,
-			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId) {
+			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget) {
 
-		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
-				id);
+		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(
+				jobExecutionId,
+				id,
+				schemaTarget);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("ID ").addValue("Step Name ").addValue("Complete ").addValue("Duration ");
@@ -233,10 +250,15 @@ public class JobCommands {
 	@ShellMethodAvailability("availableWithViewRole")
 	public Table stepExecutionDisplay(
 			@ShellOption(help = "the step execution id") long id,
-			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId) {
+			@ShellOption(value = "--jobExecutionId", help = "the job execution id") long jobExecutionId,
+			@ShellOption(value = "--schemaTarget", help = "schema target", defaultValue = ShellOption.NULL) String schemaTarget
+	) {
 
-		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(jobExecutionId,
-				id);
+		StepExecutionProgressInfoResource progressInfoResource = jobOperations().stepExecutionProgress(
+				jobExecutionId,
+				id,
+				schemaTarget
+		);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Key ").addValue("Value ");

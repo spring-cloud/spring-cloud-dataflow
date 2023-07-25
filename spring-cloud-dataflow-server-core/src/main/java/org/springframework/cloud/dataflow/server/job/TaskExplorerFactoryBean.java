@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.job;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.util.Assert;
 
 /**
@@ -31,19 +31,19 @@ import org.springframework.util.Assert;
  */
 public class TaskExplorerFactoryBean implements FactoryBean<TaskExplorer> {
 
-	private DataSource dataSource;
-
+	private final DataSource dataSource;
 	private TaskExplorer taskExplorer;
-
-	public TaskExplorerFactoryBean(DataSource dataSource) {
+	private final String tablePrefix;
+	public TaskExplorerFactoryBean(DataSource dataSource, String tablePrefix) {
 		Assert.notNull(dataSource, "dataSource must not be null");
 		this.dataSource = dataSource;
+		this.tablePrefix = tablePrefix;
 	}
 
 	@Override
 	public TaskExplorer getObject() throws Exception {
 		if (taskExplorer == null) {
-			taskExplorer = new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource));
+			taskExplorer = new SimpleTaskExplorer(new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, tablePrefix));
 		}
 		return taskExplorer;
 	}
@@ -51,11 +51,6 @@ public class TaskExplorerFactoryBean implements FactoryBean<TaskExplorer> {
 	@Override
 	public Class<?> getObjectType() {
 		return TaskExplorer.class;
-	}
-
-	@Override
-	public boolean isSingleton() {
-		return true;
 	}
 
 }

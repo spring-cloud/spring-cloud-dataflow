@@ -29,6 +29,7 @@ public class Manifest extends AbstractEntity {
 
 	@NotNull
 	@Lob
+	// @Column(columnDefinition = "text")
 	private String data;
 
 	public Manifest() {

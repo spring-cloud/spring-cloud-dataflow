@@ -102,6 +102,8 @@ export MK_ARGS="--cpus=8 --memory=12g"
 
 ===== Deploy Spring Cloud Data Flow.
 
+The `use-*` scripts will configure the values of BROKER and DATABASE.
+
 ====== Configure Broker
 [source,shell]
 ....
@@ -117,13 +119,52 @@ export DATABASE=<database> # <1>
 ....
 <1> <database> one of `mariadb` or `postgresql`
 
-NOTE: This is still optional and PostgreSQL support isn't available yet but will follow soon.
+Docker credentials need to be configured for Kubernetes to pull the various container images.
+
+For Docker Hub you can create a personal free account and use a personal access token as your password.
+
+Test your docker login using `./k8s/docker-login.sh`
+
+[source,shell]
+....
+export DOCKER_SERVER=https://docker.io
+export DOCKER_USER=<docker-userid>
+export DOCKER_PASSWORD=<docker-password>
+export DOCKER_EMAIL=<email-of-docker-use>
+....
+
+Set the version of Spring Cloud Data Flow and Skipper.
+
+This example shows the versions of the current development snapshot.
+
+[source,shell]
+....
+export DATAFLOW_VERSION=2.11.0-SNAPSHOT
+export SKIPPER_VERSION=2.11.0-SNAPSHOT
+....
+
+Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.
+
+Use:
+[source,shell]
+....
+./images/pull-app-images.sh
+./images/pull-dataflow.sh
+./images/pull-skipper.sh
+./images/pull-composed-task-runner.sh
+....
 
 [source,shell]
 ....
 ./k8s/install-scdf.sh
 source ./k8s/export-dataflow-ip.sh
 ....
+
+NOTE: You can now execute scripts from `./shell` to deploy some simple streams and tasks. You can also run `./shell/shell.sh` to run the Spring Cloud Data Flow Shell.
+
+
+If you want to start fresh you use the following to delete the SCDF deployment and then run `./k8s/install-scdf.sh` to install it again.
+
 
 ===== Delete the deployment from the cluster.
 
