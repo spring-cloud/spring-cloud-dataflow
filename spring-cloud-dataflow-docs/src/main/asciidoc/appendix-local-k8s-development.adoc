@@ -133,6 +133,16 @@ export DOCKER_PASSWORD=<docker-password>
 export DOCKER_EMAIL=<email-of-docker-use>
 ....
 
+Set the version of Spring Cloud Data Flow and Skipper.
+
+This example shows the versions of the current development snapshot.
+
+[source,shell]
+....
+export DATAFLOW_VERSION=2.11.0-SNAPSHOT
+export SKIPPER_VERSION=2.11.0-SNAPSHOT
+....
+
 Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.
 
 Use:
@@ -149,6 +159,12 @@ Use:
 ./k8s/install-scdf.sh
 source ./k8s/export-dataflow-ip.sh
 ....
+
+NOTE: You can now execute scripts from `./shell` to deploy some simple streams and tasks. You can also run `./shell/shell.sh` to run the Spring Cloud Data Flow Shell.
+
+
+If you want to start fresh you use the following to delete the SCDF deployment and then run `./k8s/install-scdf.sh` to install it again.
+
 
 ===== Delete the deployment from the cluster.
 

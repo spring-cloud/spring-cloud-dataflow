@@ -21,8 +21,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    platform: linux/amd64
-    image: mariadb:10.4.22
+    image: mariadb:10
     container_name: dataflow-mariadb
     environment:
       LANG: en.US-utf8

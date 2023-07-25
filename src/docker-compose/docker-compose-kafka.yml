@@ -22,8 +22,7 @@ version: '3'
 services:
 
   kafka-broker:
-    platform: linux/amd64
-    image: confluentinc/cp-kafka:5.5.2
+    image: confluentinc/cp-kafka:5
     container_name: dataflow-kafka
     expose:
       - "9092"
@@ -41,8 +40,7 @@ services:
       - zookeeper
 
   zookeeper:
-    platform: linux/amd64
-    image: confluentinc/cp-zookeeper:5.5.2
+    image: confluentinc/cp-zookeeper:5
     container_name: dataflow-kafka-zookeeper
     expose:
       - "2181"

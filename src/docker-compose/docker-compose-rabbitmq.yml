@@ -5,8 +5,7 @@ version: '3'
 services:
 
   rabbitmq:
-    platform: linux/amd64
-    image: rabbitmq:3.7
+    image: rabbitmq:3.8
     container_name: dataflow-rabbitmq
     environment:
       LANG: en_US.utf8

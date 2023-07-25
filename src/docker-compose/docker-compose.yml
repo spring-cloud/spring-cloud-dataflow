@@ -21,7 +21,6 @@ version: '3'
 services:
   dataflow-server:
     user: root
-    platform: linux/amd64
     image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
@@ -45,15 +44,13 @@ services:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
 
   app-import-stream:
-    platform: linux/amd64
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-stream
     depends_on:
       - dataflow-server
 
   app-import-task:
-    platform: linux/amd64
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-task
     depends_on:
       - dataflow-server
@@ -65,7 +62,6 @@ services:
 
   skipper-server:
     user: root
-    platform: linux/amd64
     image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
