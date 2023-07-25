@@ -31,7 +31,7 @@ done
 K8S=$(realpath $SCDIR/../k8s)
 case $DATABASE in
 "mariadb")
-    sh "$K8S/load-image.sh" "mariadb" "10.4" false
+    sh "$K8S/load-image.sh" "mariadb" "10" false
     ;;
 "postgresql")
     sh "$K8S/load-image.sh" "postgres" "12" false
@@ -42,11 +42,11 @@ case $DATABASE in
 esac
 case $BROKER in
 "kafka")
-    sh "$K8S/load-image.sh" "confluentinc/cp-kafka" "5.5.2" false
-    sh "$K8S/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2" false
+    sh "$K8S/load-image.sh" "confluentinc/cp-kafka" "5" false
+    sh "$K8S/load-image.sh" "confluentinc/cp-zookeeper" "5" false
     ;;
 "rabbit" | "rabbitmq")
-    sh "$K8S/load-image.sh" "rabbitmq" "3.6.10" false
+    sh "$K8S/load-image.sh" "rabbitmq" "3.8" false
     ;;
 *)
     echo "BROKER=$BROKER not supported"

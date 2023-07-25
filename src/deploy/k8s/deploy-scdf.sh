@@ -97,7 +97,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     # sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
     case $DATABASE in
     "mariadb")
-        sh "$SCDIR/load-image.sh" "mariadb" "10.4"
+        sh "$SCDIR/load-image.sh" "mariadb" "10"
         ;;
     "postgresql")
         sh "$SCDIR/load-image.sh" "postgres" "12"
@@ -108,11 +108,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     esac
     case $BROKER in
     "kafka")
-        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5.5.2"
-        sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2"
+        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5"
+        sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5"
         ;;
     "rabbit" | "rabbitmq")
-        sh "$SCDIR/load-image.sh" "rabbitmq" "3.6.10"
+        sh "$SCDIR/load-image.sh" "rabbitmq" "3.8"
         ;;
     *)
         echo "BROKER=$BROKER not supported"
