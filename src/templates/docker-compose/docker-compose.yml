@@ -21,7 +21,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    image: mariadb:10.4.22
+    image: mariadb:11
     container_name: dataflow-mariadb
     environment:
       MARIADB_DATABASE: dataflow
@@ -63,13 +63,10 @@ services:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_BROKERS=PLAINTEXT://kafka-broker:9092
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_BINDER_ZKNODES=zookeeper:2181
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_CLOUD_STREAM_KAFKA_STREAMS_BINDER_ZKNODES=zookeeper:2181
-
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_KAFKA_STREAMS_PROPERTIES_METRICS_RECORDING_LEVEL=DEBUG
       # Set CLOSECONTEXTENABLED=true to ensure that the CRT launcher is closed.
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
-
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
-
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
@@ -83,18 +80,12 @@ services:
     depends_on:
       - kafka-broker
       - skipper-server
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
-         chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
 
   app-import-stream:
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-stream
     depends_on:
       - dataflow-server
@@ -102,13 +93,11 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-maven-latest&force=true}';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/3.0.1' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:3.0.1';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/2.1.5.RELEASE' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-kafka:2.1.5.RELEASE';
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-@project.version@}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-@project.version@}';
         echo 'Maven Stream apps imported'"
 
   app-import-task:
-    image: springcloud/baseimage:1.0.1
+    image: springcloud/baseimage:1.0.4
     container_name: dataflow-app-import-task
     depends_on:
       - dataflow-server
@@ -133,12 +122,6 @@ services:
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
-         chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}

@@ -97,7 +97,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     # sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
     case $DATABASE in
     "mariadb")
-        sh "$SCDIR/load-image.sh" "mariadb" "10"
+        sh "$SCDIR/load-image.sh" "mariadb" "11"
         ;;
     "postgresql")
         sh "$SCDIR/load-image.sh" "postgres" "12"

@@ -20,6 +20,7 @@ import org.testcontainers.containers.MariaDBContainer;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 
 
 /**
@@ -27,10 +28,13 @@ import org.springframework.test.context.DynamicPropertySource;
  *
  * @author Corneil du Plessis
  */
+@TestPropertySource(properties = {
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
+})
 public class MariaDBSmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.4");
+		container = new MariaDBContainer<>("mariadb:11");
 		container.start();
 	}
 }

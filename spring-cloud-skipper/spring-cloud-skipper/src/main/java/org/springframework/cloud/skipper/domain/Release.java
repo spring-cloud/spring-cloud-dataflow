@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.domain;
 import java.io.IOException;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
@@ -29,6 +28,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -71,14 +71,14 @@ public class Release extends AbstractEntity {
 	private Long repositoryId;
 
 	@Lob
-	@Column(columnDefinition = "text")
+	// @Column(columnDefinition = "text")
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
 	@Lob
-	@Column(columnDefinition = "text")
+	// @Column(columnDefinition = "text")
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })

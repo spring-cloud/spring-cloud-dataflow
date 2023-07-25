@@ -16,8 +16,15 @@ if [ "$BROKER" = "rabbitmq" ]; then
 else
     BROKER_NAME=$BROKER
 fi
+if [ "$1" != "" ]; then
+    STREAM_APPS_VERSION=$1
+fi
 if [ "$STREAM_APPS_VERSION" = "" ]; then
     STREAM_APPS_VERSION=4.0.0-SNAPSHOT
+fi
+if [[ "$STREAM_APPS_VERSION" = "202*" ]]; then
+    echo "The version expected is not the release train version $STREAM_APPS_VERSION but the apps version."
+    exit 1
 fi
 docker pull "springcloudstream/log-sink-$BROKER_NAME:$STREAM_APPS_VERSION"
 docker pull "springcloudstream/http-source-$BROKER_NAME:$STREAM_APPS_VERSION"

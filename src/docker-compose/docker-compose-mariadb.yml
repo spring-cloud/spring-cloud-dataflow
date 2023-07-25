@@ -21,7 +21,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    image: mariadb:10
+    image: mariadb:11
     container_name: dataflow-mariadb
     environment:
       LANG: en.US-utf8
@@ -39,6 +39,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
     depends_on:
       - mariadb
 
@@ -48,5 +49,6 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
     depends_on:
       - mariadb

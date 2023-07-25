@@ -15,11 +15,16 @@
  */
 package org.springframework.cloud.skipper.server.db.migration;
 
+import java.util.Collections;
+import java.util.Map;
+
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
@@ -29,10 +34,14 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerA
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.skipper.server.EnableSkipperServer;
+import org.springframework.cloud.skipper.server.domain.AppDeployerData;
+import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource;
 
+import static org.assertj.core.api.Assertions.*;
 /**
  * Provides for testing some basic database schema and JPA tests to catch potential issues with specific databases early.
  *
@@ -40,11 +49,15 @@ import org.springframework.test.context.DynamicPropertySource;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
+@TestPropertySource(properties = {
+		"spring.jpa.hibernate.ddl-auto=validate"
+})
 public abstract class AbstractSmokeTest {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
 
 	protected static JdbcDatabaseContainer<?> container;
-
+	@Autowired
+	AppDeployerDataRepository appDeployerDataRepository;
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", container::getJdbcUrl);
@@ -56,6 +69,14 @@ public abstract class AbstractSmokeTest {
 	@Test
 	public void testStart() {
 		logger.info("started:{}", getClass().getSimpleName());
+		AppDeployerData deployerData = new AppDeployerData();
+		deployerData.setDeploymentDataUsingMap(Collections.singletonMap("a", "b"));
+		deployerData.setReleaseVersion(1);
+		deployerData.setReleaseName("a");
+		deployerData = appDeployerDataRepository.save(deployerData);
+		assertThat(deployerData.getId()).isNotNull();
+		assertThat(deployerData.getId()).isNotEqualTo(0);
+		logger.info("completed:{}", getClass().getSimpleName());
 	}
 
 	@SpringBootApplication(exclude = {CloudFoundryDeployerAutoConfiguration.class,

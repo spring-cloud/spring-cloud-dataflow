@@ -20,7 +20,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    image: mariadb:10.4.22
+    image: mariadb:11
     container_name: dataflow-mariadb
     environment:
       LANG: en.US-utf8
@@ -66,12 +66,6 @@ services:
       SPRING_DATASOURCE_PASSWORD: 'spring'
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'org.mariadb.jdbc.Driver'
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER: 'DEBUG'
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
-         chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
