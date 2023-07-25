@@ -19,7 +19,7 @@ The `username` and `password` are the same regardless of the database. However, 
 [cols="a,a,a,a,a"]
 [cols="10%,20%,20%,20%,10%"]
 |===
-|[.small]#Database#|[.small]#spring.datasource.url#|[.small]#spring.datasource.driver-class-name#|[.small]#spring.jpa.database-platform#|[.small]##Driver included#
+|[.small]#Database#|[.small]#spring.datasource.url#|[.small]#spring.datasource.driver-class-name#|[.small]#spring.jpa.database-platform#|[.small]#Driver included#
 
 |[.small]#MariaDB 10.4+#
 |[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
