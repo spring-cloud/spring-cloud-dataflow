@@ -33,7 +33,7 @@ The `username` and `password` are the same regardless of the database. However, 
 |[.small]#org.hibernate.dialect.MariaDB102Dialect#
 |[.small]#Yes#
 
-|[.small]#MariaDB 10.3, 10.4, 10.5#
+|[.small]#MariaDB 10.3 - 10.5#
 |[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
 |[.small]#org.mariadb.jdbc.Driver#
 |[.small]#org.hibernate.dialect.MariaDB103Dialect#
