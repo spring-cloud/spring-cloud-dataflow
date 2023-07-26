@@ -21,7 +21,25 @@ The `username` and `password` are the same regardless of the database. However, 
 |===
 |[.small]#Database#|[.small]#spring.datasource.url#|[.small]#spring.datasource.driver-class-name#|[.small]#spring.jpa.database-platform#|[.small]#Driver included#
 
-|[.small]#MariaDB 10.4+#
+|[.small]#MariaDB 10.0 - 10.1#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB10Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.2#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB102Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.3, 10.4, 10.5#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB103Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.6+#
 |[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
 |[.small]#org.mariadb.jdbc.Driver#
 |[.small]#org.hibernate.dialect.MariaDB106Dialect#{empty}footnote:[If the database was migrated from MySQL and uses sequence tables use `org.hibernate.dialectMariaDB102Dialect`. Please note that Hibernate selects incorrect Dialect when using MariaDB 11.]

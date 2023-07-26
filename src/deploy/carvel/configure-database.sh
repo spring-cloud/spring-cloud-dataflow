@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$DEBUG" == "true" ]; then
     echo "DEBUG: configure-database.sh $*"
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$4" = "" ]; then
-    echo "<app> <database> <url> <username/secret-name> [password/secret-username-key] [secret-password-key]"
+    echo "<app> <database> <url> <username> <password>"
+    echo " OR"
+    echo "<app> <database> <url> <secret-name> [secret-username-key] [secret-password-key]"
+    echo " - secret-username-key: key name in secret. The default is username"
+    echo " - secret-password-key: key name in secret. The default is password"
     echo "  If username / password is provided it will be assigned to the values file."
     exit 1
 fi
@@ -58,15 +62,22 @@ case $DATABASE in
     echo "Unsupported $DATABASE."
     ;;
 esac
-
 if [ "$DEBUG" == "true" ]; then
     echo "DEBUG: JDBC_DRIVER_CLASS=$JDBC_DRIVER_CLASS"
 fi
-
 if [ "$JDBC_DRIVER_CLASS" != "" ]; then
     yq ".scdf.${APP}.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
 fi
 
+if [ "$DIALECT" = "" ] && [ "$DATABASE" = "mariadb" ]; then
+    DIALECT="org.hibernate.dialect.MariaDB106Dialect"
+fi
+if [ "$DIALECT" != "" ]; then
+    if [ "$DEBUG" == "true" ]; then
+        echo "DEBUG: DIALECT=$DIALECT"
+    fi
+    yq ".scdf.${APP}.database.dialect=\"$DIALECT\"" -i ./scdf-values.yml
+fi
 if [ "$6" != "" ]; then
     SECRET_NAME=$4
     SECRET_USERNAME_KEY="$5"

@@ -118,11 +118,16 @@ spec:
                 configMapKeyRef:
                   key: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE'
                   name: 'scdf-datasource'
-            - name: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING'
+            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
               valueFrom:
                 configMapKeyRef:
-                  key: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING'
-                  name: 'scdf-datasource'
+                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+                  name: scdf-datasource
+            - name: SPRING_JPA_DATABASEPLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_JPA_DATABASEPLATFORM
+                  name: scdf-datasource
             - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED'
               value: 'true'
             - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED'

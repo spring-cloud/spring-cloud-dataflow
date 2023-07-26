@@ -180,7 +180,6 @@ cat "$YAML_PATH/skipper-deployment.yaml" | envsubst '$SKIPPER_VERSION,$DATABASE'
 
 kubectl create --namespace "$NS" -f "$YAML_PATH/skipper-svc.yaml"
 
-
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
 if [ "$USE_PRO" = "true" ]; then
