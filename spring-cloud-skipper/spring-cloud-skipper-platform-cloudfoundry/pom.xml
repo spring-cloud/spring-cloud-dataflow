@@ -9,6 +9,7 @@
 		<artifactId>spring-cloud-skipper-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
 		<version>2.11.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

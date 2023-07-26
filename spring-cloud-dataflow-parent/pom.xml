@@ -44,9 +44,15 @@
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
 		<spring-security.version>5.7.10</spring-security.version>
 		<jackson-bom.version>2.13.5</jackson-bom.version>
+		<guava.version>32.1.1-jre</guava.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-cbor</artifactId>
