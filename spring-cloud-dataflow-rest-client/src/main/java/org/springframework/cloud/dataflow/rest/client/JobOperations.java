@@ -69,7 +69,6 @@ public interface JobOperations {
 	 */
 	PagedModel<JobExecutionResource> executionListByJobName(String jobName);
 
-
 	/**
 	 * Return the {@link JobExecutionResource} for the id specified.
 	 *
