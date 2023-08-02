@@ -155,7 +155,7 @@ public class RootController {
 			root.add(unescapeTemplateVariables(linkTo(methodOn(TaskExecutionController.class).view(null,null)).withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
-			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null)).withRel("tasks/info/executions"));
+			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null, null)).withRel("tasks/info/executions"));
 			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null, null)).withRel("tasks/logs"));
 
 			if (featuresProperties.isSchedulesEnabled()) {

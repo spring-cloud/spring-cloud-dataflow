@@ -17,7 +17,13 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import javax.sql.DataSource;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -193,7 +199,20 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	@Override
 	@Transactional
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed) {
-		List<AggregateTaskExecution> tasks = this.taskExplorer.findTaskExecutionsByName(taskName, completed);
+		cleanupExecutions(actionsAsSet, taskName, completed, null);
+	}
+
+	@Override
+	@Transactional
+	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days) {
+		List<AggregateTaskExecution> tasks;
+		if (days != null) {
+			LocalDateTime localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).minusDays(days);
+			Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, completed, Date.from(instant));
+		} else {
+			tasks = this.taskExplorer.findTaskExecutions(taskName, completed);
+		}
 		final Set<AggregateTaskExecution> parentExecutions = new HashSet<>();
 		final Set<AggregateTaskExecution> childExecutions = new HashSet<>();
 		boolean removeData = actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA);
@@ -310,7 +329,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	@Override
 	public void deleteTaskExecutions(String taskName, boolean onlyCompleted) {
-		Map<String, List<AggregateTaskExecution>> tasks = this.taskExplorer.findTaskExecutionsByName(taskName, onlyCompleted)
+		Map<String, List<AggregateTaskExecution>> tasks = this.taskExplorer.findTaskExecutions(taskName, onlyCompleted)
 				.stream().collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
 		for (String schemaTarget : tasks.keySet()) {
 			Set<Long> executionIds = tasks.get(schemaTarget)

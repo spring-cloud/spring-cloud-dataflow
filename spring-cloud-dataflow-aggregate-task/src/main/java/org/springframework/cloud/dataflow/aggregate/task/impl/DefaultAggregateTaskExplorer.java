@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,8 +188,13 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed) {
-		return this.taskExecutionQueryDao.findTaskExecutionsByName(taskName, completed);
+	public List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed) {
+		return this.taskExecutionQueryDao.findTaskExecutions(taskName, completed);
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, Date endTime) {
+		return this.taskExecutionQueryDao.findTaskExecutionsBeforeEndTime(taskName, completed, endTime);
 	}
 
 	@Override

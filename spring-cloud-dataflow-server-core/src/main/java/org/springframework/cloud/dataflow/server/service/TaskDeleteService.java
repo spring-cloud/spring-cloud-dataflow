@@ -54,6 +54,15 @@ public interface TaskDeleteService {
 	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed);
 
 	/**
+	 * Clean up the resources that resuled from running the task with the given name and actions.
+	 *
+	 * @param actionsAsSet the actions
+	 * @param taskName the task name
+	 * @param completed the completion state of the task executions
+	 */
+	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days);
+
+	/**
 	 * Delete one or more Task executions.
 	 *
 	 * @param ids Collection of task execution ids to delete. Must contain at least 1 id.

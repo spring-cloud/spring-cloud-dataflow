@@ -22,6 +22,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -143,17 +144,53 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
 			+ " from AGGREGATE_TASK_EXECUTION";
 
+	private static final String GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL AND END_TIME < :endTime";
+
+	private static final String GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where END_TIME IS NOT NULL AND END_TIME < :endTime";
+
+	private static final String GET_EXECUTION_BY_NAME_BEFORE_END_TIME = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME < :endTime";
+
+	private static final String GET_EXECUTIONS_BEFORE_END_TIME = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where END_TIME < :endTime";
+
 	private static final String TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION ";
+
+	private static final String TASK_EXECUTION_COUNT_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME < :endTime";
 
 	private static final String TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName";
 
+	private static final String TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME < :endTime";
+
 	private static final String COMPLETED_TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME IS NOT NULL";
 
+	private static final String COMPLETED_TASK_EXECUTION_COUNT_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME IS NOT NULL AND END_TIME < :endTime";
+
 	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL ";
+
+	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL AND END_TIME < :endTime ";
 
 
 	private static final String RUNNING_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
@@ -281,7 +318,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed) {
+	public List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed) {
 		if(StringUtils.hasLength(taskName)) {
 			final SqlParameterSource queryParameters = new MapSqlParameterSource()
 					.addValue("taskName", taskName);
@@ -290,6 +327,20 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		} else {
 			return this.jdbcTemplate.query(completed ? GET_EXECUTIONS_COMPLETED : GET_EXECUTIONS, Collections.emptyMap(), new CompositeTaskExecutionRowMapper());
 		}
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, Date endTime) {
+		final SqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("taskName", taskName)
+				.addValue("endTime", endTime);
+		String query;
+		if (taskName.isEmpty()) {
+			query = completed ? GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME : GET_EXECUTIONS_BEFORE_END_TIME;
+		} else {
+			query = completed ? GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME : GET_EXECUTION_BY_NAME_BEFORE_END_TIME;
+		}
+		return this.jdbcTemplate.query(query, queryParameters, new CompositeTaskExecutionRowMapper());
 	}
 
 	@Override
@@ -311,6 +362,27 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
+	public long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime) {
+		Long count;
+		if (StringUtils.hasText(taskName)) {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName, Types.VARCHAR)
+					.addValue("endTime", endTime, Types.DATE);
+
+			try {
+				count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME, queryParameters, Long.class);
+			} catch (EmptyResultDataAccessException e) {
+				count = 0L;
+			}
+		} else {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("endTime", endTime, Types.DATE);
+			count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT_BEFORE_END_TIME, queryParameters, Long.class);
+		}
+		return count != null ? count : 0L;
+	}
+
+	@Override
 	public long getCompletedTaskExecutionCountByTaskName(String taskName) {
 		Long count;
 		if (StringUtils.hasText(taskName)) {
@@ -324,6 +396,27 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			}
 		} else {
 			count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT, Collections.emptyMap(), Long.class);
+		}
+		return count != null ? count : 0L;
+	}
+
+	@Override
+	public long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime) {
+		Long count;
+		if (StringUtils.hasText(taskName)) {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName, Types.VARCHAR)
+					.addValue("endTime", endTime, Types.DATE);
+
+			try {
+				count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME, queryParameters, Long.class);
+			} catch (EmptyResultDataAccessException e) {
+				count = 0L;
+			}
+		} else {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("endTime", endTime, Types.DATE);
+			count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT_AND_BEFORE_END_TIME, queryParameters, Long.class);
 		}
 		return count != null ? count : 0L;
 	}
