@@ -473,7 +473,6 @@ public class SkipperStreamDeployer implements StreamDeployer {
                 this.skipperClient.packageDelete(streamName);
             };
         } else {
-            // Stream may have package data is corrupted/missing so we attempt to delete all but the package info
             logger.info("Can not find package named '{}' - bypassing Skipper delete.", streamName);
         }
     }
