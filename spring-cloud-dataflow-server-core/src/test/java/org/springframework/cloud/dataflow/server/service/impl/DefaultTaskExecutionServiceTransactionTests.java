@@ -17,11 +17,8 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -44,9 +41,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.AuditActionType;
-import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -68,8 +62,6 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
