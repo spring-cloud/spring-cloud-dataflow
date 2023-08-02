@@ -346,9 +346,10 @@ public class TaskExecutionController {
 	public void cleanupAll(
 			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
 			@RequestParam(defaultValue = "false", name = "completed") boolean completed,
-			@RequestParam(defaultValue = "", name = "name") String taskName
+			@RequestParam(defaultValue = "", name = "name") String taskName,
+			@RequestParam(name="days", required = false) Integer days
 	) {
-		this.taskDeleteService.cleanupExecutions(new HashSet<>(Arrays.asList(actions)), taskName, completed);
+		this.taskDeleteService.cleanupExecutions(new HashSet<>(Arrays.asList(actions)), taskName, completed, days);
 	}
 
 	/**

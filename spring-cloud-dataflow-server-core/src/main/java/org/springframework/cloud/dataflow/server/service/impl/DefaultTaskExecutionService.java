@@ -17,9 +17,15 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1030,9 +1036,18 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
-		return (int) (
-			onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-				: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
-		);
+		return getAllTaskExecutionsCount(onlyCompleted, taskName, null);
+	}
+
+	@Override
+	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer days) {
+		if (days != null) {
+			Date dateBeforeDays = TaskServicesDateUtils.getDateBeforeDays(days);
+			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays)
+					: dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays));
+		} else {
+			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
+					: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
+		}
 	}
 }

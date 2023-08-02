@@ -94,4 +94,14 @@ public interface TaskExecutionService {
 	 * @since 2.8
 	 */
 	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName);
+
+	/**
+	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
+	 * @param onlyCompleted filter by completed task executions
+	 * @param taskName the task name, if null then retrieve all the tasks
+	 * @param includeTasksEndedMinDaysAgo only include tasks that have ended at least this many days ago
+	 * @return the number of executions, 0 if no data, never null
+	 * @since 2.11
+	 */
+	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer includeTasksEndedMinDaysAgo);
 }

@@ -15,7 +15,10 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
@@ -65,7 +68,17 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param completed indicator to retrieve only completed task executions.
 	 * @return a list that contains task executions.
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed);
+	List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed);
+
+	/**
+	 * Retrieves a subset of task executions by task name and execution status.
+	 *
+	 * @param taskName  the name of the task to search for in the repository.
+	 * @param endTime the time before the task ended.
+	 * @return a list that contains task executions.
+	 * @since 2.11
+	 */
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NotNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName.
@@ -76,12 +89,32 @@ public interface DataflowTaskExecutionQueryDao {
 	long getTaskExecutionCountByTaskName(String taskName);
 
 	/**
+	 * Retrieves current number of task executions for a taskName.
+	 *
+	 * @param taskName the name of the task to search for in the repository.
+	 * @param endTime the time before task ended
+	 * @return current number of task executions for the taskName.
+	 * @since 2.11
+	 */
+	long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
+
+	/**
 	 * Retrieves the number of task execution that have completed.
 	 *
 	 * @param taskName the name of the task to search
 	 * @return the number of completed task executions
 	 */
 	long getCompletedTaskExecutionCountByTaskName(String taskName);
+
+	/**
+	 * Retrieves the number of task execution that have completed.
+	 *
+	 * @param taskName the name of the task to search
+	 * @param endTime the time before the task ended
+	 * @return the number of completed task executions
+	 * @since 2.11
+	 */
+	long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName and with an endTime of
