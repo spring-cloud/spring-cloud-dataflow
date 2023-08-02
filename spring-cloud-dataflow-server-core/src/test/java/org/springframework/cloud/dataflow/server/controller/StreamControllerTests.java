@@ -1052,7 +1052,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
+		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream")));
 
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(delete("/streams/deployments/myStream")
@@ -1071,8 +1071,8 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployAllNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
-		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(Arrays.asList(new PackageMetadata()));
+		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream1")));
+		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream2")));
 
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		repository.save(new StreamDefinition("myStream2", "time | log"));
@@ -1091,6 +1091,13 @@ public class StreamControllerTests {
 		assertThat(auditRecords.get(5).getAuditOperation()).isEqualTo(AuditOperationType.STREAM);
 		assertThat(auditRecords.get(5).getAuditAction()).isEqualTo(AuditActionType.UNDEPLOY);
 	}
+
+	private PackageMetadata newPackageMetadata(String streamName) {
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName(streamName);
+		return packageMetadata;
+	}
+
 
 	@Test
 	public void testDeployWithProperties() throws Exception {

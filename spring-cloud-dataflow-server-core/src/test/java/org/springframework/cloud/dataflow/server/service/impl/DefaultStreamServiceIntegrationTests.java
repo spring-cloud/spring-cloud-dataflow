@@ -111,7 +111,9 @@ public class DefaultStreamServiceIntegrationTests {
 
 	@After
 	public void destroyStream() {
-		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Arrays.asList(new PackageMetadata()));
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName("ticktock");
+		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Arrays.asList(packageMetadata));
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}
