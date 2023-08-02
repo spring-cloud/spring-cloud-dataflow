@@ -16,15 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 
-import org.hamcrest.collection.IsMapContaining;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -33,11 +35,12 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.CoreMatchers.not;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -51,13 +54,15 @@ public class AppDeploymentRequestCreatorTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
-
+	@Autowired
+	protected PropertyResolver propertyResolver;
 	@Before
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
-				new DefaultStreamDefinitionService());
+				new DefaultStreamDefinitionService(),
+				propertyResolver);
 	}
 
 	@Test
@@ -70,22 +75,23 @@ public class AppDeploymentRequestCreatorTests {
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.timezone", "GMT+2"));
-		org.junit.Assert.assertThat(modified.getProperties(), not(IsMapContaining.hasKey("timezone")));
+		assertThat(modified.getProperties()).containsEntry("date.timezone", "GMT+2");
+		assertThat(modified.getProperties()).doesNotContainKey("timezone");
 	}
 
 	@Test
 	public void testSameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
-				.setProperty("time.format", "hh").setProperty("date.format", "yy").build("streamname");
+				.setProperty("time.format", "hh")
+				.setProperty("date.format", "yy")
+				.build("streamname");
 
 		Resource app = new ClassPathResource("/apps/included-source");
-		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
-				new HashMap<>());
+		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, Collections.emptyMap());
 
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("date.format", "yy"));
-		org.junit.Assert.assertThat(modified.getProperties(), IsMapContaining.hasEntry("time.format", "hh"));
+		assertThat(modified.getProperties()).containsEntry("date.format", "yy");
+		assertThat(modified.getProperties()).containsEntry("time.format", "hh");
 	}
 
 	@Test
@@ -115,8 +121,7 @@ public class AppDeploymentRequestCreatorTests {
 		AppDefinition modified = this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app,
 				new HashMap<>());
 
-		org.junit.Assert.assertThat(modified.getProperties(),
-				IsMapContaining.hasEntry("date.some-long-property", "yy"));
+		assertThat(modified.getProperties()).containsEntry("date.some-long-property", "yy");
 
 	}
 }

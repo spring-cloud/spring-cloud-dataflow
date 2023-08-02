@@ -42,7 +42,7 @@ public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalP
 	@Override
 	public TaskPlatform createTaskPlatform() {
 		TaskPlatform taskPlatform = super.createTaskPlatform();
-		if (taskPlatform.getLaunchers().size() == 0) {
+		if (taskPlatform.getLaunchers().isEmpty()) {
 			taskPlatform.setLaunchers(Collections.singletonList(createDefaultLauncher()));
 		}
 		return taskPlatform;
@@ -68,14 +68,13 @@ public class LocalTaskPlatformFactory extends AbstractTaskPlatformFactory<LocalP
 	private String prettyPrintLocalDeployerProperties(LocalDeployerProperties localDeployerProperties) {
 		StringBuilder builder = new StringBuilder();
 		if (localDeployerProperties.getJavaOpts() != null) {
-			builder.append("JavaOpts = [" + localDeployerProperties.getJavaOpts() + "], ");
+			builder.append("JavaOpts = [").append(localDeployerProperties.getJavaOpts()).append("], ");
 		}
-		builder.append("ShutdownTimeout = [" + localDeployerProperties.getShutdownTimeout() + "], ");
-		builder.append("EnvVarsToInherit = ["
-				+ StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit()) + "], ");
-		builder.append("JavaCmd = [" + localDeployerProperties.getJavaCmd() + "], ");
-		builder.append("WorkingDirectoriesRoot = [" + localDeployerProperties.getWorkingDirectoriesRoot() + "], ");
-		builder.append("DeleteFilesOnExit = [" + localDeployerProperties.isDeleteFilesOnExit() + "]");
+		builder.append("ShutdownTimeout = [").append(localDeployerProperties.getShutdownTimeout()).append("], ");
+		builder.append("EnvVarsToInherit = [").append(StringUtils.arrayToCommaDelimitedString(localDeployerProperties.getEnvVarsToInherit())).append("], ");
+		builder.append("JavaCmd = [").append(localDeployerProperties.getJavaCmd()).append("], ");
+		builder.append("WorkingDirectoriesRoot = [").append(localDeployerProperties.getWorkingDirectoriesRoot()).append("], ");
+		builder.append("DeleteFilesOnExit = [").append(localDeployerProperties.isDeleteFilesOnExit()).append("]");
 		return builder.toString();
 	}
 }

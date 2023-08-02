@@ -22,7 +22,7 @@
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.14</spring-boot.version>
 		<spring-cloud.version>2021.0.8</spring-cloud.version>
-		<spring-shell.version>2.1.5</spring-shell.version>
+		<spring-shell.version>2.1.12</spring-shell.version>
 		<junit.version>4.13.1</junit.version>
 		<commons-io.version>2.7</commons-io.version>
 		<commons-text.version>1.10.0</commons-text.version>

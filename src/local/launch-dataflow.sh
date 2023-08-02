@@ -13,7 +13,6 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
 
 PLATFORM_TYPE=local
-
 COMPOSE_PROFILE=
 SKIPPER_CLI=true
 USE_PRO=false
@@ -49,6 +48,7 @@ wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q
 echo "Waiting for MariaDB"
 wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q http://localhost:3306
 
+JAVA_VERSION=$(java -version | grep -oP '(\".*?\")')
 if [ "$SKIPPER_CLI" == "true" ]; then
     echo "java -jar skipper"
     java -jar $SCDIR/../../spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.11.0-SNAPSHOT.jar \

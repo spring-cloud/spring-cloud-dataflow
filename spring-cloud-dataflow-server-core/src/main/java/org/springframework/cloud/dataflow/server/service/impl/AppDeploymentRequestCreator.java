@@ -35,19 +35,24 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Create the list of {@link AppDeploymentRequest}s from a {@link StreamDefinition} and
  * deployment properties map.
+ *
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Patrick Peralta
@@ -69,10 +74,16 @@ public class AppDeploymentRequestCreator {
 
 	private final StreamDefinitionService streamDefinitionService;
 
-	public AppDeploymentRequestCreator(AppRegistryService appRegistry,
+	private final PropertyResolver propertyResolver;
+
+	public AppDeploymentRequestCreator(
+			AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver metadataResolver,
-			StreamDefinitionService streamDefinitionService) {
+			StreamDefinitionService streamDefinitionService,
+			PropertyResolver propertyResolver
+	) {
+		Assert.notNull(propertyResolver, "propertyResolver must not be null");
 		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
@@ -81,15 +92,19 @@ public class AppDeploymentRequestCreator {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.visibleProperties = new VisibleProperties(metadataResolver);
 		this.streamDefinitionService = streamDefinitionService;
+		this.propertyResolver = propertyResolver;
 	}
 
-	public List<AppDeploymentRequest> createUpdateRequests(StreamDefinition streamDefinition,
-			Map<String, String> updateProperties) {
+	public List<AppDeploymentRequest> createUpdateRequests(
+			StreamDefinition streamDefinition,
+			Map<String, String> updateProperties
+	) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		if (updateProperties == null) {
 			updateProperties = Collections.emptyMap();
 		}
-		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(
+				streamDefinition));
 		while (iterator.hasNext()) {
 			StreamAppDefinition currentApp = iterator.next();
 			ApplicationType type = currentApp.getApplicationType();
@@ -113,14 +128,74 @@ public class AppDeploymentRequestCreator {
 					this.visibleProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
 
 			expandedAppUpdateTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, type.toString());
-			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
+			addBootVersion(currentApp.getName(), appRegistration.getBootVersion(), deployerDeploymentProperties, commandlineArguments);
 
+
+			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
 			AppDeploymentRequest request = new AppDeploymentRequest(appDefinition, appResource,
 					deployerDeploymentProperties, commandlineArguments);
 			logger.debug("createUpdateRequests:request:{}", request);
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
+	}
+
+	private void addBootVersion(
+			String name,
+			AppBootSchemaVersion bootVersion,
+			Map<String, String> deployerDeploymentProperties,
+			List<String> commandlineArguments
+	) {
+		addApplicationProperty(name, "spring.cloud.deployer.bootVersion", bootVersion.getBootVersion(), deployerDeploymentProperties, commandlineArguments);
+	}
+
+	private void addDefaultDeployerProperties(
+			String taskName,
+			String platformType,
+			String bootVersion,
+			Map<String, String> deploymentProperties
+	) {
+		switch (platformType) {
+			case TaskPlatformFactory.LOCAL_PLATFORM_TYPE: {
+				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
+				if (StringUtils.hasText(javaHome)) {
+					String property = "deployer." + taskName + ".spring.cloud.deployer.local.javaHomePath." + bootVersion;
+					deploymentProperties.put(property, javaHome);
+					logger.debug("added:{}={}", property, javaHome);
+				}
+				break;
+			}
+			case TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE: {
+				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
+				if (StringUtils.hasText(buildpack)) {
+					String property = "deployer." + taskName + ".spring.cloud.deployer.cloudfoundry.buildpack";
+					deploymentProperties.put(property, buildpack);
+					logger.debug("added:{}={}", property, buildpack);
+				}
+				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
+				if (StringUtils.hasText(buildpacks)) {
+					String property = "deployer." + taskName + ".spring.cloud.deployer.cloudfoundry.buildpacks";
+					deploymentProperties.put(property, buildpacks);
+					logger.debug("added:{}={}", property, buildpacks);
+				}
+				break;
+			}
+		}
+	}
+
+	private static void addApplicationProperty(
+			String name,
+			String key,
+			String value,
+			Map<String, String> deployerDeploymentProperties,
+			List<String> commandlineArguments
+	) {
+		String propertyName = "app." + name + "." + key;
+		deployerDeploymentProperties.put(propertyName, value);
+		String arg = "--" + propertyName + "=" + value;
+		if (!commandlineArguments.contains(arg)) {
+			commandlineArguments.add(arg);
+		}
 	}
 
 	private String extractAppVersionProperty(StreamAppDefinition appDefinition, Map<String, String> updateProperties) {
@@ -136,18 +211,22 @@ public class AppDeploymentRequestCreator {
 	/**
 	 * Create a list of {@link AppDeploymentRequest}s from the provided
 	 * {@link StreamDefinition} and map of deployment properties.
-	 * @param streamDefinition the stream definition
+	 *
+	 * @param streamDefinition           the stream definition
 	 * @param streamDeploymentProperties the stream's deployment properties
-	 * @param platformType the platform types to include
+	 * @param platformType               the platform types to include
 	 * @return list of AppDeploymentRequests
 	 */
-	public List<AppDeploymentRequest> createRequests(StreamDefinition streamDefinition,
-			Map<String, String> streamDeploymentProperties, String platformType) {
+	public List<AppDeploymentRequest> createRequests(
+			StreamDefinition streamDefinition,
+			Map<String, String> streamDeploymentProperties, String platformType
+	) {
 		List<AppDeploymentRequest> appDeploymentRequests = new ArrayList<>();
 		if (streamDeploymentProperties == null) {
 			streamDeploymentProperties = Collections.emptyMap();
 		}
-		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(
+				streamDefinition));
 		int nextAppCount = 0;
 		boolean isDownStreamAppPartitioned = false;
 		while (iterator.hasNext()) {
@@ -161,13 +240,15 @@ public class AppDeploymentRequestCreator {
 					.extractAndQualifyDeployerProperties(streamDeploymentProperties, currentApp.getName());
 			deployerDeploymentProperties.put(AppDeployer.GROUP_PROPERTY_KEY, currentApp.getStreamName());
 
+
 			String version = extractAppVersionProperty(currentApp, streamDeploymentProperties);
 			List<String> commandlineArguments = new ArrayList<>();
 			if (version != null) {
 				// TODO ensure new version as a resource exists and load that AppRegistration
 				commandlineArguments.add(version);
 			}
-
+			addDefaultDeployerProperties(currentApp.getName(), platformType, appRegistration.getBootVersion().getBootVersion(), deployerDeploymentProperties);
+			addBootVersion(currentApp.getName(), appRegistration.getBootVersion(), deployerDeploymentProperties, commandlineArguments);
 			// Set instance count property
 			if (deployerDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
 				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT,
@@ -240,14 +321,16 @@ public class AppDeploymentRequestCreator {
 	 * Extract and return a map of properties for a specific app within the deployment
 	 * properties of a stream.
 	 *
-	 * @param appDefinition the {@link StreamAppDefinition} for which to return a map of
-	 * properties
+	 * @param appDefinition              the {@link StreamAppDefinition} for which to return a map of
+	 *                                   properties
 	 * @param streamDeploymentProperties deployment properties for the stream that the app is
-	 * defined in
+	 *                                   defined in
 	 * @return map of properties for an app
 	 */
-	/* default */ Map<String, String> extractAppProperties(StreamAppDefinition appDefinition,
-			Map<String, String> streamDeploymentProperties) {
+	/* default */ Map<String, String> extractAppProperties(
+			StreamAppDefinition appDefinition,
+			Map<String, String> streamDeploymentProperties
+	) {
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		appDeploymentProperties.putAll(this.commonApplicationProperties.getStream());
 		// add properties with wild card prefix
@@ -270,15 +353,18 @@ public class AppDeploymentRequestCreator {
 	 * Return {@code true} if the upstream app (the app that appears before the provided app)
 	 * contains partition related properties.
 	 *
-	 * @param streamDefinition stream for the app
-	 * @param currentApp app for which to determine if the upstream app has partition
-	 * properties
+	 * @param streamDefinition           stream for the app
+	 * @param currentApp                 app for which to determine if the upstream app has partition
+	 *                                   properties
 	 * @param streamDeploymentProperties deployment properties for the stream
 	 * @return true if the upstream app has partition properties
 	 */
-	/* default */ boolean upstreamAppHasPartitionInfo(StreamDefinition streamDefinition, StreamAppDefinition currentApp,
-			Map<String, String> streamDeploymentProperties) {
-		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(streamDefinition));
+	/* default */ boolean upstreamAppHasPartitionInfo(
+			StreamDefinition streamDefinition, StreamAppDefinition currentApp,
+			Map<String, String> streamDeploymentProperties
+	) {
+		Iterator<StreamAppDefinition> iterator = StreamDefinitionServiceUtils.getDeploymentOrderIterator(this.streamDefinitionService.getAppDefinitions(
+				streamDefinition));
 		while (iterator.hasNext()) {
 			StreamAppDefinition app = iterator.next();
 			if (app.equals(currentApp) && iterator.hasNext()) {
@@ -292,22 +378,22 @@ public class AppDeploymentRequestCreator {
 		return false;
 	}
 
-	/* default */ void parseAndPopulateProperties(Map<String, String> streamDeploymentProperties,
+	/* default */ void parseAndPopulateProperties(
+			Map<String, String> streamDeploymentProperties,
 			Map<String, String> appDeploymentProperties, String producerPropertyPrefix,
 			String consumerPropertyPrefix,
-			String appPrefix) {
+			String appPrefix
+	) {
 		for (Map.Entry<String, String> entry : streamDeploymentProperties.entrySet()) {
 			if (entry.getKey().startsWith(appPrefix)) {
 				if (entry.getKey().startsWith(producerPropertyPrefix)) {
 					appDeploymentProperties.put(BindingPropertyKeys.OUTPUT_BINDING_KEY_PREFIX
 							+ entry.getKey().substring(appPrefix.length()), entry.getValue());
-				}
-				else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
+				} else if (entry.getKey().startsWith(consumerPropertyPrefix)) {
 					appDeploymentProperties.put(
 							BindingPropertyKeys.INPUT_BINDING_KEY_PREFIX + entry.getKey().substring(appPrefix.length()),
 							entry.getValue());
-				}
-				else {
+				} else {
 					appDeploymentProperties.put(entry.getKey().substring(appPrefix.length()), entry.getValue());
 				}
 			}
@@ -319,8 +405,10 @@ public class AppDeploymentRequestCreator {
 	 * merged and short form parameters have been expanded to their long form (amongst the
 	 * included supported properties of the app) if applicable.
 	 */
-	/* default */ AppDefinition mergeAndExpandAppProperties(StreamAppDefinition original, Resource metadataResource,
-			Map<String, String> appDeployTimeProperties) {
+	/* default */ AppDefinition mergeAndExpandAppProperties(
+			StreamAppDefinition original, Resource metadataResource,
+			Map<String, String> appDeployTimeProperties
+	) {
 		Map<String, String> merged = new HashMap<>(original.getProperties());
 		merged.putAll(appDeployTimeProperties);
 		merged = this.visibleProperties.qualifyProperties(merged, metadataResource);
@@ -331,9 +419,9 @@ public class AppDeploymentRequestCreator {
 	/**
 	 * Add app properties for producing partitioned data to the provided properties.
 	 *
-	 * @param properties properties to update
+	 * @param properties        properties to update
 	 * @param nextInstanceCount the number of instances for the next (downstream) app in the
-	 * stream
+	 *                          stream
 	 */
 	/* default */ void updateProducerPartitionProperties(Map<String, String> properties, int nextInstanceCount) {
 		properties.put(BindingPropertyKeys.OUTPUT_PARTITION_COUNT, String.valueOf(nextInstanceCount));
@@ -367,13 +455,15 @@ public class AppDeploymentRequestCreator {
 	 * either by the deployment properties for the app or whether the previous (upstream) app
 	 * is publishing partitioned data.
 	 *
-	 * @param appDeploymentProperties deployment properties for the app
+	 * @param appDeploymentProperties      deployment properties for the app
 	 * @param upstreamAppSupportsPartition if true, previous (upstream) app in the stream
-	 * publishes partitioned data
+	 *                                     publishes partitioned data
 	 * @return true if the app consumes partitioned data
 	 */
-	/* default */ boolean isPartitionedConsumer(Map<String, String> appDeploymentProperties,
-			boolean upstreamAppSupportsPartition) {
+	/* default */ boolean isPartitionedConsumer(
+			Map<String, String> appDeploymentProperties,
+			boolean upstreamAppSupportsPartition
+	) {
 		return upstreamAppSupportsPartition
 				|| (appDeploymentProperties.containsKey(BindingPropertyKeys.INPUT_PARTITIONED)
 				&& appDeploymentProperties.get(BindingPropertyKeys.INPUT_PARTITIONED).equalsIgnoreCase("true"));

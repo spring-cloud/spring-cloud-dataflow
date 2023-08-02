@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.config.features;
 
-import javax.sql.DataSource;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,7 @@ import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
+import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
@@ -49,7 +51,6 @@ import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitio
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
@@ -74,6 +75,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -134,7 +136,8 @@ public class TaskConfiguration {
 
 	@Bean
 	public DeployerConfigurationMetadataResolver deployerConfigurationMetadataResolver(
-			TaskConfigurationProperties taskConfigurationProperties) {
+			TaskConfigurationProperties taskConfigurationProperties
+	) {
 		return new DeployerConfigurationMetadataResolver(taskConfigurationProperties.getDeployerProperties());
 	}
 
@@ -142,7 +145,8 @@ public class TaskConfiguration {
 	public LauncherInitializationService launcherInitializationService(
 			LauncherRepository launcherRepository,
 			List<TaskPlatform> platforms,
-			DeployerConfigurationMetadataResolver resolver) {
+			DeployerConfigurationMetadataResolver resolver
+	) {
 		return new LauncherInitializationService(launcherRepository, platforms, resolver);
 	}
 
@@ -156,8 +160,10 @@ public class TaskConfiguration {
 	 */
 	@Profile({"local", "default"})
 	@Bean
-	public TaskPlatform localTaskPlatform(LocalPlatformProperties localPlatformProperties,
-										  @Nullable Scheduler localScheduler) {
+	public TaskPlatform localTaskPlatform(
+			LocalPlatformProperties localPlatformProperties,
+			@Nullable Scheduler localScheduler
+	) {
 		TaskPlatform taskPlatform = new LocalTaskPlatformFactory(localPlatformProperties, localScheduler)
 				.createTaskPlatform();
 		taskPlatform.setPrimary(true);
@@ -180,8 +186,10 @@ public class TaskConfiguration {
 	}
 
 	@Bean
-	public TaskSaveService saveTaskService(TaskDefinitionRepository taskDefinitionRepository,
-										   AuditRecordService auditRecordService, AppRegistryService registry) {
+	public TaskSaveService saveTaskService(
+			TaskDefinitionRepository taskDefinitionRepository,
+			AuditRecordService auditRecordService, AppRegistryService registry
+	) {
 		return new DefaultTaskSaveService(taskDefinitionRepository, auditRecordService, registry);
 	}
 
@@ -189,14 +197,16 @@ public class TaskConfiguration {
 	public TaskExecutionCreationService taskExecutionRepositoryService(
 			TaskRepositoryContainer taskRepositoryContainer,
 			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader) {
+			TaskDefinitionReader taskDefinitionReader
+	) {
 		return new DefaultTaskExecutionRepositoryService(taskRepositoryContainer, aggregateExecutionSupport, taskDefinitionReader);
 	}
 
 	@Bean
 	public TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator(
 			CommonApplicationProperties commonApplicationProperties,
-			ApplicationConfigurationMetadataResolver metadataResolver) {
+			ApplicationConfigurationMetadataResolver metadataResolver
+	) {
 		return new TaskAppDeploymentRequestCreator(commonApplicationProperties,
 				metadataResolver, dataflowServerUri);
 	}
@@ -205,6 +215,7 @@ public class TaskConfiguration {
 	public static class TaskExecutionServiceConfig {
 		@Bean
 		public TaskExecutionService taskService(
+				PropertyResolver propertyResolver,
 				TaskConfigurationProperties taskConfigurationProperties,
 				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
 				LauncherRepository launcherRepository,
@@ -222,8 +233,10 @@ public class TaskConfiguration {
 				TaskSaveService taskSaveService,
 				AggregateExecutionSupport aggregateExecutionSupport,
 				TaskDefinitionRepository taskDefinitionRepository,
-				TaskDefinitionReader taskDefinitionReader) {
+				TaskDefinitionReader taskDefinitionReader
+		) {
 			DefaultTaskExecutionService defaultTaskExecutionService = new DefaultTaskExecutionService(
+					propertyResolver,
 					launcherRepository,
 					auditRecordService,
 					taskRepositoryContainer,
@@ -241,8 +254,7 @@ public class TaskConfiguration {
 					taskSaveService,
 					taskConfigurationProperties,
 					aggregateExecutionSupport,
-					composedTaskRunnerConfigurationProperties
-			);
+					composedTaskRunnerConfigurationProperties);
 			defaultTaskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
 			return defaultTaskExecutionService;
 		}

@@ -105,6 +105,7 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -340,6 +341,7 @@ public class JobDependencies {
 	@Bean
 	@ConditionalOnMissingBean
 	public TaskExecutionService taskService(
+			ApplicationContext applicationContext,
 			LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
 			TaskRepositoryContainer taskRepositoryContainer,
@@ -360,7 +362,9 @@ public class JobDependencies {
 			TaskDefinitionReader taskDefinitionReader
 	) {
 		return new DefaultTaskExecutionService(
-				launcherRepository, auditRecordService,
+				applicationContext.getEnvironment(),
+				launcherRepository,
+				auditRecordService,
 				taskRepositoryContainer,
 				taskExecutionInfoService,
 				taskDeploymentRepository,

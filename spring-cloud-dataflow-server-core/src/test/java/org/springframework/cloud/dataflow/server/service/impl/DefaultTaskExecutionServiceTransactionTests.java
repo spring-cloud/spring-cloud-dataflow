@@ -36,7 +36,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -48,16 +52,12 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -66,6 +66,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,8 +87,8 @@ import static org.mockito.Mockito.when;
  * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class DefaultTaskExecutionServiceTransactionTests {
@@ -155,6 +156,9 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@Before
 	public void setupMocks() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
@@ -162,6 +166,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		this.taskDefinitionRepository.findAll();
 		this.transactionTaskService = new DefaultTaskExecutionService(
+				applicationContext.getEnvironment(),
 				launcherRepository,
 				auditRecordService,
 				taskRepositoryContainer,
@@ -178,7 +183,8 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				mock(OAuth2TokenUtilsService.class),
 				taskSaveService,
 				taskConfigurationProperties,
-				aggregateExecutionSupport
+				aggregateExecutionSupport,
+				null
 		);
 	}
 
@@ -194,7 +200,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	private static class TaskLauncherStub implements TaskLauncher {
 		private String result = "0";
 
-		private DataSource dataSource;
+		private final DataSource dataSource;
 
 		private TaskLauncherStub(DataSource dataSource) {
 			this.dataSource = dataSource;
@@ -249,35 +255,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 
 		public String getResult() {
 			return result;
-		}
-	}
-
-	private static class AuditRecordServiceStub implements AuditRecordService {
-
-		@Override
-		public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, String data, String platformName) {
-			return null;
-		}
-
-		@Override
-		public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, Map<String, Object> data, String platformName) {
-			try {
-				Thread.sleep(1000);
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(Pageable pageable, AuditActionType[] actions, AuditOperationType[] operations, Instant fromDate, Instant toDate) {
-			return null;
-		}
-
-		@Override
-		public Optional<AuditRecord> findById(Long id) {
-			return Optional.empty();
 		}
 	}
 

@@ -27,6 +27,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -35,12 +37,15 @@ import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationPr
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ResourceLoader;
 
 /**
@@ -72,12 +77,28 @@ public class SchedulerConfiguration {
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,
 			AuditRecordService auditRecordService,
+			AggregateExecutionSupport aggregateExecutionSupport,
+			TaskDefinitionReader taskDefinitionReader,
+			TaskExecutionInfoService taskExecutionInfoService,
+			PropertyResolver propertyResolver,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
 		return new DefaultSchedulerService(commonApplicationProperties,
-				taskPlatforms, taskDefinitionRepository, registry, resourceLoader,
-				taskConfigurationProperties, dataSourceProperties,
-				this.dataflowServerUri, metaDataResolver, schedulerServiceProperties, auditRecordService,
-				composedTaskRunnerConfigurationProperties);
+				taskPlatforms,
+				taskDefinitionRepository,
+				registry,
+				resourceLoader,
+				taskConfigurationProperties,
+				dataSourceProperties,
+				this.dataflowServerUri,
+				metaDataResolver,
+				schedulerServiceProperties,
+				auditRecordService,
+				aggregateExecutionSupport,
+				taskDefinitionReader,
+				taskExecutionInfoService,
+				propertyResolver,
+				composedTaskRunnerConfigurationProperties
+		);
 	}
 
 	public static class SchedulerConfigurationPropertyChecker extends AllNestedConditions {
