@@ -232,7 +232,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		if (taskNode.isComposed()) {
 			taskDefinition = new TaskDefinition(taskDefinition.getName(), TaskServiceUtils.createComposedTaskDefinition(taskNode.toExecutableDSL()));
 			Map<String, String> establishedComposedTaskProperties = TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties, taskNode);
-			taskDeploymentProperties.clear();
 			taskDeploymentProperties.putAll(establishedComposedTaskProperties);
 			TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, this.composedTaskRunnerConfigurationProperties);
 			try {
@@ -310,6 +309,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				commandLineArgs,
 				scheduleName,
 				getTaskResource(taskDefinitionName));
+
 		launcher.getScheduler().schedule(scheduleRequest);
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, AuditActionType.CREATE,
