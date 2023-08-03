@@ -34,7 +34,7 @@ import org.springframework.test.context.TestPropertySource;
 public class MariaDBSmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:11");
+		container = new MariaDBContainer<>("mariadb:10.4");
 		container.start();
 	}
 }

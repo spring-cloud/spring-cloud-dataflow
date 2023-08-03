@@ -21,7 +21,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    image: mariadb:11
+    image: mariadb:10.6
     container_name: dataflow-mariadb
     environment:
       MARIADB_DATABASE: dataflow
@@ -68,6 +68,7 @@ services:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
@@ -118,6 +119,7 @@ services:
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20190
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/dataflow
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver

@@ -11,12 +11,16 @@ function usage_msg() {
 
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
-
-PLATFORM_TYPE=local
+PROJECT_DIR=$(realpath "$SCDIR/../..")
+if [ "$DATAFLOW_VERSION" = "" ]; then
+    DATAFLOW_VERSION=2.11.0-SNAPSHOT
+fi
+export PLATFORM_TYPE=local
 COMPOSE_PROFILE=
 SKIPPER_CLI=true
 USE_PRO=false
 START_DATAFLOW=true
+NO_SKIPPER=false
 while [ "$1" != "" ]; do
     case $1 in
     "--skipper-compose")
@@ -26,6 +30,7 @@ while [ "$1" != "" ]; do
     "--no-skipper")
         COMPOSE_PROFILE=
         SKIPPER_CLI=false
+        NO_SKIPPER=true
         ;;
     "--pro")
         USE_PRO=true
@@ -48,14 +53,15 @@ wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q
 echo "Waiting for MariaDB"
 wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q http://localhost:3306
 
-JAVA_VERSION=$(java -version | grep -oP '(\".*?\")')
-if [ "$SKIPPER_CLI" == "true" ]; then
+if [ "$SKIPPER_CLI" = "true" ]; then
     echo "java -jar skipper"
-    java -jar $SCDIR/../../spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server-2.11.0-SNAPSHOT.jar \
+    java -jar $PROJECT_DIR/spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server-$DATAFLOW_VERSION.jar \
         --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
         --spring.datasource.username=spring \
         --spring.datasource.password=spring \
-        --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver &
+        --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver \
+        --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect &
+    echo "$!" > skipper.pid
 fi
 if [ "$COMPOSE_PROFILE" == "skipper" ] || [ "$SKIPPER_CLI" == "true" ]; then
     echo "Waiting for Skipper"
@@ -63,21 +69,33 @@ if [ "$COMPOSE_PROFILE" == "skipper" ] || [ "$SKIPPER_CLI" == "true" ]; then
     echo "Skipper running"
 fi
 
-read -p "Press any key to launch Spring Cloud Data Flow..."
-if [ "$START_DATAFLOW" == "true" ]; then
-    if [ "$USE_PRO" == "true" ]; then
-        java -jar $SCDIR/../../../scdf-pro/scdf-pro-server/target/scdf-pro-server-1.6.0-SNAPSHOT.jar \
-            --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
-            --spring.datasource.username=spring \
-            --spring.datasource.password=spring \
-            --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-    else
-        java -jar $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.11.0-SNAPSHOT.jar \
-            --spring.datasource.url='jdbc:mariadb://localhost:3306/dataflow' \
-            --spring.datasource.username=spring \
-            --spring.datasource.password=spring \
-            --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-    fi
+if [ "$NO_SKIPPER" = "true" ]; then
+    DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.streams-enabled=false"
 else
-    echo "You may start $(realpath $SCDIR/../../spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-2.11.0-SNAPSHOT.jar)"
+    DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.streams-enabled=true"
+fi
+if [ "$NO_TASKS" = "true" ]; then
+    DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.tasks-enabled=false"
+else
+    DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.tasks-enabled=true"
+fi
+if [ "$USE_PRO" == "true" ]; then
+    if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
+        DATAFLOW_PRO_VERSION=1.6.0-SNAPSHOT
+    fi
+    SCDF_JAR="$(realpath $PROJECT_DIR/../scdf-pro/scdf-pro-server/target/scdf-pro-server-$DATAFLOW_PRO_VERSION.jar)"
+
+else
+    SCDF_JAR="$(realpath $PROJECT_DIR/spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-$DATAFLOW_VERSION.jar)"
+fi
+if [[ "$DATAFLOW_ARGS" != *"--spring.datasource."* ]]; then
+    DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.datasource.url=jdbc:mariadb://localhost:3306/dataflow --spring.datasource.username=spring --spring.datasource.password=spring --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect"
+fi
+if [ "$START_DATAFLOW" == "true" ]; then
+    echo "launching $SCDF_JAR with $DATAFLOW_ARGS"
+    read -p "Press any key to launch Spring Cloud Data Flow..."
+    java -jar "$SCDF_JAR" $DATAFLOW_ARGS &
+    echo "$!" > dataflow.pid
+else
+    echo "You may execute: java -jar $SCDF_JAR $DATAFLOW_ARGS"
 fi

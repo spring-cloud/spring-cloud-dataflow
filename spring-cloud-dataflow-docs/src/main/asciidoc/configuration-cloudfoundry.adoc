@@ -296,6 +296,7 @@ cf set-env SPRING_DATASOURCE_URL '${vcap.services.postgres.credentials.jdbcUrl}'
 cf set-env SPRING_DATASOURCE_USERNAME '${vcap.services.postgres.credentials.username}'
 cf set-env SPRING_DATASOURCE_PASSWORD '${vcap.services.postgres.credentials.password}'
 cf set-env SPRING_DATASOURCE_DRIVER_CLASS_NAME 'org.mariadb.jdbc.Driver'
+cf set-env SPRING_JPA_DATABASE_PLATFORM 'org.hibernate.dialect.MariaDB106Dialect'
 ----
 
 

@@ -63,7 +63,7 @@ SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:3306/mydb
 SPRING_DATASOURCE_USERNAME=user
 SPRING_DATASOURCE_PASSWORD=pass
 SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
-
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar
 ----
 

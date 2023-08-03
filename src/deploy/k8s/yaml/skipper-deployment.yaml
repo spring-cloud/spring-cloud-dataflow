@@ -85,6 +85,11 @@ spec:
               configMapKeyRef:
                 key: SPRING_DATASOURCE_URL
                 name: scdf-datasource
+          - name: SPRING_JPA_DATABASE_PLATFORM
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_JPA_DATABASE_PLATFORM
+                name: scdf-datasource
           - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
             valueFrom:
               configMapKeyRef:

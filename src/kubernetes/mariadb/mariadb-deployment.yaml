@@ -15,7 +15,7 @@ spec:
         app: mariadb
     spec:
       containers:
-      - image: mariadb:11
+      - image: mariadb:10.4
         imagePullPolicy: IfNotPresent
         name: mariadb
         env:
