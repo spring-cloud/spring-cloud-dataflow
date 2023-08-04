@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
  * Basic database schema and JPA tests for MySQL 8 or later.
@@ -26,7 +27,7 @@ import org.testcontainers.containers.MySQLContainer;
 public class MySQL8SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MySQLContainer<>("mysql:8");
+		container = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
 		container.start();
 	}
 }

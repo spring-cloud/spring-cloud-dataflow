@@ -28,7 +28,7 @@ import org.testcontainers.utility.DockerImageName;
 public class PostgreSQLSmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:11"));
+		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14"));
 		container.start();
 	}
 }

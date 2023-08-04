@@ -26,9 +26,12 @@ import org.testcontainers.utility.DockerImageName;
  * @author Corneil du Plessis
  */
 public class SqlServerSmokeTest extends AbstractSmokeTest {
+	@SuppressWarnings("resource")
 	@BeforeAll
 	static void startContainer() {
-		container = new MSSQLServerContainer<>(DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag(MSSQLServerContainer.DEFAULT_TAG)).acceptLicense();
+		container = new MSSQLServerContainer<>(
+			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
+		).acceptLicense();
 		container.start();
 	}
 }

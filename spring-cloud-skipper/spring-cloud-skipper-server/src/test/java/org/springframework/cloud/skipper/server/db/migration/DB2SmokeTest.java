@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.Db2Container;
+import org.testcontainers.utility.DockerImageName;
 
 
 /**
@@ -27,7 +28,9 @@ import org.testcontainers.containers.Db2Container;
 public class DB2SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new Db2Container().acceptLicense();
+		container = new Db2Container(
+			DockerImageName.parse("ibmcom/db2").withTag("11.5.8.0")
+		).acceptLicense();
 		container.start();
 	}
 }

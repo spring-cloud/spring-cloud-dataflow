@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import java.util.Collections;
-import java.util.Map;
 
+import javax.persistence.EntityManagerFactory;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -36,28 +36,40 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfigurati
 import org.springframework.cloud.skipper.server.EnableSkipperServer;
 import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Provides for testing some basic database schema and JPA tests to catch potential issues with specific databases early.
  *
  * @author Corneil du Plessis
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
+@ActiveProfiles({"local", "repo-test"})
 @TestPropertySource(properties = {
-		"spring.jpa.hibernate.ddl-auto=validate"
+	"spring.jpa.hibernate.ddl-auto=validate",
+	"logging.level.org.springframework.cloud=info",
+	"logging.level.org.hibernate=debug"
 })
 public abstract class AbstractSmokeTest {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
 
 	protected static JdbcDatabaseContainer<?> container;
+
 	@Autowired
 	AppDeployerDataRepository appDeployerDataRepository;
+
+	@Autowired
+	Environment environment;
+
+	@Autowired
+	EntityManagerFactory entityManagerFactory;
+
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", container::getJdbcUrl);
@@ -65,6 +77,7 @@ public abstract class AbstractSmokeTest {
 		registry.add("spring.datasource.password", container::getPassword);
 		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
 	}
+
 
 	@Test
 	public void testStart() {
@@ -80,10 +93,10 @@ public abstract class AbstractSmokeTest {
 	}
 
 	@SpringBootApplication(exclude = {CloudFoundryDeployerAutoConfiguration.class,
-			LocalDeployerAutoConfiguration.class,
-			KubernetesAutoConfiguration.class,
-			SessionAutoConfiguration.class,
-			CommonSecurityAutoConfiguration.class
+		LocalDeployerAutoConfiguration.class,
+		KubernetesAutoConfiguration.class,
+		SessionAutoConfiguration.class,
+		CommonSecurityAutoConfiguration.class
 	})
 	@EnableSkipperServer
 	public static class LocalTestSkipperServer {

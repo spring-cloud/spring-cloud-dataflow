@@ -45,6 +45,8 @@
 
 		<jmockit.version>1.24</jmockit.version>
 
+		<testcontainers.version>1.17.6</testcontainers.version>
+
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
@@ -211,6 +213,13 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${jmockit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

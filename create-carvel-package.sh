@@ -38,27 +38,35 @@ echo "Project Version=$PACKAGE_VERSION"
 echo "Data Flow Version=$DATAFLOW_VERSION"
 echo "Skipper Version=$SKIPPER_VERSION"
 echo "Build Type=$SCDF_TYPE"
+
+pushd src/carvel || exit
+npm install
+npm ci
+npm run format-check
+popd || exit
+
 source "$SCDIR/.github/actions/build-package-bundle/build-package-bundle.sh"
 
-if [ "$REGISTRY" = "" ]; then
-    REGISTRY=springcloud
+if [ "$1" != "no-push" ]; then
+    if [ "$REGISTRY" = "" ]; then
+        REGISTRY=springcloud
+    fi
+
+    echo "Bundle path:$PACKAGE_BUNDLE_GENERATED"
+    REPOSITORY="$REGISTRY/scdf-$SCDF_TYPE-package"
+
+    imgpkg push --bundle "$REPOSITORY:$PACKAGE_VERSION" --file "$PACKAGE_BUNDLE_GENERATED" --registry-username "$DOCKER_HUB_USERNAME" --registry-password "$DOCKER_HUB_PASSWORD"
+    docker pull "$REPOSITORY:$PACKAGE_VERSION"
+
+    export REPO_BUNDLE_TEMPLATE="src/carvel/templates/bundle/repo"
+    if [ "$PACKAGE_BUNDLE_REPOSITORY" = "" ]; then
+        export PACKAGE_BUNDLE_REPOSITORY="$REPOSITORY"
+    fi
+    source "$SCDIR/.github/actions/build-repository-bundle/build-repository-bundle.sh"
+
+    echo "Repository path: $REPO_BUNDLE_GENERATED"
+    REPOSITORY="$REGISTRY/scdf-$SCDF_TYPE-repo"
+    imgpkg push --bundle "$REPOSITORY:$PACKAGE_VERSION" --file "$REPO_BUNDLE_GENERATED" --registry-username "$DOCKER_HUB_USERNAME" --registry-password "$DOCKER_HUB_PASSWORD"
+    docker pull "$REPOSITORY:$PACKAGE_VERSION"
 fi
-
-echo "Bundle path:$PACKAGE_BUNDLE_GENERATED"
-REPOSITORY="$REGISTRY/scdf-$SCDF_TYPE-package"
-
-imgpkg push --bundle "$REPOSITORY:$PACKAGE_VERSION" --file "$PACKAGE_BUNDLE_GENERATED" --registry-username "$DOCKER_HUB_USERNAME" --registry-password "$DOCKER_HUB_PASSWORD"
-docker pull "$REPOSITORY:$PACKAGE_VERSION"
-
-export REPO_BUNDLE_TEMPLATE="src/carvel/templates/bundle/repo"
-if [ "$PACKAGE_BUNDLE_REPOSITORY" = "" ]; then
-    export PACKAGE_BUNDLE_REPOSITORY="$REPOSITORY"
-fi
-source "$SCDIR/.github/actions/build-repository-bundle/build-repository-bundle.sh"
-
-echo "Repository path: $REPO_BUNDLE_GENERATED"
-REPOSITORY="$REGISTRY/scdf-$SCDF_TYPE-repo"
-imgpkg push --bundle "$REPOSITORY:$PACKAGE_VERSION" --file "$REPO_BUNDLE_GENERATED" --registry-username "$DOCKER_HUB_USERNAME" --registry-password "$DOCKER_HUB_PASSWORD"
-docker pull "$REPOSITORY:$PACKAGE_VERSION"
-
 exit $?

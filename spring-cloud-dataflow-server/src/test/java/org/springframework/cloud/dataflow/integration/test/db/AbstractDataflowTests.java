@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.integration.test.db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,18 +70,20 @@ public abstract class AbstractDataflowTests {
 			);
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
+			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:14", TagNames.POSTGRES_14),
 			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
+			ClusterContainer.from(TagNames.MARIADB_10_6, "mariadb:10.6", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),
 			ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
 			ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
 			ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2, "dev.registry.pivotal.io/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2", TagNames.ORACLE),
 			ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
-			ClusterContainer.from(TagNames.DB2_10_5_0_5_3_10_0, "dev.registry.pivotal.io/p-scdf-for-kubernetes/ibmcom/database-prebuilt:10.5.0.5-3.10.0", TagNames.DB2)
+			ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
 			);
-	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
-			);
+	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
+		ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
+	);
 
 	@Autowired
 	private IntegrationTestProperties testProperties;
@@ -130,8 +133,7 @@ public abstract class AbstractDataflowTests {
 	}
 
 	protected List<ClusterContainer> getOauthContainers() {
-		ArrayList<ClusterContainer> containers = new ArrayList<>(OAUTH_CONTAINERS);
-		return containers;
+		return new ArrayList<>(OAUTH_CONTAINERS);
 	}
 
 	protected List<ClusterContainer> getDatabaseContainers() {

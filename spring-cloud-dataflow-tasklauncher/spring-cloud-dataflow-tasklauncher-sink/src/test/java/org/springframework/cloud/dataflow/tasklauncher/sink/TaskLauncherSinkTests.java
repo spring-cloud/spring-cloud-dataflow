@@ -34,8 +34,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.cloud.dataflow.core.LaunchResponse;
-import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -58,6 +56,7 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -90,7 +89,7 @@ public class TaskLauncherSinkTests {
 					LaunchRequestConsumer consumer = consumer(context);
 					CountDownLatch countDownLatch = countDownLatch(context);
 					DynamicPeriodicTrigger trigger = trigger(context);
-
+					assertThat(trigger).isNotNull();
 					consumer.start();
 					// What is going to count down the CDL?
 					assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
@@ -168,6 +167,7 @@ public class TaskLauncherSinkTests {
 											+ " Launcher: 'default'");
 							passed.set(true);
 						} catch (Exception e) {
+							fail(e.toString());
 						}
 					});
 					LaunchRequestConsumer consumer = consumer(context);
@@ -218,14 +218,12 @@ public class TaskLauncherSinkTests {
 	@SpringBootApplication
 	static class TestConfig {
 
-		private TaskOperations taskOperations;
-
-		private CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
+		private final CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
 
 		@Bean
 		public CurrentTaskExecutionsResource currentTaskExecutionsResource(Environment environment) {
 			currentTaskExecutionsResource.setMaximumTaskExecutions(
-					Integer.valueOf(environment.getProperty("maxExecutions", "10")));
+					Integer.parseInt(environment.getProperty("maxExecutions", "10")));
 			currentTaskExecutionsResource.setName("default");
 			return currentTaskExecutionsResource;
 		}
@@ -233,7 +231,7 @@ public class TaskLauncherSinkTests {
 		@Bean
 		public CountDownLatch countDownLatch(CurrentTaskExecutionsResource resource, Environment environment) {
 			return new CountDownLatch(
-					environment.containsProperty("countDown") ? Integer.valueOf(environment.getProperty("countDown"))
+					environment.containsProperty("countDown") ? Integer.parseInt(environment.getProperty("countDown", "1"))
 							: resource.getMaximumTaskExecutions());
 		}
 
@@ -242,7 +240,7 @@ public class TaskLauncherSinkTests {
 											  CountDownLatch latch) {
 
 			DataFlowOperations dataFlowOperations;
-			taskOperations = mock(TaskOperations.class);
+			TaskOperations taskOperations = mock(TaskOperations.class);
 			when(taskOperations.launch(anyString(), anyMap(), anyList()))
 					.thenAnswer((Answer<LaunchResponseResource>) invocation -> {
 						currentTaskExecutionsResource.setRunningExecutionCount(
@@ -277,7 +275,7 @@ public class TaskLauncherSinkTests {
 		public MessageSource<byte[]> testMessageSource(Environment environment, CountDownLatch countDownLatch,
 													   ObjectMapper objectMapper) {
 			return () -> {
-				boolean messageSourceDisabled = Boolean.valueOf(
+				boolean messageSourceDisabled = Boolean.parseBoolean(
 						environment.getProperty("messageSourceDisabled", "false"));
 				LaunchRequest request = new LaunchRequest();
 				request.setTaskName("foo");

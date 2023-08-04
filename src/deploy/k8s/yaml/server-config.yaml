@@ -24,6 +24,8 @@ data:
           kubernetes:
             imagePullPolicy: IfNotPresent
             imagePullSecret: registry-key
+            containerSecurityContext:
+              runAsUser:
         dataflow:
           metrics.dashboard:
             url: 'http://localhost:3000'

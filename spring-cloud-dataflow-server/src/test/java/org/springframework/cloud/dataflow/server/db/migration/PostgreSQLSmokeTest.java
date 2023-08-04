@@ -19,12 +19,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-
 
 /**
- * Basic database schema and JPA tests for PostgreSQL 11 or later.
+ * Basic database schema and JPA tests for PostgreSQL 14 or later.
  *
  * @author Corneil du Plessis
  */
@@ -32,7 +29,7 @@ public class PostgreSQLSmokeTest extends AbstractSmokeTest {
 
 	@BeforeAll
 	static void startContainer() {
-		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:11"));
+		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14"));
 		container.start();
 	}
 }

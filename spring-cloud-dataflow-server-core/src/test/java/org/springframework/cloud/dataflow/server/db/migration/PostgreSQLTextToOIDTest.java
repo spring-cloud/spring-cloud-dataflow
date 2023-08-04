@@ -15,14 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import javax.sql.DataSource;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import javax.sql.DataSource;
 
 import com.github.dockerjava.zerodep.shaded.org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -54,7 +54,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @AutoConfigureJdbc
 @ExtendWith(SpringExtension.class)
 public class PostgreSQLTextToOIDTest {
-	static PostgreSQLContainer container = new PostgreSQLContainer(DockerImageName.parse("postgres:11"));
+	@SuppressWarnings("rawtypes")
+	static PostgreSQLContainer container = new PostgreSQLContainer(DockerImageName.parse("postgres:14"));
 
 	@BeforeAll
 	static void startContainer() {

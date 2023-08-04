@@ -33,12 +33,18 @@ public abstract class TagNames {
 
 	public static final String POSTGRES = "postgres";
 	public static final String POSTGRES_10 = "postgres_10";
+	public static final String POSTGRES_11 = "postgres_11";
+	public static final String POSTGRES_12 = "postgres_12";
+	public static final String POSTGRES_13 = "postgres_13";
+	public static final String POSTGRES_14 = "postgres_14";
+
 
 	public static final String MARIADB = "mariadb";
 	public static final String MARIADB_10_2 = "mariadb_10_2";
 	public static final String MARIADB_10_3 = "mariadb_10_3";
 	public static final String MARIADB_10_4 = "mariadb_10_4";
 	public static final String MARIADB_10_5 = "mariadb_10_5";
+	public static final String MARIADB_10_6 = "mariadb_10_6";
 
 	public static final String MSSQL = "mssql";
 	public static final String MSSQL_2019_CU10_ubuntu_20_04 = "mssql_2019_CU10_ubuntu_20_04";
@@ -51,6 +57,7 @@ public abstract class TagNames {
 
 	public static final String DB2 = "db2";
 	public static final String DB2_11_5_0_0a = "db2_11_5_0_0a";
+	public static final String DB2_11_5_8_0 = "db2_11_5_8_0";
 	public static final String DB2_10_5_0_5_3_10_0 = "db2_10_5_0_5_3_10_0";
 
 	public static final String OAUTH = "oauth";

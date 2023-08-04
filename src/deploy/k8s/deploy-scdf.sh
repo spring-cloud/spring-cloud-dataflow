@@ -93,14 +93,17 @@ echo "YAML_PATH=$YAML_PATH"
 
 set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
+    # TODO get version from yaml spec.template.spec.containers[0].image
     sh "$SCDIR/load-image.sh" "busybox" "1"
     # sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
     case $DATABASE in
     "mariadb")
+        # TODO get version from yaml spec.template.spec.containers[0].image
         sh "$SCDIR/load-image.sh" "mariadb" "10.6"
         ;;
     "postgresql")
-        sh "$SCDIR/load-image.sh" "postgres" "12"
+        # TODO get version from yaml spec.template.spec.containers[0].image
+        sh "$SCDIR/load-image.sh" "postgres" "14.8"
         ;;
     *)
         echo "DATABASE=$DATABASE not supported"
@@ -108,10 +111,12 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     esac
     case $BROKER in
     "kafka")
+        # TODO get version from yaml spec.template.spec.containers[0].image
         sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5"
         sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5"
         ;;
     "rabbit" | "rabbitmq")
+        # TODO get version from yaml spec.template.spec.containers[0].image
         sh "$SCDIR/load-image.sh" "rabbitmq" "3.8"
         ;;
     *)

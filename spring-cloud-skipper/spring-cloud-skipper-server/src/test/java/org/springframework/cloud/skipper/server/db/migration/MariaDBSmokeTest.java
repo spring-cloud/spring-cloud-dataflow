@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import org.springframework.test.context.TestPropertySource;
 
@@ -33,7 +34,7 @@ public class MariaDBSmokeTest extends AbstractSmokeTest {
 
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.4");
+		container = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.6"));
 		container.start();
 	}
 }

@@ -192,10 +192,6 @@ public class AppDeploymentRequestCreator {
 	) {
 		String propertyName = "app." + name + "." + key;
 		deployerDeploymentProperties.put(propertyName, value);
-		String arg = "--" + propertyName + "=" + value;
-		if (!commandlineArguments.contains(arg)) {
-			commandlineArguments.add(arg);
-		}
 	}
 
 	private String extractAppVersionProperty(StreamAppDefinition appDefinition, Map<String, String> updateProperties) {
@@ -331,8 +327,7 @@ public class AppDeploymentRequestCreator {
 			StreamAppDefinition appDefinition,
 			Map<String, String> streamDeploymentProperties
 	) {
-		Map<String, String> appDeploymentProperties = new HashMap<>();
-		appDeploymentProperties.putAll(this.commonApplicationProperties.getStream());
+		Map<String, String> appDeploymentProperties = new HashMap<>(this.commonApplicationProperties.getStream());
 		// add properties with wild card prefix
 		String wildCardProducerPropertyPrefix = "app.*.producer.";
 		String wildCardConsumerPropertyPrefix = "app.*.consumer.";
