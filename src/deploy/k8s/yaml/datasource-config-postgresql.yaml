@@ -17,7 +17,7 @@ metadata:
 data:
   SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgresql:5432/dataflow'
   SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'org.postgresql.Driver'
-  SPRING_JPA_DATABASE_PLATFORM: 'org.hibernate.dialect.ProgressDialect'
+  SPRING_JPA_DATABASE_PLATFORM: 'org.hibernate.dialect.PostgreSQL10Dialect'
   SPRING_DATASOURCE_TEST_ON_BORROW: 'true'
   SPRING_DATASOURCE_VALIDATION_QUERY: "SELECT 1"
   SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE: 'true'

@@ -103,7 +103,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         ;;
     "postgresql")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "postgres" "14.8"
+        sh "$SCDIR/load-image.sh" "postgres" "14"
         ;;
     *)
         echo "DATABASE=$DATABASE not supported"
