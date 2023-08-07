@@ -2,13 +2,16 @@ log:
   spec:
     applicationProperties:
       server.port: '9999'
-      log.level: ERROR
+      log.level: 'ERROR'
       endpoints.sensitive: 'false'
-      spring.cloud.dataflow.stream.app.type: sink
-    version: 1.1.1.RELEASE
+      spring.cloud.dataflow.stream.app.type: 'sink'
+    version: '1.1.1.RELEASE'
     deploymentProperties:
-      spring.cloud.deployer.memory: 4096m
+      spring.cloud.deployer.memory: '4096m'
+      app.log.spring.cloud.deployer.bootVersion: '2'
 time:
   spec:
     applicationProperties:
-      spring.cloud.dataflow.stream.app.type: source
+      spring.cloud.dataflow.stream.app.type: 'source'
+    deploymentProperties:
+      app.time.spring.cloud.deployer.bootVersion: '2'
