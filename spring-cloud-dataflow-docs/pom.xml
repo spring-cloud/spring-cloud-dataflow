@@ -167,7 +167,7 @@
 									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<doctype>book</doctype>
 									<attributes>
-										// these attributes are required to use the doc resources
+										<!-- these attributes are required to use the doc resources-->
 										<docinfo>shared</docinfo>
 										<stylesdir>css/</stylesdir>
 										<stylesheet>spring.css</stylesheet>
