@@ -166,7 +166,7 @@ public class TasksInfoControllerTests {
 
             TaskExecution taskExecution1 =
                     dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
-
+            assertThat(taskExecution1.getExecutionId()).isGreaterThan(0L);
             dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
             dao.createTaskExecution(TASK_NAME_FOO, new Date(), SAMPLE_ARGUMENT_LIST, null);
             TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), SAMPLE_ARGUMENT_LIST,

@@ -86,7 +86,7 @@ public class DefaultStreamServiceUpdateTests {
 	@Test
 	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
-				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.0"),
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
 				null, null);
 		testCreateUpdateRequests();
 	}

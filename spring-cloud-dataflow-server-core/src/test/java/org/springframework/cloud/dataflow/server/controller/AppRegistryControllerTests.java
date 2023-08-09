@@ -324,26 +324,26 @@ public class AppRegistryControllerTests {
 	public void testRegisterAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.1");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.1");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.0");
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.1");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.1");
 	}
 
 	@Test
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.1");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.1");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.0");
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.1");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.0");
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.1");
 	}
 
 	@Test

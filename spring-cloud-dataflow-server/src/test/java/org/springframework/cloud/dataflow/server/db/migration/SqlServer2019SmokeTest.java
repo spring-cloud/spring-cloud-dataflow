@@ -16,25 +16,21 @@
 package org.springframework.cloud.dataflow.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MariaDBContainer;
-
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
+import org.testcontainers.containers.MSSQLServerContainer;
+import org.testcontainers.utility.DockerImageName;
 
 
 /**
- * Basic database schema and JPA tests for MariaDB 10.4 or later.
+ * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
  */
-@TestPropertySource(properties = {
-		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
-})
-public class MariaDBSmokeTest extends AbstractSmokeTest {
+public class SqlServer2019SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.6");
+		container = new MSSQLServerContainer<>(
+			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
+		).acceptLicense();
 		container.start();
 	}
 }

@@ -173,13 +173,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private static final Pattern TASK_NAME_PATTERN = Pattern.compile("[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
 
 	private static final String TASK_NAME_VALIDATION_MSG = "Task name must consist of alphanumeric characters " +
-			"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
-			"or 'abc-123')";
+		"or '-', start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
+		"or 'abc-123')";
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
-	 * @param propertyResolver                        the spring application context
+	 * @param propertyResolver                          the spring application context
 	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
 	 * @param auditRecordService                        the audit record service
 	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
@@ -200,50 +200,50 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 */
 	@Deprecated
 	public DefaultTaskExecutionService(
-			PropertyResolver propertyResolver,
-			LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService,
-			TaskRepositoryContainer taskRepositoryContainer,
-			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader,
-			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			AggregateTaskExplorer taskExplorer,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
-			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService,
-			TaskConfigurationProperties taskConfigurationProperties,
-			AggregateExecutionSupport aggregateExecutionSupport
+		PropertyResolver propertyResolver,
+		LauncherRepository launcherRepository,
+		AuditRecordService auditRecordService,
+		TaskRepositoryContainer taskRepositoryContainer,
+		TaskExecutionInfoService taskExecutionInfoService,
+		TaskDeploymentRepository taskDeploymentRepository,
+		TaskDefinitionRepository taskDefinitionRepository,
+		TaskDefinitionReader taskDefinitionReader,
+		TaskExecutionCreationService taskExecutionRepositoryService,
+		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+		AggregateTaskExplorer taskExplorer,
+		DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
+		DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
+		OAuth2TokenUtilsService oauth2TokenUtilsService,
+		TaskSaveService taskSaveService,
+		TaskConfigurationProperties taskConfigurationProperties,
+		AggregateExecutionSupport aggregateExecutionSupport
 	) {
 		this(propertyResolver,
-				launcherRepository,
-				auditRecordService,
-				taskRepositoryContainer,
-				taskExecutionInfoService,
-				taskDeploymentRepository,
-				taskDefinitionRepository,
-				taskDefinitionReader,
-				taskExecutionRepositoryService,
-				taskAppDeploymentRequestCreator,
-				taskExplorer,
-				dataflowTaskExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
-				dataflowTaskExecutionQueryDao,
-				oauth2TokenUtilsService,
-				taskSaveService,
-				taskConfigurationProperties,
-				aggregateExecutionSupport,
-				null);
+			launcherRepository,
+			auditRecordService,
+			taskRepositoryContainer,
+			taskExecutionInfoService,
+			taskDeploymentRepository,
+			taskDefinitionRepository,
+			taskDefinitionReader,
+			taskExecutionRepositoryService,
+			taskAppDeploymentRequestCreator,
+			taskExplorer,
+			dataflowTaskExecutionDaoContainer,
+			dataflowTaskExecutionMetadataDaoContainer,
+			dataflowTaskExecutionQueryDao,
+			oauth2TokenUtilsService,
+			taskSaveService,
+			taskConfigurationProperties,
+			aggregateExecutionSupport,
+			null);
 	}
 
 	/**
 	 * Initializes the {@link DefaultTaskExecutionService}.
 	 *
-	 * @param propertyResolver                        the spring application context
+	 * @param propertyResolver                          the spring application context
 	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
 	 * @param auditRecordService                        the audit record service
 	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
@@ -264,25 +264,25 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param composedTaskRunnerConfigurationProperties properties used to configure the composed task runner
 	 */
 	public DefaultTaskExecutionService(
-			PropertyResolver propertyResolver,
-			LauncherRepository launcherRepository,
-			AuditRecordService auditRecordService,
-			TaskRepositoryContainer taskRepositoryContainer,
-			TaskExecutionInfoService taskExecutionInfoService,
-			TaskDeploymentRepository taskDeploymentRepository,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader,
-			TaskExecutionCreationService taskExecutionRepositoryService,
-			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			AggregateTaskExplorer taskExplorer,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
-			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
-			OAuth2TokenUtilsService oauth2TokenUtilsService,
-			TaskSaveService taskSaveService,
-			TaskConfigurationProperties taskConfigurationProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
+		PropertyResolver propertyResolver,
+		LauncherRepository launcherRepository,
+		AuditRecordService auditRecordService,
+		TaskRepositoryContainer taskRepositoryContainer,
+		TaskExecutionInfoService taskExecutionInfoService,
+		TaskDeploymentRepository taskDeploymentRepository,
+		TaskDefinitionRepository taskDefinitionRepository,
+		TaskDefinitionReader taskDefinitionReader,
+		TaskExecutionCreationService taskExecutionRepositoryService,
+		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
+		AggregateTaskExplorer taskExplorer,
+		DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
+		DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
+		OAuth2TokenUtilsService oauth2TokenUtilsService,
+		TaskSaveService taskSaveService,
+		TaskConfigurationProperties taskConfigurationProperties,
+		AggregateExecutionSupport aggregateExecutionSupport,
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
 	) {
 		Assert.notNull(propertyResolver, "propertyResolver must not be null");
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
@@ -338,10 +338,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		// Get platform name and fallback to 'default'
 		String platformName = getPlatform(taskDeploymentProperties);
 		String platformType = StreamSupport.stream(launcherRepository.findAll().spliterator(), true)
-				.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
-				.map(Launcher::getType)
-				.findFirst()
-				.orElse("unknown");
+			.filter(deployer -> deployer.getName().equalsIgnoreCase(platformName))
+			.map(Launcher::getType)
+			.findFirst()
+			.orElse("unknown");
 		if (platformType.equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE) && !TASK_NAME_PATTERN.matcher(taskName).matches()) {
 			throw new TaskException(String.format("Task name %s is invalid. %s", taskName, TASK_NAME_VALIDATION_MSG));
 		}
@@ -350,7 +350,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			List<String> platforms = this.tasksBeingUpgraded.get(taskName);
 			if (platforms.contains(platformName)) {
 				throw new IllegalStateException(String.format(
-						"Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
+					"Unable to launch %s on platform %s because it is being upgraded", taskName, platformName));
 			}
 		}
 		Launcher launcher = this.launcherRepository.findByName(platformName);
@@ -365,13 +365,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		deploymentProperties.remove(TASK_PLATFORM_NAME);
 		DeploymentPropertiesUtils.validateDeploymentProperties(deploymentProperties);
 		TaskDeployment existingTaskDeployment = taskDeploymentRepository
-				.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
+			.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName);
 		if (existingTaskDeployment != null) {
 			if (!existingTaskDeployment.getPlatformName().equals(platformName)) {
 				throw new IllegalStateException(String.format(
-						"Task definition [%s] has already been deployed on platform [%s].  " +
-								"Requested to deploy on platform [%s].",
-						taskName, existingTaskDeployment.getPlatformName(), platformName));
+					"Task definition [%s] has already been deployed on platform [%s].  " +
+						"Requested to deploy on platform [%s].",
+					taskName, existingTaskDeployment.getPlatformName(), platformName));
 			}
 		}
 		List<String> commandLineArguments = new ArrayList<>(commandLineArgs);
@@ -385,13 +385,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		// Get the previous manifest
 		TaskManifest previousManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 		Map<String, String> previousTaskDeploymentProperties = previousManifest != null
-				&& previousManifest.getTaskDeploymentRequest() != null
-				&& previousManifest.getTaskDeploymentRequest().getDeploymentProperties() != null
-				? previousManifest.getTaskDeploymentRequest().getDeploymentProperties()
-				: Collections.emptyMap();
+			&& previousManifest.getTaskDeploymentRequest() != null
+			&& previousManifest.getTaskDeploymentRequest().getDeploymentProperties() != null
+			? previousManifest.getTaskDeploymentRequest().getDeploymentProperties()
+			: Collections.emptyMap();
 
 		TaskExecutionInformation taskExecutionInformation = findOrCreateTaskExecutionInformation(taskName,
-				deploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
+			deploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
 
 		// pre prosess command-line args
@@ -408,15 +408,15 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			addPrefixProperties(schemaVersionTarget, "app." + registeredAppName + ".", deploymentProperties);
 			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
 			commandLineArguments = commandLineArguments.stream()
-					.map(arg -> arg.replaceFirst(regex, ""))
-					.collect(Collectors.toList());
+				.map(arg -> arg.replaceFirst(regex, ""))
+				.collect(Collectors.toList());
 		}
 
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
 		addDefaultDeployerProperties(platformType, schemaVersionTarget, deploymentProperties);
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
-			if(taskDefinition != null) {
+			if (taskDefinition != null) {
 				logger.info("composedTask:dsl={}:appNames:{}", taskDefinition.getDslText(), appNames);
 			} else {
 				logger.info("composedTask:appNames:{}", appNames);
@@ -433,51 +433,51 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, taskDefinitionReader);
 				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
 				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".spring.cloud.task.tablePrefix",
-						appSchemaTarget.getTaskPrefix());
+					appSchemaTarget.getTaskPrefix());
 				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + appId + ".spring.cloud.task.tablePrefix",
-						appSchemaTarget.getTaskPrefix());
+					appSchemaTarget.getTaskPrefix());
 				deploymentProperties.put("app." + taskName + "-" + appId + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
 				deploymentProperties.put("app." + registeredName + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
 			}
 			logger.debug("ctr:added:{}:{}", taskName, deploymentProperties);
 			handleAccessToken(commandLineArguments, taskExecutionInformation);
 			TaskServiceUtils.addImagePullSecretProperty(deploymentProperties,
-					this.composedTaskRunnerConfigurationProperties);
+				this.composedTaskRunnerConfigurationProperties);
 			isCTRSplitValidForCurrentCTR(taskLauncher, taskExecutionInformation.getTaskDefinition());
 		}
 
 		// Create task execution for the task
 		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
-
+		Assert.isTrue(taskExecution.getExecutionId() > 0, () -> "Expected executionId > 0 for " + taskName);
 		// Analysing task to know what to bring forward from existing
 		TaskAnalysisReport report = taskAnalyzer
-				.analyze(
-						previousManifest != null
-								? previousManifest.getTaskDeploymentRequest() != null
-								? previousManifest.getTaskDeploymentRequest().getDeploymentProperties() : null
-								: null,
-						DeploymentPropertiesUtils.qualifyDeployerProperties(
-								taskExecutionInformation.getTaskDeploymentProperties(),
-								taskExecutionInformation.isComposed() ? "composed-task-runner"
-										: taskExecutionInformation.getTaskDefinition().getRegisteredAppName()));
+			.analyze(
+				previousManifest != null
+					? previousManifest.getTaskDeploymentRequest() != null
+					? previousManifest.getTaskDeploymentRequest().getDeploymentProperties() : null
+					: null,
+				DeploymentPropertiesUtils.qualifyDeployerProperties(
+					taskExecutionInformation.getTaskDeploymentProperties(),
+					taskExecutionInformation.isComposed() ? "composed-task-runner"
+						: taskExecutionInformation.getTaskDefinition().getRegisteredAppName()));
 		logger.debug("Task analysis report {}", report);
 
 		// We now have a new props and args what should really get used.
 		Map<String, String> mergedTaskDeploymentProperties = report.getMergedDeploymentProperties();
 		//capture merged deployment properties that are not qualified so they can be saved in the manifest for relaunching tasks.
 		Map<String, String> mergedTaskUnqualifiedDeploymentProperties = taskAnalyzer
-				.analyze(
-						previousManifest != null
-								? previousManifest.getTaskDeploymentRequest() != null
-								? previousManifest.getTaskDeploymentRequest().getDeploymentProperties() : null
-								: null,
-						taskExecutionInformation.getTaskDeploymentProperties()).getMergedDeploymentProperties();
+			.analyze(
+				previousManifest != null
+					? previousManifest.getTaskDeploymentRequest() != null
+					? previousManifest.getTaskDeploymentRequest().getDeploymentProperties() : null
+					: null,
+				taskExecutionInformation.getTaskDeploymentProperties()).getMergedDeploymentProperties();
 		// Get the merged deployment properties and update the task exec. info
 		taskExecutionInformation.setTaskDeploymentProperties(mergedTaskDeploymentProperties);
 
 		// Finally create App deployment request
 		AppDeploymentRequest request = this.taskAppDeploymentRequestCreator.createRequest(taskExecution,
-				taskExecutionInformation, commandLineArguments, platformName, launcher.getType());
+			taskExecutionInformation, commandLineArguments, platformName, launcher.getType());
 
 		TaskManifest taskManifest = createTaskManifest(platformName, request, mergedTaskUnqualifiedDeploymentProperties);
 		String taskDeploymentId;
@@ -511,19 +511,20 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskDeploymentRepository.save(taskDeployment);
 
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditOperationType.TASK, AuditActionType.DEPLOY,
-				taskExecutionInformation.getTaskDefinition().getName(),
-				getAudited(taskExecutionInformation.getTaskDefinition(),
-						taskExecutionInformation.getTaskDeploymentProperties(),
-						request.getCommandlineArguments()
-				), platformName);
+			AuditOperationType.TASK, AuditActionType.DEPLOY,
+			taskExecutionInformation.getTaskDefinition().getName(),
+			getAudited(taskExecutionInformation.getTaskDefinition(),
+				taskExecutionInformation.getTaskDeploymentProperties(),
+				request.getCommandlineArguments()
+			), platformName);
 
 		return new LaunchResponse(taskExecution.getExecutionId(), schemaVersionTarget.getName());
 	}
 
-	private void addDefaultDeployerProperties(String platformType,
-			SchemaVersionTarget schemaVersionTarget,
-			Map<String, String> deploymentProperties
+	private void addDefaultDeployerProperties(
+		String platformType,
+		SchemaVersionTarget schemaVersionTarget,
+		Map<String, String> deploymentProperties
 	) {
 		String bootVersion = schemaVersionTarget.getSchemaVersion().getBootVersion();
 		switch (platformType) {
@@ -584,27 +585,27 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private void validateTaskName(String taskName, Launcher launcher) {
 		if (launcher.getType().equals(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE)
-				|| launcher.getType().equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
+			|| launcher.getType().equals(TaskPlatformFactory.KUBERNETES_PLATFORM_TYPE)) {
 			if (taskName.length() > 63)
 				throw new IllegalStateException(String.format(
-						"Task name [%s] length must be less than 64 characters to be launched on platform %s",
-						taskName, launcher.getType()));
+					"Task name [%s] length must be less than 64 characters to be launched on platform %s",
+					taskName, launcher.getType()));
 		}
 	}
 
 	private TaskExecutionInformation findOrCreateTaskExecutionInformation(
-			String taskName,
-			Map<String, String> taskDeploymentProperties, String platform,
-			Map<String, String> previousTaskDeploymentProperties
+		String taskName,
+		Map<String, String> taskDeploymentProperties, String platform,
+		Map<String, String> previousTaskDeploymentProperties
 	) {
 
 		TaskExecutionInformation taskExecutionInformation;
 		try {
 			taskExecutionInformation = taskExecutionInfoService.findTaskExecutionInformation(taskName,
-					taskDeploymentProperties,
-					TaskServiceUtils.addDatabaseCredentials(
-							this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
-					previousTaskDeploymentProperties);
+				taskDeploymentProperties,
+				TaskServiceUtils.addDatabaseCredentials(
+					this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
+				previousTaskDeploymentProperties);
 
 		} catch (NoSuchTaskDefinitionException e) {
 			if (autoCreateTaskDefinitions) {
@@ -612,10 +613,10 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				TaskDefinition taskDefinition = new TaskDefinition(taskName, taskName);
 				taskSaveService.saveTaskDefinition(taskDefinition);
 				taskExecutionInformation = taskExecutionInfoService.findTaskExecutionInformation(taskName,
-						taskDeploymentProperties,
-						TaskServiceUtils.addDatabaseCredentials(
-								this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
-						previousTaskDeploymentProperties);
+					taskDeploymentProperties,
+					TaskServiceUtils.addDatabaseCredentials(
+						this.taskConfigurationProperties.isUseKubernetesSecretsForDbCredentials(), platform),
+					previousTaskDeploymentProperties);
 			} else {
 				throw e;
 			}
@@ -646,7 +647,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 
 		final String dataflowAccessTokenPropertyKey = "app." + taskExecutionInformation.getTaskDefinition()
-				.getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
+			.getRegisteredAppName() + "." + dataflowServerAccessTokenKey;
 		for (Map.Entry<String, String> taskDeploymentProperty : taskExecutionInformation.getTaskDeploymentProperties().entrySet()) {
 			if (taskDeploymentProperty.getKey().equals(dataflowAccessTokenPropertyKey)) {
 				containsAccessToken = true;
@@ -690,7 +691,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 */
 	private void verifyTaskIsNotRunning(String taskName, TaskExecution taskExecution, TaskLauncher taskLauncher) {
 		Page<AggregateTaskExecution> runningTaskExecutions =
-				this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
+			this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
 
 		//Found only the candidate TaskExecution
 		if (runningTaskExecutions.getTotalElements() == 1 && runningTaskExecutions.toList().get(0).getExecutionId() == taskExecution.getExecutionId()) {
@@ -706,7 +707,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			AggregateTaskExecution latestRunningExecution = runningTaskExecutions.toList().get(0);
 			if (latestRunningExecution.getExternalExecutionId() == null) {
 				logger.warn("Task repository shows a running task execution for task {} with no externalExecutionId.",
-						taskName);
+					taskName);
 				return;
 			}
 			LaunchState launchState = taskLauncher.status(latestRunningExecution.getExternalExecutionId()).getState();
@@ -752,9 +753,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName(platformName);
 		AppDeploymentRequest appRequestWithTaggedProps = new AppDeploymentRequest(
-				appDeploymentRequest.getDefinition(), appDeploymentRequest.getResource(),
-				taskDeploymentProperties,
-				appDeploymentRequest.getCommandlineArguments());
+			appDeploymentRequest.getDefinition(), appDeploymentRequest.getResource(),
+			taskDeploymentProperties,
+			appDeploymentRequest.getCommandlineArguments());
 		taskManifest.setTaskDeploymentRequest(appRequestWithTaggedProps);
 		return taskManifest;
 	}
@@ -775,7 +776,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		// In case we have exactly one launcher, we override to that
 		List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
-				.map(Launcher::getName).collect(Collectors.toList());
+			.map(Launcher::getName).collect(Collectors.toList());
 
 		if (launcherNames.size() == 1) {
 			platformName = launcherNames.get(0);
@@ -909,8 +910,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	private void updateAuditInfoForTaskStops(long numberOfExecutionsStopped) {
 		final Map<String, Object> auditData = Collections.singletonMap("Stopped Task Executions", numberOfExecutionsStopped);
 		this.auditRecordService.populateAndSaveAuditRecordUsingMapData(
-				AuditOperationType.TASK, AuditActionType.UNDEPLOY,
-				numberOfExecutionsStopped + " Task Execution Stopped", auditData, null);
+			AuditOperationType.TASK, AuditActionType.UNDEPLOY,
+			numberOfExecutionsStopped + " Task Execution Stopped", auditData, null);
 	}
 
 	private void validateExternalExecutionIds(Set<AggregateTaskExecution> taskExecutions) {
@@ -929,16 +930,16 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Launcher launcher = this.launcherRepository.findByName(platformName);
 		if (launcher == null) {
 			List<String> launcherNames = StreamSupport.stream(launcherRepository.findAll().spliterator(), false)
-					.map(Launcher::getName)
-					.collect(Collectors.toList());
+				.map(Launcher::getName)
+				.collect(Collectors.toList());
 			throw new IllegalStateException(String.format("No Launcher found for the platform named '%s'.  " +
-							"Available platform names are %s",
-					platformName, launcherNames));
+					"Available platform names are %s",
+				platformName, launcherNames));
 		}
 		TaskLauncher taskLauncher = launcher.getTaskLauncher();
 		if (taskLauncher == null) {
 			throw new IllegalStateException(String.format("No TaskLauncher found for the platform named '%s'",
-					platformName));
+				platformName));
 		}
 		return taskLauncher;
 	}
@@ -949,13 +950,13 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	private Map<String, Object> getAudited(
-			TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
-			List<String> commandLineArgs
+		TaskDefinition taskDefinition, Map<String, String> taskDeploymentProperties,
+		List<String> commandLineArgs
 	) {
 		final Map<String, Object> auditedData = new HashMap<>(3);
 		auditedData.put(TASK_DEFINITION_DSL_TEXT, this.argumentSanitizer.sanitizeTaskDsl(taskDefinition));
 		auditedData.put(TASK_DEPLOYMENT_PROPERTIES,
-				this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
+			this.argumentSanitizer.sanitizeProperties(taskDeploymentProperties));
 		auditedData.put(COMMAND_LINE_ARGS, this.argumentSanitizer.sanitizeArguments(commandLineArgs));
 		return auditedData;
 	}
@@ -971,7 +972,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			if (taskDeployment == null) {
 				if (platformTaskExecution.getParentExecutionId() != null) {
 					platformTaskExecution = this.taskExplorer.getTaskExecution(platformTaskExecution.getParentExecutionId(),
-							platformTaskExecution.getSchemaTarget());
+						platformTaskExecution.getSchemaTarget());
 					taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
 				}
 				if (taskDeployment == null) {
@@ -1014,9 +1015,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		taskNode.accept(composedRunnerVisitor);
 		if (composedRunnerVisitor.getHighCount() > taskLauncher.getMaximumConcurrentTasks()) {
 			throw new IllegalArgumentException(String.format("One or more of the " +
-							"splits in the composed task contains a task count that exceeds " +
-							"the maximumConcurrentTasks count of %s",
-					taskLauncher.getMaximumConcurrentTasks()));
+					"splits in the composed task contains a task count that exceeds " +
+					"the maximumConcurrentTasks count of %s",
+				taskLauncher.getMaximumConcurrentTasks()));
 		}
 	}
 
@@ -1030,8 +1031,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
 		return (int) (
-				onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-						: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
+			onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
+				: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
 		);
 	}
 }

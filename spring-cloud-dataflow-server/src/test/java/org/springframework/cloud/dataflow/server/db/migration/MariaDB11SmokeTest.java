@@ -18,8 +18,6 @@ package org.springframework.cloud.dataflow.server.db.migration;
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MariaDBContainer;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
 
@@ -31,10 +29,10 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
 		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
 })
-public class MariaDBSmokeTest extends AbstractSmokeTest {
+public class MariaDB11SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.6");
+		container = new MariaDBContainer<>("mariadb:11");
 		container.start();
 	}
 }

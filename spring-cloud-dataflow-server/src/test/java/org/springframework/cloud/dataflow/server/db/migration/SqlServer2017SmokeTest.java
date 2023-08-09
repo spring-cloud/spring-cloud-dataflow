@@ -19,19 +19,18 @@ import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-
 
 /**
  * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
  */
-public class SqlServerSmokeTest extends AbstractSmokeTest {
+public class SqlServer2017SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MSSQLServerContainer<>(DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag(MSSQLServerContainer.DEFAULT_TAG)).acceptLicense();
+		container = new MSSQLServerContainer<>(DockerImageName.parse(
+			MSSQLServerContainer.IMAGE).withTag("2017-latest")
+		).acceptLicense();
 		container.start();
 	}
 }

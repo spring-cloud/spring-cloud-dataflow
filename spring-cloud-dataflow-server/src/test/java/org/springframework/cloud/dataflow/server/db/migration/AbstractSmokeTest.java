@@ -30,12 +30,15 @@ import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,11 +49,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = {DataFlowServerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
-		"spring.jpa.hibernate.ddl-auto=validate"
+	"spring.jpa.hibernate.ddl-auto=validate"
 })
 public abstract class AbstractSmokeTest {
 	private final static Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
+
 	protected static JdbcDatabaseContainer<?> container;
+
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.datasource.url", container::getJdbcUrl);
@@ -58,6 +63,7 @@ public abstract class AbstractSmokeTest {
 		registry.add("spring.datasource.password", container::getPassword);
 		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
 	}
+
 	@Autowired
 	SchemaService schemaService;
 
@@ -67,18 +73,27 @@ public abstract class AbstractSmokeTest {
 	@Autowired
 	protected AggregateTaskExplorer taskExplorer;
 
+	@Autowired
+	protected PlatformTransactionManager transactionManager;
+
 	@Test
 	public void testTaskCreation() {
 		logger.info("started:{}", getClass().getSimpleName());
-		for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
-			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
-			taskRepository.createTaskExecution(schemaVersionTarget.getName() + "_test_task");
-		}
+		TransactionTemplate tx = new TransactionTemplate(transactionManager);
+		tx.execute(status -> {
+			for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
+				TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
+				TaskExecution taskExecution = taskRepository.createTaskExecution(schemaVersionTarget.getName() + "_test_task");
+				assertThat(taskExecution.getExecutionId()).isGreaterThan(0L);
+			}
+			return true;
+		});
 		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(2);
 		Page<AggregateTaskExecution> page = taskExplorer.findAll(Pageable.ofSize(100));
-		List<AggregateTaskExecution> content = page.getContent();
-		assertThat(content.size()).isEqualTo(2);
-		content.forEach(taskExecution -> {
+		List<AggregateTaskExecution> taskExecutions = page.getContent();
+		logger.info("TaskExecutions:{}", taskExecutions);
+		assertThat(taskExecutions.size()).isEqualTo(2);
+		taskExecutions.forEach(taskExecution -> {
 			assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L);
 		});
 		logger.info("completed:{}", getClass().getSimpleName());

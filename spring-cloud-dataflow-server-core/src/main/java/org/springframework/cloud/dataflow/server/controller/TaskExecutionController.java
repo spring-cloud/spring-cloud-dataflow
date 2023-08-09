@@ -454,11 +454,7 @@ public class TaskExecutionController {
 
 		@Override
 		public TaskExecutionResource instantiateModel(TaskJobExecutionRel taskJobExecutionRel) {
-			TaskExecutionResource resource = new TaskExecutionResource(taskJobExecutionRel);
-			if (!resource.getLink("tasks/logs").isPresent()) {
-				resource.add(linkTo(methodOn(TaskLogsController.class).getLog(resource.getExternalExecutionId(), resource.getPlatformName(), resource.getSchemaTarget())).withRel("tasks/logs"));
-			}
-			return resource;
+			return toModel(taskJobExecutionRel);
 		}
 	}
 

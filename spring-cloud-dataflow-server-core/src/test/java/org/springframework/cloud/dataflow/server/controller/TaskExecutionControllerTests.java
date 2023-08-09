@@ -443,7 +443,7 @@ public class TaskExecutionControllerTests {
 		when(taskLauncher.launch(any())).thenReturn("abc");
 
 		ResultActions resultActions = mockMvc.perform(
-						post("/tasks/executions")
+						post("/tasks/executions/launch")
 								.queryParam("name", "timestamp2")
 								.queryParam("properties","app.timestamp2.foo3=bar3,app.timestamp2.bar3=3foo")
 								.accept(MediaType.APPLICATION_JSON)

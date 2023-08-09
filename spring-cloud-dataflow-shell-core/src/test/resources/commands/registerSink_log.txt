@@ -1,1 +1,1 @@
-app register --type sink --force --name log --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.0
+app register --type sink --force --name log --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1

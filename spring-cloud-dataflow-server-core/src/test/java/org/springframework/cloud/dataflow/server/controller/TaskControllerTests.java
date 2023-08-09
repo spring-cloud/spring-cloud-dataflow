@@ -194,6 +194,7 @@ public class TaskControllerTests {
 		taskManifest.setPlatformName("test");
 
 		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
+		assertThat(taskExecutionRunning.getExecutionId()).isGreaterThan(0L);
 		taskExecutionRunning.setStartTime(new Date());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
@@ -209,6 +210,7 @@ public class TaskControllerTests {
 		dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
 		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
+		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
 		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
 		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(),
@@ -743,6 +745,7 @@ public class TaskControllerTests {
 	public void testTaskLaunchNoManifest() throws Exception {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("myTask3", taskDefinitionReader);
 		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3");
+		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
