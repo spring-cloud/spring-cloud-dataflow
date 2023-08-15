@@ -21,7 +21,7 @@ fi
 
 sh "$LS_DIR/deploy-scdf.sh"
 
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$SKIP_REG" != "true" ] && [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
 
@@ -56,7 +56,9 @@ if [ "$K8S_DRIVER" = "kind" ]; then
 else
   source "$LS_DIR/export-dataflow-ip.sh"
 fi
-sh "$LS_DIR/register-apps.sh"
+if [ "$SKIP_REG" != "true" ]; then
+    sh "$LS_DIR/register-apps.sh"
+fi
 end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))
 echo "Complete deployment in $elapsed seconds"
