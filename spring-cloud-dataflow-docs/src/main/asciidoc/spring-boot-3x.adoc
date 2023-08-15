@@ -32,8 +32,29 @@ In other words, if your `2.x` stream apps are currently inheriting the Dataflow 
 
 ==== Pre-packaged Stream Applications
 The default <<ootb-stream-apps,pre-packaged stream applications>> are based on Spring Boot `2.x`.
-To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manually register the apps by pointing to the `3.x` specific coordinates.
-See the section on https://dataflow.spring.io/docs/applications/pre-packaged/[pre-packaged apps] in the Dataflow Microsite for details.
+To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manually register the apps (relevant coordinates below).
+
+[cols="a"]
+[cols="40%"]
+|===
+|[.small]#Stream Applications#
+
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-rabbit-maven[RabbitMQ + Maven]#
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-rabbit-docker[RabbitMQ + Docker]#
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-kafka-maven[Kafka + Maven]#
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-kafka-docker[Kafka + Docker]#
+|===
+
+[cols="a"]
+[cols="40%"]
+|===
+|[.small]#HTTP Repository Location for Apps#
+
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.rabbit-apps-maven-repo-url.properties[RabbitMQ]#
+|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.kafka-apps-maven-repo-url.properties[Kafka]#
+|===
+
+NOTE: The `3.x` apps are currentlyf available as a candidate release (`RC2`)
 
 
 === Spring Cloud Task / Batch Applications
