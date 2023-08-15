@@ -120,17 +120,28 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
 			+ " from AGGREGATE_TASK_EXECUTION where EXTERNAL_EXECUTION_ID = :externalExecutionId and TASK_NAME = :taskName";
 
-	private static final String GET_EXECUTION_BY_NAME_COMPLETED = "SELECT TASK_EXECUTION_ID,"
+	private static final String GET_EXECUTIONS_BY_NAME_COMPLETED = "SELECT TASK_EXECUTION_ID,"
 			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
 			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
 			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
 			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL";
 
-	private static final String GET_EXECUTION_BY_NAME = "SELECT TASK_EXECUTION_ID,"
+	private static final String GET_EXECUTIONS_BY_NAME = "SELECT TASK_EXECUTION_ID,"
 			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
 			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
 			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
 			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName";
+	private static final String GET_EXECUTIONS_COMPLETED = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION where END_TIME IS NOT NULL";
+
+	private static final String GET_EXECUTIONS = "SELECT TASK_EXECUTION_ID,"
+			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
+			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
+			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
+			+ " from AGGREGATE_TASK_EXECUTION";
 
 	private static final String TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION ";
@@ -271,10 +282,14 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 
 	@Override
 	public List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed) {
-		final SqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskName", taskName);
-		String query = completed ? GET_EXECUTION_BY_NAME_COMPLETED : GET_EXECUTION_BY_NAME;
-		return this.jdbcTemplate.query(query, queryParameters, new CompositeTaskExecutionRowMapper());
+		if(StringUtils.hasLength(taskName)) {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName);
+			String query = completed ? GET_EXECUTIONS_BY_NAME_COMPLETED : GET_EXECUTIONS_BY_NAME;
+			return this.jdbcTemplate.query(query, queryParameters, new CompositeTaskExecutionRowMapper());
+		} else {
+			return this.jdbcTemplate.query(completed ? GET_EXECUTIONS_COMPLETED : GET_EXECUTIONS, Collections.emptyMap(), new CompositeTaskExecutionRowMapper());
+		}
 	}
 
 	@Override

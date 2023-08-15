@@ -577,6 +577,22 @@ public class TaskExecutionControllerTests {
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4)))
 						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(1))));
 	}
+	@Test
+	public void testDeleteAllTaskExecutions() throws Exception {
+		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
+				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+						.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4))));
+		mockMvc.perform(delete("/tasks/executions").param("action", "CLEANUP,REMOVE_DATA"))
+				.andDo(print())
+				.andExpect(status().isOk());
+		mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+						.andDo(print())
+						.andExpect(status().isOk())
+						.andExpect(jsonPath("$.page.totalElements", is(0)));
+	}
 
 	private ResultActions verifyTaskArgs(List<String> expectedArgs, String prefix, ResultActions ra) throws Exception {
 		ra.andExpect(jsonPath(prefix + "arguments", hasSize(expectedArgs.size())));
