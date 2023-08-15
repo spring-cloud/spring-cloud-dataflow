@@ -11,9 +11,9 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :github-repo: spring-cloud/spring-cloud-dataflow
 :github-code: https://github.com/{github-repo}
 :microsite-version: master
-:spring-boot-version: 2.7.6
-:spring-cloud-task-version: 2.4.5
-:spring-batch-version: 4.3.7
+:spring-boot-version: 2.7.14
+:spring-cloud-task-version: 2.4.6
+:spring-batch-version: 4.3.8
 :spring-boot-docs: https://docs.spring.io/spring-boot/docs/{spring-boot-version}/reference/htmlsingle
 :scs-stream-apps-docs: https://docs.spring.io/stream-applications/docs/current/reference/html
 :dataflow-asciidoc-images: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/main/spring-cloud-dataflow-docs/src/main/asciidoc/images

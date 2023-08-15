@@ -13,4 +13,5 @@ Having trouble with Spring Cloud Data Flow, We'd like to help!
 include::appendix-dataflow-template.adoc[]
 include::appendix-howto.adoc[]
 include::appendix-identity-providers.adoc[]
+include::spring-boot-3x.adoc[]
 // include::appendix-development-tasks.adoc[]

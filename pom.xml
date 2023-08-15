@@ -81,6 +81,7 @@
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
+		<module>spring-cloud-dataflow-package</module>
 	</modules>
 	<build>
 		<plugins>

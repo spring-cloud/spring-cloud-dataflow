@@ -140,11 +140,11 @@ jobs:
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
           -B
         jfrog rt build-clean
+        ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn clean install \
           -gs .github/settings.xml \
           -Pstagingrelease,full,deploymentfiles \
           -DskipTests -B $MAVEN_THREADS
-        ./spring-cloud-dataflow-package/build-package.sh jfrog
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV

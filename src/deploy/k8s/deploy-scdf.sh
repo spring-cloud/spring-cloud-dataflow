@@ -117,7 +117,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         ;;
     "rabbit" | "rabbitmq")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "rabbitmq" "3.8"
+        sh "$SCDIR/load-image.sh" "rabbitmq" "3.8-management"
         ;;
     *)
         echo "BROKER=$BROKER not supported"

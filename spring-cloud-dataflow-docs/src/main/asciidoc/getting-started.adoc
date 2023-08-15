@@ -1,6 +1,8 @@
 [[getting-started]]
 = Getting Started
 
+NOTE: This version of Spring Cloud Data Flow provides: <<appendix-boot3>>
+
 include::getting-started-local.adoc[]
 include::getting-started-cloudfoundry.adoc[]
 include::getting-started-kubernetes.adoc[]

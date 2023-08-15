@@ -61,8 +61,8 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog rt mvn clean install -Pfull  -B $MAVEN_THREADS
-        ./spring-cloud-dataflow-package/build-package.sh jfrog
+        ./spring-cloud-dataflow-package/set-package-version.sh
+        jfrog rt mvn clean install -Pfull  -B $MAVEN_THREADS        
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV

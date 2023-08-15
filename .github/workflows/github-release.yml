@@ -304,6 +304,7 @@ jobs:
           --draft \
           --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
           --notes-file $RELEASE_NOTES_FILE
+        # TODO retrieve spring-cloud-dataflow-package and upload to
     # zoo success
     - name: Notify Build Success Zoo Handler Controller
       uses: jvalkeal/build-zoo-handler@v0.0.4
