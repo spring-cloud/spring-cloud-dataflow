@@ -5,7 +5,7 @@ version: '3'
 services:
 
   rabbitmq:
-    image: rabbitmq:3.8
+    image: rabbitmq:3.8-management
     container_name: dataflow-rabbitmq
     environment:
       LANG: en_US.utf8
@@ -13,6 +13,7 @@ services:
       JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
     expose:
       - '5672'
+      - '15672'
 
   dataflow-server:
     environment:

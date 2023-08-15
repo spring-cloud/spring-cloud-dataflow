@@ -4,6 +4,10 @@ MVNW=$SCDIR/../mvnw
 if [ "$PACKAGE_VERSION" = "" ]; then
     PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
 fi
+
+if [[ "$1" == "jfrog" ]]; then
+    MVNW=jfrog rt mvn
+fi
 echo "PACKAGE_VERSION=$PACKAGE_VERSION"
 if [[ "$PACKAGE_VERSION" != *"SNAPSHOT"* ]]; then
     yq '.default.version="release"' -i "$SCDIR/../src/deploy/versions.yaml"

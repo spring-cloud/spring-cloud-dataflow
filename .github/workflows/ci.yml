@@ -62,6 +62,7 @@ jobs:
       run: |
         mvn clean        
         jfrog rt mvn install -Pfull,asciidoctordocs,restdocs -B $MAVEN_THREADS
+        ./spring-cloud-dataflow-package/build-package.sh jfrog         
         jfrog rt build-publish
     - name: Capture Test Results
       if: ${{ always() }}

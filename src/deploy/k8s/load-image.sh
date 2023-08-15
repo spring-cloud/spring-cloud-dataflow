@@ -59,10 +59,22 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     ;;
   *)
     echo "Loading $IMAGE to minikube"
+    DOCKER_IDS=$(docker images --filter "reference=$NAME:$TAG" | grep -F "$TAG" | awk '{print $3}')
+    MK_IDS=$(minikube image ls --format=table | grep -F "$NAME" | grep -F "$TAG" | awk '{print $6}')
+    for did in $DOCKER_IDS; do
+      for mid in $MK_IDS; do
+        # Docker id may be shorter than Minikube id.
+        if [ "${mid:0:12}" = "${did:0:12}" ]; then
+          echo "$IMAGE:$did already uploaded"
+          exit 0
+        fi
+      done
+    done
     PULL=true
     if [ "$DONT_PULL" == "true" ]; then
         PULL=false
     fi
+    echo "Loading:$IMAGE:$DOCKER_IDS"
     minikube image load --pull=$PULL "$IMAGE"
     ;;
   esac

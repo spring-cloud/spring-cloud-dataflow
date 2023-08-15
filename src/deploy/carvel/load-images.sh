@@ -46,7 +46,7 @@ case $BROKER in
     sh "$K8S/load-image.sh" "confluentinc/cp-zookeeper" "5" false
     ;;
 "rabbit" | "rabbitmq")
-    sh "$K8S/load-image.sh" "rabbitmq" "3.8" false
+    sh "$K8S/load-image.sh" "rabbitmq" "3.8-management" false
     ;;
 *)
     echo "BROKER=$BROKER not supported"

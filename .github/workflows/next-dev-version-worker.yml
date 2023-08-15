@@ -114,6 +114,7 @@ jobs:
           -B
         jfrog rt build-clean
         jfrog rt mvn clean install -DskipTests -B $MAVEN_THREADS
+        ./spring-cloud-dataflow-package/build-package.sh jfrog
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
