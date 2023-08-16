@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     # zoo extract and ensure
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -118,8 +122,15 @@ jobs:
           --draft \
           --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
           --notes-file $RELEASE_NOTES_FILE
-        # TODO retrieve spring-cloud-dataflow-package and upload to
-    # zoo success
+        # retrieve spring-cloud-dataflow-package and upload to github release
+        mvn -gs .github/settings.xml \
+            dependency:copy \
+            -Dartifact=org.springframework.cloud:spring-cloud-dataflow-package:${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}:zip \
+            -DoutputDirectory=.
+        gh release upload v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
+                spring-cloud-dataflow-package-${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}.zip \
+                --clobber
+      # zoo success
     - name: Notify Build Success Zoo Handler Controller
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
