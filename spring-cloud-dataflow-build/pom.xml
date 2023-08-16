@@ -20,7 +20,6 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
-		<spring-cloud-dataflow-build.version>2.11.0-SNAPSHOT</spring-cloud-dataflow-build.version>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.14</spring-boot.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
@@ -303,7 +302,7 @@
 						<dependency>
 							<groupId>org.springframework.cloud</groupId>
 							<artifactId>spring-cloud-dataflow-build-tools</artifactId>
-							<version>${spring-cloud-dataflow-build.version}</version>
+							<version>${project.version}</version>
 						</dependency>
 						<dependency>
 							<groupId>io.spring.nohttp</groupId>
