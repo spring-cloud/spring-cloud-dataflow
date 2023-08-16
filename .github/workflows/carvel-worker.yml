@@ -25,12 +25,12 @@ jobs:
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease
     outputs:
-      dataflow-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-      dataflow-version-no-postfix: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}'
-      skipper-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-      server-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-      ctr-version: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}'
-      prerelease: '${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}'
+      dataflow-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      dataflow-version-no-postfix: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}
+      skipper-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      server-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      ctr-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      prerelease: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}
   publish:
     name: Publish
     needs:
@@ -54,6 +54,8 @@ jobs:
   finalize:
     name: Finalize
     runs-on: ubuntu-latest
+    needs:
+      - publish
     steps:
       # zoo success
       - name: Notify Build Success Zoo Handler Controller

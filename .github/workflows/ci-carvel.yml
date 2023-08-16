@@ -68,10 +68,10 @@ jobs:
           fi
         popd
     outputs:
-      dataflow-version: '${{ env.DATAFLOW_VERSION }}'
-      skipper-version: '${{ env.SKIPPER_VERSION }}'
-      dataflow-version-no-postfix: '${{ env.DATAFLOW_VERSION_NOPOSTFIX }}'
-      package-version: '${{ env.PACKAGE_VERSION }}'
+      dataflow-version: ${{ env.DATAFLOW_VERSION }}
+      skipper-version: ${{ env.SKIPPER_VERSION }}
+      dataflow-version-no-postfix: ${{ env.DATAFLOW_VERSION_NOPOSTFIX }}
+      package-version: ${{ env.PACKAGE_VERSION }}
   publish:
     name: Publish
     needs:
