@@ -8,7 +8,7 @@ on:
         required: true
 
 env:
-  MAVEN_THREADS: '-T 2'
+  MAVEN_THREADS: '-T 0.5C'
 
 jobs:
   build:
@@ -87,10 +87,7 @@ jobs:
           -B
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn clean install \
-          -gs .github/settings.xml \
-          -P-spring,stagingmilestone,full,deploymentfiles \        
-          -DskipTests -B $MAVEN_THREADS
+        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles -B install -DskipTests 
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
