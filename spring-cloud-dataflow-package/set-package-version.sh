@@ -2,7 +2,11 @@
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 MVNW=$SCDIR/../mvnw
 if [ "$PACKAGE_VERSION" = "" ]; then
+    $MVNW help:evaluate -Dexpression=project.version -q -DforceStdout > /dev/null
     PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
+    if [[ "$PACKAGE_VERSION" == *"Downloading"* ]]; then
+        PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
+    fi
 fi
 echo "PACKAGE_VERSION=$PACKAGE_VERSION"
 if [[ "$PACKAGE_VERSION" != *"SNAPSHOT"* ]]; then

@@ -10,3 +10,4 @@ scdf-type:
 default:
   scdf-type: 'oss'
   version: 'release'
+  package-version: 2.11.0-RC1
