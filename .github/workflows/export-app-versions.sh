@@ -17,13 +17,5 @@ if ((RC!=0)); then
     exit $RC
 fi
 echo "SKIPPER_VERSION=$SKIPPER_VERSION"
-DATAFLOW_VERSION_NOPOSTFIX=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn build-helper:parse-version help:evaluate -q -DforceStdout)
-RC=$?
-if ((RC!=0)); then
-    echo "DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX"
-    exit $RC
-fi
-echo "DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX"
 export DATAFLOW_VERSION
 export SKIPPER_VERSION
-export DATAFLOW_VERSION_NOPOSTFIX

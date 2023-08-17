@@ -20,17 +20,12 @@ jobs:
         uses: jvalkeal/build-zoo-handler@v0.0.4
         with:
           dispatch-handler-extract-context-properties: true
-          ensure-env: |
-            BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
-            BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix
-            BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease
+          ensure-env: BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
     outputs:
       dataflow-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-      dataflow-version-no-postfix: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix }}
       skipper-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
       server-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
       ctr-version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-      prerelease: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease }}
   publish:
     name: Publish
     needs:
@@ -39,14 +34,12 @@ jobs:
     with:
       package-name: 'scdf'
       package-version: ${{ needs.prepare.outputs.server-version }}
-      dataflow-version-no-postfix: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}
       server-version: ${{ needs.prepare.outputs.server-version }}
       ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
       skipper-version: ${{ needs.prepare.outputs.skipper-version }}
-      prerelease: ${{ needs.prepare.outputs.prerelease }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

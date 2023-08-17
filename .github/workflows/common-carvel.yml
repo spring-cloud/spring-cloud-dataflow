@@ -27,10 +27,6 @@ on:
         type: string
         description: 'Server Version'
         required: true
-      dataflow-version-no-postfix:
-        type: string
-        description: 'Spring Cloud Data Flow Container Release Version'
-        required: true
       skipper-version:
         type: string
         description: 'Spring Cloud Skipper Container Version'
@@ -43,10 +39,6 @@ on:
         type: string
         description: 'Docker repo for Data Flow Server'
         required: true
-      prerelease:
-        type: string
-        description: 'Empty for release'
-        required: false
     secrets:
       DOCKERHUB_USERNAME:
       DOCKERHUB_TOKEN:
@@ -92,7 +84,6 @@ jobs:
         path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.package-bundle }}
         version: ${{ inputs.package-version }}
-        prerelease: ${{ inputs.prerelease && inputs.prerelease || '' }}
 
     # Builds a repository bundle
     - name: Build Repository Bundle
@@ -112,4 +103,3 @@ jobs:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.repository-bundle }}
         version: ${{ inputs.package-version }}
-        prerelease: ${{ inputs.prerelease && inputs.prerelease || '' }}

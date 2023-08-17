@@ -10,10 +10,7 @@ inputs:
   version:
     description: semver version
     required: true
-  prerelease:
-    description: semver version prerelease
-    required: false
-
+  
 runs:
   using: "composite"
   steps:
@@ -27,15 +24,9 @@ runs:
       BUNDLE_PATH: ${{ inputs.path }}
       REPOSITORY: ${{ inputs.repository }}
       VERSION: ${{ inputs.version }}
-      PRERELEASE: ${{ inputs.prerelease }}
     shell: bash
     run: |
       imgpkg push --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
       docker pull $REPOSITORY:$VERSION-RANDOM.$RTAG
-      if [[ "$VERSION" = *"SNAPSHOT"* ]]; then
-        POSTFIX=$VERSION
-      else
-        POSTFIX=$VERSION${PRERELEASE:+"-$PRERELEASE"}
-      fi
-      docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$POSTFIX
-      docker push $REPOSITORY:$POSTFIX
+      docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$VERSION
+      docker push $REPOSITORY:$VERSION

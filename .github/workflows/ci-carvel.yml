@@ -60,7 +60,6 @@ jobs:
           source $ROOT/.github/workflows/export-app-versions.sh
           echo DATAFLOW_VERSION=$DATAFLOW_VERSION >> $GITHUB_ENV
           echo SKIPPER_VERSION=$SKIPPER_VERSION >> $GITHUB_ENV
-          echo DATAFLOW_VERSION_NOPOSTFIX=$DATAFLOW_VERSION_NOPOSTFIX >> $GITHUB_ENV
           if [ "${{ inputs.package_version }}" != "" ]; then
             echo PACKAGE_VERSION=${{ inputs.package_version }} >> $GITHUB_ENV
           else
@@ -70,7 +69,6 @@ jobs:
     outputs:
       dataflow-version: ${{ env.DATAFLOW_VERSION }}
       skipper-version: ${{ env.SKIPPER_VERSION }}
-      dataflow-version-no-postfix: ${{ env.DATAFLOW_VERSION_NOPOSTFIX }}
       package-version: ${{ env.PACKAGE_VERSION }}
   publish:
     name: Publish
@@ -84,11 +82,9 @@ jobs:
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}
-      dataflow-version-no-postfix: ${{ needs.prepare.outputs.dataflow-version-no-postfix }}
       server-version: ${{ needs.prepare.outputs.dataflow-version }}
       ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
       skipper-version: ${{ needs.prepare.outputs.skipper-version }}
-      prerelease: 'SNAPSHOT'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
