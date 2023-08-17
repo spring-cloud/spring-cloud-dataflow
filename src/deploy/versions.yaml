@@ -10,3 +10,9 @@ scdf-type:
 default:
   scdf-type: 'oss'
   version: 'release'
+  package-version: |-
+    Downloading https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.8.3/apache-maven-3.8.3-bin.zip
+    ........................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+    Unzipping /home/runner/.m2/wrapper/dists/apache-maven-3.8.3-bin/5a6n1u8or3307vo2u2jgmkhm0t/apache-maven-3.8.3-bin.zip to /home/runner/.m2/wrapper/dists/apache-maven-3.8.3-bin/5a6n1u8or3307vo2u2jgmkhm0t
+    Set executable permissions for: /home/runner/.m2/wrapper/dists/apache-maven-3.8.3-bin/5a6n1u8or3307vo2u2jgmkhm0t/apache-maven-3.8.3/bin/mvn
+    2.11.0-RC1

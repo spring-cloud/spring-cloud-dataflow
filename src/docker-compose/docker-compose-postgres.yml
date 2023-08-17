@@ -4,22 +4,22 @@ version: '3'
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
 services:
 
+  mariadb:
+    entrypoint: ["echo", "MariaDB service is disabled"]
+
   postgres:
     image: postgres:14
     command: postgres -c 'max_connections=300'
     container_name: dataflow-postgres
     restart: always
     environment:
-      LANG: en_US.utf8
-      LC_ALL: en_US.utf8
-      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
       POSTGRES_DB: dataflow
       POSTGRES_USER: root
       POSTGRES_PASSWORD: rootpw
     expose:
       - 5432
     ports:
-      - '5432:5432'
+      - 5432:5432
 
   dataflow-server:
     environment:
@@ -27,13 +27,11 @@ services:
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-    depends_on:
-      - postgres
+
   skipper-server:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dataflow
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=rootpw
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
-    depends_on:
-      - postgres
+
