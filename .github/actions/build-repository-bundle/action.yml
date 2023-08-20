@@ -35,6 +35,6 @@ runs:
       REPO_BUNDLE_GENERATED: ${{ runner.temp }}/generated/repobundle
     shell: bash
     run: |
-      echo "::set-output name=bundle-path::$REPO_BUNDLE_GENERATED"
+      echo "bundle-path=$REPO_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
       SCDF_DIR="${{ inputs.project-directory || '.' }}"
       bash $SCDF_DIR/.github/actions/build-repository-bundle/build-repository-bundle.sh
