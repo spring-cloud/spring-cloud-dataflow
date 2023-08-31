@@ -145,7 +145,7 @@ public class AppDeploymentRequestCreator {
 		AppBootSchemaVersion bootVersion,
 		Map<String, String> deployerDeploymentProperties
 	) {
-		deployerDeploymentProperties.put("deployer." + name + ".spring.cloud.deployer.bootVersion", bootVersion.getBootVersion());
+		deployerDeploymentProperties.put("spring.cloud.deployer.bootVersion", bootVersion.getBootVersion());
 	}
 
 	private void addDefaultDeployerProperties(
