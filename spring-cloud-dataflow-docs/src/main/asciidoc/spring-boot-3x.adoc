@@ -66,3 +66,33 @@ Spring Cloud Data Flow will create set of tables for the Boot 3.x version that i
 In order to know that the specific task is a Boot 3.x application the version will have to be provided as part of registration. The rest endpoints accepts a `bootVersion=3` parameter and the shell commands accepts `--bootVersion 3`
 
 Since there are now multiple sets of tables that represents task and batch executions, each schema has been assigned a schemaTarget name. This value form part of queries when retrieving execution data. The UI takes care of this by using the embedded resource links. If you are using the REST API directly you will need to update those requests.
+
+==== Pre-packaged Task / Batch Applications
+The default <<ootb-task-apps,pre-packaged task / batch applications>> are based on Spring Boot `2.x`, Spring Cloud Task `2.x`, and Spring Batch `4.x`.
+To use the latest pre-packaged apps based on Spring Boot `3.x`, Spring Cloud Task `3.x`, and Spring Batch `5.x`, you must manually register the apps using the properties below.
+
+.Maven coordinates
+[.small]
+[source,properties]
+----
+task.timestamp=maven://io.spring:timestamp-task:3.0.0
+task.timestamp.bootVersion=3
+
+task.timestamp-batch=maven://io.spring:timestamp-batch-task:3.0.0
+task.timestamp-batch.bootVersion=3
+----
+[.small]
+
+.Docker coordinates
+[.small]
+[source,properties]
+----
+task.timestamp=docker:springcloudtask/timestamp-task:3.0.0
+task.timestamp.bootVersion=3
+
+task.timestamp-batch=docker:springcloudtask/timestamp-batch-task:3.0.0
+task.timestamp-batch.bootVersion=3
+----
+[.small]
+
+TIP: The properties can be used when registering an app in the Dataflow UI or the Dataflow shell CLI.

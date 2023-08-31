@@ -361,6 +361,7 @@ NOTE: By default, the out-of-the-box app's actuator endpoints are secured. You c
 On Kubernetes, see the <<getting-started-kubernetes-probes, Liveness and readiness probes>> section for how to configure
 security for actuator endpoints.
 
+[[ootb-task-apps]]
 ===== Out-of-the-Box Task Applications
 The following table includes the `dataflow.spring.io` links to the task applications based on Spring Cloud Task `2.4.x` and Spring Boot `2.7.x`.
 
