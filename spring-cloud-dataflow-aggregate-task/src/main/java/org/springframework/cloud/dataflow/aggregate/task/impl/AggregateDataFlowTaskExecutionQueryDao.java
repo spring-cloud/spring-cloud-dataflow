@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
 import javax.sql.DataSource;
+import javax.validation.constraints.NotNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -293,7 +294,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, Date endTime) {
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, @NotNull Date endTime) {
 		final SqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskName", taskName)
 				.addValue("endTime", endTime);
@@ -325,7 +326,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime) {
+	public long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName,@NotNull Date endTime) {
 		Long count;
 		try {
 			if (StringUtils.hasText(taskName)) {
@@ -364,7 +365,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime) {
+	public long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime) {
 		Long count;
 		if (StringUtils.hasText(taskName)) {
 			final SqlParameterSource queryParameters = new MapSqlParameterSource()

@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task;
 
+import javax.validation.constraints.NotNull;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -76,7 +78,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param endTime the time before the task ended.
 	 * @return a list that contains task executions.
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, Date endTime);
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, @NotNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName.
@@ -93,7 +95,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param endTime the time before task ended
 	 * @return current number of task executions for the taskName.
 	 */
-	long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime);
+	long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
 
 	/**
 	 * Retrieves the number of task execution that have completed.
@@ -110,7 +112,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param endTime the time before the task ended
 	 * @return the number of completed task executions
 	 */
-	long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime);
+	long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName and with an endTime of
