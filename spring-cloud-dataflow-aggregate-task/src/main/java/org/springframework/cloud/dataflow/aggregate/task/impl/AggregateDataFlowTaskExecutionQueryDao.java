@@ -282,7 +282,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 
 	@Override
 	public List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed) {
-		if(StringUtils.hasLength(taskName)) {
+		if (StringUtils.hasLength(taskName)) {
 			final SqlParameterSource queryParameters = new MapSqlParameterSource()
 					.addValue("taskName", taskName);
 			String query = completed ? GET_EXECUTIONS_BY_NAME_COMPLETED : GET_EXECUTIONS_BY_NAME;
@@ -327,20 +327,20 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	@Override
 	public long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, Date endTime) {
 		Long count;
-		if (StringUtils.hasText(taskName)) {
-			final SqlParameterSource queryParameters = new MapSqlParameterSource()
-					.addValue("taskName", taskName, Types.VARCHAR)
-					.addValue("endTime", endTime, Types.DATE);
+		try {
+			if (StringUtils.hasText(taskName)) {
+				final SqlParameterSource queryParameters = new MapSqlParameterSource()
+						.addValue("taskName", taskName, Types.VARCHAR)
+						.addValue("endTime", endTime, Types.DATE);
 
-			try {
 				count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME, queryParameters, Long.class);
-			} catch (EmptyResultDataAccessException e) {
-				count = 0L;
+			} else {
+				final SqlParameterSource queryParameters = new MapSqlParameterSource()
+						.addValue("endTime", endTime, Types.DATE);
+				count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT_BEFORE_END_TIME, queryParameters, Long.class);
 			}
-		} else {
-			final SqlParameterSource queryParameters = new MapSqlParameterSource()
-					.addValue("endTime", endTime, Types.DATE);
-			count = this.jdbcTemplate.queryForObject(TASK_EXECUTION_COUNT_BEFORE_END_TIME, queryParameters, Long.class);
+		} catch (EmptyResultDataAccessException e) {
+			count = 0L;
 		}
 		return count != null ? count : 0L;
 	}
