@@ -77,6 +77,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param completed indicator to retrieve only completed task executions.
 	 * @param endTime the time before the task ended.
 	 * @return a list that contains task executions.
+	 * @since 2.11
 	 */
 	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, @NotNull Date endTime);
 
@@ -94,6 +95,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param taskName the name of the task to search for in the repository.
 	 * @param endTime the time before task ended
 	 * @return current number of task executions for the taskName.
+	 * @since 2.11
 	 */
 	long getTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
 
@@ -111,6 +113,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param taskName the name of the task to search
 	 * @param endTime the time before the task ended
 	 * @return the number of completed task executions
+	 * @since 2.11
 	 */
 	long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NotNull Date endTime);
 
