@@ -1036,7 +1036,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
-		return getAllTaskExecutionsCount(onlyCompleted,taskName,null);
+		return getAllTaskExecutionsCount(onlyCompleted, taskName, null);
 	}
 
 	@Override

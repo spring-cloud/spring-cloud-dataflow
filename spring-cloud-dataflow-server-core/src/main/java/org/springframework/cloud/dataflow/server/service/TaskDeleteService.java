@@ -49,18 +49,20 @@ public interface TaskDeleteService {
 	 *
 	 * @param actionsAsSet the actions
 	 * @param taskName the task name
-	 * @param completed the completion state of the task executions
+	 * @param onlyCompleted Indicator to delete only completed tasks
 	 */
-	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed);
+	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean onlyCompleted);
 
 	/**
 	 * Clean up the resources that resuled from running the task with the given name and actions.
 	 *
 	 * @param actionsAsSet the actions
 	 * @param taskName the task name
-	 * @param completed the completion state of the task executions
+	 * @param onlyCompleted Indicator to delete only completed tasks
+	 * @param includeTasksEndedMinDaysAgo only include tasks that have ended at least this many days ago
+	 * @since 2.11
 	 */
-	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days);
+	void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean onlyCompleted, Integer includeTasksEndedMinDaysAgo);
 
 	/**
 	 * Delete one or more Task executions.
