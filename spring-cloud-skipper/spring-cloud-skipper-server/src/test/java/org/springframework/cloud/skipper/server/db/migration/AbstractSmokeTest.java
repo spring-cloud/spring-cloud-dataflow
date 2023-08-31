@@ -52,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "repo-test"})
 @TestPropertySource(properties = {
-	"spring.jpa.hibernate.ddl-auto=validate",
+	"spring.jpa.hibernate.ddl-auto=none",
 	"logging.level.org.springframework.cloud=info",
 	"logging.level.org.hibernate=debug"
 })
@@ -89,6 +89,8 @@ public abstract class AbstractSmokeTest {
 		deployerData = appDeployerDataRepository.save(deployerData);
 		assertThat(deployerData.getId()).isNotNull();
 		assertThat(deployerData.getId()).isNotEqualTo(0);
+		assertThat(deployerData.getDeploymentDataAsMap()).isNotEmpty();
+		assertThat(deployerData.getDeploymentDataAsMap()).containsEntry("a", "b");
 		logger.info("completed:{}", getClass().getSimpleName());
 	}
 
