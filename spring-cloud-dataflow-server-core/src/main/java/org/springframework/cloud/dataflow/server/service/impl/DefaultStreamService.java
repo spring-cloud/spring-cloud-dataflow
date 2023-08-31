@@ -558,7 +558,7 @@ public class DefaultStreamService implements StreamService {
 	 */
 	public Page<StreamDefinition> findDefinitionByNameContains(Pageable pageable, String search) {
 		Page<StreamDefinition> streamDefinitions;
-		if (search != null) {
+		if (StringUtils.hasLength(search)) {
 			streamDefinitions = streamDefinitionRepository.findByNameContains(search, pageable);
 		}
 		else {
