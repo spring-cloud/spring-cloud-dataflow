@@ -291,7 +291,7 @@ public class DataflowCluster implements Startable {
 
 	public String getDataflowUrl() {
 		Assert.state(runningDataflow != null, "There's no running dataflow");
-		return String.format("http://%s:%s/about", runningDataflow.getHost(),
+		return String.format("http://%s:%s", runningDataflow.getHost(),
 				runningDataflow.getMappedPort(DATAFLOW_PORT));
 	}
 
@@ -371,23 +371,25 @@ public class DataflowCluster implements Startable {
 			skipperContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
 			skipperContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
 			skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", databaseContainer.getDriverClassName());
-			if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
+			if (skipperDatabaseClusterContainer.tag.startsWith(TagNames.POSTGRES)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%d/dataflow", skipperDatabaseAlias, POSTGRES_PORT));
-			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MARIADB)) {
+			} else if (skipperDatabaseClusterContainer.tag.startsWith(TagNames.MARIADB)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%d/dataflow", skipperDatabaseAlias, MARIADB_PORT))
 					.withEnv("SPRING_JPA_DATABASE_PLATFORM", "org.hibernate.dialect.MariaDB106Dialect");
-			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.MSSQL)) {
+			} else if (skipperDatabaseClusterContainer.tag.startsWith(TagNames.MSSQL)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:sqlserver://%s:%d;encrypt=false", skipperDatabaseAlias, MSSQL_PORT));
 				skipperContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.ORACLE)) {
+			} else if (skipperDatabaseClusterContainer.tag.startsWith(TagNames.ORACLE)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:oracle:thin:spring/spring@%s:%d/ORCLPDB1", skipperDatabaseAlias, ORACLE_PORT));
-			} else if (ObjectUtils.nullSafeEquals(skipperDatabaseClusterContainer.tag, TagNames.DB2)) {
+			} else if (skipperDatabaseClusterContainer.tag.startsWith(TagNames.DB2)) {
 				skipperContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:db2://%s:%d/spring", skipperDatabaseAlias, DB2_PORT));
+			} else {
+				skipperContainer.withEnv("SPRING_DATASOURCE_URL", databaseContainer.getJdbcUrl());
 			}
 		}
 
@@ -433,22 +435,24 @@ public class DataflowCluster implements Startable {
 			dataflowContainer.withEnv("SPRING_DATASOURCE_USERNAME", databaseContainer.getUsername());
 			dataflowContainer.withEnv("SPRING_DATASOURCE_PASSWORD", databaseContainer.getPassword());
 			dataflowContainer.withEnv("SPRING_DATASOURCE_DRIVER_CLASS_NAME", databaseContainer.getDriverClassName());
-			if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.POSTGRES)) {
+			if (dataflowDatabaseClusterContainer.tag.startsWith(TagNames.POSTGRES)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:postgresql://%s:%s/dataflow", dataflowDatabaseAlias, POSTGRES_PORT));
-			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MARIADB)) {
+			} else if (dataflowDatabaseClusterContainer.tag.startsWith(TagNames.MARIADB)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:mariadb://%s:%s/dataflow", dataflowDatabaseAlias, MARIADB_PORT))
 						.withEnv("SPRING_JPA_DATABASE_PLATFORM", "org.hibernate.dialect.MariaDB106Dialect");
-			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.MSSQL)) {
+			} else if (dataflowDatabaseClusterContainer.tag.startsWith(TagNames.MSSQL)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:sqlserver://%s:%s;encrypt=false", dataflowDatabaseAlias, MSSQL_PORT));
-			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.ORACLE)) {
+			} else if (dataflowDatabaseClusterContainer.tag.startsWith(TagNames.ORACLE)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:oracle:thin:spring/spring@%s:%s/ORCLPDB1", dataflowDatabaseAlias, ORACLE_PORT));
-			} else if (ObjectUtils.nullSafeEquals(dataflowDatabaseClusterContainer.tag, TagNames.DB2)) {
+			} else if (dataflowDatabaseClusterContainer.tag.startsWith(TagNames.DB2)) {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL",
 						String.format("jdbc:db2://%s:%s/spring", dataflowDatabaseAlias, DB2_PORT));
+			} else {
+				dataflowContainer.withEnv("SPRING_DATASOURCE_URL", databaseContainer.getJdbcUrl());
 			}
 		}
 		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",

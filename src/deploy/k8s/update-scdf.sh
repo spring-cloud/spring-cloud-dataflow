@@ -75,13 +75,13 @@ echo "YAML_PATH=$YAML_PATH"
 set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
-    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" true
-    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner:$DATAFLOW_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server" "$SCDF_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server:$SCDF_PRO_VERSION" true
     else
-        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
+        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server:$DATAFLOW_VERSION" true
     fi
 fi
 

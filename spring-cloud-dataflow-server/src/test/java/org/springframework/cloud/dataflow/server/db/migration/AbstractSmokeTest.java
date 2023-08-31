@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.db.migration;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,9 +27,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -49,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = {DataFlowServerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
-	"spring.jpa.hibernate.ddl-auto=validate"
+	"spring.jpa.hibernate.ddl-auto=none"
 })
 public abstract class AbstractSmokeTest {
 	private final static Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
@@ -74,11 +77,14 @@ public abstract class AbstractSmokeTest {
 	protected AggregateTaskExplorer taskExplorer;
 
 	@Autowired
+	protected StreamDefinitionRepository streamDefinitionRepository;
+
+	@Autowired
 	protected PlatformTransactionManager transactionManager;
 
 	@Test
 	public void testTaskCreation() {
-		logger.info("started:{}", getClass().getSimpleName());
+		logger.info("testTaskCreation:started:{}", getClass().getSimpleName());
 		TransactionTemplate tx = new TransactionTemplate(transactionManager);
 		tx.execute(status -> {
 			for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
@@ -96,6 +102,18 @@ public abstract class AbstractSmokeTest {
 		taskExecutions.forEach(taskExecution -> {
 			assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L);
 		});
-		logger.info("completed:{}", getClass().getSimpleName());
+		logger.info("testTaskCreation:completed:{}", getClass().getSimpleName());
+	}
+	@Test
+	public void streamCreation() {
+		TransactionTemplate tx = new TransactionTemplate(transactionManager);
+		tx.execute(status -> {
+			StreamDefinition streamDefinition = new StreamDefinition("timelogger", "time | log");
+			streamDefinition = streamDefinitionRepository.save(streamDefinition);
+			Optional<StreamDefinition> loaded = streamDefinitionRepository.findById(streamDefinition.getName());
+			assertThat(loaded).isPresent();
+			assertThat(loaded.get().getDslText()).isEqualTo("time | log");
+			return true;
+		});
 	}
 }

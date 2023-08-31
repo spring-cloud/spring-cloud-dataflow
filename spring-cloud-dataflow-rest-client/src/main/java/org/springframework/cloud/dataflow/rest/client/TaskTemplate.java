@@ -113,7 +113,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION).isPresent(), "Execution relation is required");
-		Assert.isTrue(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent(), "Execution launch relation is required");
+
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.isTrue(resources.getLink(RETRIEVE_LOG).isPresent(), "Log relation is required");
@@ -137,7 +137,11 @@ public class TaskTemplate implements TaskOperations {
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
-		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
+		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
+			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
+		} else {
+			this.executionLaunchLink = null;
+		}
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
@@ -174,6 +178,7 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
+		Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		String formattedProperties = DeploymentPropertiesUtils.format(properties);
 		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");

@@ -31,7 +31,7 @@ public class PostgresSharedDbIT extends AbstractPostgresDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {
-		return TagNames.POSTGRES_10;
+		return TagNames.POSTGRES_14;
 	}
 
 	@Override

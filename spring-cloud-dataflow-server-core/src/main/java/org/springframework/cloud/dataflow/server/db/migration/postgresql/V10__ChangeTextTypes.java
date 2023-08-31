@@ -19,16 +19,21 @@ import org.flywaydb.core.api.migration.Context;
 
 import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
 
+import static org.springframework.cloud.dataflow.server.db.migration.PostgreSQLTextToOID.convertColumnFromOID;
 
-public class V9__ChangeTextTypes extends AbstractMigration {
+public class V10__ChangeTextTypes extends AbstractMigration {
 
-	public V9__ChangeTextTypes() {
+	public V10__ChangeTextTypes() {
 		super(null);
 	}
 
 
 	@Override
 	public void migrate(Context context) throws Exception {
-		// perform no conversions
+		convertColumnFromOID("app_registration", "id", "uri", context.getConfiguration().getDataSource());
+		convertColumnFromOID("app_registration", "id", "metadata_uri", context.getConfiguration().getDataSource());
+		convertColumnFromOID("stream_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
+		convertColumnFromOID("stream_definitions", "definition_name", "original_definition", context.getConfiguration().getDataSource());
+		convertColumnFromOID("task_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
 	}
 }

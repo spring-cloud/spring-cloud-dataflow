@@ -38,6 +38,7 @@ import org.springframework.cloud.dataflow.integration.test.db.container.Dataflow
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.cloud.dataflow.integration.test.util.AssertUtils;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Base test class for all database integration tests providing foundation for
@@ -70,7 +71,7 @@ public abstract class AbstractDataflowTests {
 			);
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
 			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
-			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:14", TagNames.POSTGRES_14),
+			ClusterContainer.from(TagNames.POSTGRES_14, "postgres:14", TagNames.POSTGRES_14),
 			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
 			ClusterContainer.from(TagNames.MARIADB_10_6, "mariadb:10.6", TagNames.MARIADB),
@@ -167,10 +168,10 @@ public abstract class AbstractDataflowTests {
 	}
 
 	protected static void assertDataflowServerRunning(DataflowCluster dataflowCluster) {
-		AssertUtils.assertDataflowServerRunning(dataflowCluster.getDataflowUrl());
+		AssertUtils.assertDataflowServerRunning(UriComponentsBuilder.fromHttpUrl(dataflowCluster.getDataflowUrl()).pathSegment("about").toUriString());
 	}
 
 	protected static void assertDataflowServerNotRunning(DataflowCluster dataflowCluster) {
-		AssertUtils.assertDataflowServerNotRunning(dataflowCluster.getDataflowUrl());
+		AssertUtils.assertDataflowServerNotRunning(UriComponentsBuilder.fromHttpUrl(dataflowCluster.getDataflowUrl()).pathSegment("about").toUriString());
 	}
 }

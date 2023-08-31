@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.skipper.server.db.migration;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -33,13 +37,31 @@ public class PostgreSQLTextToOID {
 
 	private final static String ADD_TMP_OID_COL = "alter table %s add column %s oid";
 
+	private final static String ADD_TMP_TEXT_COL = "alter table %s add column %s text";
+
 	private final static String UPDATE_TMP_OID_COL = "update %s set %s = lo_from_bytea(0, %s::bytea), %s = null where %s in (select %s from %s where %s is null and %s is not null limit 100)";
+
+	private final static String UPDATE_TMP_TEXT_COL = "update %s set %s = convert_from(lo_get(cast(%s as bigint)),'UTF8'), %s = null where %s in (select %s from %s where %s is null and %s is not null limit 100)";
 
 	private final static String DROP_ORIGINAL_COL = "alter table %s drop column %s";
 
-	private final static String RENAME_OID_COL = "alter table %s rename column %s to %s";
+	private final static String RENAME_TMP_COL = "alter table %s rename column %s to %s";
 
-	public static void convertColumn(String table, String id, String column, DataSource dataSource) {
+	public static void convertColumnToOID(String table, String id, String column, DataSource dataSource) {
+
+		try (Connection connection = dataSource.getConnection()) {
+			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
+				while (resultSet.next()) {
+					String dataType = resultSet.getString("DATA_TYPE");
+					if (dataType.equalsIgnoreCase("OID")) {
+						logger.info("Found {}:{}:{}", table, column, dataType);
+						return;
+					}
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 		JdbcTemplate template = new JdbcTemplate(dataSource);
 		final String tmp_col = column + "_tmp";
 		String sqlTmp = String.format(ADD_TMP_OID_COL, table, tmp_col);
@@ -59,7 +81,45 @@ public class PostgreSQLTextToOID {
 		String sqlDrop = String.format(DROP_ORIGINAL_COL, table, column);
 		logger.debug("Executing:{}", sqlDrop);
 		template.update(sqlDrop);
-		String sqlRename = String.format(RENAME_OID_COL, table, tmp_col, column);
+		String sqlRename = String.format(RENAME_TMP_COL, table, tmp_col, column);
+		logger.debug("Executing:{}", sqlRename);
+		template.update(sqlRename);
+	}
+
+	public static void convertColumnFromOID(String table, String id, String column, DataSource dataSource) {
+		try (Connection connection = dataSource.getConnection()) {
+			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
+				while (resultSet.next()) {
+					String dataType = resultSet.getString("DATA_TYPE");
+					if (!dataType.equalsIgnoreCase("OID")) {
+						logger.info("Found {}:{}:{}", table, column, dataType);
+						return;
+					}
+				}
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		JdbcTemplate template = new JdbcTemplate(dataSource);
+		final String tmp_col = column + "_tmp";
+		String sqlTmp = String.format(ADD_TMP_TEXT_COL, table, tmp_col);
+		logger.debug("Executing:{}", sqlTmp);
+		template.update(sqlTmp);
+		int total = 0;
+		do {
+			String sql = String.format(UPDATE_TMP_TEXT_COL, table, tmp_col, column, column, id, id, table, tmp_col, column);
+			logger.debug("Executing:{}", sql);
+			int count = template.update(sql);
+			total += count;
+			if (count <= 0) {
+				logger.info("Updated {} rows of {} in {}", total, column, table);
+				break;
+			}
+		} while (true);
+		String sqlDrop = String.format(DROP_ORIGINAL_COL, table, column);
+		logger.debug("Executing:{}", sqlDrop);
+		template.update(sqlDrop);
+		String sqlRename = String.format(RENAME_TMP_COL, table, tmp_col, column);
 		logger.debug("Executing:{}", sqlRename);
 		template.update(sqlRename);
 	}

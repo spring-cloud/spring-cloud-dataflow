@@ -78,13 +78,28 @@ public class PostgreSQLTextToOIDTest {
 		final List<Pair<String, String>> data = new ArrayList<>();
 		final Random random = new Random(System.currentTimeMillis());
 		for (int i = 0; i < 5000; i++) {
-			data.add(new ImmutablePair<>(randomString(random, 1024), randomString(random, 128)));
+			data.add(new ImmutablePair<>(randomString(random, 1024, 8), randomString(random, 128, 4)));
 		}
 		createTable("simple_table", "text", data);
-		PostgreSQLTextToOID.convertColumn("simple_table", "id", "big_string", dataSource);
+		PostgreSQLTextToOID.convertColumnToOID("simple_table", "id", "big_string", dataSource);
 		final String selectTable = "select id, convert_from(lo_get(cast(big_string as bigint)), 'UTF8'), short_string from simple_table";
 		JdbcTemplate template = new JdbcTemplate(dataSource);
 		List<Triple<Long, String, String>> result = template.query(selectTable, (rs, rowNum) -> new ImmutableTriple<>(
+						rs.getLong(1),
+						rs.getString(2),
+						rs.getString(3)
+				)
+		);
+		for (Triple<Long, String, String> item : result) {
+			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
+			assertNotNull(right);
+			assertEquals(right.getLeft(), item.getMiddle());
+			assertEquals(right.getRight(), item.getRight());
+		}
+		PostgreSQLTextToOID.convertColumnFromOID("simple_table", "id", "big_string", dataSource);
+		final String selectTextTable = "select id, big_string, short_string from simple_table";
+		template = new JdbcTemplate(dataSource);
+		result = template.query(selectTextTable, (rs, rowNum) -> new ImmutableTriple<>(
 						rs.getLong(1),
 						rs.getString(2),
 						rs.getString(3)
@@ -103,13 +118,28 @@ public class PostgreSQLTextToOIDTest {
 		final List<Pair<String, String>> data = new ArrayList<>();
 		final Random random = new Random(System.currentTimeMillis());
 		for (int i = 0; i < 5000; i++) {
-			data.add(new ImmutablePair<>(randomString(random, 1024), randomString(random, 128)));
+			data.add(new ImmutablePair<>(randomString(random, 1024, 8), randomString(random, 128, 4)));
 		}
 		createTable("simple_table2", "varchar(2048)", data);
-		PostgreSQLTextToOID.convertColumn("simple_table2", "id", "big_string", dataSource);
+		PostgreSQLTextToOID.convertColumnToOID("simple_table2", "id", "big_string", dataSource);
 		final String selectTable = "select id, convert_from(lo_get(cast(big_string as bigint)), 'UTF8'), short_string from simple_table2";
 		JdbcTemplate template = new JdbcTemplate(dataSource);
 		List<Triple<Long, String, String>> result = template.query(selectTable, (rs, rowNum) -> new ImmutableTriple<>(
+						rs.getLong(1),
+						rs.getString(2),
+						rs.getString(3)
+				)
+		);
+		for (Triple<Long, String, String> item : result) {
+			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
+			assertNotNull(right);
+			assertEquals(right.getLeft(), item.getMiddle());
+			assertEquals(right.getRight(), item.getRight());
+		}
+		PostgreSQLTextToOID.convertColumnFromOID("simple_table2", "id", "big_string", dataSource);
+		final String selectTextTable = "select id, big_string, short_string from simple_table2";
+		template = new JdbcTemplate(dataSource);
+		result = template.query(selectTextTable, (rs, rowNum) -> new ImmutableTriple<>(
 						rs.getLong(1),
 						rs.getString(2),
 						rs.getString(3)
@@ -151,9 +181,9 @@ public class PostgreSQLTextToOIDTest {
 		});
 	}
 
-	private String randomString(Random random, int len) {
+	private String randomString(Random random, int len, int minLen) {
 		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < Math.max(minLen, len); i++) {
 			char c = (char) (random.nextInt(26) + 'a');
 			result.append(random.nextBoolean() ? Character.toUpperCase(c) : Character.toLowerCase(c));
 		}

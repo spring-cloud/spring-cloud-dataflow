@@ -1,21 +1,27 @@
 #!/bin/bash
+function print_args() {
+    echo "Arguments: <docker-image:tag> [<dont-pull>]"
+    echo "Not there is not space between name and tag. It is like on any docker registry"
+    echo "dont-pull: true - will not pull never"
+    echo "dont-pull: false | will pull always"
+    echo "dont-pull: <pot-provided>: will pull if not present"
+}
 if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
-if [ "$2" == "" ]; then
-  echo "Arguments: <docker-image> <tag> [<dont-pull>]"
+if [ "$1" == "" ]; then
+  print_args
   exit 1
 fi
+if [ "$2" != "" ] && [ "$2" != "true" ] && [ "$2" != "false" ]; then
+  print_args
+  exit 1
+fi
+
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
-  DONT_PULL=$3
-  if [[ "$2" = "" ]]; then
-    echo "A TAG is required for $1" >&2
-    exit 2
-  fi
-  TAG=$2
-  NAME=$1
-  IMAGE="$NAME:$TAG"
-  COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
+  DONT_PULL=$2
+  IMAGE="$1"
+  COUNT=$(docker images --filter "reference=$IMAGE" --format "{{ .Repository }}:{{ .Tag }}" 2> /dev/null | grep -c -F "$IMAGE")
   if [ "$DONT_PULL" = "true" ]; then
     if ((COUNT == 0)); then
       echo "ERROR:Image not found $IMAGE" >&2
@@ -24,14 +30,14 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
       echo "Not pulling:$IMAGE"
     fi
   elif [ "$DONT_PULL" = "" ]; then
-    if ((COUNT == 0)) || [[ "$TAG" == *"SNAPSHOT"* ]] || [[ "$TAG" == *"latest"* ]]; then
+    if ((COUNT == 0)) || [[ "$IMAGE" == *"-SNAPSHOT" ]] || [[ "$IMAGE" == *":latest" ]]; then
       echo "Pulling:$IMAGE"
       docker pull "$IMAGE"
     else
       echo "Exists:$IMAGE"
     fi
   fi
-  COUNT=$(docker images 2> /dev/null | grep -F "$NAME" | grep -c -F "$TAG")
+  COUNT=$(docker images --filter "reference=$IMAGE" --format "{{ .Repository }}:{{ .Tag }}" 2> /dev/null | grep -c -F "$IMAGE")
   if ((COUNT == 0)); then
     echo "WARN:Image Not found:$IMAGE"
     exit 0
@@ -59,8 +65,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     ;;
   *)
     echo "Loading $IMAGE to minikube"
-    DOCKER_IDS=$(docker images --filter "reference=$NAME:$TAG" | grep -F "$TAG" | awk '{print $3}')
-    MK_IDS=$(minikube image ls --format=table | grep -F "$NAME" | grep -F "$TAG" | awk '{print $6}')
+    DOCKER_IDS=$(docker images --filter "reference=$IMAGE" --format "{{ .ID }}")
+    NAME="${IMAGE%%:*}"
+    colon=":"
+    TAG=${IMAGE#*$colon}
+    MK_IDS=$(minikube image ls --format table | grep -F "$NAME" | grep -F "$TAG" | awk '{print $6}')
     for did in $DOCKER_IDS; do
       for mid in $MK_IDS; do
         # Docker id may be shorter than Minikube id.
@@ -70,11 +79,13 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
         fi
       done
     done
-    PULL=true
-    if [ "$DONT_PULL" == "true" ]; then
-        PULL=false
+    PULL=false
+    if [ "$DONT_PULL" == "false" ]; then
+        PULL=true
+        echo "Loading:$IMAGE"
+    else
+        echo "Loading:$IMAGE:$DOCKER_IDS"
     fi
-    echo "Loading:$IMAGE:$DOCKER_IDS"
     minikube image load --pull=$PULL "$IMAGE"
     ;;
   esac

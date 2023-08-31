@@ -94,16 +94,15 @@ echo "YAML_PATH=$YAML_PATH"
 set -e
 if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     # TODO get version from yaml spec.template.spec.containers[0].image
-    sh "$SCDIR/load-image.sh" "busybox" "1"
-    # sh "$SCDIR/load-image.sh" "bitnami/kubectl" "1.23.6-debian-10-r0"
+    sh "$SCDIR/load-image.sh" "busybox:1"
     case $DATABASE in
     "mariadb")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "mariadb" "10.6"
+        sh "$SCDIR/load-image.sh" "mariadb:10.6"
         ;;
     "postgresql")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "postgres" "14"
+        sh "$SCDIR/load-image.sh" "postgres:14"
         ;;
     *)
         echo "DATABASE=$DATABASE not supported"
@@ -112,25 +111,25 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     case $BROKER in
     "kafka")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka" "5"
-        sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper" "5"
+        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka:5"
+        sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper:5"
         ;;
     "rabbit" | "rabbitmq")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "rabbitmq" "3.8-management"
+        sh "$SCDIR/load-image.sh" "rabbitmq:3.8-management"
         ;;
     *)
         echo "BROKER=$BROKER not supported"
         ;;
     esac
 
-    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner" "$DATAFLOW_VERSION" true
-    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server" "$SKIPPER_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner:$DATAFLOW_VERSION" true
+    sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server" "$SCDF_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server:$SCDF_PRO_VERSION" true
     else
-        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
+        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server:$DATAFLOW_VERSION" true
     fi
 fi
 
@@ -154,9 +153,9 @@ kubectl create --namespace "$NS" -f $K8S/$DATABASE/
 if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
     echo "Loading Prometheus and Grafana"
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
-        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus" "2.11.0-SNAPSHOT" false
-        sh "$SCDIR/load-image.sh" "prom/prometheus" "v2.37.8"
-        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "1.5.2"
+        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.0-SNAPSHOT" false
+        sh "$SCDIR/load-image.sh" "prom/prometheus:v2.37.8"
+        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy:1.5.2"
     fi
     set +e
     kubectl create --namespace "$NS" serviceaccount prometheus-rsocket-proxy
