@@ -1042,10 +1042,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer days) {
 		if (days != null) {
-			LocalDateTime localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).minusDays(days);
-			Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
-			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskNameAndBeforeDate(taskName, Date.from(instant))
-					: dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, Date.from(instant)));
+			Date dateBeforeDays = TaskServicesDateUtils.getDateBeforeDays(days);
+			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays)
+					: dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays));
 		} else {
 			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
 					: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
