@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -344,7 +345,7 @@ public class DefaultStreamService implements StreamService {
 			if (hasProps) {
 				appMap.put(SpringCloudDeployerApplicationManifest.SPEC_STRING, specMap);
 			}
-			if (appMap.size() != 0) {
+			if (!appMap.isEmpty()) {
 				skipperConfigValuesMap.put(appName, appMap);
 			}
 		}
@@ -353,7 +354,7 @@ public class DefaultStreamService implements StreamService {
 			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			dumperOptions.setPrettyFlow(true);
 			dumperOptions.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
-			Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+			Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 			return yaml.dump(skipperConfigValuesMap);
 		}
 		else {

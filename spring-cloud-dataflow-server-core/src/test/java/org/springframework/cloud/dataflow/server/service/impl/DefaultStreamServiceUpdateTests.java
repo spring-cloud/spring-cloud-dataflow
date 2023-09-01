@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -112,7 +113,7 @@ public class DefaultStreamServiceUpdateTests {
 		Map<String, String> updateProperties = new HashMap<>();
 		updateProperties.put("app.log.server.port", "9999");
 		updateProperties.put("app.log.endpoints.sensitive", "false");
-		updateProperties.put("app.log.level", "ERROR"); // this should be expanded
+		updateProperties.put("app.log.log.level", "ERROR"); // this should be expanded
 		updateProperties.put("deployer.log.memory", "4096m");
 		updateProperties.put("version.log", "1.1.1.RELEASE");
 		String yml = streamService.convertPropertiesToSkipperYaml(streamDefinition, updateProperties);
@@ -127,7 +128,7 @@ public class DefaultStreamServiceUpdateTests {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 
 		Object actualYamlLoaded = yaml.load(yml);
 		Object expectedYamlLoaded = yaml.load(expectedYaml);
