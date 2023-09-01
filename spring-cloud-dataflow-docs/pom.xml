@@ -11,7 +11,7 @@
 	<description>Spring Cloud Data Flow Docs</description>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
-		<docs.resources.version>0.2.5</docs.resources.version>
+		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -50,13 +50,6 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-completion</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.spring.docresources</groupId>
-			<artifactId>spring-doc-resources</artifactId>
-			<version>${docs.resources.version}</version>
-			<type>zip</type>
-			<optional>true</optional>
-		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
@@ -94,27 +87,8 @@
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-dependency-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>unpack-doc-resources</id>
-								<goals>
-									<goal>unpack-dependencies</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<includeGroupIds>io.spring.docresources</includeGroupIds>
-									<includeArtifactIds>spring-doc-resources</includeArtifactIds>
-									<includeTypes>zip</includeTypes>
-									<excludeTransitive>true</excludeTransitive>
-									<outputDirectory>${project.build.directory}/refdocs/</outputDirectory>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-resources-plugin</artifactId>
+						<version>${maven-resources-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>copy-asciidoc-resources</id>
@@ -137,7 +111,14 @@
 					<plugin>
 						<groupId>org.asciidoctor</groupId>
 						<artifactId>asciidoctor-maven-plugin</artifactId>
-						<version>1.5.6</version>
+						<version>2.2.4</version>
+						<dependencies>
+							<dependency>
+								<groupId>io.spring.asciidoctor.backends</groupId>
+								<artifactId>spring-asciidoctor-backends</artifactId>
+								<version>0.0.5</version>
+							</dependency>
+						</dependencies>
 						<configuration>
 							<sourceDirectory>${project.build.directory}/refdocs/</sourceDirectory>
 							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
@@ -170,11 +151,11 @@
 									<goal>process-asciidoc</goal>
 								</goals>
 								<configuration>
-									<backend>html5</backend>
+									<backend>spring-html</backend>
 									<sourceHighlighter>highlight.js</sourceHighlighter>
 									<doctype>book</doctype>
 									<attributes>
-										// these attributes are required to use the doc resources
+										<!-- these attributes are required to use the doc resources-->
 										<docinfo>shared</docinfo>
 										<stylesdir>css/</stylesdir>
 										<stylesheet>spring.css</stylesheet>
