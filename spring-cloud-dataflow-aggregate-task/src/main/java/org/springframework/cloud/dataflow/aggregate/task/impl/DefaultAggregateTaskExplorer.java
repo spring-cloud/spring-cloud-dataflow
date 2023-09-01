@@ -193,8 +193,8 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, Date endTime) {
-		return this.taskExecutionQueryDao.findTaskExecutionsBeforeEndTime(taskName, completed, endTime);
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime) {
+		return this.taskExecutionQueryDao.findTaskExecutionsBeforeEndTime(taskName, endTime);
 	}
 
 	@Override

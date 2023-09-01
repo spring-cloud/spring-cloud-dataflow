@@ -207,7 +207,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days) {
 		List<AggregateTaskExecution> tasks;
 		if (days != null) {
-			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, completed, TaskServicesDateUtils.getDateBeforeDays(days));
+			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, TaskServicesDateUtils.getDateBeforeDays(days));
 		} else {
 			tasks = this.taskExplorer.findTaskExecutions(taskName, completed);
 		}

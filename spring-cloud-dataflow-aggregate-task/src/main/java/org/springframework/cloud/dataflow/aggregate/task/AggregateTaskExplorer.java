@@ -104,12 +104,11 @@ public interface AggregateTaskExplorer {
 	 * Get a list of executions for a task by name, completion status and end time.
 	 *
 	 * @param taskName  the name of the task to be searched
-	 * @param onlyCompleted Indicator to find only completed tasks
 	 * @param endTime the tasks that ended before the endTime
 	 * @return list of task executions
 	 * @since 2.11
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean onlyCompleted, Date endTime);
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime);
 
 	/**
 	 * Get a collection/page of executions.

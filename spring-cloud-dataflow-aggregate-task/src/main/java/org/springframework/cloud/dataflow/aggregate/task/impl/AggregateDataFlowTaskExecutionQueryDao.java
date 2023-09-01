@@ -126,12 +126,6 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	private static final String GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME = GET_EXECUTIONS +
 			" where END_TIME IS NOT NULL AND END_TIME < :endTime";
 
-	private static final String GET_EXECUTION_BY_NAME_BEFORE_END_TIME = GET_EXECUTIONS +
-			" where TASK_NAME = :taskName AND END_TIME < :endTime";
-
-	private static final String GET_EXECUTIONS_BEFORE_END_TIME = GET_EXECUTIONS +
-			" where END_TIME < :endTime";
-
 	private static final String TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION ";
 
@@ -294,16 +288,12 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, @NotNull Date endTime) {
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NotNull Date endTime) {
 		final SqlParameterSource queryParameters = new MapSqlParameterSource()
 				.addValue("taskName", taskName)
 				.addValue("endTime", endTime);
 		String query;
-		if (taskName.isEmpty()) {
-			query = completed ? GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME : GET_EXECUTIONS_BEFORE_END_TIME;
-		} else {
-			query = completed ? GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME : GET_EXECUTION_BY_NAME_BEFORE_END_TIME;
-		}
+		query = taskName.isEmpty() ? GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME : GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME;
 		return this.jdbcTemplate.query(query, queryParameters, new CompositeTaskExecutionRowMapper());
 	}
 

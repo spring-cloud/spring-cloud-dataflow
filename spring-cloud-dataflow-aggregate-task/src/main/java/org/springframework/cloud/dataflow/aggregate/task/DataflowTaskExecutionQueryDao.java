@@ -74,12 +74,11 @@ public interface DataflowTaskExecutionQueryDao {
 	 * Retrieves a subset of task executions by task name and execution status.
 	 *
 	 * @param taskName  the name of the task to search for in the repository.
-	 * @param completed indicator to retrieve only completed task executions.
 	 * @param endTime the time before the task ended.
 	 * @return a list that contains task executions.
 	 * @since 2.11
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, boolean completed, @NotNull Date endTime);
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NotNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName.
