@@ -16,28 +16,32 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import org.springframework.lang.NonNull;
+
 /**
- * Used to provide basic date functionality for the task services.
+ * Provides date functionality for the task services.
  *
  * @author Tobias Soloschenko
  */
-public class TaskServicesDateUtils {
+final class TaskServicesDateUtils {
+
+	private TaskServicesDateUtils() {
+	}
 
 	/**
-	 * Gets the date for the given days in the past.
+	 * Gets the date representation for the given number of days in the past.
 	 *
-	 * @param days the days to calculate the date with
-	 * @return the date in the past
+	 * @param numDaysAgo the number of days ago
+	 * @return the date for {@code numDaysAgo} from today at midnight (locally)
 	 */
-	public static Date getDateBeforeDays(@NotNull Integer days) {
-		LocalDateTime localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).minusDays(days);
+	public static Date numDaysAgoFromLocalMidnightToday(@NonNull Integer numDaysAgo) {
+		LocalDateTime localDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT).minusDays(numDaysAgo);
 		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
 }

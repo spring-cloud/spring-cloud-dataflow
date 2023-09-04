@@ -21,7 +21,6 @@ import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.TaskManifest;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 
 /**
  * Provides Task related services.
@@ -88,7 +87,7 @@ public interface TaskExecutionService {
 
 	/**
 	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
-	 * @param onlyCompleted filter by completed task executions
+	 * @param onlyCompleted whether to include only completed task executions
 	 * @param taskName the task name, if null then retrieve all the tasks
 	 * @return the number of executions
 	 * @since 2.8
@@ -97,11 +96,11 @@ public interface TaskExecutionService {
 
 	/**
 	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
-	 * @param onlyCompleted filter by completed task executions
+	 * @param onlyCompleted whether to include only completed task executions (ignored when {@code includeTasksEndedMinDaysAgo} is specified)
 	 * @param taskName the task name, if null then retrieve all the tasks
 	 * @param includeTasksEndedMinDaysAgo only include tasks that have ended at least this many days ago
 	 * @return the number of executions, 0 if no data, never null
-	 * @since 2.11
+	 * @since 2.11.0
 	 */
 	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer includeTasksEndedMinDaysAgo);
 }

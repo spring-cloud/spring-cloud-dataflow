@@ -16,14 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.sql.DataSource;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +28,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -207,7 +202,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days) {
 		List<AggregateTaskExecution> tasks;
 		if (days != null) {
-			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, TaskServicesDateUtils.getDateBeforeDays(days));
+			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, TaskServicesDateUtils.numDaysAgoFromLocalMidnightToday(days));
 		} else {
 			tasks = this.taskExplorer.findTaskExecutions(taskName, completed);
 		}

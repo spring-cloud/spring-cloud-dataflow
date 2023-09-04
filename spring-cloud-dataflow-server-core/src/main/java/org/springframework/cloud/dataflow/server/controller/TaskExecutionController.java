@@ -337,9 +337,10 @@ public class TaskExecutionController {
 	 * optional {@code actions} and {@code completed} parameters can be used to not only clean up task execution resources,
 	 * but can also trigger the deletion of task execution and job data in the persistence store.
 	 *
-	 * @param actions   Defaults to "CLEANUP" if not specified
-	 * @param completed Defaults to cleanup only completed task executions
-	 * @param taskName  Optional name of task to clean up.
+	 * @param actions the actions to perform (default 'CLEANUP')
+	 * @param completed whether to include only completed task executions (default false)
+	 * @param taskName name of the task (default '')
+	 * @param days only include tasks that have ended at least this many days ago (default null)
 	 */
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
