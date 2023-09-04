@@ -15,18 +15,20 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -86,62 +89,43 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	private static final String FIND_TASK_ARGUMENTS = "SELECT TASK_EXECUTION_ID, "
 			+ "TASK_PARAM from AGGREGATE_TASK_EXECUTION_PARAMS where TASK_EXECUTION_ID = :taskExecutionId and SCHEMA_TARGET = :schemaTarget";
 
-	private static final String GET_EXECUTION_BY_ID = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION where TASK_EXECUTION_ID = :taskExecutionId and SCHEMA_TARGET = :schemaTarget";
+	private static final String GET_EXECUTIONS = "SELECT " + SELECT_CLAUSE +
+			" from AGGREGATE_TASK_EXECUTION";
 
-	private final static String GET_CHILD_EXECUTION_BY_ID = "SELECT TASK_EXECUTION_ID," +
-			"START_TIME, END_TIME, TASK_NAME, EXIT_CODE," +
-			"EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID," +
-			"PARENT_EXECUTION_ID, SCHEMA_TARGET" +
-			" from AGGREGATE_TASK_EXECUTION" +
+	private static final String GET_EXECUTION_BY_ID = GET_EXECUTIONS +
+			" where TASK_EXECUTION_ID = :taskExecutionId and SCHEMA_TARGET = :schemaTarget";
+
+	private final static String GET_CHILD_EXECUTION_BY_ID = GET_EXECUTIONS +
 			" where PARENT_EXECUTION_ID = :taskExecutionId" +
 			" and (SELECT COUNT(*) FROM AGGREGATE_TASK_EXECUTION_PARAMS P " +
 			"           WHERE P.TASK_EXECUTION_ID=TASK_EXECUTION_ID " +
 			"             AND P.SCHEMA_TARGET=SCHEMA_TARGET" +
 			"             AND P.TASK_PARAM = :schemaTarget) > 0";
 
-	private final static String GET_CHILD_EXECUTION_BY_IDS = "SELECT TASK_EXECUTION_ID," +
-			"START_TIME, END_TIME, TASK_NAME, EXIT_CODE," +
-			"EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID," +
-			"PARENT_EXECUTION_ID, SCHEMA_TARGET" +
-			" from AGGREGATE_TASK_EXECUTION" +
+	private final static String GET_CHILD_EXECUTION_BY_IDS = GET_EXECUTIONS +
 			" where PARENT_EXECUTION_ID IN (:taskExecutionIds)" +
 			" and (SELECT COUNT(*) FROM AGGREGATE_TASK_EXECUTION_PARAMS P " +
 			"           WHERE P.TASK_EXECUTION_ID=TASK_EXECUTION_ID " +
 			"             AND P.SCHEMA_TARGET=SCHEMA_TARGET" +
 			"             AND P.TASK_PARAM = :schemaTarget) > 0";
 
-	private static final String GET_EXECUTION_BY_EXTERNAL_EXECUTION_ID = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION where EXTERNAL_EXECUTION_ID = :externalExecutionId and TASK_NAME = :taskName";
+	private static final String GET_EXECUTION_BY_EXTERNAL_EXECUTION_ID = GET_EXECUTIONS +
+			" where EXTERNAL_EXECUTION_ID = :externalExecutionId and TASK_NAME = :taskName";
 
-	private static final String GET_EXECUTIONS_BY_NAME_COMPLETED = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL";
+	private static final String GET_EXECUTIONS_BY_NAME_COMPLETED = GET_EXECUTIONS +
+			" where TASK_NAME = :taskName AND END_TIME IS NOT NULL";
 
-	private static final String GET_EXECUTIONS_BY_NAME = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName";
-	private static final String GET_EXECUTIONS_COMPLETED = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION where END_TIME IS NOT NULL";
+	private static final String GET_EXECUTIONS_BY_NAME = GET_EXECUTIONS +
+			" where TASK_NAME = :taskName";
 
-	private static final String GET_EXECUTIONS = "SELECT TASK_EXECUTION_ID,"
-			+ "START_TIME, END_TIME, TASK_NAME, EXIT_CODE,"
-			+ "EXIT_MESSAGE, ERROR_MESSAGE, LAST_UPDATED, EXTERNAL_EXECUTION_ID,"
-			+ "PARENT_EXECUTION_ID, SCHEMA_TARGET"
-			+ " from AGGREGATE_TASK_EXECUTION";
+	private static final String GET_EXECUTIONS_COMPLETED = GET_EXECUTIONS +
+			" where END_TIME IS NOT NULL";
+
+	private static final String GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME = GET_EXECUTIONS +
+			" where TASK_NAME = :taskName AND END_TIME IS NOT NULL AND END_TIME < :endTime";
+
+	private static final String GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME = GET_EXECUTIONS +
+			" where END_TIME IS NOT NULL AND END_TIME < :endTime";
 
 	private static final String TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION ";
@@ -149,11 +133,20 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	private static final String TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName";
 
+	private static final String TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME < :endTime";
+
 	private static final String COMPLETED_TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME IS NOT NULL";
 
+	private static final String COMPLETED_TASK_EXECUTION_COUNT_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION WHERE END_TIME IS NOT NULL AND END_TIME < :endTime";
+
 	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL ";
+
+	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
+			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL AND END_TIME < :endTime ";
 
 
 	private static final String RUNNING_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
@@ -281,8 +274,8 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed) {
-		if(StringUtils.hasLength(taskName)) {
+	public List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed) {
+		if (StringUtils.hasLength(taskName)) {
 			final SqlParameterSource queryParameters = new MapSqlParameterSource()
 					.addValue("taskName", taskName);
 			String query = completed ? GET_EXECUTIONS_BY_NAME_COMPLETED : GET_EXECUTIONS_BY_NAME;
@@ -290,6 +283,16 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		} else {
 			return this.jdbcTemplate.query(completed ? GET_EXECUTIONS_COMPLETED : GET_EXECUTIONS, Collections.emptyMap(), new CompositeTaskExecutionRowMapper());
 		}
+	}
+
+	@Override
+	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NonNull Date endTime) {
+		final SqlParameterSource queryParameters = new MapSqlParameterSource()
+				.addValue("taskName", taskName)
+				.addValue("endTime", endTime);
+		String query;
+		query = taskName.isEmpty() ? GET_EXECUTIONS_COMPLETED_BEFORE_END_TIME : GET_EXECUTION_BY_NAME_COMPLETED_BEFORE_END_TIME;
+		return this.jdbcTemplate.query(query, queryParameters, new CompositeTaskExecutionRowMapper());
 	}
 
 	@Override
@@ -324,6 +327,27 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			}
 		} else {
 			count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT, Collections.emptyMap(), Long.class);
+		}
+		return count != null ? count : 0L;
+	}
+
+	@Override
+	public long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NonNull Date endTime) {
+		Long count;
+		if (StringUtils.hasText(taskName)) {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("taskName", taskName, Types.VARCHAR)
+					.addValue("endTime", endTime, Types.DATE);
+
+			try {
+				count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME, queryParameters, Long.class);
+			} catch (EmptyResultDataAccessException e) {
+				count = 0L;
+			}
+		} else {
+			final SqlParameterSource queryParameters = new MapSqlParameterSource()
+					.addValue("endTime", endTime, Types.DATE);
+			count = this.jdbcTemplate.queryForObject(COMPLETED_TASK_EXECUTION_COUNT_AND_BEFORE_END_TIME, queryParameters, Long.class);
 		}
 		return count != null ? count : 0L;
 	}

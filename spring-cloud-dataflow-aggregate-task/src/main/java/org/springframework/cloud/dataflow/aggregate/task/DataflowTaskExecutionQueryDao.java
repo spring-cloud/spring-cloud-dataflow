@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.aggregate.task;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
@@ -23,6 +24,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 
 /**
  * Repository to access {@link TaskExecution}s. Mirrors the {@link TaskExecutionDao}
@@ -30,6 +32,7 @@ import org.springframework.data.domain.Pageable;
  * be migrated to Spring Cloud Task itself.
  *
  * @author Corneil du Plessis
+ * @since 2.11.0
  */
 public interface DataflowTaskExecutionQueryDao {
 	/**
@@ -59,26 +62,44 @@ public interface DataflowTaskExecutionQueryDao {
 	List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget);
 
 	/**
-	 * Retrieves a subset of task executions by task name and execution status.
+	 * Find task executions by task name and completion status.
 	 *
 	 * @param taskName  the name of the task to search for in the repository.
-	 * @param completed indicator to retrieve only completed task executions.
-	 * @return a list that contains task executions.
+	 * @param completed whether to include only completed task executions.
+	 * @return list of task executions
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed);
+	List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed);
+
+	/**
+	 * Find task executions by task name whose end date is before the specified date.
+	 *
+	 * @param taskName  the name of the task to search for in the repository.
+	 * @param endTime the time before the task ended.
+	 * @return list of task executions.
+	 */
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NonNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName.
 	 *
-	 * @param taskName the name of the task to search for in the repository.
+	 * @param taskName the name of the task
 	 * @return current number of task executions for the taskName.
 	 */
 	long getTaskExecutionCountByTaskName(String taskName);
 
 	/**
-	 * Retrieves the number of task execution that have completed.
+	 * Retrieves current number of task executions for a taskName and with a non-null endTime before the specified date.
 	 *
-	 * @param taskName the name of the task to search
+	 * @param taskName the name of the task
+	 * @param endTime the time before task ended
+	 * @return the number of completed task executions
+	 */
+	long getCompletedTaskExecutionCountByTaskNameAndBeforeDate(String taskName, @NonNull Date endTime);
+
+	/**
+	 * Retrieves current number of task executions for a taskName and with a non-null endTime.
+	 *
+	 * @param taskName the name of the task
 	 * @return the number of completed task executions
 	 */
 	long getCompletedTaskExecutionCountByTaskName(String taskName);
@@ -88,7 +109,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * null.
 	 *
 	 * @param taskName the name of the task to search for in the repository.
-	 * @return current number of task executions for the taskName.
+	 * @return the number of running task executions
 	 */
 	long getRunningTaskExecutionCountByTaskName(String taskName);
 

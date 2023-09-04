@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.aggregate.task;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -94,10 +95,20 @@ public interface AggregateTaskExplorer {
 	 * Get a list of executions for a task by name and completion status.
 	 *
 	 * @param taskName  the name of the task to be searched
-	 * @param completed Indicator to find only completed tasks
+	 * @param onlyCompleted whether to include only completed tasks
 	 * @return list of task executions
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsByName(String taskName, boolean completed);
+	List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean onlyCompleted);
+
+	/**
+	 * Get a list of executions for a task by name, completion status and end time.
+	 *
+	 * @param taskName  the name of the task to be searched
+	 * @param endTime the tasks that ended before the endTime
+	 * @return list of task executions
+	 * @since 2.11.0
+	 */
+	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime);
 
 	/**
 	 * Get a collection/page of executions.

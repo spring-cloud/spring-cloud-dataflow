@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1030,9 +1031,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
-		return (int) (
-			onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-				: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName)
-		);
+		return getAllTaskExecutionsCount(onlyCompleted, taskName, null);
+	}
+
+	@Override
+	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer days) {
+		if (days != null) {
+			Date dateBeforeDays = TaskServicesDateUtils.numDaysAgoFromLocalMidnightToday(days);
+			return (int) dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays);
+		} else {
+			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
+					: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
+		}
 	}
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.sql.DataSource;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -29,6 +28,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,7 +194,18 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	@Override
 	@Transactional
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed) {
-		List<AggregateTaskExecution> tasks = this.taskExplorer.findTaskExecutionsByName(taskName, completed);
+		cleanupExecutions(actionsAsSet, taskName, completed, null);
+	}
+
+	@Override
+	@Transactional
+	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days) {
+		List<AggregateTaskExecution> tasks;
+		if (days != null) {
+			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, TaskServicesDateUtils.numDaysAgoFromLocalMidnightToday(days));
+		} else {
+			tasks = this.taskExplorer.findTaskExecutions(taskName, completed);
+		}
 		final Set<AggregateTaskExecution> parentExecutions = new HashSet<>();
 		final Set<AggregateTaskExecution> childExecutions = new HashSet<>();
 		boolean removeData = actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA);
@@ -310,7 +322,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	@Override
 	public void deleteTaskExecutions(String taskName, boolean onlyCompleted) {
-		Map<String, List<AggregateTaskExecution>> tasks = this.taskExplorer.findTaskExecutionsByName(taskName, onlyCompleted)
+		Map<String, List<AggregateTaskExecution>> tasks = this.taskExplorer.findTaskExecutions(taskName, onlyCompleted)
 				.stream().collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
 		for (String schemaTarget : tasks.keySet()) {
 			Set<Long> executionIds = tasks.get(schemaTarget)
