@@ -79,6 +79,7 @@ jobs:
       package-name: 'scdf'
       package-version: ${{ needs.prepare.outputs.package-version }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
+      skipper-repository: 'springcloud/spring-cloud-skipper-server'
       package-bundle: 'springcloud/scdf-oss-package'
       repository-bundle: 'springcloud/scdf-oss-repo'
       dataflow-version: ${{ needs.prepare.outputs.dataflow-version }}

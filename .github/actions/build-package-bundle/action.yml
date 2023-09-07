@@ -13,6 +13,9 @@ inputs:
   server-repository:
     description: server repository
     required: true
+  skipper-repository:
+    description: skipper repository
+    required: true
   ctr-version:
     description: ctr version
     required: true
@@ -44,6 +47,7 @@ runs:
     env:
       DATAFLOW_VERSION: ${{ inputs.dataflow-version }}
       SKIPPER_VERSION: ${{ inputs.skipper-version }}
+      SKIPPER_REPOSITORY: ${{ inputs.skipper-repository }}
       SERVER_VERSION: ${{ inputs.server-version }}
       SERVER_REPOSITORY: ${{ inputs.server-repository }}
       CTR_VERSION: ${{ inputs.ctr-version }}

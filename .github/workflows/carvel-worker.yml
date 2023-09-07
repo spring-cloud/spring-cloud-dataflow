@@ -41,6 +41,7 @@ jobs:
       ctr-version: ${{ needs.prepare.outputs.dataflow-version }}
       skipper-version: ${{ needs.prepare.outputs.skipper-version }}
       server-repository: 'springcloud/spring-cloud-dataflow-server'
+      skipper-repository: 'springcloud/spring-cloud-skipper-server'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

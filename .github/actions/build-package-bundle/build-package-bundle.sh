@@ -31,11 +31,12 @@ check_env SERVER_VERSION
 check_env SERVER_REPOSITORY
 check_env DATAFLOW_VERSION
 check_env SKIPPER_VERSION
+check_env SKIPPER_REPOSITORY
 check_env PACKAGE_NAME
 check_env IMGPKG_LOCK_TEMPLATE
 check_env VENDIR_SRC_IN
 
-echo "Build Package Bundle: $PACKAGE_BUNDLE_TEMPLATE package.name=$PACKAGE_NAME, server.repository=$SERVER_REPOSITORY, server.version=$SERVER_VERSION, output=$PACKAGE_BUNDLE_GENERATED"
+echo "Build Package Bundle: $PACKAGE_BUNDLE_TEMPLATE package.name=$PACKAGE_NAME, server.repository=$SERVER_REPOSITORY, server.version=$SERVER_VERSION,skipper.repository=$SKIPPER_REPOSITORY, skipper.version=$SKIPPER_VERSION, output=$PACKAGE_BUNDLE_GENERATED"
 
 set -e
 ytt -f "$PACKAGE_BUNDLE_TEMPLATE" \
@@ -45,6 +46,7 @@ ytt -f "$PACKAGE_BUNDLE_TEMPLATE" \
     --data-value-yaml ctr.version="$DATAFLOW_VERSION" \
     --data-value-yaml dataflow.version="$DATAFLOW_VERSION" \
     --data-value-yaml skipper.version="$SKIPPER_VERSION" \
+    --data-value-yaml skipper.repository="$SKIPPER_REPOSITORY" \
     --data-value-yaml grafana.version="$DATAFLOW_VERSION" \
     --data-value-yaml package.name="$PACKAGE_NAME" \
     --file-mark 'config/values.yml:type=text-template' \
@@ -57,6 +59,7 @@ ytt -f "$IMGPKG_LOCK_TEMPLATE" \
     --data-value-yaml ctr.version="$DATAFLOW_VERSION" \
     --data-value-yaml dataflow.version="$DATAFLOW_VERSION" \
     --data-value-yaml skipper.version="$SKIPPER_VERSION" \
+    --data-value-yaml skipper.repository="$SKIPPER_REPOSITORY" \
     --data-value-yaml grafana.version="$DATAFLOW_VERSION" \
     --file-mark '**/*.yml:type=text-template'
 

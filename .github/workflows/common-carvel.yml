@@ -39,6 +39,10 @@ on:
         type: string
         description: 'Docker repo for Data Flow Server'
         required: true
+      skipper-repository:
+        type: string
+        description: 'Docker repo for Skipper Server'
+        required: true
     secrets:
       DOCKERHUB_USERNAME:
       DOCKERHUB_TOKEN:
@@ -67,6 +71,7 @@ jobs:
       with:
         dataflow-version: ${{ inputs.dataflow-version }}
         skipper-version: ${{ inputs.skipper-version }}
+        skipper-repository: ${{ inputs.skipper-repository }}
         server-version: ${{ inputs.server-version }}
         server-repository: ${{ inputs.server-repository }}
         ctr-version: ${{ inputs.ctr-version }}
