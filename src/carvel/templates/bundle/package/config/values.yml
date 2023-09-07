@@ -10,4 +10,5 @@ scdf:
       tag: (@= data.values.ctr.version @)
   skipper:
     image:
+      repository: (@= data.values.skipper.repository @)
       tag: (@= data.values.skipper.version @)
