@@ -243,13 +243,12 @@ public class DefaultStreamService implements StreamService {
 				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
-		// TODO consider adding an explicit UPDATE method to the streamDefRepository
-		// Note: Not transactional and can lead to loosing the stream definition
+		// NOTE: Not transactional and can lead to losing the stream definition
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
-				updatedStreamDefinition.getDslText(), null);
+				this.streamDefinitionService.redactDsl(updatedStreamDefinition), null);
 	}
 
 	@Override

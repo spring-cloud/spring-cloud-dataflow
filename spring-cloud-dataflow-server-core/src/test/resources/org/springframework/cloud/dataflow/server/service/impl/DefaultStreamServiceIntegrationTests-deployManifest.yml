@@ -10,6 +10,7 @@ spec:
   applicationProperties:
     spring.cloud.dataflow.stream.app.label: time
     trigger.fixed-delay: 100
+    spring.cloud.config.password: 5150
     spring.cloud.stream.bindings.output.producer.requiredGroups: ticktock
     spring.cloud.stream.bindings.output.destination: ticktock.time
     spring.cloud.dataflow.stream.name: ticktock

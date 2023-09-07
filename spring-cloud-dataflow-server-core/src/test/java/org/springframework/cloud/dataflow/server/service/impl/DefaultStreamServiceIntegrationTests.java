@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDeployment;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -64,6 +69,8 @@ import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.RollbackRequest;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
 import org.springframework.cloud.skipper.domain.UploadRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -99,6 +106,9 @@ public class DefaultStreamServiceIntegrationTests {
 
 	@Autowired
 	private AppRegistryService appRegistryService;
+
+	@Autowired
+	private AuditRecordService auditRecordService;
 
 	@MockBean
 	private SkipperClient skipperClient;
@@ -179,14 +189,13 @@ public class DefaultStreamServiceIntegrationTests {
 	public void testUpdateStreamDslOnDeploy() throws IOException {
 
 		// Create stream
-		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
-				"time --fixed-delay=100 | log --level=DEBUG");
+		String originalDsl = "time --fixed-delay=100 --spring.cloud.config.password=5150 | log --level=DEBUG";
+		StreamDefinition streamDefinition = new StreamDefinition("ticktock", originalDsl);
 		this.streamDefinitionRepository.deleteById(streamDefinition.getName());
 		this.streamDefinitionRepository.save(streamDefinition);
 
 		StreamDefinition streamDefinitionBeforeDeploy = this.streamDefinitionRepository.findById("ticktock").get();
-		assertThat(streamDefinitionBeforeDeploy.getDslText())
-				.isEqualTo("time --fixed-delay=100 | log --level=DEBUG");
+		assertThat(streamDefinitionBeforeDeploy.getDslText()).isEqualTo(originalDsl);
 
 		String expectedReleaseManifest = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "deployManifest.yml").getInputStream(),
@@ -203,9 +212,27 @@ public class DefaultStreamServiceIntegrationTests {
 
 		streamService.deployStream("ticktock", deploymentProperties);
 
+		assertThatAuditRecordDataIsRedacted(AuditActionType.DEPLOY);
+		assertThatAuditRecordDataIsRedacted(AuditActionType.UPDATE);
+
+		String expectedUpdatedDsl = "time --spring.cloud.config.password=5150 --trigger.fixed-delay=100 | log --log.level=DEBUG";
 		StreamDefinition streamDefinitionAfterDeploy = this.streamDefinitionRepository.findById("ticktock").get();
-		assertThat(streamDefinitionAfterDeploy.getDslText())
-				.isEqualTo("time --trigger.fixed-delay=100 | log --log.level=DEBUG");
+		assertThat(streamDefinitionAfterDeploy.getDslText()).isEqualTo(expectedUpdatedDsl);
+	}
+
+	private void assertThatAuditRecordDataIsRedacted(AuditActionType auditActionType) {
+		Page<AuditRecord> auditRecords = this.auditRecordService.findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(
+				PageRequest.of(0, 1),
+				new AuditActionType[]{ auditActionType },
+				new AuditOperationType[]{ AuditOperationType.STREAM },
+				Instant.now().minusSeconds(5),
+				Instant.now().plusSeconds(1)
+		);
+		assertThat(auditRecords.getNumberOfElements()).isEqualTo(1);
+		assertThat(auditRecords.get().map(AuditRecord::getAuditData).findFirst())
+				.hasValueSatisfying((auditData) -> assertThat(auditData)
+					.contains("--spring.cloud.config.password='******'")
+					.doesNotContain("--spring.cloud.config.password='5150'"));
 	}
 
 	@Test
