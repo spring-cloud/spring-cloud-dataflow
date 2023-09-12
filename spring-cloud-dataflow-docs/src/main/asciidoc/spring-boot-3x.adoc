@@ -96,3 +96,9 @@ task.timestamp-batch.bootVersion=3
 [.small]
 
 TIP: The properties can be used when registering an app in the Dataflow UI or the Dataflow shell CLI.
+
+==== Composed Task Runner
+
+Composed Task Runner for Spring Cloud Data Flow 2.11.x supports the launching of both Spring Boot `3.x`/`2.x`, Spring Cloud Task `3.x`/`2.x`, and Spring Batch `5.x`/`4.x` applications.
+
+NOTE: When registering Task applications verify that the correct `Spring Boot Version` is selected.
