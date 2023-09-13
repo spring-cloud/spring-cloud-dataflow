@@ -395,7 +395,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			deploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
 
-		// pre prosess command-line args
+		// pre process command-line args
 		// moving things like app.<label> = arg
 		// into deployment properties if ctr and removing
 		// prefix if simple task.
