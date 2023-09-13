@@ -16,7 +16,7 @@ runs:
   - name: Install pack
     uses: jvalkeal/build-zoo-handler@v0.0.4
     with:
-      pack-version: 0.24.1
+      pack-version: 0.30.0
   - name: Build Images
     env:
       TAG: ${{ inputs.version }}
