@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Corneil du Plessis
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = AbstractSmokeTest.LocalTestSkipperServer.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "repo-test"})
 @TestPropertySource(properties = {
 	"spring.jpa.hibernate.ddl-auto=none",
