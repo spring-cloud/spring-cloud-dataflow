@@ -27,7 +27,7 @@ create table app_registration (
 create table audit_records (
   id bigint not null,
   audit_action bigint,
-  audit_data varchar(4000),
+  audit_data varchar(1000000000),
   audit_operation bigint,
   correlation_id varchar(255),
   created_by varchar(255),
