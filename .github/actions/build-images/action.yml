@@ -17,17 +17,18 @@ runs:
     uses: jvalkeal/build-zoo-handler@v0.0.4
     with:
       pack-version: 0.30.0
+
+    # docker hub login
+  - uses: docker/login-action@v1
+    with:
+      username: ${{ inputs.dockerhub-username }}
+      password: ${{ inputs.dockerhub-password }}
+
   - name: Build Images
     env:
       TAG: ${{ inputs.version }}
     shell: bash
     run: .github/actions/build-images/pack-images.sh
-
-  # docker hub login
-  - uses: docker/login-action@v1
-    with:
-      username: ${{ inputs.dockerhub-username }}
-      password: ${{ inputs.dockerhub-password }}
 
   # push images
   - name: Push images
