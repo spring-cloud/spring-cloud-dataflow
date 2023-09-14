@@ -18,11 +18,20 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.util.concurrent.Executor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.task.TaskExecutorBuilder;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import static org.springframework.cloud.dataflow.server.config.DataflowAsyncConfiguration.ASYNC_PREFIX;
 
 /**
  * Class to override the executor at the application level. It also enables async executions for the Spring Cloud Data Flow Server.
@@ -30,29 +39,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @author Tobias Soloschenko
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnProperty(prefix = ASYNC_PREFIX, name = "enabled")
 @EnableAsync
-@EnableConfigurationProperties(AsyncConfigurationProperties.class)
-public class DataflowAsyncConfiguration implements AsyncConfigurer {
+class DataflowAsyncConfiguration implements AsyncConfigurer {
 
-	private final AsyncConfigurationProperties asyncConfigurationProperties;
+	private static final Logger logger = LoggerFactory.getLogger(DataflowAsyncConfiguration.class);
 
-	public DataflowAsyncConfiguration(AsyncConfigurationProperties asyncConfigurationProperties) {
-		this.asyncConfigurationProperties = asyncConfigurationProperties;
+	public static final String ASYNC_PREFIX = DataFlowPropertyKeys.PREFIX + "task.cleanup.async";
+
+	@Bean(name = "taskCleanupExecutor")
+	Executor taskCleanupExecutor(TaskExecutorBuilder taskExecutorBuilder) {
+		return taskExecutorBuilder.threadNamePrefix("TaskCleanup-").build();
 	}
 
 	@Override
-	public Executor getAsyncExecutor() {
-		ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setQueueCapacity(asyncConfigurationProperties.getQueueCapacity());
-		threadPoolTaskExecutor.setCorePoolSize(asyncConfigurationProperties.getCorePoolSize());
-		threadPoolTaskExecutor.setMaxPoolSize(asyncConfigurationProperties.getMaxPoolSize());
-		threadPoolTaskExecutor.setKeepAliveSeconds(asyncConfigurationProperties.getKeepAliveSeconds());
-		threadPoolTaskExecutor.setAllowCoreThreadTimeOut(asyncConfigurationProperties.isAllowCoreThreadTimeOut());
-		threadPoolTaskExecutor.setPrestartAllCoreThreads(asyncConfigurationProperties.isPrestartAllCoreThreads());
-		threadPoolTaskExecutor.setAwaitTerminationMillis(asyncConfigurationProperties.getAwaitTerminationMillis());
-		threadPoolTaskExecutor.setThreadNamePrefix(asyncConfigurationProperties.getThreadNamePrefix());
-		threadPoolTaskExecutor.setWaitForTasksToCompleteOnShutdown(asyncConfigurationProperties.isWaitForTasksToCompleteOnShutdown());
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
+	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+		return (throwable, method, objects) -> logger.error("Exception thrown in @Async Method " + method.getName(),
+				throwable);
 	}
 }
