@@ -47,9 +47,11 @@ class DataflowAsyncConfiguration implements AsyncConfigurer {
 
 	public static final String ASYNC_PREFIX = DataFlowPropertyKeys.PREFIX + "task.cleanup.async";
 
-	@Bean(name = "taskCleanupExecutor")
-	Executor taskCleanupExecutor(TaskExecutorBuilder taskExecutorBuilder) {
-		return taskExecutorBuilder.threadNamePrefix("TaskCleanup-").build();
+	private static final String THREAD_NAME_PREFIX = "scdf-async-";
+
+	@Bean(name = "asyncExecutor")
+	Executor getAsyncExecutor(TaskExecutorBuilder taskExecutorBuilder) {
+		return taskExecutorBuilder.threadNamePrefix(THREAD_NAME_PREFIX).build();
 	}
 
 	@Override
