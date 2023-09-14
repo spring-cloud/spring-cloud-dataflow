@@ -6,5 +6,8 @@ pushd $PROJECT_DIR || exit
         SCDF_VER=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     else
         SCDF_VER=$DATAFLOW_VERSION
-    docker build -f "src/grafana/prometheus/docker/grafana" "springcloud/spring-cloud-dataflow-grafana-prometheus:$SCDF_VER"
+    fi
+    pushd src/grafana/prometheus/docker/grafana || exit 1
+        docker build -t "springcloud/spring-cloud-dataflow-grafana-prometheus:$SCDF_VER" .
+    popd || exit 1
 popd || exit
