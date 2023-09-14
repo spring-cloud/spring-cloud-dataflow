@@ -28,16 +28,7 @@ runs:
     env:
       TAG: ${{ inputs.version }}
     shell: bash
-    run: .github/actions/build-images/pack-images.sh
-
-  # push images
-  - name: Push images
-    env:
-      TAG: ${{ inputs.version }}
-    shell: bash
-    run: |
-      export DEFAULT_JDK=11
-      .github/actions/build-images/push-images.sh
+    run: ${{ github.action_path }}/build-images.sh
 
   # build/publish support images
   - name: Publish Grafana Prometheus

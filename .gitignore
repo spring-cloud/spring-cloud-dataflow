@@ -62,3 +62,6 @@ workspace/
 *.shell
 /*.json
 *.tar
+/srp
+/srp*gz
+/observer/*
