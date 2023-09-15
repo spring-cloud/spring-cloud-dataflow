@@ -68,3 +68,5 @@ for ((i = 0; i < len; i++)); do
         fi
     done
 done
+docker system prune -f
+docker system prune --volumes -f
