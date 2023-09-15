@@ -43,12 +43,15 @@ public interface AggregateExecutionSupport {
 	 * @return The {@link SchemaVersionTarget} for the taskName specified.
 	 */
 	SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinitionReader taskDefinitionReader);
+	SchemaVersionTarget findSchemaVersionTarget(String taskName, String version, TaskDefinitionReader taskDefinitionReader);
 	SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinition taskDefinition);
+	SchemaVersionTarget findSchemaVersionTarget(String taskName, String version, TaskDefinition taskDefinition);
 
 	/**
 	 * Retrieve the {@link AppRegistration} for the registeredName.
 	 */
 	AppRegistration findTaskAppRegistration(String registeredName);
+	AppRegistration findTaskAppRegistration(String registeredName, String version);
 
 	/**
 	 * Return the {@link AggregateTaskExecution} for the {@link TaskExecution} and Schema Target name specified.

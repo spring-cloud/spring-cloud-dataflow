@@ -61,4 +61,5 @@ public interface TaskExecutionInfoService {
 	List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText);
 
 	Set<String> composedTaskChildNames(String taskName);
+	Set<String> taskNames(String taskName);
 }

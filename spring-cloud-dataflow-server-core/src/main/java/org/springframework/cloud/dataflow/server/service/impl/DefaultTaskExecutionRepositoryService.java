@@ -54,8 +54,8 @@ public class DefaultTaskExecutionRepositoryService implements TaskExecutionCreat
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public TaskExecution createTaskExecution(String taskName) {
-		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
+	public TaskExecution createTaskExecution(String taskName, String version) {
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(taskName, version, taskDefinitionReader);
 		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 		return taskRepository.createTaskExecution(taskName);
 	}

@@ -109,6 +109,8 @@ abstract class DataFlowAppDefinition {
 		return applicationType;
 	}
 
+	public AppDefinition getAppDefinition() { return appDefinition; }
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

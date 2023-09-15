@@ -379,7 +379,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskDefinition taskDefinition = taskDefinitionRepository.findByTaskName(taskName);
 
 		String taskAppName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinitionReader);
+
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinition);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
@@ -394,23 +395,32 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionInformation taskExecutionInformation = findOrCreateTaskExecutionInformation(taskName,
 			deploymentProperties, launcher.getType(), previousTaskDeploymentProperties);
 
-
-		// pre process command-line args
-		// moving things like app.<label> = arg
-		// into deployment properties if ctr and removing
-		// prefix if simple task.
+		String version = null;
 		if (taskExecutionInformation.isComposed()) {
 			commandLineArguments = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArguments);
 		} else {
-
-			// remove argument prefix for simple task
-			String registeredAppName = taskExecutionInformation.getTaskDefinition().getRegisteredAppName();
-			addPrefixCommandLineArgs(schemaVersionTarget, "app." + registeredAppName + ".", commandLineArguments);
-			addPrefixProperties(schemaVersionTarget, "app." + registeredAppName + ".", deploymentProperties);
-			String regex = String.format("app\\.%s\\.\\d+=", registeredAppName);
+			Set<String> appNames = taskExecutionInfoService.taskNames(taskName);
+			Assert.isTrue(appNames.size() == 1, () -> "Expected one entry in " + appNames);
+			String appName = appNames.iterator().next();
+			List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
+			String registeredName = names.get(0);
+			String appId = registeredName;
+			if (names.size() > 1) {
+				appId = names.get(1);
+			}
+			String appVersion = deploymentProperties.get("version." + appId);
+			if (StringUtils.hasText(appVersion)) {
+				version = appVersion;
+			}
+			schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
+			dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+			addPrefixCommandLineArgs(schemaVersionTarget, "app." + appId + ".", commandLineArguments);
+			addPrefixProperties(schemaVersionTarget, "app." + appId + ".", deploymentProperties);
+			String regex = String.format("app\\.%s\\.\\d+=", appId);
 			commandLineArguments = commandLineArguments.stream()
 				.map(arg -> arg.replaceFirst(regex, ""))
 				.collect(Collectors.toList());
+
 		}
 
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
@@ -431,7 +441,15 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				if (names.size() > 1) {
 					appId = names.get(1);
 				}
-				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, taskDefinitionReader);
+
+				String appVersion = deploymentProperties.get("version." + taskName + "-" + appId + "." + appId);
+				if (!StringUtils.hasText(appVersion)) {
+					appVersion = deploymentProperties.get("version." + taskName + "-" + appId);
+				}
+				if (!StringUtils.hasText(appVersion)) {
+					appVersion = deploymentProperties.get("version." + appId);
+				}
+				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
 				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
 				deploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + taskName + "-" + appId + ".spring.cloud.task.tablePrefix",
 					appSchemaTarget.getTaskPrefix());
@@ -448,7 +466,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 
 		// Create task execution for the task
-		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName);
+		TaskExecution taskExecution = taskExecutionRepositoryService.createTaskExecution(taskName, version);
 		Assert.isTrue(taskExecution.getExecutionId() > 0, () -> "Expected executionId > 0 for " + taskName);
 		// Analysing task to know what to bring forward from existing
 		TaskAnalysisReport report = taskAnalyzer
@@ -493,7 +511,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 			dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 			taskDeploymentId = taskLauncher.launch(request);
-			saveExternalExecutionId(taskExecution, taskDeploymentId);
+			saveExternalExecutionId(taskExecution, version, taskDeploymentId);
 		} finally {
 			if (this.tasksBeingUpgraded.containsKey(taskName)) {
 				List<String> platforms = this.tasksBeingUpgraded.get(taskName);
@@ -673,11 +691,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskExecution    task execution id to associate the external execution id with
 	 * @param taskDeploymentId platform specific execution id
 	 */
-	private void saveExternalExecutionId(TaskExecution taskExecution, String taskDeploymentId) {
+	private void saveExternalExecutionId(TaskExecution taskExecution, String version, String taskDeploymentId) {
 		if (!StringUtils.hasText(taskDeploymentId)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskExecution.getTaskName());
 		}
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskExecution.getTaskName(), taskDefinitionReader);
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskExecution.getTaskName(), version, taskDefinitionReader);
 		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId, schemaVersionTarget.getName());
 		taskExecution.setExternalExecutionId(taskDeploymentId);
 	}
@@ -886,8 +904,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	@Override
 	public TaskManifest findTaskManifestById(Long id, String schemaTarget) {
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "Expected dataflowTaskExecutionMetadataDao using " + schemaTarget);
 		AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
-		return dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId());
+		return taskExecution != null ? dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId()) : null;
 	}
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
@@ -1041,7 +1060,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			return (int) dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays);
 		} else {
 			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-					: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
+				: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
 		}
 	}
 }

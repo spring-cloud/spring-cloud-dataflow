@@ -30,5 +30,5 @@ public interface TaskExecutionCreationService {
 	 * @param taskName the name to be associated with the {@link TaskExecution}
 	 * @return {@link TaskExecution}
 	 */
-	TaskExecution createTaskExecution(String taskName);
+	TaskExecution createTaskExecution(String taskName, String version);
 }

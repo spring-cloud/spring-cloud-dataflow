@@ -281,6 +281,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 	}
 
+	@SuppressWarnings("SqlWithoutWhere")
 	public void setupTest(DataSource dataSource) {
 		JdbcTemplate template = new JdbcTemplate(dataSource);
 
@@ -1324,6 +1325,55 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertEquals("BOOT3_TASK_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.cloud.task.tablePrefix"));
 			assertEquals("BOOT3_BATCH_", cmdProps.get("app." + TIMESTAMP_3 + ".spring.batch.jdbc.table-prefix"));
 		}
+		@Test
+		@DirtiesContext
+		public void launchBoot3WithNameAndVersion() throws IOException {
+			DefaultTaskExecutionServiceTests.initializeMultiVersionRegistry(appRegistry);
+			this.taskDefinitionRepository.save(new TaskDefinition("ts3", "s1: some-name"));
+			when(this.taskLauncher.launch(any())).thenReturn("abc");
+			LaunchResponse response = this.taskExecutionService.executeTask("ts3", Collections.singletonMap("version.s1", "1.0.2"), new LinkedList<>());
+			this.taskExecutionService.findTaskManifestById(response.getExecutionId(), response.getSchemaTarget());
+			SchemaVersionTarget schemaVersionTarget = schemaService.getTarget(response.getSchemaTarget());
+			assertThat(schemaVersionTarget.getSchemaVersion()).isEqualByComparingTo(AppBootSchemaVersion.BOOT3);
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("ts3");
+			assertNotNull(lastManifest, "expected to find manifest for ts3");
+			assertEquals("file:src/test/resources/apps/foo-task102", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			System.out.println("cmdLine:" + lastManifest.getTaskDeploymentRequest().getCommandlineArguments());
+			assertEquals(6, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
+
+			assertEquals("BOOT3_TASK_", cmdProps.get("app.s1.spring.cloud.task.tablePrefix"));
+			assertEquals("BOOT3_BATCH_", cmdProps.get("app.s1.spring.batch.jdbc.table-prefix"));
+		}
+		@Test
+		@DirtiesContext
+		public void launchBoot3WithVersion() throws IOException {
+			DefaultTaskExecutionServiceTests.initializeMultiVersionRegistry(appRegistry);
+			this.taskDefinitionRepository.save(new TaskDefinition("s3", "some-name"));
+			when(this.taskLauncher.launch(any())).thenReturn("abc");
+			LaunchResponse response = this.taskExecutionService.executeTask("s3", Collections.emptyMap(), Collections.emptyList());
+			this.taskExecutionService.findTaskManifestById(response.getExecutionId(), response.getSchemaTarget());
+			SchemaVersionTarget schemaVersionTarget = schemaService.getTarget(response.getSchemaTarget());
+			assertThat(schemaVersionTarget.getSchemaVersion()).isEqualByComparingTo(AppBootSchemaVersion.BOOT2);
+			when(this.taskLauncher.launch(any())).thenReturn("xyz");
+			response = this.taskExecutionService.executeTask("s3", Collections.singletonMap("version.some-name", "1.0.2"), new LinkedList<>());
+			this.taskExecutionService.findTaskManifestById(response.getExecutionId(), response.getSchemaTarget());
+			schemaVersionTarget = schemaService.getTarget(response.getSchemaTarget());
+			assertThat(schemaVersionTarget.getSchemaVersion()).isEqualByComparingTo(AppBootSchemaVersion.BOOT3);
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("s3");
+			assertNotNull(lastManifest, "expected to find manifest for s3");
+			assertEquals("file:src/test/resources/apps/foo-task102", lastManifest.getTaskDeploymentRequest().getResource().getURL().toString());
+			assertEquals("default", lastManifest.getPlatformName());
+			System.out.println("cmdLine:" + lastManifest.getTaskDeploymentRequest().getCommandlineArguments());
+			assertEquals(6, lastManifest.getTaskDeploymentRequest().getCommandlineArguments().size());
+			Map<String, String> cmdProps = lastManifest.getTaskDeploymentRequest().getDeploymentProperties();
+
+			assertEquals("BOOT3_TASK_", cmdProps.get("app.some-name.spring.cloud.task.tablePrefix"));
+			assertEquals("BOOT3_BATCH_", cmdProps.get("app.some-name.spring.batch.jdbc.table-prefix"));
+		}
 	}
 
 	@TestPropertySource(properties = {
@@ -1980,7 +2030,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void initializeMultiVersionRegistry(AppRegistryService appRegistry) throws MalformedURLException {
 		AppRegistration appRegistration100 = new AppRegistration("some-name", ApplicationType.task, "1.0.0", URI.create("https://helloworld/some-name-1.0.0.jar"), null);
 		AppRegistration appRegistration101 = new AppRegistration("some-name", ApplicationType.task, "1.0.1", URI.create("https://helloworld/some-name-1.0.1.jar"), null);
-		AppRegistration appRegistration102 = new AppRegistration("some-name", ApplicationType.task, "1.0.2", URI.create("https://helloworld/some-name-1.0.2.jar"), null);
+		AppRegistration appRegistration102 = new AppRegistration("some-name", ApplicationType.task, "1.0.2", URI.create("https://helloworld/some-name-1.0.2.jar"), null, AppBootSchemaVersion.BOOT3);
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(appRegistration100);
 		when(appRegistry.find(anyString(), any(ApplicationType.class), eq("1.0.0"))).thenReturn(appRegistration100);
 		when(appRegistry.find(anyString(), any(ApplicationType.class), eq("1.0.1"))).thenReturn(appRegistration101);

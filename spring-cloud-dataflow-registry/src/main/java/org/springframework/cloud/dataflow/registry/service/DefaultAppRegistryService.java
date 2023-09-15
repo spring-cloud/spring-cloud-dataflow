@@ -106,7 +106,9 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public AppRegistration find(String name, ApplicationType type, String version) {
-		return this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(name, type, version);
+		AppRegistration registration = this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(name, type, version);
+		logger.debug("find:{}:{}:{}={}", name, type, version, registration);
+		return registration;
 	}
 
 	@Override

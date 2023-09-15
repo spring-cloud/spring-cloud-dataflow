@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
@@ -193,7 +194,7 @@ public class TaskControllerTests {
 		taskManifest.setTaskDeploymentRequest(request);
 		taskManifest.setPlatformName("test");
 
-		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
+		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask", null);
 		assertThat(taskExecutionRunning.getExecutionId()).isGreaterThan(0L);
 		taskExecutionRunning.setStartTime(new Date());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
@@ -209,7 +210,7 @@ public class TaskControllerTests {
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
-		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
+		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
 		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
@@ -266,7 +267,9 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(1);
 
-		TaskDefinition myTask = repository.findById("myTask").get();
+		Optional<TaskDefinition> myTaskOpt = repository.findById("myTask");
+		assertThat(myTaskOpt).isPresent();
+		TaskDefinition myTask = myTaskOpt.get();
 
 		assertThat(myTask.getProperties()).hasSize(1);
 		assertThat(myTask.getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
@@ -334,13 +337,17 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		TaskDefinition myTask1 = repository.findById("myTask-t1").get();
+		Optional<TaskDefinition> myTask1Opt = repository.findById("myTask-t1");
+		assertThat(myTask1Opt).isPresent();
+		TaskDefinition myTask1 = myTask1Opt.get();
 		assertThat(myTask1.getProperties().get("foo")).isEqualTo("bar rab");
 		assertThat(myTask1.getDslText()).isEqualTo("t1:task --foo='bar rab'");
 		assertThat(myTask1.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask1.getName()).isEqualTo("myTask-t1");
 
-		TaskDefinition myTask2 = repository.findById("myTask-t2").get();
+		Optional<TaskDefinition> myTask2Opt = repository.findById("myTask-t2");
+		assertThat(myTask2Opt).isPresent();
+		TaskDefinition myTask2 = myTask2Opt.get();
 		assertThat(myTask2.getProperties().get("foo")).isEqualTo("one two");
 		assertThat(myTask2.getDslText()).isEqualTo("t2:task --foo='one two'");
 		assertThat(myTask2.getRegisteredAppName()).isEqualTo("task");
@@ -744,7 +751,7 @@ public class TaskControllerTests {
 	@Test
 	public void testTaskLaunchNoManifest() throws Exception {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("myTask3", taskDefinitionReader);
-		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3");
+		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");
 		taskExecutionComplete.setStartTime(new Date());

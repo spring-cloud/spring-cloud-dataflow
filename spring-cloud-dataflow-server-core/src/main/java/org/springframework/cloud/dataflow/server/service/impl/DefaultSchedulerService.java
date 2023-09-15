@@ -222,7 +222,12 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 
 		String taskAppName = taskDefinition.getRegisteredAppName();
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinitionReader);
+		String taskLabel = taskDefinition.getAppDefinition().getName();
+		if(!StringUtils.hasText(taskLabel)) {
+			taskLabel = taskAppName;
+		}
+		String version = taskDeploymentProperties.get("version." + taskLabel);
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, version, taskDefinition);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
@@ -258,8 +263,15 @@ public class DefaultSchedulerService implements SchedulerService {
 				if (names.size() > 1) {
 					appId = names.get(1);
 				}
-				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, taskDefinitionReader);
-				logger.debug("ctr:{}:registeredName={}, schemaTarget={}", names, registeredName, appSchemaTarget.getName());
+				String appVersion = taskDeploymentProperties.get("version." + taskAppName + "-" + appId + "." + appId);
+				if(!StringUtils.hasText(appVersion)) {
+					appVersion = taskDeploymentProperties.get("version." + taskAppName + "-" + appId);
+				}
+				if(!StringUtils.hasText(appVersion)) {
+					appVersion = taskDeploymentProperties.get("version." + appId);
+				}
+				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
+				logger.debug("ctr:{}:registeredName={}, version={}, schemaTarget={}", names, registeredName, appVersion, appSchemaTarget.getName());
 				taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + scheduleName + "-" + appId + ".spring.cloud.task.tablePrefix",
 						appSchemaTarget.getTaskPrefix());
 				taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + appId + ".spring.cloud.task.tablePrefix",
@@ -437,9 +449,7 @@ public class DefaultSchedulerService implements SchedulerService {
 	private List<Launcher> getLaunchers() {
 		List<Launcher> launchers = new ArrayList<>();
 		for (TaskPlatform taskPlatform : this.taskPlatforms) {
-			for (Launcher launcher : taskPlatform.getLaunchers()) {
-				launchers.add(launcher);
-			}
+			launchers.addAll(taskPlatform.getLaunchers());
 		}
 		return launchers;
 	}

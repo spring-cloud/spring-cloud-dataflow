@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 
 public class DefaultAggregateExecutionSupport implements AggregateExecutionSupport {
-	private static Logger logger = LoggerFactory.getLogger(AggregateExecutionSupport.class);
+	private static final Logger logger = LoggerFactory.getLogger(AggregateExecutionSupport.class);
 
 	private final AppRegistryService registryService;
 
@@ -81,11 +81,28 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 	}
 
 	@Override
+	public SchemaVersionTarget findSchemaVersionTarget(String taskName, String version, TaskDefinitionReader taskDefinitionReader) {
+		logger.debug("findSchemaVersionTarget:{}:{}", taskName, version);
+		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
+		return findSchemaVersionTarget(taskName, version, definition);
+	}
+
+	@Override
 	public SchemaVersionTarget findSchemaVersionTarget(String taskName, TaskDefinition taskDefinition) {
+		return findSchemaVersionTarget(taskName, null, taskDefinition);
+	}
+
+	@Override
+	public SchemaVersionTarget findSchemaVersionTarget(String taskName, String version, TaskDefinition taskDefinition) {
+		logger.debug("findSchemaVersionTarget:{}:{}", taskName, version);
 		String registeredName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
-		AppRegistration registration = findTaskAppRegistration(registeredName);
+		AppRegistration registration = findTaskAppRegistration(registeredName, version);
 		if (registration == null) {
-			logger.warn("Cannot find AppRegistration for {}", taskName);
+			if(StringUtils.hasLength(version)) {
+				logger.warn("Cannot find AppRegistration for {}:{}", taskName, version);
+			} else {
+				logger.warn("Cannot find AppRegistration for {}", taskName);
+			}
 			return SchemaVersionTarget.defaultTarget();
 		}
 		final AppRegistration finalRegistration = registration;
@@ -101,16 +118,26 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 			throw new IllegalStateException("Multiple SchemaVersionTargets for " + registration.getBootVersion());
 		}
 		SchemaVersionTarget schemaVersionTarget = versionTargets.get(0);
-		logger.debug("findSchemaVersionTarget:{}={},{}", taskName, registeredName, schemaVersionTarget);
+		logger.debug("findSchemaVersionTarget:{}:{}:{}={}", taskName, registeredName, version, schemaVersionTarget);
 		return schemaVersionTarget;
 	}
 
 	@Override
-	public AppRegistration findTaskAppRegistration(String registeredAppName) {
-		AppRegistration registration = registryService.find(registeredAppName, ApplicationType.task);
+	public AppRegistration findTaskAppRegistration(String registeredName) {
+		return findTaskAppRegistration(registeredName, null);
+	}
+
+	@Override
+	public AppRegistration findTaskAppRegistration(String registeredAppName, String version) {
+		AppRegistration registration = StringUtils.hasLength(version) ?
+			registryService.find(registeredAppName, ApplicationType.task, version) :
+			registryService.find(registeredAppName, ApplicationType.task);
 		if (registration == null) {
-			registration = registryService.find(registeredAppName, ApplicationType.app);
+			registration = StringUtils.hasLength(version) ?
+				registryService.find(registeredAppName, ApplicationType.app, version) :
+				registryService.find(registeredAppName, ApplicationType.app);
 		}
+		logger.debug("findTaskAppRegistration:{}:{}={}", registeredAppName, version, registration);
 		return registration;
 	}
 

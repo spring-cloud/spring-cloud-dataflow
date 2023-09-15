@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -38,7 +39,6 @@ import org.springframework.cloud.dataflow.core.dsl.TaskAppNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -64,6 +64,7 @@ import org.springframework.util.Assert;
  * @author Michael Wirth
  * @author David Turanski
  * @author Daniel Serleg
+ * @author Corneil du Plessis
  */
 public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService {
 	private final static Logger logger = LoggerFactory.getLogger(DefaultTaskExecutionInfoService.class);
@@ -103,21 +104,23 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 * @param taskPlatforms               the task platforms
 	 */
 	@Deprecated
-	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
-										   AppRegistryService appRegistryService,
-										   AggregateTaskExplorer taskExplorer,
-										   TaskDefinitionRepository taskDefinitionRepository,
-										   TaskConfigurationProperties taskConfigurationProperties,
-										   LauncherRepository launcherRepository,
-										   List<TaskPlatform> taskPlatforms) {
+	public DefaultTaskExecutionInfoService(
+		DataSourceProperties dataSourceProperties,
+		AppRegistryService appRegistryService,
+		AggregateTaskExplorer taskExplorer,
+		TaskDefinitionRepository taskDefinitionRepository,
+		TaskConfigurationProperties taskConfigurationProperties,
+		LauncherRepository launcherRepository,
+		List<TaskPlatform> taskPlatforms
+	) {
 		this(dataSourceProperties,
-				appRegistryService,
-				taskExplorer,
-				taskDefinitionRepository,
-				taskConfigurationProperties,
-				launcherRepository,
-				taskPlatforms,
-				null);
+			appRegistryService,
+			taskExplorer,
+			taskDefinitionRepository,
+			taskConfigurationProperties,
+			launcherRepository,
+			taskPlatforms,
+			null);
 	}
 
 	/**
@@ -133,14 +136,16 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	 * @param taskPlatforms                             the task platforms
 	 * @param composedTaskRunnerConfigurationProperties the properties used to define the behavior of CTR
 	 */
-	public DefaultTaskExecutionInfoService(DataSourceProperties dataSourceProperties,
-										   AppRegistryService appRegistryService,
-										   AggregateTaskExplorer taskExplorer,
-										   TaskDefinitionRepository taskDefinitionRepository,
-										   TaskConfigurationProperties taskConfigurationProperties,
-										   LauncherRepository launcherRepository,
-										   List<TaskPlatform> taskPlatforms,
-										   ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
+	public DefaultTaskExecutionInfoService(
+		DataSourceProperties dataSourceProperties,
+		AppRegistryService appRegistryService,
+		AggregateTaskExplorer taskExplorer,
+		TaskDefinitionRepository taskDefinitionRepository,
+		TaskConfigurationProperties taskConfigurationProperties,
+		LauncherRepository launcherRepository,
+		List<TaskPlatform> taskPlatforms,
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
+	) {
 		Assert.notNull(dataSourceProperties, "DataSourceProperties must not be null");
 		Assert.notNull(appRegistryService, "AppRegistryService must not be null");
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
@@ -160,8 +165,10 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	}
 
 	@Override
-	public TaskExecutionInformation findTaskExecutionInformation(String taskName,
-																 Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials, Map<String, String> previousTaskDeploymentProperties) {
+	public TaskExecutionInformation findTaskExecutionInformation(
+		String taskName,
+		Map<String, String> taskDeploymentProperties, boolean addDatabaseCredentials, Map<String, String> previousTaskDeploymentProperties
+	) {
 		Assert.hasText(taskName, "The provided taskName must not be null or empty.");
 		Assert.notNull(taskDeploymentProperties, "The provided runtimeProperties must not be null.");
 
@@ -169,11 +176,11 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		taskExecutionInformation.setTaskDeploymentProperties(taskDeploymentProperties);
 
 		TaskDefinition originalTaskDefinition = taskDefinitionRepository.findById(taskName)
-				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
+			.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		//TODO: This normally called by JPA automatically but `AutoCreateTaskDefinitionTests` fails without this.
 		originalTaskDefinition.initialize();
 		TaskParser taskParser = new TaskParser(originalTaskDefinition.getName(), originalTaskDefinition.getDslText(),
-				true, true);
+			true, true);
 		TaskNode taskNode = taskParser.parse();
 		// if composed task definition replace definition with one composed task
 		// runner and executable graph.
@@ -181,24 +188,24 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		AppRegistration appRegistration;
 		if (taskNode.isComposed()) {
 			taskDefinitionToUse = new TaskDefinition(originalTaskDefinition.getName(),
-					TaskServiceUtils.createComposedTaskDefinition(taskNode.toExecutableDSL()));
+				TaskServiceUtils.createComposedTaskDefinition(taskNode.toExecutableDSL()));
 			taskExecutionInformation.setTaskDeploymentProperties(
-					TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
-							taskNode));
+				TaskServiceUtils.establishComposedTaskProperties(taskDeploymentProperties,
+					taskNode));
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(taskDefinitionToUse,
-					dataSourceProperties, addDatabaseCredentials);
+				dataSourceProperties, addDatabaseCredentials);
 			try {
 				appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
-						ApplicationType.task,
-						new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
-								this.composedTaskRunnerConfigurationProperties)));
+					ApplicationType.task,
+					new URI(TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
+						this.composedTaskRunnerConfigurationProperties)));
 			} catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 			}
 
 		} else {
 			taskDefinitionToUse = TaskServiceUtils.updateTaskProperties(originalTaskDefinition,
-					dataSourceProperties, addDatabaseCredentials);
+				dataSourceProperties, addDatabaseCredentials);
 
 			String label = null;
 			if (taskNode.getTaskApp() != null) {
@@ -217,10 +224,10 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			// if we have version, use that or rely on default version set
 			if (version == null) {
 				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
-						ApplicationType.task);
+					ApplicationType.task);
 			} else {
 				appRegistration = appRegistryService.find(taskDefinitionToUse.getRegisteredAppName(),
-						ApplicationType.task, version);
+					ApplicationType.task, version);
 			}
 		}
 
@@ -241,42 +248,56 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 		Set<String> result = new HashSet<>();
 		TaskNode taskNode = taskParser.parse();
 		if (taskNode.isComposed()) {
-			for (TaskApp subTask : taskNode.getTaskApps()) {
-				logger.debug("subTask:{}:{}:{}", subTask.getName(), subTask.getTaskName(), subTask);
-				TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
-				if (subTaskDefinition != null) {
-					result.add(subTaskDefinition.getRegisteredAppName() + "," + subTask.getLabel());
-					TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDefinition.getDslText(), true, true);
-					TaskNode subTaskNode = subTaskParser.parse();
-					if (subTaskNode != null && subTaskNode.getTaskApp() != null) {
-						for (TaskApp subSubTask : subTaskNode.getTaskApps()) {
-							logger.debug("subSubTask:{}:{}:{}", subSubTask.getName(), subSubTask.getTaskName(), subSubTask);
-							TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getName());
-							if (subSubTaskDefinition != null) {
-								if(!subTask.getLabel().contains("$")) {
-									result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
-								} else {
-									result.add(subSubTaskDefinition.getRegisteredAppName());
-								}
+			extractNames(taskNode, result);
+		}
+		return result;
+	}
+
+	@Override
+	public Set<String> taskNames(String taskName) {
+		TaskDefinition taskDefinition = taskDefinitionRepository.findByTaskName(taskName);
+		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
+		Set<String> result = new HashSet<>();
+		TaskNode taskNode = taskParser.parse();
+		extractNames(taskNode, result);
+		return result;
+	}
+
+	private void extractNames(TaskNode taskNode, Set<String> result) {
+		for (TaskApp subTask : taskNode.getTaskApps()) {
+			logger.debug("subTask:{}:{}:{}:{}", subTask.getName(), subTask.getTaskName(), subTask.getLabel(), subTask);
+			TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
+			if (subTaskDefinition != null) {
+				result.add(subTaskDefinition.getRegisteredAppName() + "," + subTask.getLabel());
+				TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDefinition.getDslText(), true, true);
+				TaskNode subTaskNode = subTaskParser.parse();
+				if (subTaskNode != null && subTaskNode.getTaskApp() != null) {
+					for (TaskApp subSubTask : subTaskNode.getTaskApps()) {
+						logger.debug("subSubTask:{}:{}:{}:{}", subSubTask.getName(), subSubTask.getTaskName(), subSubTask.getLabel(), subSubTask);
+						TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getName());
+						if (subSubTaskDefinition != null) {
+							if (!subTask.getLabel().contains("$")) {
+								result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
+							} else {
+								result.add(subSubTaskDefinition.getRegisteredAppName());
 							}
 						}
 					}
+				}
+			} else {
+				if ((subTask.getLabel() == null || subTask.getLabel().equals(subTask.getName())) && !subTask.getName().contains("$")) {
+					result.add(subTask.getName());
 				} else {
-					if((subTask.getLabel() == null || subTask.getLabel().equals(subTask.getName())) && !subTask.getName().contains("$")) {
+					if (!subTask.getName().contains("$") && !subTask.getLabel().contains("$")) {
+						result.add(subTask.getName() + "," + subTask.getLabel());
+					} else if (!subTask.getName().contains("$")) {
 						result.add(subTask.getName());
-					} else {
-						if(!subTask.getName().contains("$") && !subTask.getLabel().contains("$")) {
-							result.add(subTask.getName() + "," + subTask.getLabel());
-						} else if(!subTask.getName().contains("$")) {
-							result.add(subTask.getName());
-						} else if(!subTask.getTaskName().contains("$")) {
-							result.add(subTask.getTaskName());
-						}
+					} else if (!subTask.getTaskName().contains("$")) {
+						result.add(subTask.getTaskName());
 					}
 				}
 			}
 		}
-		return result;
 	}
 
 	@Override
@@ -293,7 +314,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 				TaskNode subTaskNode = subTaskParser.parse();
 				String subTaskName = subTaskNode.getTaskApp().getName();
 				AppRegistration appRegistration = appRegistryService.find(subTaskName,
-						ApplicationType.task);
+					ApplicationType.task);
 				Assert.notNull(appRegistration, "Unknown task app: " + subTask.getName());
 				Resource appResource = appRegistryService.getAppResource(appRegistration);
 
@@ -302,7 +323,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 				AppDefinition appDefinition = new AppDefinition(subTask.getName(), subTaskNode.getTaskApp().getArgumentsAsMap());
 
 				AppDeploymentRequest appDeploymentRequest = new AppDeploymentRequest(appDefinition,
-						appResource, null, null);
+					appResource, null, null);
 				appDeploymentRequests.add(appDeploymentRequest);
 			}
 		}
