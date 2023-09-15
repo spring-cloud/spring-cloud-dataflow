@@ -47,6 +47,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link DefaultTaskExecutionInfoService} interface.
@@ -268,7 +269,11 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 			logger.debug("subTask:{}:{}:{}:{}", subTask.getName(), subTask.getTaskName(), subTask.getLabel(), subTask);
 			TaskDefinition subTaskDefinition = taskDefinitionRepository.findByTaskName(subTask.getName());
 			if (subTaskDefinition != null) {
-				result.add(subTaskDefinition.getRegisteredAppName() + "," + subTask.getLabel());
+				if(StringUtils.hasText(subTask.getLabel())) {
+					result.add(subTaskDefinition.getRegisteredAppName() + "," + subTask.getLabel());
+				} else {
+					result.add(subTaskDefinition.getRegisteredAppName());
+				}
 				TaskParser subTaskParser = new TaskParser(subTaskDefinition.getTaskName(), subTaskDefinition.getDslText(), true, true);
 				TaskNode subTaskNode = subTaskParser.parse();
 				if (subTaskNode != null && subTaskNode.getTaskApp() != null) {
@@ -276,7 +281,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 						logger.debug("subSubTask:{}:{}:{}:{}", subSubTask.getName(), subSubTask.getTaskName(), subSubTask.getLabel(), subSubTask);
 						TaskDefinition subSubTaskDefinition = taskDefinitionRepository.findByTaskName(subSubTask.getName());
 						if (subSubTaskDefinition != null) {
-							if (!subTask.getLabel().contains("$")) {
+							if (subSubTask.getLabel() != null && !subTask.getLabel().contains("$")) {
 								result.add(subSubTaskDefinition.getRegisteredAppName() + "," + subSubTask.getLabel());
 							} else {
 								result.add(subSubTaskDefinition.getRegisteredAppName());
