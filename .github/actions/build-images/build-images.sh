@@ -67,6 +67,7 @@ for ((i = 0; i < len; i++)); do
             echo "Pushed $IMAGE:$TAG"
         fi
     done
+    sleep 60
 done
 docker system prune -f
 docker system prune --volumes -f
