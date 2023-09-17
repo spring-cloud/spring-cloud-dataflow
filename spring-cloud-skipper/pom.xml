@@ -40,7 +40,7 @@
 		<jmockit.version>1.24</jmockit.version>
 
 		<testcontainers.version>1.17.6</testcontainers.version>
-
+		<commons-compress.version>1.24.0</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
@@ -212,8 +212,19 @@
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-bom</artifactId>
 				<version>${testcontainers.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+					</exclusion>
+				</exclusions>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${commons-compress.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
