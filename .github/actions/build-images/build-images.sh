@@ -54,8 +54,8 @@ for ((i = 0; i < len; i++)); do
     for v in 8 11 17; do
         TARGET="${TARGETS[i]}"
         IMAGE="${IMAGES[i]}"
+        sleep 60
         pack_image $TARGET $IMAGE $v
-        sleep 30
         RC=$?
         if [ $RC -ne 0 ]; then
             exit $RC
@@ -67,9 +67,7 @@ for ((i = 0; i < len; i++)); do
             docker push "$IMAGE:$TAG"
             echo "Pushed $IMAGE:$TAG"
         fi
-
     done
-    sleep 60
 done
 docker system prune -f
 docker system prune --volumes -f
