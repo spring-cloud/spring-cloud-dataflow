@@ -30,19 +30,19 @@ function pack_image {
     echo "Created: $REPO:$TAG-jdk$v"
 }
 
-TARGETS=("spring-cloud-dataflow-server/target/spring-cloud-dataflow-server" \
+TARGETS=("spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" \
+        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit" \
+        "spring-cloud-dataflow-server/target/spring-cloud-dataflow-server" \
         "spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server" \
         "spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner" \
-        "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job" \
-        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit")
+        "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job")
 
-IMAGES=("springcloud/spring-cloud-dataflow-server" \
+IMAGES=("springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
+        "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit" \
+        "springcloud/spring-cloud-dataflow-server" \
         "springcloud/spring-cloud-skipper-server" \
         "springcloud/spring-cloud-dataflow-composed-task-runner" \
-        "springcloud/spring-cloud-dataflow-single-step-batch-job" \
-        "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit")
+        "springcloud/spring-cloud-dataflow-single-step-batch-job")
 
 len=${#TARGETS[@]}
 imageLen=${#IMAGES[@]}
