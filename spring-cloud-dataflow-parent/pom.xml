@@ -32,6 +32,7 @@
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.12.513</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.17.6</testcontainers.version>
+		<commons-compress.version>1.24.0</commons-compress.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>4.0.0-SNAPSHOT</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
@@ -127,8 +128,19 @@
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-bom</artifactId>
 				<version>${testcontainers.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.commons</groupId>
+						<artifactId>commons-compress</artifactId>
+					</exclusion>
+				</exclusions>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${commons-compress.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
