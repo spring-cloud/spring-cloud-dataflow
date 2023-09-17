@@ -52,14 +52,15 @@ if ((len != imageLen)); then
 fi
 for ((i = 0; i < len; i++)); do
     for v in 8 11 17; do
+        sleep 60
         TARGET="${TARGETS[i]}"
         IMAGE="${IMAGES[i]}"
-        sleep 60
         pack_image $TARGET $IMAGE $v
         RC=$?
         if [ $RC -ne 0 ]; then
             exit $RC
         fi
+        sleep 60
         docker push "$IMAGE:$TAG-jdk$v"
         echo "Pushed $IMAGE:$TAG-jdk$v"
         if [ "$DEFAULT_JDK" == "$v" ]; then
