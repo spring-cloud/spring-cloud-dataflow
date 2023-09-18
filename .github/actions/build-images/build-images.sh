@@ -30,37 +30,36 @@ function pack_image {
     echo "Created: $REPO:$TAG-jdk$v"
 }
 
-TARGETS=("spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit" \
-        "spring-cloud-dataflow-server/target/spring-cloud-dataflow-server" \
+TARGETS=("spring-cloud-dataflow-server/target/spring-cloud-dataflow-server" \
         "spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server" \
         "spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner" \
-        "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job")
+        "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job" \
+        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" \
+        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit")
 
-IMAGES=("springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit" \
-        "springcloud/spring-cloud-dataflow-server" \
+IMAGES=("springcloud/spring-cloud-dataflow-server" \
         "springcloud/spring-cloud-skipper-server" \
         "springcloud/spring-cloud-dataflow-composed-task-runner" \
-        "springcloud/spring-cloud-dataflow-single-step-batch-job")
+        "springcloud/spring-cloud-dataflow-single-step-batch-job" \
+        "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
+        "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit")
 
-len=${#TARGETS[@]}
-imageLen=${#IMAGES[@]}
+len=${#TARGETS1[@]}
+imageLen=${#IMAGES1[@]}
 if ((len != imageLen)); then
     echo "Expected $len == $imageLen"
     exit 1
 fi
+
 for ((i = 0; i < len; i++)); do
+    TARGET="${TARGETS[i]}"
+    IMAGE="${IMAGES[i]}"
     for v in 8 11 17; do
-        sleep 60
-        TARGET="${TARGETS[i]}"
-        IMAGE="${IMAGES[i]}"
         pack_image $TARGET $IMAGE $v
         RC=$?
         if [ $RC -ne 0 ]; then
             exit $RC
         fi
-        sleep 60
         docker push "$IMAGE:$TAG-jdk$v"
         echo "Pushed $IMAGE:$TAG-jdk$v"
         if [ "$DEFAULT_JDK" == "$v" ]; then
@@ -69,6 +68,14 @@ for ((i = 0; i < len; i++)); do
             echo "Pushed $IMAGE:$TAG"
         fi
     done
+    if [ "$IMAGE" == "springcloud/spring-cloud-dataflow-composed-task-runner" ]; then
+        echo "Pruning Docker"
+        docker system prune -f
+        docker system prune --volumes -f
+        echo "Sleeping for 5mins"
+        sleep 300
+    fi
 done
+
 docker system prune -f
 docker system prune --volumes -f
