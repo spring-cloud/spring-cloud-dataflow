@@ -79,7 +79,7 @@ jobs:
         version: ${{ env.spring_cloud_dataflow_version }}
         dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+        GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
     # clean m2 cache
     - name: Clean cache
       run: |

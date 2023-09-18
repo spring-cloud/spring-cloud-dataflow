@@ -10,6 +10,9 @@ inputs:
   dockerhub-password:
     description: 'dockerhub password'
     required: true
+  GCR_JSON_KEY:
+    description: 'GCR_JSON_KEY'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -29,7 +32,7 @@ runs:
     with:
       registry: gcr.io
       username: _json_key
-      password: ${{ secrets.GCR_JSON_KEY }}
+      password: ${{ inputs.GCR_JSON_KEY }}
   - name: Build Images
     env:
       TAG: ${{ inputs.version }}
