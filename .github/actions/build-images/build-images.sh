@@ -44,8 +44,8 @@ IMAGES=("springcloud/spring-cloud-dataflow-server" \
         "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
         "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit")
 
-len=${#TARGETS1[@]}
-imageLen=${#IMAGES1[@]}
+len=${#TARGETS[@]}
+imageLen=${#IMAGES[@]}
 if ((len != imageLen)); then
     echo "Expected $len == $imageLen"
     exit 1
