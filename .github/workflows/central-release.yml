@@ -28,22 +28,8 @@ jobs:
       with:
         dispatch-handler-extract-context-properties: true
         ensure-env: |
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname
           BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber
-          BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname
-          BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname
@@ -54,28 +40,7 @@ jobs:
       run: |
         jfrog rt download \
           --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
           --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_deployer_local_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_common_security_config_buildnumber"
-        jfrog rt download \
-          --spec .github/release-files-spec.json \
-          --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_skipper_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_skipper_buildnumber"
         jfrog rt download \
           --spec .github/release-files-spec.json \
           --spec-vars "buildname=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildname;buildnumber=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber"
