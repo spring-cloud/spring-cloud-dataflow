@@ -69,13 +69,7 @@ for ((i = 0; i < len; i++)); do
             echo "Pushed $IMAGE:$TAG"
         fi
     done
-    if [ "$IMAGE" == "springcloud/spring-cloud-dataflow-composed-task-runner" ] || [ "$IMAGE" ==  "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" ]; then
-        echo "Pruning Docker"
-        docker system prune -f
-        docker system prune --volumes -f
-        echo "Sleeping for 5mins"
-    fi
 done
-
+echo "Pruning Docker"
 docker system prune -f
 docker system prune --volumes -f
