@@ -21,6 +21,7 @@ function pack_image {
     echo "Creating: $REPO:$TAG-jdk$v"
     pack build --builder gcr.io/paketo-buildpacks/builder:base \
             --path "$JAR" \
+            --trust-builder --verbose \
             --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
     RC=$?
     if ((RC!=0)); then
