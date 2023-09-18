@@ -74,7 +74,6 @@ for ((i = 0; i < len; i++)); do
         docker system prune -f
         docker system prune --volumes -f
         echo "Sleeping for 5mins"
-        sleep 300
     fi
 done
 
