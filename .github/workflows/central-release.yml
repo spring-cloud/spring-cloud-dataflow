@@ -9,7 +9,7 @@ on:
 
 jobs:
   central:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu22-8-32
     environment: central
     steps:
 
