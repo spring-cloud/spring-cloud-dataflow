@@ -23,18 +23,20 @@ VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 FILES=$(find . -name "pom.xml" -type f)
 MVNV=$(realpath ./mvnw)
 for file in $FILES; do
-    COUNT_FOUND=$((1 + COUNT_FOUND))
-    DIR=$(dirname "$file")
-    pushd "$DIR" > /dev/null || exit 1
-        PACKAGING=$($MVNV help:evaluate -Dexpression=project.packaging -q -DforceStdout)
-    popd > /dev/null || exit 1
-    if [ "$PACKAGING" == "jar" ]; then
-        FILE=$(find $DIR/target -name "*-${VERSION}.jar" 2> /dev/null)
-        if [ "$FILE" = "" ]; then
-            COUNT_MISSING_JAR=$((1 + COUNT_MISSING_JAR))
-            echo "No jar in $DIR/target $PACKAGING"
-        else
-            check_jars "$FILE" "$DIR/target" "$VERSION"
+    if [[ "$file" != *"/target/"* ]]; then
+        COUNT_FOUND=$((1 + COUNT_FOUND))
+        DIR=$(dirname "$file")
+        pushd "$DIR" > /dev/null || exit 1
+            PACKAGING=$($MVNV help:evaluate -Dexpression=project.packaging -q -DforceStdout)
+        popd > /dev/null || exit 1
+        if [ "$PACKAGING" == "jar" ]; then
+            FILE=$(find $DIR/target -name "*-${VERSION}.jar" 2> /dev/null)
+            if [ "$FILE" = "" ]; then
+                COUNT_MISSING_JAR=$((1 + COUNT_MISSING_JAR))
+                echo "No jar in $DIR/target $PACKAGING"
+            else
+                check_jars "$FILE" "$DIR/target" "$VERSION"
+            fi
         fi
     fi
 done
