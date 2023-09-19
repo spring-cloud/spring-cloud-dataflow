@@ -32,7 +32,7 @@ package org.springframework.cloud.dataflow.core.dsl;
  *
  * This includes two sequences - as in two separate definitions. The primary definition
  * references other definitions where it would be too messy to inline them. In this case
- * <tt>preVisit(int)</tt> would be called for both 0 and 1.
+ * {@link #preVisit(FlowNode)} would be called.
  *
  * @author Andy Clement
  */
@@ -112,7 +112,7 @@ public abstract class TaskVisitor {
 	}
 
 	/**
-	 * After <tt>visit(TaskAppNode)</tt> and before <tt>postVisit(TaskAppNode)</tt> the
+	 * After {@link #visit(TaskAppNode)} and before {@link #postVisit(TaskAppNode)} the
 	 * transitions (if there are any) are visited for that task app.
 	 *
 	 * @param transition the transition

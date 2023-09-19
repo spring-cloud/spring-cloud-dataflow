@@ -10,7 +10,6 @@
 	<artifactId>spring-cloud-dataflow-classic-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs for Classic mode</name>
 	<description>Spring Cloud Data Flow Docs for Classic Mode</description>
-	<packaging>pom</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

@@ -256,7 +256,7 @@ public class StreamParser extends AppParser {
 			return null;
 		}
 
-		DestinationNode destinationNode = eatDestinationReference(false);
+		DestinationNode destinationNode = eatDestinationReference();
 		if (destinationNode == null) {
 			return null;
 		}
@@ -279,7 +279,7 @@ public class StreamParser extends AppParser {
 		SinkDestinationNode SinkDestinationNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
-			DestinationNode destinationNode = eatDestinationReference(false);
+			DestinationNode destinationNode = eatDestinationReference();
 			if (destinationNode == null) {
 				return null;
 			}
@@ -317,7 +317,7 @@ public class StreamParser extends AppParser {
 	 *
 	 * @return {@code DestinationNode} representing the destination reference
 	 */
-	protected DestinationNode eatDestinationReference(boolean canDefault) {
+	protected DestinationNode eatDestinationReference() {
 		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
 		if (!firstToken.isKind(TokenKind.COLON)) {
@@ -366,7 +366,7 @@ public class StreamParser extends AppParser {
 	 * <p>
 	 * Expected formats: {@code appList: app (| app)*} A stream may end in an app (if it is
 	 * a sink) or be followed by a sink destination.
-	 *
+	 * @param preceedingSourceChannelSpecified indicator to parser about state of stream.
 	 * @return a list of {@code AppNode}
 	 */
 	protected List<AppNode> eatAppList(boolean preceedingSourceChannelSpecified) {

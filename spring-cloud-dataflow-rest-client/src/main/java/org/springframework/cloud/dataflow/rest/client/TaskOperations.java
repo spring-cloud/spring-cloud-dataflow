@@ -54,8 +54,8 @@ public interface TaskOperations {
 	/**
 	 * Create a new task definition
 	 *
-	 * @param name the name of the task
-	 * @param definition the task definition DSL
+	 * @param name        the name of the task
+	 * @param definition  the task definition DSL
 	 * @param description the description of the task definition
 	 * @return the task definition
 	 */
@@ -64,9 +64,9 @@ public interface TaskOperations {
 	/**
 	 * Launch an already created task.
 	 *
-	 * @param name the name of the task
+	 * @param name       the name of the task
 	 * @param properties the deployment properties
-	 * @param arguments the command line arguments
+	 * @param arguments  the command line arguments
 	 * @return long containing the TaskExecutionId
 	 */
 	LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments);
@@ -74,15 +74,17 @@ public interface TaskOperations {
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
-	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 * @param ids          comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 * @param schemaTarget the schema target of the task execution.
 	 */
 	void stop(String ids, String schemaTarget);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
-	 * @param ids comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
-	 * @param platform the platform name where the task is executing.
+	 * @param ids          comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
+	 * @param schemaTarget the schema target of the task execution.
+	 * @param platform     the platform name where the task is executing.
 	 */
 	void stop(String ids, String schemaTarget, String platform);
 
@@ -96,7 +98,7 @@ public interface TaskOperations {
 	/**
 	 * Destroy an existing task with the flag to cleanup task resources.
 	 *
-	 * @param name the name of the task
+	 * @param name    the name of the task
 	 * @param cleanup flag indicates task execution cleanup
 	 */
 	void destroy(String name, boolean cleanup);
@@ -117,7 +119,8 @@ public interface TaskOperations {
 	/**
 	 * Return the {@link TaskExecutionResource} for the id specified.
 	 *
-	 * @param id identifier of the task execution
+	 * @param id           identifier of the task execution
+	 * @param schemaTarget the schema target of the task execution.
 	 * @return {@link TaskExecutionResource}
 	 */
 	TaskExecutionResource taskExecutionStatus(long id, String schemaTarget);
@@ -134,7 +137,7 @@ public interface TaskOperations {
 	 * Return the task execution log.
 	 *
 	 * @param externalExecutionId the external execution identifier of the task execution.
-	 * @param platform the platform from which to obtain the log.
+	 * @param platform            the platform from which to obtain the log.
 	 * @return {@link String} containing the log.
 	 */
 	String taskExecutionLog(String externalExecutionId, String platform);
@@ -142,6 +145,7 @@ public interface TaskOperations {
 	/**
 	 * Return information including the count of currently executing tasks and task execution
 	 * limits.
+	 *
 	 * @return Collection of {@link CurrentTaskExecutionsResource}
 	 */
 	Collection<CurrentTaskExecutionsResource> currentTaskExecutions();
@@ -149,15 +153,17 @@ public interface TaskOperations {
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.
 	 *
-	 * @param id identifier of the task execution
+	 * @param id           identifier of the task execution
+	 * @param schemaTarget the schema target of the task execution.
 	 */
 	void cleanup(long id, String schemaTarget);
 
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.
 	 *
-	 * @param id identifier of the task execution
-	 * @param removeData delete the history of the execution
+	 * @param id           identifier of the task execution
+	 * @param schemaTarget the schema target of the task execution.
+	 * @param removeData   delete the history of the execution
 	 */
 	void cleanup(long id, String schemaTarget, boolean removeData);
 
@@ -166,20 +172,22 @@ public interface TaskOperations {
 	 * Cleanup any resources associated with the matching task executions.
 	 *
 	 * @param completed cleanup only completed task executions
-	 * @param taskName the name of the task to cleanup, if null then all the tasks are considered.
+	 * @param taskName  the name of the task to cleanup, if null then all the tasks are considered.
 	 */
 	void cleanupAllTaskExecutions(boolean completed, String taskName);
 
 	/**
 	 * Get the task executions count with the option to filter only the completed task executions.
+	 *
 	 * @param completed cleanup only completed task executions
-	 * @param taskName the name of the task to cleanup, if null then all the tasks are considered.
+	 * @param taskName  the name of the task to cleanup, if null then all the tasks are considered.
 	 * @return the number of task executions.
 	 */
 	Integer getAllTaskExecutionsCount(boolean completed, String taskName);
 
 	/**
 	 * Return the validation status for the tasks in an definition.
+	 *
 	 * @param taskDefinitionName The name of the task definition to be validated.
 	 * @return {@link TaskAppStatusResource} containing the task app statuses.
 	 * @throws OperationNotSupportedException if the server does not support task validation
@@ -188,7 +196,6 @@ public interface TaskOperations {
 
 	/**
 	 * Destroy all existing tasks.
-	 *
 	 */
 	void destroyAll();
 }

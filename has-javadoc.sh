@@ -10,13 +10,28 @@ function check_jars() {
     VERSION=$3
     set +e
     RESULT=$(ls -1a "$TARGET_DIR/" 2> /dev/null)
+    CLASS_COUNT=-1
     if [[ "$RESULT" != *"-$VERSION-javadoc.jar"* ]]; then
+        echo "Checking for classes in $TARGET"
+        CLASS_COUNT=$(jar -t -f "$TARGET" | grep -c "\.class")
         COUNT_MISSING_JAVADOC=$((1 + COUNT_MISSING_JAVADOC))
-        echo "No javadoc for $TARGET_DIR"
+        if ((CLASS_COUNT <= 0)); then
+            echo "No classes and no javadoc jar for $TARGET_DIR"
+        else
+            echo "No javadoc jar for $TARGET_DIR"
+        fi
     fi
     if [[ "$RESULT" != *"-$VERSION-sources.jar"* ]]; then
         COUNT_MISSING_SOURCES=$((1 + COUNT_MISSING_SOURCES))
-        echo "No sources for $TARGET_DIR"
+        if((CLASS_COUNT < 0)); then
+            echo "Checking for classes in $TARGET"
+            CLASS_COUNT=$(jar -t -f "$TARGET" | grep -c "\.class")
+        fi
+        if ((CLASS_COUNT <= 0)); then
+            echo "No classes and no sources for $TARGET_DIR"
+        else
+            echo "No sources jar for $TARGET_DIR"
+        fi
     fi
 }
 VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)

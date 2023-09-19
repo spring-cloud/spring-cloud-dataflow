@@ -55,6 +55,7 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 	 * @param dataSource                    the underlying data source
 	 * @param transactionManagerCustomizers transaction manager customizers (or
 	 *                                      {@code null})
+	 * @param composedTaskProperties composed task properties
 	 */
 	protected ComposedBatchConfigurer(BatchProperties properties, DataSource dataSource,
 			TransactionManagerCustomizers transactionManagerCustomizers, ComposedTaskProperties composedTaskProperties) {

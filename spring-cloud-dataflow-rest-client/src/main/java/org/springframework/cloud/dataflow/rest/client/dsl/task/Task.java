@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -162,13 +161,13 @@ public class Task implements AutoCloseable {
 	 */
 	public void stop() {
 		Map<String, Set<TaskExecutionResource>> idTargets = executions().stream()
-				.filter(Objects::nonNull)
-				.filter(e -> e.getTaskExecutionStatus() == TaskExecutionStatus.RUNNING)
-				.collect(Collectors.groupingBy(TaskExecutionResource::getSchemaTarget, Collectors.toSet()));
+			.filter(Objects::nonNull)
+			.filter(e -> e.getTaskExecutionStatus() == TaskExecutionStatus.RUNNING)
+			.collect(Collectors.groupingBy(TaskExecutionResource::getSchemaTarget, Collectors.toSet()));
 		idTargets.forEach((schemaTarget, tasks) -> {
 			String ids = tasks.stream()
-					.map(taskExecutionResource -> String.valueOf(taskExecutionResource.getExecutionId()))
-					.collect(Collectors.joining(","));
+				.map(taskExecutionResource -> String.valueOf(taskExecutionResource.getExecutionId()))
+				.collect(Collectors.joining(","));
 			this.taskOperations.stop(ids, schemaTarget);
 		});
 	}
@@ -176,14 +175,15 @@ public class Task implements AutoCloseable {
 	/**
 	 * Stop a list of {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
+	 * @param schemaTarget     the schema target of the task executions.
 	 * @param taskExecutionIds List of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
 	 *                         <p>
 	 *                         Note: this functionality is platform dependent! It works for local platform but does nothing on K8s!
 	 */
 	public void stop(String schemaTarget, long... taskExecutionIds) {
 		String commaSeparatedIds = Stream.of(taskExecutionIds)
-				.map(String::valueOf)
-				.collect(Collectors.joining(","));
+			.map(String::valueOf)
+			.collect(Collectors.joining(","));
 		if (StringUtils.hasText(commaSeparatedIds)) {
 			this.taskOperations.stop(commaSeparatedIds, schemaTarget);
 		}
@@ -212,7 +212,8 @@ public class Task implements AutoCloseable {
 	/**
 	 * Retrieve task execution by Id.
 	 *
-	 * @param executionId Task execution Id
+	 * @param executionId  Task execution Id
+	 * @param schemaTarget the schema target of the task execution.
 	 * @return Task executions for the given task execution id.
 	 */
 	public Optional<TaskExecutionResource> execution(long executionId, String schemaTarget) {
@@ -223,25 +224,27 @@ public class Task implements AutoCloseable {
 	 * Find {@link TaskExecutionResource} by a parent execution id.
 	 *
 	 * @param parentExecutionId parent task execution id.
+	 * @param schemaTarget      the schema target of the parent execution.
 	 * @return Return TaskExecutionResource
 	 */
 	public Optional<TaskExecutionResource> executionByParentExecutionId(long parentExecutionId, String schemaTarget) {
 		return this.executions().stream()
-				.filter(Objects::nonNull)
-				.filter(e -> e.getParentExecutionId() == parentExecutionId && e.getSchemaTarget().equals(schemaTarget))
-				.findFirst();
+			.filter(Objects::nonNull)
+			.filter(e -> e.getParentExecutionId() == parentExecutionId && e.getSchemaTarget().equals(schemaTarget))
+			.findFirst();
 	}
 
 	/**
 	 * Task execution status
 	 *
-	 * @param executionId execution Id
+	 * @param executionId  execution Id.
+	 * @param schemaTarget the schema target of the execution.
 	 * @return returns the task execution status.
 	 */
 	public TaskExecutionStatus executionStatus(long executionId, String schemaTarget) {
 		return this.execution(executionId, schemaTarget)
-				.map(TaskExecutionResource::getTaskExecutionStatus)
-				.orElse(TaskExecutionStatus.UNKNOWN);
+			.map(TaskExecutionResource::getTaskExecutionStatus)
+			.orElse(TaskExecutionStatus.UNKNOWN);
 	}
 
 	/**
@@ -256,12 +259,12 @@ public class Task implements AutoCloseable {
 	 */
 	public List<Task> composedTaskChildTasks() {
 		return !isComposed() ?
-				new ArrayList<>() :
-				this.taskOperations.list().getContent().stream()
-						.filter(Objects::nonNull)
-						.filter(t -> t.getName().startsWith(this.taskName + "-"))
-						.map(t -> new Task(t.getName(), this.dataFlowOperations))
-						.collect(Collectors.toList());
+			new ArrayList<>() :
+			this.taskOperations.list().getContent().stream()
+				.filter(Objects::nonNull)
+				.filter(t -> t.getName().startsWith(this.taskName + "-"))
+				.map(t -> new Task(t.getName(), this.dataFlowOperations))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -270,7 +273,7 @@ public class Task implements AutoCloseable {
 	 */
 	public Optional<Task> composedTaskChildTaskByLabel(String childTaskLabel) {
 		return this.composedTaskChildTasks().stream()
-				.filter(childTask -> childTask.getTaskName().endsWith("-" + childTaskLabel)).findFirst();
+			.filter(childTask -> childTask.getTaskName().endsWith("-" + childTaskLabel)).findFirst();
 	}
 
 
@@ -291,6 +294,7 @@ public class Task implements AutoCloseable {
 
 	/**
 	 * @param jobExecutionId the job execution id.
+	 * @param schemaTarget   the schema target of the job execution.
 	 * @return Returns list of {@link StepExecutionResource} belonging to the job.
 	 */
 	public Collection<StepExecutionResource> jobStepExecutions(long jobExecutionId, String schemaTarget) {
@@ -306,9 +310,9 @@ public class Task implements AutoCloseable {
 
 	private Optional<TaskDefinitionResource> definitionResource() {
 		return this.taskOperations.list().getContent().stream()
-				.filter(Objects::nonNull)
-				.filter(t -> t.getName().equals(this.taskName))
-				.findFirst();
+			.filter(Objects::nonNull)
+			.filter(t -> t.getName().equals(this.taskName))
+			.findFirst();
 	}
 
 	/**
@@ -331,6 +335,7 @@ public class Task implements AutoCloseable {
 	 * Remove specified task execution for the specified task execution id.
 	 *
 	 * @param taskExecutionId the id of the task execution to be removed.
+	 * @param schemaTarget    the schema target
 	 */
 	public void cleanupTaskExecution(long taskExecutionId, String schemaTarget) {
 		this.taskOperations.cleanup(taskExecutionId, schemaTarget, true);

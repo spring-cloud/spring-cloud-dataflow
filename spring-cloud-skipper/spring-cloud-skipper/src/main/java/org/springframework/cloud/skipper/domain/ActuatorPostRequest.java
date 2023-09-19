@@ -20,23 +20,22 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.util.Assert;
-
+/**
+ * @author David Turanski
+ */
 public class ActuatorPostRequest {
 
 	private String endpoint;
 
 	private Map<String, Object> body;
 
-	/**
-	 * @author David Turanski
-	 */
 	public ActuatorPostRequest() {
 	}
 
 	/**
 	 * @param endpoint the relative actuator path, e.g., {@code /info}, base actuator url if empty.
 	 * @param body the request body as JSON text
-	 * @return
+	 * @return actuator post request
 	 */
 	public static ActuatorPostRequest of(String endpoint, Map<String, Object> body) {
 		Assert.notEmpty(body, "'body' must not be empty");

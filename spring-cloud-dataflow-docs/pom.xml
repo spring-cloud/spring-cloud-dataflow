@@ -10,7 +10,7 @@
 	<artifactId>spring-cloud-dataflow-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs</name>
 	<description>Spring Cloud Data Flow Docs</description>
-	<packaging>pom</packaging>
+	<packaging>jar</packaging>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.resources.version>0.2.5</docs.resources.version>
