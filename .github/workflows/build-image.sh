@@ -32,7 +32,7 @@ function download_image() {
     echo "Downloaded $TARGET_FILE"
 }
 
-TARGET=$1
+TARGET=$(realpath $1)
 REPO="$2"
 ARTIFACT_ID=$3
 
