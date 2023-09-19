@@ -13,7 +13,7 @@ function check_jars() {
     CLASS_COUNT=-1
     if [[ "$RESULT" != *"-$VERSION-javadoc.jar"* ]]; then
         echo "Checking for classes in $TARGET"
-        CLASS_COUNT=$(jar -t -f "$TARGET" | grep -c "\.class")
+        CLASS_COUNT=$(jar tf "$TARGET" | grep -c "\.class")
         COUNT_MISSING_JAVADOC=$((1 + COUNT_MISSING_JAVADOC))
         if ((CLASS_COUNT <= 0)); then
             echo "No classes and no javadoc jar for $TARGET_DIR"
@@ -25,7 +25,7 @@ function check_jars() {
         COUNT_MISSING_SOURCES=$((1 + COUNT_MISSING_SOURCES))
         if((CLASS_COUNT < 0)); then
             echo "Checking for classes in $TARGET"
-            CLASS_COUNT=$(jar -t -f "$TARGET" | grep -c "\.class")
+            CLASS_COUNT=$(jar tf "$TARGET" | grep -c "\.class")
         fi
         if ((CLASS_COUNT <= 0)); then
             echo "No classes and no sources for $TARGET_DIR"

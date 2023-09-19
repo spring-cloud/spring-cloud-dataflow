@@ -45,6 +45,11 @@ IMAGES=("springcloud/spring-cloud-dataflow-server" \
         "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
         "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit")
 
+MAVEN_ARTIFACT_IDS=("spring-cloud-dataflow-server" \
+        "spring-cloud-dataflow-server" \
+        "spring-cloud-dataflow-composed-task-runner" \
+        "spring-cloud-dataflow-tasklauncher-sink-kafka" \
+        "spring-cloud-dataflow-tasklauncher-sink-rabbit")
 len=${#TARGETS[@]}
 imageLen=${#IMAGES[@]}
 if ((len != imageLen)); then
@@ -55,8 +60,9 @@ fi
 for ((i = 0; i < len; i++)); do
     TARGET="${TARGETS[i]}"
     IMAGE="${IMAGES[i]}"
+    ARTIFACT_ID="${MAVEN_ARTIFACT_IDS[i]}"
     for v in 8 11 17; do
-        pack_image $TARGET $IMAGE $v
+        pack_image $TARGET $IMAGE $v $ARTIFACT_ID
         RC=$?
         if [ $RC -ne 0 ]; then
             exit $RC

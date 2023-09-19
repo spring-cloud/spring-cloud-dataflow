@@ -1,0 +1,29 @@
+{
+  "include": [
+    {
+      "name": "spring-cloud-dataflow-server",
+      "path": "spring-cloud-dataflow-server/target",
+      "image": "springcloud/spring-cloud-dataflow-server"
+    },
+    {
+      "name": "spring-cloud-skipper-server",
+      "path": "spring-cloud-skipper/spring-cloud-skipper-server/target",
+      "image": "springcloud/spring-cloud-skipper-server"
+    },
+    {
+      "name": "spring-cloud-dataflow-composed-task-runner",
+      "path": "spring-cloud-skipper/spring-cloud-skipper-server/target",
+      "image": "springcloud/spring-cloud-skipper-server"
+    },
+    {
+      "name": "spring-cloud-dataflow-tasklauncher-sink-kafka",
+      "path": "spring-cloud-skipper/spring-cloud-skipper-server/target",
+      "image": "springcloud/spring-cloud-skipper-server"
+    },
+    {
+      "name": "spring-cloud-dataflow-tasklauncher-sink-rabbit",
+      "path": "spring-cloud-skipper/spring-cloud-skipper-server/target",
+      "image": "springcloud/spring-cloud-skipper-server"
+    }
+  ]
+}
