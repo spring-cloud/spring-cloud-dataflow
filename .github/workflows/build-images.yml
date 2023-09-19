@@ -53,6 +53,10 @@ jobs:
       - name: Install xmllint
         shell: bash
         run: sudo apt -y install libxml2-utils
+      - name: Install pack
+        uses: jvalkeal/build-zoo-handler@v0.0.4
+        with:
+          pack-version: 0.30.0
       - name: Login to docker.io
         uses: docker/login-action@v1
         with:
