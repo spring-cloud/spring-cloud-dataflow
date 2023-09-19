@@ -76,13 +76,13 @@ jobs:
     - name: Clean cache
       run: |
         find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
-    - name: Export version
-      id: export
-      run: echo "version=$spring_cloud_dataflow_version" >> $GITHUB_OUTPUT
+    outputs:
+      version: ${{ env.spring_cloud_dataflow_version }}
   images:
+    name: Build and Publish Images
     needs:
       - build
-    uses: .github/workflows/build-images.yml
+    uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.build.outputs.version }}
     secrets:
