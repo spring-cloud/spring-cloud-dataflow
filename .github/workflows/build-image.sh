@@ -70,16 +70,16 @@ for v in 8 11 17; do
         exit $RC
     fi
     echo "Created: $REPO:$TAG-jdk$v"
-    docker push "$IMAGE:$TAG-jdk$v"
+    docker push "$REPO:$TAG-jdk$v"
     RC=$?
     if ((RC!=0)); then
         exit $RC
     fi
-    echo "Pushed $IMAGE:$TAG-jdk$v"
+    echo "Pushed $REPO:$TAG-jdk$v"
     if [ "$DEFAULT_JDK" == "$v" ]; then
-        docker tag "$IMAGE:$TAG-jdk$DEFAULT_JDK" "$IMAGE:$TAG"
-        docker push "$IMAGE:$TAG"
-        echo "Pushed $IMAGE:$TAG"
+        docker tag "$REPO:$TAG-jdk$DEFAULT_JDK" "$REPO:$TAG"
+        docker push "$REPO:$TAG"
+        echo "Pushed $REPO:$TAG"
     fi
 done
 echo "Pruning Docker"
