@@ -28,7 +28,7 @@ jobs:
           else
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
           fi
-          echo "matrix=$(jq -c .github/workflows/images.json)" >> $GITHUB_OUTPUT
+          echo "matrix=$(cat .github/workflows/images.json | jq -c)" >> $GITHUB_OUTPUT
   publish:
     name: Publish
     runs-on: ubuntu-latest
