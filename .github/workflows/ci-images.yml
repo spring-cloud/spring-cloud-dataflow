@@ -1,0 +1,23 @@
+name: CI - Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - '2.10.x'
+      - '2.9.x'
+    paths-ignore:
+      - '.github/**'
+
+
+jobs:
+  images:
+    name: Build and Publish Images
+    needs:
+      - build
+    uses: ./.github/workflows/build-images.yml
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
