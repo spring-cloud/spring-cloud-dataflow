@@ -70,37 +70,41 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
 
-    # build and publish images via composite action
-    - name: Build and Publish Images
-      uses: ./.github/actions/build-images
-      with:
-        version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-        dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-        dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-        GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
+  images:
+    name: Build and Publish Images
+    needs: [ build ]
+    uses: ./.github/workflows/build-images.yml
+    with:
+      version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
 
-    # zoo success
-    - name: Notify Build Success Zoo Handler Controller
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
-        dispatch-handler-client-payload-data: >
-          {
-            "event": "build-succeed"
-          }
-
-    # zoo failure
-    - name: Notify Build Failure Zoo Handler Controller
-      if: ${{ failure() }}
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
-        dispatch-handler-client-payload-data: >
-          {
-            "event": "build-failed",
-            "message": "spring-cloud-dataflow failed"
-          }
-    # clean m2 cache
-    - name: Clean cache
-      run: |
-        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
+  wrap:
+    needs: [ build, images ]
+    steps:
+      # zoo success
+      - name: Notify Build Success Zoo Handler Controller
+        uses: jvalkeal/build-zoo-handler@v0.0.4
+        with:
+          dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+          dispatch-handler-client-payload-data: >
+            {
+              "event": "build-succeed"
+            }
+      # zoo failure
+      - name: Notify Build Failure Zoo Handler Controller
+        if: ${{ failure() }}
+        uses: jvalkeal/build-zoo-handler@v0.0.4
+        with:
+          dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+          dispatch-handler-client-payload-data: >
+            {
+              "event": "build-failed",
+              "message": "spring-cloud-dataflow failed"
+            }
+      # clean m2 cache
+      - name: Clean cache
+        run: |
+          find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
