@@ -45,7 +45,7 @@ jobs:
     needs:
       - prepare
     strategy:
-      matrix: ${{ fromJson(needs.prepare.output.matrix) }}
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
     concurrency:
       group: ${{ matrix.name }}
     steps:
@@ -64,7 +64,7 @@ jobs:
       - name: Build and Publish ${{ matrix.name }}
         shell: bash
         env:
-          TAG: ${{ needs.prepare.output.version }}
+          TAG: ${{ needs.prepare.outputs.version }}
           DEFAULT_JDK: '11'
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}
