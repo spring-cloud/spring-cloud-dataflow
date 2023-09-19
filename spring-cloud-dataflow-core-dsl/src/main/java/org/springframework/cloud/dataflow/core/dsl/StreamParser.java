@@ -256,7 +256,7 @@ public class StreamParser extends AppParser {
 			return null;
 		}
 
-		DestinationNode destinationNode = eatDestinationReference();
+		DestinationNode destinationNode = eatDestinationReference(false);
 		if (destinationNode == null) {
 			return null;
 		}
@@ -279,7 +279,7 @@ public class StreamParser extends AppParser {
 		SinkDestinationNode SinkDestinationNode = null;
 		if (tokens.peek(TokenKind.GT)) {
 			Token gt = tokens.eat(TokenKind.GT);
-			DestinationNode destinationNode = eatDestinationReference();
+			DestinationNode destinationNode = eatDestinationReference(false);
 			if (destinationNode == null) {
 				return null;
 			}
@@ -315,9 +315,10 @@ public class StreamParser extends AppParser {
 	 * Expected format: {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
+	 * @param canDefault allows the user to peek ahead to parse a reference when working with colons in the syntax.
 	 * @return {@code DestinationNode} representing the destination reference
 	 */
-	protected DestinationNode eatDestinationReference() {
+	protected DestinationNode eatDestinationReference(boolean canDefault) {
 		Tokens tokens = getTokens();
 		Token firstToken = tokens.next();
 		if (!firstToken.isKind(TokenKind.COLON)) {
