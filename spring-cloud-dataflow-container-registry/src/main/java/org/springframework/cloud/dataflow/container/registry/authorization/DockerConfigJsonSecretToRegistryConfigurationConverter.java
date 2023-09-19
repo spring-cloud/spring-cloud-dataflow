@@ -49,10 +49,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class DockerConfigJsonSecretToRegistryConfigurationConverter implements Converter<String, Map<String, ContainerRegistryConfiguration>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DockerConfigJsonSecretToRegistryConfigurationConverter.class);
+
 	public static final String BEARER_REALM_ATTRIBUTE = "Bearer realm";
+
 	public static final String SERVICE_ATTRIBUTE = "service";
+
 	public static final String HTTPS_INDEX_DOCKER_IO_V_1 = "https://index.docker.io/v1/";
+
 	public static final String DOCKER_IO = "docker.io";
+
 	public static final String REGISTRY_1_DOCKER_IO = "registry-1.docker.io";
 
 	//	private final RestTemplate restTemplate;
@@ -62,26 +67,27 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 
 	private final boolean replaceDefaultDockerRegistryServer;
 
-	public DockerConfigJsonSecretToRegistryConfigurationConverter(ContainerRegistryProperties properties,
-			ContainerImageRestTemplateFactory containerImageRestTemplate) {
+	public DockerConfigJsonSecretToRegistryConfigurationConverter(
+		ContainerRegistryProperties properties,
+		ContainerImageRestTemplateFactory containerImageRestTemplate
+	) {
 
 		this.replaceDefaultDockerRegistryServer = properties.isReplaceDefaultDockerRegistryServer();
 		// Retrieve registry configurations, explicitly declared via properties.
 		this.httpProxyPerHost = properties.getRegistryConfigurations().entrySet().stream()
-				.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), e -> e.getValue().isUseHttpProxy()));
+			.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), e -> e.getValue().isUseHttpProxy()));
 		this.containerImageRestTemplate = containerImageRestTemplate;
 	}
 
 	/**
 	 * The .dockerconfigjson value hast the following format:
 	 * <code>
-	 *  {"auths":{"demo.goharbor.io":{"username":"admin","password":"Harbor12345","auth":"YWRtaW46SGFyYm9yMTIzNDU="}}}
+	 * {"auths":{"demo.goharbor.io":{"username":"admin","password":"Harbor12345","auth":"YWRtaW46SGFyYm9yMTIzNDU="}}}
 	 * </code>
-	 *
+	 * <p>
 	 * The map key is the registry host name and the value contains the username  and password to access this registry.
 	 *
 	 * @param dockerconfigjson to convert into RegistryConfiguration map.
-	 *
 	 * @return Return as (host-name, registry-configuration) map constructed from the dockerconfigjson content.
 	 */
 	@Override
@@ -100,17 +106,15 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 					rc.setSecret((String) registryMap.get("password"));
 
 					Optional<String> tokenAccessUrl = getDockerTokenServiceUri(rc.getRegistryHost(),
-							true, this.httpProxyPerHost.getOrDefault(rc.getRegistryHost(), false));
+						true, this.httpProxyPerHost.getOrDefault(rc.getRegistryHost(), false));
 
 					if (tokenAccessUrl.isPresent()) {
 						rc.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
 						rc.getExtra().put(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, tokenAccessUrl.get());
-					}
-					else {
+					} else {
 						if (StringUtils.isEmpty(rc.getUser()) && StringUtils.isEmpty(rc.getSecret())) {
 							rc.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.anonymous);
-						}
-						else {
+						} else {
 							rc.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.basicauth);
 						}
 					}
@@ -120,8 +124,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 					registryConfigurationMap.put(rc.getRegistryHost(), rc);
 				}
 				return registryConfigurationMap;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				logger.error("Failed to parse the Secrets in dockerconfigjson");
 			}
 		}
@@ -136,7 +139,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	 * To be able to reuse docker registry secretes for the purpose of imagePullSecrets and SCDF Container Metadata retrieval.
 	 * by default the `https://index.docker.io/v1/` and `domain.io` docker-server values found in any mounted dockerconfigjson secret
 	 * are replaced by `registry-1.docker.io`.
-	 *
+	 * <p>
 	 * You can override this behaviour by setting replaceDefaultDockerRegistryServer to false.
 	 *
 	 * @param dockerConfigJsonRegistryHost Docker-Server property value as extracted from the dockerconfigjson.
@@ -144,22 +147,24 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	 */
 	private String replaceDefaultDockerRegistryServerUrl(String dockerConfigJsonRegistryHost) {
 		return (this.replaceDefaultDockerRegistryServer && (DOCKER_IO.equals(dockerConfigJsonRegistryHost)
-				|| HTTPS_INDEX_DOCKER_IO_V_1.equals(dockerConfigJsonRegistryHost))) ?
-				REGISTRY_1_DOCKER_IO : dockerConfigJsonRegistryHost;
+			|| HTTPS_INDEX_DOCKER_IO_V_1.equals(dockerConfigJsonRegistryHost))) ?
+			REGISTRY_1_DOCKER_IO : dockerConfigJsonRegistryHost;
 	}
 
 	/**
 	 * Best effort to construct a valid Docker OAuth2 token authorization uri from the HTTP 401 Error response.
-	 *
+	 * <p>
 	 * Hit the http://registry-host/v2/ and parse the on authorization error (401) response.
 	 * If a Www-Authenticate response header exists and contains a "Bearer realm" and "service" attributes then use
 	 * them to constructs the Token Endpoint URI.
-	 *
+	 * <p>
 	 * Returns null for non 401 errors or invalid Www-Authenticate content.
-	 *
+	 * <p>
 	 * Applicable only for dockeroauth2 authorization-type.
 	 *
 	 * @param registryHost Container Registry host to retrieve the tokenServiceUri for.
+	 * @param disableSSl Disable SSL
+	 * @param useHttpProxy Enable the use of http proxy.
 	 * @return Returns Token Endpoint Url or null.
 	 */
 	public Optional<String> getDockerTokenServiceUri(String registryHost, boolean disableSSl, boolean useHttpProxy) {
@@ -170,7 +175,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			Integer port = null;
 			if (registryHost.contains(":")) {
 				int colon = registryHost.lastIndexOf(":");
-				String portString = registryHost.substring(colon+1);
+				String portString = registryHost.substring(colon + 1);
 				try {
 					int intPort = Integer.parseInt(portString);
 					if (Integer.toString(intPort).equals(portString) && intPort > 0 && intPort < 32767) {
@@ -190,14 +195,13 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			logger.info("getDockerTokenServiceUri:" + uri);
 			restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(new HttpHeaders()), Map.class);
 			return Optional.empty();
-		}
-		catch (HttpClientErrorException httpError) {
+		} catch (HttpClientErrorException httpError) {
 
 			if (httpError.getRawStatusCode() != 401) {
 				return Optional.empty();
 			}
 			if (httpError.getResponseHeaders() == null
-					|| !httpError.getResponseHeaders().containsKey(HttpHeaders.WWW_AUTHENTICATE)) {
+				|| !httpError.getResponseHeaders().containsKey(HttpHeaders.WWW_AUTHENTICATE)) {
 				return Optional.empty();
 			}
 
@@ -210,18 +214,18 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 
 			// Extract the "Bearer realm" and "service" attributes from the Www-Authenticate value
 			Map<String, String> wwwAuthenticateAttributes = Stream.of(wwwAuthenticate.get(0).split(","))
-					.map(s -> s.split("="))
-					.collect(Collectors.toMap(b -> b[0], b -> b[1]));
+				.map(s -> s.split("="))
+				.collect(Collectors.toMap(b -> b[0], b -> b[1]));
 
 			if (CollectionUtils.isEmpty(wwwAuthenticateAttributes)
-					|| !wwwAuthenticateAttributes.containsKey(BEARER_REALM_ATTRIBUTE)
-					|| !wwwAuthenticateAttributes.containsKey(SERVICE_ATTRIBUTE)) {
+				|| !wwwAuthenticateAttributes.containsKey(BEARER_REALM_ATTRIBUTE)
+				|| !wwwAuthenticateAttributes.containsKey(SERVICE_ATTRIBUTE)) {
 				logger.warn("Invalid Www-Authenticate: {} for container registry {}", wwwAuthenticate, registryHost);
 				return Optional.empty();
 			}
 
 			String tokenServiceUri = String.format("%s?service=%s&scope=repository:{repository}:pull",
-					wwwAuthenticateAttributes.get(BEARER_REALM_ATTRIBUTE), wwwAuthenticateAttributes.get(SERVICE_ATTRIBUTE));
+				wwwAuthenticateAttributes.get(BEARER_REALM_ATTRIBUTE), wwwAuthenticateAttributes.get(SERVICE_ATTRIBUTE));
 
 			// remove redundant quotes.
 			tokenServiceUri = tokenServiceUri.replaceAll("\"", "");
@@ -229,8 +233,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			logger.info("tokenServiceUri: " + tokenServiceUri);
 
 			return Optional.of(tokenServiceUri);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// Log error because we cannot change the contract that returns empty optional.
 			logger.error("Ignoring:" + e, e);
 			return Optional.empty();

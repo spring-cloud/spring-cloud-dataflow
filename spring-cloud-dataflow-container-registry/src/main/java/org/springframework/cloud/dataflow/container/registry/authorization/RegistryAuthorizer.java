@@ -50,6 +50,7 @@ public interface RegistryAuthorizer {
 	/**
 	 * @param registryConfiguration configuration such as credentials and additional information required to obtain the
 	 *                              authorized headers.
+	 * @param configProperties configuration properties for obtaining the authorized headers.
 	 * @return Returns HTTP headers, configured with authorization credentials or tokens that would allow access
 	 * the target Registry.
 	 */

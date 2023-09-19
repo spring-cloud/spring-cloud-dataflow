@@ -10,6 +10,7 @@
 	<artifactId>spring-cloud-dataflow-classic-docs</artifactId>
 	<name>Spring Cloud Data Flow Docs for Classic mode</name>
 	<description>Spring Cloud Data Flow Docs for Classic Mode</description>
+	<packaging>pom</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -100,14 +101,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.3.0</version>
-				<executions>
-					<execution>
-						<phase>test</phase>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

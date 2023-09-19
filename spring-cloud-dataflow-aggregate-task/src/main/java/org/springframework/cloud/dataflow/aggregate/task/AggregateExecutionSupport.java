@@ -32,6 +32,7 @@ public interface AggregateExecutionSupport {
 	 * Retrieves the {@link AggregateTaskExecution} for the task execution and {@link TaskDefinitionReader} provided.
 	 * @param execution A {@link TaskExecution} that contains the TaskName that will be used to find the {@link AggregateTaskExecution}.
 	 * @param taskDefinitionReader {@link TaskDefinitionReader} that will be used to find the {@link SchemaVersionTarget} for the task execution.
+	 * @param taskDeploymentReader {@link TaskDeploymentReader} will be used to read the deployment.
 	 * @return The {@link AggregateTaskExecution} containing the {@link SchemaVersionTarget} for the TaskExecution.
 	 */
 	AggregateTaskExecution from(TaskExecution execution, TaskDefinitionReader taskDefinitionReader, TaskDeploymentReader taskDeploymentReader);
@@ -49,12 +50,18 @@ public interface AggregateExecutionSupport {
 
 	/**
 	 * Retrieve the {@link AppRegistration} for the registeredName.
+	 * @param registeredName Registered name for registration to find.
+	 * @return The application registration
 	 */
 	AppRegistration findTaskAppRegistration(String registeredName);
 	AppRegistration findTaskAppRegistration(String registeredName, String version);
 
 	/**
 	 * Return the {@link AggregateTaskExecution} for the {@link TaskExecution} and Schema Target name specified.
+	 * @param execution The task execution
+	 * @param schemaTarget The schemaTarget of the task execution
+	 * @param platformName The platform name of the task execution
+	 * @return The task execution
 	 */
 	AggregateTaskExecution from(TaskExecution execution, String schemaTarget, String platformName);
 }

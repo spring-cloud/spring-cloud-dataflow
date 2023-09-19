@@ -10,7 +10,7 @@
 	<modules>
 		<module>spring-cloud-dataflow-build-dependencies</module>
 		<module>spring-cloud-dataflow-dependencies-parent</module>
-		<module>spring-cloud-dataflow-build-tools</module>
+<!--		<module>spring-cloud-dataflow-build-tools</module>-->
 	</modules>
 	<url>https://spring.io/projects/spring-cloud-dataflow</url>
 	<properties>
@@ -449,11 +449,25 @@
 					<version>${maven-javadoc-plugin.version}</version>
 					<executions>
 						<execution>
-							<id>aggregate</id>
+							<id>javadoc</id>
 							<goals>
-								<goal>aggregate</goal>
+								<goal>jar</goal>
 							</goals>
-							<phase>site</phase>
+							<phase>package</phase>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<id>source</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+							<phase>package</phase>
 						</execution>
 					</executions>
 				</plugin>

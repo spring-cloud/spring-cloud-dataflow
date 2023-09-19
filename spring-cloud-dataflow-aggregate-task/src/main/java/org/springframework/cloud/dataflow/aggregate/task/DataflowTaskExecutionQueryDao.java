@@ -39,6 +39,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * Retrieves a task execution from the task repository.
 	 *
 	 * @param executionId the id associated with the task execution.
+	 * @param schemaTarget the schema target.
 	 * @return a fully qualified TaskExecution instance.
 	 */
 	AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget);

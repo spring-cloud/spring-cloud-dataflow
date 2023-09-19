@@ -10,12 +10,11 @@
 	</parent>
 	<artifactId>spring-cloud-starter-dataflow-ui</artifactId>
 	<description>Data Flow UI Starter</description>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-ui</artifactId>
-			<type>jar</type>
 		</dependency>
 	</dependencies>
 </project>

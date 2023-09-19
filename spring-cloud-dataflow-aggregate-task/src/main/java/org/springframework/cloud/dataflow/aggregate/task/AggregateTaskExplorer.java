@@ -133,6 +133,7 @@ public interface AggregateTaskExplorer {
 	 * was executed within the context of. Returns null if none were found.
 	 *
 	 * @param jobExecutionId the id of the JobExecution
+	 * @param schemaTarget the schema target
 	 * @return the id of the {@link TaskExecution}
 	 */
 	Long getTaskExecutionIdByJobExecutionId(long jobExecutionId, String schemaTarget);
@@ -142,6 +143,7 @@ public interface AggregateTaskExplorer {
 	 * of the requested task.
 	 *
 	 * @param taskExecutionId id of the {@link TaskExecution}
+	 * @param schemaTarget the schema target
 	 * @return a <code>Set</code> of the ids of the job executions executed within the
 	 * task.
 	 */

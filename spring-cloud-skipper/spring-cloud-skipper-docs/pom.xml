@@ -13,6 +13,7 @@
 	<artifactId>spring-cloud-skipper-docs</artifactId>
 	<name>Spring Cloud Skipper :: Docs</name>
 	<description>Spring Cloud Skipper Docs</description>
+	<packaging>pom</packaging>
 	<properties>
 		<main.basedir>${basedir}/..</main.basedir>
 		<rootDir>${basedir}/../..</rootDir>
@@ -80,6 +81,19 @@
 			<id>asciidoctordocs</id>
 			<build>
 				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>jar</id>
+								<phase>prepare-package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>

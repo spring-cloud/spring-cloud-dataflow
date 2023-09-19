@@ -55,7 +55,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Provide aggregate data for Boot 3 and Boot <=2 TaskExecutions.
+ * Provide aggregate data for Boot 3 and Boot &lt;=2 TaskExecutions.
  *
  * @author Corneil du Plessis
  */
@@ -194,6 +194,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	 * Initializes the AggregateDataFlowJobExecutionDao.
 	 *
 	 * @param dataSource used by the dao to execute queries and update the tables.
+	 * @param schemaService used the find schema target information
 	 */
 	public AggregateDataFlowTaskExecutionQueryDao(DataSource dataSource, SchemaService schemaService) {
 		Assert.notNull(dataSource, "The dataSource must not be null.");

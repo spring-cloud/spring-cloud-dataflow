@@ -9,9 +9,11 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-package</artifactId>
+	<packaging>pom</packaging>
 	<properties>
 		<package.version>${project.version}</package.version>
 		<scdf.type.version>oss</scdf.type.version>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<build>
 		<plugins>
