@@ -28,6 +28,7 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.version }}" = "" ]; then
+            ./mvnw help:evaluate -Dexpression=project.version -q
             echo "version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
           else
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
