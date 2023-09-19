@@ -50,9 +50,10 @@ jobs:
       group: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install xmllint
-        shell: bash
-        run: sudo apt -y install libxml2-utils
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'liberica'
       - name: Install pack
         uses: jvalkeal/build-zoo-handler@v0.0.4
         with:
