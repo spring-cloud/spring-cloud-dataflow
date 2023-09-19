@@ -14,8 +14,6 @@ on:
 jobs:
   images:
     name: Build and Publish Images
-    needs:
-      - build
     uses: ./.github/workflows/build-images.yml
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
