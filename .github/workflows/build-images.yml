@@ -14,7 +14,7 @@ on:
 
 jobs:
   # test templating before publishing a package
-  pepare:
+  prepare:
     name: Prepare Job
     runs-on: ubuntu-latest
     steps:
