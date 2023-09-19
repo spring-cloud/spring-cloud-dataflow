@@ -307,7 +307,6 @@ public class StreamParser extends AppParser {
 	}
 
 	/**
-	 * @param canDefault allows the user to peek ahead to parse a reference when working with colons in the syntax.
 	 * Return a {@link DestinationNode} for the token at the current position.
 	 * <p>
 	 * A destination reference is the label component when referencing a specific
@@ -316,6 +315,7 @@ public class StreamParser extends AppParser {
 	 * Expected format: {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
+	 * @param canDefault allows the user to peek ahead to parse a reference when working with colons in the syntax.
 	 * @return {@code DestinationNode} representing the destination reference
 	 */
 	protected DestinationNode eatDestinationReference(boolean canDefault) {
