@@ -29,11 +29,16 @@ jobs:
         run: |
           if [ "${{ inputs.version }}" = "" ]; then
             ./mvnw help:evaluate -Dexpression=project.version -q
-            echo "version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+            echo "VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
           else
-            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
-          fi
-          echo "matrix=$(cat .github/workflows/images.json | jq -c)" >> $GITHUB_OUTPUT
+            echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+          fi          
+          MATRIX=$(cat .github/workflows/images.json | jq -c)
+          echo "MATRIX=$MATRIX"
+          echo "MATRIX=$MATRIX" >> $GITHUB_ENV
+    outputs:
+      matrix: ${{ env.MATRIX }}
+      version: ${{ env.VERSION }}
   publish:
     name: Publish
     runs-on: ubuntu-latest
