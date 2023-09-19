@@ -94,6 +94,10 @@ for v in 8 11 17; do
     fi
     echo "Created: $REPO:$TAG-jdk$v"
     docker push "$IMAGE:$TAG-jdk$v"
+    RC=$?
+    if ((RC!=0)); then
+        exit $RC
+    fi
     echo "Pushed $IMAGE:$TAG-jdk$v"
     if [ "$DEFAULT_JDK" == "$v" ]; then
         docker tag "$IMAGE:$TAG-jdk$DEFAULT_JDK" "$IMAGE:$TAG"
