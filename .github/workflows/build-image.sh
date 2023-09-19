@@ -10,7 +10,12 @@ if [ "$DEFAULT_JDK" = "" ]; then
 else
     echo "DEFAULT_JDK=$DEFAULT_JDK"
 fi
-
+xmllint --version
+RC=$?
+if((RC!=0)); then
+    echo "xmllint not found"
+    exit $RC
+fi
 function download_image() {
     TARGET=$1
     ARTIFACT_ID=$2
@@ -20,7 +25,19 @@ function download_image() {
         META_DATA="https://repo.spring.io/snapshot/org/springframework/cloud/$ARTIFACT_ID/${VERSION}/maven-metadata.xml"
         echo "Downloading $META_DATA"
         rm -f maven-metadata.xml
-        wget -O maven-metadata.xml -q "$META_DATA"
+        COUNT=5
+        RC=0
+        while ((COUNT>0)); do
+            wget -O maven-metadata.xml -q "$META_DATA"
+            RC=$?
+            if((RC==0)); then
+                break;
+            fi
+        done
+        if((RC!=0)); then
+            exit $RC
+        fi
+        xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//'
         DL_TS=$(xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//')
         echo "Metadata: $DL_TS"
         DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
