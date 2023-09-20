@@ -69,8 +69,17 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
+    # clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
     outputs:
       version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}
+      BUILD_ZOO_HANDLER_spring_cloud_skipper_version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+
   images:
     name: Build and Publish Images
     needs: [ build ]
@@ -86,6 +95,14 @@ jobs:
     needs: [ build, images ]
     runs-on: ubuntu-latest
     steps:
+      - name: Save env
+        shell: bash
+        if: ${{ success() }}
+        run: |
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}" >> $GITHUB_ENV
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}" >> $GITHUB_ENV 
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}" >> $GITHUB_ENV
+          echo "BUILD_ZOO_HANDLER_spring_cloud_skipper_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}" >> $GITHUB_ENV
       # zoo success
       - name: Notify Build Success Zoo Handler Controller
         uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -106,7 +123,3 @@ jobs:
               "event": "build-failed",
               "message": "spring-cloud-dataflow failed"
             }
-      # clean m2 cache
-      - name: Clean cache
-        run: |
-          find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
