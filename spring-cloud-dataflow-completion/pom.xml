@@ -9,6 +9,8 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-completion</artifactId>
+	<name>spring-cloud-dataflow-completion</name>
+	<description>Spring Cloud Data Flow Completion</description>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>

@@ -4,6 +4,7 @@
 	<artifactId>spring-cloud-skipper-server-core</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Server Core</name>
+	<description>Spring Cloud Skipper :: Server Core</description>
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>

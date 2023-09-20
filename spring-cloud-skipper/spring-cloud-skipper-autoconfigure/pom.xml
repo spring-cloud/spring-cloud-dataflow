@@ -4,6 +4,7 @@
 	<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Autoconfigure</name>
+	<description>Spring Cloud Skipper :: Autoconfigure</description>
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>

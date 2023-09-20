@@ -11,6 +11,9 @@
 	</parent>
 
 	<artifactId>spring-cloud-dataflow-tasklauncher-function</artifactId>
+	<name>spring-cloud-dataflow-tasklauncher-function</name>
+	<description>Data Flow Tasklauncher Function</description>
+
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>

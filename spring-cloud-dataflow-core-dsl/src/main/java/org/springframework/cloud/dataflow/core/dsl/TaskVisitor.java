@@ -20,7 +20,7 @@ package org.springframework.cloud.dataflow.core.dsl;
  * Basic visitor pattern for a parsed task. Provide a concrete implementation to
  * participate in the visit and pass it to a parsed TaskNode. A simple task only has one
  * sequence, for example: {@code appA && appB && appC}. In this situation
- * <tt> preVisit(int)</tt> and <tt>postVisit(int)</tt> will only be called with 0. A more
+ * <b> preVisit(int)</b> and <b>postVisit(int)</b> will only be called with 0. A more
  * complex situation would be:
  *
  * <pre>

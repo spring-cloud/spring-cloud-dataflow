@@ -10,6 +10,7 @@
 	<artifactId>spring-cloud-starter-skipper-server</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Starter :: Skipper Server</name>
+	<description>Spring Cloud Starter :: Skipper Server</description>
 	<properties>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>

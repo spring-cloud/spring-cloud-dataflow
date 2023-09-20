@@ -8,6 +8,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-platform-kubernetes</artifactId>
+	<name>spring-cloud-dataflow-platform-kubernetes</name>
+	<description>Data Platform Kubernetes</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

@@ -11,6 +11,8 @@
 	</parent>
 
 	<artifactId>spring-cloud-dataflow-tasklauncher</artifactId>
+	<name>spring-cloud-dataflow-tasklauncher</name>
+	<description>Data Flow Tasklauncher</description>
 	<packaging>pom</packaging>
 
 	<modules>

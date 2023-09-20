@@ -8,6 +8,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-container-registry</artifactId>
+	<name>spring-cloud-dataflow-container-registry</name>
+	<description>Spring Cloud Data Flow Container Registry</description>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<failIfNoTests>true</failIfNoTests>

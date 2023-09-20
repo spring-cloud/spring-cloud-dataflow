@@ -5,6 +5,7 @@
 	<artifactId>spring-cloud-skipper-dependencies</artifactId>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Skipper :: Dependencies</name>
+	<description>Spring Cloud Skipper :: Dependencies</description>
 
 	<parent>
 		<artifactId>spring-cloud-dataflow-dependencies-parent</artifactId>

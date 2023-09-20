@@ -8,6 +8,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-aggregate-task</artifactId>
+	<name>spring-cloud-dataflow-aggregate-task</name>
+	<description>Spring Cloud Data Flow Aggregate Task</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

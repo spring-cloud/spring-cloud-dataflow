@@ -10,6 +10,7 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-starter-dataflow-server</artifactId>
+	<name>spring-cloud-starter-dataflow-server</name>
 	<description>Data Flow Server Starter</description>
 	<packaging>jar</packaging>
 	<properties>

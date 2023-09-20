@@ -9,6 +9,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-package</artifactId>
+	<name>spring-cloud-dataflow-package</name>
+	<description>Data Flow Package</description>
+
 	<packaging>pom</packaging>
 	<properties>
 		<package.version>${project.version}</package.version>
