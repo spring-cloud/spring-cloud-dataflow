@@ -28,11 +28,13 @@ jobs:
       - name: Version from POM
         if: ${{ inputs.version == null || inputs.version == '' }}
         shell: bash
-        run: echo "version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+        run: echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
       - name: Version from Input
         if: ${{ inputs.version != null && inputs.version != '' }}
         shell: bash
-        run: echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
+    outputs:
+      version: ${{ env.VERSION }}
   images:
     name: Build and Publish Images
     needs: [ prepare ]
