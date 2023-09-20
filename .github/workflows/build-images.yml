@@ -7,6 +7,11 @@ on:
         type: string
         description: 'Version'
         required: false
+      delete-tags:
+        type: boolean
+        default: false
+        description: 'Delete the image tags'
+
     secrets:
       DOCKERHUB_USERNAME:
       DOCKERHUB_TOKEN:
@@ -78,5 +83,6 @@ jobs:
           DEFAULT_JDK: '11'
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          DELETE_TAGS: ${{ inputs.delete-tags }}
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}

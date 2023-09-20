@@ -4,8 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
+        type: string
         description: 'Version to build'
         required: false
+      delete-tags:
+        required: false
+        type: boolean
+        default: false
+        description: 'Delete the image tags'
 
 jobs:
   prepare:
@@ -33,6 +39,7 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.prepare.outputs.version }}
+      delete-tags: ${{ inputs.delete-tags == 'true' }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

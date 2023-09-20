@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 set +e
+if [ "$PUSH" == "" ]; then
+    PUSH=true
+fi
 if [ "$TAG" == "" ]; then
     echo "TAG not found"
     exit 1
@@ -48,40 +51,50 @@ if [ ! -f "$JAR" ]; then
         exit $RC
     fi
 fi
-echo "Creating: $REPO:$TAG-jdk$v"
-
 for v in 8 11 17; do
-    END=$(date '+%s')
-    END=$((600 + END))
-    RC=0
-    while ((END > $(date '+%s') )); do
-        pack build --builder gcr.io/paketo-buildpacks/builder:base \
-            --path "$JAR" \
-            --trust-builder --verbose \
-            --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
-        RC=$?
-        if ((RC == 0)); then
-            break;
-        fi
-        echo "Sleeping for 1m"
-        sleep 1m
-    done
+    echo "Creating: $REPO:$TAG-jdk$v"
+    pack build --builder gcr.io/paketo-buildpacks/builder:base \
+        --path "$JAR" \
+        --trust-builder --verbose \
+        --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
+    RC=$?
+    if ((RC == 0)); then
+        break;
+    fi
     if((RC != 0)); then
         exit $RC
     fi
     echo "Created: $REPO:$TAG-jdk$v"
-    docker push "$REPO:$TAG-jdk$v"
-    RC=$?
-    if ((RC!=0)); then
-        exit $RC
+    if [ "$PUSH" == "true" ]; then
+        if [ "$DELETE_TAGS" == "true" ]; then
+            $SCDIR/docker-rm-tag.sh $REPO $TAG-jdk$v
+        fi
+        docker push "$REPO:$TAG-jdk$v"
+        RC=$?
+        if ((RC!=0)); then
+            exit $RC
+        fi
+        echo "Pushed $REPO:$TAG-jdk$v"
+    else
+        echo "Skipped push $REPO:$TAG-jdk$v"
     fi
-    echo "Pushed $REPO:$TAG-jdk$v"
+
     if [ "$DEFAULT_JDK" == "$v" ]; then
         docker tag "$REPO:$TAG-jdk$DEFAULT_JDK" "$REPO:$TAG"
-        docker push "$REPO:$TAG"
-        echo "Pushed $REPO:$TAG"
+        if [ "$PUSH" == "true" ]; then
+            if [ "$DELETE_TAGS" == "true" ]; then
+                $SCDIR/docker-rm-tag.sh $REPO $TAG-jdk$v
+            fi
+            docker push "$REPO:$TAG"
+            echo "Pushed $REPO:$TAG"
+        else
+            echo "Skipped push $REPO:$TAG"
+        fi
     fi
 done
-echo "Pruning Docker"
-docker system prune -f
-docker system prune --volumes -f
+#if [ "$PUSH" == "true" ]; then
+#    echo "Pruning Docker"
+#    docker system prune -f
+#    docker system prune --volumes -f
+#fi
+
