@@ -84,6 +84,7 @@ jobs:
 
   wrap:
     needs: [ build, images ]
+    runs-on: ubuntu-latest
     steps:
       # zoo success
       - name: Notify Build Success Zoo Handler Controller
