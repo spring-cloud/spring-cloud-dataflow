@@ -110,7 +110,6 @@ jobs:
       BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}
       BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}
       BUILD_ZOO_HANDLER_spring_cloud_skipper_version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
-
   images:
     name: Build and Publish Images
     needs:
