@@ -11,6 +11,8 @@ on:
       DOCKERHUB_USERNAME:
       DOCKERHUB_TOKEN:
       GCR_JSON_KEY:
+      ARTIFACTORY_USERNAME:
+      ARTIFACTORY_PASSWORD:
 
 jobs:
   # test templating before publishing a package
@@ -74,5 +76,7 @@ jobs:
         env:
           TAG: ${{ needs.prepare.outputs.version }}
           DEFAULT_JDK: '11'
+          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}

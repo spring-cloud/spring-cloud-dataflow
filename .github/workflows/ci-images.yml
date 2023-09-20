@@ -2,19 +2,37 @@ name: CI - Images
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'main'
-      - '2.10.x'
-      - '2.9.x'
-    paths-ignore:
-      - '.github/**'
-
+    inputs:
+      version:
+        description: 'Version to build'
+        required: false
 
 jobs:
+  prepare:
+    name: Prepare Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        if: ${{ inputs.version == null || inputs.version == '' }}
+      - uses: actions/setup-java@v3
+        if: ${{ inputs.version == null || inputs.version == '' }}
+        with:
+          java-version: '8'
+          distribution: 'liberica'
+      - name: Version from POM
+        if: ${{ inputs.version == null || inputs.version == '' }}
+        shell: bash
+        run: echo "version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
+      - name: Version from Input
+        if: ${{ inputs.version != null && inputs.version != '' }}
+        shell: bash
+        run: echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
   images:
     name: Build and Publish Images
+    needs: [ prepare ]
     uses: ./.github/workflows/build-images.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

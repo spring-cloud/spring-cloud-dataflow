@@ -88,9 +88,11 @@ jobs:
         ./spring-cloud-dataflow-package/set-package-version.sh        
         jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles -B install -DskipTests 
         jfrog rt build-publish
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
     # zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -98,38 +100,62 @@ jobs:
         tag-release-branch: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
         tag-release-tag: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
         tag-release-tag-prefix: v
-
-    # build and publish images via composite action
-    - name: Build and Publish Images
-      uses: ./.github/actions/build-images
-      with:
-        version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
-        dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-        dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
-        GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
-
-    # zoo success
-    - name: Notify Build Success Zoo Handler Controller
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
-        dispatch-handler-client-payload-data: >
-          {
-            "event": "build-succeed"
-          }
-
-    # zoo failure
-    - name: Notify Build Failure Zoo Handler Controller
-      if: ${{ failure() }}
-      uses: jvalkeal/build-zoo-handler@v0.0.4
-      with:
-        dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
-        dispatch-handler-client-payload-data: >
-          {
-            "event": "build-failed",
-            "message": "spring-cloud-dataflow failed"
-          }
-    # clean m2 cache
+      # clean m2 cache
     - name: Clean cache
       run: |
         find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
+    outputs:
+      version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}
+      BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}
+      BUILD_ZOO_HANDLER_spring_cloud_skipper_version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}
+
+  images:
+    name: Build and Publish Images
+    needs:
+      - build
+    uses: ./.github/workflows/build-images.yml
+    with:
+      version: ${{ needs.build.outputs.version }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
+      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  wrap:
+    needs: [ build, images ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save env
+        shell: bash
+        if: ${{ success() }}
+        run: |
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}" >> $GITHUB_ENV
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}" >> $GITHUB_ENV 
+          echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}" >> $GITHUB_ENV
+          echo "BUILD_ZOO_HANDLER_spring_cloud_skipper_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}" >> $GITHUB_ENV
+
+    # zoo success
+      - name: Notify Build Success Zoo Handler Controller
+        if: ${{ success() }}
+        uses: jvalkeal/build-zoo-handler@v0.0.4
+        with:
+          dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+          dispatch-handler-client-payload-data: >
+            {
+              "event": "build-succeed"
+            }
+
+      # zoo failure
+      - name: Notify Build Failure Zoo Handler Controller
+        if: ${{ failure() }}
+        uses: jvalkeal/build-zoo-handler@v0.0.4
+        with:
+          dispatch-handler-token: ${{ secrets.SCDF_ACCESS_TOKEN }}
+          dispatch-handler-client-payload-data: >
+            {
+              "event": "build-failed",
+              "message": "spring-cloud-dataflow failed"
+            }
