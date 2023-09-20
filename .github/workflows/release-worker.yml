@@ -92,7 +92,7 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
     # zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4
