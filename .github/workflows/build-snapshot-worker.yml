@@ -69,13 +69,14 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
-
+    outputs:
+      version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
   images:
     name: Build and Publish Images
     needs: [ build ]
     uses: ./.github/workflows/build-images.yml
     with:
-      version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
+      version: ${{ needs.build.outputs.version }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
