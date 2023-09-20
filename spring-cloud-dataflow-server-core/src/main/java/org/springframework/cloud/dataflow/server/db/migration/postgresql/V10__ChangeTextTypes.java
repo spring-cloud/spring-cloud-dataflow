@@ -18,8 +18,7 @@ package org.springframework.cloud.dataflow.server.db.migration.postgresql;
 import org.flywaydb.core.api.migration.Context;
 
 import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
-
-import static org.springframework.cloud.dataflow.server.db.migration.PostgreSQLTextToOID.convertColumnFromOID;
+import org.springframework.cloud.dataflow.server.db.migration.PostgreSQLTextToOID;
 
 public class V10__ChangeTextTypes extends AbstractMigration {
 
@@ -30,10 +29,10 @@ public class V10__ChangeTextTypes extends AbstractMigration {
 
 	@Override
 	public void migrate(Context context) throws Exception {
-		convertColumnFromOID("app_registration", "id", "uri", context.getConfiguration().getDataSource());
-		convertColumnFromOID("app_registration", "id", "metadata_uri", context.getConfiguration().getDataSource());
-		convertColumnFromOID("stream_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
-		convertColumnFromOID("stream_definitions", "definition_name", "original_definition", context.getConfiguration().getDataSource());
-		convertColumnFromOID("task_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
+		PostgreSQLTextToOID.convertColumnFromOID("app_registration", "id", "uri", context.getConfiguration().getDataSource());
+		PostgreSQLTextToOID.convertColumnFromOID("app_registration", "id", "metadata_uri", context.getConfiguration().getDataSource());
+		PostgreSQLTextToOID.convertColumnFromOID("stream_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
+		PostgreSQLTextToOID.convertColumnFromOID("stream_definitions", "definition_name", "original_definition", context.getConfiguration().getDataSource());
+		PostgreSQLTextToOID.convertColumnFromOID("task_definitions", "definition_name", "definition", context.getConfiguration().getDataSource());
 	}
 }
