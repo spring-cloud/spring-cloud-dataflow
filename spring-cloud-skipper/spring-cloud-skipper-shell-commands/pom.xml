@@ -3,6 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-skipper-shell-commands</artifactId>
 	<name>Spring Cloud Skipper :: Shell Commands</name>
+	<description>Spring Cloud Skipper :: Shell Commands</description>
 	<packaging>jar</packaging>
 
 	<parent>

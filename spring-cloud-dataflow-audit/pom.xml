@@ -9,6 +9,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-audit</artifactId>
+	<name>spring-cloud-dataflow-audit</name>
+	<description>Spring Cloud Data Flow Audit</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

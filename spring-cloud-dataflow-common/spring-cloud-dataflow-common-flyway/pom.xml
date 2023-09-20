@@ -6,7 +6,7 @@
 	<artifactId>spring-cloud-dataflow-common-flyway</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Dataflow Common Flyway Support</name>
-
+	<description>Spring Cloud Dataflow Common Flyway Support</description>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-common-parent</artifactId>

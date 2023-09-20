@@ -10,6 +10,8 @@
 	<artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Kubernetes Platform</name>
+	<description>Spring Cloud Skipper :: Kubernetes Platform</description>
+
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
 	</properties>

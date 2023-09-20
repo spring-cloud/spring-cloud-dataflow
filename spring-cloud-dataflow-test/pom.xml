@@ -8,6 +8,8 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-test</artifactId>
+	<name>spring-cloud-dataflow-test</name>
+	<description>Data Flow Test</description>
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

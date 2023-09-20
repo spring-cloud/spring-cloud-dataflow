@@ -8,6 +8,8 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
+	<name>spring-cloud-dataflow-platform-cloudfoundry</name>
+	<description>Data Platform Cloud Foundry</description>
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

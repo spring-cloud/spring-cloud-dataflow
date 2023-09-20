@@ -9,6 +9,7 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-starter-dataflow-ui</artifactId>
+	<name>spring-cloud-starter-dataflow-ui</name>
 	<description>Data Flow UI Starter</description>
 	<packaging>jar</packaging>
 	<properties>

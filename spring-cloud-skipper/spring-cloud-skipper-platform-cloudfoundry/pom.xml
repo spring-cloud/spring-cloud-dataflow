@@ -4,6 +4,7 @@
 	<artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: CloudFoundry Platform</name>
+	<description>Spring Cloud Skipper :: CloudFoundry Platform</description>
 
 	<parent>
 		<artifactId>spring-cloud-skipper-parent</artifactId>

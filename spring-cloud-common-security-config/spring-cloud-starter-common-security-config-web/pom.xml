@@ -7,6 +7,8 @@
 		<version>2.11.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+	<name>spring-cloud-starter-common-security-config-web</name>
+	<description>Spring Cloud Starter Common Security Config Web</description>
 	<packaging>pom</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

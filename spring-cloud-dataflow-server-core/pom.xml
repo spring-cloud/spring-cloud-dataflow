@@ -9,6 +9,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-server-core</artifactId>
+	<name>spring-cloud-dataflow-server-core</name>
+	<description>Data Flow Server Core</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

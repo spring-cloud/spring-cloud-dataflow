@@ -8,6 +8,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-shell</artifactId>
+	<name>spring-cloud-dataflow-shell</name>
+	<description>Data Flow Shell</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>

@@ -9,6 +9,7 @@
 	</parent>
 	<name>spring-cloud-dataflow-registry</name>
 	<artifactId>spring-cloud-dataflow-registry</artifactId>
+	<description>Data Flow Registry</description>
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

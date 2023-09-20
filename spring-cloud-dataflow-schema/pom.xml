@@ -8,6 +8,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-schema</artifactId>
+	<name>spring-cloud-dataflow-schema</name>
+	<description>Data Flow Schema</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

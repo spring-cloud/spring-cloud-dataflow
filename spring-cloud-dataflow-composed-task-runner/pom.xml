@@ -12,6 +12,9 @@
 	<version>2.11.0-SNAPSHOT</version>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-composed-task-runner</artifactId>
+	<name>spring-cloud-dataflow-composed-task-runner</name>
+	<description>Spring Cloud Data Flow Composed Task Runner</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>1.8</java.version>

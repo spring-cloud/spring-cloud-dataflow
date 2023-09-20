@@ -9,6 +9,9 @@
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-single-step-batch-job</artifactId>
+	<name>spring-cloud-dataflow-single-step-batch-job</name>
+	<description>Data Flow Single Step Batch Job</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>1.8</java.version>

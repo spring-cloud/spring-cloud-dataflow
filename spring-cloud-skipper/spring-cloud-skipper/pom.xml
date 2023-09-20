@@ -4,7 +4,7 @@
 	<artifactId>spring-cloud-skipper</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Skipper</name>
-
+	<description>Spring Cloud Skipper</description>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-skipper-parent</artifactId>

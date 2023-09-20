@@ -5,6 +5,8 @@
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow</artifactId>
 	<version>2.11.0-SNAPSHOT</version>
+	<name>spring-cloud-dataflow</name>
+	<description>Spring Cloud Dataflow</description>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
