@@ -58,9 +58,6 @@ for v in 8 11 17; do
         --trust-builder --verbose \
         --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
     RC=$?
-    if ((RC == 0)); then
-        break;
-    fi
     if((RC != 0)); then
         exit $RC
     fi
