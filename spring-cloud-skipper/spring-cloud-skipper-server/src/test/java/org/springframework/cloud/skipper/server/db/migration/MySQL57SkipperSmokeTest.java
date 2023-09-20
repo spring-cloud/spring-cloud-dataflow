@@ -23,7 +23,7 @@ import org.testcontainers.containers.MySQLContainer;
  *
  * @author Corneil du Plessis
  */
-public class MySQL57SmokeTest extends AbstractSmokeTest {
+public class MySQL57SkipperSmokeTest extends AbstractSkipperSmokeTest {
 	@BeforeAll
 	static void startContainer() {
 		container = new MySQLContainer<>("mysql:5.7");

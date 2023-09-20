@@ -16,18 +16,18 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.OracleContainer;
-
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 /**
- * Basic database schema and JPA tests for Oracle XE.
+ * Basic database schema and JPA tests for MySQL 8 or later.
  *
  * @author Corneil du Plessis
  */
-public class OracleSmokeTest extends AbstractSmokeTest {
+public class MySQL8SkipperSmokeTest extends AbstractSkipperSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new OracleContainer();
+		container = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
 		container.start();
 	}
 }

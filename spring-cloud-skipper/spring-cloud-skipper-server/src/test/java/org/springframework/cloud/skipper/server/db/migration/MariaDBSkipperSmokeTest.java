@@ -16,19 +16,25 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.utility.DockerImageName;
+
+import org.springframework.test.context.TestPropertySource;
 
 
 /**
- * Basic database schema and JPA tests for PostgreSQL 11 or later.
+ * Basic database schema and JPA tests for MariaDB 10.4 or later.
  *
  * @author Corneil du Plessis
  */
-public class PostgreSQLSmokeTest extends AbstractSmokeTest {
+@TestPropertySource(properties = {
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
+})
+public class MariaDBSkipperSmokeTest extends AbstractSkipperSmokeTest {
+
 	@BeforeAll
 	static void startContainer() {
-		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14"));
+		container = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.6"));
 		container.start();
 	}
 }

@@ -49,15 +49,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = AbstractSmokeTest.LocalTestSkipperServer.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = AbstractSkipperSmokeTest.LocalTestSkipperServer.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "repo-test"})
 @TestPropertySource(properties = {
 	"spring.jpa.hibernate.ddl-auto=none",
 	"logging.level.org.springframework.cloud=info",
 	"logging.level.org.hibernate=debug"
 })
-public abstract class AbstractSmokeTest {
-	private static final Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
+public abstract class AbstractSkipperSmokeTest {
+	private static final Logger logger = LoggerFactory.getLogger(AbstractSkipperSmokeTest.class);
 
 	protected static JdbcDatabaseContainer<?> container;
 

@@ -16,25 +16,22 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
-
-import org.springframework.test.context.TestPropertySource;
 
 
 /**
- * Basic database schema and JPA tests for MariaDB 10.4 or later.
+ * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
  */
-@TestPropertySource(properties = {
-		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
-})
-public class MariaDBSmokeTest extends AbstractSmokeTest {
-
+public class SqlServerSkipperSmokeTest extends AbstractSkipperSmokeTest {
+	@SuppressWarnings("resource")
 	@BeforeAll
 	static void startContainer() {
-		container = new MariaDBContainer<>(DockerImageName.parse("mariadb:10.6"));
+		container = new MSSQLServerContainer<>(
+			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
+		).acceptLicense();
 		container.start();
 	}
 }

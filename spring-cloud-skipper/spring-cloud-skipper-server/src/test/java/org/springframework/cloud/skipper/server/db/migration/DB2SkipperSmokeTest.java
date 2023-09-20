@@ -25,7 +25,7 @@ import org.testcontainers.utility.DockerImageName;
  *
  * @author Corneil du Plessis
  */
-public class DB2SmokeTest extends AbstractSmokeTest {
+public class DB2SkipperSmokeTest extends AbstractSkipperSmokeTest {
 	@BeforeAll
 	static void startContainer() {
 		container = new Db2Container(

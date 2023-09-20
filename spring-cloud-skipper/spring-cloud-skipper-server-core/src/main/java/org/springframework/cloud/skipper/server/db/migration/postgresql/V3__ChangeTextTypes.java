@@ -18,8 +18,8 @@ package org.springframework.cloud.skipper.server.db.migration.postgresql;
 import org.flywaydb.core.api.migration.Context;
 
 import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
-import org.springframework.cloud.skipper.server.db.migration.PostgreSQLTextToOID;
 
+import static org.springframework.cloud.skipper.server.db.migration.PostgreSQLTextToOID.convertColumnFromOID;
 public class V3__ChangeTextTypes extends AbstractMigration {
 	public V3__ChangeTextTypes() {
 		super(null);
@@ -27,16 +27,16 @@ public class V3__ChangeTextTypes extends AbstractMigration {
 
 	@Override
 	public void migrate(Context context) {
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_app_deployer_data", "id", "deployment_data", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_package_metadata", "id", "description", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_package_metadata", "id", "icon_url", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_package_metadata", "id", "package_home_url", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_package_metadata", "id", "package_source_url", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_package_metadata", "id", "tags", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_release", "id", "config_values_string", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_release", "id", "pkg_json_string", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_repository", "id", "source_url", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_repository", "id", "url", context.getConfiguration().getDataSource());
-		PostgreSQLTextToOID.convertColumnFromOID("skipper_status", "id", "platform_status", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_app_deployer_data", "id", "deployment_data", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_package_metadata", "id", "description", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_package_metadata", "id", "icon_url", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_package_metadata", "id", "package_home_url", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_package_metadata", "id", "package_source_url", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_package_metadata", "id", "tags", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_release", "id", "config_values_string", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_release", "id", "pkg_json_string", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_repository", "id", "source_url", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_repository", "id", "url", context.getConfiguration().getDataSource());
+		convertColumnFromOID("skipper_status", "id", "platform_status", context.getConfiguration().getDataSource());
 	}
 }

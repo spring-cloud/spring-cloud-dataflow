@@ -17,8 +17,10 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -52,9 +54,9 @@ public class PostgreSQLTextToOID {
 		try (Connection connection = dataSource.getConnection()) {
 			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
 				while (resultSet.next()) {
-					String dataType = resultSet.getString("DATA_TYPE");
-					if (dataType.equalsIgnoreCase("OID")) {
-						logger.info("Found {}:{}:{}", table, column, dataType);
+					int dataType = resultSet.getInt("DATA_TYPE");
+					logger.info("Found {}:{}:{}", table, column, JDBCType.valueOf(dataType));
+					if (dataType == Types.BIGINT) {
 						return;
 					}
 				}
@@ -90,9 +92,9 @@ public class PostgreSQLTextToOID {
 		try (Connection connection = dataSource.getConnection()) {
 			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
 				while (resultSet.next()) {
-					String dataType = resultSet.getString("DATA_TYPE");
-					if (!dataType.equalsIgnoreCase("OID")) {
-						logger.info("Found {}:{}:{}", table, column, dataType);
+					int dataType = resultSet.getInt("DATA_TYPE");
+					logger.info("Found {}:{}:{}", table, column, JDBCType.valueOf(dataType));
+					if (dataType != Types.BIGINT) {
 						return;
 					}
 				}

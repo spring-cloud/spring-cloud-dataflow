@@ -10,7 +10,7 @@
 	<modules>
 		<module>spring-cloud-dataflow-build-dependencies</module>
 		<module>spring-cloud-dataflow-dependencies-parent</module>
-<!--		<module>spring-cloud-dataflow-build-tools</module>-->
+		<module>spring-cloud-dataflow-build-tools</module>
 	</modules>
 	<url>https://spring.io/projects/spring-cloud-dataflow</url>
 	<properties>

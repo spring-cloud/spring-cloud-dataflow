@@ -16,22 +16,18 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.containers.OracleContainer;
 
 
 /**
- * Basic database schema and JPA tests for MS SQL Server.
+ * Basic database schema and JPA tests for Oracle XE.
  *
  * @author Corneil du Plessis
  */
-public class SqlServerSmokeTest extends AbstractSmokeTest {
-	@SuppressWarnings("resource")
+public class OracleSkipperSmokeTest extends AbstractSkipperSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MSSQLServerContainer<>(
-			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
-		).acceptLicense();
+		container = new OracleContainer();
 		container.start();
 	}
 }

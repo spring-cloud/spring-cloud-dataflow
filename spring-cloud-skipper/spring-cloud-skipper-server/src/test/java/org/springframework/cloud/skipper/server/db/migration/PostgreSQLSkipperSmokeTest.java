@@ -16,18 +16,19 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+
 /**
- * Basic database schema and JPA tests for MySQL 8 or later.
+ * Basic database schema and JPA tests for PostgreSQL 11 or later.
  *
  * @author Corneil du Plessis
  */
-public class MySQL8SmokeTest extends AbstractSmokeTest {
+public class PostgreSQLSkipperSmokeTest extends AbstractSkipperSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
+		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14"));
 		container.start();
 	}
 }

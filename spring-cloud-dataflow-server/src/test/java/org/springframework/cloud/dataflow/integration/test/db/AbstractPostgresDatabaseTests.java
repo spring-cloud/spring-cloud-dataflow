@@ -20,8 +20,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +34,6 @@ import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,7 +99,7 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 		StreamDefinitionResource timelogger = dataFlowTemplate.streamOperations().getStreamDefinition("timelogger");
 		assertThat(timelogger.getDslText()).isEqualTo("time | log");
 		assertThat(timelogger.getDescription()).isEqualTo("timelogger");
-
+		dataFlowTemplate.streamOperations().undeploy("timelogger");
 
 		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_main, TagNames.DATAFLOW_main);
 		assertDataflowServerRunning(this.dataflowCluster);
