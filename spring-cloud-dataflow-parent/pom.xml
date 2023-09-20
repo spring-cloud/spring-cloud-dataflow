@@ -274,6 +274,32 @@
 			<url>https://repo.spring.io/libs-snapshot-local</url>
 		</snapshotRepository>
 	</distributionManagement>
+	<organization>
+		<name>Pivotal Software, Inc.</name>
+		<url>https://www.spring.io</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
+	<scm>
+		<url>https://github.com/spring-cloud/spring-cloud-dataflow-build</url>
+		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-dataflow-build.git
+		</connection>
+		<developerConnection>
+			scm:git:ssh://git@github.com/spring-cloud/spring-cloud-dataflow-build.git
+		</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+	<developers>
+		<developer>
+			<id>scdf-team</id>
+			<name>Data Flow Team</name>
+			<organizationUrl>https://github.com/spring-cloud/spring-cloud-dataflow/graphs/contributors</organizationUrl>
+		</developer>
+	</developers>
 	<build>
 		<pluginManagement>
 			<plugins>
