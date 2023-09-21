@@ -10,7 +10,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 80
-      targetPort: 9393
+      targetPort: 8080
       name: scdf-server
   selector:
     app: scdf-server

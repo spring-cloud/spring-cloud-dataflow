@@ -6,6 +6,7 @@ metadata:
     app: kafka
     component: kafka-broker
 spec:
+  clusterIP: None
   ports:
   - port: 9092
     name: kafka-port
