@@ -128,7 +128,7 @@ jobs:
             -Dartifact=org.springframework.cloud:spring-cloud-dataflow-package:${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}:zip \
             -DoutputDirectory=.
         gh release upload v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
-                spring-cloud-dataflow-package-${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}.zip \
+                spring-cloud-dataflow-package-${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}.zip \
                 --clobber
       # zoo success
     - name: Notify Build Success Zoo Handler Controller
