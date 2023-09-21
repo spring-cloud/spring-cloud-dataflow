@@ -1,5 +1,5 @@
 #!/bin/bash
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  DATAFLOW_VERSION=2.11.0-SNAPSHOT
+  DATAFLOW_VERSION=2.11.1-SNAPSHOT
 fi
 docker pull "springcloud/spring-cloud-dataflow-server:$DATAFLOW_VERSION"

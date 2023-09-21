@@ -13,10 +13,10 @@ if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
   DATAFLOW_PRO_VERSION=1.6.0-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  export DATAFLOW_VERSION=2.11.0-SNAPSHOT
+  export DATAFLOW_VERSION=2.11.1-SNAPSHOT
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-  export SKIPPER_VERSION=2.11.0-SNAPSHOT
+  export SKIPPER_VERSION=2.11.1-SNAPSHOT
 fi
 
 case $BROKER in
@@ -77,11 +77,11 @@ if [ "$USE_PRO" = "" ]; then
 fi
 
 if [ "$DATAFLOW_VERSION" = "" ]; then
-    DATAFLOW_VERSION=2.11.0-SNAPSHOT
+    DATAFLOW_VERSION=2.11.1-SNAPSHOT
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-    SKIPPER_VERSION=2.11.0-SNAPSHOT
+    SKIPPER_VERSION=2.11.1-SNAPSHOT
 fi
 
 if [ "$SCDF_PRO_VERSION" = "" ]; then
@@ -153,7 +153,7 @@ kubectl create --namespace "$NS" -f $K8S/$DATABASE/
 if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
     echo "Loading Prometheus and Grafana"
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
-        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.0-SNAPSHOT" false
+        sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.1-SNAPSHOT" false
         sh "$SCDIR/load-image.sh" "prom/prometheus:v2.37.8"
         sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy:1.5.2"
     fi

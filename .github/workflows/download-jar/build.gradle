@@ -28,4 +28,7 @@ def downloadJar = tasks.register('downloadJar', Copy) {
     }
     destinationDir = file(artifactPath)
     from configurations.download.resolvedConfiguration.files
+    doLast {
+        logger.lifecycle "$path:Downloaded:$artifactGroup:$artifactId:$artifactVersion"
+    }
 }

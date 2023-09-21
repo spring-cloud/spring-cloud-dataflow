@@ -7,7 +7,7 @@ ROOT_DIR=$(realpath $SCDIR/../..)
 if [ "$1" != "" ]; then
     TAG=$1
 else
-    TAG=2.11.0-SNAPSHOT
+    TAG=2.11.1-SNAPSHOT
 fi
 if [ "$2" != "" ]; then
     v=$2
