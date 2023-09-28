@@ -91,6 +91,8 @@ public class TaskLauncherTasklet implements Tasklet {
 
 	private final String ctrSchemaTarget;
 
+	private long startTimeout;
+
 	private long timeout;
 
 	private final ClientRegistrationRepository clientRegistrations;
@@ -163,8 +165,12 @@ public class TaskLauncherTasklet implements Tasklet {
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) {
 		TaskOperations taskOperations = taskOperations();
 		if (this.executionId == null) {
+			this.startTimeout = System.currentTimeMillis() +
+					this.composedTaskProperties.getMaxStartWaitTime();
 			this.timeout = System.currentTimeMillis() +
 					this.composedTaskProperties.getMaxWaitTime();
+			logger.debug("Wait time for this task to start is " +
+					this.composedTaskProperties.getMaxStartWaitTime());
 			logger.debug("Wait time for this task to complete is " +
 					this.composedTaskProperties.getMaxWaitTime());
 			logger.debug("Interval check time for this task to complete is " +
@@ -242,6 +248,13 @@ public class TaskLauncherTasklet implements Tasklet {
 				else {
 					return RepeatStatus.FINISHED;
 				}
+			}
+			if (this.composedTaskProperties.getMaxStartWaitTime() > 0 &&
+				(taskExecution == null || taskExecution.getStartTime() == null) &&
+				System.currentTimeMillis() > startTimeout) {
+				throw new TaskExecutionTimeoutException(String.format(
+						"Timeout occurred during startup of task with Execution Id %s",
+						this.executionId));
 			}
 			if (this.composedTaskProperties.getMaxWaitTime() > 0 &&
 					System.currentTimeMillis() > timeout) {

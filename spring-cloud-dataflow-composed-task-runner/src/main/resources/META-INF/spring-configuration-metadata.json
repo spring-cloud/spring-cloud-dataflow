@@ -83,6 +83,13 @@
       "defaultValue": 10000
     },
     {
+      "name": "max-start-wait-time",
+      "type": "java.lang.Integer",
+      "description": "Determines the maximum time each child task is allowed for application startup. The default of `0` indicates no timeout.",
+      "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
+      "defaultValue": 0
+    },
+    {
       "name": "max-wait-time",
       "type": "java.lang.Integer",
       "description": "The maximum amount of time in millis that a individual step can run before the execution of the Composed task is failed.",
