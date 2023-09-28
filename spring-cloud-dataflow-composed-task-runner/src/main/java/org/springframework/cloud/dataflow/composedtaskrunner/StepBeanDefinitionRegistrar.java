@@ -208,6 +208,10 @@ public class StepBeanDefinitionRegistrar implements ImportBeanDefinitionRegistra
 		if (dataFlowUriString != null) {
 			properties.setDataflowServerUri(URI.create(dataFlowUriString));
 		}
+		String maxStartWaitTime = getPropertyValue("max-start-wait-time");
+		if (maxStartWaitTime != null) {
+			properties.setMaxStartWaitTime(Integer.parseInt(maxStartWaitTime));
+		}
 		String maxWaitTime = getPropertyValue("max-wait-time");
 		if (maxWaitTime != null) {
 			properties.setMaxWaitTime(Integer.parseInt(maxWaitTime));
