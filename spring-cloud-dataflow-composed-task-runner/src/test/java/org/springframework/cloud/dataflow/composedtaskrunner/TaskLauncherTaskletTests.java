@@ -83,6 +83,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -265,6 +266,25 @@ public class TaskLauncherTaskletTests {
 		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
+	}
+
+	@Test
+	@DirtiesContext
+	public void testTaskLauncherTaskletStartTimeout() {
+		mockReturnValForTaskExecution(1L);
+		this.composedTaskProperties.setMaxStartWaitTime(500);
+		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
+		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
+		ChunkContext chunkContext = chunkContext();
+		Throwable exception = assertThrows(TaskExecutionTimeoutException.class, () -> execute(taskLauncherTasklet, null, chunkContext));
+		Assertions.assertThat(exception.getMessage()).isEqualTo("Timeout occurred during " +
+				"startup of task with Execution Id 1");
+
+		createCompleteTaskExecution(0);
+		this.composedTaskProperties.setMaxStartWaitTime(500);
+		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
+		TaskLauncherTasklet taskLauncherTaskletNoTimeout = getTaskExecutionTasklet();
+		assertDoesNotThrow(() -> execute(taskLauncherTaskletNoTimeout, null, chunkContext));
 	}
 
 	@Test
