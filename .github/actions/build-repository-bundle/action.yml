@@ -55,3 +55,4 @@ runs:
         $SRP_SCRIPTS/run-under-observer.sh bash "${{ github.action_path }}/build-repository-bundle.sh"
       else 
         bash "${{ github.action_path }}/build-repository-bundle.sh"
+      fi
