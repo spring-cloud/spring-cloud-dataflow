@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -e
 imgpkg push --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
 docker pull $REPOSITORY:$VERSION-RANDOM.$RTAG
 docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$VERSION
