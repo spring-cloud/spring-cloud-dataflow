@@ -68,6 +68,7 @@ runs:
           exit 2
         fi
         export OBSERVATION=package-bundle
+      export OUTPUT_VERSION=$SERVER_VERSION
         $SRP_SCRIPTS/run-under-observer.sh "${{ github.action_path }}/build-package-bundle.sh"
       else
         bash "${{ github.action_path }}/build-package-bundle.sh"

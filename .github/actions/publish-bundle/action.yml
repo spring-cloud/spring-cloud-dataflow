@@ -36,6 +36,7 @@ runs:
         else
           export OBSERVATION=repository-publish
         fi
+        export OUTPUT_VERSION=$VERSION
         $SRP_SCRIPTS/run-under-observer.sh bash "${{ github.action_path }}/publish-bundle.sh"
       else
         bash "${{ github.action_path }}/publish-bundle.sh"
