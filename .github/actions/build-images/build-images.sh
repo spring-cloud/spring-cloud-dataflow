@@ -19,6 +19,7 @@ function pack_image {
         exit 2
     fi
     echo "Creating: $REPO:$TAG-jdk$v"
+    # --buildpack "paketo-buildpacks/java@10.0.0" --buildpack "paketo-buildpacks/bellsoft-liberica@10.3.2"
     pack build --builder gcr.io/paketo-buildpacks/builder:base \
             --path "$JAR" \
             --trust-builder --verbose \
@@ -61,7 +62,7 @@ for ((i = 0; i < len; i++)); do
     TARGET="${TARGETS[i]}"
     IMAGE="${IMAGES[i]}"
     ARTIFACT_ID="${MAVEN_ARTIFACT_IDS[i]}"
-    for v in 8 11 17; do
+    for v in 8 11 17 21; do
         pack_image $TARGET $IMAGE $v $ARTIFACT_ID
         RC=$?
         if [ $RC -ne 0 ]; then

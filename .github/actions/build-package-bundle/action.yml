@@ -62,4 +62,13 @@ runs:
     run: |
       echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
       SCDF_DIR="${{ inputs.project-directory || '.' }}"
-      bash "${{ github.action_path }}/build-package-bundle.sh"
+      if [ "$USE_SRP" == "true" ]; then
+        if [ "$SRP_SCRIPTS" == "" ]; then
+          echo "SRP_SCRIPTS not defined"
+          exit 2
+        fi
+        export OBSERVATION=package-bundle
+        $SRP_SCRIPTS/run-under-observer.sh "${{ github.action_path }}/build-package-bundle.sh"
+      else
+        bash "${{ github.action_path }}/build-package-bundle.sh"
+      fi

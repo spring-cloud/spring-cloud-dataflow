@@ -26,7 +26,17 @@ runs:
       VERSION: ${{ inputs.version }}
     shell: bash
     run: |
-      imgpkg push --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
-      docker pull $REPOSITORY:$VERSION-RANDOM.$RTAG
-      docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$VERSION
-      docker push $REPOSITORY:$VERSION
+      if [ "$USE_SRP" == "true" ]; then
+        if [ "$SRP_SCRIPTS" == "" ]; then
+          echo "SRP_SCRIPTS not defined"
+          exit 2
+        fi
+        if [[ "$REPOSITORY" == *"-package"* ]]; then
+          export OBSERVATION=package-publish
+        else
+          export OBSERVATION=repository-publish
+        fi
+        $SRP_SCRIPTS/run-under-observer.sh bash "${{ github.action_path }}/publish-bundle.sh"
+      else
+        bash "${{ github.action_path }}/publish-bundle.sh"
+      fi
