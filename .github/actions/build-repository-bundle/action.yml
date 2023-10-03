@@ -53,7 +53,7 @@ runs:
         fi
         export OBSERVATION=repository-bundle
         export OUTPUT_VERSION=$PACKAGE_VERSION
-        $SRP_SCRIPTS/run-under-observer.sh bash "${{ github.action_path }}/build-repository-bundle.sh"
+        $SRP_SCRIPTS/run-under-observer.sh "${{ github.action_path }}/build-repository-bundle.sh"
       else 
-        bash "${{ github.action_path }}/build-repository-bundle.sh"
+        "${{ github.action_path }}/build-repository-bundle.sh"
       fi
