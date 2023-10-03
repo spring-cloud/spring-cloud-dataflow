@@ -91,11 +91,6 @@
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-<!--			<dependency>-->
-<!--				<groupId>org.springframework.cloud</groupId>-->
-<!--				<artifactId>spring-cloud-starter-dataflow-ui</artifactId>-->
-<!--				<version>${project.version}</version>-->
-<!--			</dependency>-->
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>

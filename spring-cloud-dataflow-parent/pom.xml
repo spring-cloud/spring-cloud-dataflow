@@ -14,8 +14,8 @@
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-		<spring-boot.version>2.7.15</spring-boot.version>
-		<spring.version>5.3.29</spring.version>
+		<spring-boot.version>2.7.16</spring-boot.version>
+		<spring.version>5.3.30</spring.version>
 		<spring-cloud-dataflow-ui.version>3.4.1-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<dataflow.version>${project.version}</dataflow.version>
 		<spring-cloud-dataflow-common.version>${project.version}</spring-cloud-dataflow-common.version>
@@ -29,13 +29,18 @@
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
+		<!-- Specific version overrides to deal w/ CVEs -->
 		<snakeyaml.version>1.33</snakeyaml.version>
+		<json-smart.version>2.4.11</json-smart.version>
+		<nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
+		<snappy-java.version>1.1.10.4</snappy-java.version>
+		<commons-compress.version>1.24.0</commons-compress.version>
+
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.12.513</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.17.6</testcontainers.version>
-		<commons-compress.version>1.24.0</commons-compress.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>4.0.0-SNAPSHOT</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
@@ -43,7 +48,7 @@
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
-		<spring-security.version>5.7.10</spring-security.version>
+		<spring-security.version>5.7.11</spring-security.version>
 		<jackson-bom.version>2.13.5</jackson-bom.version>
 		<guava.version>32.1.1-jre</guava.version>
 	</properties>
@@ -55,19 +60,36 @@
 				<version>${guava.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-cbor</artifactId>
-				<version>${jackson-bom.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
 				<version>2.2.222</version>
 			</dependency>
 			<dependency>
+				<groupId>net.minidev</groupId>
+				<artifactId>json-smart</artifactId>
+				<version>${json-smart.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.31</version>
+				<version>${nimbus-jose-jwt.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snakeyaml.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xerial.snappy</groupId>
+				<artifactId>snappy-java</artifactId>
+				<version>${snappy-java.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
@@ -78,11 +100,6 @@
 				<groupId>com.squareup.okio</groupId>
 				<artifactId>okio</artifactId>
 				<version>3.4.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${snakeyaml.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
