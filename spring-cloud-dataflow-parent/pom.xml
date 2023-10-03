@@ -134,6 +134,21 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-common-security-config-core</artifactId>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-common-security-config-web</artifactId>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-task-dependencies</artifactId>
 				<version>${spring-cloud-task.version}</version>
 				<type>pom</type>
