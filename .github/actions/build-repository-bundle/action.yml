@@ -16,6 +16,12 @@ inputs:
   project-directory:
     description: The working directory
     required: false
+  SRP_CLIENT_ID:
+    description: secrets.SRP_CLIENT_ID
+    required: false
+  SRP_CLIENT_SECRET:
+    description: secrets.SRP_CLIENT_SECRET
+    required: false
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -33,6 +39,8 @@ runs:
       REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}
       REPO_BUNDLE_RENDERED: ${{ runner.temp }}/generated/reporendered
       REPO_BUNDLE_GENERATED: ${{ runner.temp }}/generated/repobundle
+      SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
+      SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
     run: |
       echo "bundle-path=$REPO_BUNDLE_GENERATED" >> $GITHUB_OUTPUT

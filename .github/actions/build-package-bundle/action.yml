@@ -34,6 +34,12 @@ inputs:
   project-directory:
     description: The working directory
     required: false
+  SRP_CLIENT_ID:
+    description: secrets.SRP_CLIENT_ID
+    required: false
+  SRP_CLIENT_SECRET:
+    description: secrets.SRP_CLIENT_SECRET
+    required: false
 outputs:
   bundle-path:
     description: Location path where bundle was build
@@ -58,6 +64,8 @@ runs:
       IMGPKG_LOCK_TEMPLATE: ${{ inputs.imgpkg-lock-template }}
       IMGPKG_LOCK_GENERATED_IN: ${{ runner.temp }}/generated/imgpkgin
       IMGPKG_LOCK_GENERATED_OUT: ${{ runner.temp }}/generated/imgpkgout
+      SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
+      SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
     run: |
       echo "bundle-path=$PACKAGE_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
