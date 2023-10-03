@@ -15,7 +15,7 @@ inputs:
     required: true
   project-directory:
     description: The working directory
-    required: false
+    required: true
   SRP_CLIENT_ID:
     description: secrets.SRP_CLIENT_ID
     required: false
@@ -42,6 +42,7 @@ runs:
       SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
       SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
+    working-directory: ${{ inputs.project-directory }}
     run: |
       echo "bundle-path=$REPO_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
       SCDF_DIR="${{ inputs.project-directory || '.' }}"      

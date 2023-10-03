@@ -7,6 +7,9 @@ inputs:
   repository:
     description: repository to publish
     required: true
+  project-directory:
+    description: The working directory
+    required: true
   version:
     description: semver version
     required: true
@@ -32,6 +35,7 @@ runs:
       SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
       SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
+    working-directory: ${{ inputs.project-directory }}
     run: |
       if [ "$USE_SRP" == "true" ]; then
         if [ "$SRP_SCRIPTS" == "" ]; then

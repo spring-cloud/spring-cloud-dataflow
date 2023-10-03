@@ -79,6 +79,7 @@ jobs:
         package-bundle-template: 'src/carvel/templates/bundle/package'
         imgpkg-lock-template: 'src/carvel/templates/imgpkg'
         config: 'src/carvel/config'
+        project-directory: '.'
 
     # Publishes scdf package bundle as it needs to be in place
     # before repository bundle can be created.
@@ -89,6 +90,7 @@ jobs:
         path: '${{ steps.build-package-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.package-bundle }}
         version: ${{ inputs.package-version }}
+        project-directory: '.'
 
     # Builds a repository bundle
     - name: Build Repository Bundle
@@ -99,6 +101,7 @@ jobs:
         repo-bundle-template: 'src/carvel/templates/bundle/repo'
         package-bundle-repository: ${{ inputs.package-bundle }}
         package-name: ${{ inputs.package-name }}
+        project-directory: '.'
 
     # Publishes scdf repo bundle
     - name: Publish Repository Bundle
@@ -108,3 +111,4 @@ jobs:
         path: '${{ steps.build-repository-bundle.outputs.bundle-path }}'
         repository: ${{ inputs.repository-bundle }}
         version: ${{ inputs.package-version }}
+        project-directory: '.'
