@@ -19,103 +19,118 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-shell-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-completion</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-core-dsl</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-client</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-configuration-metadata</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-rest-resource</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-registry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-container-registry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-composed-task-runner</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-autoconfigure</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-dataflow-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 				<type>test-jar</type>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-audit</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-platform-kubernetes</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-test</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-common-security-config-core</artifactId>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-common-security-config-web</artifactId>
+				<version>${dataflow.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+				<version>${dataflow.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -124,7 +139,7 @@
 		<site>
 			<id>spring-docs</id>
 			<url>
-				scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-cloud/docs/${project.artifactId}/${project.version}
+				scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-cloud/docs/${project.artifactId}/${dataflow.version}
 			</url>
 		</site>
 		<repository>

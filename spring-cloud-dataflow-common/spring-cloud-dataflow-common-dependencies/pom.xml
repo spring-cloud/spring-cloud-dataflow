@@ -21,17 +21,17 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-common-flyway</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-common-test-docker</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-common-test-docker-junit5</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

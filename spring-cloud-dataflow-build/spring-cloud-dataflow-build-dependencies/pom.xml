@@ -42,7 +42,6 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-
 			<dependency>
 				<groupId>net.minidev</groupId>
 				<artifactId>json-smart</artifactId>
@@ -81,7 +80,6 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>io.fabric8</groupId>
 				<artifactId>kubernetes-client-bom</artifactId>

@@ -36,6 +36,8 @@
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- NOTE: this needs to be updated and kept in sync w/ the project.version -->
+		<dataflow.version>2.11.1-SNAPSHOT</dataflow.version>
 	</properties>
 	<profiles>
 		<profile>
