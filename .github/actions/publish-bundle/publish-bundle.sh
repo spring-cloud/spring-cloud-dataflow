@@ -2,7 +2,7 @@
 set -e
 IMG_PKG_OPT=
 if [ "$USE_SRP" == "true" ]; then
-    IMG_PKG_OPT="--debug --registry-verify-certs false"
+    IMG_PKG_OPT="--debug --registry-verify-certs=false"
 fi
 
 imgpkg push $IMG_PKG_OPT --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
