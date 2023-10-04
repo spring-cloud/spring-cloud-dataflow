@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skipper
+  labels:
+    app: skipper
+spec:
+  selector:
+    matchLabels:
+      app: skipper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: skipper
+    spec:
+      containers:
+      - name: skipper
+        image: dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-skipper:${DATAFLOW_PRO_VERSION}
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: config
+            mountPath: /workspace/config
+            readOnly: true
+          - name: database
+            mountPath: /etc/secrets/database
+            readOnly: true
+        ports:
+        - containerPort: 7577
+          name: http-skipper
+        - containerPort: 8000
+          name: jdwp-skipper
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 7577
+          initialDelaySeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 7577
+          initialDelaySeconds: 1
+        startupProbe:
+          tcpSocket:
+            port: 7577
+          failureThreshold: 10
+          timeoutSeconds: 2
+          initialDelaySeconds: 50
+          periodSeconds: 3
+        resources:
+          requests:
+            cpu: '0.5'
+            memory: 640Mi
+        env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+          - name: JDK_JAVA_OPTIONS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+          - name: SPRING_PROFILES_ACTIVE
+            value: 'kubernetes'
+          - name: SERVER_PORT
+            value: '7577'
+          - name: SPRING_CLOUD_CONFIG_ENABLED
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+            value: /etc/secrets
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                key: SPRING_DATASOURCE_USERNAME
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: SPRING_DATASOURCE_PASSWORD
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_URL
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_URL
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_TEST_ON_BORROW
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_TEST_ON_BORROW
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_VALIDATION_QUERY
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_VALIDATION_QUERY
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+                name: scdf-datasource
+          - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
+                name: scdf-datasource
+          - name: SPRING_JPA_DATABASE_PLATFORM
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_JPA_DATABASE_PLATFORM
+                name: scdf-datasource
+          - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+            value: 'true'
+          - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED
+            value: 'true'
+      serviceAccountName: scdf-sa
+      volumes:
+        - name: config
+          configMap:
+            name: skipper
+            items:
+            - key: 'application-kubernetes.yaml'
+              path: 'application-kubernetes.yaml'
+        - name: database
+          secret:
+            secretName: ${DATABASE}
