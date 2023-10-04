@@ -3,8 +3,8 @@ set -e
 IMG_PKG_OPT=
 if [ "$USE_SRP" == "true" ]; then
     IMG_PKG_OPT="--debug"
-    if [ "$NODE_EXTRA_CA_CERTS" != "" ]; then
-        IMG_PKG_OPT="$IMG_PKG_OPT --registry-ca-cert-path $NODE_EXTRA_CA_CERTS"
+    if [ "$SSL_CERT_FILE" != "" ] && [ -f "$SSL_CERT_FILE" ]; then
+        IMG_PKG_OPT="$IMG_PKG_OPT --registry-ca-cert-path $SSL_CERT_FILE"
     else
         IMG_PKG_OPT="$IMG_PKG_OPT --registry-verify-certs=false"
     fi
