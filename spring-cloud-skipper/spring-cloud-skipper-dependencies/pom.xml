@@ -19,42 +19,42 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-server-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-shell-commands</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-client</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-skipper-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

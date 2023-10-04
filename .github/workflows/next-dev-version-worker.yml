@@ -69,6 +69,11 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         jfrog rt mvn versions:set-property \
           -DgenerateBackupPoms=false \
+          -Dproperty=dataflow.version \
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
+          -B        
+        jfrog rt mvn versions:set-property \
+          -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
           -B
