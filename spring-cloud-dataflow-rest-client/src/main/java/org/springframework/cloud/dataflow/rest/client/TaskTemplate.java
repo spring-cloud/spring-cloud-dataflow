@@ -17,6 +17,8 @@
 package org.springframework.cloud.dataflow.rest.client;
 
 import javax.naming.OperationNotSupportedException;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -175,7 +177,14 @@ public class TaskTemplate implements TaskOperations {
 		return restTemplate.postForObject(definitionsLink.expand().getHref(), values,
 				TaskDefinitionResource.class);
 	}
-
+	private boolean isOldServer() {
+		for(String version : Arrays.asList("2.10.", "1.5.", "2.9.", "1.4.")) {
+			if(this.dataFlowServerVersion.contains(version)) {
+				return true;
+			}
+		}
+		return false;
+	}
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
@@ -183,7 +192,7 @@ public class TaskTemplate implements TaskOperations {
 		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");
 		values.add("properties", formattedProperties);
 		values.add("arguments", commandLineArguments);
-		if(this.dataFlowServerVersion.contains("2.10") || this.dataFlowServerVersion.contains("1.5")) {
+		if(isOldServer()) {
 			Long id = restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Long.class, name);
 			if(id != null) {
 				LaunchResponseResource response = new LaunchResponseResource();
