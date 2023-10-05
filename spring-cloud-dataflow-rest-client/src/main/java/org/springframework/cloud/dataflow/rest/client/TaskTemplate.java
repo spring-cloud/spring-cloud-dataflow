@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import javax.naming.OperationNotSupportedException;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +32,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
+import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
@@ -104,22 +104,23 @@ public class TaskTemplate implements TaskOperations {
 	private final Link platformListLink;
 
 	private final String dataFlowServerVersion;
+	private String actualDataFlowServerCoreVersion = null;
 
 	private final Link retrieveLogLink;
-
+	private final Link aboutLink;
 	TaskTemplate(RestTemplate restTemplate, RepresentationModel<?> resources, String dataFlowServerVersion) {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
-		Assert.notNull(resources.getLink(DEFINITIONS_RELATION), "Definitions relation is required");
-		Assert.notNull(resources.getLink(DEFINITION_RELATION), "Definition relation is required");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
+		Assert.isTrue(resources.getLink("about").isPresent(), "Expected about relation");
+		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
+		Assert.isTrue(resources.getLink(DEFINITIONS_RELATION).isPresent(), "Definitions relation is required");
+		Assert.isTrue(resources.getLink(DEFINITION_RELATION).isPresent(), "Definition relation is required");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION).isPresent(), "Execution relation is required");
 
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.isTrue(resources.getLink(RETRIEVE_LOG).isPresent(), "Log relation is required");
-
 		this.dataFlowServerVersion = dataFlowServerVersion;
 
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
@@ -135,6 +136,7 @@ public class TaskTemplate implements TaskOperations {
 		}
 
 		this.restTemplate = restTemplate;
+		this.aboutLink = resources.getLink("about").get();
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
@@ -177,13 +179,15 @@ public class TaskTemplate implements TaskOperations {
 		return restTemplate.postForObject(definitionsLink.expand().getHref(), values,
 				TaskDefinitionResource.class);
 	}
-	private boolean isOldServer() {
-		for(String version : Arrays.asList("2.10.", "1.5.", "2.9.", "1.4.")) {
-			if(this.dataFlowServerVersion.contains(version)) {
-				return true;
-			}
+	private boolean isNewServer() {
+		if(this.actualDataFlowServerCoreVersion == null) {
+			AboutResource aboutResource = restTemplate.getForObject(aboutLink.expand().getHref(), AboutResource.class);
+			Assert.notNull(aboutResource, "Expected about");
+			this.actualDataFlowServerCoreVersion = aboutResource.getVersionInfo().getCore().getVersion();
 		}
-		return false;
+		String v2_11_0 = VersionUtils.getThreePartVersion("2.11.0-SNAPSHOT");
+		String serverVersion = VersionUtils.getThreePartVersion(this.actualDataFlowServerCoreVersion);
+		return VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(serverVersion, v2_11_0);
 	}
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
@@ -192,7 +196,13 @@ public class TaskTemplate implements TaskOperations {
 		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");
 		values.add("properties", formattedProperties);
 		values.add("arguments", commandLineArguments);
-		if(isOldServer()) {
+		if(isNewServer()) {
+			Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
+			values.add("name", name);
+			String url = executionLaunchLink.expand(name).getHref();
+			values.remove("name");
+			return restTemplate.postForObject(url, values, LaunchResponseResource.class);
+		} else {
 			Long id = restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Long.class, name);
 			if(id != null) {
 				LaunchResponseResource response = new LaunchResponseResource();
@@ -202,11 +212,6 @@ public class TaskTemplate implements TaskOperations {
 				throw new RuntimeException("Expected id");
 			}
 		}
-		Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
-		values.add("name", name);
-		String url = executionLaunchLink.expand(name).getHref();
-		values.remove("name");
-		return restTemplate.postForObject(url, values, LaunchResponseResource.class);
 	}
 
 	@Override
