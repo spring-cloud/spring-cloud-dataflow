@@ -140,7 +140,7 @@ public class AboutControllerTests {
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.0-SNAPSHOT",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.1-SNAPSHOT",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
