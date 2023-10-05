@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -207,6 +208,7 @@ public class TaskTemplate implements TaskOperations {
 			if(id != null) {
 				LaunchResponseResource response = new LaunchResponseResource();
 				response.setExecutionId(id);
+				response.setSchemaTarget(SchemaVersionTarget.defaultTarget().getName());
 				return response;
 			} else {
 				throw new RuntimeException("Expected id");
