@@ -178,12 +178,22 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
-		Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		String formattedProperties = DeploymentPropertiesUtils.format(properties);
 		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");
 		values.add("properties", formattedProperties);
 		values.add("arguments", commandLineArguments);
+		if(this.dataFlowServerVersion.contains("2.10") || this.dataFlowServerVersion.contains("1.5")) {
+			Long id = restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Long.class, name);
+			if(id != null) {
+				LaunchResponseResource response = new LaunchResponseResource();
+				response.setExecutionId(id);
+				return response;
+			} else {
+				throw new RuntimeException("Expected id");
+			}
+		}
+		Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
 		values.add("name", name);
 		String url = executionLaunchLink.expand(name).getHref();
 		values.remove("name");
