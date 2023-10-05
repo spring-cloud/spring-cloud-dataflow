@@ -87,3 +87,26 @@ jobs:
           DELETE_TAGS: ${{ inputs.delete-tags }}
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}
+  build-extra:
+    name: Build extra images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publish Grafana Prometheus
+        uses: docker/build-push-action@v2
+        with:
+          context: src/grafana/prometheus/docker/grafana
+          push: true
+          tags: springcloud/spring-cloud-dataflow-grafana-prometheus:${{ inputs.version }}
+      - name: Publish Grafana InfluxDB
+        uses: docker/build-push-action@v2
+        with:
+          context: src/grafana/influxdb/docker/grafana
+          push: true
+          tags: springcloud/spring-cloud-dataflow-grafana-influxdb:${{ inputs.version }}
+      - name: Publish Prometheus Local
+        uses: docker/build-push-action@v2
+        with:
+          context: src/grafana/prometheus/docker/prometheus-local
+          push: true
+          tags: springcloud/spring-cloud-dataflow-prometheus-local:${{ inputs.version }}
