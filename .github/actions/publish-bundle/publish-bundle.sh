@@ -12,6 +12,9 @@ fi
 if [ "$IMG_PKG_OPT" != "" ]; then
     echo "IMG_PKG_OPT=$IMG_PKG_OPT"
 fi
+set +e
+docker rmi "$REPOSITORY:$VERSION" > /dev/null
+set -e
 imgpkg push $IMG_PKG_OPT --bundle "$REPOSITORY:$VERSION-RANDOM.$RTAG" --file "$BUNDLE_PATH"
 docker pull "$REPOSITORY:$VERSION-RANDOM.$RTAG"
 docker tag "$REPOSITORY:$VERSION-RANDOM.$RTAG" "$REPOSITORY:$VERSION"
