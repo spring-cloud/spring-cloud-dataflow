@@ -13,7 +13,10 @@ if [ "$IMG_PKG_OPT" != "" ]; then
     echo "IMG_PKG_OPT=$IMG_PKG_OPT"
 fi
 set +e
-docker rmi "$REPOSITORY:$VERSION" > /dev/null
+IMAGE_ID=$(docker images --digests --format json | jq -r IMAGE_URL "${REPOSITORY}" --arg TAG "${VERSION}" 'select(.Repository == $IMAGE_URL and .Tag == $TAG)' | jq -r --slurp 'map({ID: .ID}) | unique | .[] | .ID')
+if [ "$IMAGE_ID" != "" ]; then
+    docker rmi --force "$REPOSITORY:$VERSION"
+fi
 set -e
 imgpkg push $IMG_PKG_OPT --bundle "$REPOSITORY:$VERSION-RANDOM.$RTAG" --file "$BUNDLE_PATH"
 docker pull "$REPOSITORY:$VERSION-RANDOM.$RTAG"
