@@ -44,8 +44,7 @@ public abstract class AssertUtils {
 	}
 
 	public static void assertDataflowServerRunning(String url) {
-		assertServerResponse("Spring Cloud Data Flow", url, 1, TimeUnit.SECONDS, 60,
-				TimeUnit.SECONDS);
+		assertServerResponse("Spring Cloud Data Flow", url, 1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS);
 	}
 
 	public static void assertSkipperServerNotRunning(String url) {
@@ -56,8 +55,7 @@ public abstract class AssertUtils {
 	}
 
 	public static void assertSkipperServerRunning(String url) {
-		assertServerResponse("Spring Cloud Skipper Server", url, 1, TimeUnit.SECONDS, 60,
-				TimeUnit.SECONDS);
+		assertServerResponse("Spring Cloud Skipper Server", url, 1, TimeUnit.SECONDS, 60,  TimeUnit.SECONDS);
 	}
 
 	public static void assertServerResponse(String responseContains, String url, long pollInterval,
@@ -73,7 +71,7 @@ public abstract class AssertUtils {
 					log.debug("Checking url {}", url);
 					String response = template.getForObject(url, String.class);
 					log.debug("Response is {}", response);
-					boolean ok = response.contains(responseContains);
+					boolean ok = response != null && response.contains(responseContains);
 					log.info("Check {} for url {}", ok, url);
 					return ok;
 				});
