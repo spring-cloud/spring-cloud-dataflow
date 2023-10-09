@@ -92,22 +92,25 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new Jackson2DataflowModule());
-		DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
+		final DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
 		dataFlowTemplate.appRegistryOperations().register("time", ApplicationType.source, "docker:springcloudstream/time-source-rabbit:3.2.1", null, false);
 		dataFlowTemplate.appRegistryOperations().register("log", ApplicationType.sink, "docker:springcloudstream/log-sink-rabbit:3.2.1", null, false);
 		dataFlowTemplate.streamOperations().createStream("timelogger", "time | log", "timelogger", false);
+
 		StreamDefinitionResource timelogger = dataFlowTemplate.streamOperations().getStreamDefinition("timelogger");
 		assertThat(timelogger.getDslText()).isEqualTo("time | log");
 		assertThat(timelogger.getDescription()).isEqualTo("timelogger");
-		dataFlowTemplate.streamOperations().undeploy("timelogger");
 
 		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_main, TagNames.DATAFLOW_main);
-		assertDataflowServerRunning(this.dataflowCluster);
+//		this.dataflowCluster.replaceSkipper(TagNames.SKIPPER_main);
 		assertSkipperServerRunning(this.dataflowCluster);
+//		this.dataflowCluster.replaceDataflow(TagNames.DATAFLOW_main);
+		assertDataflowServerRunning(this.dataflowCluster);
+
 		Integer count = runCountQuery("select count(*) from flyway_schema_history_dataflow");
 		assertThat(count).isGreaterThan(1);
-		dataFlowTemplate = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
-		timelogger = dataFlowTemplate.streamOperations().getStreamDefinition("timelogger");
+		DataFlowTemplate dataFlowTemplate2 = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
+		timelogger = dataFlowTemplate2.streamOperations().getStreamDefinition("timelogger");
 		assertThat(timelogger.getDslText()).isEqualTo("time | log");
 		assertThat(timelogger.getDescription()).isEqualTo("timelogger");
 	}

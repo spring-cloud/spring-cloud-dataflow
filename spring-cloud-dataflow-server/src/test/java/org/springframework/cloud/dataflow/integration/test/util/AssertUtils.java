@@ -30,7 +30,6 @@ import static org.awaitility.Awaitility.with;
  * Various assert utils.
  *
  * @author Janne Valkealahti
- *
  */
 public abstract class AssertUtils {
 
@@ -38,42 +37,52 @@ public abstract class AssertUtils {
 
 	public static void assertDataflowServerNotRunning(String url) {
 		assertThatThrownBy(() -> {
-			assertServerResponse("Spring Cloud Data Flow", url, 1, TimeUnit.SECONDS, 60,
-			TimeUnit.SECONDS);
+			assertServerResponse("Spring Cloud Data Flow", url, 5, TimeUnit.SECONDS, 120, TimeUnit.SECONDS);
 		});
 	}
 
 	public static void assertDataflowServerRunning(String url) {
-		assertServerResponse("Spring Cloud Data Flow", url, 1, TimeUnit.SECONDS, 60, TimeUnit.SECONDS);
+		assertServerResponse("Spring Cloud Data Flow", url, 5, TimeUnit.SECONDS, 120, TimeUnit.SECONDS);
 	}
 
 	public static void assertSkipperServerNotRunning(String url) {
 		assertThatThrownBy(() -> {
-			assertServerResponse("Spring Cloud Skipper Server", url, 1, TimeUnit.SECONDS, 60,
-			TimeUnit.SECONDS);
+			assertServerResponse("Spring Cloud Skipper Server", url, 5, TimeUnit.SECONDS, 120, TimeUnit.SECONDS);
 		});
 	}
 
 	public static void assertSkipperServerRunning(String url) {
-		assertServerResponse("Spring Cloud Skipper Server", url, 1, TimeUnit.SECONDS, 60,  TimeUnit.SECONDS);
+		assertServerResponse("Spring Cloud Skipper Server", url, 5, TimeUnit.SECONDS, 120, TimeUnit.SECONDS);
 	}
 
-	public static void assertServerResponse(String responseContains, String url, long pollInterval,
-			TimeUnit pollTimeUnit, long awaitInterval, TimeUnit awaitTimeUnit) {
+	public static void assertServerResponse(
+		String responseContains,
+		String url,
+		long pollInterval,
+		TimeUnit pollTimeUnit,
+		long awaitInterval,
+		TimeUnit awaitTimeUnit
+	) {
 		RestTemplate template = new RestTemplate();
 		with()
 			.pollInterval(pollInterval, pollTimeUnit)
 			.and()
 			.await()
-				.ignoreExceptions()
-				.atMost(awaitInterval, awaitTimeUnit)
-				.until(() -> {
-					log.debug("Checking url {}", url);
+			.atMost(awaitInterval, awaitTimeUnit)
+			.until(() -> {
+				log.info("Checking url {}", url);
+				try {
 					String response = template.getForObject(url, String.class);
-					log.debug("Response is {}", response);
+					log.info("Response is {}", response);
 					boolean ok = response != null && response.contains(responseContains);
-					log.info("Check {} for url {}", ok, url);
+					if (!ok) {
+						log.warn("Failed check {} for url {}", ok, url);
+					}
 					return ok;
-				});
+				} catch (Throwable x) {
+					log.warn("Exception:" + x);
+					return false;
+				}
+			});
 	}
 }

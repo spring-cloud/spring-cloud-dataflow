@@ -49,22 +49,22 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-server-core</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

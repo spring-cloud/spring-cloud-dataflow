@@ -22,6 +22,7 @@
 		<docs.main>${project.artifactId}</docs.main>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.16</spring-boot.version>
+		<dataflow.version>2.11.1-SNAPSHOT</dataflow.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-asciidoctor-extensions.version>0.1.3.RELEASE</spring-asciidoctor-extensions.version>

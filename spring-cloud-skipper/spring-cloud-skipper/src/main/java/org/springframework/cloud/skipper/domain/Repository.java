@@ -22,6 +22,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
+
 /**
  * Repository for the packages.
  *
@@ -46,7 +48,7 @@ public class Repository extends AbstractEntity {
 	 */
 	@NotNull
 	@Lob
-	// @Column(columnDefinition = "text")
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String url;
 
 	/**
@@ -54,7 +56,7 @@ public class Repository extends AbstractEntity {
 	 * packages.
 	 */
 	@Lob
-	// @Column(columnDefinition = "text")
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String sourceUrl;
 
 	/**

@@ -23,7 +23,12 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-common-persistence</artifactId>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
@@ -48,7 +53,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-common-flyway</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -178,12 +183,12 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-common-security-config-web</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 			<exclusions>
