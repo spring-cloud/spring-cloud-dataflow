@@ -51,6 +51,7 @@
 	</developers>
 	<modules>
 		<module>spring-cloud-dataflow-build</module>
+
 		<module>spring-cloud-dataflow-common</module>
 		<module>spring-cloud-common-security-config</module>
 		<module>spring-cloud-dataflow-parent</module>

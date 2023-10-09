@@ -73,7 +73,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-common-dependencies</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -87,12 +87,12 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-common-security-config-web</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security.oauth.boot</groupId>
@@ -102,47 +102,47 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-client</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-server-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-shell</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-shell-commands</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>

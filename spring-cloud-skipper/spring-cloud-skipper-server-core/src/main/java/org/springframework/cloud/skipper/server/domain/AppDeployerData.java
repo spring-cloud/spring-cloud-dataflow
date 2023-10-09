@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.annotations.Type;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.AbstractEntity;
@@ -52,6 +53,7 @@ public class AppDeployerData extends AbstractEntity {
 
 	// Store deployment Ids associated with the given release.
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String deploymentData;
 
 	public AppDeployerData() {

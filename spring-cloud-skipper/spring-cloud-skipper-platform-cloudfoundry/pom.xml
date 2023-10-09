@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-skipper-server-core</artifactId>
-			<version>${project.version}</version>
+			<version>${dataflow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
