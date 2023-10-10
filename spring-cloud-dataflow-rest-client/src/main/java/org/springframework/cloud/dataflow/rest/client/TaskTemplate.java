@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,14 +303,18 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public void cleanup(long id, String schemaTarget, boolean removeData) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
+
 		String uriTemplate = executionLink.expand(id).getHref();
+
 		if (removeData) {
-			values.add("action", "CLEANUP,REMOVE_DATA");
+			uriTemplate = uriTemplate + "?action=CLEANUP,REMOVE_DATA";
 		}
-		restTemplate.delete(uriTemplate, values);
+
+		if (StringUtils.hasText(schemaTarget)) {
+			String schemaVal =  (removeData) ?  "&schemaTarget=" + schemaTarget : "?schemaTarget=" + schemaTarget;
+			uriTemplate = uriTemplate + schemaVal;
+		}
+		restTemplate.delete(uriTemplate);
 	}
 
 	@Override
