@@ -230,7 +230,7 @@ public class Task implements AutoCloseable {
 	public Optional<TaskExecutionResource> executionByParentExecutionId(long parentExecutionId, String schemaTarget) {
 		return this.executions().stream()
 			.filter(Objects::nonNull)
-			.filter(e -> e.getParentExecutionId() == parentExecutionId && e.getSchemaTarget().equals(schemaTarget))
+			.filter(e -> e.getParentExecutionId() == parentExecutionId)
 			.findFirst();
 	}
 
