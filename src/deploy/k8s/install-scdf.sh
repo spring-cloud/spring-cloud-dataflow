@@ -63,4 +63,4 @@ end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))
 echo "Complete deployment in $elapsed seconds"
 echo "Execute source $LS_DIR/export-dataflow-ip.sh to export DATAFLOW_IP for executing tests"
-echo "Monitor pods using k9s and kail --ns=default | tee pods.log"
+echo "Monitor pods using k9s and kail --ns=$NS | tee pods.log"
