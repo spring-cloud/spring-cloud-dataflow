@@ -149,7 +149,7 @@ public class AppDeploymentRequestCreator {
 	}
 
 	private void addDefaultDeployerProperties(
-		String taskName,
+		String appName,
 		String platformType,
 		String bootVersion,
 		Map<String, String> deploymentProperties
@@ -158,7 +158,7 @@ public class AppDeploymentRequestCreator {
 			case TaskPlatformFactory.LOCAL_PLATFORM_TYPE: {
 				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
 				if (StringUtils.hasText(javaHome)) {
-					String property = "deployer." + taskName + ".spring.cloud.deployer.local.javaHomePath." + bootVersion;
+					String property = "deployer." + appName + ".spring.cloud.deployer.local.javaHomePath." + bootVersion;
 					deploymentProperties.put(property, javaHome);
 					logger.debug("added:{}={}", property, javaHome);
 				}
@@ -167,15 +167,18 @@ public class AppDeploymentRequestCreator {
 			case TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE: {
 				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
 				if (StringUtils.hasText(buildpack)) {
-					String property = "deployer." + taskName + ".spring.cloud.deployer.cloudfoundry.buildpack";
+					String property = "deployer." + appName + ".spring.cloud.deployer.cloudfoundry.buildpack";
 					deploymentProperties.put(property, buildpack);
 					logger.debug("added:{}={}", property, buildpack);
 				}
 				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
 				if (StringUtils.hasText(buildpacks)) {
-					String property = "deployer." + taskName + ".spring.cloud.deployer.cloudfoundry.buildpacks";
+					String property = "deployer." + appName + ".spring.cloud.deployer.cloudfoundry.buildpacks";
 					deploymentProperties.put(property, buildpacks);
 					logger.debug("added:{}={}", property, buildpacks);
+				}
+				if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
+					deploymentProperties.put("deployer." + appName + ".cloudfoundry.env.JBP_CONFIG_OPEN_JDK_JRE", "{jre: {version: 17.+}}");
 				}
 				break;
 			}
