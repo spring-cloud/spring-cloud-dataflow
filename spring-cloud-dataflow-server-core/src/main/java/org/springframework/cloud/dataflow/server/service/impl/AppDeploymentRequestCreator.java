@@ -155,7 +155,7 @@ public class AppDeploymentRequestCreator {
 		Map<String, String> deploymentProperties
 	) {
 		switch (platformType) {
-			case TaskPlatformFactory.LOCAL_PLATFORM_TYPE: {
+			case "local": {
 				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
 				if (StringUtils.hasText(javaHome)) {
 					String property = "spring.cloud.deployer.local.javaHomePath." + bootVersion;
@@ -164,7 +164,7 @@ public class AppDeploymentRequestCreator {
 				}
 				break;
 			}
-			case TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE: {
+			case "cloudfoundry": {
 				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
 				if (StringUtils.hasText(buildpack)) {
 					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.buildpack", buildpack);
