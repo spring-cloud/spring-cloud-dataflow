@@ -178,7 +178,7 @@ public class AppDeploymentRequestCreator {
 					logger.debug("added:{}={}", property, buildpacks);
 				}
 				if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
-					deploymentProperties.put("deployer." + appName + ".cloudfoundry.JBP_CONFIG_OPEN_JDK_JRE", "'{ jre: { version: 17.+ }}'");
+					deploymentProperties.put("app." + appName + ".JBP_CONFIG_OPEN_JDK_JRE", "'{ jre: { version: 17.+ }}'");
 					deploymentProperties.put("deployer." + appName + ".cloudfoundry.use-spring-application-json", "false");
 				}
 				break;
