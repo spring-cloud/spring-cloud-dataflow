@@ -19,6 +19,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
+		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
 		<checkstyle.config.location>../src/checkstyle/checkstyle.xml</checkstyle.config.location>
 		<failIfNoTests>true</failIfNoTests>
 	</properties>
@@ -247,6 +248,20 @@
 							<goal>jar</goal>
 						</goals>
 						<phase>prepare-package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>${maven-source-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>source</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
 					</execution>
 				</executions>
 			</plugin>
