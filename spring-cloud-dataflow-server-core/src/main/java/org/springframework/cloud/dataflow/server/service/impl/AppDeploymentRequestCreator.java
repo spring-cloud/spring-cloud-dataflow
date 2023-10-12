@@ -166,15 +166,19 @@ public class AppDeploymentRequestCreator {
 			}
 			case "cloudfoundry": {
 				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
+				logger.debug("Resolved defaults buildpack: " + buildpack);
 				if (StringUtils.hasText(buildpack)) {
 					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.buildpack", buildpack);
 					logger.debug("added:spring.cloud.deployer.cloudfoundry.buildpack={}", buildpack);
 				}
+
 				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
+				logger.debug("Resolved defaults buildpacks: " + buildpacks);
 				if (StringUtils.hasText(buildpacks)) {
 					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.buildpacks", buildpacks);
 					logger.debug("added:spring.cloud.deployer.cloudfoundry.buildpacks={}", buildpacks);
 				}
+				logger.debug("Using Boot Version: " + bootVersion);
 				if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
 					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.env.JBP_CONFIG_OPEN_JDK_JRE", "{jre: {version: 17.+}}");
 				}
