@@ -144,8 +144,14 @@ public class TaskAppDeploymentRequestCreator {
 				taskExecution, platformName, registeredAppName) : this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName);
 		if(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE.equals(platformType)) {
-			String bootVersion = deployerDeploymentProperties.get("spring.cloud.deployer.bootVersion");
+			//Extracting boot version from app deployer property ex: 'app.timestamp3.spring.cloud.deployer.bootVersion=3'
+			String bootVersion = deployerDeploymentProperties.entrySet().stream()
+				.filter((e) -> e.getKey().endsWith(".bootVersion"))
+				.findFirst().map(Map.Entry::getValue)
+				.orElse(null);
+			logger.debug("Resolved default bootVersion = " + bootVersion);
 			if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
+				logger.info("AppBootSchemaVersion = " + AppBootSchemaVersion.BOOT3.getBootVersion());
 				deployerDeploymentProperties.put("spring.cloud.deployer.cloudfoundry.env.JBP_CONFIG_OPEN_JDK_JRE", "{jre: {version: 17.+}}");
 			}
 		}
