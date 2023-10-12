@@ -53,6 +53,7 @@ fi
 echo "DATAFLOW_IP=$DATAFLOW_IP"
 pushd "$ROOTDIR/../spring-cloud-dataflow-acceptance-tests"
 echo "EXTRA=$EXTRA" | tee build.log
+set -o pipefail
 ./mvnw -Dspring.profiles.active=blah \
   -DPLATFORM_TYPE=kubernetes \
   -DNAMESPACE=$NS \
