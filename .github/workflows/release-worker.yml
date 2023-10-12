@@ -64,6 +64,7 @@ jobs:
         jfrog rt mvn build-helper:parse-version versions:set \
           -gs .github/settings.xml \
           -Pstagingrelease \
+          -DskipResolution=true \
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
