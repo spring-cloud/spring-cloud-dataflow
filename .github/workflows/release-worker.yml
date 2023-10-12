@@ -71,6 +71,7 @@ jobs:
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' \
           -B
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingrelease \
@@ -79,6 +80,7 @@ jobs:
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
           -B             
+        echo "::notice ::set spring-cloud-deployer.version=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version}"
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingrelease \
@@ -87,6 +89,7 @@ jobs:
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
           -B
+        echo "::notice ::set spring-cloud-dataflow-ui.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version}"
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -DskipResolution=true \
@@ -95,18 +98,24 @@ jobs:
           -Dproperty=spring-cloud-dataflow-ui.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
           -B
-        echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version"
-        echo "BUILD_ZOO_HANDLER_spring_cloud_deployer_version=$BUILD_ZOO_HANDLER_spring_cloud_deployer_version"
-        echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version"
+        echo "::notice ::build-clean"
         jfrog rt build-clean
-        ./spring-cloud-dataflow-package/set-package-version.sh        
-        jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles -B install -DskipTests 
+        echo "::notice ::set-package-version"
+        ./spring-cloud-dataflow-package/set-package-version.sh
+        echo "::notice ::install"
+        jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles -B install -DskipTests
+        echo "::notice ::build-publish"
         jfrog rt build-publish
         spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
+        
+        echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version" 
+        echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release" 
+        echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER" 
+        echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version"
     # zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4
