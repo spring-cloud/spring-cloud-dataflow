@@ -16,6 +16,11 @@
       "image": "springcloud/spring-cloud-dataflow-composed-task-runner"
     },
     {
+      "name": "spring-cloud-dataflow-single-step-batch-job",
+      "path": "spring-cloud-dataflow-single-step-batch-job/target",
+      "image": "springcloud/spring-cloud-dataflow-single-step-batch-job"
+    },
+    {
       "name": "spring-cloud-dataflow-tasklauncher-sink-kafka",
       "path": "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target",
       "image": "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka"

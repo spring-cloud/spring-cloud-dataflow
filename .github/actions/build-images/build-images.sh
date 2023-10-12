@@ -31,37 +31,11 @@ function pack_image {
     fi
     echo "Created: $REPO:$TAG-jdk$v"
 }
-
-TARGETS=("spring-cloud-dataflow-server/target/spring-cloud-dataflow-server" \
-        "spring-cloud-skipper/spring-cloud-skipper-server/target/spring-cloud-skipper-server" \
-        "spring-cloud-dataflow-composed-task-runner/target/spring-cloud-dataflow-composed-task-runner" \
-        "spring-cloud-dataflow-single-step-batch-job/target/spring-cloud-dataflow-single-step-batch-job" \
-        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-kafka/target/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "spring-cloud-dataflow-tasklauncher/spring-cloud-dataflow-tasklauncher-sink-rabbit/target/spring-cloud-dataflow-tasklauncher-sink-rabbit")
-
-IMAGES=("springcloud/spring-cloud-dataflow-server" \
-        "springcloud/spring-cloud-skipper-server" \
-        "springcloud/spring-cloud-dataflow-composed-task-runner" \
-        "springcloud/spring-cloud-dataflow-single-step-batch-job" \
-        "springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "springcloud/spring-cloud-dataflow-tasklauncher-sink-rabbit")
-
-MAVEN_ARTIFACT_IDS=("spring-cloud-dataflow-server" \
-        "spring-cloud-dataflow-server" \
-        "spring-cloud-dataflow-composed-task-runner" \
-        "spring-cloud-dataflow-tasklauncher-sink-kafka" \
-        "spring-cloud-dataflow-tasklauncher-sink-rabbit")
-len=${#TARGETS[@]}
-imageLen=${#IMAGES[@]}
-if ((len != imageLen)); then
-    echo "Expected $len == $imageLen"
-    exit 1
-fi
-
-for ((i = 0; i < len; i++)); do
-    TARGET="${TARGETS[i]}"
-    IMAGE="${IMAGES[i]}"
-    ARTIFACT_ID="${MAVEN_ARTIFACT_IDS[i]}"
+LEN=$(jq '.include | length' .github/workflows/images.json)
+for ((i = 0; i < LEN; i++)); do
+    TARGET="$(jq -r --arg index $i '.include[$index | tonumber] | .path' .github/workflows/images.json)"
+    IMAGE="$(jq -r --arg index $i '.include[$index | tonumber ] | .image' .github/workflows/images.json)"
+    ARTIFACT_ID="$(jq -r --arg index $i '.include[$index | tonumber ] | .name' .github/workflows/images.json)"
     for v in 8 11 17 21; do
         pack_image $TARGET $IMAGE $v $ARTIFACT_ID
         RC=$?
