@@ -7,6 +7,11 @@ on:
         description: 'Build Zoo Handler Payload'
         required: true
 
+env:
+  BUILD_ZOO_HANDLER_spring_cloud_deployer_version=2.9.1
+  BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version=3.4.1
+  BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=2.11.1
+
 jobs:
   ghrelease:
     runs-on: ubuntu-latest
@@ -17,14 +22,14 @@ jobs:
           maven-version: 3.8.8
           maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
       # zoo extract and ensure
-      - name: Extract Zoo Context Properties
-        uses: jvalkeal/build-zoo-handler@v0.0.4
-        with:
-          dispatch-handler-extract-context-properties: true
-          ensure-env: |
-            BUILD_ZOO_HANDLER_spring_cloud_deployer_version
-            BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
-            BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
+#      - name: Extract Zoo Context Properties
+#        uses: jvalkeal/build-zoo-handler@v0.0.4
+#        with:
+#          dispatch-handler-extract-context-properties: true
+#          ensure-env: |
+#            BUILD_ZOO_HANDLER_spring_cloud_deployer_version
+#            BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
+#            BUILD_ZOO_HANDLER_spring_cloud_dataflow_version
       # tooling
       - name: Install Tooling
         run: |
