@@ -33,11 +33,12 @@ function pack_image {
 }
 LEN=$(jq '.include | length' .github/workflows/images.json)
 for ((i = 0; i < LEN; i++)); do
-    TARGET="$(jq -r --arg index $i '.include[$index | tonumber] | .path' .github/workflows/images.json)"
-    IMAGE="$(jq -r --arg index $i '.include[$index | tonumber ] | .image' .github/workflows/images.json)"
-    ARTIFACT_ID="$(jq -r --arg index $i '.include[$index | tonumber ] | .name' .github/workflows/images.json)"
-    for v in 8 11 17 21; do
-        pack_image $TARGET $IMAGE $v $ARTIFACT_ID
+    TARGET="$(jq -r --argjson index $i '.include[$index] | .path' .github/workflows/images.json)"
+    IMAGE="$(jq -r --argjson index $i '.include[$index] | .image' .github/workflows/images.json)"
+    ARTIFACT_ID="$(jq -r --argjson index $i '.include[$index] | .name' .github/workflows/images.json)"
+    # 8 11 17 21
+    for v in 8 11 17; do
+        pack_image "$TARGET/$ARTIFACT_ID"  $IMAGE $v $ARTIFACT_ID
         RC=$?
         if [ $RC -ne 0 ]; then
             exit $RC
