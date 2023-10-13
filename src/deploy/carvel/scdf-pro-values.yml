@@ -2,6 +2,9 @@ scdf:
   binder:
     type: rabbit
   server:
+    image:
+      repository: dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server
+      tag: 1.6.0
     service:
       type: LoadBalancer
     env:
@@ -12,6 +15,9 @@ scdf:
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
         value: "true"
   skipper:
+    image:
+      repository: springcloud/spring-cloud-skipper-server
+      tag: 2.11.1
   registry:
     secret:
       ref: "reg-creds-dev-registry"
