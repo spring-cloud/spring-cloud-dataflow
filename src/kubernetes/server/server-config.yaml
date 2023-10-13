@@ -23,10 +23,8 @@ data:
           task:
             platform:
               kubernetes:
-                accounts:                  
+                accounts:
                   default:
-                    fabric8:
-                      
                     limits:
                       memory: 1024Mi
       datasource:
@@ -36,4 +34,4 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-        
+

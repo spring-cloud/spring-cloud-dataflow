@@ -31,9 +31,6 @@ spec:
             requests:
               cpu: 0.5
               memory: 1024Mi
-          env:
-            - name: LOGGING_LEVEL_IO_MICROMETER
-              value: DEBUG
       securityContext:
         fsGroup: 2000
         runAsNonRoot: true
