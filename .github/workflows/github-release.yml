@@ -124,18 +124,22 @@ jobs:
             --notes-file $RELEASE_NOTES_FILE
           # retrieve spring-cloud-dataflow-package and upload to github release
           set +e
+          export PACKAGE_VERSION=${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
           mvn -gs .github/settings.xml \
               dependency:copy \
-              -Dartifact=org.springframework.cloud:spring-cloud-dataflow-package:${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}:zip \
+              -Dartifact=org.springframework.cloud:spring-cloud-dataflow-package:${PACKAGE_VERSION}:zip \
               -DoutputDirectory=./spring-cloud-dataflow-package/target
           RC=$?
-          if ((RC!=0)); then
+          if ((RC!=0)); then            
             ./spring-cloud-dataflow-package/set-package-version.sh
             ./mvnw -pl spring-cloud-dataflow-package          
-          fi          
-          gh release upload v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
-             spring-cloud-dataflow-package-${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}.zip \
-             --clobber
+          fi
+          PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-oss-install-${PACKAGE_VERSION}.zip"
+          DL_PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-package-${PACKAGE_VERSION}.zip"
+          if [ ! -f $PACKAGE_FILE ]; then 
+            cp -f $DL_PACKAGE_FILE $PACKAGE_FILE
+          fi
+          gh release upload v$PACKAGE_VERSION $PACKAGE_FILE --clobber
         # zoo success
       - name: Notify Build Success Zoo Handler Controller
         uses: jvalkeal/build-zoo-handler@v0.0.4
