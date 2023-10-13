@@ -66,7 +66,9 @@ jobs:
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT' \
           -B
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
+        echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
         jfrog rt mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
