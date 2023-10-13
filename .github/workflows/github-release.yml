@@ -8,9 +8,9 @@ on:
         required: true
 
 env:
-  BUILD_ZOO_HANDLER_spring_cloud_deployer_version=2.9.1
-  BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version=3.4.1
-  BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=2.11.1
+  BUILD_ZOO_HANDLER_spring_cloud_deployer_version: 2.9.1
+  BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version: 3.4.1
+  BUILD_ZOO_HANDLER_spring_cloud_dataflow_version: 2.11.1
 
 jobs:
   ghrelease:
