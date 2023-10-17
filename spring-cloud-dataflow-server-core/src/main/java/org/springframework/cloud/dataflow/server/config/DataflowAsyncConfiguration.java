@@ -45,7 +45,7 @@ class DataflowAsyncConfiguration implements AsyncConfigurer {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataflowAsyncConfiguration.class);
 
-	public static final String ASYNC_PREFIX = DataFlowPropertyKeys.PREFIX + "task.cleanup.async";
+	public static final String ASYNC_PREFIX = DataFlowPropertyKeys.PREFIX + "async";
 
 	private static final String THREAD_NAME_PREFIX = "scdf-async-";
 
