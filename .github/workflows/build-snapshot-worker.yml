@@ -70,7 +70,14 @@ jobs:
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
-    # clean m2 cache
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: ${{ success() || failure() }}
+      with:
+        name: Unit Tests
+        path: '**/surefire-reports/*.xml'
+        reporter: java-junit
+      # clean m2 cache
     - name: Clean cache
       run: |
         find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
