@@ -47,7 +47,7 @@ jobs:
       if: ${{ success() || failure() }}
       with:
         name: Integration Tests
-        path: '**/failsafe-reports/*.xml'
+        path: '**/failsafe-reports/*IT.xml'
         reporter: java-junit
         fail-on-empty: false
     - name: 'Action: Upload Unit Test Results'
