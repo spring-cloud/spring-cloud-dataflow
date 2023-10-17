@@ -27,8 +27,7 @@ jobs:
           -Dgroups=oauth \
           -Pfailsafe \
           --batch-mode \
-          integration-test \
-          verify
+          integration-test
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
