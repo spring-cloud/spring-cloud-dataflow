@@ -32,14 +32,6 @@ jobs:
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
       with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        fail-on-empty: false
-        reporter: java-junit
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: ${{ success() || failure() }}
-      with:
         name: Integration Tests
         path: '**/failsafe-reports/*IT.xml'
         reporter: java-junit
