@@ -5,8 +5,8 @@ scdf-type:
     milestone: '2.11.0-RC1'
     maintenance-snapshot: '2.10.4-SNAPSHOT'
   pro:
-    release: '1.5.3'
-    snapshot: '1.6.0-SNAPSHOT'
+    release: '1.6.0'
+    snapshot: '1.6.1-SNAPSHOT'
     maintenance-snapshot: '1.5.4-SNAPSHOT'
 default:
   scdf-type: 'oss'

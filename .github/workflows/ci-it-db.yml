@@ -33,15 +33,7 @@ jobs:
           -Pfailsafe \
           --batch-mode \
           integration-test
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: ${{ success() || failure() }}
-      with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        fail-on-empty: false
-        reporter: java-junit
-    - name: Test Report
+    - name: Integration Test Report for ${{ matrix.group }}
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
       with:
