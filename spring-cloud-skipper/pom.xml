@@ -25,7 +25,7 @@
 		<java.version>1.8</java.version>
 
 		<spring-statemachine.version>2.5.1</spring-statemachine.version>
-		<spring-cloud-deployer.version>2.9.3-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer.version>2.9.2-SNAPSHOT</spring-cloud-deployer.version>
 
 		<zeroturnaround.version>1.15</zeroturnaround.version>
 		<spring-restdocs.version>2.0.7.RELEASE</spring-restdocs.version>
