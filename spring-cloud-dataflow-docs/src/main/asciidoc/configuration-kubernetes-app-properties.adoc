@@ -504,7 +504,7 @@ The following example shows how you can individually configure applications:
 ====
 [source,options=nowrap]
 ----
-deployer.<application>.kubernetes.imagePullPolicy=Always
+deployer.<application>.kubernetes.imagePullPolicy=IfNotPresent
 ----
 ====
 
@@ -527,7 +527,7 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    imagePullPolicy: Always
+                    imagePullPolicy: IfNotPresent
 ----
 ====
 

@@ -28,7 +28,7 @@ spec:
       containers:
       - name: skipper
         image: #@ skipper_image()
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: config
           mountPath: /workspace/config
