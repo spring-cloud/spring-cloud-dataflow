@@ -83,7 +83,7 @@ public class AwaitUtils {
 				Assert.isTrue(offset >= 0, "Expected offset >= 0 not " + offset);
 				return result;
 			} catch (Throwable x) {
-				logger.debug("logs:exception:" + x);
+				logger.info("logs:exception:" + x);
 			}
 			return "";
 		}
@@ -98,7 +98,7 @@ public class AwaitUtils {
 					log = stream.logs();
 				}
 			} catch (Throwable x) {
-				logger.debug("extractLog:exception:" + x);
+				logger.info("extractLog:exception:" + x);
 			}
 			return log == null ? "" : log;
 		}
