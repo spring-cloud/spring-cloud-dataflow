@@ -17,3 +17,4 @@ KUBECONFIG=
 export KUBECONFIG
 shift
 source $SCDIR/set-ver.sh
+
