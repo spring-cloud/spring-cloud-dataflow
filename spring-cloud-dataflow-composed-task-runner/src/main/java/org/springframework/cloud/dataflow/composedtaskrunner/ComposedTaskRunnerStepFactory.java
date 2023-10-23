@@ -142,7 +142,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		List<String> argumentsFromAppProperties = Base64Utils.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments())
 				.entrySet()
 				.stream()
-				.filter(e -> e.getKey().startsWith("app." + taskNameId) || e.getKey().startsWith("app.*."))
+				.filter(e -> e.getKey().startsWith("app." + taskNameId + ".") || e.getKey().startsWith("app.*."))
 				.map(Map.Entry::getValue)
 				.collect(Collectors.toList());
 
@@ -155,8 +155,11 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
 		Map<String, String> propertiesFrom = Base64Utils
 				.decodeMap(this.composedTaskProperties.getComposedTaskAppProperties()).entrySet().stream()
-				.filter(e -> e.getKey().startsWith("app." + taskNameId)
-						|| e.getKey().startsWith("deployer." + taskNameId) || e.getKey().startsWith("deployer.*"))
+				.filter(e ->
+					e.getKey().startsWith("app." + taskNameId + ".") ||
+					e.getKey().startsWith("app.*.") ||
+					e.getKey().startsWith("deployer." + taskNameId + ".") ||
+					e.getKey().startsWith("deployer.*."))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		Map<String, String> propertiesToUse = new HashMap<>();
