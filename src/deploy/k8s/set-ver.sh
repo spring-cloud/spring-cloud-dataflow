@@ -78,7 +78,7 @@ export K8S_DRIVER
 export KUBECONFIG
 
 if [ "$DATAFLOW_VERSION" = "" ] || [ "$FORCE_VERSION" = "true" ]; then
-    if [ "$SCDF_TYPE" == "pro" ]; then
+    if [ "$SCDF_TYPE" = "pro" ]; then
         DATAFLOW_PRO_VERSION=$(cat $VERSION_FILE | yq ".scdf-type.pro.${VERSION_TYPE}")
         export DATAFLOW_PRO_VERSION
         DATAFLOW_VERSION=$(cat $VERSION_FILE | yq ".scdf-type.oss.${VERSION_TYPE}")
