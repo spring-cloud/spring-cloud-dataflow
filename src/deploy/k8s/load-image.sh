@@ -63,6 +63,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
   "tmc")
     echo "not supported in TMC"
     ;;
+  "microk8s")
+    echo "Loading $IMAGE to microk8s"
+    docker tag $IMAGE localhost:32000/$IMAGE
+    docker push localhost:32000/$IMAGE
+    ;;
   *)
     echo "Loading $IMAGE to minikube"
     DOCKER_IDS=$(docker images --filter "reference=$IMAGE" --format "{{ .ID }}")

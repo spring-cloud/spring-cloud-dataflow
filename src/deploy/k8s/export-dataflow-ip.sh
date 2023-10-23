@@ -18,6 +18,7 @@ fi
 export PLATFORM_TYPE=kubernetes
 if [ "$EXTERNAL_IP" != "" ]; then
   export DATAFLOW_IP=http://$EXTERNAL_IP:9393
+  export DATAFLOW_URL="$DATAFLOW_IP"
   echo "DATAFLOW_URL=$DATAFLOW_IP"
 else
   echo "EXTERNAL_IP not found"
