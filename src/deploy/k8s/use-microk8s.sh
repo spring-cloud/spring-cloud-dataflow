@@ -5,16 +5,12 @@ if [ "$sourced" = "0" ]; then
   echo "This script must be invoked using: source $0 $*"
   exit 1
 fi
-export K8S_DRIVER=tmc
-if [ "$1" = "" ]; then
-  echo "Expected parameter providing TMC cluster"
-  return 2
-fi
-export TMC_CLUSTER="$1"
-echo "Connecting to $TMC_CLUSTER"
-tmc cluster auth kubeconfig get $TMC_CLUSTER > $HOME/.kube/config
+microk8s status
+mkdir -p $HOME/.kube
+microk8s config > $HOME/.kube/config
 export KUBECONFIG=$HOME/.kube/config
-shift
+echo "KUBECONFIG=$KUBECONFIG"
+export K8S_DRIVER=microk8s
 if [ "$1" != "" ]; then
   export NS=$1
   shift

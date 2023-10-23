@@ -42,6 +42,12 @@ case "$K8S_DRIVER" in
         exit 2
     fi
     ;;
+"microk8s")
+    echo "Configure Microk8s"
+    microk8s enable registry
+    microk8s enable metallb:172.18.0.1-172.18.0.254
+    microk8s kubectl get all --all-namespaces
+    ;;
 *)
     echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"
     # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion or hyperkit

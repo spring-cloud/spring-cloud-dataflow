@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import com.github.zafarkhaja.semver.Version;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
@@ -71,13 +72,16 @@ import org.springframework.web.client.RestTemplate;
 public class CloudFoundryPlatformAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory
-			.getLogger(CloudFoundryPlatformAutoConfiguration.class);
+		.getLogger(CloudFoundryPlatformAutoConfiguration.class);
 
 	@Bean
 	public Platform cloudFoundryPlatform(
-			CloudFoundryPlatformProperties cloudFoundryPlatformProperties, RestTemplate actuatorRestTemplate) {
+		CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
+		RestTemplate actuatorRestTemplate,
+		LogCacheClient logCacheClient
+	) {
 		List<Deployer> deployers = cloudFoundryPlatformProperties.getAccounts().entrySet().stream().map(
-				e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue(), actuatorRestTemplate)
+			e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue(), actuatorRestTemplate, logCacheClient)
 		).collect(Collectors.toList());
 		return new Platform("Cloud Foundry", deployers);
 	}
@@ -88,25 +92,29 @@ public class CloudFoundryPlatformAutoConfiguration {
 		return new RestTemplate();
 	}
 
-	private Deployer createAndSaveCFAppDeployer(String account,
-			CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties, RestTemplate restTemplate) {
+	private Deployer createAndSaveCFAppDeployer(
+		String account,
+		CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties,
+		RestTemplate restTemplate,
+		LogCacheClient logCacheClient
+	) {
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
-				.getDeployment();
+			.getDeployment();
 		if (deploymentProperties == null) {
 			// todo: use server level shared deployment properties
 			deploymentProperties = new CloudFoundryDeploymentProperties();
 		}
 		CloudFoundryConnectionProperties connectionProperties = cloudFoundryProperties
-				.getConnection();
+			.getConnection();
 		try {
 			ConnectionContext connectionContext = DefaultConnectionContext.builder()
-					.apiHost(connectionProperties.getUrl().getHost())
-					.skipSslValidation(connectionProperties.isSkipSslValidation())
-					.build();
+				.apiHost(connectionProperties.getUrl().getHost())
+				.skipSslValidation(connectionProperties.isSkipSslValidation())
+				.build();
 			Builder tokenProviderBuilder = PasswordGrantTokenProvider.builder()
-					.username(connectionProperties.getUsername())
-					.password(connectionProperties.getPassword())
-					.loginHint(connectionProperties.getLoginHint());
+				.username(connectionProperties.getUsername())
+				.password(connectionProperties.getPassword())
+				.loginHint(connectionProperties.getLoginHint());
 			if (StringUtils.hasText(connectionProperties.getClientId())) {
 				tokenProviderBuilder.clientId(connectionProperties.getClientId());
 			}
@@ -116,55 +124,58 @@ public class CloudFoundryPlatformAutoConfiguration {
 			TokenProvider tokenProvider = tokenProviderBuilder.build();
 
 			CloudFoundryClient cloudFoundryClient = ReactorCloudFoundryClient.builder()
-					.connectionContext(connectionContext).tokenProvider(tokenProvider)
-					.build();
+				.connectionContext(connectionContext).tokenProvider(tokenProvider)
+				.build();
 			Version version = cloudFoundryClient.info()
-					.get(GetInfoRequest.builder().build())
-					.map(response -> Version.valueOf(response.getApiVersion()))
-					.doOnNext(versionInfo -> logger.info(
-							"Connecting to Cloud Foundry with API Version {}",
-							versionInfo))
-					.timeout(Duration.ofSeconds(deploymentProperties.getApiTimeout()))
-					.block();
+				.get(GetInfoRequest.builder().build())
+				.map(response -> Version.valueOf(response.getApiVersion()))
+				.doOnNext(versionInfo -> logger.info(
+					"Connecting to Cloud Foundry with API Version {}",
+					versionInfo))
+				.timeout(Duration.ofSeconds(deploymentProperties.getApiTimeout()))
+				.block();
 			RuntimeEnvironmentInfo runtimeEnvironmentInfo = new RuntimeEnvironmentInfo.Builder()
-					.implementationName(CloudFoundryAppDeployer.class.getSimpleName())
-					.spiClass(AppDeployer.class)
-					.implementationVersion(
-							RuntimeVersionUtils.getVersion(CloudFoundryAppDeployer.class))
-					.platformType("Cloud Foundry")
-					.platformClientVersion(
-							RuntimeVersionUtils.getVersion(cloudFoundryClient.getClass()))
-					.platformApiVersion(version.toString()).platformHostVersion("unknown")
-					.addPlatformSpecificInfo("API Endpoint",
-							connectionProperties.getUrl().toString())
-					.build();
+				.implementationName(CloudFoundryAppDeployer.class.getSimpleName())
+				.spiClass(AppDeployer.class)
+				.implementationVersion(
+					RuntimeVersionUtils.getVersion(CloudFoundryAppDeployer.class))
+				.platformType("Cloud Foundry")
+				.platformClientVersion(
+					RuntimeVersionUtils.getVersion(cloudFoundryClient.getClass()))
+				.platformApiVersion(version.toString()).platformHostVersion("unknown")
+				.addPlatformSpecificInfo("API Endpoint",
+					connectionProperties.getUrl().toString())
+				.build();
 			ReactorDopplerClient dopplerClient = ReactorDopplerClient.builder()
-					.connectionContext(connectionContext)
-					.tokenProvider(tokenProvider)
-					.build();
+				.connectionContext(connectionContext)
+				.tokenProvider(tokenProvider)
+				.build();
 			CloudFoundryOperations cloudFoundryOperations = DefaultCloudFoundryOperations
-					.builder().cloudFoundryClient(cloudFoundryClient)
-					.organization(connectionProperties.getOrg())
-					.dopplerClient(dopplerClient)
-					.space(connectionProperties.getSpace()).build();
+				.builder().cloudFoundryClient(cloudFoundryClient)
+				.organization(connectionProperties.getOrg())
+				.dopplerClient(dopplerClient)
+				.space(connectionProperties.getSpace()).build();
 			CloudFoundryAppNameGenerator appNameGenerator = new CloudFoundryAppNameGenerator(
-					deploymentProperties);
+				deploymentProperties);
 			appNameGenerator.afterPropertiesSet();
 			CloudFoundryAppDeployer cfAppDeployer = new CloudFoundryAppDeployer(
-					appNameGenerator, deploymentProperties, cloudFoundryOperations,
-					runtimeEnvironmentInfo);
+				appNameGenerator,
+				deploymentProperties,
+				cloudFoundryOperations,
+				runtimeEnvironmentInfo,
+				logCacheClient
+			);
 			ActuatorOperations actuatorOperations = new CloudFoundryActuatorTemplate(
-					restTemplate, cfAppDeployer, cloudFoundryProperties
-					.getDeployment().getAppAdmin());
+				restTemplate, cfAppDeployer, cloudFoundryProperties
+				.getDeployment().getAppAdmin());
 			Deployer deployer = new Deployer(account, "cloudfoundry", cfAppDeployer, actuatorOperations);
 			deployer.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
-					connectionProperties.getOrg(), connectionProperties.getSpace(),
-					connectionProperties.getUrl()));
+				connectionProperties.getOrg(), connectionProperties.getSpace(),
+				connectionProperties.getUrl()));
 			return deployer;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",
-					account, e.getMessage());
+				account, e.getMessage());
 			throw new SkipperException(e.getMessage());
 		}
 	}
