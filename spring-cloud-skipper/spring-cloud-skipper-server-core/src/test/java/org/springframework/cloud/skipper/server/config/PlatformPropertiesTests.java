@@ -54,7 +54,7 @@ public class PlatformPropertiesTests {
 	@Test
 	public void deserializationTest() {
 		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
-		assertThat(localAccounts).containsOnlyKeys("default", "localDev", "localDevDebug");
+		assertThat(localAccounts).containsOnlyKeys("localDev", "localDevDebug");
 		assertThat(localAccounts.get("localDev").getShutdownTimeout()).isEqualTo(60);
 		assertThat(localAccounts.get("localDevDebug").getJavaOpts()).isEqualTo("-Xdebug");
 	}
