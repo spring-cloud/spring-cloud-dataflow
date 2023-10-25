@@ -54,6 +54,7 @@ import org.springframework.cloud.skipper.deployer.cloudfoundry.CloudFoundrySkipp
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.cloud.skipper.server.config.EnableSkipperServerConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -79,10 +80,10 @@ public class CloudFoundryPlatformAutoConfiguration {
 	public Platform cloudFoundryPlatform(
 		CloudFoundryPlatformProperties cloudFoundryPlatformProperties,
 		RestTemplate actuatorRestTemplate,
-		@Autowired(required = false) LogCacheClient logCacheClient
+		ApplicationContext applicationContext
 	) {
 		List<Deployer> deployers = cloudFoundryPlatformProperties.getAccounts().entrySet().stream().map(
-			e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue(), actuatorRestTemplate, logCacheClient)
+			e -> createAndSaveCFAppDeployer(e.getKey(), e.getValue(), actuatorRestTemplate, applicationContext)
 		).collect(Collectors.toList());
 		return new Platform("Cloud Foundry", deployers);
 	}
@@ -97,7 +98,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 		String account,
 		CloudFoundryPlatformProperties.CloudFoundryProperties cloudFoundryProperties,
 		RestTemplate restTemplate,
-		LogCacheClient logCacheClient
+		ApplicationContext applicationContext
 	) {
 		CloudFoundryDeploymentProperties deploymentProperties = cloudFoundryProperties
 			.getDeployment();
@@ -164,7 +165,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 				deploymentProperties,
 				cloudFoundryOperations,
 				runtimeEnvironmentInfo,
-				logCacheClient
+				applicationContext
 			);
 			ActuatorOperations actuatorOperations = new CloudFoundryActuatorTemplate(
 				restTemplate, cfAppDeployer, cloudFoundryProperties
