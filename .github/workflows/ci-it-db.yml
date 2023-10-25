@@ -41,7 +41,7 @@ jobs:
         name: Integration Tests
         path: '**/failsafe-reports/*IT.xml'
         reporter: java-junit
-        fail-on-empty: false
+        list-tests: 'failed'
     - name: Publish Test Url for ${{ matrix.group }}
       shell: bash
       run: |

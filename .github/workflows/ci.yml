@@ -72,6 +72,7 @@ jobs:
         name: Unit Tests
         path: '**/surefire-reports/*.xml'
         reporter: java-junit
+        list-tests: 'failed'
     - name: Capture Test Results
       if: ${{ always() }}
       uses: actions/upload-artifact@v3
