@@ -219,14 +219,14 @@ public class TaskLauncherTaskletTests {
 	@Test
 	@DirtiesContext
 	public void testTaskLauncherTaskletWithoutTaskExecutionId() {
-		TaskProperties taskProperties = new TaskProperties();
+
 		mockReturnValForTaskExecution(2L);
 		ChunkContext chunkContext = chunkContext();
 		JobExecution jobExecution = new JobExecution(0L, new JobParameters());
 
 		createAndStartCompleteTaskExecution(0, jobExecution);
 
-		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
+		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		taskLauncherTasklet.setArguments(null);
 		StepExecution stepExecution = new StepExecution("stepName", jobExecution, 0L);
 		StepContribution contribution = new StepContribution(stepExecution);
@@ -235,10 +235,11 @@ public class TaskLauncherTaskletTests {
 		logger.info("execution-context:{}", executionContext.entrySet());
 		assertThat(executionContext.get("task-execution-id")).isEqualTo(2L);
 		assertThat(executionContext.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(executionContext.get("task-arguments")).isNotNull();
+		assertThat(executionContext.get("task-arguments")).as("task-arguments not null").isNotNull();
 		assertThat(((List<?>) executionContext.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	@DirtiesContext
 	public void testTaskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() {
@@ -248,23 +249,19 @@ public class TaskLauncherTaskletTests {
 		mockReturnValForTaskExecution(2L);
 		ChunkContext chunkContext = chunkContext();
 		createCompleteTaskExecution(0);
-		chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext().put("task-arguments", new ArrayList<String>());
-		((List)chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).add("--spring.cloud.task.parent-execution-id=84");
+		ExecutionContext executionContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
+		executionContext.put("task-arguments", new ArrayList<String>());
+		List<String> taskArguments = (List<String>) executionContext.get("task-arguments");
+		assertThat(taskArguments).isNotNull().as("taskArguments");
+		taskArguments.add("--spring.cloud.task.parent-execution-id=84");
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet(taskProperties);
 		taskLauncherTasklet.setArguments(null);
 		execute(taskLauncherTasklet, null, chunkContext);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(((List<?>) chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
+		executionContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
+		taskArguments = (List<String>) executionContext.get("task-arguments");
+		assertThat(executionContext.get("task-execution-id")).isEqualTo(2L);
+		assertThat(executionContext.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(((List<?>) taskArguments).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
 
 	@Test

@@ -68,13 +68,8 @@ public class MultiSchemaIncrementerFactory extends DefaultDataFieldMaxValueIncre
 			DatabaseMetaData metaData = connection.getMetaData();
 			String[] types = {"TABLE", "SEQUENCE"};
 			try (ResultSet tables = metaData.getTables(null, null, "%", types)) {
-				int count = tables.getMetaData().getColumnCount();
-				for (int i = 1; i <= count; i++) {
-					logger.debug("Column:{}:{}", tables.getMetaData().getColumnName(i), tables.getMetaData().getColumnTypeName(i));
-				}
 				while (tables.next()) {
 					String tableName = tables.getString("TABLE_NAME");
-					logger.debug("Table:{}", tableName);
 					if (tableName.equalsIgnoreCase(incrementerName)) {
 						String tableType = tables.getString("TABLE_TYPE");
 						logger.debug("Found Table:{}:{}", incrementerName, tableType);

@@ -46,6 +46,7 @@ import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -184,6 +185,8 @@ public class TaskLauncherTasklet implements Tasklet {
 				for (String argument : args) {
 					if (!argument.startsWith("--spring.cloud.task.parent-execution-id=") && !argument.startsWith("--spring.cloud.task.parent-execution-id%")) {
 						cleansedArgs.add(argument);
+					} else {
+						logger.debug("cleanse:removing argument:{}", argument);
 					}
 				}
 				args = cleansedArgs;
@@ -191,10 +194,10 @@ public class TaskLauncherTasklet implements Tasklet {
 			if (args == null) {
 				args = new ArrayList<>();
 			}
-			Long parentTaskExecutionId = getParentTaskExecutionId();
+			Long parentTaskExecutionId = getParentTaskExecutionId(contribution);
 			if (parentTaskExecutionId != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
-				String parentSchemaTarget = StringUtils.hasText(ctrSchemaTarget) ? ctrSchemaTarget : "boot2";
+				String parentSchemaTarget = StringUtils.hasText(ctrSchemaTarget) ? ctrSchemaTarget : SchemaVersionTarget.defaultTarget().getName();
 				args.add("--spring.cloud.task.parent-schema-target=" + parentSchemaTarget);
 
 			} else {
@@ -248,7 +251,7 @@ public class TaskLauncherTasklet implements Tasklet {
 		return RepeatStatus.CONTINUABLE;
 	}
 
-	public Long getParentTaskExecutionId() {
+	public Long getParentTaskExecutionId(StepContribution stepContribution) {
 		Long result = null;
 		if (this.taskProperties.getExecutionid() != null) {
 			result = this.taskProperties.getExecutionid();
@@ -256,6 +259,8 @@ public class TaskLauncherTasklet implements Tasklet {
 		} else if (ComposedTaskRunnerTaskListener.getExecutionId() != null) {
 			result = ComposedTaskRunnerTaskListener.getExecutionId();
 			logger.debug("getParentTaskExecutionId:ComposedTaskRunnerTaskListener.executionId={}", result);
+		} else if (stepContribution != null) {
+			result = this.taskExplorer.getTaskExecutionIdByJobExecutionId(stepContribution.getStepExecution().getJobExecutionId());
 		}
 		return result;
 	}
