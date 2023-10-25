@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -42,6 +44,7 @@ import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
@@ -95,7 +98,7 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
 		org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTaskletTests.TestConfiguration.class})
 public class TaskLauncherTaskletTests {
-
+	private final static Logger logger = LoggerFactory.getLogger(TaskLauncherTaskletTests.class);
 	private static final String TASK_NAME = "testTask1_0";
 
 	@Autowired
@@ -228,15 +231,12 @@ public class TaskLauncherTaskletTests {
 		StepExecution stepExecution = new StepExecution("stepName", jobExecution, 0L);
 		StepContribution contribution = new StepContribution(stepExecution);
 		execute(taskLauncherTasklet, contribution, chunkContext);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		assertThat(((List<?>) chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
+		ExecutionContext executionContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
+		logger.info("execution-context:{}", executionContext.entrySet());
+		assertThat(executionContext.get("task-execution-id")).isEqualTo(2L);
+		assertThat(executionContext.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+		assertThat(executionContext.get("task-arguments")).isNotNull();
+		assertThat(((List<?>) executionContext.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
 	}
 
 	@Test
