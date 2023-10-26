@@ -20,8 +20,4 @@ if [ "$IMAGE_ID" != "" ]; then
     docker rmi --force $IMAGE_ID
 fi
 set -e
-imgpkg push $IMG_PKG_OPT --bundle "$REPOSITORY:$VERSION-RANDOM.$RTAG" --file "$BUNDLE_PATH"
-docker pull "$REPOSITORY:$VERSION-RANDOM.$RTAG"
-docker tag "$REPOSITORY:$VERSION-RANDOM.$RTAG" "$REPOSITORY:$VERSION"
-docker push "$REPOSITORY:$VERSION"
-
+imgpkg push $IMG_PKG_OPT --bundle "$REPOSITORY:$VERSION" --file "$BUNDLE_PATH"
