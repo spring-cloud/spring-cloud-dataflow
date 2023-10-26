@@ -21,7 +21,7 @@
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.16</spring-boot.version>
+		<spring-boot.version>2.7.17</spring-boot.version>
 		<dataflow.version>2.11.2-SNAPSHOT</dataflow.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
