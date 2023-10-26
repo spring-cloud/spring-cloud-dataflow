@@ -52,12 +52,15 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.converter.DateToStringConverter;
+import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -219,6 +222,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.schemaService = schemaService;
 		this.jobServiceContainer = jobServiceContainer;
+
+		conversionService.addConverter(new DateToStringConverter());
+		conversionService.addConverter(new StringToDateConverter());
+		Jsr310Converters.getConvertersToRegister().forEach(conversionService::addConverter);
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, null);
 
