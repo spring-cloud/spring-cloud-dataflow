@@ -38,7 +38,7 @@ jobs:
         name: Unit Tests
         path: '**/surefire-reports/*.xml'
         reporter: java-junit
-        list-tests: 'failed'
+        list-tests: failed
     # clean m2 cache
     - name: Clean cache
       run: |
