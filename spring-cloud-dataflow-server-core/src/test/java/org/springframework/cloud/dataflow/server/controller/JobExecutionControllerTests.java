@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Date;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +37,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
@@ -47,6 +47,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -57,7 +58,6 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -205,13 +205,24 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
+	public void testGetExecutionWithJobProperties() throws Exception {
+		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.executionId", is(10)))
+			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
+			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("{\"identifying\":true,\"value\":\"2023-06-07T04:00:00.000+00:00\",\"type\":\"DATE\"}");
+	}
+
+	@Test
 	public void testGetAllExecutionsFailed() throws Exception {
 		createDirtyJob();
 		// expecting to ignore dirty job
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)));
 	}
 
 	@Test
@@ -219,8 +230,8 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(9)))
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 2, 1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)))
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInAnyOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
 	@Test
@@ -282,7 +293,7 @@ public class JobExecutionControllerTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(4)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(5)));
 	}
 
 	@Test

@@ -109,9 +109,9 @@ public class JobExecutionThinControllerTests {
 	@Test
 	public void testGetAllExecutionsJobExecutionOnly() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)));
 	}
 
 	@Test
@@ -136,9 +136,9 @@ public class JobExecutionThinControllerTests {
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(toDate))
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(8, 7, 6, 5, 4, 3, 3, 2, 1)))
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(9)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)));
 	}
 
 	@Test
