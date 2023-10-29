@@ -39,10 +39,10 @@ To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manuall
 |===
 |[.small]#Stream Applications#
 
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-rabbit-maven[RabbitMQ + Maven]#
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-rabbit-docker[RabbitMQ + Docker]#
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-kafka-maven[Kafka + Maven]#
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.stream-apps-kafka-docker[Kafka + Docker]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-rabbit-maven[RabbitMQ + Maven]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-rabbit-docker[RabbitMQ + Docker]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-kafka-maven[Kafka + Maven]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-kafka-docker[Kafka + Docker]#
 |===
 
 [cols="a"]
@@ -50,12 +50,9 @@ To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manuall
 |===
 |[.small]#HTTP Repository Location for Apps#
 
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.rabbit-apps-maven-repo-url.properties[RabbitMQ]#
-|[.small]#https://repo.spring.io/artifactory/milestone/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0-RC2/stream-applications-descriptor-2022.0.0-RC2.kafka-apps-maven-repo-url.properties[Kafka]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.rabbit-apps-maven-repo-url.properties[RabbitMQ]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.kafka-apps-maven-repo-url.properties[Kafka]#
 |===
-
-NOTE: The `3.x` apps are currentlyf available as a candidate release (`RC2`)
-
 
 === Spring Cloud Task / Batch Applications
 
