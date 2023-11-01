@@ -28,9 +28,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -39,6 +38,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -57,6 +57,7 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -76,13 +77,13 @@ import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
@@ -91,6 +92,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -104,9 +106,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author David Turanski
  * @author Gunnar Hillert
+ * @author Chris Bono
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@SpringBootTest(
+		classes = { JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
+				PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -183,7 +187,7 @@ public class TaskExecutionControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
@@ -238,22 +242,21 @@ public class TaskExecutionControllerTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingExplorer() {
-		new TaskExecutionController(
+	@Test
+	void taskExecutionControllerConstructorMissingExplorer() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				null,
 				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
 				taskDefinitionReader, taskExecutionInfoService,
 				taskDeleteService,
-				taskJobService
-		);
+				taskJobService));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingTaskService() {
-		new TaskExecutionController(
+	@Test
+	void taskExecutionControllerConstructorMissingTaskService() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				taskExplorer,
 				aggregateExecutionSupport,
 				null,
@@ -261,68 +264,63 @@ public class TaskExecutionControllerTests {
 				taskDefinitionReader,
 				taskExecutionInfoService,
 				taskDeleteService,
-				taskJobService
-		);
+				taskJobService));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRepository() {
-		new TaskExecutionController(
+	@Test
+	void taskExecutionControllerConstructorMissingTaskDefinitionRepository() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				taskExplorer,
 				aggregateExecutionSupport,
 				taskExecutionService,
 				null,
 				taskDefinitionReader, taskExecutionInfoService,
 				taskDeleteService,
-				taskJobService
-		);
+				taskJobService));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
-		new TaskExecutionController(taskExplorer,
+	@Test
+	void taskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
 				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
 				taskDefinitionReader, null,
 				taskDeleteService,
-				taskJobService
-		);
+				taskJobService));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingDeleteTaskService() {
-		new TaskExecutionController(taskExplorer,
+	@Test
+	void taskExecutionControllerConstructorMissingDeleteTaskService() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
 				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
 				taskDefinitionReader, taskExecutionInfoService,
 				null,
-				taskJobService
-		);
+				taskJobService));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testTaskExecutionControllerConstructorMissingDeleteTaskJobService() {
-		new TaskExecutionController(taskExplorer,
+	@Test
+	void taskExecutionControllerConstructorMissingDeleteTaskJobService() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
 				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
 				taskDefinitionReader, taskExecutionInfoService,
 				taskDeleteService,
-				null
-		);
+				null));
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception {
+	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetExecution() throws Exception {
+	void getExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -333,7 +331,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetChildTaskExecution() throws Exception {
+	void getChildTaskExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/2").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -343,7 +341,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionForJob() throws Exception {
+	void getExecutionForJob() throws Exception {
 		mockMvc.perform(get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -353,7 +351,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetAllExecutions() throws Exception {
+	void getAllExecutions() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -364,7 +362,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetCurrentExecutions() throws Exception {
+	void getCurrentExecutions() throws Exception {
 		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
 		mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -374,7 +372,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testBoot3Execution() throws Exception {
+	void boot3Execution() throws Exception {
 		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
 			appRegistryService.save("timestamp3",
 					ApplicationType.task,
@@ -424,7 +422,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testInvalidBoot3Execution() throws Exception {
+	void invalidBoot3Execution() throws Exception {
 		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
 			appRegistryService.save("timestamp3",
 					ApplicationType.task,
@@ -448,7 +446,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testBoot2Execution() throws Exception {
+	void boot2Execution() throws Exception {
 		if (appRegistryService.getDefaultApp("timestamp2", ApplicationType.task) == null) {
 			appRegistryService.save("timestamp2",
 					ApplicationType.task,
@@ -499,7 +497,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception {
+	void getExecutionsByName() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -512,7 +510,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception {
+	void getExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()
@@ -520,7 +518,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testCleanup() throws Exception {
+	void cleanup() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1"))
 				.andDo(print())
 				.andExpect(status().is(200));
@@ -528,7 +526,15 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testCleanupWithActionParam() throws Exception {
+	void cleanupAll() throws Exception {
+		mockMvc.perform(delete("/tasks/executions"))
+				.andDo(print())
+				.andExpect(status().is(200));
+		verify(taskLauncher,  times(2)).cleanup("foobar");
+	}
+
+	@Test
+	void cleanupWithActionParam() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "CLEANUP"))
 				.andDo(print())
 				.andExpect(status().is(200));
@@ -536,7 +542,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testCleanupWithInvalidAction() throws Exception {
+	void cleanupWithInvalidAction() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is(400))
@@ -545,7 +551,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testCleanupByIdNotFound() throws Exception {
+	void cleanupByIdNotFound() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/10"))
 				.andDo(print())
 				.andExpect(status().is(404))
@@ -555,7 +561,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testDeleteSingleTaskExecutionById() throws Exception {
+	void deleteSingleTaskExecutionById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -579,7 +585,7 @@ public class TaskExecutionControllerTests {
 	 * execution will be deleted as well.
 	 */
 	@Test
-	public void testDeleteThreeTaskExecutionsById() throws Exception {
+	void deleteThreeTaskExecutionsById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -598,7 +604,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testDeleteAllTaskExecutions() throws Exception {
+	void deleteAllTaskExecutions() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
@@ -623,7 +629,7 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	public void testSorting() throws Exception {
+	void sorting() throws Exception {
 		mockMvc.perform(get("/tasks/executions").param("sort", "TASK_EXECUTION_ID").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
@@ -640,4 +646,5 @@ public class TaskExecutionControllerTests {
 				.andExpect(status().is5xxServerError())
 				.andExpect(content().string(containsString("Sorting column wrong_field not allowed")));
 	}
+
 }

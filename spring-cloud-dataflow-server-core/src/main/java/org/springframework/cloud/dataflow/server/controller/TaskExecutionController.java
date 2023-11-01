@@ -48,6 +48,7 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
@@ -337,6 +338,9 @@ public class TaskExecutionController {
 	 * Cleanup resources associated with one or more task executions. The
 	 * optional {@code actions} and {@code completed} parameters can be used to not only clean up task execution resources,
 	 * but can also trigger the deletion of task execution and job data in the persistence store.
+	 * <p>
+	 * When the {@code spring.cloud.dataflow.async.enabled} property is set to {@code true} the cleanup will happen
+	 * asynchronously.
 	 *
 	 * @param actions the actions to perform (default 'CLEANUP')
 	 * @param completed whether to include only completed task executions (default false)
@@ -345,7 +349,7 @@ public class TaskExecutionController {
 	 */
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseStatus(HttpStatus.OK)
-	@Async
+	@Async(DataflowAsyncAutoConfiguration.DATAFLOW_ASYNC_EXECUTOR)
 	public void cleanupAll(
 			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
 			@RequestParam(defaultValue = "false", name = "completed") boolean completed,

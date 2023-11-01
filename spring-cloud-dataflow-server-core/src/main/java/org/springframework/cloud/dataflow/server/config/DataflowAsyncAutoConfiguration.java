@@ -21,37 +21,51 @@ import java.util.concurrent.Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.boot.task.TaskExecutorBuilder;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import static org.springframework.cloud.dataflow.server.config.DataflowAsyncConfiguration.ASYNC_PREFIX;
+import static org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration.ASYNC_PROPS_PREFIX;
 
 /**
- * Class to override the executor at the application level. It also enables async executions for the Spring Cloud Data Flow Server.
+ * Enables async executions for the Spring Cloud Dataflow server.
+ * Uses the Spring Boot autoconfigured {@code TaskExecutorBuilder} to create an async executor and register it
+ * with name {@link #DATAFLOW_ASYNC_EXECUTOR}.
  *
  * @author Tobias Soloschenko
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(prefix = ASYNC_PREFIX, name = "enabled")
+@ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class})
+@ConditionalOnProperty(prefix = ASYNC_PROPS_PREFIX, name = "enabled", havingValue = "true")
+@AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
 @EnableAsync
-class DataflowAsyncConfiguration implements AsyncConfigurer {
+public class DataflowAsyncAutoConfiguration implements AsyncConfigurer {
 
-	private static final Logger logger = LoggerFactory.getLogger(DataflowAsyncConfiguration.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataflowAsyncAutoConfiguration.class);
 
-	public static final String ASYNC_PREFIX = DataFlowPropertyKeys.PREFIX + "async";
+	public static final String ASYNC_PROPS_PREFIX = DataFlowPropertyKeys.PREFIX + "async";
+
+	public static final String DATAFLOW_ASYNC_EXECUTOR = "dataflowAsyncExecutor";
 
 	private static final String THREAD_NAME_PREFIX = "scdf-async-";
 
-	@Bean(name = "asyncExecutor")
-	Executor getAsyncExecutor(TaskExecutorBuilder taskExecutorBuilder) {
-		return taskExecutorBuilder.threadNamePrefix(THREAD_NAME_PREFIX).build();
+	private final TaskExecutorBuilder taskExecutorBuilder;
+
+	public DataflowAsyncAutoConfiguration(TaskExecutorBuilder taskExecutorBuilder) {
+		this.taskExecutorBuilder = taskExecutorBuilder;
+	}
+
+	@Bean(name = DATAFLOW_ASYNC_EXECUTOR)
+	@Override
+	public Executor getAsyncExecutor() {
+		return this.taskExecutorBuilder.threadNamePrefix(THREAD_NAME_PREFIX).build();
 	}
 
 	@Override
