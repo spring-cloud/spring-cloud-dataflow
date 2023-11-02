@@ -14,8 +14,8 @@
 	</parent>
 
 	<properties>
-		<flyway.version>8.5.11
-		</flyway.version> <!-- have to repeat this here in order for filtering in src/main/resources/ -->
+		<!-- have to repeat this here in order for filtering in src/main/resources/ -->
+		<flyway.version>8.5.13</flyway.version>
 	</properties>
 
 	<dependencies>

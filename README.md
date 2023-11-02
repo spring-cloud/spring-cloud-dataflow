@@ -72,7 +72,7 @@ stream or task and managing its lifecycle.
 
 Clone the repo and type 
 
-    $ ./mvnw clean install 
+    $ ./mvnw -s settings.xml clean install 
 
 Looking for more information? Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc).
 
