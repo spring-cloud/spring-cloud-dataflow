@@ -28,6 +28,7 @@ import org.cloudfoundry.client.v2.organizations.Organizations;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
+import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -120,6 +121,8 @@ public class MultiplePlatformTypeTests {
 	static class TestConfig {
 		private CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class);
 
+		private LogCacheClient logCacheClient = mock(LogCacheClient.class);
+
 		private TokenProvider tokenProvider = mock(TokenProvider.class);
 
 		@Bean
@@ -133,10 +136,8 @@ public class MultiplePlatformTypeTests {
 			when(cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
 			CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
 					CloudFoundryPlatformClientProvider.class);
-			when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenAnswer(invocation -> {
-				System.out.println("Returning " + cloudFoundryClient);
-				return cloudFoundryClient;
-			});
+			when(cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenAnswer((__) -> this.cloudFoundryClient);
+			when(cloudFoundryClientProvider.logCacheClient(anyString())).thenAnswer((__) -> this.logCacheClient);
 			return cloudFoundryClientProvider;
 		}
 
