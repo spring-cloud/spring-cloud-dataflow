@@ -317,7 +317,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private int countJobExecutions(String jobName, BatchStatus status) throws NoSuchJobException {
-		if (StringUtils.isEmpty(jobName)) {
+		if (!StringUtils.hasText(jobName)) {
 			if (status != null) {
 				return jobExecutionDao.countJobExecutions(status);
 			}
