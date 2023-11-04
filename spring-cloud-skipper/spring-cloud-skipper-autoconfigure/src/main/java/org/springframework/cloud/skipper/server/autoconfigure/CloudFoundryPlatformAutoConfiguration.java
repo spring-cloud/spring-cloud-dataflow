@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import com.github.zafarkhaja.semver.Version;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.info.GetInfoRequest;
+import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
@@ -29,6 +30,7 @@ import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
 import org.cloudfoundry.reactor.doppler.ReactorDopplerClient;
+import org.cloudfoundry.reactor.logcache.v1.ReactorLogCacheClient;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider.Builder;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.cloudfoundry.ApplicationLogAccessor;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryActuatorTemplate;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppNameGenerator;
@@ -124,8 +127,13 @@ public class CloudFoundryPlatformAutoConfiguration {
 			TokenProvider tokenProvider = tokenProviderBuilder.build();
 
 			CloudFoundryClient cloudFoundryClient = ReactorCloudFoundryClient.builder()
-				.connectionContext(connectionContext).tokenProvider(tokenProvider)
-				.build();
+					.connectionContext(connectionContext)
+					.tokenProvider(tokenProvider)
+					.build();
+			LogCacheClient logCacheClient = ReactorLogCacheClient.builder()
+					.connectionContext(connectionContext)
+					.tokenProvider(tokenProvider)
+					.build();
 			Version version = cloudFoundryClient.info()
 				.get(GetInfoRequest.builder().build())
 				.map(response -> Version.valueOf(response.getApiVersion()))
@@ -163,8 +171,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 				deploymentProperties,
 				cloudFoundryOperations,
 				runtimeEnvironmentInfo,
-				applicationContext
-			);
+				new ApplicationLogAccessor(logCacheClient));
 			ActuatorOperations actuatorOperations = new CloudFoundryActuatorTemplate(
 				restTemplate, cfAppDeployer, cloudFoundryProperties
 				.getDeployment().getAppAdmin());

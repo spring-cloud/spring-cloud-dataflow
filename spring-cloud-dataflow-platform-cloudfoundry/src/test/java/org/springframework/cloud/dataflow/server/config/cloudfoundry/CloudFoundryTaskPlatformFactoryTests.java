@@ -32,6 +32,7 @@ import org.cloudfoundry.client.v2.organizations.Organizations;
 import org.cloudfoundry.client.v2.spaces.ListSpacesResponse;
 import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
+import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,13 +62,13 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformConnectionContextProvider connectionContextProvider;
 
-	private CloudFoundryPlatformClientProvider cloudFoundryClientProvider = mock(
-			CloudFoundryPlatformClientProvider.class);
+	private CloudFoundryPlatformClientProvider cloudFoundryClientProvider;
 
-	private CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProvider = mock(
-			CloudFoundrySchedulerClientProvider.class);
+	private CloudFoundrySchedulerClientProvider cloudFoundrySchedulerClientProvider;
 
-	private CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class);
+	private CloudFoundryClient cloudFoundryClient;
+
+	private LogCacheClient logCacheClient;
 
 	private CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
 
@@ -79,6 +80,11 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
+		cloudFoundryClientProvider = mock(CloudFoundryPlatformClientProvider.class);
+		cloudFoundrySchedulerClientProvider = mock(CloudFoundrySchedulerClientProvider.class);
+		cloudFoundryClient = mock(CloudFoundryClient.class);
+		logCacheClient = mock(LogCacheClient.class);
+
 		when(this.cloudFoundryClient.info())
 				.thenReturn(getInfoRequest -> Mono.just(GetInfoResponse.builder().apiVersion("0.0.0").build()));
 		when(this.cloudFoundryClient.organizations()).thenReturn(mock(Organizations.class));
@@ -86,6 +92,8 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		when(this.cloudFoundryClient.organizations().list(any())).thenReturn(listOrganizationsResponse());
 		when(this.cloudFoundryClient.spaces().list(any())).thenReturn(listSpacesResponse());
 		when(this.cloudFoundryClientProvider.cloudFoundryClient(anyString())).thenReturn(this.cloudFoundryClient);
+		when(this.cloudFoundryClientProvider.logCacheClient(anyString())).thenReturn(this.logCacheClient);
+
 		this.cloudFoundryPlatformProperties = new CloudFoundryPlatformProperties();
 
 		this.defaultConnectionProperties = new CloudFoundryConnectionProperties();
