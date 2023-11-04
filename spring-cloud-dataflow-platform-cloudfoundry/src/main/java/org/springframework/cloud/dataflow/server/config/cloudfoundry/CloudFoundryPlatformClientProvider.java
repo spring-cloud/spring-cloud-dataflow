@@ -20,11 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.cloudfoundry.client.CloudFoundryClient;
+import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
+import org.cloudfoundry.reactor.logcache.v1.ReactorLogCacheClient;
 
 /**
  * @author David Turanski
- **/
+ * @author Chris Bono
+ */
 public class CloudFoundryPlatformClientProvider {
 
 	private final CloudFoundryPlatformProperties platformProperties;
@@ -34,6 +37,8 @@ public class CloudFoundryPlatformClientProvider {
 	private final CloudFoundryPlatformTokenProvider platformTokenProvider;
 
 	private final Map<String, CloudFoundryClient> cloudFoundryClients = new HashMap<>();
+
+	private final Map<String, LogCacheClient> cloudFoundryLogClients = new HashMap<>();
 
 	CloudFoundryPlatformClientProvider(
 		CloudFoundryPlatformProperties platformProperties,
@@ -45,10 +50,16 @@ public class CloudFoundryPlatformClientProvider {
 	}
 
 	public CloudFoundryClient cloudFoundryClient(String account){
-			cloudFoundryClients.putIfAbsent(account, ReactorCloudFoundryClient.builder()
+		return cloudFoundryClients.computeIfAbsent(account, (__) -> ReactorCloudFoundryClient.builder()
 				.connectionContext(connectionContextProvider.connectionContext(account))
 				.tokenProvider(platformTokenProvider.tokenProvider(account))
 				.build());
-			return cloudFoundryClients.get(account);
+	}
+
+	public LogCacheClient logCacheClient(String account) {
+		return cloudFoundryLogClients.computeIfAbsent(account, (__) -> ReactorLogCacheClient.builder()
+				.connectionContext(connectionContextProvider.connectionContext(account))
+				.tokenProvider(platformTokenProvider.tokenProvider(account))
+				.build());
 	}
 }

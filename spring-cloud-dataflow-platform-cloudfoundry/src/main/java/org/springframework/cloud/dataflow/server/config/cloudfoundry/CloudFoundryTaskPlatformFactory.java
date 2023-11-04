@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.dataflow.core.AbstractTaskPlatformFactory;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
+import org.springframework.cloud.deployer.spi.cloudfoundry.ApplicationLogAccessor;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryAppDeployer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
@@ -85,7 +86,8 @@ public class CloudFoundryTaskPlatformFactory extends AbstractTaskPlatformFactory
 				cloudFoundryClient,
 				deploymentProperties(account),
 				cloudFoundryOperations,
-				runtimeEnvironmentInfo(cloudFoundryClient, account));
+				runtimeEnvironmentInfo(cloudFoundryClient, account),
+				new ApplicationLogAccessor(this.cloudFoundryClientProvider.logCacheClient(account)));
 		Launcher launcher = new Launcher(account, CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher,
 				scheduler(account, taskLauncher, cloudFoundryOperations));
 		CloudFoundryConnectionProperties connectionProperties = connectionProperties(account);
