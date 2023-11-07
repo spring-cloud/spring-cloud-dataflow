@@ -15,28 +15,20 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.info.BuildInfoContributor;
+import org.springframework.boot.actuate.info.GitInfoContributor;
+import org.springframework.boot.actuate.info.Info;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.core.Launcher;
-import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
-import org.springframework.cloud.dataflow.rest.resource.about.Dependency;
-import org.springframework.cloud.dataflow.rest.resource.about.FeatureInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.MonitoringDashboardType;
-import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment;
-import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
-import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
-import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
+import org.springframework.cloud.dataflow.rest.resource.about.*;
 import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -62,6 +54,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 /**
@@ -71,6 +67,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
+ * @author Felipe Gutierrez
  */
 @RestController
 @RequestMapping("/about")
@@ -101,14 +98,21 @@ public class AboutController {
 
 	private DataflowMetricsProperties dataflowMetricsProperties;
 
+	private ObjectProvider<GitInfoContributor> gitInfoContributor;
+
+	private ObjectProvider<BuildInfoContributor> buildInfoContributor;
+
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
-			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties) {
+			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties,
+						   ObjectProvider<GitInfoContributor> gitInfoContributor,ObjectProvider<BuildInfoContributor> buildInfoContributor) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
 		this.versionInfoProperties = versionInfoProperties;
 		this.securityStateBean = securityStateBean;
 		this.dataflowMetricsProperties = monitoringProperties;
+		this.gitInfoContributor = gitInfoContributor;
+		this.buildInfoContributor = buildInfoContributor;
 	}
 
 	/**
@@ -224,6 +228,8 @@ public class AboutController {
 
 		aboutResource.add(linkTo(AboutController.class).withSelfRel());
 
+		aboutResource.setGitAndBuildInfo(getGitInfoFromEndpoints());
+
 		return aboutResource;
 	}
 
@@ -315,4 +321,14 @@ public class AboutController {
 		}
 		return result;
 	}
+
+	private Map getGitInfoFromEndpoints() {
+		Info.Builder builder = new Info.Builder();
+
+		gitInfoContributor.ifAvailable(c -> c.contribute(builder));
+		buildInfoContributor.ifAvailable(c -> c.contribute(builder));
+
+		return builder.build().getDetails();
+	}
+
 }

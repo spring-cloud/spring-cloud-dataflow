@@ -20,8 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration;
+import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,9 +38,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -49,8 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Glenn Renfro
  */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = TestDependencies.class)
+@SpringBootTest(classes = {TestDependencies.class, ProjectInfoAutoConfiguration.class, InfoContributorAutoConfiguration.class},properties = {"management.info.git.enabled=true"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
 		"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
@@ -98,6 +96,10 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.schedulesEnabled", is(false)))
+
+				.andExpect(jsonPath("$.gitAndBuildInfo.git.commit").exists() )
+				.andExpect(jsonPath("$.gitAndBuildInfo.build.version").exists() )
+
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(emptyOrNullString())));
 	}
 
@@ -343,7 +345,7 @@ public class AboutControllerTests {
 	}
 
 	@ExtendWith(SpringExtension.class)
-	@SpringBootTest(classes = TestDependencies.class)
+	@SpringBootTest(classes = {TestDependencies.class, ProjectInfoAutoConfiguration.class, InfoContributorAutoConfiguration.class},properties = {"management.info.git.enabled=true"})
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
@@ -398,6 +400,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", is("skipper server")))
 					.andExpect(jsonPath("$.monitoringDashboardInfo.url", is("http://localhost:3001")))
 					.andExpect(jsonPath("$.monitoringDashboardInfo.dashboardType", is("GRAFANA")))
+					.andExpect(jsonPath("$.gitAndBuildInfo.git.commit").exists() )
+					.andExpect(jsonPath("$.gitAndBuildInfo.build.version").exists() )
 					.andExpect(jsonPath("$.monitoringDashboardInfo.refreshInterval", is(30)));
 		}
 
