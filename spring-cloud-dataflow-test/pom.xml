@@ -15,6 +15,7 @@
 		<failIfNoTests>true</failIfNoTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -22,10 +23,24 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>uk.org.webcompere</groupId>
+			<artifactId>system-stubs-jupiter</artifactId>
+			<version>2.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>oracle-xe</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
