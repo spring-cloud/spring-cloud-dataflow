@@ -31,6 +31,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.actuate.info.BuildInfoContributor;
+import org.springframework.boot.actuate.info.GitInfoContributor;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -769,7 +771,9 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 	public AboutController aboutController(
 			VersionInfoProperties versionInfoProperties,
 			FeaturesProperties featuresProperties, StreamDeployer streamDeployer,
-			DataflowMetricsProperties monitoringDashboardInfoProperties
+			DataflowMetricsProperties monitoringDashboardInfoProperties,
+			ObjectProvider<GitInfoContributor> gitInfoContributor,
+			ObjectProvider<BuildInfoContributor> buildInfoContributor
 	) {
 
 		Launcher launcher = mock(Launcher.class);
@@ -791,7 +795,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
-				mock(SecurityStateBean.class), monitoringDashboardInfoProperties);
+				mock(SecurityStateBean.class), monitoringDashboardInfoProperties,
+				gitInfoContributor, buildInfoContributor);
 	}
 
 

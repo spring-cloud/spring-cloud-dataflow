@@ -1,4 +1,8 @@
 management:
+  info:
+    git:
+      mode: full
+      enabled: true
   metrics:
     tags:
       application: ${info.app.name}

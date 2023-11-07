@@ -18,10 +18,14 @@ package org.springframework.cloud.dataflow.rest.resource.about;
 
 import org.springframework.hateoas.RepresentationModel;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Provides meta-information about the Spring Cloud Data Flow server.
  *
  * @author Gunnar Hillert
+ * @author Felipe Gutierrez
  */
 public class AboutResource extends RepresentationModel {
 
@@ -34,6 +38,8 @@ public class AboutResource extends RepresentationModel {
 	private RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment();
 
 	private MonitoringDashboardInfo monitoringDashboardInfo = new MonitoringDashboardInfo();
+
+	private Map<String,Object> gitAndBuildInfo = new HashMap<>();
 
 	/**
 	 * Default constructor for serialization frameworks.
@@ -79,5 +85,13 @@ public class AboutResource extends RepresentationModel {
 
 	public void setMonitoringDashboardInfo(MonitoringDashboardInfo monitoringDashboardInfo) {
 		this.monitoringDashboardInfo = monitoringDashboardInfo;
+	}
+
+	public Map<String, Object> getGitAndBuildInfo() {
+		return gitAndBuildInfo;
+	}
+
+	public void setGitAndBuildInfo(Map<String, Object> gitAndBuildInfo) {
+		this.gitAndBuildInfo = gitAndBuildInfo;
 	}
 }
