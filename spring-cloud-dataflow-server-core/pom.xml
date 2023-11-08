@@ -314,12 +314,6 @@
 						<goals>
 							<goal>build-info</goal>
 						</goals>
-						<configuration>
-							<additionalProperties>
-								<encoding.source>UTF-8</encoding.source>
-								<encoding.reporting>UTF-8</encoding.reporting>
-							</additionalProperties>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -342,8 +336,6 @@
 					<commitIdGenerationMode>full</commitIdGenerationMode>
 				</configuration>
 			</plugin>
-
-
 		</plugins>
 	</build>
 </project>

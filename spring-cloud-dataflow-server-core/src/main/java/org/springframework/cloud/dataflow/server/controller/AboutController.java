@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -45,6 +48,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,10 +57,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -101,6 +101,17 @@ public class AboutController {
 	private ObjectProvider<GitInfoContributor> gitInfoContributor;
 
 	private ObjectProvider<BuildInfoContributor> buildInfoContributor;
+
+	@Deprecated
+	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
+						   VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties) {
+		this.streamDeployer = streamDeployer;
+		this.launcherRepository = launcherRepository;
+		this.featuresProperties = featuresProperties;
+		this.versionInfoProperties = versionInfoProperties;
+		this.securityStateBean = securityStateBean;
+		this.dataflowMetricsProperties = monitoringProperties;
+	}
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties,
@@ -228,7 +239,7 @@ public class AboutController {
 
 		aboutResource.add(linkTo(AboutController.class).withSelfRel());
 
-		aboutResource.setGitAndBuildInfo(getGitInfoFromEndpoints());
+		addGitAndBuildInfoIfAvailable(aboutResource);
 
 		return aboutResource;
 	}
@@ -322,13 +333,14 @@ public class AboutController {
 		return result;
 	}
 
-	private Map getGitInfoFromEndpoints() {
+	private void addGitAndBuildInfoIfAvailable(AboutResource aboutResource) {
 		Info.Builder builder = new Info.Builder();
-
 		gitInfoContributor.ifAvailable(c -> c.contribute(builder));
 		buildInfoContributor.ifAvailable(c -> c.contribute(builder));
-
-		return builder.build().getDetails();
+		Map<String, Object> details = builder.build().getDetails();
+		if (!ObjectUtils.isEmpty(details)) {
+			aboutResource.setGitAndBuildInfo(details);
+		}
 	}
 
 }
