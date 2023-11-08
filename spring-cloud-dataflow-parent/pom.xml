@@ -12,6 +12,7 @@
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<properties>
 		<!-- NOTE: this needs to be updated and kept in sync w/ the project.version -->
+		<git-commit-id-plugin.version>4.9.9</git-commit-id-plugin.version>
 		<dataflow.version>2.11.2-SNAPSHOT</dataflow.version>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
@@ -364,6 +365,23 @@
 							<phase>package</phase>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>${git-commit-id-plugin.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>revision</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<generateGitPropertiesFile>true</generateGitPropertiesFile>
+						<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+						<commitIdGenerationMode>full</commitIdGenerationMode>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.cloud</groupId>

@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,9 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.NestedTestConfiguration;
+import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -50,6 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Glenn Renfro
+ * @author Felipe Gutierrez
+ * @author Chris Bono
  */
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -102,7 +105,8 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(emptyOrNullString())));
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -112,7 +116,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class ChecksumDisabledTests {
+	class ChecksumDisabledTests {
 
 		private MockMvc mockMvc;
 
@@ -137,7 +141,8 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -146,7 +151,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class SnapshotUrlTests {
+	class SnapshotUrlTests {
 
 		private MockMvc mockMvc;
 
@@ -171,7 +176,8 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -180,7 +186,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class MilestoneUrlTests {
+	class MilestoneUrlTests {
 
 		private MockMvc mockMvc;
 
@@ -205,8 +211,8 @@ public class AboutControllerTests {
 		}
 	}
 
-
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -215,7 +221,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class RCUrlTests {
+	class RCUrlTests {
 
 		private MockMvc mockMvc;
 
@@ -240,7 +246,8 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -249,7 +256,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class GAUrlTests {
+	class GAUrlTests {
 
 		private MockMvc mockMvc;
 
@@ -274,7 +281,8 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -283,7 +291,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class ReleaseUrlTests {
+	class ReleaseUrlTests {
 
 		private MockMvc mockMvc;
 
@@ -308,7 +316,8 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
@@ -319,7 +328,7 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha256-url="
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class ChecksumNoDefaultTests {
+	class ChecksumNoDefaultTests {
 
 		private MockMvc mockMvc;
 
@@ -343,29 +352,30 @@ public class AboutControllerTests {
 		}
 	}
 
-	@ExtendWith(SpringExtension.class)
-	@SpringBootTest(classes = { TestDependencies.class, ProjectInfoAutoConfiguration.class, InfoContributorAutoConfiguration.class },
-		properties = {
-		"management.info.git.enabled=true"
-	})
+	@Nested
+	@NestedTestConfiguration(EnclosingConfiguration.OVERRIDE)
+	@SpringBootTest(
+			classes = { TestDependencies.class, ProjectInfoAutoConfiguration.class, InfoContributorAutoConfiguration.class }, 
+			properties = { "management.info.git.enabled=true" }
+	)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=1.2.3.SHELL.TEST",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.1",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url={repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1.jar.sha1",
 			"spring.cloud.dataflow.metrics.dashboard.url=http://localhost:3001",
 			"spring.cloud.dataflow.metrics.dashboard.type=GRAFANA",
 			"spring.cloud.dataflow.metrics.dashboard.grafana.token=boza",
 			"spring.cloud.dataflow.metrics.dashboard.grafana.refresh-interval=30"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class AboutTests {
+	class AboutTests {
 
 		private MockMvc mockMvc;
 
@@ -392,8 +402,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.1")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
@@ -409,11 +419,8 @@ public class AboutControllerTests {
 
 		@Test
 		public void testAboutWithMissingSkipper() throws Exception {
-
 			reset(this.skipperClient);
-
 			Mockito.when(this.skipperClient.info()).thenThrow(new ResourceAccessException("Skipper Not There"));
-
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.implementation.name", is("${info.app.name}")))
@@ -423,8 +430,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.3.0.BUILD-SNAPSHOT/spring-cloud-dataflow-shell-1.3.0.BUILD-SNAPSHOT.jsdfasdf")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("1.2.3.SHELL.TEST")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.1")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
