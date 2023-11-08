@@ -16,21 +16,19 @@
 package org.springframework.cloud.dataflow.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.OracleContainer;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-
+import org.springframework.cloud.dataflow.server.db.oracle.OracleContainerSupport;
 
 /**
  * Basic database schema and JPA tests for Oracle XE.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class OracleSmokeTest extends AbstractSmokeTest {
+public class OracleSmokeTest extends AbstractSmokeTest implements OracleContainerSupport {
+
 	@BeforeAll
 	static void startContainer() {
-		container = new OracleContainer();
-		container.start();
+		container = OracleContainerSupport.startContainer();
 	}
 }

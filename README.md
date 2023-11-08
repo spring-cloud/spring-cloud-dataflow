@@ -72,7 +72,7 @@ stream or task and managing its lifecycle.
 
 Clone the repo and type 
 
-    $ ./mvnw -s settings.xml clean install 
+    $ ./mvnw -s .settings.xml clean install 
 
 Looking for more information? Follow this [link](https://github.com/spring-cloud/spring-cloud-dataflow/blob/master/spring-cloud-dataflow-docs/src/main/asciidoc/appendix-building.adoc).
 
@@ -84,6 +84,19 @@ as this may lead to test failures under Windows.
 
 Therefore, please ensure that you set Git property `core.autocrlf` to `false`, e.g. using: `$ git config core.autocrlf false`.
 For more information please refer to the [Git documentation, Formatting and Whitespace](https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration).
+
+----
+
+## Running Locally w/ Oracle 
+By default, the Dataflow server jar does not include the Oracle database driver dependency.
+If you want to use Oracle for development/testing when running locally, you can specify the `local-dev-oracle` Maven profile when building.
+The following command will include the Oracle driver dependency in the jar:
+```
+$ ./mvnw -s .settings.xml clean package -Plocal-dev-oracle
+```
+You can follow the steps in the [Oracle on Mac ARM64](https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Oracle-on-Mac-ARM64#run-container-in-docker) Wiki to run Oracle XE locally in Docker with Dataflow pointing at it.
+
+> **NOTE:** If you are not running Mac ARM64 just skip the steps related to Homebrew and Colima 
 
 ----
 

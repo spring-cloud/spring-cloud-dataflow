@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.OracleContainer;
 
+import org.springframework.cloud.dataflow.server.db.oracle.OracleContainerSupport;
 
 /**
  * Basic database schema and JPA tests for Oracle XE.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class OracleSkipperSmokeTest extends AbstractSkipperSmokeTest {
+public class OracleSkipperSmokeTest extends AbstractSkipperSmokeTest implements OracleContainerSupport {
+
 	@BeforeAll
 	static void startContainer() {
-		container = new OracleContainer();
-		container.start();
+		container = OracleContainerSupport.startContainer();
 	}
 }

@@ -18,6 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<oracle-driver-ojdbc8.version>21.9.0.0</oracle-driver-ojdbc8.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
 		<checkstyle.config.location>../src/checkstyle/checkstyle.xml</checkstyle.config.location>
@@ -89,6 +90,13 @@
 			<artifactId>h2</artifactId>
 			<version>2.2.222</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-dataflow-test</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -116,7 +124,6 @@
 			<artifactId>json-unit-assertj</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.awaitility</groupId>
 			<artifactId>awaitility</artifactId>
@@ -167,29 +174,24 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.ibm.db2</groupId>
 			<artifactId>jcc</artifactId>
 			<version>11.5.8.0</version>
 			<scope>test</scope>
 		</dependency>
-
-
 		<dependency>
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc8</artifactId>
-			<version>21.9.0.0</version>
+			<version>${oracle-driver-ojdbc8.version}</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.33</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -408,6 +410,16 @@
 					</snapshots>
 				</pluginRepository>
 			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>local-dev-oracle</id>
+			<dependencies>
+				<dependency>
+					<groupId>com.oracle.database.jdbc</groupId>
+					<artifactId>ojdbc8</artifactId>
+					<version>${oracle-driver-ojdbc8.version}</version>
+				</dependency>
+			</dependencies>
 		</profile>
 	</profiles>
 </project>
