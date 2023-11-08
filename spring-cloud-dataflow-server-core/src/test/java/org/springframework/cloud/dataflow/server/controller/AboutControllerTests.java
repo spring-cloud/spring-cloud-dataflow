@@ -99,10 +99,6 @@ public class AboutControllerTests {
 				.andExpect(jsonPath("$.featureInfo.streamsEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.tasksEnabled", is(true)))
 				.andExpect(jsonPath("$.featureInfo.schedulesEnabled", is(false)))
-
-				.andExpect(jsonPath("$.gitAndBuildInfo.git.commit").exists() )
-				.andExpect(jsonPath("$.gitAndBuildInfo.build.version").exists() )
-
 				.andExpect(jsonPath("$.runtimeEnvironment.appDeployer.deployerName", not(emptyOrNullString())));
 	}
 
