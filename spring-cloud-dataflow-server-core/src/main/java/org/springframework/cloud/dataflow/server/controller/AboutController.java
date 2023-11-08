@@ -115,7 +115,7 @@ public class AboutController {
 
 	public AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
 			VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties,
-						   ObjectProvider<GitInfoContributor> gitInfoContributor,ObjectProvider<BuildInfoContributor> buildInfoContributor) {
+						   ObjectProvider<GitInfoContributor> gitInfoContributor, ObjectProvider<BuildInfoContributor> buildInfoContributor) {
 		this.streamDeployer = streamDeployer;
 		this.launcherRepository = launcherRepository;
 		this.featuresProperties = featuresProperties;
