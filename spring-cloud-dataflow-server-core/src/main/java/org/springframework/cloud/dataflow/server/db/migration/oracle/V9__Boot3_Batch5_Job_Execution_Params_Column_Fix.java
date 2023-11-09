@@ -31,13 +31,15 @@ import org.springframework.cloud.dataflow.common.flyway.SqlCommandsRunner;
 public class V9__Boot3_Batch5_Job_Execution_Params_Column_Fix extends BaseJavaMigration {
 
 	public final static String DROP_COLUMNS_BATCH_JOB_EXECUTION_PARAMS_TABLE =
-			"ALTER TABLE BOOT3_BATCH_JOB_EXECUTION_PARAMS DROP (TYPE_CD, KEY_NAME, STRING_VAL, DATE_VAL, LONG_VAL, DOUBLE_VAL)";
+			"ALTER TABLE BOOT3_BATCH_JOB_EXECUTION_PARAMS DROP (TYPE_CD, KEY_NAME, STRING_VAL, DATE_VAL, " +
+					"LONG_VAL, DOUBLE_VAL, IDENTIFYING)";
 
 	public final static String ADD_COLUMNS_BATCH_JOB_EXECUTION_PARAMS_TABLE =
 			"ALTER TABLE BOOT3_BATCH_JOB_EXECUTION_PARAMS ADD (\n" +
 					"    PARAMETER_NAME VARCHAR(100 char) NOT NULL,\n" +
 					"    PARAMETER_TYPE VARCHAR(100 char) NOT NULL,\n" +
-					"    PARAMETER_VALUE VARCHAR(2500 char)\n" +
+					"    PARAMETER_VALUE VARCHAR(2500 char),\n" +
+					"	 IDENTIFYING CHAR(1) NOT NULL\n" +
 					")";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
