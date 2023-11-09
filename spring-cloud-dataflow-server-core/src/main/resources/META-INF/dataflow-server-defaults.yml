@@ -1,7 +1,7 @@
 management:
   info:
     git:
-      mode: full
+      mode: simple
       enabled: true
   metrics:
     tags:
