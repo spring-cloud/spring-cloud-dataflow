@@ -16,9 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner.support;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.boot.ExitCodeGenerator;
@@ -32,8 +30,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
  */
 public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionException implements ExitCodeGenerator {
 
-	private static final long serialVersionUID = 3494615323781500165L;
-
+	private static final long serialVersionUID = 1080992679855603656L;
 	/**
 	 * The unique id associated with the task execution.
 	 */
@@ -78,11 +75,6 @@ public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionExce
 	 * Error information available upon the failure of a task.
 	 */
 	private String errorMessage;
-
-	/**
-	 * The arguments that were used for this task execution.
-	 */
-	private ArrayList<String> arguments;
 
 	/**
 	 * Constructs an UnexpectedTaskExecutionException with the specified
@@ -146,7 +138,6 @@ public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionExce
 			externalExecutionId = taskExecution.getExternalExecutionId();
 			errorMessage = taskExecution.getErrorMessage();
 			exitMessage = taskExecution.getExitMessage();
-			arguments = new ArrayList<>(taskExecution.getArguments());
 		}
 	}
 
@@ -178,10 +169,6 @@ public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionExce
 
 	public String getExitMessage() {
 		return this.exitMessage;
-	}
-
-	public List<String> getArguments() {
-		return this.arguments;
 	}
 
 	public String getErrorMessage() {
