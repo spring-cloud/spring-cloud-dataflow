@@ -31,6 +31,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
 public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionException implements ExitCodeGenerator {
 
 	private static final long serialVersionUID = 1080992679855603656L;
+
 	/**
 	 * The unique id associated with the task execution.
 	 */
