@@ -36,6 +36,7 @@ import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
+import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -59,7 +60,7 @@ import static org.mockito.Mockito.verify;
 @TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
 		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
-		"transaction-isolation-level=ISOLATION_READ_COMMITTED",
+		"transaction-isolation-level=ISOLATION_READ_COMMITTED","spring.cloud.task.closecontext-enabled=true",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithPropertiesTests {
@@ -72,6 +73,9 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
+
+	@Autowired
+	private TaskProperties taskProperties;
 
 	@Autowired
 	ApplicationContext context;
@@ -101,10 +105,12 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
 		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
 		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_READ_COMMITTED");
+		assertThat(taskProperties.getClosecontextEnabled()).isTrue();
 
 		List<String> args = new ArrayList<>(2);
 		args.add("--baz=boo --foo=bar");
 		args.add("--spring.cloud.task.parent-execution-id=1");
+		args.add("--spring.cloud.task.parent-schema-target=boot2");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(taskOperations).launch("ComposedTest-AAA", props, args);
 	}

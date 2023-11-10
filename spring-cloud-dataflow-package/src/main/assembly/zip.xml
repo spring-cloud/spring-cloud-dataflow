@@ -1,0 +1,23 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.1"
+		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		  xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.1 https://maven.apache.org/xsd/assembly-2.1.1.xsd">
+	<id>distribution</id>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+			<directory>${project.basedir}/../src/deploy</directory>
+			<outputDirectory>deploy</outputDirectory>
+			<excludes>
+				<exclude>**/*.adoc</exclude>
+				<exclude>**/*.jar</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/../src/kubernetes</directory>
+			<outputDirectory>deploy/kubernetes</outputDirectory>
+		</fileSet>
+	</fileSets>
+</assembly>

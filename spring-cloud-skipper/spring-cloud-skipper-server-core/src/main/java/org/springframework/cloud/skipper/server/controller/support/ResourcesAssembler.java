@@ -16,23 +16,22 @@
 package org.springframework.cloud.skipper.server.controller.support;
 
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
 /**
- * Analogous to {@link ResourceAssembler} but for resource collections.
+ * Analogous to {@link RepresentationModelAssembler} but for resource collections.
  *
  * @author Greg Turnquist
  */
-public interface ResourcesAssembler<T, D extends RepresentationModel> {
+public interface ResourcesAssembler<T, D extends RepresentationModel<D>> {
 
 	/**
 	 * Converts all given entities into resources and wraps the collection as a resource as well.
 	 *
 	 * @see RepresentationModelAssembler#toModel(Object)
 	 * @param entities must not be {@literal null}.
-	 * @return {@link Resources} containing {@link EntityModel} of {@code T}.
+	 * @return {@link CollectionModel} containing {@link RepresentationModel} of {@code T}.
 	 */
 	CollectionModel<D> toCollectionModel(Iterable<? extends T> entities);
 }

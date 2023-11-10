@@ -66,9 +66,11 @@ import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -499,40 +501,66 @@ public class SkipperStreamDeployerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testUndeploySkippedForUndefinedStream() {
+	public void testUndeployPackageAndReleaseExistAllGood() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
-
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
-
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
-
-		when(skipperClient.search(eq(streamDefinition.getName()), eq(false))).thenReturn(new ArrayList<>());
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName("foo");
+		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
+				.thenReturn(Arrays.asList(packageMetadata));
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
 
-		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()), eq(true));
+		verify(skipperClient).search("foo", false);
+		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(true));
+		verifyNoMoreInteractions(skipperClient);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testUndeployForDefinedStream() {
+	public void testUndeployPackageExistsWithoutReleaseStillDeletesPackage() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
-
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
-
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
-
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName("foo");
 		when(skipperClient.search(eq(streamDefinition.getName()), eq(false)))
-				.thenReturn(Arrays.asList(new PackageMetadata()));
+				.thenReturn(Arrays.asList(packageMetadata));
+		ReleaseNotFoundException noReleaseEx = new ReleaseNotFoundException("foo");
+		doThrow(noReleaseEx).when(skipperClient).delete("foo", true);
 
 		skipperStreamDeployer.undeployStream(streamDefinition.getName());
+
+		verify(skipperClient).search("foo", false);
 		verify(skipperClient, times(1)).delete(eq(streamDefinition.getName()), eq(true));
+		verify(skipperClient, times(1)).packageDelete("foo");
+		verify(skipperClient, times(0)).delete(eq(streamDefinition.getName()), eq(false));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testUndeployPackageDoesNotExistSkipsDelete() {
+		AppRegistryService appRegistryService = mock(AppRegistryService.class);
+		SkipperClient skipperClient = mock(SkipperClient.class);
+		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
+		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
+				streamDefinitionRepository, appRegistryService, mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
+		StreamDefinition streamDefinition = new StreamDefinition("foo", "foo|bar");
+		PackageMetadata packageMetadata = new PackageMetadata();
+		packageMetadata.setName("foobar");
+		when(skipperClient.search(eq(streamDefinition.getName()), eq(false))).thenReturn(Arrays.asList(packageMetadata));
+
+		skipperStreamDeployer.undeployStream(streamDefinition.getName());
+
+		verify(skipperClient).search("foo", false);
+		verifyNoMoreInteractions(skipperClient);
 	}
 
 	@Test

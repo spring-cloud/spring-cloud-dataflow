@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.integration.test.db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ import org.springframework.cloud.dataflow.integration.test.db.container.Dataflow
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.cloud.dataflow.integration.test.util.AssertUtils;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Base test class for all database integration tests providing foundation for
@@ -46,7 +48,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Testcontainers
 @SpringBootTest(classes = {AbstractDataflowTests.EmptyConfig.class})
-@EnableConfigurationProperties({ IntegrationTestProperties.class })
+@EnableConfigurationProperties({IntegrationTestProperties.class})
 public abstract class AbstractDataflowTests {
 
 	@Configuration
@@ -54,35 +56,44 @@ public abstract class AbstractDataflowTests {
 	}
 
 	public final static String DATAFLOW_IMAGE_PREFIX = "springcloud/spring-cloud-dataflow-server:";
+
 	public final static String SKIPPER_IMAGE_PREFIX = "springcloud/spring-cloud-skipper-server:";
+
 	public final static List<ClusterContainer> DATAFLOW_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.DATAFLOW_2_7, DATAFLOW_IMAGE_PREFIX + "2.7.2"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
-			ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.2")
-			);
+		ClusterContainer.from(TagNames.DATAFLOW_2_7, DATAFLOW_IMAGE_PREFIX + "2.7.2"),
+		ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
+		ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
+		ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.3"),
+		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.0")
+	);
+
 	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.SKIPPER_2_6, SKIPPER_IMAGE_PREFIX + "2.6.2"),
-			ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
-			ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
-			ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.2")
-			);
+		ClusterContainer.from(TagNames.SKIPPER_2_6, SKIPPER_IMAGE_PREFIX + "2.6.2"),
+		ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
+		ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
+		ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.3"),
+		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.0")
+	);
+
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
-			ClusterContainer.from(TagNames.MARIADB_10_2, "mariadb:10.2", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_3, "mariadb:10.3", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
-			ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),
-			ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
-			ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
-			ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2, "dev.registry.pivotal.io/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2", TagNames.ORACLE),
-			ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
-			ClusterContainer.from(TagNames.DB2_10_5_0_5_3_10_0, "dev.registry.pivotal.io/p-scdf-for-kubernetes/ibmcom/database-prebuilt:10.5.0.5-3.10.0", TagNames.DB2)
-			);
-	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
-			ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
-			);
+		ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
+		ClusterContainer.from(TagNames.POSTGRES_14, "postgres:14", TagNames.POSTGRES_14),
+		ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
+		ClusterContainer.from(TagNames.MARIADB_10_5, "mariadb:10.5", TagNames.MARIADB),
+		ClusterContainer.from(TagNames.MARIADB_10_6, "mariadb:10.6", TagNames.MARIADB),
+		ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),
+		ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
+		ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
+		ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2,
+			"dev.registry.pivotal.io/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2",
+			TagNames.ORACLE),
+		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
+		ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
+	);
+
+	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
+		ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
+	);
 
 	@Autowired
 	private IntegrationTestProperties testProperties;
@@ -104,11 +115,11 @@ public abstract class AbstractDataflowTests {
 	@BeforeEach
 	public void setupCluster() {
 		this.dataflowCluster = new DataflowCluster(getDatabaseContainers(), getOauthContainers(),
-				getSkipperContainers(), getDataflowContainers(), testProperties.getDatabase().isSharedDatabase());
+			getSkipperContainers(), getDataflowContainers(), testProperties.getDatabase().isSharedDatabase());
 	}
 
 	protected Container.ExecResult execInToolsContainer(String... command)
-			throws UnsupportedOperationException, IOException, InterruptedException {
+		throws UnsupportedOperationException, IOException, InterruptedException {
 		if (toolsContainer == null) {
 			toolsContainer = new GenericContainer<>("praqma/network-multitool:latest");
 			toolsContainer.withNetwork(dataflowCluster.getNetwork());
@@ -132,16 +143,15 @@ public abstract class AbstractDataflowTests {
 	}
 
 	protected List<ClusterContainer> getOauthContainers() {
-		ArrayList<ClusterContainer> containers = new ArrayList<>(OAUTH_CONTAINERS);
-		return containers;
+		return new ArrayList<>(OAUTH_CONTAINERS);
 	}
 
 	protected List<ClusterContainer> getDatabaseContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(DATABASE_CONTAINERS);
 		List<ClusterContainer> additional = this.testProperties.getDatabase().getAdditionalImages().getDatatabase()
-				.entrySet().stream()
-				.map(e -> ClusterContainer.from(e.getKey(), e.getValue().getImage(), e.getValue().getTag()))
-				.collect(Collectors.toList());
+			.entrySet().stream()
+			.map(e -> ClusterContainer.from(e.getKey(), e.getValue().getImage(), e.getValue().getTag()))
+			.collect(Collectors.toList());
 		containers.addAll(additional);
 		return containers;
 	}
@@ -149,12 +159,20 @@ public abstract class AbstractDataflowTests {
 	protected List<ClusterContainer> getSkipperContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(SKIPPER_CONTAINERS);
 		containers.add(ClusterContainer.from(TagNames.SKIPPER_main, SKIPPER_IMAGE_PREFIX + getSkipperLatestVersion()));
+		List<Integer> jdkTags = Arrays.asList(8, 11, 17);
+		for(Integer jdk : jdkTags) {
+			containers.add(ClusterContainer.from(TagNames.SKIPPER_main + "-jdk" + jdk, SKIPPER_IMAGE_PREFIX + getSkipperLatestVersion() + "-jdk" + jdk));
+		}
 		return containers;
 	}
 
 	protected List<ClusterContainer> getDataflowContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(DATAFLOW_CONTAINERS);
 		containers.add(ClusterContainer.from(TagNames.DATAFLOW_main, DATAFLOW_IMAGE_PREFIX + getDataflowLatestVersion()));
+		List<Integer> jdkTags = Arrays.asList(8, 11, 17);
+		for(Integer jdk : jdkTags) {
+			containers.add(ClusterContainer.from(TagNames.DATAFLOW_main + "-jdk" + jdk, DATAFLOW_IMAGE_PREFIX + getDataflowLatestVersion() + "-jdk" + jdk));
+		}
 		return containers;
 	}
 
@@ -167,10 +185,10 @@ public abstract class AbstractDataflowTests {
 	}
 
 	protected static void assertDataflowServerRunning(DataflowCluster dataflowCluster) {
-		AssertUtils.assertDataflowServerRunning(dataflowCluster.getDataflowUrl());
+		AssertUtils.assertDataflowServerRunning(UriComponentsBuilder.fromHttpUrl(dataflowCluster.getDataflowUrl()).pathSegment("about").toUriString());
 	}
 
 	protected static void assertDataflowServerNotRunning(DataflowCluster dataflowCluster) {
-		AssertUtils.assertDataflowServerNotRunning(dataflowCluster.getDataflowUrl());
+		AssertUtils.assertDataflowServerNotRunning(UriComponentsBuilder.fromHttpUrl(dataflowCluster.getDataflowUrl()).pathSegment("about").toUriString());
 	}
 }

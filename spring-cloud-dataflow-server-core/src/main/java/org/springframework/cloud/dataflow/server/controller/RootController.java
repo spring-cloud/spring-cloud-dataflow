@@ -145,17 +145,18 @@ public class RootController {
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskDefinitionResource.class, "{name}")
 					.withRel("tasks/definitions/definition")));
 			root.add(entityLinks.linkToCollectionResource(TaskExecutionResource.class).withRel("tasks/executions"));
+			root.add(linkTo(methodOn(TaskExecutionController.class).viewByExternal(null,null)).withRel("tasks/executions/external"));
+			root.add(linkTo(methodOn(TaskExecutionController.class).launchBoot3(null,null,null)).withRel("tasks/executions/launch"));
 			String taskTemplated = entityLinks.linkToCollectionResource(TaskExecutionResource.class).getHref()
 					+ "{?name}";
 			root.add(Link.of(taskTemplated).withRel("tasks/executions/name"));
 			root.add(linkTo(methodOn(TaskExecutionController.class)
 					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
-			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskExecutionResource.class, "{id}")
-					.withRel("tasks/executions/execution")));
+			root.add(unescapeTemplateVariables(linkTo(methodOn(TaskExecutionController.class).view(null,null)).withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
-			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null)).withRel("tasks/info/executions"));
-			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null)).withRel("tasks/logs"));
+			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null, null)).withRel("tasks/info/executions"));
+			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null, null)).withRel("tasks/logs"));
 
 			if (featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));

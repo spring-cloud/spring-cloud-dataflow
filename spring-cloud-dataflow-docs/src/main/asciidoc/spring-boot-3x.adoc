@@ -1,0 +1,101 @@
+[appendix]
+[[appendix-boot3]]
+== Spring Boot 3.x Support
+
+=== Stream Applications
+Spring Cloud Data Flow supports both Spring Boot `2.x` and `3.x` based Stream applications.
+
+==== Differences in 3.x
+Be aware of the following areas that have changed across versions.
+
+===== Metrics Configuration Properties
+IMPORTANT: The following does **NOT** apply when configuring metrics for the Dataflow or Skipper server as they both run on Spring Boot 2.x. It is only applicable to applications managed by Dataflow.
+
+The naming of the metrics registry-specific properties differ as follows:
+
+* `2.x`: `management.metrics.export.<meter-registry>.<property-path>`
+* `3.x`: `management.<meter-registry>.metrics.export.<property-path>`
+
+.Example:
+* `2.x`: `management.metrics.export.prometheus.enabled=true`
+* `3.x`: `management.prometheus.metrics.export.enabled=true`
+
+NOTE: One exception to this rule is the Prometheus RSocket Proxy which still runs on Spring Boot `2.x` and therefore expects the properties in the `management.metrics.export.prometheus.rsocket.*` format.
+
+Be sure that you use the `2.x` format when configuring `2.x` based stream apps and the `3.x` format when configuring `3.x` based stream apps.
+
+===== Dataflow Metrics Property Replication
+By default, Dataflow replicates relevant metrics properties that it has been configured with to all launched stream and task applications.
+This replication has been updated to target both the `2.x` and `3.x` expected formats.
+In other words, if your `2.x` stream apps are currently inheriting the Dataflow metrics configuration, they will continue to do so for your `3.x` stream apps.
+
+
+==== Pre-packaged Stream Applications
+The default <<ootb-stream-apps,pre-packaged stream applications>> are based on Spring Boot `2.x`.
+To use the latest pre-packaged apps based on Spring Boot `3.x`, you must manually register the apps (relevant coordinates below).
+
+[cols="a"]
+[cols="40%"]
+|===
+|[.small]#Stream Applications#
+
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-rabbit-maven[RabbitMQ + Maven]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-rabbit-docker[RabbitMQ + Docker]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-kafka-maven[Kafka + Maven]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.stream-apps-kafka-docker[Kafka + Docker]#
+|===
+
+[cols="a"]
+[cols="40%"]
+|===
+|[.small]#HTTP Repository Location for Apps#
+
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.rabbit-apps-maven-repo-url.properties[RabbitMQ]#
+|[.small]#https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/2022.0.0/stream-applications-descriptor-2022.0.0.kafka-apps-maven-repo-url.properties[Kafka]#
+|===
+
+=== Spring Cloud Task / Batch Applications
+
+The database schemas for Spring Cloud Task 3.x and Spring Batch 5.x have been modified in the versions that forms part of Spring Boot 3.x
+
+Spring Cloud Data Flow will create set of tables for the Boot 3.x version that is prefixed by `BOOT3_` and will configure the `spring.cloud.task.tablePrefix` and `spring.batch.jdbc.table-prefix` with the correct values.
+
+In order to know that the specific task is a Boot 3.x application the version will have to be provided as part of registration. The rest endpoints accepts a `bootVersion=3` parameter and the shell commands accepts `--bootVersion 3`
+
+Since there are now multiple sets of tables that represents task and batch executions, each schema has been assigned a schemaTarget name. This value form part of queries when retrieving execution data. The UI takes care of this by using the embedded resource links. If you are using the REST API directly you will need to update those requests.
+
+==== Pre-packaged Task / Batch Applications
+The default <<ootb-task-apps,pre-packaged task / batch applications>> are based on Spring Boot `2.x`, Spring Cloud Task `2.x`, and Spring Batch `4.x`.
+To use the latest pre-packaged apps based on Spring Boot `3.x`, Spring Cloud Task `3.x`, and Spring Batch `5.x`, you must manually register the apps using the properties below.
+
+.Maven coordinates
+[.small]
+[source,properties]
+----
+task.timestamp=maven://io.spring:timestamp-task:3.0.0
+task.timestamp.bootVersion=3
+
+task.timestamp-batch=maven://io.spring:timestamp-batch-task:3.0.0
+task.timestamp-batch.bootVersion=3
+----
+[.small]
+
+.Docker coordinates
+[.small]
+[source,properties]
+----
+task.timestamp=docker:springcloudtask/timestamp-task:3.0.0
+task.timestamp.bootVersion=3
+
+task.timestamp-batch=docker:springcloudtask/timestamp-batch-task:3.0.0
+task.timestamp-batch.bootVersion=3
+----
+[.small]
+
+TIP: The properties can be used when registering an app in the Dataflow UI or the Dataflow shell CLI.
+
+==== Composed Task Runner
+
+Composed Task Runner for Spring Cloud Data Flow 2.11.x supports the launching of both Spring Boot `3.x`/`2.x`, Spring Cloud Task `3.x`/`2.x`, and Spring Batch `5.x`/`4.x` applications.
+
+NOTE: When registering Task applications verify that the correct `Spring Boot Version` is selected.

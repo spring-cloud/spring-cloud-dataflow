@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kafka-zk
-  namespace: kafka
   labels:
     app: kafka
     component: kafka-zk

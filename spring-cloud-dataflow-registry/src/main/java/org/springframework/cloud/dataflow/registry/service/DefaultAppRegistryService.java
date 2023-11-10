@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.AuditActionType;
@@ -42,6 +41,7 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
@@ -106,7 +106,9 @@ public class DefaultAppRegistryService implements AppRegistryService {
 
 	@Override
 	public AppRegistration find(String name, ApplicationType type, String version) {
-		return this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(name, type, version);
+		AppRegistration registration = this.appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(name, type, version);
+		logger.debug("find:{}:{}:{}={}", name, type, version, registration);
+		return registration;
 	}
 
 	@Override

@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,6 +73,7 @@ public class TaskLogsControllerTests {
 
 	@Before
 	public void setupMockMVC() {
+		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
 		taskPlatform.setLaunchers(Collections.singletonList(launcher));

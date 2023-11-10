@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -49,16 +51,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
-		DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
-		ComposedTaskRunnerConfiguration.class})
-@TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l3","max-wait-time=1010",
-		"composed-task-app-properties.app.l1.AAA.format=yyyy",
-		"interval-time-between-checks=1100",
-		"composed-task-arguments=--baz=boo",
-		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
+	DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
+	ComposedTaskRunnerConfiguration.class})
+@TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l11","max-wait-time=1010",
+	"composed-task-app-properties.app.l1.AAA.format=yyyy",
+	"composed-task-app-properties.app.l11.AAA.format=yyyy",
+	"composed-task-app-properties.app.l2.AAA.format=yyyy",
+	"interval-time-between-checks=1100",
+	"composed-task-arguments=--baz=boo",
+	"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
-
+	private static final Logger logger = LoggerFactory.getLogger(ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests.class);
 	@Autowired
 	private JobRepository jobRepository;
 
@@ -75,13 +79,17 @@ public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 	@DirtiesContext
 	public void testComposedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
-				"ComposedTest", new JobParameters());
+			"ComposedTest", new JobParameters());
 		job.execute(jobExecution);
 
 		Map<String, String> props = new HashMap<>(1);
 		props.put("app.l1.AAA.format", "yyyy");
-		Map<String, String> composedTaskAppProperties = new HashMap<>(1);
+		props.put("app.l2.AAA.format", "yyyy");
+		props.put("app.l11.AAA.format", "yyyy");
+		Map<String, String> composedTaskAppProperties = new HashMap<>();
 		composedTaskAppProperties.put("app.l1.AAA.format", "yyyy");
+		composedTaskAppProperties.put("app.l2.AAA.format", "yyyy");
+		composedTaskAppProperties.put("app.l11.AAA.format", "yyyy");
 
 		assertThat(composedTaskProperties.getComposedTaskAppProperties()).isEqualTo(composedTaskAppProperties);
 		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
@@ -95,6 +103,8 @@ public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 		assertThat(result).contains("--baz=boo");
 		assertThat(result.size()).isEqualTo(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
+		logger.info("taskletProperties:{}", taskletProperties);
+		assertThat(taskletProperties.keySet()).containsExactly("app.l1.AAA.format");
 		assertThat(taskletProperties.size()).isEqualTo(1);
 		assertThat(taskletProperties.get("app.l1.AAA.format")).isEqualTo("yyyy");
 	}

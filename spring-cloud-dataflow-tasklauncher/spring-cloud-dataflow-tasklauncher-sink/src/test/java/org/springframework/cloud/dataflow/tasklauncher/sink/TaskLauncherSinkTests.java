@@ -37,7 +37,9 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
+import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.tasklauncher.LaunchRequest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationContext;
@@ -54,6 +56,7 @@ import org.springframework.messaging.support.ErrorMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -76,9 +79,9 @@ public class TaskLauncherSinkTests {
 	@Test
 	public void consumerPausesWhenMaxTaskExecutionsReached() {
 		contextRunner = contextRunner.withPropertyValues(
-				"trigger.period=10",
-				"trigger.initial-delay=0",
-				"autostart=false")
+						"trigger.period=10",
+						"trigger.initial-delay=0",
+						"autostart=false")
 				.run(context -> {
 					CurrentTaskExecutionsResource currentTaskExecutionsResource = currentTaskExecutionsResource(
 							context);
@@ -86,9 +89,9 @@ public class TaskLauncherSinkTests {
 					LaunchRequestConsumer consumer = consumer(context);
 					CountDownLatch countDownLatch = countDownLatch(context);
 					DynamicPeriodicTrigger trigger = trigger(context);
-
+					assertThat(trigger).isNotNull();
 					consumer.start();
-
+					// What is going to count down the CDL?
 					assertThat(countDownLatch.await(1, TimeUnit.SECONDS)).isTrue();
 					assertThat(currentTaskExecutionsResource.getRunningExecutionCount()).isEqualTo(
 							currentTaskExecutionsResource.getMaximumTaskExecutions());
@@ -124,10 +127,10 @@ public class TaskLauncherSinkTests {
 	public void backoffWhenNoMessages() {
 
 		contextRunner.withPropertyValues(
-				"trigger.period=10",
-				"trigger.initial-delay=0",
-				"messageSourceDisabled=true",
-				"countDown=3")
+						"trigger.period=10",
+						"trigger.initial-delay=0",
+						"messageSourceDisabled=true",
+						"countDown=3")
 				.run(context -> {
 					CountDownLatch countDownLatch = countDownLatch(context);
 					CurrentTaskExecutionsResource currentTaskExecutionsResource = currentTaskExecutionsResource(
@@ -144,11 +147,11 @@ public class TaskLauncherSinkTests {
 	public void launchRequestHasWrongPlatform() {
 		final AtomicBoolean passed = new AtomicBoolean();
 		contextRunner.withPropertyValues(
-				"trigger.period=10",
-				"trigger.initial-delay=0",
-				"autostart=false",
-				"spring.cloud.stream.bindings.input.consumer.max-attempts=1",
-				"requestWrongPlatform=true")
+						"trigger.period=10",
+						"trigger.initial-delay=0",
+						"autostart=false",
+						"spring.cloud.stream.bindings.input.consumer.max-attempts=1",
+						"requestWrongPlatform=true")
 				.run(context -> {
 
 					SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
@@ -163,8 +166,8 @@ public class TaskLauncherSinkTests {
 											+ ".task.platformName=other' which does not match the platform configured for the Task"
 											+ " Launcher: 'default'");
 							passed.set(true);
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
+							fail(e.toString());
 						}
 					});
 					LaunchRequestConsumer consumer = consumer(context);
@@ -194,7 +197,7 @@ public class TaskLauncherSinkTests {
 	}
 
 	private synchronized boolean eventually(Predicate<LaunchRequestConsumer> condition,
-			LaunchRequestConsumer consumer) {
+											LaunchRequestConsumer consumer) {
 		final long MAX_WAIT = 1000;
 		long waitTime = 0;
 		long sleepTime = 10;
@@ -205,8 +208,7 @@ public class TaskLauncherSinkTests {
 			waitTime += sleepTime;
 			try {
 				Thread.sleep(sleepTime);
-			}
-			catch (InterruptedException e) {
+			} catch (InterruptedException e) {
 				Thread.interrupted();
 			}
 		}
@@ -216,14 +218,12 @@ public class TaskLauncherSinkTests {
 	@SpringBootApplication
 	static class TestConfig {
 
-		private TaskOperations taskOperations;
-
-		private CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
+		private final CurrentTaskExecutionsResource currentTaskExecutionsResource = new CurrentTaskExecutionsResource();
 
 		@Bean
 		public CurrentTaskExecutionsResource currentTaskExecutionsResource(Environment environment) {
 			currentTaskExecutionsResource.setMaximumTaskExecutions(
-					Integer.valueOf(environment.getProperty("maxExecutions", "10")));
+					Integer.parseInt(environment.getProperty("maxExecutions", "10")));
 			currentTaskExecutionsResource.setName("default");
 			return currentTaskExecutionsResource;
 		}
@@ -231,22 +231,22 @@ public class TaskLauncherSinkTests {
 		@Bean
 		public CountDownLatch countDownLatch(CurrentTaskExecutionsResource resource, Environment environment) {
 			return new CountDownLatch(
-					environment.containsProperty("countDown") ? Integer.valueOf(environment.getProperty("countDown"))
+					environment.containsProperty("countDown") ? Integer.parseInt(environment.getProperty("countDown", "1"))
 							: resource.getMaximumTaskExecutions());
 		}
 
 		@Bean
 		DataFlowOperations dataFlowOperations(CurrentTaskExecutionsResource currentTaskExecutionsResource,
-				CountDownLatch latch) {
+											  CountDownLatch latch) {
 
 			DataFlowOperations dataFlowOperations;
-			taskOperations = mock(TaskOperations.class);
+			TaskOperations taskOperations = mock(TaskOperations.class);
 			when(taskOperations.launch(anyString(), anyMap(), anyList()))
-					.thenAnswer((Answer<Long>) invocation -> {
+					.thenAnswer((Answer<LaunchResponseResource>) invocation -> {
 						currentTaskExecutionsResource.setRunningExecutionCount(
 								currentTaskExecutionsResource.getRunningExecutionCount() + 1);
 						latch.countDown();
-						return Long.valueOf(currentTaskExecutionsResource.getRunningExecutionCount());
+						return new LaunchResponseResource(currentTaskExecutionsResource.getRunningExecutionCount(), SchemaVersionTarget.defaultTarget().getName());
 					});
 
 			List<LauncherResource> launcherResources = new ArrayList<>();
@@ -273,9 +273,9 @@ public class TaskLauncherSinkTests {
 
 		@Bean
 		public MessageSource<byte[]> testMessageSource(Environment environment, CountDownLatch countDownLatch,
-				ObjectMapper objectMapper) {
+													   ObjectMapper objectMapper) {
 			return () -> {
-				boolean messageSourceDisabled = Boolean.valueOf(
+				boolean messageSourceDisabled = Boolean.parseBoolean(
 						environment.getProperty("messageSourceDisabled", "false"));
 				LaunchRequest request = new LaunchRequest();
 				request.setTaskName("foo");
@@ -289,18 +289,16 @@ public class TaskLauncherSinkTests {
 
 				if (messageSourceDisabled) {
 					countDownLatch.countDown();
-				}
-				else {
+				} else {
 					try {
 						message = MessageBuilder.withPayload(
-								objectMapper.writeValueAsBytes(request))
+										objectMapper.writeValueAsBytes(request))
 								.setHeader("contentType", "application/json")
 								.setHeader(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK,
 										(AcknowledgmentCallback) status -> {
 										})
 								.build();
-					}
-					catch (JsonProcessingException e) {
+					} catch (JsonProcessingException e) {
 						throw new BeanCreationException(e.getMessage(), e);
 					}
 				}

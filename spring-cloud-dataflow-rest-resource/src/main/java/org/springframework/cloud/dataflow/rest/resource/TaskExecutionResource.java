@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
+
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
@@ -38,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class TaskExecutionResource extends RepresentationModel<TaskExecutionResource> {
 
@@ -119,6 +122,8 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	private String composedTaskJobExecutionStatus;
 
+	private String schemaTarget;
+
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -142,6 +147,8 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
+		this.schemaTarget = taskJobExecutionRel.getTaskExecution().getSchemaTarget();
+		this.platformName = taskJobExecutionRel.getTaskExecution().getPlatformName();
 		if (taskJobExecutionRel.getJobExecutionIds() == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}
@@ -169,11 +176,12 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskExecution contains the {@link TaskExecution}
 	 * @param composedTaskJobExecution the optional composed task execution.
 	 */
-	public TaskExecutionResource(TaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
+	public TaskExecutionResource(AggregateTaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
+		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();
@@ -193,12 +201,13 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskManifest contains the (@link TaskManifest}
 	 * @param composedTaskJobExecution The optional composed task execution.
 	 */
-	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
+	public TaskExecutionResource(AggregateTaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		Assert.notNull(taskManifest, "taskManifest must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
+		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();
@@ -279,6 +288,14 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
+	}
+
+	public String getSchemaTarget() {
+		return schemaTarget;
+	}
+
+	public void setSchemaTarget(String schemaTarget) {
+		this.schemaTarget = schemaTarget;
 	}
 
 	public void setTaskExecutionStatus(String taskExecutionStatus) {

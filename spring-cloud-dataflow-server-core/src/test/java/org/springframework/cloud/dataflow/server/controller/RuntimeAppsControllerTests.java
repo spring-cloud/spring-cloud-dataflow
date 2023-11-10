@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
@@ -145,10 +146,10 @@ public class RuntimeAppsControllerTests {
 		releases.add(release4);
 		when(this.skipperClient.list(any())).thenReturn(releases);
 
-		when(this.skipperClient.statuses(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamsInfo);
-		when(this.skipperClient.states(new String[] {"ticktock3", "ticktock4"})).thenReturn(streamDeploymentStates);
-		when(this.skipperClient.states(new String[] {"ticktock3"})).thenReturn(streamDeploymentStates);
-		when(this.skipperClient.states(new String[] {"ticktock4"})).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.statuses("ticktock3", "ticktock4")).thenReturn(streamsInfo);
+		when(this.skipperClient.states("ticktock3", "ticktock4")).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.states("ticktock3")).thenReturn(streamDeploymentStates);
+		when(this.skipperClient.states("ticktock4")).thenReturn(streamDeploymentStates);
 		when(this.skipperClient.status("ticktock3")).thenReturn(ticktock3Info);
 		when(this.skipperClient.status("ticktock4")).thenReturn(ticktock4Info);
 		when(this.skipperClient.statuses("ticktock3")).thenReturn(t3streamsInfo);

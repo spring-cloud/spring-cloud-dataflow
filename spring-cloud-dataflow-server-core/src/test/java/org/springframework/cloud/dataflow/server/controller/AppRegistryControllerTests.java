@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -60,11 +60,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -75,6 +75,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
 
 /**
  * Tests for {@link AppRegistryController}
@@ -124,7 +126,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterVersionedApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
 	}
 
 	@Test
@@ -134,36 +136,51 @@ public class AppRegistryControllerTests {
 				post("/apps/sink/log1/3.0.0")
 						.queryParam("bootVersion", "3")
 						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
-				)
-				.andDo(print())
-				.andExpect(status().isCreated());
+				).andExpect(status().isCreated());
 		// when
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
-		assertThat(registration.getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0"));
-		assertThat(registration.getBootVersion(), is(AppBootSchemaVersion.BOOT3));
+		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
+		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
 	}
 
 	@Test
 	public void testRegisterAppAndUpdateToBoot3() throws Exception {
+		testAndValidateUpdateToBoot3();
+	}
+
+	private void testAndValidateUpdateToBoot3() throws Exception{
 		mockMvc.perform(post("/apps/sink/log1/1.2.0.RELEASE").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+				.andExpect(status().isCreated());
+		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
 		// given
 		mockMvc.perform(post("/apps/sink/log1/3.0.0")
-								.queryParam("force", "true")
-								.queryParam("bootVersion", "3")
-								.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
+						.queryParam("force", "true")
+						.queryParam("bootVersion", "3")
+						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
 				)
-				.andDo(print())
 				.andExpect(status().isCreated());
 		// updating default version to 3.0.0
 		mockMvc.perform(put("/apps/sink/log1/3.0.0")).andDo(print()).andExpect(status().isAccepted());
 		// when
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
-		assertThat(registration.getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0"));
-		assertThat(registration.getBootVersion(), is(AppBootSchemaVersion.BOOT3));
+		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
+		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
+
+	}
+	@Test
+	public void testRegisterAppAndUpdateToBoot3AndRollback() throws Exception {
+		testAndValidateUpdateToBoot3();
+
+		// updating Rollback version to 1.2.0
+		mockMvc.perform(put("/apps/sink/log1/1.2.0.RELEASE")).andExpect(status().isAccepted());
+		// when
+		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
+		// then
+		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
+		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT2);
+
 	}
 
 	@Test
@@ -192,7 +209,7 @@ public class AppRegistryControllerTests {
 	public void testRegisterApp() throws Exception {
 		mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		assertThat(this.appRegistryService.find("log1", ApplicationType.sink).getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
 	}
 
 	@Test
@@ -293,40 +310,40 @@ public class AppRegistryControllerTests {
 	public void testRegisterAll() throws Exception {
 		mockMvc.perform(post("/apps").param("apps", "sink.foo=maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
 	}
 
 	@Test
 	public void testRegisterAllFromFile() throws Exception {
 		mockMvc.perform(post("/apps").param("uri", "classpath:/register-all.txt").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString(), is("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"));
+		assertThat(this.appRegistryService.find("foo", ApplicationType.sink).getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
 	}
 
 	@Test
 	public void testRegisterAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.0"));
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.0"));
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
-				is("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.0"));
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.0"));
+		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.1");
+		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.1");
+		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.1");
+		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.1");
 	}
 
 	@Test
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.0"));
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.0"));
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString(),
-				is("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.0"));
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString(),
-				is("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.0"));
+		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.1");
+		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.1");
+		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.1");
+		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.1");
 	}
 
 	@Test

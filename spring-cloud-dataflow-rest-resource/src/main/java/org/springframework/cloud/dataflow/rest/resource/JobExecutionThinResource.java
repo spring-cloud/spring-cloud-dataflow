@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -40,6 +42,7 @@ import org.springframework.util.Assert;
  * A HATEOAS representation of a JobExecution without the StepExecutions.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  *
  * @since 2.0
  */
@@ -47,11 +50,11 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	private DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
+	private static final DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
 
-	private DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
+	private static final DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
 
-	private DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
+	private static final DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
 
 	private Long executionId;
 
@@ -93,6 +96,8 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private BatchStatus status;
 
+	private String schemaTarget;
+
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
@@ -108,6 +113,7 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
+		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
@@ -211,6 +217,10 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	public boolean isDefined() {
 		return defined;
+	}
+
+	public String getSchemaTarget() {
+		return schemaTarget;
 	}
 
 	/**

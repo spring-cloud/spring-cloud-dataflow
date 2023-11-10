@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.server.service.impl.TaskExecutionInformation;
@@ -58,4 +59,7 @@ public interface TaskExecutionInfoService {
 	 * @since 2.3
 	 */
 	List<AppDeploymentRequest> createTaskDeploymentRequests(String taskName, String dslText);
+
+	Set<String> composedTaskChildNames(String taskName);
+	Set<String> taskNames(String taskName);
 }

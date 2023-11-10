@@ -11,48 +11,74 @@ To configure a database the following properties must be set:
 * `spring.datasource.username`
 * `spring.datasource.password`
 * `spring.datasource.driver-class-name`
+* `spring.jpa.database-platform`
 
 The `username` and `password` are the same regardless of the database. However, the `url` and `driver-class-name` vary per database as follows.
 
 [frame="none"]
-[cols="a,a,a,a"]
-[cols="10%,30%,20%,10%"]
+[cols="a,a,a,a,a"]
+[cols="10%,20%,20%,20%,10%"]
 |===
-|[.small]#Database#|[.small]#spring.datasource.url#|[.small]#spring.datasource.driver-class-name#|[.small]#Driver included#
+|[.small]#Database#|[.small]#spring.datasource.url#|[.small]#spring.datasource.driver-class-name#|[.small]#spring.jpa.database-platform#|[.small]#Driver included#
 
-|[.small]#MariaDB 10.4+#
+|[.small]#MariaDB 10.0 - 10.1#
 |[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
 |[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB10Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.2#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB102Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.3 - 10.5#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB103Dialect#
+|[.small]#Yes#
+
+|[.small]#MariaDB 10.6+#
+|[.small]#jdbc:mariadb://${db-hostname}:${db-port}/${db-name}#
+|[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MariaDB106Dialect#{empty}footnote:[If the database was migrated from MySQL and uses sequence tables use `org.hibernate.dialectMariaDB102Dialect`. Please note that Hibernate selects incorrect Dialect when using MariaDB 11.]
 |[.small]#Yes#
 
 |[.small]#MySQL 5.7#
 |[.small]#jdbc:mysql://${db-hostname}:${db-port}/${db-name}?permitMysqlScheme#
 |[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MySQL57Dialect#
 |[.small]#Yes#
 
 |[.small]#MySQL 8.0+#
 |[.small]#jdbc:mysql://${db-hostname}:${db-port}/${db-name}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&permitMysqlScheme#{empty}footnote:[SSL is disabled in this example, adjust accordingly for your environment and requirements]
 |[.small]#org.mariadb.jdbc.Driver#
+|[.small]#org.hibernate.dialect.MySQL8Dialect#
 |[.small]#Yes#
 
 |[.small]#PostgresSQL#
 |[.small]#jdbc:postgres://${db-hostname}:${db-port}/${db-name}#
 |[.small]#org.postgresql.Driver#
+|[.small]#Remove for Hibernate default#
 |[.small]#Yes#
 
 |[.small]#SQL Server#
 |[.small]#jdbc:sqlserver://${db-hostname}:${db-port};databasename=${db-name}&encrypt=false#
 |[.small]#com.microsoft.sqlserver.jdbc.SQLServerDriver#
+|[.small]#Remove for Hibernate default#
 |[.small]#Yes#
 
 |[.small]#DB2#
 |[.small]#jdbc:db2://${db-hostname}:${db-port}/{db-name}#
 |[.small]#com.ibm.db2.jcc.DB2Driver#
+|[.small]#Remove for Hibernate default#
 |[.small]#No#
 
 |[.small]#Oracle#
 |[.small]#jdbc:oracle:thin:@${db-hostname}:${db-port}/{db-name}#
 |[.small]#oracle.jdbc.OracleDriver#
+|[.small]#Remove for Hibernate default#
 |[.small]#No#
 |===
 

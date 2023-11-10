@@ -33,7 +33,7 @@ spec:
       containers:
       - name: scdf-server
         image: #@ dataflow_image()
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: config
           mountPath: /workspace/config

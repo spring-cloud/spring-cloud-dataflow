@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 
 /**
@@ -38,58 +39,75 @@ public interface TaskExecutionService {
 	/**
 	 * Execute a task with the provided task name and optional runtime properties.
 	 *
-	 * @param taskName Name of the task. Must not be null or empty.
+	 * @param taskName                 Name of the task. Must not be null or empty.
 	 * @param taskDeploymentProperties Optional deployment properties. Must not be null.
-	 * @param commandLineArgs Optional runtime commandline argument
+	 * @param commandLineArgs          Optional runtime commandline argument
 	 * @return the taskExecutionId for the executed task.
 	 */
-	long executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
+	LaunchResponse executeTask(String taskName, Map<String, String> taskDeploymentProperties, List<String> commandLineArgs);
 
 	/**
 	 * Retrieve logs for the task application.
 	 *
 	 * @param platformName the name of the platform
-	 * @param taskId the ID that uniquely identifies the task
+	 * @param taskId       the ID that uniquely identifies the task
 	 * @return the logs of the task application.
 	 */
-	String getLog(String platformName, String taskId);
+	String getLog(String platformName, String taskId, String schemaTarget);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
 	 * @param ids a set of ids for the task executions to be stopped.
 	 */
-	void stopTaskExecution(Set<Long> ids);
+	void stopTaskExecution(Set<Long> ids, String schemaTarget);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
-	 * @param ids a set of ids for the task executions to be stopped.
-	 * @param platform The name of the platform where the tasks are executing.
+	 * @param ids          a set of ids for the task executions to be stopped.
+	 * @param schemaTarget the schema target of the task execution.
+	 * @param platform     The name of the platform where the tasks are executing.
 	 */
-	void stopTaskExecution(Set<Long> ids, String platform);
+	void stopTaskExecution(Set<Long> ids, String schemaTarget, String platform);
 
 	/**
 	 * Retrieve the TaskManifest for the execution id provided
-	 * @param id task exectution id
+	 *
+	 * @param id           task exectution id
+	 * @param schemaTarget the schema target of the task execution.
 	 * @return {@code TaskManifest} or null if not found.
 	 */
-	TaskManifest findTaskManifestById(Long id);
+	TaskManifest findTaskManifestById(Long id, String schemaTarget);
 
 	/**
 	 * Returns all the task execution IDs with the option to include only the completed task executions.
+	 *
 	 * @param onlyCompleted filter by completed task executions
-	 * @param taskName the task name, if null then retrieve all the tasks
+	 * @param taskName      the task name, if null then retrieve all the tasks
+	 * @return the set of execution ids.
 	 * @since 2.8
 	 */
 	Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName);
 
 	/**
 	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
-	 * @param onlyCompleted filter by completed task executions
-	 * @param taskName the task name, if null then retrieve all the tasks
+	 *
+	 * @param onlyCompleted whether to include only completed task executions
+	 * @param taskName      the task name, if null then retrieve all the tasks
 	 * @return the number of executions
 	 * @since 2.8
 	 */
 	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName);
+
+	/**
+	 * Returns the count of all the task execution IDs with the option to include only the completed task executions.
+	 *
+	 * @param onlyCompleted               whether to include only completed task executions (ignored when {@code includeTasksEndedMinDaysAgo} is specified)
+	 * @param taskName                    the task name, if null then retrieve all the tasks
+	 * @param includeTasksEndedMinDaysAgo only include tasks that have ended at least this many days ago
+	 * @return the number of executions, 0 if no data, never null
+	 * @since 2.11.0
+	 */
+	Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName, Integer includeTasksEndedMinDaysAgo);
 }

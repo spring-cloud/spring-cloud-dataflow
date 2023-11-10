@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DeployerConfigurationMetadataResolverTests {
 
 	//todo: Brittle. This breaks if you add a deployer property
-	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 24;
+	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 25;
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withUserConfiguration(Config.class);

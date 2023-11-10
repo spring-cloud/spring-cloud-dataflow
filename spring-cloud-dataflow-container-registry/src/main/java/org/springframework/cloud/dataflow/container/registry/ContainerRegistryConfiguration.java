@@ -23,38 +23,38 @@ import org.springframework.cloud.dataflow.container.registry.authorization.Regis
 
 /**
  * Configurations specific for each target Container Registry provider/instance.
- *
+ * <p>
  * The Docker Hub configuration is set by default. Additional registries can be configured through the
  * {@link ContainerRegistryProperties#getRegistryConfigurations()} properties like this:
  *
- * <code>
- *  Configure Arifactory/JFrog private container registry:
- *    - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].registry-host=springsource-docker-private-local.jfrog.io
- *    - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].authorization-type=basicauth
- *    - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].user=[artifactory user]
- *    - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].secret=[artifactory encryptedkey]
- *
- *  Configure Amazon ECR private registry:
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].registry-host=283191309520.dkr.ecr.us-west-1.amazonaws.com
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].authorization-type=awsecr
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].user=[your AWS accessKey]
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].secret=[your AWS secretKey]
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].extra[region]=us-west-1
- *    - spring.cloud.dataflow.container.registry-configurations[myamazonaws].extra[registryIds]=283191309520
- *
- *  Configure Azure private container registry
- *    - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].registry-host=tzolovazureregistry.azurecr.io
- *    - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].authorization-type=basicauth
- *    - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].user=[your Azure registry username]
- *    - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].secret=[your Azure registry access password]
- *
- *  Harbor Registry. Same as DockerHub but with different registryAuthUri
- *    - spring.cloud.dataflow.container.registry-configurations[harbor].registry-host=demo.goharbor.io
- *    - spring.cloud.dataflow.container.registry-configurations[harbor].authorization-type=dockeroauth2
- *    - spring.cloud.dataflow.container.registry-configurations[harbor].user=admin
- *    - spring.cloud.dataflow.container.registry-configurations[harbor].secret=Harbor12345
- *    - spring.cloud.dataflow.container.registry-configurations[harbor].extra[registryAuthUri]=https://demo.goharbor.io/service/token?service=harbor-registry&scope=repository:{repository}:pull
- * </code>
+ * {@code
+ * Configure Arifactory/JFrog private container registry:
+ * - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].registry-host=springsource-docker-private-local.jfrog.io
+ * - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].authorization-type=basicauth
+ * - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].user=[artifactory user]
+ * - spring.cloud.dataflow.container.registry-configurations[springsourcejfrog].secret=[artifactory encryptedkey]
+ * <p>
+ * Configure Amazon ECR private registry:
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].registry-host=283191309520.dkr.ecr.us-west-1.amazonaws.com
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].authorization-type=awsecr
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].user=[your AWS accessKey]
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].secret=[your AWS secretKey]
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].extra[region]=us-west-1
+ * - spring.cloud.dataflow.container.registry-configurations[myamazonaws].extra[registryIds]=283191309520
+ * <p>
+ * Configure Azure private container registry
+ * - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].registry-host=tzolovazureregistry.azurecr.io
+ * - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].authorization-type=basicauth
+ * - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].user=[your Azure registry username]
+ * - spring.cloud.dataflow.container.registry-configurations[tzolovazureregistry].secret=[your Azure registry access password]
+ * <p>
+ * Harbor Registry. Same as DockerHub but with different registryAuthUri
+ * - spring.cloud.dataflow.container.registry-configurations[harbor].registry-host=demo.goharbor.io
+ * - spring.cloud.dataflow.container.registry-configurations[harbor].authorization-type=dockeroauth2
+ * - spring.cloud.dataflow.container.registry-configurations[harbor].user=admin
+ * - spring.cloud.dataflow.container.registry-configurations[harbor].secret=Harbor12345
+ * - spring.cloud.dataflow.container.registry-configurations[harbor].extra[registryAuthUri]=https://demo.goharbor.io/service/token?service=harbor-registry&scope=repository:repository-name:pull:
+ * }
  *
  * @author Christian Tzolov
  */
@@ -92,7 +92,7 @@ public class ContainerRegistryConfiguration {
 
 	/**
 	 * Container Registry Host (and optional port). Must me unique per registry.
-	 *
+	 * <p>
 	 * Used as a key to to map a container image to target registry where it is stored!
 	 */
 	private String registryHost;
@@ -102,6 +102,7 @@ public class ContainerRegistryConfiguration {
 	 * (determined by the {@link #authorizationType}) to authorize the registry access.
 	 */
 	private String user;
+
 	private String secret;
 
 	/**
@@ -197,14 +198,14 @@ public class ContainerRegistryConfiguration {
 	@Override
 	public String toString() {
 		return "ContainerRegistryConfiguration{" +
-				"registryHost='" + registryHost + '\'' +
-				", user='" + user + '\'' +
-				", secret='****'" + '\'' +
-				", authorizationType=" + authorizationType +
-				", manifestMediaType='" + manifestMediaType + '\'' +
-				", disableSslVerification='" + disableSslVerification + '\''
-				+", useHttpProxy='" + useHttpProxy + '\'' +
-				", extra=" + extra +
-				'}';
+			"registryHost='" + registryHost + '\'' +
+			", user='" + user + '\'' +
+			", secret='****'" + '\'' +
+			", authorizationType=" + authorizationType +
+			", manifestMediaType='" + manifestMediaType + '\'' +
+			", disableSslVerification='" + disableSslVerification + '\''
+			+ ", useHttpProxy='" + useHttpProxy + '\'' +
+			", extra=" + extra +
+			'}';
 	}
 }

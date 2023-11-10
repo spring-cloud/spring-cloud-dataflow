@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.Type;
 
 /**
  * Metadata for the Package.
@@ -89,12 +90,14 @@ public class PackageMetadata extends AbstractEntity {
 	 * Location to source code for this package.
 	 */
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String packageSourceUrl;
 
 	/**
 	 * The home page of the package
 	 */
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String packageHomeUrl;
 
 	/**
@@ -110,6 +113,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * A comma separated list of tags to use for searching
 	 */
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String tags;
 
 	/**
@@ -121,6 +125,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Brief description of the package. The packages README.md will contain more information.
 	 */
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String description;
 
 	/**
@@ -132,6 +137,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Url location of a icon.
 	 */
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String iconUrl;
 
 	public PackageMetadata() {

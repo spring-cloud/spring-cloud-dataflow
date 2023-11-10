@@ -29,10 +29,12 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hibernate.annotations.Type;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.util.StringUtils;
@@ -70,12 +72,14 @@ public class Release extends AbstractEntity {
 	private Long repositoryId;
 
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })

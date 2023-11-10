@@ -16,31 +16,22 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.support.DatabaseType;
 import org.springframework.boot.autoconfigure.batch.BasicBatchConfigurer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
-import org.springframework.cloud.dataflow.composedtaskrunner.support.SqlServerSequenceMaxValueIncrementer;
-import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
-import org.springframework.util.StringUtils;
 
 /**
  * A BatchConfigurer for CTR that will establish the transaction isolation level to ISOLATION_REPEATABLE_READ by default.
@@ -64,6 +55,7 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 	 * @param dataSource                    the underlying data source
 	 * @param transactionManagerCustomizers transaction manager customizers (or
 	 *                                      {@code null})
+	 * @param composedTaskProperties composed task properties
 	 */
 	protected ComposedBatchConfigurer(BatchProperties properties, DataSource dataSource,
 			TransactionManagerCustomizers transactionManagerCustomizers, ComposedTaskProperties composedTaskProperties) {
@@ -80,13 +72,7 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 	@Override
 	public JobRepository getJobRepository() {
 		JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
-		DefaultDataFieldMaxValueIncrementerFactory incrementerFactory =
-				new DefaultDataFieldMaxValueIncrementerFactory(this.incrementerDataSource) {
-					@Override
-					public DataFieldMaxValueIncrementer getIncrementer(String incrementerType, String incrementerName) {
-						return getIncrementerForApp(incrementerName);
-					}
-				};
+		MultiSchemaIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(this.incrementerDataSource);
 		factory.setIncrementerFactory(incrementerFactory);
 		factory.setDataSource(this.incrementerDataSource);
 		factory.setTransactionManager(this.getTransactionManager());
@@ -99,71 +85,4 @@ public class ComposedBatchConfigurer extends BasicBatchConfigurer {
 			throw new ComposedTaskException(exception.getMessage());
 		}
 	}
-
-	private DataFieldMaxValueIncrementer getIncrementerForApp(String incrementerName) {
-
-		DefaultDataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(this.incrementerDataSource);
-		DataFieldMaxValueIncrementer incrementer = null;
-		if(incrementerMap.containsKey(incrementerName)) {
-			return incrementerMap.get(incrementerName);
-		}
-		if (this.incrementerDataSource != null) {
-			String databaseType;
-			try {
-				databaseType = DatabaseType.fromMetaData(this.incrementerDataSource).name();
-			}
-			catch (MetaDataAccessException e) {
-				throw new IllegalStateException(e);
-			}
-			if (StringUtils.hasText(databaseType) && databaseType.equals("SQLSERVER")) {
-				if (!isSqlServerTableSequenceAvailable(incrementerName)) {
-					incrementer = new SqlServerSequenceMaxValueIncrementer(this.incrementerDataSource, incrementerName);
-					incrementerMap.put(incrementerName, incrementer);
-				}
-			}
-		}
-		if (incrementer == null) {
-			try {
-				incrementer = incrementerFactory.getIncrementer(DatabaseType.fromMetaData(this.incrementerDataSource).name(), incrementerName);
-				incrementerMap.put(incrementerName, incrementer);
-			}
-			catch (Exception exception) {
-				logger.warn(exception.getMessage(), exception);
-			}
-		}
-		return incrementer;
-	}
-
-	private boolean isSqlServerTableSequenceAvailable(String incrementerName) {
-		boolean result = false;
-		DatabaseMetaData metaData;
-		Connection connection = null;
-		try {
-			connection = this.incrementerDataSource.getConnection();
-			metaData = connection.getMetaData();
-			String[] types = {"TABLE"};
-			ResultSet tables = metaData.getTables(null, null, "%", types);
-			while (tables.next()) {
-				if (tables.getString("TABLE_NAME").equals(incrementerName)) {
-					result = true;
-					break;
-				}
-			}
-		}
-		catch (SQLException sqe) {
-			logger.warn(sqe.getMessage(), sqe);
-		}
-		finally {
-			if(connection != null) {
-				try {
-					connection.close();
-				}
-				catch (SQLException sqe) {
-					logger.warn(sqe.getMessage(), sqe);
-				}
-			}
-		}
-		return result;
-	}
-
 }

@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell.converter;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;

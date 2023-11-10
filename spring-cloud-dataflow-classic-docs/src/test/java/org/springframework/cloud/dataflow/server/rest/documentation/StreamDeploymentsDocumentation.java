@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +43,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -50,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
@@ -93,7 +94,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/scale/{streamName}/{appName}/instances/{count}", "timelog", "log", 1)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(pathParameters(
 						parameterWithName("streamName")
@@ -148,7 +148,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/{timelog}", "timelog")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
@@ -163,19 +162,17 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/{timelog1}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(json))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
 								.description("The name of an existing stream definition (required)"))
 				));
-		Thread.sleep(30000);
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest();
 		updateStreamRequest.setReleaseName("timelog1");
 		Map<String, String> updateProperties = new HashMap<>();
 		updateProperties.put("app.time.timestamp.format", "YYYYMMDD");
 		updateStreamRequest.setUpdateProperties(updateProperties);
-		final String releaseName = "myLogRelease";
+
 		final PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("timelog1");
 		packageIdentifier.setPackageVersion("1.0.0");
@@ -186,40 +183,35 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				post("/streams/deployments/update/{timelog1}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(convertObjectToJson(updateStreamRequest)))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
 								.description("The name of an existing stream definition (required)"))
 				));
-		Thread.sleep(30000);
 	}
 
 	@Test
 	public void rollback() throws Exception {
-		RollbackRequest rollbackRequest = new RollbackRequest();
+		final RollbackRequest rollbackRequest = new RollbackRequest();
 		rollbackRequest.setReleaseName("timelog1");
 		this.mockMvc.perform(
 				post("/streams/deployments/rollback/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
 										.description("The name of an existing stream definition (required)"),
 								parameterWithName("version").description("The version to rollback to"))));
-		Thread.sleep(30000);
 	}
 
 	@Test
 	public void history() throws Exception {
-		when(this.springDataflowServer.getSkipperClient().history(anyString()))
-				.thenReturn(Arrays.asList(new Release()));
+		when(springDataflowServer.getSkipperClient().history(anyString()))
+				.thenReturn(Collections.singletonList(new Release()));
 
 		this.mockMvc.perform(
 				get("/streams/deployments/history/{name}", "timelog1")
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
@@ -231,7 +223,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/streams/deployments/manifest/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
@@ -244,15 +235,13 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/streams/deployments/platform/list")
 						.contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 
 	public static String convertObjectToJson(Object object) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		String json = mapper.writeValueAsString(object);
-		return json;
+		return mapper.writeValueAsString(object);
 	}
 
 }

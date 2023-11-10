@@ -463,14 +463,17 @@ public class SkipperStreamDeployer implements StreamDeployer {
     }
 
     public void undeployStream(String streamName) {
-        Collection<PackageMetadata> packageMetadataResources = this.skipperClient.search(streamName, false);
-        if (!packageMetadataResources.isEmpty()) {
+        Collection<PackageMetadata> packages = this.skipperClient.search(streamName, false);
+        boolean packageExists = packages.stream().map(PackageMetadata::getName).anyMatch(s -> s.equalsIgnoreCase(streamName));
+        if (packageExists) {
             try {
                 this.skipperClient.delete(streamName, true);
             } catch (ReleaseNotFoundException e) {
                 logger.info("Release not found for {}. Deleting the package {}", streamName, streamName);
                 this.skipperClient.packageDelete(streamName);
-            }
+            };
+        } else {
+            logger.info("Can not find package named '{}' - bypassing Skipper delete.", streamName);
         }
     }
 

@@ -137,7 +137,7 @@ public class DefaultYamlConverter implements YamlConverter {
 	}
 
 	/**
-	 * Default implementation of a {@link Builder} building a {@link DefaultYamlConverter}.
+	 * Default implementation of a {@link org.springframework.cloud.skipper.support.yaml.YamlConverter.Builder} building a {@link DefaultYamlConverter}.
 	 */
 	public static class DefaultBuilder implements Builder {
 

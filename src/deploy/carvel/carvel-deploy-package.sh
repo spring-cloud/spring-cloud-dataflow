@@ -22,7 +22,7 @@ fi
 if [ "$6" != "" ]; then
     SA=$6
 else
-    SA=$NS-sa
+    SA=scdf-sa
 fi
 if [ ! -f "$VALUES_FILE" ]; then
     echo "Cannot find $VALUES_FILE"
@@ -35,9 +35,12 @@ check_env PACKAGE_VERSION
 check_env VALUES_FILE
 echo "Install package $PACKAGE_NAME as $APP_NAME"
 if [ "$DEBUG" = "true" ]; then
-    ARGS="--debug --json"
+    ARGS="--debug"
 else
     ARGS=""
+fi
+if [ "$SA" = "" ]; then
+    SA=scdf-sa
 fi
 echo "Installing $APP_NAME from $PACKAGE_NAME:$PACKAGE_VERSION"
 kctrl package install --package-install "$APP_NAME" \
@@ -46,6 +49,9 @@ kctrl package install --package-install "$APP_NAME" \
   --values-file "$VALUES_FILE" \
   --version "$PACKAGE_VERSION" --namespace "$NS" --yes \
   --wait --wait-check-interval 10s $ARGS
-
+RC=$?
+if ((RC!=0)); then
+    kubectl --namespace "$NS" describe package/$PACKAGE_NAME
+fi
 kctrl app status --app "$APP_NAME" --namespace "$NS" --json
 kctrl package installed status --package-install "$APP_NAME" --namespace "$NS"

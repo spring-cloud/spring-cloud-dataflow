@@ -20,7 +20,7 @@ version: '3'
 #                             can be reached on the ports they expose.
 services:
   mariadb:
-    image: mariadb:10.4.22
+    image: mariadb:10.6
     container_name: dataflow-mariadb
     environment:
       LANG: en.US-utf8
@@ -28,14 +28,14 @@ services:
       MARIADB_DATABASE: 'dataflow'
       MARIADB_USER: 'spring'
       MARIADB_PASSWORD: 'spring'
-      MARIADB_ROOT_PASSWORD: 'spring'
+      MARIADB_ROOT_PASSWORD: 'yourpassword'
     ports:
       - "3306:3306"
     expose:
       - 3306
 
   rabbitmq:
-    image: rabbitmq:3.7
+    image: rabbitmq:3.8-management
     container_name: dataflow-rabbitmq
     environment:
       LANG: en_US.utf8
@@ -43,8 +43,10 @@ services:
       JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
     ports:
       - "5672:5672"
+      - "15672:15672"
     expose:
       - 5672
+      - 15672
 
   skipper-server:
     depends_on:
@@ -53,7 +55,7 @@ services:
     profiles:
       - skipper
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.0-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.2-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper
     ports:
       - "7577:7577"
@@ -62,16 +64,11 @@ services:
       SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW: 20000
       SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH: 20190
       SPRING_DATASOURCE_URL: 'jdbc:mariadb://mariadb:3306/dataflow'
-      SPRING_DATASOURCE_USERNAME: 'spring'
-      SPRING_DATASOURCE_PASSWORD: 'spring'
+      SPRING_JPA_DATABASE_PLATFORM: 'org.hibernate.dialect.MariaDB106Dialect'
+      SPRING_DATASOURCE_USERNAME: 'root'
+      SPRING_DATASOURCE_PASSWORD: 'yourpassword'
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'org.mariadb.jdbc.Driver'
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER: 'DEBUG'
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh &&
-         chmod a+x /tmp/wait-for-it.sh &&
-         /tmp/wait-for-it.sh mariadb:3306 -- /cnb/process/web"
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}

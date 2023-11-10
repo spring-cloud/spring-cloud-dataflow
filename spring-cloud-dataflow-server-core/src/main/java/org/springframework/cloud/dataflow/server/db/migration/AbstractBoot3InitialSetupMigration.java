@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
  * @author Chris Bono
  */
 public abstract class AbstractBoot3InitialSetupMigration extends AbstractMigration {
-
 	public AbstractBoot3InitialSetupMigration() {
 		super(null);
 	}
@@ -53,4 +52,5 @@ public abstract class AbstractBoot3InitialSetupMigration extends AbstractMigrati
 	 * @return the list of sql commands
 	 */
 	public abstract List<SqlCommand> createBatch5Tables();
+
 }

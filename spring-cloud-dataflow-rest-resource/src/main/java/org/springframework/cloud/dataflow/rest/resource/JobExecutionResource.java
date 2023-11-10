@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
  * @author Glenn Renfro
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class JobExecutionResource extends RepresentationModel<JobExecutionResource> {
 
@@ -86,6 +87,8 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private TimeZone timeZone;
 
+	private String schemaTarget;
+
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
@@ -103,19 +106,20 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
+		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
-		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
+		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
+		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
 			this.restartable = JobUtils.isJobExecutionRestartable(jobExecution);
 			this.abandonable = JobUtils.isJobExecutionAbandonable(jobExecution);
 			this.stoppable = JobUtils.isJobExecutionStoppable(jobExecution);
-		}
-		else {
+		} else {
 			this.name = "?";
 		}
 
@@ -130,7 +134,6 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
 			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
 		}
-
 	}
 
 	public TimeZone getTimeZone() {
@@ -195,6 +198,10 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	public boolean isDefined() {
 		return defined;
+	}
+
+	public String getSchemaTarget() {
+		return schemaTarget;
 	}
 
 	/**

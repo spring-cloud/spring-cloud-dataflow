@@ -96,6 +96,7 @@ public class ContainerImage {
 
 	/**
 	 * Helper method that returns the full Registry host address (host:port)
+	 * @return The registry host name
 	 */
 	public String getRegistryHost() {
 		return this.hostname + (StringUtils.hasText(this.port) ? ":" + this.port : "");
@@ -103,6 +104,7 @@ public class ContainerImage {
 
 	/**
 	 * Helper method that returns the full Repository name (e.g. namespace/registryName) without the tag or digest.
+	 * @return The repository name.
 	 */
 	public String getRepository() {
 		String ns = StringUtils.hasText(this.repositoryNamespace) ? this.repositoryNamespace + "/" : "";

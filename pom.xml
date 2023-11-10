@@ -4,7 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow</artifactId>
-	<version>2.11.0-SNAPSHOT</version>
+	<version>2.11.2-SNAPSHOT</version>
+	<name>spring-cloud-dataflow</name>
+	<description>Spring Cloud Dataflow</description>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<organization>
@@ -49,13 +51,17 @@
 	</developers>
 	<modules>
 		<module>spring-cloud-dataflow-build</module>
+
 		<module>spring-cloud-dataflow-common</module>
 		<module>spring-cloud-common-security-config</module>
 		<module>spring-cloud-dataflow-parent</module>
 		<module>spring-cloud-dataflow-container-registry</module>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-core-dsl</module>
+		<module>spring-cloud-dataflow-schema-core</module>
 		<module>spring-cloud-dataflow-core</module>
+		<module>spring-cloud-dataflow-schema</module>
+		<module>spring-cloud-dataflow-aggregate-task</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-rest-resource</module>
 		<module>spring-cloud-dataflow-audit</module>
@@ -78,7 +84,24 @@
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-dataflow-classic-docs</module>
 		<module>spring-cloud-dataflow-docs</module>
+		<module>spring-cloud-dataflow-package</module>
 	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-eclipse-batch</artifactId>
+			<version>3.0.8-01</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>3.0.19</version>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -89,6 +112,38 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+				<version>2.1.1</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-eclipse-batch</artifactId>
+						<version>3.0.8-01</version>
+					</dependency>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+						<version>3.0.19</version>
+						<type>pom</type>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+						<configuration>
+							<properties>
+								<basedir>${project.basedir}</basedir>
+							</properties>
+							<source>${project.basedir}/src/test/groovy/check-pom.groovy</source>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

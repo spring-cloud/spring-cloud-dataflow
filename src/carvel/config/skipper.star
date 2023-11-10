@@ -37,11 +37,26 @@ def skipper_container_env():
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_PATHS", "value": "/workspace/runtime/secrets"}])
   if non_empty_string(skipper_db_dialect()):
-    envs.extend([{"name": "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT", "value": skipper_db_dialect()}])
+    envs.extend([{"name": "SPRING_JPA_DATABASE_PLATFORM", "value": skipper_db_dialect()}])
   end
   if non_empty_string(data.values.scdf.skipper.database.secretName):
-    envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretUsernameKey}}}])
-    envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretPasswordKey}}}])
+    if non_empty_string(data.values.scdf.skipper.database.secretUsernameKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretUsernameKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": "username"}}}])
+    end
+    if non_empty_string(data.values.scdf.skipper.database.secretPasswordKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": data.values.scdf.skipper.database.secretPasswordKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.skipper.database.secretName, "key": "password"}}}])
+    end
+  else:
+    if non_empty_string(data.values.scdf.skipper.database.username):
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "value": data.values.scdf.skipper.database.username}])
+    end
+    if non_empty_string(data.values.scdf.skipper.database.password):
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "value": data.values.scdf.skipper.database.password}])
+    end
   end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])

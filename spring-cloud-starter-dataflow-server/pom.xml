@@ -6,14 +6,15 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
+		<version>2.11.2-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-starter-dataflow-server</artifactId>
+	<name>spring-cloud-starter-dataflow-server</name>
 	<description>Data Flow Server Starter</description>
 	<packaging>jar</packaging>
 	<properties>
-		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -86,6 +87,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<threadCount>1</threadCount>
+					<forkCount>1</forkCount>
 					<excludes>
 						<exclude>**/local/security/**.java</exclude>
 					</excludes>
@@ -110,6 +113,20 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
-K8S=$(realpath $SCDIR/../../kubernetes)
+K8S=$(realpath $SCDIR/../kubernetes)
+if [ ! -d "$K8S" ]; then
+  K8S=$(realpath $SCDIR/../../kubernetes)
+fi
 
 $SCDIR/prepare-local-namespace.sh prometheus prometheus
 kubectl create serviceaccount prometheus-rsocket-proxy --namespace prometheus

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
@@ -6,27 +9,30 @@ if [ "$NS" = "" ]; then
     echo "Expected env var NS"
     exit 1
 fi
-SA=$NS-sa
+
 if [ "$SCDF_TYPE" == "" ]; then
-    SCDF_TYPE=pro
+    echo "Environmental variable SCDF_TYPE must defined."
+    exit 1
 fi
-if [ "$1" != "" ]; then
-    SCDF_TYPE=$1
+if [ "$PACKAGE_VERSION" == "" ]; then
+    echo "Environmental variable PACKAGE_VERSION must defined."
+    exit 1
 fi
 
 case $SCDF_TYPE in
 "pro")
-    APP_NAME=scdf-pro
-    PACKAGE_VERSION=1.5.3-SNAPSHOT
+    APP_NAME=scdf-pro-app
     ;;
 "oss")
-    APP_NAME=scdf-oss
-    PACKAGE_VERSION=2.11.0-SNAPSHOT
+    APP_NAME=scdf-oss-app
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
+if [ "$1" != "" ]; then
+    APP_NAME="$1"
+fi
 echo "Updating SCDF-$SCDF_TYPE $PACKAGE_VERSION as $APP_NAME"
 if [ "$DATAFLOW_VERSION" != "" ]; then
     yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml

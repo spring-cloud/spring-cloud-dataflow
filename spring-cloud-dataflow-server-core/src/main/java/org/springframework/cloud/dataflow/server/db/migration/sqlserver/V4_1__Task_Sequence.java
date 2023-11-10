@@ -69,7 +69,7 @@ public class V4_1__Task_Sequence extends AbstractMigration {
 			logger.info("Looks like we have TASK_SEQ table, initiate fix");
 		}
 		catch (Exception e) {
-			logger.debug("Unable to query TASK_SEQ table, a TASK_SEQ sequence may already exist", e);
+			logger.debug("Unable to query TASK_SEQ table, a TASK_SEQ sequence may already exist" + e);
 		}
 		// will result call to get commands from this class and then we choose which ones to run
 		super.migrate(context);

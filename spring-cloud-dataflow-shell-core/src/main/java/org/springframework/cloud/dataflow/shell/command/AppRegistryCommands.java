@@ -25,11 +25,11 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
@@ -142,6 +142,9 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 				result.addHeader(String.format("Resource URI: %s", info.getUri()));
 				if (info.getShortDescription() != null) {
 					result.addHeader(info.getShortDescription());
+				}
+				if (info.getBootVersion() != null) {
+					result.addHeader(String.format("Boot version: %s:", info.getBootVersion().getBootVersion()));
 				}
 				if (options == null) {
 					result.addHeader("Application options metadata is not available");

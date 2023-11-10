@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Glenn Renfro
  */
+@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskSchedulerDocumentation extends BaseDocumentation {
 

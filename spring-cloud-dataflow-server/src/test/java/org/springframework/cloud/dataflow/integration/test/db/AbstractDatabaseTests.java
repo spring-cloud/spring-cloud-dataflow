@@ -60,6 +60,57 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 		assertDataflowServerRunning(this.dataflowCluster);
 	}
 
+	@Test
+	@DataflowMain
+	public void testLatestSharedDbJdk8() {
+		log.info("Running testLatestSharedDb()");
+		// start defined database
+		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
+		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
+
+		// start defined skipper server and check it started
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk8");
+		assertSkipperServerRunning(this.dataflowCluster);
+
+		// start defined dataflow server and check it started
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk8");
+		assertDataflowServerRunning(this.dataflowCluster);
+	}
+
+	@Test
+	@DataflowMain
+	public void testLatestSharedDbJdk11() {
+		log.info("Running testLatestSharedDb()");
+		// start defined database
+		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
+		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
+
+		// start defined skipper server and check it started
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk11");
+		assertSkipperServerRunning(this.dataflowCluster);
+
+		// start defined dataflow server and check it started
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk11");
+		assertDataflowServerRunning(this.dataflowCluster);
+	}
+
+	@Test
+	@DataflowMain
+	public void testLatestSharedDbJdk17() {
+		log.info("Running testLatestSharedDb()");
+		// start defined database
+		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
+		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
+
+		// start defined skipper server and check it started
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk17");
+		assertSkipperServerRunning(this.dataflowCluster);
+
+		// start defined dataflow server and check it started
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk17");
+		assertDataflowServerRunning(this.dataflowCluster);
+	}
+
 	protected Integer runCountQuery(String sql) {
 		try {
 			return runQuery(sql, Integer.class);
@@ -98,21 +149,29 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_6);
 		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_7);
+		log.info("Launching {},${}", TagNames.SKIPPER_2_6, TagNames.DATAFLOW_2_7);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
 		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_7, TagNames.DATAFLOW_2_8);
+		log.info("Launching {},${}", TagNames.SKIPPER_2_7, TagNames.DATAFLOW_2_8);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
 		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_8, TagNames.DATAFLOW_2_9);
+		log.info("Launching {},${}", TagNames.SKIPPER_2_8, TagNames.DATAFLOW_2_9);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
 		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_2_9, TagNames.DATAFLOW_2_10);
+		log.info("Launching {},${}", TagNames.SKIPPER_2_9, TagNames.DATAFLOW_2_10);
 		assertSkipperServerRunning(this.dataflowCluster);
 		assertDataflowServerRunning(this.dataflowCluster);
 
+		this.dataflowCluster.replaceSkipperAndDataflow(TagNames.SKIPPER_main, TagNames.DATAFLOW_main);
+		log.info("Launching {},${}", TagNames.SKIPPER_main, TagNames.DATAFLOW_main);
+		assertSkipperServerRunning(this.dataflowCluster);
+		assertDataflowServerRunning(this.dataflowCluster);
 
 	}
 }

@@ -4,13 +4,16 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
+		<version>2.11.2-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-platform-cloudfoundry</artifactId>
+	<name>spring-cloud-dataflow-platform-cloudfoundry</name>
+	<description>Data Platform Cloud Foundry</description>
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -66,6 +69,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.0.0</version>
+				<configuration>
+					<threadCount>1</threadCount>
+					<forkCount>1</forkCount>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
@@ -73,6 +80,34 @@
 						<version>3.0.0</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>source</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

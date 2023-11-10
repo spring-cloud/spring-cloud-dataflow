@@ -47,7 +47,7 @@ spec:
             periodSeconds: 3
           resources:
             requests:
-              cpu: 0.5
+              cpu: '0.5'
               memory: 1024Mi
           env:
             - name: LANG
@@ -83,9 +83,6 @@ spec:
               # Provide the Skipper service location
             - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
               value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
-              # Add Maven repo for metadata artifact resolution for all stream apps
-            - name: SPRING_APPLICATION_JSON
-              value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -116,16 +113,29 @@ spec:
                 configMapKeyRef:
                   key: SPRING_DATASOURCE_VALIDATION_QUERY
                   name: scdf-datasource
-            - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
+            - name: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE'
               valueFrom:
                 configMapKeyRef:
-                  key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE
-                  name: scdf-datasource
+                  key: 'SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE'
+                  name: 'scdf-datasource'
             - name: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
               valueFrom:
                 configMapKeyRef:
                   key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
                   name: scdf-datasource
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              valueFrom:
+                configMapKeyRef:
+                  key: SPRING_JPA_DATABASE_PLATFORM
+                  name: scdf-datasource
+            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED'
+              value: 'true'
+            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED'
+              value: 'true'
+            - name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL'
+              value: 'http://localhost:3000'
+            - name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_TYPE'
+              value: 'GRAFANA'
       serviceAccountName: scdf-sa
       volumes:
         - name: config

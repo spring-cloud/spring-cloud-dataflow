@@ -35,6 +35,9 @@ import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -51,14 +54,14 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION";
 
-	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
-			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=?";
+	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E " +
+			"JOIN %PREFIX%JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID where I.JOB_NAME=?";
 
-	private static final String GET_COUNT_BY_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
-			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.STATUS = ?";
+	private static final String GET_COUNT_BY_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E " +
+			"JOIN %PREFIX%JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID where E.STATUS = ?";
 
-	private static final String GET_COUNT_BY_JOB_NAME_AND_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
-			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? AND E.STATUS = ?";
+	private static final String GET_COUNT_BY_JOB_NAME_AND_STATUS = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E " +
+			"JOIN %PREFIX%JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID where I.JOB_NAME=? AND E.STATUS = ?";
 
 	private static final String FIELDS = "E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, "
 			+ "E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, I.JOB_INSTANCE_ID, I.JOB_NAME";
@@ -68,8 +71,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 
 	private static final String GET_RUNNING_EXECUTIONS = "SELECT " + FIELDS
-			+ " from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I "
-			+ "where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and E.END_TIME is NULL";
+			+ " from %PREFIX%JOB_EXECUTION E JOIN %PREFIX%JOB_INSTANCE I ON E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID where E.END_TIME is NULL";
 
 	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
 
@@ -84,7 +86,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String TASK_EXECUTION_ID_FILTER =
 			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
 
-	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "TASK_TASK_BATCH B";
+	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%PREFIX%TASK_BATCH B";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
@@ -274,8 +276,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public List<JobExecutionWithStepCount> getJobExecutionsWithStepCountFilteredByTaskExecutionId(
 			int taskExecutionId, int start, int count) {
+		// TODO find schemaVersionTarget for the taskExecutionId
 		if (start <= 0) {
-			return getJdbcTemplate().query(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+			return getJdbcTemplate().query(SchemaUtilities.getQuery(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
+					SchemaVersionTarget.defaultTarget().getName()),
 					new JobExecutionStepCountRowMapper(), taskExecutionId);
 		}
 		try {

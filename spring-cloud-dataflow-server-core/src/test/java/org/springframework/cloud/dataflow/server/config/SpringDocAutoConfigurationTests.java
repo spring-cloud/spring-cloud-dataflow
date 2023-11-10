@@ -54,7 +54,7 @@ public class SpringDocAutoConfigurationTests {
 	//	 - loads the config props auto-config to ensure config props beans get bound to the env
 	//	 - loads all auto-configs that are loaded by Springdoc
 	//   - loads custom Springdoc auto-config
-	private WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
+	private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
 			.withPropertyValues("spring.config.additional-location=classpath:/META-INF/dataflow-server-defaults.yml")
 			.withInitializer(new ConfigDataApplicationContextInitializer())
 			.withConfiguration(AutoConfigurations.of(
@@ -78,7 +78,7 @@ public class SpringDocAutoConfigurationTests {
 							.hasSingleBean(SpringDocAutoConfiguration.class)
 							.hasBean("springDocWebSecurityCustomizer")
 							.hasBean("springDocJsonDecodeFilterRegistration");
-					verfiyFilterHasUrlPatterns(context,"/v3", "/v3/*", "/v3/api-docs", "/v3/api-docs/*");
+					verifyFilterHasUrlPatterns(context,"/v3", "/v3/*", "/v3/api-docs", "/v3/api-docs/*");
 					verifyCustomizerHasIgnorePatterns(context, "/swagger-ui/**",
 							"/v3/**",
 							"/swagger-ui.html",
@@ -102,7 +102,7 @@ public class SpringDocAutoConfigurationTests {
 							.hasSingleBean(SpringDocAutoConfiguration.class)
 							.hasBean("springDocWebSecurityCustomizer")
 							.hasBean("springDocJsonDecodeFilterRegistration");
-					verfiyFilterHasUrlPatterns(context,"/v4/foo", "/v4/foo/*", "/v4/bar", "/v4/bar/*");
+					verifyFilterHasUrlPatterns(context,"/v4/foo", "/v4/foo/*", "/v4/bar", "/v4/bar/*");
 					verifyCustomizerHasIgnorePatterns(context, "/swagger-ui/**",
 							"/v4/foo/**",
 							"/swagger-ui.html",
@@ -115,7 +115,7 @@ public class SpringDocAutoConfigurationTests {
 				});
 	}
 
-	private void verfiyFilterHasUrlPatterns(AssertableWebApplicationContext context, String... expected) {
+	private void verifyFilterHasUrlPatterns(AssertableWebApplicationContext context, String... expected) {
 		FilterRegistrationBean<SpringDocJsonDecodeFilter> filterRegistration =
 				context.getBean("springDocJsonDecodeFilterRegistration", FilterRegistrationBean.class);
 		assertThat(filterRegistration.getUrlPatterns()).containsExactlyInAnyOrder(expected);

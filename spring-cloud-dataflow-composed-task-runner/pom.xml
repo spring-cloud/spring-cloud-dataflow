@@ -6,17 +6,21 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
+		<version>2.11.2-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
-	<version>2.11.0-SNAPSHOT</version>
+	<version>2.11.2-SNAPSHOT</version>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-composed-task-runner</artifactId>
+	<name>spring-cloud-dataflow-composed-task-runner</name>
+	<description>Spring Cloud Data Flow Composed Task Runner</description>
+
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>1.8</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
 		<failIfNoTests>true</failIfNoTests>
+		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -49,6 +53,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>[2.2.222,)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
@@ -116,9 +121,16 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.micrometer.prometheus</groupId>
 			<artifactId>prometheus-rsocket-spring</artifactId>
-			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer.prometheus</groupId>
+			<artifactId>prometheus-rsocket-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -141,6 +153,34 @@
 				<configuration>
 					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>source</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

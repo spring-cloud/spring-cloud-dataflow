@@ -89,9 +89,8 @@ public class SecurityController {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 
-				for (Object authority : authentication.getAuthorities()) {
-					final GrantedAuthority grantedAuthority = (GrantedAuthority) authority;
-					securityInfo.addRole(grantedAuthority.getAuthority());
+				for (GrantedAuthority authority : authentication.getAuthorities()) {
+					securityInfo.addRole(authority.getAuthority());
 				}
 			}
 

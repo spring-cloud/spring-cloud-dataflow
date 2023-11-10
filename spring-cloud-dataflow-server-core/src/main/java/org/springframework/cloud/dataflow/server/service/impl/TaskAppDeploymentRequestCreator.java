@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
@@ -141,6 +143,18 @@ public class TaskAppDeploymentRequestCreator {
 		List<String> updatedCmdLineArgs = (taskExecutionInformation.isComposed()) ? this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName, registeredAppName) : this.updateCommandLineArgs(commandLineArgs,
 				taskExecution, platformName);
+		if(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE.equals(platformType)) {
+			//Extracting boot version from app deployer property ex: 'app.timestamp3.spring.cloud.deployer.bootVersion=3'
+			String bootVersion = deployerDeploymentProperties.entrySet().stream()
+				.filter((e) -> e.getKey().endsWith(".bootVersion"))
+				.findFirst().map(Map.Entry::getValue)
+				.orElse(null);
+			logger.debug("Resolved default bootVersion = " + bootVersion);
+			if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
+				logger.info("AppBootSchemaVersion = " + AppBootSchemaVersion.BOOT3.getBootVersion());
+				deployerDeploymentProperties.put("spring.cloud.deployer.cloudfoundry.env.JBP_CONFIG_OPEN_JDK_JRE", "{jre: {version: 17.+}}");
+			}
+		}
 		AppDeploymentRequest request = new AppDeploymentRequest(revisedDefinition,
 				taskExecutionInformation.getAppResource(),
 				deployerDeploymentProperties, updatedCmdLineArgs);

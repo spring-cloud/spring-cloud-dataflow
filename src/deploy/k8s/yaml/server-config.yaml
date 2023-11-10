@@ -15,6 +15,12 @@ data:
         metrics:
           export:
             enabled: false
+    maven:
+      remoteRepositories:
+        sprinklerRepo: 
+          url: https://maven.pkg.github.com/corneil/sprinkler-demos
+          username: 'corneil'
+          password: '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'
     spring:
       output:
         ansi:
@@ -24,7 +30,9 @@ data:
           kubernetes:
             imagePullPolicy: IfNotPresent
             imagePullSecret: registry-key
-        dataflow:
+            containerSecurityContext:
+              runAsUser:
+        dataflow:          
           metrics.dashboard:
             url: 'http://localhost:3000'
           task:

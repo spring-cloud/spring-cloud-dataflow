@@ -1,5 +1,4 @@
-#!/bin/bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 bold="\033[1m"
 dim="\033[2m"
@@ -11,7 +10,6 @@ if [ "$NS" = "" ]; then
 fi
 start_time=$(date +%s)
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-K8S_PATH=$(realpath $SCDIR/k8s)
 set -e
 if [ "$K8S_DRIVER" = "" ]; then
     K8S_DRIVER=kind
@@ -19,7 +17,7 @@ fi
 if [ "$1" != "" ]; then
     export K8S_VERSION="$1"
 else
-    export K8S_VERSION="1.24.12"
+    export K8S_VERSION="1.25"
 fi
 set +e
 case "$K8S_DRIVER" in
@@ -44,10 +42,16 @@ case "$K8S_DRIVER" in
         exit 2
     fi
     ;;
+"microk8s")
+    echo "Configure Microk8s"
+    microk8s enable registry
+    microk8s enable metallb:172.18.0.1-172.18.0.254
+    microk8s kubectl get all --all-namespaces
+    ;;
 *)
     echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"
     # K8S_DRIVER=kvm2, docker, vmware, virtualbox, podman, vmwarefusion or hyperkit
-    if [ "$K8S_DRIVER" != "docker" ] && [ "$MK_ARGS" = "" ]; then
+    if [ "$MK_ARGS" = "" ]; then
         MK_ARGS="--cpus=8 --memory=12g"
     fi
     minikube start $MK_ARGS "--driver=$K8S_DRIVER" "--kubernetes-version=$K8S_VERSION"

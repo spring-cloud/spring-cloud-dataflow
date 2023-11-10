@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.actuate.info.BuildInfoContributor;
+import org.springframework.boot.actuate.info.GitInfoContributor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -41,6 +43,7 @@ import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -56,9 +59,9 @@ import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
-import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnStreamsEnabled;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
@@ -101,9 +104,11 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.cloud.dataflow.server.service.SchemaService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
 import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
@@ -116,7 +121,6 @@ import org.springframework.cloud.dataflow.server.service.TaskValidationService;
 import org.springframework.cloud.dataflow.server.service.impl.AppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunnerConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultLauncherService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultStreamValidationService;
@@ -130,10 +134,10 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
 import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
-import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -201,10 +205,12 @@ public class DataFlowControllerAutoConfiguration {
 										   VersionInfoProperties versionInfoProperties,
 										   SecurityStateBean securityStateBean,
 										   DataflowMetricsProperties monitoringDashboardInfoProperties,
-	                                       @Nullable OAuth2ClientProperties oAuth2ClientProperties) {
+	                     @Nullable OAuth2ClientProperties oAuth2ClientProperties,
+                       ObjectProvider<GitInfoContributor> gitInfoContributor,
+										   ObjectProvider<BuildInfoContributor> buildInfoContributor) {
 		return new AboutController(streamDeployer.getIfAvailable(), launcherRepository.getIfAvailable(),
 				featuresProperties, versionInfoProperties, securityStateBean, monitoringDashboardInfoProperties,
-				oAuth2ClientProperties);
+				oAuth2ClientProperties, gitInfoContributor, buildInfoContributor);
 	}
 
 	@Bean
@@ -217,14 +223,7 @@ public class DataFlowControllerAutoConfiguration {
 		return new RestControllerAdvice();
 	}
 
-	@Configuration
-	public static class SchemaConfiguration {
-		@Bean
-		@ConditionalOnMissingBean
-		public SchemaService schemaService() {
-			return new DefaultSchemaService();
-		}
-	}
+
 
 	@Configuration
 	public static class AppRegistryConfiguration {
@@ -280,13 +279,25 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskExecutionController taskExecutionController(TaskExplorer explorer,
-															   TaskExecutionService taskExecutionService,
-															   TaskDefinitionRepository taskDefinitionRepository, TaskExecutionInfoService taskExecutionInfoService,
-															   TaskDeleteService taskDeleteService, TaskJobService taskJobService) {
-			return new TaskExecutionController(explorer, taskExecutionService, taskDefinitionRepository,
+		public TaskExecutionController taskExecutionController(
+				AggregateTaskExplorer explorer,
+				AggregateExecutionSupport aggregateExecutionSupport,
+			   	TaskExecutionService taskExecutionService,
+				TaskDefinitionRepository taskDefinitionRepository,
+				TaskDefinitionReader taskDefinitionReader,
+				TaskExecutionInfoService taskExecutionInfoService,
+				TaskDeleteService taskDeleteService,
+				TaskJobService taskJobService
+		) {
+			return new TaskExecutionController(explorer,
+					aggregateExecutionSupport,
+					taskExecutionService,
+					taskDefinitionRepository,
+					taskDefinitionReader,
 					taskExecutionInfoService,
-					taskDeleteService, taskJobService);
+					taskDeleteService,
+					taskJobService
+			);
 		}
 
 		@Bean
@@ -297,15 +308,22 @@ public class DataFlowControllerAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
-				TaskExecutionService taskExecutionService, TaskJobService taskJobService, TaskExplorer taskExplorer) {
-			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
+				TaskExecutionService taskExecutionService,
+				TaskJobService taskJobService,
+				AggregateTaskExplorer taskExplorer,
+				AggregateExecutionSupport aggregateExecutionSupport
+		) {
+			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer, aggregateExecutionSupport);
 		}
 
 		@Bean
-		public TaskDefinitionController taskDefinitionController(TaskExplorer taskExplorer,
-																 TaskDefinitionRepository repository, TaskSaveService taskSaveService,
+		public TaskDefinitionController taskDefinitionController(
+				AggregateTaskExplorer taskExplorer,
+				TaskDefinitionRepository repository,
+				TaskSaveService taskSaveService,
 																 TaskDeleteService taskDeleteService,
-																 TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
+				TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider
+		) {
 			return new TaskDefinitionController(taskExplorer, repository, taskSaveService, taskDeleteService,
 					taskDefinitionAssemblerProvider);
 		}
@@ -326,13 +344,13 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public JobStepExecutionController jobStepExecutionController(JobService service) {
-			return new JobStepExecutionController(service);
+		public JobStepExecutionController jobStepExecutionController(TaskJobService taskJobService) {
+			return new JobStepExecutionController(taskJobService);
 		}
 
 		@Bean
-		public JobStepExecutionProgressController jobStepExecutionProgressController(JobService service) {
-			return new JobStepExecutionProgressController(service);
+		public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
+			return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
 		}
 
 		@Bean
@@ -495,9 +513,10 @@ public class DataFlowControllerAutoConfiguration {
 		public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 																		   CommonApplicationProperties commonApplicationProperties,
 																		   ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
-																		   StreamDefinitionService streamDefinitionService) {
+																		   StreamDefinitionService streamDefinitionService,
+																		   PropertyResolver propertyResolver) {
 			return new AppDeploymentRequestCreator(appRegistry, commonApplicationProperties,
-					applicationConfigurationMetadataResolver, streamDefinitionService);
+					applicationConfigurationMetadataResolver, streamDefinitionService, propertyResolver);
 		}
 
 		@Bean

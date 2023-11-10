@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.AuditActionType;
+import org.springframework.cloud.dataflow.core.AuditOperationType;
+import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -55,6 +60,7 @@ import org.springframework.cloud.dataflow.server.configuration.TaskServiceDepend
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SchedulerServiceProperties;
+import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.CreateScheduleException;
@@ -63,8 +69,10 @@ import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.listener.TaskException;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -131,6 +139,16 @@ public class DefaultSchedulerServiceTests {
 
 	@Autowired
 	private  AuditRecordService auditRecordService;
+
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
+	@Autowired
+	private TaskDefinitionReader taskDefinitionReader;
+	@Autowired
+	private TaskExecutionInfoService taskExecutionInfoService;
+
+	@Autowired
+	private PropertyResolver propertyResolver;
 
 	@Autowired
 	private ApplicationConfigurationMetadataResolver metaDataResolver;
@@ -205,11 +223,22 @@ public class DefaultSchedulerServiceTests {
 		launchers.add(launcher);
 		List<TaskPlatform> taskPlatform = Collections.singletonList(new TaskPlatform("testTaskPlatform", launchers));
 
-		return new DefaultSchedulerService(this.commonApplicationProperties,
-				taskPlatform, this.taskDefinitionRepository,
-				this.appRegistry, this.resourceLoader,
-				this.taskConfigurationProperties, mock(DataSourceProperties.class), null,
-				this.metaDataResolver, this.schedulerServiceProperties, this.auditRecordService,
+		return new DefaultSchedulerService(
+				this.commonApplicationProperties,
+				taskPlatform,
+				this.taskDefinitionRepository,
+				this.appRegistry,
+				this.resourceLoader,
+				this.taskConfigurationProperties,
+				mock(DataSourceProperties.class),
+				null,
+				this.metaDataResolver,
+				this.schedulerServiceProperties,
+				this.auditRecordService,
+				aggregateExecutionSupport,
+				taskDefinitionReader,
+				taskExecutionInfoService,
+				propertyResolver,
 				this.composedTaskRunnerConfigurationProperties);
 	}
 
@@ -221,8 +250,15 @@ public class DefaultSchedulerServiceTests {
 
 	@Test
 	public void testScheduleCTR(){
-		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
+		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, Collections.singletonList("app.demo.0=foo=bar"));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
+		AuditActionType[] createActions = {AuditActionType.CREATE};
+		AuditOperationType[] operationTypes = {AuditOperationType.SCHEDULE};
+		Page<AuditRecord> auditPropertyResults = auditRecordService.
+				findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(PageRequest.of(0, 500), createActions,
+						operationTypes, null, null);
+		assertThat(auditPropertyResults.getTotalElements()).isEqualTo(1);
+		assertThat(auditPropertyResults.getContent().get(0).getAuditData()).contains("--composed-task-app-arguments.base64_YXBwLmRlbW8uMA=foo=bar");
 	}
 
 	@Test(expected = CreateScheduleException.class)
@@ -408,11 +444,24 @@ public class DefaultSchedulerServiceTests {
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		List<TaskPlatform> taskPlatform = Collections.singletonList(new TaskPlatform("testTaskPlatform", launchers));
-		SchedulerService mockSchedulerService = new DefaultSchedulerService(mock(CommonApplicationProperties.class),
-				taskPlatform, mockTaskDefinitionRepository, mockAppRegistryService, mock(ResourceLoader.class),
-				this.taskConfigurationProperties, mock(DataSourceProperties.class), "uri",
-				mock(ApplicationConfigurationMetadataResolver.class), mock(SchedulerServiceProperties.class),
-				mock(AuditRecordService.class), this.composedTaskRunnerConfigurationProperties);
+		SchedulerService mockSchedulerService = new DefaultSchedulerService(
+				mock(CommonApplicationProperties.class),
+				taskPlatform,
+				mockTaskDefinitionRepository,
+				mockAppRegistryService,
+				mock(ResourceLoader.class),
+				this.taskConfigurationProperties,
+				mock(DataSourceProperties.class),
+				"uri",
+				mock(ApplicationConfigurationMetadataResolver.class),
+				mock(SchedulerServiceProperties.class),
+				mock(AuditRecordService.class),
+				this.aggregateExecutionSupport,
+				this.taskDefinitionReader,
+				this.taskExecutionInfoService,
+				this.propertyResolver,
+				this.composedTaskRunnerConfigurationProperties
+		);
 
 		TaskDefinition taskDefinition = new TaskDefinition(BASE_DEFINITION_NAME, definition);
 

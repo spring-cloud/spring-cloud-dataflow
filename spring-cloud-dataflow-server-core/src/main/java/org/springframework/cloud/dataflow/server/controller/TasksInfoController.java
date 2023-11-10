@@ -60,9 +60,12 @@ public class TasksInfoController {
 
 	@RequestMapping(value= "executions", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public TaskExecutionsInfoResource getInfo(@RequestParam(required = false, defaultValue = "false", name="completed") String completed,
-									 @RequestParam(required = false, defaultValue = "", name="name") String taskName) {
-		return this.taskExecutionsAssembler.toModel(this.taskExecutionService.getAllTaskExecutionsCount(Boolean.valueOf(completed), taskName));
+	public TaskExecutionsInfoResource getInfo(
+			@RequestParam(required = false, defaultValue = "false", name="completed") String completed,
+			@RequestParam(required = false, defaultValue = "", name="name") String taskName,
+			@RequestParam(required = false, name="days") Integer days
+	) {
+		return this.taskExecutionsAssembler.toModel(this.taskExecutionService.getAllTaskExecutionsCount(Boolean.parseBoolean(completed), taskName, days));
 	}
 
 	/**

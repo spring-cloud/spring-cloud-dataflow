@@ -5,9 +5,11 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-common-security-config</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
+		<version>2.11.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-common-security-config-core</artifactId>
+	<name>spring-cloud-common-security-config-core</name>
+	<description>Spring Cloud Common Security Config Core</description>
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>

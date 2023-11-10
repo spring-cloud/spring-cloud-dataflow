@@ -20,6 +20,8 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
+
 /**
  * @author Mark Pollack
  */
@@ -29,6 +31,7 @@ public class Manifest extends AbstractEntity {
 
 	@NotNull
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String data;
 
 	public Manifest() {

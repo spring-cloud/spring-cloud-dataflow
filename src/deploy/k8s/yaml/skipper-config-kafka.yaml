@@ -9,7 +9,7 @@ data:
     logging:
       level:
         root: info
-        org.springframework.cloud: debug
+        org.springframework: debug
         io.fabric8: debug
     spring:
       output:

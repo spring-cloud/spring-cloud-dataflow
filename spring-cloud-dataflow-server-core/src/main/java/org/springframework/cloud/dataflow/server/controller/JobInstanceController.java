@@ -31,9 +31,9 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
@@ -41,6 +41,7 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -68,7 +69,7 @@ public class JobInstanceController {
 	 * Creates a {@code JobInstanceController} that retrieves Job Instance information.
 	 *
 	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance
-	 * data.
+	 *                       data.
 	 */
 	@Autowired
 	public JobInstanceController(TaskJobService taskJobService) {
@@ -79,20 +80,20 @@ public class JobInstanceController {
 	/**
 	 * Return a page-able list of {@link JobInstanceResource} defined jobs.
 	 *
-	 * @param jobName the name of the job
-	 * @param pageable page-able collection of {@link JobInstance}s.
+	 * @param jobName   the name of the job
+	 * @param pageable  page-able collection of {@link JobInstance}s.
 	 * @param assembler for the {@link JobInstance}s
 	 * @return a list of Job Instance
 	 * @throws NoSuchJobException if the job for jobName specified does not exist.
 	 */
 	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<JobInstanceResource> list(@RequestParam("name") String jobName, Pageable pageable,
+	public PagedModel<JobInstanceResource> list(
+			@RequestParam("name") String jobName,
+			Pageable pageable,
 			PagedResourcesAssembler<JobInstanceExecutions> assembler) throws NoSuchJobException {
-		List<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
-		Page<JobInstanceExecutions> page = new PageImpl<>(jobInstances, pageable,
-				taskJobService.countJobInstances(jobName));
-		return assembler.toModel(page, jobAssembler);
+		Page<JobInstanceExecutions> jobInstances = taskJobService.listTaskJobInstancesForJobName(pageable, jobName);
+		return assembler.toModel(jobInstances, jobAssembler);
 	}
 
 	/**
@@ -101,12 +102,21 @@ public class JobInstanceController {
 	 * @param id the id of the requested {@link JobInstance}
 	 * @return the {@link JobInstance}
 	 * @throws NoSuchJobInstanceException if job instance for the id does not exist.
-	 * @throws NoSuchJobException if the job for the job instance does not exist.
+	 * @throws NoSuchJobException         if the job for the job instance does not exist.
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
-	public JobInstanceResource view(@PathVariable("id") long id) throws NoSuchJobInstanceException, NoSuchJobException {
-		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
+	public JobInstanceResource view(
+			@PathVariable("id") long id,
+			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+	) throws NoSuchJobInstanceException, NoSuchJobException {
+		if (!StringUtils.hasText(schemaTarget)) {
+			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		}
+		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
+		if (jobInstance == null) {
+			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d' and schema target '%s'", id, schemaTarget));
+		}
 		return jobAssembler.toModel(jobInstance);
 	}
 

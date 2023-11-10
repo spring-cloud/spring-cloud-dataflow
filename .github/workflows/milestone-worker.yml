@@ -8,7 +8,7 @@ on:
         required: true
 
 env:
-  MAVEN_THREADS: '-T 2'
+  MAVEN_THREADS: '-T 0.5C'
 
 jobs:
   build:
@@ -16,12 +16,14 @@ jobs:
     steps:
 
     - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/setup-java@v3
       with:
-        java-version: 1.8
+        java-version: '8'
+        distribution: 'liberica'
     - uses: jvalkeal/setup-maven@v1
       with:
-        maven-version: 3.6.3
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - uses: jfrog/setup-jfrog-cli@v1
       with:
         version: 1.46.4
@@ -54,14 +56,7 @@ jobs:
         dispatch-handler-extract-context-properties: true
         ensure-env: |
           BUILD_ZOO_HANDLER_milestone_version
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version
           BUILD_ZOO_HANDLER_spring_cloud_deployer_version
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version
-          BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version
-          BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version
-          BUILD_ZOO_HANDLER_spring_cloud_skipper_version
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
 
     # build and publish to configured target
@@ -75,20 +70,16 @@ jobs:
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-'${BUILD_ZOO_HANDLER_milestone_version} \
           -B
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
-        jfrog rt mvn versions:update-parent \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
-          -DparentVersion='['${BUILD_ZOO_HANDLER_spring_cloud_dataflow_build_version}']' \
-          -B
+        BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
+        echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-dataflow-common.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_common_version} \
-          -B
+          -Dproperty=dataflow.version \
+          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
+          -B        
         jfrog rt mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
@@ -100,56 +91,16 @@ jobs:
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-deployer-local.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_local_version} \
-          -B
-        jfrog rt mvn versions:set-property \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-deployer-cloudfoundry.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_cloudfoundry_version} \
-          -B
-        jfrog rt mvn versions:set-property \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-deployer-kubernetes.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_kubernetes_version} \
-          -B
-        jfrog rt mvn versions:set-property \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-common-security-config.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_common_security_config_version} \
-          -B
-        jfrog rt mvn versions:set-property \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
-          -Dproperty=spring-cloud-skipper.version \
-          -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_skipper_version} \
-          -B
-        jfrog rt mvn versions:set-property \
-          -gs .github/settings.xml \
-          -Pstagingmilestone \
-          -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-ui.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
           -B
         jfrog rt build-clean
-        jfrog rt mvn clean install \
-          -gs .github/settings.xml \
-          -P-spring,stagingmilestone,full,deploymentfiles \
-          -DskipTests -B $MAVEN_THREADS
+        ./spring-cloud-dataflow-package/set-package-version.sh
+        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles -B install -DskipTests 
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version_nopostfix=$(echo '${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' | mvn -gs .github/settings.xml -Pstagingmilestone build-helper:parse-version help:evaluate -q -DforceStdout) >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_prerelease=$(echo '${parsedVersion.qualifier}' | mvn -gs .github/settings.xml -Pstagingmilestone build-helper:parse-version help:evaluate -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
     # zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -165,6 +116,7 @@ jobs:
         version: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
         dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+        GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
 
     # zoo success
     - name: Notify Build Success Zoo Handler Controller

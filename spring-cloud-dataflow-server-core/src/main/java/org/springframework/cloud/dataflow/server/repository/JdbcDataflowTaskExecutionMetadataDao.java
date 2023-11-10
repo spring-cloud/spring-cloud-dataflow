@@ -26,6 +26,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
@@ -33,6 +35,7 @@ import org.springframework.cloud.dataflow.server.repository.support.AppDefinitio
 import org.springframework.cloud.dataflow.server.repository.support.AppDeploymentRequestMixin;
 import org.springframework.cloud.dataflow.server.repository.support.Order;
 import org.springframework.cloud.dataflow.server.repository.support.PagingQueryProvider;
+import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.dataflow.server.repository.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.cloud.dataflow.server.service.impl.ResourceDeserializer;
 import org.springframework.cloud.dataflow.server.service.impl.ResourceMixin;
@@ -52,23 +55,22 @@ import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
  * JDBC implementation for the {@code DataflowTaskExecutionMetadataDao}
  *
  * @author Michael Minella
- * @since 2.3
+ * @author Corneil du Plessis
  * @see DataflowTaskExecutionMetadataDao
+ * @since 2.3
  */
 public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecutionMetadataDao {
+	private final static Logger logger = LoggerFactory.getLogger(JdbcDataflowTaskExecutionMetadataDao.class);
 
-	private static final String INSERT_SQL = "INSERT INTO task_execution_metadata (id, task_execution_id, " +
-			"task_execution_manifest) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
+	private static final String INSERT_SQL = "INSERT INTO %PREFIX%EXECUTION_METADATA (ID, TASK_EXECUTION_ID, " +
+		"TASK_EXECUTION_MANIFEST) VALUES (:id, :taskExecutionId, :taskExecutionManifest)";
 
-	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "select m.task_execution_manifest as task_execution_manifest " +
-			"from task_execution_metadata m inner join " +
-			"TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID " +
-			"where e.TASK_EXECUTION_ID = :taskExecutionId";
+	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_ID = "SELECT M.TASK_EXECUTION_MANIFEST AS TASK_EXECUTION_MANIFEST " +
+		"FROM %PREFIX%EXECUTION_METADATA M INNER JOIN " +
+		"%PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID " +
+		"WHERE E.TASK_EXECUTION_ID = :taskExecutionId";
 
-	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS =
-			"DELETE FROM task_execution_metadata " +
-			"WHERE task_execution_id " +
-			"IN (:taskExecutionIds)";
+	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS = "DELETE FROM %PREFIX%EXECUTION_METADATA WHERE TASK_EXECUTION_ID IN (:taskExecutionIds)";
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -78,9 +80,14 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 
 	private final DataSource dataSource;
 
-	public JdbcDataflowTaskExecutionMetadataDao(DataSource dataSource,
-			DataFieldMaxValueIncrementer incrementer) {
+	private final String tablePrefix;
 
+	public JdbcDataflowTaskExecutionMetadataDao(
+		DataSource dataSource,
+		DataFieldMaxValueIncrementer incrementer,
+		String prefix
+	) {
+		this.tablePrefix = prefix;
 		this.incrementer = incrementer;
 
 		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -88,7 +95,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		this.objectMapper = new ObjectMapper();
 		SimpleModule module = new SimpleModule();
 		module.addDeserializer(Resource.class,
-				new ResourceDeserializer(new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader())));
+			new ResourceDeserializer(new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader())));
 		this.objectMapper.registerModule(module);
 		this.objectMapper.addMixIn(Resource.class, ResourceMixin.class);
 		this.objectMapper.addMixIn(AppDefinition.class, AppDefinitionMixin.class);
@@ -104,13 +111,14 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			final String manifestJson = this.objectMapper.writeValueAsString(manifest);
 
 			final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-					.addValue("id", incrementer.nextLongValue())
-					.addValue("taskExecutionId", taskExecution.getExecutionId())
-					.addValue("taskExecutionManifest", manifestJson);
+				.addValue("id", incrementer.nextLongValue())
+				.addValue("taskExecutionId", taskExecution.getExecutionId())
+				.addValue("taskExecutionManifest", manifestJson);
 
-			this.jdbcTemplate.update(INSERT_SQL, queryParameters);
-		}
-		catch (JsonProcessingException e) {
+			String sql = SchemaUtilities.getQuery(INSERT_SQL, tablePrefix);
+			logger.debug("save:sql={}, parameters={}", sql, queryParameters.getValues());
+			this.jdbcTemplate.update(sql, queryParameters);
+		} catch (JsonProcessingException e) {
 			throw new IllegalArgumentException("Unable to serialize manifest", e);
 		}
 	}
@@ -118,14 +126,16 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	@Override
 	public TaskManifest getLatestManifest(String taskName) {
 		Map<String, Order> sortKeys = new HashMap<>(1);
-		sortKeys.put("e.TASK_EXECUTION_ID", Order.DESCENDING);
+		sortKeys.put("E.TASK_EXECUTION_ID", Order.DESCENDING);
 
 		SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
 
 		sqlPagingQueryProviderFactoryBean.setDataSource(this.dataSource);
-		sqlPagingQueryProviderFactoryBean.setSelectClause("task_execution_manifest");
-		sqlPagingQueryProviderFactoryBean.setFromClause("task_execution_metadata m inner join TASK_EXECUTION e on m.task_execution_id = e.TASK_EXECUTION_ID");
-		sqlPagingQueryProviderFactoryBean.setWhereClause("e.TASK_NAME = :taskName");
+		sqlPagingQueryProviderFactoryBean.setSelectClause("TASK_EXECUTION_MANIFEST");
+		sqlPagingQueryProviderFactoryBean.setFromClause(SchemaUtilities.getQuery(
+			"%PREFIX%EXECUTION_METADATA M INNER JOIN %PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID",
+			tablePrefix));
+		sqlPagingQueryProviderFactoryBean.setWhereClause("E.TASK_NAME = :taskName");
 		sqlPagingQueryProviderFactoryBean.setSortKeys(sortKeys);
 
 		try {
@@ -134,22 +144,20 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			queryProvider.init(this.dataSource);
 
 			final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-					.addValue("taskName", taskName);
+				.addValue("taskName", taskName);
 
-			return this.jdbcTemplate.queryForObject(queryProvider.getPageQuery(PageRequest.of(0, 1)),
-					queryParameters, (resultSet, i) -> {
-						try {
-							return objectMapper.readValue(resultSet.getString("task_execution_manifest"), TaskManifest.class);
-						}
-						catch (IOException e) {
-							throw new IllegalArgumentException("Unable to deserialize manifest", e);
-						}
-					});
-		}
-		catch (EmptyResultDataAccessException erdae) {
+			String sql = queryProvider.getPageQuery(PageRequest.of(0, 1));
+			logger.debug("getLatestManifest:sql={},parameters={}", sql, queryParameters.getValues());
+			return this.jdbcTemplate.queryForObject(sql, queryParameters, (resultSet, i) -> {
+				try {
+					return objectMapper.readValue(resultSet.getString("TASK_EXECUTION_MANIFEST"), TaskManifest.class);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Unable to deserialize manifest", e);
+				}
+			});
+		} catch (EmptyResultDataAccessException erdae) {
 			return null;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException("Unable to generate query", e);
 		}
 	}
@@ -157,21 +165,19 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	@Override
 	public TaskManifest findManifestById(Long id) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskExecutionId", id);
+			.addValue("taskExecutionId", id);
 
 		try {
-			return this.jdbcTemplate.queryForObject(FIND_MANIFEST_BY_TASK_EXECUTION_ID,
-					queryParameters,
-					(resultSet, i) -> {
-						try {
-							return objectMapper.readValue(resultSet.getString("task_execution_manifest"), TaskManifest.class);
-						}
-						catch (IOException e) {
-							throw new IllegalArgumentException("Unable to deserialize manifest", e);
-						}
-					});
-		}
-		catch (EmptyResultDataAccessException erdae) {
+			String sql = SchemaUtilities.getQuery(FIND_MANIFEST_BY_TASK_EXECUTION_ID, tablePrefix);
+			logger.debug("findManifestById:sql={}, parameters={}", sql, queryParameters);
+			return this.jdbcTemplate.queryForObject(sql, queryParameters, (resultSet, i) -> {
+				try {
+					return objectMapper.readValue(resultSet.getString("TASK_EXECUTION_MANIFEST"), TaskManifest.class);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Unable to deserialize manifest", e);
+				}
+			});
+		} catch (EmptyResultDataAccessException erdae) {
 			return null;
 		}
 	}
@@ -179,7 +185,9 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 	@Override
 	public int deleteManifestsByTaskExecutionIds(Set<Long> taskExecutionIds) {
 		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
-				.addValue("taskExecutionIds", taskExecutionIds);
-		return this.jdbcTemplate.update(DELETE_MANIFEST_BY_TASK_EXECUTION_IDS, queryParameters);
+			.addValue("taskExecutionIds", taskExecutionIds);
+		String sql = SchemaUtilities.getQuery(DELETE_MANIFEST_BY_TASK_EXECUTION_IDS, tablePrefix);
+		logger.debug("deleteManifestsByTaskExecutionIds:sql={}, parameters={}", sql, queryParameters);
+		return this.jdbcTemplate.update(sql, queryParameters);
 	}
 }

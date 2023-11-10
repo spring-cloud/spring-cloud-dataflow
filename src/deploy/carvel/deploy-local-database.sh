@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 if [ "$1" = "" ]; then
@@ -18,47 +21,40 @@ case $1 in
     ;;
 esac
 
-K8S=$(realpath $SCDIR/../../kubernetes)
+K8S=$(realpath $SCDIR/../kubernetes)
+if [ ! -d "$K8S" ]; then
+  K8S=$(realpath $SCDIR/../../kubernetes)
+fi
 set +e
 $SCDIR/prepare-local-namespace.sh "$DATABASE-sa" $DATABASE
+
 kubectl create --namespace $DATABASE -f $K8S/$DATABASE/
 set -e
-"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE"
-
 kubectl rollout status deployment --namespace "$DATABASE" $DATABASE
-export DATABASE
-echo "Deployed $DATABASE. Host:$DATABASE.$DATABASE"
+set +e
+
+FILE="$(mktemp).yml"
+cat >$FILE <<EOF
+apiVersion: secretgen.carvel.dev/v1alpha1
+kind: SecretExport
+metadata:
+  name: $DATABASE
+  namespace: $DATABASE
+spec:
+  toNamespace: '*'
+EOF
+echo "Create SecretExport $SECRET_NAME to $NS"
+if [ "$DEBUG" = "true" ]; then
+    cat $FILE
+fi
+kubectl apply -f $FILE
 
 JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
-
-yq ".scdf.server.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
-yq ".scdf.skipper.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
-
-case $DATABASE in
-"mariadb")
-    JDBC_DRIVER_CLASS=org.mariadb.jdbc.Driver
-    ;;
-"postgresql")
-    JDBC_DRIVER_CLASS=org.postgresql.Driver
-    ;;
-*)
-    echo "Unsupported $DATABASE."
-esac
-if [ "$JDBC_DRIVER_CLASS" != "" ]; then
-    yq ".scdf.server.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
-    yq ".scdf.skipper.database.driverClassName=\"$JDBC_DRIVER_CLASS\"" -i ./scdf-values.yml
-fi
-
-yq ".scdf.server.database.secretName=\"$DATABASE\"" -i ./scdf-values.yml
-yq ".scdf.server.database.secretUsernameKey=\"database-username\"" -i ./scdf-values.yml
-yq ".scdf.server.database.secretPasswordKey=\"database-password\"" -i ./scdf-values.yml
-
-yq ".scdf.skipper.database.secretName=\"$DATABASE\"" -i ./scdf-values.yml
-yq ".scdf.skipper.database.secretUsernameKey=\"database-username\"" -i ./scdf-values.yml
-yq ".scdf.skipper.database.secretPasswordKey=\"database-password\"" -i ./scdf-values.yml
-
-echo "Set JDBC url: $JDBC_URL"
-echo "Set JDBC class: $JDBC_DRIVER_CLASS"
+$SCDIR/configure-database.sh dataflow $DATABASE "$JDBC_URL" $DATABASE database-username database-password
+$SCDIR/configure-database.sh skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password
+"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE"
+export DATABASE
+echo "Deployed $DATABASE. Host:$DATABASE.$DATABASE"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed $DATABASE in ${bold}$elapsed${end} seconds"

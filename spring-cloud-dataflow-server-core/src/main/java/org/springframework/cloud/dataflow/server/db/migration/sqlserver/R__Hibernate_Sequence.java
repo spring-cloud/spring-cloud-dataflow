@@ -74,7 +74,7 @@ public class R__Hibernate_Sequence extends AbstractMigration {
 			logger.info("Looks like we have hibernate_sequence table, initiate fix");
 		}
 		catch (Exception e) {
-			logger.debug("Unable to query hibernate_sequence table, looks like we have a proper sequence", e);
+			logger.debug("Unable to query hibernate_sequence table, looks like we have a proper sequence" + e);
 		}
 		// will result call to get commands from this class and then we choose which ones to run
 		super.migrate(context);

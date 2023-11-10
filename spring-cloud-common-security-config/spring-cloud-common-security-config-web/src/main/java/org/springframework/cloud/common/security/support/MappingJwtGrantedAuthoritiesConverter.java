@@ -127,7 +127,7 @@ public final class MappingJwtGrantedAuthoritiesConverter implements Converter<Jw
 	/**
 	 * Sets the name of token claim to use for group mapping {@link GrantedAuthority
 	 * authorities} by this converter. Defaults to
-	 * {@link JwtGrantedAuthoritiesConverter#WELL_KNOWN_GROUPS_CLAIM_NAMES}.
+	 * {@link org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter#WELL_KNOWN_AUTHORITIES_CLAIM_NAMES}.
 	 *
 	 * @param groupAuthoritiesClaimName the token claim name to map group
 	 *                                  authorities

@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  */
+@SuppressWarnings("NewClassNamingConvention")
 @Ignore
 public class RuntimeStreamStatusForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
 

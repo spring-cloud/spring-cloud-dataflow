@@ -17,7 +17,7 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 /**
- * Exception will be thrown by query for {@link org.springframework.cloud.dataflow.core.SchemaVersionTarget}
+ * Exception will be thrown by query for {@link org.springframework.cloud.dataflow.schema.SchemaVersionTarget}
  * that doesn't exist.
  * @author Corneil du Plessis
  */

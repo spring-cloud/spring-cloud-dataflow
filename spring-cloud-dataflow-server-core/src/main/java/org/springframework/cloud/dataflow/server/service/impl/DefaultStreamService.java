@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -242,13 +243,12 @@ public class DefaultStreamService implements StreamService {
 				streamDefinition.getOriginalDslText(), streamDefinition.getDescription());
 		logger.debug("Updated StreamDefinition: " + updatedStreamDefinition);
 
-		// TODO consider adding an explicit UPDATE method to the streamDefRepository
-		// Note: Not transactional and can lead to loosing the stream definition
+		// NOTE: Not transactional and can lead to losing the stream definition
 		this.streamDefinitionRepository.delete(updatedStreamDefinition);
 		this.streamDefinitionRepository.save(updatedStreamDefinition);
 		this.auditRecordService.populateAndSaveAuditRecord(
 				AuditOperationType.STREAM, AuditActionType.UPDATE, streamName,
-				updatedStreamDefinition.getDslText(), null);
+				this.streamDefinitionService.redactDsl(updatedStreamDefinition), null);
 	}
 
 	@Override
@@ -344,7 +344,7 @@ public class DefaultStreamService implements StreamService {
 			if (hasProps) {
 				appMap.put(SpringCloudDeployerApplicationManifest.SPEC_STRING, specMap);
 			}
-			if (appMap.size() != 0) {
+			if (!appMap.isEmpty()) {
 				skipperConfigValuesMap.put(appName, appMap);
 			}
 		}
@@ -353,7 +353,7 @@ public class DefaultStreamService implements StreamService {
 			dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			dumperOptions.setPrettyFlow(true);
 			dumperOptions.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
-			Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+			Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 			return yaml.dump(skipperConfigValuesMap);
 		}
 		else {
@@ -557,7 +557,7 @@ public class DefaultStreamService implements StreamService {
 	 */
 	public Page<StreamDefinition> findDefinitionByNameContains(Pageable pageable, String search) {
 		Page<StreamDefinition> streamDefinitions;
-		if (search != null) {
+		if (StringUtils.hasLength(search)) {
 			streamDefinitions = streamDefinitionRepository.findByNameContains(search, pageable);
 		}
 		else {

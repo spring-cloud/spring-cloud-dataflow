@@ -18,10 +18,10 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Properties;
 
-import org.springframework.cloud.dataflow.core.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 
 /**

@@ -7,13 +7,18 @@ inputs:
   repository:
     description: repository to publish
     required: true
+  project-directory:
+    description: The working directory
+    required: true
   version:
     description: semver version
     required: true
-  prerelease:
-    description: semver version prerelease
+  SRP_CLIENT_ID:
+    description: secrets.SRP_CLIENT_ID
     required: false
-
+  SRP_CLIENT_SECRET:
+    description: secrets.SRP_CLIENT_SECRET
+    required: false
 runs:
   using: "composite"
   steps:
@@ -27,13 +32,23 @@ runs:
       BUNDLE_PATH: ${{ inputs.path }}
       REPOSITORY: ${{ inputs.repository }}
       VERSION: ${{ inputs.version }}
-      PRERELEASE: ${{ inputs.prerelease }}
+      SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
+      SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
+    working-directory: ${{ inputs.project-directory }}
     run: |
-      imgpkg push --bundle $REPOSITORY:$VERSION-RANDOM.$RTAG --file $BUNDLE_PATH
-      docker pull $REPOSITORY:$VERSION-RANDOM.$RTAG
-
-      POSTFIX=$VERSION${PRERELEASE:+"-$PRERELEASE"}
-
-      docker tag $REPOSITORY:$VERSION-RANDOM.$RTAG $REPOSITORY:$POSTFIX
-      docker push $REPOSITORY:$POSTFIX
+      if [ "$USE_SRP" == "true" ]; then
+        if [ "$SRP_SCRIPTS" == "" ]; then
+          echo "SRP_SCRIPTS not defined"
+          exit 2
+        fi
+        if [[ "$REPOSITORY" == *"-package"* ]]; then
+          export OBSERVATION=package-publish
+        else
+          export OBSERVATION=repository-publish
+        fi
+        export OUTPUT_VERSION=$VERSION
+        $SRP_SCRIPTS/run-under-observer.sh "${{ github.action_path }}/publish-bundle.sh"
+      else
+        "${{ github.action_path }}/publish-bundle.sh"
+      fi

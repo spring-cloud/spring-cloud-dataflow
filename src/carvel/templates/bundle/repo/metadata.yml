@@ -12,5 +12,6 @@ spec:
   providerName: VMware
   maintainers:
   - name: Janne Valkealahti
+  - name: Corneil du Plessis
   categories:
     - "dataflow"

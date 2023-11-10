@@ -1,11 +1,29 @@
 #!/usr/bin/env bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
+function check_env() {
+  eval ev='$'$1
+  if [ "$ev" == "" ]; then
+    echo "env var $1 not defined"
+    if ((sourced != 0)); then
+      return 1
+    else
+      exit 1
+    fi
+  fi
+}
+if [ "$SCDF_TYPE" == "" ]; then
+    echo "Environmental variable SCDF_TYPE must be set to one of oss or pro."
+fi
+check_env NS
+check_env PACKAGE_VERSION
+check_env SCDF_TYPE
+
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
-if [ "$NS" = "" ]; then
-    echo "Expected env var NS"
-    exit 1
-fi
+
 COUNT=$(kubectl get namespace $NS | grep -c "$NS")
 if ((COUNT == 0)); then
     echo "Expected namespace $NS"
@@ -14,30 +32,22 @@ else
     echo "Namespace $NS exists"
 fi
 
-SA=$NS-sa
-if [ "$SCDF_TYPE" == "" ]; then
-    echo "SCDF_TYPE must be set to one of oss or pro."
-fi
-
 case $SCDF_TYPE in
 "pro")
-    APP_NAME=scdf-pro
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=1.5.3-SNAPSHOT
-    fi
-    PACKAGE_NAME=scdfpro.tanzu.vmware.com
+    APP_NAME=scdf-pro-app
+    PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     ;;
 "oss")
-    APP_NAME=scdf-oss
-    if [ "$PACKAGE_VERSION" = "" ]; then
-        PACKAGE_VERSION=2.11.0-SNAPSHOT
-    fi
+    APP_NAME=scdf-oss-app
     PACKAGE_NAME=scdf.tanzu.vmware.com
     ;;
 *)
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
+if [ "$1" != "" ]; then
+    APP_NAME="$1"
+fi
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
 if [ "$DATAFLOW_VERSION" != "" ]; then
     yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml

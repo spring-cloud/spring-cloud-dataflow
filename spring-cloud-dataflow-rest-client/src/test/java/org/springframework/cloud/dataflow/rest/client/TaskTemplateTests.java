@@ -44,7 +44,6 @@ public class TaskTemplateTests {
 	@Before
 	public void setup() {
 		restTemplate = mock(RestTemplate.class);
-
 	}
 
 	@Test
@@ -77,10 +76,11 @@ public class TaskTemplateTests {
 		Assert.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
 	}
 
-	public static class TestResource extends RepresentationModel {
+	public static class TestResource extends RepresentationModel<TestResource> {
 
-		private Map<String, Long> linksRequested = new HashMap<>();
+		private final Map<String, Long> linksRequested = new HashMap<>();
 
+		@Override
 		public Optional<Link> getLink(String rel) {
 			if (this.linksRequested.containsKey(rel)) {
 				Long count = this.linksRequested.get(rel);

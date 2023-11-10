@@ -41,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("NewClassNamingConvention")
 public class ApiDocumentation extends BaseDocumentation {
 
 	@Test
@@ -112,7 +113,9 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/definitions").description("Provides the task definition resource"),
 				linkWithRel("tasks/definitions/definition").description("Provides details for a specific task definition"),
 				linkWithRel("tasks/validation").description("Provides the validation for a task definition"),
-				linkWithRel("tasks/executions").description("Returns Task executions and allows launching of tasks"),
+				linkWithRel("tasks/executions").description("Returns Task executions"),
+				linkWithRel("tasks/executions/launch").description("Provides for launching a Task execution"),
+				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
@@ -213,11 +216,16 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/definitions/definition.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/definitions/definition is templated"),
 
 						fieldWithPath("_links.tasks/executions.href").description("Link to the tasks/executions"),
+						fieldWithPath("_links.tasks/executions/launch.href").description("Link to tasks/executions/launch"),
+						fieldWithPath("_links.tasks/executions/launch.templated").type(JsonFieldType.BOOLEAN).optional().description("Indicates that Link tasks/executions/launch is templated"),
 						fieldWithPath("_links.tasks/executions/name.href").description("Link to the tasks/executions/name"),
 						fieldWithPath("_links.tasks/executions/name.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/name is templated"),
 						fieldWithPath("_links.tasks/executions/current.href").description("Link to the tasks/executions/current"),
 						fieldWithPath("_links.tasks/executions/execution.href").description("Link to the tasks/executions/execution"),
 						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/execution is templated"),
+						fieldWithPath("_links.tasks/executions/external.href").description("Link to the tasks/executions/external"),
+						fieldWithPath("_links.tasks/executions/external.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/external is templated"),
+
 						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
 						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),
 

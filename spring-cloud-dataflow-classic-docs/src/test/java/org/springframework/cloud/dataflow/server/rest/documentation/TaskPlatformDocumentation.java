@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Ilayaperumal Gopinathan
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskPlatformDocumentation extends BaseDocumentation {
 

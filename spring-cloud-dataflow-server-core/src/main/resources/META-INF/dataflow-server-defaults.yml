@@ -1,4 +1,8 @@
 management:
+  info:
+    git:
+      mode: simple
+      enabled: true
   metrics:
     tags:
       application: ${info.app.name}
@@ -95,13 +99,13 @@ spring:
             version: "@spring-cloud-dataflow-ui.version@"
           spring-cloud-dataflow-core:
             name: Spring Cloud Data Flow Core
-            version: "@project.version@"
+            version: "@dataflow.version@"
           spring-cloud-dataflow-implementation:
             name: ${info.app.name}
-            version: ${info.app.version}
+            version: "@dataflow.version@"
           spring-cloud-dataflow-shell:
             name: Spring Cloud Data Flow Shell
-            version: "@project.version@"
+            version: "@dataflow.version@"
             url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar"
             checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
             checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
@@ -171,6 +175,13 @@ spring:
             - GET    /runtime/streams/**             => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
+
+            # Schema Versions
+            - GET   /schema/versions                 => hasRole('ROLE_VIEW')
+
+            # Schema Targets
+            - GET   /schema/targets                  => hasRole('ROLE_VIEW')
+            - GET   /schema/targets/*                => hasRole('ROLE_VIEW')
 
             # Stream Definitions
 
@@ -251,6 +262,7 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     enabled: false
+    url: ${springdoc.api-docs.path}
     path: /swagger-ui.html
     disable-swagger-default-url: true
     config-url: /v3/api-docs/swagger-config

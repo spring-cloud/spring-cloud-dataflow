@@ -1,0 +1,6 @@
+<configuration>
+	<include resource="org/springframework/boot/logging/logback/base.xml"/>
+	<root>
+		<level value="DEBUG"/>
+	</root>
+</configuration>

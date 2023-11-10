@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,17 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.hamcrest.MatcherAssert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hibernate.AssertionFailure;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -39,17 +42,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -57,29 +66,27 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
-import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -97,8 +104,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -125,7 +132,7 @@ public class TaskControllerTests {
 	private LauncherRepository launcherRepository;
 
 	@Autowired
-	private TaskExplorer taskExplorer;
+	private AggregateTaskExplorer taskExplorer;
 
 	@Autowired
 	private TaskSaveService taskSaveService;
@@ -134,7 +141,10 @@ public class TaskControllerTests {
 	private TaskDeleteService taskDeleteService;
 
 	@Autowired
-	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+
+	@Autowired
+	private TaskExecutionDaoContainer taskExecutionDaoContainer;
 
 	@Autowired
 	private TaskExecutionCreationService taskExecutionCreationService;
@@ -142,13 +152,19 @@ public class TaskControllerTests {
 	@Autowired
 	private CommonApplicationProperties appsProperties;
 
+	@Autowired
+	private AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	private TaskDefinitionReader taskDefinitionReader;
+
 	private boolean initialized = false;
 
 	private static List<String> SAMPLE_ARGUMENT_LIST;
 
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -171,39 +187,54 @@ public class TaskControllerTests {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put("app.test.key1", "value1");
 		TaskManifest taskManifest = new TaskManifest();
-		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("test", Collections.emptyMap()), new FileSystemResource(""), deploymentProperties, null);
+		AppDeploymentRequest request = new AppDeploymentRequest(new AppDefinition("test", Collections.emptyMap()),
+				new FileSystemResource(""),
+				deploymentProperties,
+				null);
 		taskManifest.setTaskDeploymentRequest(request);
 		taskManifest.setPlatformName("test");
 
-		final TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask");
+		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask", null);
+		assertThat(taskExecutionRunning.getExecutionId()).isGreaterThan(0L);
 		taskExecutionRunning.setStartTime(new Date());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask")).thenReturn(taskExecutionRunning);
-		when(taskExplorer.getTaskExecution(taskExecutionRunning.getExecutionId())).thenReturn(taskExecutionRunning);
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
 
-		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2");
-		taskExecutionComplete.setTaskName("myTask2");
-		taskExecutionComplete.setStartTime(new Date());
-		taskExecutionComplete.setEndTime(new Date());
-		taskExecutionComplete.setExitCode(0);
-		taskExecutionComplete.setArguments(SAMPLE_ARGUMENT_LIST);
+		TaskExecutionDao taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget.getName());
+		taskExecutionDao.startTaskExecution(taskExecutionRunning.getExecutionId(),
+				taskExecutionRunning.getTaskName(),
+				new Date(),
+				SAMPLE_ARGUMENT_LIST,
+				Long.toString(taskExecutionRunning.getExecutionId()));
+		taskExecutionRunning = taskExecutionDao.getTaskExecution(taskExecutionRunning.getExecutionId());
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask2")).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
-				.thenReturn(Arrays.asList(taskExecutionRunning, taskExecutionComplete));
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
+		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2", null);
+		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
+		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
+		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
+		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(),
+				taskExecutionComplete.getTaskName(),
+				new Date(),
+				SAMPLE_ARGUMENT_LIST,
+				Long.toString(taskExecutionComplete.getExecutionId()));
+		taskExecutionDao.completeTaskExecution(taskExecutionComplete.getExecutionId(), 0, new Date(), null);
+		taskExecutionComplete = taskExecutionDao.getTaskExecution(taskExecutionComplete.getExecutionId());
+		dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget2.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingRepository() {
-		new TaskDefinitionController(mock(TaskExplorer.class), null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TaskDefinitionController(this.taskExplorer, null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
-		new TaskDefinitionController(null, mock(TaskDefinitionRepository.class), taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider);
+		assertThatIllegalArgumentException().isThrownBy(() ->
+				new TaskDefinitionController(null, this.repository, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
@@ -236,7 +267,9 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(1);
 
-		TaskDefinition myTask = repository.findById("myTask").get();
+		Optional<TaskDefinition> myTaskOpt = repository.findById("myTask");
+		assertThat(myTaskOpt).isPresent();
+		TaskDefinition myTask = myTaskOpt.get();
 
 		assertThat(myTask.getProperties()).hasSize(1);
 		assertThat(myTask.getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
@@ -258,12 +291,12 @@ public class TaskControllerTests {
 
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
-				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertThat(repository.count()).isEqualTo(1);
 
-		TaskDefinition myTask = repository.findById("myTask").get();
+		TaskDefinition myTask = repository.findById("myTask").orElseThrow(() -> new AssertionFailure("Expected myTask"));
 
 		assertThat(myTask.getProperties().get("foo")).isEqualTo("bar");
 		assertThat(myTask.getProperties().get("bar")).isEqualTo("baz");
@@ -277,19 +310,19 @@ public class TaskControllerTests {
 	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
-				.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/definitions/myTask")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties", is(nullValue())));
 		mockMvc.perform(get("/tasks/definitions/myTask?manifest=true")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$.lastTaskExecution.deploymentProperties", hasEntry("app.test.key1", "value1")));
 		mockMvc.perform(get("/tasks/definitions")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].lastTaskExecution.deploymentProperties", is(nullValue())));
 		mockMvc.perform(get("/tasks/definitions?manifest=true")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].lastTaskExecution.deploymentProperties", hasEntry("app.test.key1", "value1")));
 	}
 
@@ -298,52 +331,73 @@ public class TaskControllerTests {
 
 		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
 		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
-				.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print())
+						.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		TaskDefinition myTask1 = repository.findById("myTask-t1").get();
+		Optional<TaskDefinition> myTask1Opt = repository.findById("myTask-t1");
+		assertThat(myTask1Opt).isPresent();
+		TaskDefinition myTask1 = myTask1Opt.get();
 		assertThat(myTask1.getProperties().get("foo")).isEqualTo("bar rab");
 		assertThat(myTask1.getDslText()).isEqualTo("t1:task --foo='bar rab'");
 		assertThat(myTask1.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask1.getName()).isEqualTo("myTask-t1");
 
-		TaskDefinition myTask2 = repository.findById("myTask-t2").get();
+		Optional<TaskDefinition> myTask2Opt = repository.findById("myTask-t2");
+		assertThat(myTask2Opt).isPresent();
+		TaskDefinition myTask2 = myTask2Opt.get();
 		assertThat(myTask2.getProperties().get("foo")).isEqualTo("one two");
 		assertThat(myTask2.getDslText()).isEqualTo("t2:task --foo='one two'");
 		assertThat(myTask2.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask2.getName()).isEqualTo("myTask-t2");
 	}
 
-	@Test
-	public void testFindTaskNameContainsSubstring() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {"search", "taskName"})
+	public void testFindTaskNameContainsSubstring(String taskNameRequestParamName) throws Exception {
 		repository.save(new TaskDefinition("foo", "task"));
 		repository.save(new TaskDefinition("foz", "task"));
 		repository.save(new TaskDefinition("ooz", "task"));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "f")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "f")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "oz")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "oz")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foz")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("ooz")));
 
-		mockMvc.perform(get("/tasks/definitions").param("search", "o")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "o")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[2].name", is("ooz")));
+	}
+
+	@Test
+	public void testFindTaskDescriptionAndDslContainsSubstring() throws Exception {
+		repository.save(new TaskDefinition("foo", "fooDsl", "fooTask"));
+		repository.save(new TaskDefinition("foz", "fozDsl", "fozTask"));
+
+		mockMvc.perform(get("/tasks/definitions").param("description", "fooTask")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].description", is("fooTask")));
+
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fozDsl")
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("fozDsl")));
 	}
 
 	@Test
@@ -353,21 +407,21 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("ooz", "task-ooz"));
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foo")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].dslText", is("task-foz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "oz")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foz")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].dslText", is("task-ooz")));
 
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "o")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+						.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].dslText", is("task-foo")))
@@ -492,7 +546,7 @@ public class TaskControllerTests {
 	@Test
 	public void testTaskNotDefined() throws Exception {
 		mockMvc.perform(post("/tasks/executions")
-				.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
+						.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
 				.andExpect(jsonPath("_embedded.errors[0].message", is("Could not find task definition named myFoo")))
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchTaskDefinitionException")));
@@ -573,7 +627,7 @@ public class TaskControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask2")
-				.accept(MediaType.APPLICATION_JSON))
+						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
 
 		ArgumentCaptor<AppDeploymentRequest> argumentCaptor = ArgumentCaptor.forClass(AppDeploymentRequest.class);
@@ -581,7 +635,7 @@ public class TaskControllerTests {
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		MatcherAssert.assertThat(request.getDefinition().getProperties(), hasEntry("common.prop2", "wizz"));
-		assertEquals("myTask2", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+		assertThat(request.getDefinition().getProperties()).containsEntry("spring.cloud.task.name", "myTask2");
 	}
 
 	@Test
@@ -591,12 +645,12 @@ public class TaskControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		mockMvc.perform(post("/tasks/executions")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.content(EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
-						new BasicNameValuePair("name", "myTask3"),
-						new BasicNameValuePair("arguments",
-								"--foobar=jee --foobar2=jee2,foo=bar --foobar3='jee3 jee3'")))))
-				.accept(MediaType.APPLICATION_JSON))
+						.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+						.content(EntityUtils.toString(new UrlEncodedFormEntity(Arrays.asList(
+								new BasicNameValuePair("name", "myTask3"),
+								new BasicNameValuePair("arguments",
+										"--foobar=jee --foobar2=jee2,foo=bar --foobar3='jee3 jee3'")))))
+						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isCreated());
 
@@ -604,10 +658,10 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertEquals(4, request.getCommandlineArguments().size());
+		assertThat(request.getCommandlineArguments()).hasSize(9);
 		// don't assume order in a list
 		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
-		assertEquals("myTask3", request.getDefinition().getProperties().get("spring.cloud.task.name"));
+		assertThat(request.getDefinition().getProperties()).containsKey("spring.cloud.task.name");
 	}
 
 	@Test
@@ -690,25 +744,24 @@ public class TaskControllerTests {
 
 		mockMvc.perform(get("/tasks/validation/myTask")).andExpect(status().isOk())
 				.andDo(print()).andExpect(content().json(
-				"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\"}"));
+						"{\"appName\":\"myTask\",\"appStatuses\":{\"task:myTask\":\"valid\"},\"dsl\":\"foo\"}"));
 
 	}
 
 	@Test
 	public void testTaskLaunchNoManifest() throws Exception {
-		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3");
+		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("myTask3", taskDefinitionReader);
+		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3", null);
+		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");
 		taskExecutionComplete.setStartTime(new Date());
 		taskExecutionComplete.setEndTime(new Date());
 		taskExecutionComplete.setExitCode(0);
-		when(taskExplorer.getLatestTaskExecutionForTaskName("myTask3")).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getTaskExecution(taskExecutionComplete.getExecutionId())).thenReturn(taskExecutionComplete);
-		when(taskExplorer.getLatestTaskExecutionsByTaskNames(any()))
-				.thenReturn(Arrays.asList(taskExecutionComplete, taskExecutionComplete));
 		repository.save(new TaskDefinition("myTask3", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
-		this.dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
+		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
 		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk());
 

@@ -38,9 +38,10 @@ public interface JobOperations {
 	/**
 	 * Restarts a job by id
 	 *
-	 * @param id job execution id
+	 * @param id           job execution id
+	 * @param schemaTarget the schema target for the job execution
 	 */
-	void executionRestart(long id);
+	void executionRestart(long id, String schemaTarget);
 
 	/**
 	 * @return the list job executions without step executions known to the system.
@@ -69,39 +70,42 @@ public interface JobOperations {
 	 */
 	PagedModel<JobExecutionResource> executionListByJobName(String jobName);
 
-
 	/**
 	 * Return the {@link JobExecutionResource} for the id specified.
 	 *
-	 * @param id identifier of the job execution
+	 * @param id           identifier of the job execution
+	 * @param schemaTarget the schema target for the job execution
 	 * @return {@link JobExecutionResource}
 	 */
-	JobExecutionResource jobExecution(long id);
+	JobExecutionResource jobExecution(long id, String schemaTarget);
 
 	/**
 	 * Return the {@link JobInstanceResource} for the id specified.
 	 *
-	 * @param id identifier of the job instasnce
+	 * @param id           identifier of the job instance
+	 * @param schemaTarget the schema target for the job instance
 	 * @return {@link JobInstanceResource}
 	 */
-	JobInstanceResource jobInstance(long id);
+	JobInstanceResource jobInstance(long id, String schemaTarget);
 
 	/**
 	 * List step executions known for a specific job execution id.
 	 *
 	 * @param jobExecutionId the id of the job execution.
+	 * @param schemaTarget   the schema target for the job execution
 	 * @return the paged list of step executions
 	 */
-	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId);
+	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget);
 
 	/**
 	 * Return StepExecutionProgressInfoResource for a specific job execution id and step
 	 * execution Id.
 	 *
-	 * @param jobExecutionId the id of the job execution for the step to be returned.
+	 * @param jobExecutionId  the id of the job execution for the step to be returned.
 	 * @param stepExecutionId the id step execution to be returned.
+	 * @param schemaTarget    the schema target of the job execution.
 	 * @return the step execution progress info
 	 */
-	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId);
+	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget);
 
 }

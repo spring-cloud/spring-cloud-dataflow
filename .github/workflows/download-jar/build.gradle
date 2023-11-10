@@ -1,0 +1,31 @@
+repositories {
+    maven {
+        url 'https://repo.spring.io/snapshot'
+    }
+    maven {
+        url 'https://repo.spring.io/milestone'
+    }
+    maven {
+        url 'https://repo.spring.io/libs-spring-dataflow-private-staging-release'
+        credentials {
+            username System.getenv('ARTIFACTORY_USERNAME')
+            password System.getenv('ARTIFACTORY_PASSWORD')
+        }
+    }
+    mavenCentral()
+}
+
+configurations {
+    download
+}
+dependencies {
+    download artifactGroup +  ':' + artifactId + ':' + artifactVersion + '@jar'
+}
+
+def downloadJar = tasks.register('downloadJar', Copy) {
+    doFirst {
+        logger.lifecycle "$path:Resolving:$artifactGroup:$artifactId:$artifactVersion"
+    }
+    destinationDir = file(artifactPath)
+    from configurations.download.resolvedConfiguration.files
+}

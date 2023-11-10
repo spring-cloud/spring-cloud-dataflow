@@ -22,6 +22,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -37,12 +40,14 @@ import org.springframework.cloud.dataflow.rest.resource.RootResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.shell.Target;
 import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.cloud.dataflow.shell.config.DataFlowShellProperties;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.shell.table.Table;
@@ -74,10 +79,19 @@ public class ConfigCommandTests {
 	@Mock
 	private RestTemplate restTemplate;
 
+	private ObjectMapper mapper;
+
 
 	@Before
 	public void setUp() {
-		MockitoAnnotations.initMocks(this);
+		if (this.mapper == null) {
+			this.mapper = new ObjectMapper();
+			this.mapper.registerModule(new Jdk8Module());
+			this.mapper.registerModule(new Jackson2HalModule());
+			this.mapper.registerModule(new JavaTimeModule());
+			this.mapper.registerModule(new Jackson2DataflowModule());
+		}
+		MockitoAnnotations.openMocks(this);
 
 		dataFlowShell = new DataFlowShell();
 
@@ -91,7 +105,7 @@ public class ConfigCommandTests {
 		TargetHolder targetHolder = new TargetHolder();
 		targetHolder.setTarget(new Target("http://localhost:9393"));
 
-		configCommands = new ConfigCommands(dataFlowShell, shellProperties(), userInput, targetHolder, restTemplate, null);
+		configCommands = new ConfigCommands(dataFlowShell, shellProperties(), userInput, targetHolder, restTemplate, null, mapper);
 	}
 
 	@Test

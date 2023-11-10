@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import java.time.temporal.ValueRange;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -25,7 +29,12 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Implementation for {@link JobOperations}.
@@ -34,11 +43,11 @@ import org.springframework.web.client.RestTemplate;
  */
 public class JobTemplate implements JobOperations {
 
-	private static final String EXECUTIONS_RELATION = "jobs/thinexecutions";
-
+	private static final String EXECUTIONS_THIN_RELATION = "jobs/thinexecutions";
+	private static final String EXECUTIONS_RELATION = "jobs/executions";
 	private static final String EXECUTION_RELATION = "jobs/executions/execution";
-
-	private static final String EXECUTION_RELATION_BY_NAME = "jobs/thinexecutions/name";
+	private static final String EXECUTION_RELATION_BY_NAME = "jobs/executions/name";
+	private static final String EXECUTION_THIN_RELATION_BY_NAME = "jobs/thinexecutions/name";
 
 	private static final String INSTANCE_RELATION = "jobs/instances/instance";
 
@@ -51,6 +60,9 @@ public class JobTemplate implements JobOperations {
 	private final RestTemplate restTemplate;
 
 	private final Link executionsLink;
+	private final Link thinExecutionsLink;
+
+	private final Link thinExecutionByNameLink;
 
 	private final Link executionLink;
 
@@ -67,21 +79,25 @@ public class JobTemplate implements JobOperations {
 	JobTemplate(RestTemplate restTemplate, RepresentationModel<?> resources) {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
-		Assert.notNull(resources.getLink(EXECUTIONS_RELATION), "Executions relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION), "Execution relation is required");
-		Assert.notNull(resources.getLink(EXECUTION_RELATION_BY_NAME), "Execution by name relation is required");
-		Assert.notNull(resources.getLink(INSTANCE_RELATION), "Instance relation is required");
-		Assert.notNull(resources.getLink(INSTANCE_RELATION_BY_NAME), "Instance by name relation is required");
-		Assert.notNull(resources.getLink(STEP_EXECUTION_RELATION_BY_ID), "Step Execution by id relation is required");
-		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID),
+		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
+		Assert.isTrue(resources.getLink(EXECUTIONS_THIN_RELATION).isPresent(), "Executions thin relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_THIN_RELATION_BY_NAME).isPresent(), "Executions thin relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_RELATION).isPresent(), "Execution relation is required");
+		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
+		Assert.isTrue(resources.getLink(INSTANCE_RELATION).isPresent(), "Instance relation is required");
+		Assert.isTrue(resources.getLink(INSTANCE_RELATION_BY_NAME).isPresent(), "Instance by name relation is required");
+		Assert.isTrue(resources.getLink(STEP_EXECUTION_RELATION_BY_ID).isPresent(), "Step Execution by id relation is required");
+		Assert.isTrue(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).isPresent(),
 				"Step Execution Progress by id " + "relation is required");
-		Assert.notNull(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID),
+		Assert.isTrue(resources.getLink(STEP_EXECUTION_PROGRESS_RELATION_BY_ID).isPresent(),
 				"Step Execution View by id relation" + " is required");
 
 		this.restTemplate = restTemplate;
-		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
+		this.executionsLink = resources.getLink(EXECUTION_RELATION).get();
+		this.thinExecutionsLink = resources.getLink(EXECUTIONS_THIN_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
+		this.thinExecutionByNameLink = resources.getLink(EXECUTION_THIN_RELATION_BY_NAME).get();
 		this.instanceLink = resources.getLink(INSTANCE_RELATION).get();
 		this.instanceByNameLink = resources.getLink(INSTANCE_RELATION_BY_NAME).get();
 		this.stepExecutionsLink = resources.getLink(STEP_EXECUTION_RELATION_BY_ID).get();
@@ -90,26 +106,24 @@ public class JobTemplate implements JobOperations {
 
 	@Override
 	public PagedModel<JobExecutionResource> executionList() {
-		String uriTemplate = executionsLink.getHref();
-		uriTemplate = uriTemplate + "?size=2000";
-
-		return restTemplate.getForObject(uriTemplate, JobExecutionResource.Page.class);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionsLink.getHref()).queryParam("size", "2000");
+		return restTemplate.getForObject(builder.toUriString(), JobExecutionResource.Page.class);
 	}
 
 	@Override
-	public void executionRestart(long id) {
-		String uriTemplate = executionLink.expand(id).getHref();
-		uriTemplate = uriTemplate + "?restart=true";
+	public void executionRestart(long id, String schemaTarget) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true");
 
-		restTemplate.put(uriTemplate, null);
+		if (StringUtils.hasText(schemaTarget)) {
+			builder.queryParam("schemaTarget", schemaTarget);
+		}
+		restTemplate.put(builder.toUriString(), null);
 	}
 
 	@Override
 	public PagedModel<JobExecutionThinResource> executionThinList() {
-		String uriTemplate = executionsLink.getHref();
-		uriTemplate = uriTemplate + "?size=2000";
-
-		return restTemplate.getForObject(uriTemplate, JobExecutionThinResource.Page.class);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(thinExecutionsLink.getHref()).queryParam("size", "2000");
+		return restTemplate.getForObject(builder.toUriString(), JobExecutionThinResource.Page.class);
 	}
 
 	@Override
@@ -119,36 +133,50 @@ public class JobTemplate implements JobOperations {
 
 	@Override
 	public PagedModel<JobExecutionThinResource> executionThinListByJobName(String jobName) {
-		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(),
-				JobExecutionThinResource.Page.class);
+		return restTemplate.getForObject(thinExecutionByNameLink.expand(jobName).getHref(), JobExecutionThinResource.Page.class);
 	}
 
 	@Override
 	public PagedModel<JobExecutionResource> executionListByJobName(String jobName) {
-		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(),
-				JobExecutionResource.Page.class);
+		return restTemplate.getForObject(executionByNameLink.expand(jobName).getHref(), JobExecutionResource.Page.class);
 	}
 
 	@Override
-	public JobExecutionResource jobExecution(long id) {
-		return restTemplate.getForObject(executionLink.expand(id).getHref(), JobExecutionResource.class);
+	public JobExecutionResource jobExecution(long id, String schemaTarget) {
+		String url = executionLink.expand(id).getHref();
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
+		if (StringUtils.hasText(schemaTarget)) {
+			builder.queryParam("schemaTarget", schemaTarget);
+		}
+
+		return restTemplate.getForObject(builder.toUriString(), JobExecutionResource.class);
 	}
 
 	@Override
-	public JobInstanceResource jobInstance(long id) {
-		return restTemplate.getForObject(instanceLink.expand(id).getHref(), JobInstanceResource.class);
+	public JobInstanceResource jobInstance(long id, String schemaTarget) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(instanceLink.expand(id).getHref());
+		if (StringUtils.hasText(schemaTarget)) {
+			builder.queryParam("schemaTarget", schemaTarget);
+		}
+		return restTemplate.getForObject(builder.toUriString(), JobInstanceResource.class);
 	}
 
 	@Override
-	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId) {
-		return restTemplate.getForObject(stepExecutionsLink.expand(jobExecutionId).getHref(),
-				StepExecutionResource.Page.class);
+	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionsLink.expand(jobExecutionId).getHref());
+		if (StringUtils.hasText(schemaTarget)) {
+			builder.queryParam("schemaTarget", schemaTarget);
+		}
+		return restTemplate.getForObject(builder.toUriString(), StepExecutionResource.Page.class);
 	}
 
 	@Override
-	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId) {
-		return restTemplate.getForObject(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref(),
-				StepExecutionProgressInfoResource.class);
+	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref());
+		if (StringUtils.hasText(schemaTarget)) {
+			builder.queryParam("schemaTarget", schemaTarget);
+		}
+		return restTemplate.getForObject(builder.toUriString(), StepExecutionProgressInfoResource.class);
 	}
 
 }

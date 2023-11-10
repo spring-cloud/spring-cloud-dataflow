@@ -54,9 +54,9 @@ public class CloudFoundryPlatformPropertiesTests {
 		assertThat(cfAccounts.get("dev").getDeployment().getMemory()).isEqualTo("512m");
 		assertThat(cfAccounts.get("dev").getDeployment().getDisk()).isEqualTo("2048m");
 		assertThat(cfAccounts.get("dev").getDeployment().getInstances()).isEqualTo(4);
-		assertThat(cfAccounts.get("dev").getDeployment().getAppNamePrefix().equals("dev1"));
+		assertThat(cfAccounts.get("dev").getDeployment().getAppNamePrefix()).isEqualTo("dev1");
 		assertThat(cfAccounts.get("dev").getDeployment().getServices())
-				.containsExactly("rabbit", "mysql");
+				.containsExactlyInAnyOrder("rabbit", "mysql");
 
 		assertThat(cfAccounts.get("qa").getConnection().getOrg()).isEqualTo("myOrgQA");
 		assertThat(cfAccounts.get("qa").getConnection().getClientId()).isEqualTo("id2");
@@ -64,9 +64,9 @@ public class CloudFoundryPlatformPropertiesTests {
 		assertThat(cfAccounts.get("qa").getDeployment().getMemory()).isEqualTo("756m");
 		assertThat(cfAccounts.get("qa").getDeployment().getDisk()).isEqualTo("724m");
 		assertThat(cfAccounts.get("qa").getDeployment().getInstances()).isEqualTo(2);
-		assertThat(cfAccounts.get("qa").getDeployment().getAppNamePrefix().equals("qa1"));
+		assertThat(cfAccounts.get("qa").getDeployment().getAppNamePrefix()).isEqualTo("qa1");
 		assertThat(cfAccounts.get("qa").getDeployment().getServices())
-				.containsExactly("rabbitQA", "mysqlQA");
+				.containsExactlyInAnyOrder("rabbitQA", "mysqlQA");
 	}
 
 	@Configuration

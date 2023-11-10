@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.11.0-SNAPSHOT
-        imagePullPolicy: Always
+        image: springcloud/spring-cloud-dataflow-server:2.11.2-SNAPSHOT
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
             mountPath: /workspace/config
@@ -68,7 +68,7 @@ spec:
         - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
           value: 'true'
         - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
-          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.11.0-SNAPSHOT'
+          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.11.2-SNAPSHOT'
         - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
@@ -80,9 +80,6 @@ spec:
           # Provide the Skipper service location
         - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
           value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
-          # Add Maven repo for metadata artifact resolution for all stream apps
-        - name: SPRING_APPLICATION_JSON
-          value: "{ \"maven\": { \"local-repository\": null, \"remote-repositories\": { \"repo1\": { \"url\": \"https://repo.spring.io/snapshot\"} } } }"
       initContainers:
       - name: init-mariadb-wait
         image: busybox:1

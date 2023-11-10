@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
  */
-
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskDefinitionsDocumentation extends BaseDocumentation {
 

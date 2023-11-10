@@ -26,6 +26,20 @@ By default, stream (requires Skipper), and tasks are enabled and Task Scheduler 
 
 The REST `/about` endpoint provides information on the features that have been enabled and disabled.
 
+[[configuration-local-java-home]]
+=== Java Home
+
+When launching Spring Cloud Data Flow or Skipper Server they may need to know where Java 17 home is in order to successfully launch Spring Boot 3 applications.
+
+By passing the following property you can provide the path.
+
+[source,shell]
+....
+java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar \
+    --spring.cloud.dataflow.defaults.boot3.local.javaHomePath=/usr/lib/jvm/java-17 \
+    --spring.cloud.dataflow.defaults.boot2.local.javaHomePath=/usr/lib/jvm/java-1.8
+....
+
 [[configuration-local-rdbms]]
 === Database
 
@@ -49,48 +63,8 @@ SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:3306/mydb
 SPRING_DATASOURCE_USERNAME=user
 SPRING_DATASOURCE_PASSWORD=pass
 SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.mariadb.jdbc.Driver
-
+SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MariaDB106Dialect
 java -jar spring-cloud-dataflow-server/target/spring-cloud-dataflow-server-{project-version}.jar
-----
-
-[#add-custom-driver]
-==== Adding a Custom JDBC Driver
-To add a custom driver for the database (for example, Oracle), you should rebuild the Data Flow Server and add the dependency to the Maven `pom.xml` file.
-You need to modify the maven `pom.xml` of `spring-cloud-dataflow-server` module.
-There are GA release tags in GitHub repository, so you can switch to desired GA tags to add the drivers on the production-ready codebase.
-
-To add a custom JDBC driver dependency for the Spring Cloud Data Flow server:
-
-. Select the tag that corresponds to the version of the server you want to rebuild and clone the github repository.
-. Edit the spring-cloud-dataflow-server/pom.xml and, in the `dependencies` section, add the dependency for the database driver required.  In the following example , an Oracle driver has been chosen:
-
-[source,xml]
-----
-<dependencies>
-...
-  <dependency>
-    <groupId>com.oracle.jdbc</groupId>
-    <artifactId>ojdbc8</artifactId>
-    <version>12.2.0.1</version>
-  </dependency>
-...
-</dependencies>
-----
-
-[start=3]
-. Build the application as described in <<appendix-building.adoc#building, Building Spring Cloud Data Flow>>
-
-You can also provide default values when rebuilding the server by adding the necessary properties to the dataflow-server.yml file,
-as shown in the following example for PostgreSQL:
-
-[source]
-----
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydb
-    username: myuser
-    password: mypass
-    driver-class-name:org.postgresql.Driver
 ----
 
 [[configuration-local-rdbms-schema]]
@@ -149,6 +123,10 @@ These properties are also used when configuring <<configuration-local-tasks,Loca
 |Command to run java
 |java
 
+|javaHomePath.<bootVersion>
+| Path to JDK installation for launching applications depending on their registered Boot version. `bootVersion` should be `2` or `3`.
+| System property `java.home`
+
 |shutdownTimeout
 |Max number of seconds to wait for app shutdown.
 |30
@@ -191,14 +169,14 @@ The logging configuration is located on the classpath contained in a file named 
 
 By default, the log file is configured to use:
 
-```
+[source,xml]
+----
 <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}}/spring-cloud-dataflow-server-local.log}"/>
-```
-
-with the logback configuration for the `RollingPolicy`:
-
 ----
 
+with the logback configuration for the `RollingPolicy`:
+[source,xml]
+----
 <appender name="FILE"
 			  class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${LOG_FILE}</file>
@@ -214,15 +192,15 @@ with the logback configuration for the `RollingPolicy`:
 			<pattern>${FILE_LOG_PATTERN}</pattern>
 		</encoder>
 	</appender>
-
 ----
 
 To check the `java.io.tmpdir` for the current Spring Cloud Data Flow Server `local` server,
 
-```
+[source,shell]
+----
 jinfo <pid> | grep "java.io.tmpdir"
 
-```
+----
 
 If you want to change or override any of the properties `LOG_FILE`, `LOG_PATH`, `LOG_TEMP`, `LOG_FILE_MAX_SIZE`, `LOG_FILE_MAX_HISTORY` and `LOG_FILE_TOTAL_SIZE_CAP`, please set them as system properties.
 
@@ -514,11 +492,15 @@ refers to Maven Central.
 * `version`: Inserts the version of the jar/pom.
 
 For example,
-```
-https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/\{version}/spring-cloud-dataflow-shell-\{version}.jar
-```
+
+[source]
+----
+https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-\{version}.jar
+----
 produces
-```
-https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/2.1.4/spring-cloud-dataflow-shell-2.1.4.jar
-```
-if you were using the `2.1.4` version of the Spring Cloud Data Flow Shell.
+
+[source]
+----
+https://myrepository/org/springframework/cloud/spring-cloud-dataflow-shell/2.1.4/spring-cloud-dataflow-shell-2.11.0.jar
+----
+if you were using the `2.11.0` version of the Spring Cloud Data Flow Shell.

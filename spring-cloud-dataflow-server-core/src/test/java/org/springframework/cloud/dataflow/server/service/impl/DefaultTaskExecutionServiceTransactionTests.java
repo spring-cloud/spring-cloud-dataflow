@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -36,19 +33,23 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.core.AuditActionType;
-import org.springframework.cloud.dataflow.core.AuditOperationType;
-import org.springframework.cloud.dataflow.core.AuditRecord;
+import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -59,15 +60,13 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
-import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -77,10 +76,11 @@ import static org.mockito.Mockito.when;
 /**
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
+@SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class DefaultTaskExecutionServiceTransactionTests {
@@ -93,7 +93,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
 	@Autowired
-	TaskRepository taskRepository;
+	TaskRepositoryContainer taskRepositoryContainer;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -123,7 +123,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
 	@Autowired
-	TaskExplorer taskExplorer;
+	AggregateTaskExplorer taskExplorer;
 
 	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
@@ -132,38 +132,67 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Autowired
-	DataflowTaskExecutionDao dataflowTaskExecutionDao;
+	DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
+	DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+
+	@Autowired
+	DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
 
 	private TaskExecutionService transactionTaskService;
 
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@Before
 	public void setupMocks() {
-		this.launcherRepository.save(new Launcher("default", "local", new TaskLauncherStub(dataSource)));
+		assertThat(this.launcherRepository.findByName("default")).isNull();
+		this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new TaskLauncherStub(dataSource)));
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 		this.taskDefinitionRepository.findAll();
 		this.transactionTaskService = new DefaultTaskExecutionService(
-				launcherRepository, auditRecordService, taskRepository,
-				taskExecutionInfoService, mock(TaskDeploymentRepository.class),
-				taskExecutionRepositoryService, taskAppDeploymentRequestCreator,
-				this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
-				mock(OAuth2TokenUtilsService.class), this.taskSaveService, this.taskConfigurationProperties,
-				this.composedTaskRunnerConfigurationProperties);
+				applicationContext.getEnvironment(),
+				launcherRepository,
+				auditRecordService,
+				taskRepositoryContainer,
+				taskExecutionInfoService,
+				mock(TaskDeploymentRepository.class),
+				taskDefinitionRepository,
+				taskDefinitionReader,
+				taskExecutionRepositoryService,
+				taskAppDeploymentRequestCreator,
+				taskExplorer,
+				dataflowTaskExecutionDaoContainer,
+				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionQueryDao,
+				mock(OAuth2TokenUtilsService.class),
+				taskSaveService,
+				taskConfigurationProperties,
+				aggregateExecutionSupport,
+				null
+		);
 	}
 
 	@Test
 	@DirtiesContext
 	public void executeSingleTaskTransactionTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
-		assertEquals(1L, this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>()));
+		LaunchResponse taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
+		assertEquals(1L, taskExecution.getExecutionId());
+		assertEquals("boot2", taskExecution.getSchemaTarget());
 	}
 
 	private static class TaskLauncherStub implements TaskLauncher {
 		private String result = "0";
 
-		private DataSource dataSource;
+		private final DataSource dataSource;
 
 		private TaskLauncherStub(DataSource dataSource) {
 			this.dataSource = dataSource;
@@ -218,35 +247,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 
 		public String getResult() {
 			return result;
-		}
-	}
-
-	private static class AuditRecordServiceStub implements AuditRecordService {
-
-		@Override
-		public AuditRecord populateAndSaveAuditRecord(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, String data, String platformName) {
-			return null;
-		}
-
-		@Override
-		public AuditRecord populateAndSaveAuditRecordUsingMapData(AuditOperationType auditOperationType, AuditActionType auditActionType, String correlationId, Map<String, Object> data, String platformName) {
-			try {
-				Thread.sleep(1000);
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		public Page<AuditRecord> findAuditRecordByAuditOperationTypeAndAuditActionTypeAndDate(Pageable pageable, AuditActionType[] actions, AuditOperationType[] operations, Instant fromDate, Instant toDate) {
-			return null;
-		}
-
-		@Override
-		public Optional<AuditRecord> findById(Long id) {
-			return Optional.empty();
 		}
 	}
 

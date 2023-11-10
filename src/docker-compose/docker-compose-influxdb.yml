@@ -19,15 +19,13 @@ services:
         }
 
   influxdb:
-    platform: linux/amd64
-    image: influxdb:1.7.7
+    image: influxdb:1.8
     container_name: influxdb
     ports:
       - '8086:8086'
 
   grafana:
-    platform: linux/amd64
-    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:-2.11.0-SNAPSHOT}
+    image: springcloud/spring-cloud-dataflow-grafana-influxdb:${DATAFLOW_VERSION:-2.11.2-SNAPSHOT}
     container_name: grafana
     ports:
       - '3000:3000'

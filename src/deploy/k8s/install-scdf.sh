@@ -21,17 +21,12 @@ fi
 
 sh "$LS_DIR/deploy-scdf.sh"
 
-if [ "$K8S_DRIVER" != "tmc" ]; then
+if [ "$SKIP_REG" != "true" ] && [ "$K8S_DRIVER" != "tmc" ]; then
   sh "$LS_DIR/load-images.sh"
 fi
 
-if [ "$DATABASE" = "mariadb" ]; then
-    echo "Waiting for mariadb"
-    kubectl rollout status deployment --namespace "$NS" mariadb
-else
-    echo "Waiting for PostgreSQL"
-    kubectl rollout status deployment --namespace "$NS" postgresql
-fi
+
+kubectl rollout status deployment --namespace "$NS" $DATABASE
 
 if [ "$BROKER" = "kafka" ]; then
   echo "Waiting for Kafka and Zookeeper"
@@ -40,6 +35,14 @@ if [ "$BROKER" = "kafka" ]; then
 else
   echo "Waiting for rabbitmq"
   kubectl rollout status deployment --namespace "$NS" rabbitmq
+fi
+if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
+    echo "Waiting for prometheus"
+    kubectl rollout status deployment --namespace "$NS" prometheus
+    echo "Waiting for grafana"
+    kubectl rollout status deployment --namespace "$NS" grafana
+    echo "Waiting for prometheus-rsocket-proxy"
+    kubectl rollout status deployment --namespace "$NS" prometheus-rsocket-proxy
 fi
 echo "Waiting for skipper"
 kubectl rollout status deployment --namespace "$NS" skipper
@@ -53,9 +56,11 @@ if [ "$K8S_DRIVER" = "kind" ]; then
 else
   source "$LS_DIR/export-dataflow-ip.sh"
 fi
-sh "$LS_DIR/register-apps.sh"
+if [ "$SKIP_REG" != "true" ]; then
+    sh "$LS_DIR/register-apps.sh"
+fi
 end_time=$(date +%s)
 elapsed=$(( end_time - start_time ))
 echo "Complete deployment in $elapsed seconds"
 echo "Execute source $LS_DIR/export-dataflow-ip.sh to export DATAFLOW_IP for executing tests"
-echo "Monitor pods using k9s and kail --ns=default | tee pods.log"
+echo "Monitor pods using k9s and kail --ns=$NS | tee pods.log"

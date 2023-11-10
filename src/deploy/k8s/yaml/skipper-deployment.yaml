@@ -49,7 +49,7 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            cpu: 0.5
+            cpu: '0.5'
             memory: 640Mi
         env:
           - name: LANG
@@ -110,6 +110,15 @@ spec:
               configMapKeyRef:
                 key: SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING
                 name: scdf-datasource
+          - name: SPRING_JPA_DATABASE_PLATFORM
+            valueFrom:
+              configMapKeyRef:
+                key: SPRING_JPA_DATABASE_PLATFORM
+                name: scdf-datasource
+          - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED
+            value: 'true'
+          - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED
+            value: 'true'
       serviceAccountName: scdf-sa
       volumes:
         - name: config

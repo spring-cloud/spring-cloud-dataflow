@@ -55,7 +55,7 @@ public class V2__Add_Descriptions_And_OriginalDefinition extends BaseJavaMigrati
 					")";
 
 	private final static String CREATE_TASK_METADATA_SEQUENCE =
-			"CREATE SEQUENCE task_execution_metadata_seq START WITH 0 MINVALUE 0 MAXVALUE 9223372036854775807 NOCACHE NOCYCLE";
+			"CREATE SEQUENCE task_execution_metadata_seq START WITH 1 MINVALUE 1 MAXVALUE 9223372036854775807 NOCACHE NOCYCLE";
 
 	private final SqlCommandsRunner runner = new SqlCommandsRunner();
 

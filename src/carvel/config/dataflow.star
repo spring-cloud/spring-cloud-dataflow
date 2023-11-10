@@ -38,7 +38,7 @@ def dataflow_container_env():
   envs.extend([{"name": "SPRING_CLOUD_DATAFLOW_SERVER_URI", "value": "http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}"}])
   envs.extend([{"name": "SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI", "value": "http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api"}])
   if non_empty_string(dataflow_db_dialect()):
-    envs.extend([{"name": "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT", "value": dataflow_db_dialect()}])
+    envs.extend([{"name": "SPRING_JPA_DATABASE_PLATFORM", "value": dataflow_db_dialect()}])
   end
   if grafana_enabled():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
@@ -47,8 +47,23 @@ def dataflow_container_env():
     envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
   end
   if non_empty_string(data.values.scdf.server.database.secretName):
-    envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])
-    envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretPasswordKey}}}])
+    if non_empty_string(data.values.scdf.server.database.secretUsernameKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretUsernameKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": "username"}}}])
+    end
+    if non_empty_string(data.values.scdf.server.database.secretPasswordKey):
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": data.values.scdf.server.database.secretPasswordKey}}}])
+    else:
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "valueFrom": {"secretKeyRef": {"name": data.values.scdf.server.database.secretName, "key": "password"}}}])
+    end
+  else:
+    if non_empty_string(data.values.scdf.server.database.username):
+      envs.extend([{"name": "SPRING_DATASOURCE_USERNAME", "value": data.values.scdf.server.database.username}])
+    end
+    if non_empty_string(data.values.scdf.server.database.password):
+      envs.extend([{"name": "SPRING_DATASOURCE_PASSWORD", "value": data.values.scdf.server.database.password}])
+    end
   end
   for e in data.values.scdf.server.env:
       envs.extend([{"name": e.name, "value": e.value}])

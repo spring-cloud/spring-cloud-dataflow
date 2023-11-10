@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -30,17 +34,29 @@ import org.springframework.util.Assert;
 @Transactional
 public class DefaultTaskExecutionRepositoryService implements TaskExecutionCreationService {
 
-	private TaskRepository taskRepository;
+	private final TaskRepositoryContainer taskRepositoryContainer;
+	private final AggregateExecutionSupport aggregateExecutionSupport;
 
-	public DefaultTaskExecutionRepositoryService(TaskRepository taskRepository) {
-		Assert.notNull(taskRepository, "taskRepository must not be null");
-		this.taskRepository = taskRepository;
+	private final TaskDefinitionReader taskDefinitionReader;
+
+	public DefaultTaskExecutionRepositoryService(
+			TaskRepositoryContainer taskRepositoryContainer,
+			AggregateExecutionSupport aggregateExecutionSupport,
+			TaskDefinitionReader taskDefinitionReader
+	) {
+		Assert.notNull(taskRepositoryContainer, "taskRepository must not be null");
+		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport must not be null");
+		Assert.notNull(taskDefinitionReader, "taskDefinitionReader must not be null");
+		this.taskRepositoryContainer = taskRepositoryContainer;
+		this.aggregateExecutionSupport = aggregateExecutionSupport;
+		this.taskDefinitionReader = taskDefinitionReader;
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	// TODO pass the SchemaVersionTarget
-	public TaskExecution createTaskExecution(String taskName) {
+	public TaskExecution createTaskExecution(String taskName, String version) {
+		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(taskName, version, taskDefinitionReader);
+		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 		return taskRepository.createTaskExecution(taskName);
 	}
 }

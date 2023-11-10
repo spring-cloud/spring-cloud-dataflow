@@ -17,6 +17,12 @@
       "sourceType": "org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties",
       "sourceMethod": "getComposedTaskAppProperties()"
     }
+  ,
+    {
+      "name": "task-app-properties",
+      "type": "org.springframework.cloud.task.configuration.TaskProperties",
+      "sourceType": "org.springframework.cloud.task.configuration.TaskProperties"
+    }
   ],
   "properties": [
     {

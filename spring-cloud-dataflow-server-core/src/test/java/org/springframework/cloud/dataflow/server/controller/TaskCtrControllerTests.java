@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -68,7 +69,12 @@ public class TaskCtrControllerTests {
 		ConfigurationMetadataProperty p = new ConfigurationMetadataProperty();
 		p.setId("oauth2-client-credentials-scopes");
 		p.setName("oauth2-client-credentials-scopes");
-		List<ConfigurationMetadataProperty> props = Arrays.asList(p);
+		List<ConfigurationMetadataProperty> props = new ArrayList<>();
+		props.add(p);
+		p = new ConfigurationMetadataProperty();
+		p.setId("spring.cloud.task.closecontext-enabled");
+		p.setName("false");
+		props.add(p);
 		Mockito.when(metadataResolver.listProperties(any())).thenReturn(props);
 	}
 
@@ -76,6 +82,7 @@ public class TaskCtrControllerTests {
 	public void testOptions() throws Exception {
 		mockMvc.perform(get("/tasks/ctr/options").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.[?(@.id == 'oauth2-client-credentials-scopes')].name", hasItems("oauth2-client-credentials-scopes")));
+			.andExpect(jsonPath("$.[?(@.id == 'oauth2-client-credentials-scopes')].name", hasItems("oauth2-client-credentials-scopes")))
+			.andExpect(jsonPath("$.[?(@.id == 'spring.cloud.task.closecontext-enabled')].name", hasItems("false")));
 	}
 }

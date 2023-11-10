@@ -1,4 +1,7 @@
 #!/bin/bash
+bold="\033[1m"
+dim="\033[2m"
+end="\033[0m"
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 function register_app() {
@@ -44,7 +47,15 @@ elif [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
     STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
     STREAM_URI="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
-    STREAM_URI="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/$STREAM_APPS_VERSION/stream-applications-descriptor-$STREAM_APPS_VERSION.stream-apps-${BROKER_NAME}-${TYPE}"
+    REL_TYPE=
+    if [[ "$STREAM_APPS_VERSION" = *"-M"* ]] || [[ "$STREAM_APPS_VERSION" = *"-RC"* ]]; then
+        REL_TYPE=milestone
+    fi
+    if [ "$REL_TYPE" != "" ]; then
+        STREAM_URI="https://repo.spring.io/$REL_TYPE/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    else
+        STREAM_URI="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    fi
 fi
 if [ "$DATAFLOW_URL" = "" ]; then
     source $SCDIR/export-dataflow-ip.sh
@@ -70,6 +81,10 @@ wget -qO- "$DATAFLOW_URL/apps" --post-data="uri=$TASK_URI"
 # replace with individual calls to register only what is required.
 #register_app "task/timestamp" "docker:springcloudtask/timestamp-task:2.0.2"
 #register_app "task/timestamp-batch" "docker:springcloudtask/timestamp-batch-task:2.0.2"
+register_app "task/timestamp3" "docker:springcloudtask/timestamp-task:3.0.0"
+register_app "task/timestamp-batch3" "docker:springcloudtask/timestamp-batch-task:3.0.0"
+register_app "task/task-demo-metrics-prometheus" "docker:springcloudtask/task-demo-metrics-prometheus:2.0.1-SNAPSHOT"
+
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Registered apps from $STREAM_URI in ${bold}$elapsed${end} seconds"

@@ -15,7 +15,7 @@ spec:
         app: mariadb
     spec:
       containers:
-      - image: mariadb:10.4.22
+      - image: mariadb:10.4
         name: mariadb
         env:
           - name: LANG

@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,8 +36,10 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.Base64Utils;
-import org.springframework.cloud.task.configuration.TaskConfigurer;
+import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.core.env.Environment;
+import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -49,19 +54,20 @@ import org.springframework.util.Assert;
  *
  * @author Glenn Renfro
  * @author Michael Minella
+ * @author Corneil du Plessis
  */
 public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
-	private final static Logger log = LoggerFactory.getLogger(ComposedTaskRunnerStepFactory.class);
+	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskRunnerStepFactory.class);
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
 
 	private ComposedTaskProperties composedTaskPropertiesFromEnv;
 
-	private String taskName;
+	private final String taskName;
 
-	private String taskNameId;
+	private final String taskNameId;
 
 	private Map<String, String> taskSpecificProps = new HashMap<>();
 
@@ -74,7 +80,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	private StepExecutionListener composedTaskStepExecutionListener;
 
 	@Autowired
-	private TaskConfigurer taskConfigurer;
+	private TaskExplorerContainer taskExplorerContainer;
 
 	@Autowired
 	private TaskProperties taskProperties;
@@ -85,8 +91,15 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	@Autowired(required = false)
 	private OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient;
 
+	@Autowired(required = false)
+	private ObjectMapper mapper;
+
+	@Autowired
+	private Environment environment;
+
 	public ComposedTaskRunnerStepFactory(
-			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId) {
+			ComposedTaskProperties composedTaskPropertiesFromEnv, String taskName, String taskNameId
+	) {
 		Assert.notNull(composedTaskPropertiesFromEnv,
 				"composedTaskProperties must not be null");
 		Assert.hasText(taskName, "taskName must not be empty nor null");
@@ -97,53 +110,66 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	}
 
 	public void setTaskSpecificProps(Map<String, String> taskSpecificProps) {
-		if(taskSpecificProps != null) {
+		if (taskSpecificProps != null) {
 			this.taskSpecificProps = taskSpecificProps;
 		}
 	}
 
 	public void setArguments(List<String> arguments) {
-		if(arguments != null) {
+		if (arguments != null) {
 			this.arguments = arguments;
 		}
 	}
 
 	@Override
-	public Step getObject() throws Exception {
-
+	public Step getObject() {
+		if (this.mapper == null) {
+			this.mapper = new ObjectMapper();
+			this.mapper.registerModule(new Jdk8Module());
+			this.mapper.registerModule(new Jackson2HalModule());
+			this.mapper.registerModule(new JavaTimeModule());
+			this.mapper.registerModule(new Jackson2DataflowModule());
+		}
 		TaskLauncherTasklet taskLauncherTasklet = new TaskLauncherTasklet(
-				this.clientRegistrations, this.clientCredentialsTokenResponseClient, taskConfigurer.getTaskExplorer(),
-				this.composedTaskPropertiesFromEnv, this.taskName, taskProperties);
+				this.clientRegistrations,
+				this.clientCredentialsTokenResponseClient,
+				this.taskExplorerContainer.get(this.taskNameId),
+				this.composedTaskPropertiesFromEnv,
+				this.taskName,
+				taskProperties,
+				environment, this.mapper);
 
-		List<String> argumentsFromAppProperties = Base64Utils
-			.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments()).entrySet().stream()
-			.filter(e -> e.getKey().startsWith("app." + taskNameId) || e.getKey().startsWith("app.*."))
-			.map(e -> e.getValue())
-			.collect(Collectors.toList());
+		List<String> argumentsFromAppProperties = Base64Utils.decodeMap(this.composedTaskProperties.getComposedTaskAppArguments())
+				.entrySet()
+				.stream()
+				.filter(e -> e.getKey().startsWith("app." + taskNameId + ".") || e.getKey().startsWith("app.*."))
+				.map(Map.Entry::getValue)
+				.collect(Collectors.toList());
 
 		List<String> argumentsToUse = Stream.concat(this.arguments.stream(), argumentsFromAppProperties.stream())
-			.collect(Collectors.toList());
+				.collect(Collectors.toList());
 
 		taskLauncherTasklet.setArguments(argumentsToUse);
 
-		log.debug("decoded composed-task-app-properties {}", composedTaskProperties.getComposedTaskAppProperties());
+		logger.debug("decoded composed-task-app-properties {}", composedTaskProperties.getComposedTaskAppProperties());
 
 		Map<String, String> propertiesFrom = Base64Utils
 				.decodeMap(this.composedTaskProperties.getComposedTaskAppProperties()).entrySet().stream()
-				.filter(e -> e.getKey().startsWith("app." + taskNameId)
-						|| e.getKey().startsWith("deployer." + taskNameId) || e.getKey().startsWith("deployer.*"))
-				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+				.filter(e ->
+					e.getKey().startsWith("app." + taskNameId + ".") ||
+					e.getKey().startsWith("app.*.") ||
+					e.getKey().startsWith("deployer." + taskNameId + ".") ||
+					e.getKey().startsWith("deployer.*."))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
 		Map<String, String> propertiesToUse = new HashMap<>();
 		propertiesToUse.putAll(this.taskSpecificProps);
 		propertiesToUse.putAll(propertiesFrom);
 
 		taskLauncherTasklet.setProperties(propertiesToUse);
-		log.debug("Properties to use {}", propertiesToUse);
+		logger.debug("Properties to use {}", propertiesToUse);
 
-		String stepName = this.taskName;
-
-		return this.steps.get(stepName)
+		return this.steps.get(this.taskName)
 				.tasklet(taskLauncherTasklet)
 				.transactionAttribute(getTransactionAttribute())
 				.listener(this.composedTaskStepExecutionListener)
@@ -156,7 +182,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	 * what is in its transaction.  By setting isolation to READ_COMMITTED
 	 * The task launcher can see latest state of the db.  Since the changes
 	 * to the task execution are done by the tasks.
-
+	 *
 	 * @return DefaultTransactionAttribute with isolation set to READ_COMMITTED.
 	 */
 	private TransactionAttribute getTransactionAttribute() {
@@ -172,8 +198,4 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		return Step.class;
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return true;
-	}
 }

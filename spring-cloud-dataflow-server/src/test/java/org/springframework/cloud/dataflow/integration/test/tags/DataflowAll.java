@@ -30,10 +30,12 @@ import org.junit.jupiter.api.Tag;
 @Tag(TagNames.DATAFLOW_2_8)
 @Tag(TagNames.DATAFLOW_2_9)
 @Tag(TagNames.DATAFLOW_2_10)
+@Tag(TagNames.DATAFLOW_main)
 
 @Tag(TagNames.SKIPPER_2_6)
 @Tag(TagNames.SKIPPER_2_7)
 @Tag(TagNames.SKIPPER_2_8)
 @Tag(TagNames.SKIPPER_2_9)
+@Tag(TagNames.SKIPPER_main)
 public @interface DataflowAll {
 }

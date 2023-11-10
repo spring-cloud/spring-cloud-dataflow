@@ -76,7 +76,7 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       - name: init-mariadb-database
-        image: mariadb:10.4.22
+        image: mariadb:10.4
         env:
         - name: MARIADB_PWD
           valueFrom:

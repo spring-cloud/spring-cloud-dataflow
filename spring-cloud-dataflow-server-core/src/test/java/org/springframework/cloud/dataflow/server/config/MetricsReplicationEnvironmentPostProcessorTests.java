@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2020-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +27,9 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
+import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -37,79 +37,75 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecuti
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Tests for {@link MetricsReplicationEnvironmentPostProcessor}.
+ * 
  * @author Christian Tzolov
+ * @author Chris Bono
  */
-public class MetricsReplicationEnvironmentPostProcessorTests {
+class MetricsReplicationEnvironmentPostProcessorTests {
 
-	private static final List<String> testArgs = Arrays.asList("--server.port=0",
-			"--spring.main.allow-bean-definition-overriding=true",
-			"--spring.autoconfigure.exclude=" +
-					"org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration," +
-					"org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
-
-	private static final String[] COMMON_APPLICATION_PREFIXES = new String[] {
-			MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".stream.",
-			MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".task." };
-
+	private static final String COMMON_STREAM_PROP_PREFIX = "spring.cloud.dataflow.application-properties.stream.";
+	private static final String COMMON_TASK_PROP_PREFIX = "spring.cloud.dataflow.application-properties.task.";
+	private static final String[] COMMON_APPLICATION_PREFIXES = new String[] { COMMON_STREAM_PROP_PREFIX, COMMON_TASK_PROP_PREFIX };
+	
 	@Test
-	public void monitoringDashboardWavefront() {
+	void monitoringDashboardWavefront() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.wavefront.enabled=true",
 				"--management.metrics.export.wavefront.api-token=654-token",
 				"--management.metrics.export.wavefront.uri=https://vmware.wavefront.com",
 				"--management.metrics.export.wavefront.source=my-source")) {
-
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".type")).isEqualTo("WAVEFRONT");
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".url")).isEqualTo("https://vmware.wavefront.com");
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".wavefront.source")).isEqualTo("my-source");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("type"), "WAVEFRONT");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("url"), "https://vmware.wavefront.com");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("wavefront.source"), "my-source");
 		}
 	}
 
 	@Test
-	public void monitoringDashboardInfluxGrafana() {
+	void monitoringDashboardInfluxGrafana() {
 		try (ConfigurableApplicationContext ctx = applicationContext("--management.metrics.export.influx.enabled=true")) {
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".type")).isEqualTo("GRAFANA");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("type"), "GRAFANA");
 		}
 	}
 
 	@Test
-	public void monitoringDashboardPrometheusGrafana() {
+	void monitoringDashboardPrometheusGrafana() {
 		try (ConfigurableApplicationContext ctx = applicationContext("--management.metrics.export.prometheus.enabled=true")) {
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".type")).isEqualTo("GRAFANA");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("type"), "GRAFANA");
 		}
 	}
 
 	@Test
-	public void monitoringDashboardExplicitProperties() {
+	void monitoringDashboardExplicitProperties() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.wavefront.enabled=true",
 				"--management.metrics.export.wavefront.api-token=654-token",
 				"--management.metrics.export.wavefront.uri=https://vmware.wavefront.com",
 				"--management.metrics.export.wavefront.source=my-source",
-
-				// The explicit monitoring dashboard properties have precedence over the infered from the metrics.
-				"--" + MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".url=http://dashboard",
-				"--" + MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".wavefront.source=different-source")) {
-
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".type")).isEqualTo("WAVEFRONT");
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".url")).isEqualTo("http://dashboard");
-			assertThat(ctx.getEnvironment().getProperty(MetricsReplicationEnvironmentPostProcessor.MONITORING_DASHBOARD_PREFIX + ".wavefront.source")).isEqualTo("different-source");
+				// The explicit monitoring dashboard properties have precedence over the inferred from the metrics.
+				"--" + monitoringDashboardProperty("url") + "=http://dashboard",
+				"--" + monitoringDashboardProperty("wavefront.source") + "=different-source")) {
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("type"), "WAVEFRONT");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("url"), "http://dashboard");
+			assertEnvHasProperty(ctx, monitoringDashboardProperty("wavefront.source"), "different-source");
 		}
 	}
-
+	
+	private String monitoringDashboardProperty(String propName) {
+		return "spring.cloud.dataflow.metrics.dashboard." + propName;
+	}
+	
 	@Test
-	public void wavefrontPropertiesReplication() {
+	void wavefrontPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.wavefront.enabled=true",
 				"--management.metrics.export.wavefront.api-token=654-token",
@@ -117,25 +113,25 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 				"--management.metrics.export.wavefront.source=my-source",
 				// Inherited property from parent PushRegistryProperties
 				"--management.metrics.export.wavefront.batch-size=20000")) {
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.api-token", "654-token");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.uri", "https://vmware.wavefront.com");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.source", "my-source");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.batch-size", "20000");
 
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.enabled", Boolean.class)).isTrue();
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.api-token")).isEqualTo("654-token");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.uri")).isEqualTo("https://vmware.wavefront.com");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.source")).isEqualTo("my-source");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.batch-size")).isEqualTo("20000");
+				// Boot3 properties are replicated as well
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.api-token", "654-token");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.uri", "https://vmware.wavefront.com");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.source", "my-source");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.batch-size", "20000");
 			}
 		}
 	}
 
 	@Test
-	public void wavefrontPropertiesReplicationWithPlaceholders() {
+	void wavefrontPropertiesReplicationWithPlaceholders() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.wavefront.enabled=true",
 				"--management.metrics.export.wavefront.api-token=${wavefront-api-secret}",
@@ -143,26 +139,19 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 				"--management.metrics.export.wavefront.source=my-source",
 				// Inherited property from parent PushRegistryProperties
 				"--management.metrics.export.wavefront.batch-size=20000")) {
-
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.enabled", Boolean.class)).isTrue();
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.enabled", "true");
 				ctx.getEnvironment().setIgnoreUnresolvableNestedPlaceholders(true);
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.api-token")).isEqualTo("${wavefront-api-secret}");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.uri")).isEqualTo("https://vmware.wavefront.com");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.source")).isEqualTo("my-source");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.batch-size")).isEqualTo("20000");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.api-token", "${wavefront-api-secret}");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.uri", "https://vmware.wavefront.com");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.source", "my-source");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.batch-size", "20000");
 			}
 		}
 	}
 
 	@Test
-	public void disabledPropertiesReplication() {
+	void disabledPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--spring.cloud.dataflow.metrics.property-replication=false",
 				"--management.metrics.export.wavefront.enabled=true",
@@ -171,124 +160,127 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 				"--management.metrics.export.wavefront.source=my-source",
 				// Inherited property from parent PushRegistryProperties
 				"--management.metrics.export.wavefront.batch-size=20000")) {
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.enabled");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.api-token");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.uri");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.source");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.batch-size");
 
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().containsProperty(
-						applicationPrefix + "management.metrics.export.wavefront.enabled")).isFalse();
-				assertThat(ctx.getEnvironment().containsProperty(
-						applicationPrefix + "management.metrics.export.wavefront.api-token")).isFalse();
-				assertThat(ctx.getEnvironment().containsProperty(
-						applicationPrefix + "management.metrics.export.wavefront.uri")).isFalse();
-				assertThat(ctx.getEnvironment().containsProperty(
-						applicationPrefix + "management.metrics.export.wavefront.source")).isFalse();
-				assertThat(ctx.getEnvironment().containsProperty(
-						applicationPrefix + "management.metrics.export.wavefront.batch-size")).isFalse();
+				// Boot3 variants are also not available
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.enabled");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.api-token");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.uri");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.source");
+				assertEnvDoesNotContainProperty(ctx, commonPropPrefix + "management.wavefront.metrics.export.batch-size");
 			}
 		}
 	}
-
+	
 	@Test
-	public void dontReplicateExplicitlySetStreamOrTaskProperties() {
+	void doNotReplicateExplicitlySetStreamOrTaskProperties() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.wavefront.enabled=true",
-				"--" + MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".stream." + "management.metrics.export.wavefront.uri=https://StreamUri",
-				"--" + MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".task." + "management.metrics.export.wavefront.uri=https://TaskUri",
+				"--" + COMMON_STREAM_PROP_PREFIX + "management.metrics.export.wavefront.uri=https://StreamUri",
+				"--" + COMMON_TASK_PROP_PREFIX + "management.metrics.export.wavefront.uri=https://TaskUri",
+				"--" + COMMON_STREAM_PROP_PREFIX + "management.wavefront.metrics.export.uri=https://StreamUri",
+				"--" + COMMON_TASK_PROP_PREFIX + "management.wavefront.metrics.export.uri=https://TaskUri",
 				"--management.metrics.export.wavefront.api-token=654-token",
 				"--management.metrics.export.wavefront.uri=https://vmware.wavefront.com",
 				"--management.metrics.export.wavefront.source=my-source",
 				// Inherited property from parent PushRegistryProperties
 				"--management.metrics.export.wavefront.batch-size=20000")) {
-
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.enabled", Boolean.class)).isTrue();
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.api-token")).isEqualTo("654-token");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.source")).isEqualTo("my-source");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.wavefront.batch-size")).isEqualTo("20000");
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.api-token", "654-token");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.source", "my-source");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.wavefront.batch-size", "20000");
 			}
-
-			assertThat(ctx.getEnvironment().getProperty(
-					MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".stream." + "management.metrics.export.wavefront.uri"))
-					.isEqualTo("https://StreamUri");
-			assertThat(ctx.getEnvironment().getProperty(
-					MetricsReplicationEnvironmentPostProcessor.COMMON_APPLICATION_PREFIX + ".task." + "management.metrics.export.wavefront.uri"))
-					.isEqualTo("https://TaskUri");
+			assertEnvHasProperty(ctx, COMMON_STREAM_PROP_PREFIX + "management.metrics.export.wavefront.uri", "https://StreamUri");
+			assertEnvHasProperty(ctx, COMMON_TASK_PROP_PREFIX + "management.metrics.export.wavefront.uri", "https://TaskUri");
+			// Boot3 variants are also not overridden
+			assertEnvHasProperty(ctx, COMMON_STREAM_PROP_PREFIX + "management.wavefront.metrics.export.uri", "https://StreamUri");
+			assertEnvHasProperty(ctx, COMMON_TASK_PROP_PREFIX + "management.wavefront.metrics.export.uri", "https://TaskUri");
 		}
 	}
 
 	@Test
-	public void influxPropertiesReplication() {
+	void influxPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.influx.enabled=true",
 				"--management.metrics.export.influx.db=myinfluxdb",
 				"--management.metrics.export.influx.uri=http://influxdb:8086",
-				// Inherited property from parent PushRegistryProperties
+				// Inherited property
 				"--management.metrics.export.influx.batch-size=20000")) {
-
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.influx.enabled", Boolean.class)).isTrue();
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.influx.db")).isEqualTo("myinfluxdb");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.influx.uri")).isEqualTo("http://influxdb:8086");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.influx.batch-size")).isEqualTo("20000");
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.influx.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.influx.db", "myinfluxdb");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.influx.uri", "http://influxdb:8086");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.influx.batch-size", "20000");
+				// Boot3 variants are replicated
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.influx.metrics.export.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.influx.metrics.export.db", "myinfluxdb");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.influx.metrics.export.uri", "http://influxdb:8086");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.influx.metrics.export.batch-size", "20000");
 			}
 		}
 	}
 
 	@Test
-	public void prometheusPropertiesReplication() {
+	void prometheusPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(
 				"--management.metrics.export.prometheus.enabled=true",
 				"--management.metrics.export.prometheus.rsocket.enabled=true",
 				"--management.metrics.export.prometheus.rsocket.host=prometheus-rsocket-proxy",
 				"--management.metrics.export.prometheus.rsocket.port=7001",
-				//Inner property class
+				// Inherited property
 				"--management.metrics.export.prometheus.pushgateway.enabled=false")) {
-
-			for (String applicationPrefix : COMMON_APPLICATION_PREFIXES) {
-
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.prometheus.enabled", Boolean.class)).isTrue();
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.prometheus.rsocket.enabled", Boolean.class)).isTrue();
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.prometheus.rsocket.host")).isEqualTo("prometheus-rsocket-proxy");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.prometheus.rsocket.port")).isEqualTo("7001");
-				assertThat(ctx.getEnvironment().getProperty(
-						applicationPrefix + "management.metrics.export.prometheus.pushgateway.enabled", Boolean.class)).isFalse();
+			for (String commonPropPrefix : COMMON_APPLICATION_PREFIXES) {
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.prometheus.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.prometheus.rsocket.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.prometheus.rsocket.host", "prometheus-rsocket-proxy");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.prometheus.rsocket.port", "7001");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.metrics.export.prometheus.pushgateway.enabled", "false");
+				// Boot3 variants are replicated
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.prometheus.metrics.export.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.prometheus.metrics.export.rsocket.enabled", "true");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.prometheus.metrics.export.rsocket.host", "prometheus-rsocket-proxy");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.prometheus.metrics.export.rsocket.port", "7001");
+				assertEnvHasProperty(ctx, commonPropPrefix + "management.prometheus.metrics.export.pushgateway.enabled", "false");
 			}
 		}
 	}
 
-	private ConfigurableApplicationContext applicationContext(String... args) {
-		List<String> l = new ArrayList<>(Arrays.asList(args));
-		l.addAll(testArgs);
-		String[] finalArgs = l.toArray(new String[0]);
-		return SpringApplication.run(EmptyDefaultApp.class, finalArgs);
+
+	private void assertEnvDoesNotContainProperty(ConfigurableApplicationContext ctx, String property) {
+		assertThat(ctx.getEnvironment().containsProperty(property)).isFalse();
 	}
 
+	private void assertEnvHasProperty(ConfigurableApplicationContext ctx, String property, Object expectedValue) {
+		assertThat(ctx.getEnvironment().getProperty(property)).isEqualTo(expectedValue);
+	}
+	
+	private ConfigurableApplicationContext applicationContext(String... args) {
+		String[] commonArgs = {
+				"--server.port=0",
+				"--spring.main.allow-bean-definition-overriding=true",
+				"--spring.autoconfigure.exclude=" +
+						"org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration," +
+						"org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration"
+		};
+		String[] allArgs = Stream.of(commonArgs, args)
+				.flatMap(Stream::of)
+				.toArray(String[]::new);
+		return SpringApplication.run(EmptyDefaultApp.class, allArgs);
+	}
 
 	@Configuration
-	@Import(TestConfiguration.class)
 	@EnableAutoConfiguration(exclude = { SessionAutoConfiguration.class, FlywayAutoConfiguration.class,
 			SecurityAutoConfiguration.class, SecurityFilterAutoConfiguration.class,
 			ManagementWebSecurityAutoConfiguration.class })
 	@EnableDataFlowServer
 	public static class EmptyDefaultApp {
-	}
-
-	private static class TestConfiguration {
-
 		@Bean
 		public AppDeployer appDeployer() {
 			return mock(AppDeployer.class);
@@ -310,8 +302,8 @@ public class MetricsReplicationEnvironmentPostProcessorTests {
 		}
 
 		@Bean
-		public TaskRepository taskRepository() {
-			return mock(TaskRepository.class);
+		public TaskRepositoryContainer taskRepositoryContainer() {
+			return mock(DefaultTaskRepositoryContainer.class);
 		}
 
 		@Bean

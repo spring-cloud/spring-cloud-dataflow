@@ -25,6 +25,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -85,7 +86,7 @@ public class DefaultStreamServiceUpdateTests {
 	@Test
 	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
-				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.0"),
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
 				null, null);
 		testCreateUpdateRequests();
 	}
@@ -127,7 +128,8 @@ public class DefaultStreamServiceUpdateTests {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+		@SuppressWarnings("VulnerableCodeUsages")
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 
 		Object actualYamlLoaded = yaml.load(yml);
 		Object expectedYamlLoaded = yaml.load(expectedYaml);

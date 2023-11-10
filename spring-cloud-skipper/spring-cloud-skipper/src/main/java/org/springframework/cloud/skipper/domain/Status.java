@@ -25,6 +25,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
@@ -34,6 +35,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.hibernate.annotations.Type;
 
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
@@ -55,6 +57,7 @@ public class Status extends NonVersionedAbstractEntity {
 
 	// Status from the underlying platform
 	@Lob
+	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
 	private String platformStatus;
 
 	public Status() {

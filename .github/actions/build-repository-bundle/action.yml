@@ -15,6 +15,12 @@ inputs:
     required: true
   project-directory:
     description: The working directory
+    required: true
+  SRP_CLIENT_ID:
+    description: secrets.SRP_CLIENT_ID
+    required: false
+  SRP_CLIENT_SECRET:
+    description: secrets.SRP_CLIENT_SECRET
     required: false
 outputs:
   bundle-path:
@@ -33,8 +39,21 @@ runs:
       REPO_BUNDLE_TEMPLATE: ${{ inputs.repo-bundle-template }}
       REPO_BUNDLE_RENDERED: ${{ runner.temp }}/generated/reporendered
       REPO_BUNDLE_GENERATED: ${{ runner.temp }}/generated/repobundle
+      SRP_CLIENT_ID: ${{ inputs.SRP_CLIENT_ID }}
+      SRP_CLIENT_SECRET: ${{ inputs.SRP_CLIENT_SECRET }}
     shell: bash
+    working-directory: ${{ inputs.project-directory }}
     run: |
-      echo "::set-output name=bundle-path::$REPO_BUNDLE_GENERATED"
-      SCDF_DIR="${{ inputs.project-directory || '.' }}"
-      bash $SCDF_DIR/.github/actions/build-repository-bundle/build-repository-bundle.sh
+      echo "bundle-path=$REPO_BUNDLE_GENERATED" >> $GITHUB_OUTPUT
+      SCDF_DIR="${{ inputs.project-directory || '.' }}"      
+      if [ "$USE_SRP" == "true" ]; then
+        if [ "$SRP_SCRIPTS" == "" ]; then
+          echo "SRP_SCRIPTS not defined"
+          exit 2
+        fi
+        export OBSERVATION=repository-bundle
+        export OUTPUT_VERSION=$PACKAGE_VERSION
+        $SRP_SCRIPTS/run-under-observer.sh "${{ github.action_path }}/build-repository-bundle.sh"
+      else 
+        "${{ github.action_path }}/build-repository-bundle.sh"
+      fi

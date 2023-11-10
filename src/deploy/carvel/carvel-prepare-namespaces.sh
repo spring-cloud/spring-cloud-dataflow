@@ -15,20 +15,25 @@ function count_kind() {
 function patch_serviceaccount() {
     kubectl patch serviceaccount scdf-sa -p "$1" --namespace "$NS"
     kubectl patch serviceaccount default -p "$1" --namespace "$NS"
+    kubectl patch serviceaccount default -p "$1" --namespace default
 }
 if [ "$1" != "" ]; then
     NS=$1
 fi
+if [ "$2" != "" ]; then
+    SA=$2
+else
+    SA=scdf-sa
+fi
 check_env NS
-
 kubectl create namespace $NS
 kubectl create namespace secrets-ns
 $SCDIR/add-roles.sh "system:aggregate-to-edit" "system:aggregate-to-admin" "system:aggregate-to-view"
-PRESENT=$(kubectl get serviceaccount --namespace $NS --output=json | count_kind serviceaccount "$NS-sa")
+PRESENT=$(kubectl get serviceaccount --namespace $NS --output=json | count_kind serviceaccount "$SA")
 if ((PRESENT > 0)); then
-    kubectl delete serviceaccount "scdf-sa" --namespace $NS
+    kubectl delete serviceaccount "$SA" --namespace $NS
 fi
-kubectl create serviceaccount "scdf-sa" --namespace $NS
+kubectl create serviceaccount "$SA" --namespace $NS
 
 $SCDIR/carvel-add-registry-secret.sh scdf-metadata-default docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 $SCDIR/carvel-add-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"

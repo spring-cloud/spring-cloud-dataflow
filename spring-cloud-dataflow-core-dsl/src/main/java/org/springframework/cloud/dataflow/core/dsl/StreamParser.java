@@ -315,6 +315,7 @@ public class StreamParser extends AppParser {
 	 * Expected format: {@code ':' identifier [ '.' identifier ]*}
 	 * <p>
 	 *
+	 * @param canDefault allows the user to peek ahead to parse a reference when working with colons in the syntax.
 	 * @return {@code DestinationNode} representing the destination reference
 	 */
 	protected DestinationNode eatDestinationReference(boolean canDefault) {
@@ -366,7 +367,7 @@ public class StreamParser extends AppParser {
 	 * <p>
 	 * Expected formats: {@code appList: app (| app)*} A stream may end in an app (if it is
 	 * a sink) or be followed by a sink destination.
-	 *
+	 * @param preceedingSourceChannelSpecified indicator to parser about state of stream.
 	 * @return a list of {@code AppNode}
 	 */
 	protected List<AppNode> eatAppList(boolean preceedingSourceChannelSpecified) {

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
@@ -84,9 +86,9 @@ public class DefaultStreamServiceTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
+	private final StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 
-	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+	private final StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
 	private StreamDefinitionRepository streamDefinitionRepository;
 
@@ -108,10 +110,11 @@ public class DefaultStreamServiceTests {
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryService = mock(AppRegistryService.class);
 		this.auditRecordService = mock(AuditRecordService.class); // FIXME
+		PropertyResolver propertyResolver = mock(PropertyResolver.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryService,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
-				new DefaultStreamDefinitionService());
+				new DefaultStreamDefinitionService(), propertyResolver);
 		this.streamValidationService = mock(DefaultStreamValidationService.class);
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
@@ -216,10 +219,10 @@ public class DefaultStreamServiceTests {
 		StreamDefinition streamDefinition = new StreamDefinition("myStream", "time|log");
 		Map<StreamDefinition, DeploymentState> streamSates = new HashMap<>();
 		streamSates.put(streamDefinition, DeploymentState.deployed);
-		when(this.skipperStreamDeployer.streamsStates(eq(Arrays.asList(streamDefinition)))).thenReturn(streamSates);
+		when(this.skipperStreamDeployer.streamsStates(eq(Collections.singletonList(streamDefinition)))).thenReturn(streamSates);
 
 		Map<StreamDefinition, DeploymentState> resultStates = this.defaultStreamService
-				.state(Arrays.asList(streamDefinition));
+				.state(Collections.singletonList(streamDefinition));
 
 		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
 
@@ -232,7 +235,7 @@ public class DefaultStreamServiceTests {
 	public void verifyStreamHistory() {
 		Release release = new Release();
 		release.setName("RELEASE666");
-		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Arrays.asList(release));
+		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Collections.singletonList(release));
 
 		Collection<Release> releases = this.defaultStreamService.history("myStream");
 
@@ -246,7 +249,7 @@ public class DefaultStreamServiceTests {
 	@Test
 	public void verifyStreamPlatformList() {
 		Deployer deployer = new Deployer("testDeployer", "testType", null, mock(ActuatorOperations.class));
-		when(this.skipperStreamDeployer.platformList()).thenReturn(Arrays.asList(deployer));
+		when(this.skipperStreamDeployer.platformList()).thenReturn(Collections.singletonList(deployer));
 		Collection<Deployer> deployers = this.defaultStreamService.platformList();
 
 		verify(this.skipperStreamDeployer, times(1)).platformList();
@@ -340,8 +343,8 @@ public class DefaultStreamServiceTests {
 
 		when(streamDefinitionRepository.findById(streamDefinition.getName())).thenReturn(Optional.of(streamDefinition));
 
-		List<AppDeploymentRequest> appDeploymentRequests = Arrays.asList(mock(AppDeploymentRequest.class));
-		when(appDeploymentRequestCreator.createRequests(streamDefinition, new HashMap<>(), "default"))
+		List<AppDeploymentRequest> appDeploymentRequests = Collections.singletonList(mock(AppDeploymentRequest.class));
+		when(appDeploymentRequestCreator.createRequests(streamDefinition, Collections.emptyMap(), "default"))
 				.thenReturn(appDeploymentRequests);
 
 		this.defaultStreamService.deployStream(streamDefinition1.getName(), deploymentProperties);

@@ -4,11 +4,12 @@
 	<artifactId>spring-cloud-skipper</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Skipper</name>
-
+	<description>Spring Cloud Skipper</description>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-skipper-parent</artifactId>
-		<version>2.11.0-SNAPSHOT</version>
+		<version>2.11.2-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
@@ -45,6 +46,11 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.zeroturnaround</groupId>

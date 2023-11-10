@@ -29,7 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Chris Bono
  */
+@SuppressWarnings("NewClassNamingConvention")
 public class AboutDocumentation extends BaseDocumentation {
 
 	@Test
@@ -156,8 +158,32 @@ public class AboutDocumentation extends BaseDocumentation {
 						fieldWithPath("monitoringDashboardInfo.source").type(JsonFieldType.STRING).description(
 								"Unique DataFlow identifier within the monitoring system."),
 						fieldWithPath("monitoringDashboardInfo.refreshInterval").type(JsonFieldType.NUMBER).description(
-								"Provides the time interval (in seconds) for updating the monitoring dashboards.")
+								"Provides the time interval (in seconds) for updating the monitoring dashboards."),
 
+						fieldWithPath("gitAndBuildInfo").type(JsonFieldType.OBJECT).description(
+								"Provides the git and build info for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git").type(JsonFieldType.OBJECT).description(
+								"Provides the git details for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.branch").type(JsonFieldType.STRING).description(
+								"Provides the git branch for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.commit").type(JsonFieldType.OBJECT).description(
+								"Provides the git commit info for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.commit.id").type(JsonFieldType.STRING).description(
+								"Provides the git commit id for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.commit.time").type(JsonFieldType.STRING).description(
+								"Provides the git commit time for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build").type(JsonFieldType.OBJECT).description(
+								"Provides the build details for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build.artifact").type(JsonFieldType.STRING).description(
+								"Provides the build artifact for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build.name").type(JsonFieldType.STRING).description(
+								"Provides the build name for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build.time").type(JsonFieldType.STRING).description(
+								"Provides the build time for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build.version").type(JsonFieldType.STRING).description(
+								"Provides the build version for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.build.group").type(JsonFieldType.STRING).description(
+								"Provides the build group for the Dataflow server")
 				)));
 	}
 }

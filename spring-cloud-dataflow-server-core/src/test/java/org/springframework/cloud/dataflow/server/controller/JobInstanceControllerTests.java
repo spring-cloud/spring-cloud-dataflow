@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -56,6 +62,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
@@ -76,18 +83,24 @@ public class JobInstanceControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	private TaskExecutionDao dao;
+	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepository jobRepository;
+	JobRepositoryContainer jobRepositoryContainer;
 
 	@Autowired
-	private TaskBatchDao taskBatchDao;
+	TaskBatchDaoContainer taskBatchDaoContainer;
 
 	private MockMvc mockMvc;
 
 	@Autowired
-	private WebApplicationContext wac;
+	WebApplicationContext wac;
+
+	@Autowired
+	AggregateExecutionSupport aggregateExecutionSupport;
+
+	@Autowired
+	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setupMockMVC() {
@@ -142,12 +155,16 @@ public class JobInstanceControllerTests {
 	}
 
 	private void createSampleJob(String jobName, int jobExecutionCount) {
+		String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
+		JobRepository jobRepository = jobRepositoryContainer.get(defaultSchemaTarget);
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
-		JobExecution jobExecution = null;
 
+		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
+		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+
+		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(defaultSchemaTarget);
 		for (int i = 0; i < jobExecutionCount; i++) {
-			jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		}
 	}

@@ -18,11 +18,18 @@ package org.springframework.cloud.dataflow.server.job.support;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.cloud.dataflow.rest.job.support.StepType;
 import org.springframework.cloud.dataflow.rest.job.support.TaskletType;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
+import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
+import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.util.Assert;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Knows how to build a StepExecutionResource out of our domain model
@@ -33,8 +40,25 @@ import org.springframework.util.Assert;
  */
 public class StepExecutionResourceBuilder {
 
-	static public StepExecutionResource toModel(StepExecution entity) {
-		return new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity));
+	static public StepExecutionResource toModel(StepExecution entity, String schemaTarget) {
+		StepExecutionResource resource = new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity), schemaTarget);
+		try {
+			resource.add(
+					linkTo(
+							methodOn(JobStepExecutionController.class)
+									.getStepExecution(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId(), schemaTarget)
+					).withSelfRel()
+			);
+			resource.add(
+					linkTo(
+							methodOn(JobStepExecutionProgressController.class)
+									.progress(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId(), schemaTarget)
+					).withRel("progress")
+			);
+		} catch (NoSuchStepExecutionException | NoSuchJobExecutionException e) {
+			throw new RuntimeException(e);
+		}
+		return resource;
 	}
 
 	private static String generateStepType(StepExecution stepExecution) {

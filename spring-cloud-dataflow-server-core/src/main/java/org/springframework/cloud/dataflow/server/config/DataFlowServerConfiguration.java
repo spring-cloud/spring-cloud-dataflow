@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,31 @@ import javax.persistence.EntityManager;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 
-import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.item.database.support.DefaultDataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
+import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.db.migration.DataFlowFlywayConfigurationCustomizer;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.support.AuthenticationSuccessEventListener;
 import org.springframework.cloud.task.configuration.TaskProperties;
-import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.filter.ForwardedHeaderFilter;
@@ -68,11 +63,21 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
  * @author Michael Minella
  * @author Gunnar Hillert
  * @author Michael Wirth
+ * @author Corneil du Plessis
  */
 @EnableSpringDataWebSupport
 @Configuration
-@Import({ CompletionConfiguration.class, FeaturesConfiguration.class, WebConfiguration.class, H2ServerConfiguration.class })
+@Import({
+		CompletionConfiguration.class,
+		FeaturesConfiguration.class,
+		WebConfiguration.class,
+		H2ServerConfiguration.class,
+		SchemaServiceConfiguration.class,
+		AggregateTaskConfiguration.class,
+		AggregateDataFlowTaskConfiguration.class
+})
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
+@ComponentScan(basePackages = {"org.springframework.cloud.dataflow.schema.service", "org.springframework.cloud.dataflow.aggregate.task"})
 public class DataFlowServerConfiguration {
 
 	@Bean
@@ -94,34 +99,12 @@ public class DataFlowServerConfiguration {
 		return transactionManager;
 	}
 
-	@Bean
-	DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
-		return new JdbcDataflowJobExecutionDao(dataSource, AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX);
-	}
 
 	@Bean
 	public TaskProperties taskProperties() {
 		return new TaskProperties();
 	}
 
-	@Bean
-	DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource, TaskProperties taskProperties) {
-		return new JdbcDataflowTaskExecutionDao(dataSource, taskProperties);
-	}
-
-	@Bean
-	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource) {
-		DataFieldMaxValueIncrementerFactory incrementerFactory = new DefaultDataFieldMaxValueIncrementerFactory(dataSource);
-		String databaseType;
-		try {
-			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		}
-		catch (MetaDataAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		return new JdbcDataflowTaskExecutionMetadataDao(dataSource, incrementerFactory.getIncrementer(databaseType,
-				"task_execution_metadata_seq"));
-	}
 
 	@Bean
 	public AuthenticationSuccessEventListener authenticationSuccessEventListener(
