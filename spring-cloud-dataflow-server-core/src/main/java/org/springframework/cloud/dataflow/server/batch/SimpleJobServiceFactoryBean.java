@@ -40,6 +40,11 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
+import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
+import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
@@ -83,8 +88,22 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	private PlatformTransactionManager transactionManager;
 
+	private JobServiceContainer jobServiceContainer;
+
+	private SchemaService schemaService;
+
+	private SchemaVersionTarget schemaVersionTarget;
+
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
+	}
+
+	/**
+	 * Set the schemaVersionTarget to be used by the created SimpleJobService.
+	 * @param schemaVersionTarget the schemaVersionTarget to be associated with this service.
+	 */
+	public void setAppBootSchemaVersionTarget(SchemaVersionTarget schemaVersionTarget) {
+		this.schemaVersionTarget = schemaVersionTarget;
 	}
 
 	/**
@@ -135,6 +154,22 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 */
 	public void setTablePrefix(String tablePrefix) {
 		this.tablePrefix = tablePrefix;
+	}
+
+	/**
+	 * Sets the {@link JobServiceContainer} for the service.
+	 * @param jobServiceContainer the JobServiceContainer for this service.
+	 */
+	public void setJobServiceContainer(JobServiceContainer jobServiceContainer) {
+		this.jobServiceContainer = jobServiceContainer;
+	}
+
+	/**
+	 * Sets the {@link SchemaService} for this factory bean.
+	 * @param schemaService the schemaService for this factory bean.
+	 */
+	public void setSchemaService(SchemaService schemaService) {
+		this.schemaService = schemaService;
 	}
 
 	/**
@@ -266,7 +301,10 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 			return Types.CLOB;
 		}
 	}
-
+	protected AggregateJobQueryDao createAggregateJobQueryDao() throws Exception {
+		AggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(this.dataSource, this.schemaService, this.jobServiceContainer);
+		return dao;
+	}
 	/**
 	 * Create a {@link SimpleJobService} from the configuration provided.
 	 *
@@ -280,7 +318,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 				transactionManager);
 		jsrJobOperator.afterPropertiesSet();
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-				jobRepository, createExecutionContextDao(), jsrJobOperator);
+			jobRepository, createExecutionContextDao(), jsrJobOperator, createAggregateJobQueryDao(), schemaVersionTarget);
 	}
 
 	/**

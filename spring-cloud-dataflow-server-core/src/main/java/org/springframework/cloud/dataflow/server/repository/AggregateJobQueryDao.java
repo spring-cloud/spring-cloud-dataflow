@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.data.domain.Page;
@@ -54,4 +56,7 @@ public interface AggregateJobQueryDao {
 	JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId);
 
 	JobInstanceExecutions getJobInstanceExecutions(long id, String schemaTarget);
+
+	JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException;
+
 }

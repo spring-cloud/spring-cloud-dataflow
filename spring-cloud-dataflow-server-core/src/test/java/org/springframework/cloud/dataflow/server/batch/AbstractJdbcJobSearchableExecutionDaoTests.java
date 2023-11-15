@@ -52,10 +52,6 @@ abstract class AbstractJdbcJobSearchableExecutionDaoTests extends AbstractDaoTes
 
 	protected JdbcStepExecutionDao stepExecutionDao;
 
-	protected String determineDatabaseType(DatabaseType databaseType) {
-		return (databaseType != DatabaseType.MARIADB) ? databaseType.name() : DatabaseType.MYSQL.name();
-	}
-
 	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName, DatabaseType databaseType) throws Exception {
 		super.prepareForTest(dbContainer, schemaName);
 
@@ -67,18 +63,18 @@ abstract class AbstractJdbcJobSearchableExecutionDaoTests extends AbstractDaoTes
 		this.jdbcSearchableJobInstanceDao.setJdbcTemplate(getJdbcTemplate());
 		incrementerFactory = new MultiSchemaIncrementerFactory(getDataSource());
 		this.jdbcSearchableJobInstanceDao.afterPropertiesSet();
-		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
+		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType).name(),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "JOB_SEQ"));
 
 		jobExecutionDao = new JdbcJobExecutionDao();
-		jobExecutionDao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
+		jobExecutionDao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType).name(),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "JOB_EXECUTION_SEQ"));
 		this.jobExecutionDao.setJdbcTemplate(new JdbcTemplate(getDataSource()));
 		jobExecutionDao.afterPropertiesSet();
 
 		this.stepExecutionDao = new JdbcStepExecutionDao();
 		this.stepExecutionDao.setJdbcTemplate(getJdbcTemplate());
-		this.stepExecutionDao.setStepExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
+		this.stepExecutionDao.setStepExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType).name(),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "STEP_EXECUTION_SEQ"));
 		this.stepExecutionDao.afterPropertiesSet();
 	}
