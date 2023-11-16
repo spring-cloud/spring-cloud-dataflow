@@ -170,7 +170,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	public Optional<String> getDockerTokenServiceUri(String registryHost, boolean disableSSl, boolean useHttpProxy) {
 
 		try {
-			RestTemplate restTemplate = this.containerImageRestTemplate.getContainerRestTemplate(disableSSl, useHttpProxy);
+			RestTemplate restTemplate = this.containerImageRestTemplate.getContainerRestTemplate(disableSSl, useHttpProxy, Collections.emptyMap());
 			String host = registryHost;
 			Integer port = null;
 			if (registryHost.contains(":")) {

@@ -20,6 +20,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -123,11 +125,11 @@ public class ContainerImageRestTemplateFactory {
 		this.restTemplateCache = new ConcurrentHashMap();
 	}
 
-	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy) {
+	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
 		try {
 			CacheKey cacheKey = CacheKey.of(skipSslVerification, withHttpProxy);
 			if (!this.restTemplateCache.containsKey(cacheKey)) {
-				RestTemplate restTemplate = createContainerRestTemplate(skipSslVerification, withHttpProxy);
+				RestTemplate restTemplate = createContainerRestTemplate(skipSslVerification, withHttpProxy, extra);
 				this.restTemplateCache.putIfAbsent(cacheKey, restTemplate);
 			}
 			return this.restTemplateCache.get(cacheKey);
@@ -139,12 +141,12 @@ public class ContainerImageRestTemplateFactory {
 		}
 	}
 
-	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy)
+	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra)
 			throws NoSuchAlgorithmException, KeyManagementException {
 
 		if (!skipSslVerification) {
 			// Create a RestTemplate that uses custom request factory
-			return this.initRestTemplate(HttpClients.custom(), withHttpProxy);
+			return this.initRestTemplate(HttpClients.custom(), withHttpProxy, extra);
 		}
 
 		// Trust manager that blindly trusts all SSL certificates.
@@ -170,10 +172,11 @@ public class ContainerImageRestTemplateFactory {
 				HttpClients.custom()
 						.setSSLContext(sslContext)
 						.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE),
-				withHttpProxy);
+				withHttpProxy,
+				extra);
 	}
 
-	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy) {
+	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
@@ -189,7 +192,7 @@ public class ContainerImageRestTemplateFactory {
 		HttpComponentsClientHttpRequestFactory customRequestFactory =
 				new HttpComponentsClientHttpRequestFactory(
 						clientBuilder
-								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy())
+								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy(extra))
 								// Azure redirects may contain double slashes and on default those are normilised
 								.setDefaultRequestConfig(RequestConfig.custom().setNormalizeUri(false).build())
 								.build());

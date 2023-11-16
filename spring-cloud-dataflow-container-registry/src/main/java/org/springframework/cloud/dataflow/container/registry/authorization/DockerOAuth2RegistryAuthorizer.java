@@ -122,7 +122,9 @@ public class DockerOAuth2RegistryAuthorizer implements RegistryAuthorizer {
 	}
 
 	private RestTemplate getRestTemplate(ContainerRegistryConfiguration registryConfiguration) {
-		return this.containerImageRestTemplate.getContainerRestTemplate(registryConfiguration.isDisableSslVerification(),
-				registryConfiguration.isUseHttpProxy());
+		return this.containerImageRestTemplate.getContainerRestTemplate(
+				registryConfiguration.isDisableSslVerification(),
+				registryConfiguration.isUseHttpProxy(),
+				registryConfiguration.getExtra());
 	}
 }
