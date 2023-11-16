@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.container.registry.authorization;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -30,9 +32,10 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
 
 /**
- * Both Amazon and Azure Container Registry services require special treatment for the Authorization headers when the
+ * Amazon, Azure and Custom Container Registry services require special treatment for the Authorization headers when the
  * HTTP request are forwarded to 3rd party services.
  *
  * Amazon:
@@ -53,11 +56,16 @@ import org.apache.http.protocol.HttpContext;
  *   Azure have same type of issues as S3 so header needs to be dropped as well.
  *   (https://docs.microsoft.com/en-us/azure/container-registry/container-registry-faq#authentication-information-is-not-given-in-the-correct-format-on-direct-rest-api-calls)
  *
+ * Custom:
+ *   Custom Container Registry may have same type of issues as S3 so header needs to be dropped as well.
+ *
  * @author Adam J. Weigold
  * @author Janne Valkealahti
  * @author Christian Tzolov
+ * @author Cheng Guan Poh
  */
 public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedirectStrategy {
+	public static final String CUSTOM_REGISTRY = "custom-registry";
 
 	private static final String AMZ_CREDENTIAL = "X-Amz-Credential";
 
@@ -66,6 +74,16 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 	private static final String AZURECR_URI_SUFFIX = "azurecr.io";
 
 	private static final String BASIC_AUTH = "Basic";
+
+	/**
+	 * Additional registry specific configuration properties.
+	 * Usually used inside the Registry authorizer implementations. For example check the AwsEcrAuthorizer implementation.
+	 */
+	private Map<String, String> extra = new HashMap<>();
+
+	public DropAuthorizationHeaderRequestRedirectStrategy(Map<String, String> extra) {
+		this.extra = extra;
+	}
 
 	@Override
 	public HttpUriRequest getRedirect(final HttpRequest request, final HttpResponse response,
@@ -97,6 +115,17 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 								&& value.contains(BASIC_AUTH);
 					}
 				};
+			}
+		}
+
+		// Handle custom requests
+		if (extra.containsKey(CUSTOM_REGISTRY)) {
+			if (request.getRequestLine().getUri().contains(extra.get(CUSTOM_REGISTRY))) {
+				final String method = request.getRequestLine().getMethod();
+				if (StringUtils.isNoneEmpty(method)
+					&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME))) {
+					return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
+				}
 			}
 		}
 

@@ -40,9 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -62,7 +60,7 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
-		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean())).thenReturn(mockRestTemplate);
+		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
 		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(new ContainerRegistryProperties(), containerImageRestTemplateFactory);
 	}
 

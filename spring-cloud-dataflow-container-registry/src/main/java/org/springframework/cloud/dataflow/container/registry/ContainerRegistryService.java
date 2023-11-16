@@ -109,7 +109,9 @@ public class ContainerRegistryService {
 					.build().expand(repositoryName);
 
 			RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
-					containerRegistryConfiguration.isDisableSslVerification(), containerRegistryConfiguration.isUseHttpProxy());
+					containerRegistryConfiguration.isDisableSslVerification(),
+					containerRegistryConfiguration.isUseHttpProxy(),
+					containerRegistryConfiguration.getExtra());
 
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
@@ -145,7 +147,9 @@ public class ContainerRegistryService {
 
 
 			RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
-					containerRegistryConfiguration.isDisableSslVerification(), containerRegistryConfiguration.isUseHttpProxy());
+					containerRegistryConfiguration.isDisableSslVerification(),
+					containerRegistryConfiguration.isUseHttpProxy(),
+					containerRegistryConfiguration.getExtra());
 
 			ResponseEntity<Map> manifest = requestRestTemplate.exchange(manifestUriComponents.toUri(),
 					HttpMethod.GET, new HttpEntity<>(httpHeaders), Map.class);
@@ -184,7 +188,7 @@ public class ContainerRegistryService {
 		}
 
 		RestTemplate requestRestTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(
-				registryConf.isDisableSslVerification(), registryConf.isUseHttpProxy());
+				registryConf.isDisableSslVerification(), registryConf.isUseHttpProxy(), registryConf.getExtra());
 
 		return new ContainerRegistryRequest(containerImage, registryConf, authHttpHeaders, requestRestTemplate);
 	}
