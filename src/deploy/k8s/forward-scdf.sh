@@ -1,6 +1,9 @@
 #!/bin/bash
 (return 0 2>/dev/null) && sourced=1 || sourced=0
-
+if [ -z "$BASH_VERSION" ]; then
+    echo "This script requires Bash. Use: bash $0 $*"
+    exit 0
+fi
 FWSCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SC_PATH=$(realpath $FWSCDIR)
 set -e

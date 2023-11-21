@@ -5,7 +5,10 @@ end="\033[0m"
 function count_kind() {
     jq --arg kind $1 --arg name $2 '.items | .[] | select(.kind == $kind) | .metadata | select(.name == $name) | .name' | grep -c -F "$2"
 }
-
+if [ -z "$BASH_VERSION" ]; then
+    echo "This script requires Bash. Use: bash $0 $*"
+    exit 1
+fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 if [ "$BROKER" = "" ]; then
     echo "BROKER must be defined"

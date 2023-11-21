@@ -2,6 +2,10 @@
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
+if [ -z "$BASH_VERSION" ]; then
+    echo "This script requires Bash. Use: bash $0 $*"
+    exit 1
+fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
