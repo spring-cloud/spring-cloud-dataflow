@@ -3,6 +3,10 @@ if [ "$NS" = "" ]; then
     echo "NS not defined" >&2
     exit 0
 fi
+if [ -z "$BASH_VERSION" ]; then
+    echo "This script requires Bash. Use: bash $0 $*"
+    exit 1
+fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
