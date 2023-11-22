@@ -20,14 +20,7 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -238,14 +231,17 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
-		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("JOB_INSTANCE_ID", Order.DESCENDING));
+		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING));
 		byJobExecutionIdAndSchemaPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
 
 	}
 
 	@Override
-	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) {
+	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException {
 		int total = countJobExecutions(jobName);
+		if(total == 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+		}
 		List<JobInstanceExecutions> taskJobInstancesForJobName = total > 0
 				? getTaskJobInstancesForJobName(jobName, pageable)
 				: Collections.emptyList();
@@ -273,7 +269,14 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		} else if (executions.size() > 1) {
 			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
 		}
-		return executions.get(0);
+		JobInstanceExecutions jobInstanceExecution = executions.get(0);
+		if(jobInstanceExecution.getTaskJobExecutions() != null && !jobInstanceExecution.getTaskJobExecutions().isEmpty()) {
+			for (TaskJobExecution taskJobExecution : jobInstanceExecution.getTaskJobExecutions()) {
+				JobService jobService = jobServiceContainer.get(taskJobExecution.getSchemaTarget());
+				jobService.addStepExecutions(taskJobExecution.getJobExecution());
+			}
+		}
+		return jobInstanceExecution;
 	}
 
 	@Override

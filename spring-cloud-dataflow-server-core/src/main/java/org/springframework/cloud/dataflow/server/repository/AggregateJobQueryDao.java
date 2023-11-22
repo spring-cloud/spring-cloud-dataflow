@@ -33,7 +33,7 @@ import org.springframework.data.domain.Pageable;
  * @author Corneil du Plessis
  */
 public interface AggregateJobQueryDao {
-	Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable);
+	Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException;
 
 	Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) throws NoSuchJobExecutionException;
 

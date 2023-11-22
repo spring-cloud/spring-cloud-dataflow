@@ -186,7 +186,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public Page<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable, String jobName) {
+	public Page<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
 		return aggregateJobQueryDao.listJobInstances(jobName, pageable);
