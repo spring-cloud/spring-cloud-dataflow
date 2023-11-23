@@ -47,6 +47,10 @@ case $DATABASE in
     export DATABASE=postgresql
     ;;
 
+"mysql" | "mysql57")
+    export DATABASE=mysql57
+    ;;
+
 "")
     # default is MariaDB
     export DATABASE=mariadb
@@ -97,6 +101,10 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     # TODO get version from yaml spec.template.spec.containers[0].image
     sh "$SCDIR/load-image.sh" "busybox:1"
     case $DATABASE in
+    "mysql57")
+        # TODO get version from yaml spec.template.spec.containers[0].image
+        sh "$SCDIR/load-image.sh" "mysql:5.7"
+        ;;
     "mariadb")
         # TODO get version from yaml spec.template.spec.containers[0].image
         sh "$SCDIR/load-image.sh" "mariadb:10.6"

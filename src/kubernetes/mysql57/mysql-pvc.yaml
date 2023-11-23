@@ -11,4 +11,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 'storage-placeholder'
+      storage: 8Gi

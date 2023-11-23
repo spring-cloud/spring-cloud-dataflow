@@ -15,7 +15,8 @@ spec:
         app: mysql57
     spec:
       containers:
-        - image: mysql:5.7-debian
+        - image: mysql:5.7
+          imagePullPolicy: IfNotPresent
           name: mysql57
           env:
             - name: MYSQL_ROOT_PASSWORD
@@ -56,13 +57,7 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql57
-            - name: init-db
-              mountPath: /docker-entrypoint-initdb.d/init.sql
-              subPath: init.sql
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: mysql57
-        - name: init-db
-          configMap:
-            name: init-sql

@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: scdf-datasource
+  labels:
+    app: scdf-datasource
+# same values as in src/kubernetes/mariadb/mariadb-secrets.yaml
+data:
+  SPRING_DATASOURCE_USERNAME: cm9vdA==
+  SPRING_DATASOURCE_PASSWORD: eW91cnBhc3N3b3Jk
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-datasource
+data:
+  SPRING_DATASOURCE_URL: 'jdbc:mysql://mysql57:3306/dataflow?permitMysqlScheme'
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: 'org.mariadb.jdbc.Driver'
+  SPRING_JPA_DATABASE_PLATFORM: 'org.hibernate.dialect.MySQLDialect'
+  SPRING_DATASOURCE_TEST_ON_BORROW: 'true'
+  SPRING_DATASOURCE_VALIDATION_QUERY: "SELECT 1"
+  SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_USE_UNICODE: 'true'
+  SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_CHARACTER_ENCODING: 'UTF-8'

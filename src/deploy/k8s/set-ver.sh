@@ -19,6 +19,9 @@ while [ "$1" != "" ]; do
     "maria" | "mariadb")
         DATABASE=mariadb
         ;;
+    "mysql" | "mysql57")
+        DATABASE=mysql57
+        ;;
     "rabbit" | "rabbitmq")
         BROKER=rabbitmq
         ;;
@@ -55,7 +58,7 @@ while [ "$1" != "" ]; do
         shift
         ;;
     *)
-        echo "Unknown option $2"
+        echo "Unknown option $1"
         return 0
     esac
     shift

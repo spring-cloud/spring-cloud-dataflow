@@ -43,6 +43,10 @@ case $DATABASE in
     export DATABASE=postgresql
     ;;
 
+"mysql" | "mysql57")
+    export DATABASE=mysql57
+    ;;
+
 "")
     # default is MariaDB
     export DATABASE=mariadb
