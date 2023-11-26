@@ -119,14 +119,12 @@ public class JobInstanceControllerTests {
 	@Test
 	public void testGetInstanceNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1345345345345").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testGetInstance() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.jobInstanceId", equalTo(1)))
 			.andExpect(jsonPath("$.jobExecutions[0].stepExecutionCount", equalTo(1)))
@@ -136,7 +134,6 @@ public class JobInstanceControllerTests {
 	@Test
 	public void testGetInstancesByName() throws Exception {
 		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_ORIG)))
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList", hasSize(1)));
@@ -145,7 +142,6 @@ public class JobInstanceControllerTests {
 	@Test
 	public void testGetExecutionsByNameMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_FOOBAR)))
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobExecutions[0].executionId", is(4)))
@@ -156,7 +152,6 @@ public class JobInstanceControllerTests {
 	@Test
 	public void testGetInstanceByNameNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/instances/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().is4xxClientError())
 			.andExpect(content().string(containsString("NoSuchJobException")));
 	}

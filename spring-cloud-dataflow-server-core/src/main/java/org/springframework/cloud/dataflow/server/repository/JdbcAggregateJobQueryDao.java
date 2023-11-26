@@ -16,12 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +69,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -239,12 +247,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	@Override
 	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException {
 		int total = countJobExecutions(jobName);
-		if(total == 0) {
+		if (total == 0) {
 			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 		}
-		List<JobInstanceExecutions> taskJobInstancesForJobName = total > 0
-				? getTaskJobInstancesForJobName(jobName, pageable)
-				: Collections.emptyList();
+		List<JobInstanceExecutions> taskJobInstancesForJobName = getTaskJobInstancesForJobName(jobName, pageable);
 		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
 
 	}
@@ -270,11 +276,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
 		}
 		JobInstanceExecutions jobInstanceExecution = executions.get(0);
-		if(jobInstanceExecution.getTaskJobExecutions() != null && !jobInstanceExecution.getTaskJobExecutions().isEmpty()) {
-			for (TaskJobExecution taskJobExecution : jobInstanceExecution.getTaskJobExecutions()) {
-				JobService jobService = jobServiceContainer.get(taskJobExecution.getSchemaTarget());
-				jobService.addStepExecutions(taskJobExecution.getJobExecution());
-			}
+		if (!ObjectUtils.isEmpty(jobInstanceExecution.getTaskJobExecutions())) {
+			jobInstanceExecution.getTaskJobExecutions().forEach((execution) ->
+				jobServiceContainer.get(execution.getSchemaTarget()).addStepExecutions(execution.getJobExecution())
+			);
 		}
 		return jobInstanceExecution;
 	}
