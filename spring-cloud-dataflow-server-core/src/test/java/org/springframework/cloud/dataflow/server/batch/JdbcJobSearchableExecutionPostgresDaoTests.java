@@ -30,7 +30,7 @@ public class JdbcJobSearchableExecutionPostgresDaoTests extends AbstractJdbcJobS
 	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11.1");
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		setupSearchableExecutionDaoTest(dbContainer, "postgresql", DatabaseType.POSTGRES);
 	}
 }

@@ -30,7 +30,8 @@ public class JdbcJobSearchableExecutionMariadbDaoTests extends AbstractJdbcJobSe
 	private static final JdbcDatabaseContainer dbContainer = new MariaDBContainer("mariadb:10.9.3");
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
+		//TODO when migrating to Boot 3.x and Batch 5.x change mysql to mariadb
 		setupSearchableExecutionDaoTest(dbContainer, "mariadb", DatabaseType.MYSQL);
 	}
 }

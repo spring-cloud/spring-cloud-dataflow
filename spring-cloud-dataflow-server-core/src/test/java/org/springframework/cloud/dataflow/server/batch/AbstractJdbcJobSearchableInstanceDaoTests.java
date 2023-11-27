@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import javax.sql.DataSource;
@@ -28,20 +27,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public abstract class AbstractJdbcJobSearchableInstanceDaoTests extends AbstractDaoTests {
 	private static final String BASE_JOB_INST_NAME = "JOB_INST_";
 
-	private DataSource dataSource;
+	JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
 
-	public JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
-
-	public void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer,  String schemaName) throws Exception {
-		this.dataSource = createDataSourceForContainer(dbContainer);
-		createDataFlowSchema(dbContainer, schemaName);
+	void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer,  String schemaName) throws Exception {
+		prepareForTest(dbContainer, schemaName);
 		jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
-		jdbcSearchableJobInstanceDao.setJdbcTemplate(new JdbcTemplate(this.dataSource));
+		jdbcSearchableJobInstanceDao.setJdbcTemplate(this.jdbcTemplate);
 		jdbcSearchableJobInstanceDao.afterPropertiesSet();
 	}
 
 	@Test
-	public void testCountJobInstances() {
+	void retrieveJobInstanceCountWithoutFilter() {
 		assertThat(jdbcSearchableJobInstanceDao.countJobInstances(BASE_JOB_INST_NAME)).isEqualTo(0);
 		jdbcSearchableJobInstanceDao.createJobInstance(BASE_JOB_INST_NAME, new JobParameters());
 		assertThat(jdbcSearchableJobInstanceDao.countJobInstances(BASE_JOB_INST_NAME)).isEqualTo(1);

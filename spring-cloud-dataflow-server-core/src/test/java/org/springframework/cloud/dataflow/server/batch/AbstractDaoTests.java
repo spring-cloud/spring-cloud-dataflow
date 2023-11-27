@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.ext.ScriptUtils;
@@ -27,11 +28,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AbstractDaoTests {
 
-	protected DataSource createDataSourceForContainer(JdbcDatabaseContainer dbContainer) {
+	DataSource dataSource;
+	JdbcTemplate jdbcTemplate;
+
+	DataSource createDataSourceForContainer(JdbcDatabaseContainer dbContainer) {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(dbContainer.getDriverClassName());
 		dataSource.setUrl(dbContainer.getJdbcUrl());
@@ -39,7 +44,7 @@ public class AbstractDaoTests {
 		dataSource.setPassword(dbContainer.getPassword());
 		return dataSource;
 	}
-	protected void createDataFlowSchema(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
+	void createDataFlowSchema(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
 		JdbcDatabaseDelegate containerDelegate = new JdbcDatabaseDelegate(dbContainer, "");
 		ScriptUtils.runInitScript(containerDelegate, "schemas/drop-table-schema-" + schemaName + ".sql");
 
@@ -47,6 +52,12 @@ public class AbstractDaoTests {
 			if (str.contains("dataflow"))
 				ScriptUtils.runInitScript(containerDelegate, "schemas/" + schemaName + "/" + str);
 		});
+	}
+
+	void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
+		this.dataSource = createDataSourceForContainer(dbContainer);
+		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+		createDataFlowSchema(dbContainer, schemaName);
 	}
 
 	private List<String> getResourceFiles(String path) throws IOException {
@@ -61,11 +72,30 @@ public class AbstractDaoTests {
 				fileNames.add(fileName);
 			}
 		}
+		fileNames.sort(new SchemaComparator());
 		return fileNames;
 	}
 
 	private InputStream getResourceFileAsStream(String resourceFile) {
 		InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceFile);
 		return stream == null ? getClass().getResourceAsStream(resourceFile) : stream;
+	}
+
+	private static class SchemaComparator implements Comparator<String> {
+
+		@Override
+		public int compare(String o1, String o2) {
+			int result = 0;
+			if (getVersion(o1) > getVersion(o2)) {
+				result = 1;
+			} else if (getVersion(o1) < getVersion(o2)) {
+				result = -1;
+			}
+			return result;
+		}
+
+		private int getVersion(String fileName) {
+			return Integer.valueOf(fileName.substring(1, fileName.indexOf("-")));
+		}
 	}
 }

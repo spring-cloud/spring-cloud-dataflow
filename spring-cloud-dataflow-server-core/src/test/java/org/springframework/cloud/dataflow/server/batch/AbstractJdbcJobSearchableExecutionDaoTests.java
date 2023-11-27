@@ -28,12 +28,9 @@ import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
-import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,29 +40,19 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 
 	private static final String BASE_JOB_INSTANCE_NAME = "JOB_INST_";
 
-	protected JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
+	JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
 
-	protected JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
+	JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
 
-	protected DataSource dataSource;
+	DataFieldMaxValueIncrementerFactory incrementerFactory;
 
-	protected DataFieldMaxValueIncrementerFactory incrementerFactory;
+	JdbcJobExecutionDao jobExecutionDao;
 
-	protected JdbcJobExecutionDao jobExecutionDao;
+	JdbcStepExecutionDao stepExecutionDao;
 
-	protected JdbcStepExecutionDao stepExecutionDao;
-
-	protected JdbcTemplate jdbcTemplate;
-
-	protected TaskRepository taskRepository;
-
-	protected JdbcTaskBatchDao jdbcTaskBatchDao;
-
-	public void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer, String schemaName,
+	void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer, String schemaName,
 												DatabaseType databaseType) throws Exception {
-		this.dataSource = createDataSourceForContainer(dbContainer);
-		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-		createDataFlowSchema(dbContainer, schemaName);
+		prepareForTest(dbContainer, schemaName);
 
 		this.jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
 		this.jdbcSearchableJobExecutionDao.setDataSource(this.dataSource);
@@ -89,7 +76,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionCount() {
+	void retrieveJobExecutionCountBeforeAndAfterJobExecution() {
 		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions()).isEqualTo(0);
 		JobInstance jobInstance = jdbcSearchableJobInstanceDao.createJobInstance(BASE_JOB_INSTANCE_NAME,
 			new JobParameters());
@@ -98,7 +85,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testGetCompletedJobExecutionsByType() {
+	void retrieveJobExecutionsByTypeAfterJobExeuction() {
 		String suffix = "_BY_NAME";
 		assertThat(this.jdbcSearchableJobExecutionDao.getJobExecutions(BASE_JOB_INSTANCE_NAME + suffix,
 			BatchStatus.COMPLETED, 0, 5).size()).isEqualTo(0);
@@ -112,7 +99,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testGetJobExecutions() {
+	void retrieveJobExecutionCountWithoutFilter() {
 		String suffix = "_BY_NAME";
 		String suffixFailed = suffix + "_FAILED";
 		assertThat(this.jdbcSearchableJobExecutionDao.getJobExecutions(BASE_JOB_INSTANCE_NAME + suffix,
@@ -128,7 +115,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionCountByName() {
+	void retrieveJobExecutionCountFilteredByName() {
 		String suffix = "COUNT_BY_NAME";
 		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions(BASE_JOB_INSTANCE_NAME + suffix))
 			.isEqualTo(0);
@@ -138,7 +125,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionCountByStatus() {
+	void retrieveJobExecutionCountFilteredByStatus() {
 		String suffix = "_COUNT_BY_NAME";
 		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions(BatchStatus.COMPLETED)).isEqualTo(0);
 		createJobExecutions(BASE_JOB_INSTANCE_NAME + suffix, 5);
@@ -146,7 +133,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionCountByNameAndStatus() {
+	void retrieveJobExecutionCountFilteredNameAndStatus() {
 		String suffix = "_COUNT_BY_NAME_STATUS";
 		assertThat(this.jdbcSearchableJobExecutionDao.countJobExecutions(BASE_JOB_INSTANCE_NAME + suffix,
 			BatchStatus.COMPLETED)).isEqualTo(0);
@@ -156,7 +143,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionsWithStepCount() {
+	void retrieveJobExecutionWithStepCount() {
 		String suffix = "_JOB_EXECUTIONS_WITH_STEP_COUNT";
 
 		createJobExecutions(BASE_JOB_INSTANCE_NAME + suffix, 5);
@@ -168,7 +155,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	}
 
 	@Test
-	public void testJobExecutionsWithStepCountByJobInstance() {
+	void retrieveJobExecutionWithStepCountFilteredJobInstance() {
 		String suffix = "_JOB_EXECUTIONS_WITH_STEP_COUNT_BY_JOB_INSTANCE";
 
 		createJobExecutions(BASE_JOB_INSTANCE_NAME + suffix, 5);

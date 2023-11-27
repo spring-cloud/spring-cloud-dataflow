@@ -29,7 +29,7 @@ public class JdbcJobSearchableInstancePostgresDaoTests extends AbstractJdbcJobSe
 	private static final JdbcDatabaseContainer<?> mariaDBContainer = new PostgreSQLContainer<>("postgres:11.1");
 
 	@BeforeEach
-	public void setup() throws Exception{
+	void setup() throws Exception{
 		setupSearchableExecutionDaoTest(mariaDBContainer, "postgresql");
 	}
 }
