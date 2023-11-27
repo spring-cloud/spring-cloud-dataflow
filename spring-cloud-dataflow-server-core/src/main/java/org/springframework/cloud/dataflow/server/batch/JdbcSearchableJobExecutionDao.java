@@ -279,7 +279,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		// TODO find schemaVersionTarget for the taskExecutionId
 		if (start <= 0) {
 			return getJdbcTemplate().query(SchemaUtilities.getQuery(byTaskExecutionIdWithStepCountPagingQueryProvider.generateFirstPageQuery(count),
-					SchemaVersionTarget.defaultTarget().getName()),
+					this.getTablePrefix()),
 					new JobExecutionStepCountRowMapper(), taskExecutionId);
 		}
 		try {
