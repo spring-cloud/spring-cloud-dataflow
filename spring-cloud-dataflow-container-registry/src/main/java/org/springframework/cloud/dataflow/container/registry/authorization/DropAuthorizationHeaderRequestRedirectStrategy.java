@@ -18,10 +18,8 @@ package org.springframework.cloud.dataflow.container.registry.authorization;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -32,7 +30,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.protocol.HttpContext;
-import org.springframework.cloud.dataflow.container.registry.ContainerRegistryConfiguration;
+
+import org.springframework.util.StringUtils;
 
 /**
  * Amazon, Azure and Custom Container Registry services require special treatment for the Authorization headers when the
@@ -65,7 +64,8 @@ import org.springframework.cloud.dataflow.container.registry.ContainerRegistryCo
  * @author Cheng Guan Poh
  */
 public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedirectStrategy {
-	public static final String CUSTOM_REGISTRY = "custom-registry";
+
+	private static final String CUSTOM_REGISTRY = "custom-registry";
 
 	private static final String AMZ_CREDENTIAL = "X-Amz-Credential";
 
@@ -76,10 +76,10 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 	private static final String BASIC_AUTH = "Basic";
 
 	/**
-	 * Additional registry specific configuration properties.
-	 * Usually used inside the Registry authorizer implementations. For example check the AwsEcrAuthorizer implementation.
+	 * Additional registry specific configuration properties - usually used inside the Registry authorizer
+	 * implementations (eg. the AwsEcrAuthorizer implementation).
 	 */
-	private Map<String, String> extra = new HashMap<>();
+	private Map<String, String> extra;
 
 	public DropAuthorizationHeaderRequestRedirectStrategy(Map<String, String> extra) {
 		this.extra = extra;
@@ -90,46 +90,42 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 			final HttpContext context) throws ProtocolException {
 
 		HttpUriRequest httpUriRequest = super.getRedirect(request, response, context);
+		String query = httpUriRequest.getURI().getQuery();
+		String method = request.getRequestLine().getMethod();
 
 		// Handle Amazon requests
-		final String query = httpUriRequest.getURI().getQuery();
-
-		if (StringUtils.isNoneEmpty(query) && query.contains(AMZ_CREDENTIAL)) {
-			final String method = request.getRequestLine().getMethod();
-			if (StringUtils.isNoneEmpty(method)
-					&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME))) {
+		if (StringUtils.hasText(query) && query.contains(AMZ_CREDENTIAL)) {
+			if (isHeadOrGetMethod(method)) {
 				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
 			}
 		}
 
 		// Handle Azure requests
 		if (request.getRequestLine().getUri().contains(AZURECR_URI_SUFFIX)) {
-			final String method = request.getRequestLine().getMethod();
-			if (StringUtils.isNoneEmpty(method)
-					&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME))) {
+			if (isHeadOrGetMethod(method)) {
 				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method) {
-					// drop headers only for the Basic Auth and leve  them unchanged for OAuth2!
+					// Drop headers only for the Basic Auth and leave unchanged for OAuth2
 					@Override
 					protected boolean isDropHeader(String name, String value) {
-						return name.equalsIgnoreCase(AUTHORIZATION_HEADER) && StringUtils.isNoneEmpty(value)
-								&& value.contains(BASIC_AUTH);
+						return name.equalsIgnoreCase(AUTHORIZATION_HEADER) && StringUtils.hasText(value) && value.contains(BASIC_AUTH);
 					}
 				};
 			}
 		}
 
-		// Handle custom requests
-		if (extra.containsKey(CUSTOM_REGISTRY)) {
-			if (request.getRequestLine().getUri().contains(extra.get(CUSTOM_REGISTRY))) {
-				final String method = request.getRequestLine().getMethod();
-				if (StringUtils.isNoneEmpty(method)
-					&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME))) {
-					return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
-				}
+		// Handle Custom requests
+		if (extra.containsKey(CUSTOM_REGISTRY) && request.getRequestLine().getUri().contains(extra.get(CUSTOM_REGISTRY))) {
+			if (isHeadOrGetMethod(method)) {
+				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
 			}
 		}
 
 		return httpUriRequest;
+	}
+
+	private boolean isHeadOrGetMethod(String method) {
+		return StringUtils.hasText(method)
+				&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME));
 	}
 
 	/**

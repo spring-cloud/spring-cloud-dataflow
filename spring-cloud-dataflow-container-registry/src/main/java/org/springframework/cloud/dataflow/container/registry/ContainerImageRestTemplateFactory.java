@@ -20,7 +20,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,6 +75,7 @@ import org.springframework.web.client.RestTemplate;
  * </code>
  *
  * @author Christian Tzolov
+ * @author Cheng Guan Poh
  */
 public class ContainerImageRestTemplateFactory {
 
@@ -123,6 +124,10 @@ public class ContainerImageRestTemplateFactory {
 		this.restTemplateBuilder = restTemplateBuilder;
 		this.properties = properties;
 		this.restTemplateCache = new ConcurrentHashMap();
+	}
+
+	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy) {
+		return this.getContainerRestTemplate(skipSslVerification, withHttpProxy, Collections.emptyMap());
 	}
 
 	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {

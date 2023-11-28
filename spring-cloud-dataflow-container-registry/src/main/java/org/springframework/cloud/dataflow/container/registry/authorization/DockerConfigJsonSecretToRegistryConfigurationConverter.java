@@ -60,23 +60,19 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 
 	public static final String REGISTRY_1_DOCKER_IO = "registry-1.docker.io";
 
-	//	private final RestTemplate restTemplate;
-	private final ContainerImageRestTemplateFactory containerImageRestTemplate;
+	private final ContainerImageRestTemplateFactory containerImageRestTemplateFactory;
 
 	private final Map<String, Boolean> httpProxyPerHost;
 
 	private final boolean replaceDefaultDockerRegistryServer;
 
 	public DockerConfigJsonSecretToRegistryConfigurationConverter(
-		ContainerRegistryProperties properties,
-		ContainerImageRestTemplateFactory containerImageRestTemplate
-	) {
-
+			ContainerRegistryProperties properties,
+			ContainerImageRestTemplateFactory containerImageRestTemplateFactory) {
 		this.replaceDefaultDockerRegistryServer = properties.isReplaceDefaultDockerRegistryServer();
-		// Retrieve registry configurations, explicitly declared via properties.
 		this.httpProxyPerHost = properties.getRegistryConfigurations().entrySet().stream()
 			.collect(Collectors.toMap(e -> e.getValue().getRegistryHost(), e -> e.getValue().isUseHttpProxy()));
-		this.containerImageRestTemplate = containerImageRestTemplate;
+		this.containerImageRestTemplateFactory = containerImageRestTemplateFactory;
 	}
 
 	/**
@@ -170,7 +166,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 	public Optional<String> getDockerTokenServiceUri(String registryHost, boolean disableSSl, boolean useHttpProxy) {
 
 		try {
-			RestTemplate restTemplate = this.containerImageRestTemplate.getContainerRestTemplate(disableSSl, useHttpProxy, Collections.emptyMap());
+			RestTemplate restTemplate = this.containerImageRestTemplateFactory.getContainerRestTemplate(disableSSl, useHttpProxy, Collections.emptyMap());
 			String host = registryHost;
 			Integer port = null;
 			if (registryHost.contains(":")) {
