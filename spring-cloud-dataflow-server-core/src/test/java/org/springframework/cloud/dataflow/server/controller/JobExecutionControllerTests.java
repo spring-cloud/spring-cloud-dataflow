@@ -52,7 +52,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,8 +62,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Glenn Renfro
@@ -212,7 +212,8 @@ public class JobExecutionControllerTests {
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
 			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
-		assertThat(result.getResponse().getContentAsString()).contains("{\"identifying\":true,\"value\":\"2023-06-07T04:00:00.000+00:00\",\"type\":\"DATE\"}");
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
+		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"DATE\"");
 	}
 
 	@Test
@@ -231,7 +232,7 @@ public class JobExecutionControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)))
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInAnyOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInRelativeOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
 	@Test

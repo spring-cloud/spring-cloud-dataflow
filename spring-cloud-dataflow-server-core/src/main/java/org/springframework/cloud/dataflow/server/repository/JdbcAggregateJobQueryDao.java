@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +69,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -238,17 +239,18 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
-		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("JOB_INSTANCE_ID", Order.DESCENDING));
+		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING));
 		byJobExecutionIdAndSchemaPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
 
 	}
 
 	@Override
-	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) {
+	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException {
 		int total = countJobExecutions(jobName);
-		List<JobInstanceExecutions> taskJobInstancesForJobName = total > 0
-				? getTaskJobInstancesForJobName(jobName, pageable)
-				: Collections.emptyList();
+		if (total == 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+		}
+		List<JobInstanceExecutions> taskJobInstancesForJobName = getTaskJobInstancesForJobName(jobName, pageable);
 		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
 
 	}
@@ -273,7 +275,13 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		} else if (executions.size() > 1) {
 			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
 		}
-		return executions.get(0);
+		JobInstanceExecutions jobInstanceExecution = executions.get(0);
+		if (!ObjectUtils.isEmpty(jobInstanceExecution.getTaskJobExecutions())) {
+			jobInstanceExecution.getTaskJobExecutions().forEach((execution) ->
+				jobServiceContainer.get(execution.getSchemaTarget()).addStepExecutions(execution.getJobExecution())
+			);
+		}
+		return jobInstanceExecution;
 	}
 
 	@Override
