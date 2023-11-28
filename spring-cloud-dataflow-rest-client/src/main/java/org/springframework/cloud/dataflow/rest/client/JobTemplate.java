@@ -93,7 +93,7 @@ public class JobTemplate implements JobOperations {
 				"Step Execution View by id relation" + " is required");
 
 		this.restTemplate = restTemplate;
-		this.executionsLink = resources.getLink(EXECUTION_RELATION).get();
+		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.thinExecutionsLink = resources.getLink(EXECUTIONS_THIN_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
