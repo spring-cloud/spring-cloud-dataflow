@@ -23,13 +23,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class JdbcJobSearchableInstanceMariadbDaoTests extends AbstractJdbcJobSearchableInstanceDaoTests {
+class JdbcJobSearchableInstanceMariadbDaoTests extends AbstractJdbcJobSearchableInstanceDaoTests {
 
 	@Container
 	private static final JdbcDatabaseContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.9.3");
 
 	@BeforeEach
-	void setup() throws Exception{
-		setupSearchableExecutionDaoTest(mariaDBContainer, "mariadb");
+	void prepareForTest() throws Exception {
+		super.prepareForTest(mariaDBContainer, "mariadb");
 	}
 }

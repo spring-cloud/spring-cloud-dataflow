@@ -17,22 +17,23 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.JobParameters;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-import javax.sql.DataSource;
+import org.springframework.batch.core.JobParameters;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class AbstractJdbcJobSearchableInstanceDaoTests extends AbstractDaoTests {
+abstract class AbstractJdbcJobSearchableInstanceDaoTests extends AbstractDaoTests {
+
 	private static final String BASE_JOB_INST_NAME = "JOB_INST_";
 
-	JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
+	protected JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
 
-	void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer,  String schemaName) throws Exception {
-		prepareForTest(dbContainer, schemaName);
+	@Override
+	protected void prepareForTest(JdbcDatabaseContainer dbContainer,  String schemaName) throws Exception {
+		super.prepareForTest(dbContainer, schemaName);
 		jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
-		jdbcSearchableJobInstanceDao.setJdbcTemplate(this.jdbcTemplate);
+		jdbcSearchableJobInstanceDao.setJdbcTemplate(getJdbcTemplate());
 		jdbcSearchableJobInstanceDao.afterPropertiesSet();
 	}
 

@@ -17,21 +17,21 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
+
 @Testcontainers
-public class JdbcJobSearchableExecutionMariadbDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
+class JdbcJobSearchableExecutionMariadbDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
 
 	@Container
 	private static final JdbcDatabaseContainer dbContainer = new MariaDBContainer("mariadb:10.9.3");
 
 	@BeforeEach
-	void setup() throws Exception {
-		//TODO when migrating to Boot 3.x and Batch 5.x change mysql to mariadb
-		setupSearchableExecutionDaoTest(dbContainer, "mariadb", DatabaseType.MYSQL);
+	void prepareForTest() throws Exception {
+		super.prepareForTest(dbContainer, "mariadb", DatabaseType.MARIADB);
 	}
 }

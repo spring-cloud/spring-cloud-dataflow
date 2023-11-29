@@ -16,13 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.ext.ScriptUtils;
-import org.testcontainers.jdbc.JdbcDatabaseDelegate;
-
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,12 +24,35 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class AbstractDaoTests {
+import javax.sql.DataSource;
 
-	DataSource dataSource;
-	JdbcTemplate jdbcTemplate;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+import org.testcontainers.ext.ScriptUtils;
+import org.testcontainers.jdbc.JdbcDatabaseDelegate;
 
-	DataSource createDataSourceForContainer(JdbcDatabaseContainer dbContainer) {
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+class AbstractDaoTests {
+
+	private DataSource dataSource;
+	private JdbcTemplate jdbcTemplate;
+
+	protected DataSource getDataSource() {
+		return this.dataSource;
+	}
+
+	protected JdbcTemplate getJdbcTemplate() {
+		return this.jdbcTemplate;
+	}
+
+	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName) throws Exception {
+		this.dataSource = createDataSourceForContainer(dbContainer);
+		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+		createDataFlowSchema(dbContainer, schemaName);
+	}
+
+	protected DataSource createDataSourceForContainer(JdbcDatabaseContainer dbContainer) {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName(dbContainer.getDriverClassName());
 		dataSource.setUrl(dbContainer.getJdbcUrl());
@@ -44,30 +60,22 @@ public class AbstractDaoTests {
 		dataSource.setPassword(dbContainer.getPassword());
 		return dataSource;
 	}
-	void createDataFlowSchema(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
+
+	protected void createDataFlowSchema(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
 		JdbcDatabaseDelegate containerDelegate = new JdbcDatabaseDelegate(dbContainer, "");
 		ScriptUtils.runInitScript(containerDelegate, "schemas/drop-table-schema-" + schemaName + ".sql");
-
 		getResourceFiles("schemas/" + schemaName).forEach(str -> {
 			if (str.contains("dataflow"))
 				ScriptUtils.runInitScript(containerDelegate, "schemas/" + schemaName + "/" + str);
 		});
 	}
 
-	void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName) throws IOException {
-		this.dataSource = createDataSourceForContainer(dbContainer);
-		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
-		createDataFlowSchema(dbContainer, schemaName);
-	}
-
 	private List<String> getResourceFiles(String path) throws IOException {
 		List<String> fileNames = new ArrayList<>();
-
 		try (
 			InputStream stream = getResourceFileAsStream(path);
 			BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
 			String fileName;
-
 			while ((fileName = br.readLine()) != null) {
 				fileNames.add(fileName);
 			}

@@ -318,17 +318,15 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private int countJobExecutions(String jobName, BatchStatus status) throws NoSuchJobException {
 		if (!StringUtils.hasText(jobName)) {
-			if (status != null) {
-				return jobExecutionDao.countJobExecutions(status);
+			if (status == null) {
+				throw new IllegalArgumentException("One of jobName or status must be specified");
 			}
-		} else {
-			if (status != null) {
-				return jobExecutionDao.countJobExecutions(jobName, status);
-			}
+			return jobExecutionDao.countJobExecutions(status);
 		}
-
 		checkJobExists(jobName);
-		return jobExecutionDao.countJobExecutions(jobName);
+		return (status != null) ?
+				jobExecutionDao.countJobExecutions(jobName, status) :
+				jobExecutionDao.countJobExecutions(jobName);
 	}
 
 	@Override

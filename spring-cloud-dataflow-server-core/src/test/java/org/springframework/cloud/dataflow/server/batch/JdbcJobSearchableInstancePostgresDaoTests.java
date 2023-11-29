@@ -23,13 +23,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class JdbcJobSearchableInstancePostgresDaoTests extends AbstractJdbcJobSearchableInstanceDaoTests {
+class JdbcJobSearchableInstancePostgresDaoTests extends AbstractJdbcJobSearchableInstanceDaoTests {
 
 	@Container
 	private static final JdbcDatabaseContainer<?> mariaDBContainer = new PostgreSQLContainer<>("postgres:11.1");
 
 	@BeforeEach
-	void setup() throws Exception{
-		setupSearchableExecutionDaoTest(mariaDBContainer, "postgresql");
+	void prepareForTest() throws Exception {
+		super.prepareForTest(mariaDBContainer, "postgresql");
 	}
 }

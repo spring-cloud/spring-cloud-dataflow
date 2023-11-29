@@ -16,7 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.JdbcDatabaseContainer;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -29,48 +34,51 @@ import org.springframework.batch.item.database.support.DataFieldMaxValueIncremen
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.containers.JdbcDatabaseContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends AbstractDaoTests {
+
+abstract class AbstractJdbcJobSearchableExecutionDaoTests extends AbstractDaoTests {
 
 	private static final String BASE_JOB_INSTANCE_NAME = "JOB_INST_";
 
-	JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
+	protected JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
 
-	JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
+	protected JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
 
-	DataFieldMaxValueIncrementerFactory incrementerFactory;
+	protected DataFieldMaxValueIncrementerFactory incrementerFactory;
 
-	JdbcJobExecutionDao jobExecutionDao;
+	protected JdbcJobExecutionDao jobExecutionDao;
 
-	JdbcStepExecutionDao stepExecutionDao;
+	protected JdbcStepExecutionDao stepExecutionDao;
 
-	void setupSearchableExecutionDaoTest(JdbcDatabaseContainer dbContainer, String schemaName,
-												DatabaseType databaseType) throws Exception {
-		prepareForTest(dbContainer, schemaName);
+	protected String determineDatabaseType(DatabaseType databaseType) {
+		return (databaseType != DatabaseType.MARIADB) ? databaseType.name() : DatabaseType.MYSQL.name();
+	}
+
+	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName, DatabaseType databaseType) throws Exception {
+		super.prepareForTest(dbContainer, schemaName);
 
 		this.jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
-		this.jdbcSearchableJobExecutionDao.setDataSource(this.dataSource);
+		this.jdbcSearchableJobExecutionDao.setDataSource(getDataSource());
 		this.jdbcSearchableJobExecutionDao.afterPropertiesSet();
-		this.jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
-		this.jdbcSearchableJobInstanceDao.setJdbcTemplate(this.jdbcTemplate);
-		incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 
-		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(databaseType.name(),
+		this.jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
+		this.jdbcSearchableJobInstanceDao.setJdbcTemplate(getJdbcTemplate());
+		incrementerFactory = new MultiSchemaIncrementerFactory(getDataSource());
+		this.jdbcSearchableJobInstanceDao.afterPropertiesSet();
+		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "JOB_SEQ"));
+
 		jobExecutionDao = new JdbcJobExecutionDao();
-		jobExecutionDao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType.name(),
+		jobExecutionDao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "JOB_EXECUTION_SEQ"));
-		this.jobExecutionDao.setJdbcTemplate(new JdbcTemplate(this.dataSource));
+		this.jobExecutionDao.setJdbcTemplate(new JdbcTemplate(getDataSource()));
 		jobExecutionDao.afterPropertiesSet();
+
 		this.stepExecutionDao = new JdbcStepExecutionDao();
-		this.stepExecutionDao.setJdbcTemplate(this.jdbcTemplate);
-		this.stepExecutionDao.setStepExecutionIncrementer(incrementerFactory.getIncrementer(databaseType.name(),
+		this.stepExecutionDao.setJdbcTemplate(getJdbcTemplate());
+		this.stepExecutionDao.setStepExecutionIncrementer(incrementerFactory.getIncrementer(determineDatabaseType(databaseType),
 			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "STEP_EXECUTION_SEQ"));
 		this.stepExecutionDao.afterPropertiesSet();
 	}
@@ -111,7 +119,6 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 			0, 20).size()).isEqualTo(5);
 		assertThat(this.jdbcSearchableJobExecutionDao.getJobExecutions(BASE_JOB_INSTANCE_NAME + suffixFailed,
 			0, 20).size()).isEqualTo(7);
-
 	}
 
 	@Test
@@ -145,9 +152,7 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	@Test
 	void retrieveJobExecutionWithStepCount() {
 		String suffix = "_JOB_EXECUTIONS_WITH_STEP_COUNT";
-
 		createJobExecutions(BASE_JOB_INSTANCE_NAME + suffix, 5);
-
 		List<JobExecutionWithStepCount> jobExecutionsWithStepCount =
 			this.jdbcSearchableJobExecutionDao.getJobExecutionsWithStepCount(0, 20);
 		assertThat(jobExecutionsWithStepCount.size()).isEqualTo(5);
@@ -157,11 +162,9 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	@Test
 	void retrieveJobExecutionWithStepCountFilteredJobInstance() {
 		String suffix = "_JOB_EXECUTIONS_WITH_STEP_COUNT_BY_JOB_INSTANCE";
-
 		createJobExecutions(BASE_JOB_INSTANCE_NAME + suffix, 5);
 		JobInstance jobInstance = this.jdbcSearchableJobInstanceDao.getJobInstances(
 			BASE_JOB_INSTANCE_NAME + suffix, 0, 5).get(0);
-
 		List<JobExecutionWithStepCount> jobExecutionsWithStepCount =
 			this.jdbcSearchableJobExecutionDao.getJobExecutionsWithStepCountFilteredByJobInstanceId((int) jobInstance
 				.getInstanceId(), 0, 10);
@@ -176,7 +179,6 @@ public abstract class AbstractJdbcJobSearchableExecutionDaoTests extends Abstrac
 	private List<JobExecution> createJobExecutions(String name, BatchStatus batchStatus, int numberOfJobs) {
 		List<JobExecution> jobExecutions = new ArrayList<>();
 		JobInstance jobInstance = jdbcSearchableJobInstanceDao.createJobInstance(name, new JobParameters());
-
 		for (int i = 0; i < numberOfJobs; i++) {
 			JobExecution jobExecution = new JobExecution(jobInstance, new JobParameters());
 			jobExecution.setStatus(batchStatus);

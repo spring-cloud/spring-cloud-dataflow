@@ -17,20 +17,21 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
+
 @Testcontainers
-public class JdbcJobSearchableExecutionPostgresDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
+class JdbcJobSearchableExecutionPostgresDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
 
 	@Container
 	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11.1");
 
 	@BeforeEach
 	void setup() throws Exception {
-		setupSearchableExecutionDaoTest(dbContainer, "postgresql", DatabaseType.POSTGRES);
+		super.prepareForTest(dbContainer, "postgresql", DatabaseType.POSTGRES);
 	}
 }
