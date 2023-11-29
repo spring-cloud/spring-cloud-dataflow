@@ -17,20 +17,28 @@ package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import org.cloudfoundry.logcache.v1.Envelope;
+import org.cloudfoundry.logcache.v1.Log;
+import org.cloudfoundry.logcache.v1.ReadRequest;
+import org.cloudfoundry.logcache.v1.ReadResponse;
 import org.cloudfoundry.operations.applications.ApplicationManifest;
-import org.cloudfoundry.operations.applications.LogsRequest;
 import org.cloudfoundry.operations.applications.PushApplicationManifestRequest;
 import org.cloudfoundry.operations.applications.ScaleApplicationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
@@ -191,14 +199,53 @@ public class CloudFoundryReleaseManager implements ReleaseManager {
 			Assert.isTrue(applicationName.equalsIgnoreCase(appName),
 					String.format("Application name % is different from the CF manifest: %", appName, applicationName));
 		}
-		String logMessage = this.platformCloudFoundryOperations.getCloudFoundryOperations(release.getPlatformName()).applications()
-				.logs(LogsRequest.builder().name(applicationName).build())
-				.blockFirst(Duration.ofMillis(API_TIMEOUT.toMillis())).getMessage();
+		AppStatus status = this.cfManifestApplicationDeployer.status(release);
+		status.getInstances().keySet().forEach(str-> logger.info("id is: " + appName + " >>>  key is : " + str ));
+		String cfGuid = null;
+		for(Map.Entry<String, AppInstanceStatus> appInstanceStatus : status.getInstances().entrySet()) {
+			logger.info("MapValues : {}={}", appInstanceStatus.getKey(), appInstanceStatus.getValue().getAttributes());
+			if(appInstanceStatus.getValue().getAttributes().containsKey("guid")) {
+				cfGuid = appInstanceStatus.getValue().getAttributes().get("guid");
+				logger.info("===> {} : {}", appInstanceStatus.getKey(), cfGuid);
+			}
+		}
+		logger.info("cf-guid used for log will be {}", cfGuid);
+		String result = getLog(cfGuid, Duration.ofSeconds(API_TIMEOUT.toMillis()), release);
+		logger.info("THE RESULTS ARE IN ==>" + result);
 		Map<String, String> logMap = new HashMap<>();
-		logMap.put(appName, logMessage);
+		logMap.put(appName, result);
 		return new LogInfo(logMap);
 	}
 
+	private String getLog(String deploymentId, Duration apiTimeout, Release release) {
+		Assert.hasText(deploymentId, "id must have text and not null");
+		Assert.notNull(apiTimeout, "apiTimeout must not be null");
+		StringBuilder stringBuilder = new StringBuilder();
+		ReadRequest.Builder builder = ReadRequest.builder().sourceId(deploymentId);
+		Assert.notNull(builder, "builder must not be null");
+		ReadRequest request = builder.build();
+		Assert.notNull(request, "request must not be null");
+		List<Log> logs = this.platformCloudFoundryOperations.buildLogCacheClient(release.getPlatformName())
+			.read(request)
+			.flatMapMany(this::responseToEnvelope)
+			.collectList()
+			.block(apiTimeout);
+		// if no log exists the result set is null.
+		if(logs == null) {
+			return "";
+		}
+		Base64.Decoder decoder = Base64.getDecoder();
+		logs.forEach((log) -> {
+			stringBuilder.append(new String(decoder.decode(log.getPayload())));
+			stringBuilder.append(System.lineSeparator());
+		});
+		return stringBuilder.toString();
+	}
+	private Flux<Log> responseToEnvelope(ReadResponse response) {
+		return Flux.fromIterable(response.getEnvelopes().getBatch())
+			.map(Envelope::getLog)
+			.filter(Objects::nonNull);
+	}
 	@Override
 	public Release scale(Release release, ScaleRequest scaleRequest) {
 		logger.info("Scaling the application instance using ", scaleRequest.toString());
