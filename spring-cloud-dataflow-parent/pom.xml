@@ -286,6 +286,25 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<dependencies>
+		<!-- Allow Surefire to run both Junit 4 and 5 by providing Junit4 libs and engine -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>hamcrest-core</artifactId>
+					<groupId>org.hamcrest</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
 	<distributionManagement>
 		<repository>
 			<id>repo.spring.io</id>
