@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +49,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.SimpleTestScheduler;
@@ -74,13 +74,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerServiceTestUtil.assertThatCommandLineArgsHaveNonDefaultArgs;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TaskServiceDependencies.class,
@@ -185,6 +184,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		this.testProperties = new HashMap<>();
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
+		this.testProperties.put("version." + BASE_DEFINITION_NAME, "boot2");
 		this.resolvedProperties = new HashMap<>();
 		this.resolvedProperties.put(DEPLOYER_PREFIX + "AAAA", "* * * * *");
 		this.resolvedProperties.put(DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
@@ -402,20 +402,17 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	@Test
 	public void testScheduleWithCommandLineArguments() throws Exception {
-		List<String> commandLineArguments = getCommandLineArguments(Arrays.asList("--myArg1", "--myArg2"));
-
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 2, commandLineArguments.size());
-		assertEquals("Invalid command line argument", "--myArg1", commandLineArguments.get(0));
-		assertEquals("Invalid command line argument", "--myArg2", commandLineArguments.get(1));
+		List<String> args = new ArrayList<>();
+		args.add("--myArg1");
+		args.add("--myArg2");
+		args = getCommandLineArguments(args);
+		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp", "--myArg1", "--myArg2");
 	}
 
 	@Test
-	public void testScheduleWithoutCommandLineArguments() throws Exception {
-		List<String> commandLineArguments = getCommandLineArguments(new ArrayList<>());
-
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 0, commandLineArguments.size());
+	public void testScheduleWithoutCommandLineArguments() {
+		List<String> args = getCommandLineArguments(new ArrayList<>());
+		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp", new String[0]);
 	}
 
 	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
@@ -423,11 +420,15 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
 
+		AggregateExecutionSupport mockAggExecSupport = mock(AggregateExecutionSupport.class);
+		when(mockAggExecSupport.findSchemaVersionTarget(anyString(), anyString(), any(TaskDefinition.class)))
+				.thenReturn(SchemaVersionTarget.defaultTarget());
+
 		Launcher launcher = new Launcher("default", "defaultType", null, mockScheduler);
 		List<Launcher> launchers = new ArrayList<>();
 		launchers.add(launcher);
 		List<TaskPlatform> taskPlatform = Collections.singletonList(new TaskPlatform("testTaskPlatform", launchers));
-		SchedulerService mockSchedulerService = new DefaultSchedulerService(
+		SchedulerService schedulerService = new DefaultSchedulerService(
 				mock(CommonApplicationProperties.class),
 				taskPlatform,
 				mockTaskDefinitionRepository,
@@ -439,7 +440,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				mock(ApplicationConfigurationMetadataResolver.class),
 				mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class),
-				mock(AggregateExecutionSupport.class),
+				mockAggExecSupport,
 				mock(TaskDefinitionReader.class),
 				mock(TaskExecutionInfoService.class),
 				mock(PropertyResolver.class),
@@ -451,7 +452,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		when(mockAppRegistryService.getAppResource(any())).thenReturn(new DockerResource("springcloudtask/timestamp-task:latest"));
 		when(mockAppRegistryService.find(taskDefinition.getRegisteredAppName(), ApplicationType.task))
 				.thenReturn(new AppRegistration());
-		mockSchedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties,
+		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties,
 				commandLineArguments, null);
 
 		ArgumentCaptor<ScheduleRequest> scheduleRequestArgumentCaptor = ArgumentCaptor.forClass(ScheduleRequest.class);

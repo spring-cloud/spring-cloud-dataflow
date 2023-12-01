@@ -425,7 +425,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(1)));
+				.andExpect(jsonPath("$.options[*]", hasSize(7)));
 	}
 
 	@Test
@@ -433,7 +433,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(2001)));
+				.andExpect(jsonPath("$.options[*]", hasSize(2022)));
 	}
 
 	@Test
@@ -482,11 +482,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isConflict());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/3.2.0").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/3.2.1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/3.2.0").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/3.2.1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -624,11 +624,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isOk());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/3.2.0").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/3.2.1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/3.2.0").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/3.2.1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -728,17 +728,17 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testListApplicationsByVersion() throws Exception {
-		mockMvc.perform(get("/apps?version=3.2.0").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/apps?version=3.2.1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 	}
 
 	@Test
 	public void testListApplicationsByVersionAndSearch() throws Exception {
-		mockMvc.perform(get("/apps?version=3.2.0&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=3.2.1&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
-		mockMvc.perform(get("/apps?version=3.2.0&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=3.2.1&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}
