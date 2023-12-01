@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,12 +78,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerServiceTestUtil.assertThatCommandLineArgsHaveNonDefaultArgs;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class,
@@ -407,21 +406,18 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	public void testScheduleWithCommandLineArguments() throws Exception{
-		List<String> commandLineArguments = getCommandLineArguments(Arrays.asList("--myArg1", "--myArg2"));
-
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 2, commandLineArguments.size());
-		assertEquals("Invalid command line argument", "--myArg1", commandLineArguments.get(0));
-		assertEquals("Invalid command line argument", "--myArg2", commandLineArguments.get(1));
+	public void testScheduleWithCommandLineArguments() {
+		List<String> args = new ArrayList<>();
+		args.add("--myArg1");
+		args.add("--myArg2");
+		args = getCommandLineArguments(args);
+		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp", "--myArg1", "--myArg2");
 	}
 
 	@Test
-	public void testScheduleWithoutCommandLineArguments() throws Exception {
-		List<String> commandLineArguments = getCommandLineArguments(new ArrayList<>());
-
-		assertNotNull("Command line arguments should not be null", commandLineArguments);
-		assertEquals("Invalid number of command line arguments", 0, commandLineArguments.size());
+	public void testScheduleWithoutCommandLineArguments() {
+		List<String> args = getCommandLineArguments(new ArrayList<>());
+		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp", new String[0]);
 	}
 
 	@Test

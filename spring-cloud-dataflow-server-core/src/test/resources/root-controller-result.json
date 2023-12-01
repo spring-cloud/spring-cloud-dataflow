@@ -122,6 +122,14 @@
     "tasks/executions": {
       "href": "http://localhost/tasks/executions"
     },
+    "tasks/executions/external": {
+      "href": "http://localhost/tasks/executions/external/{externalExecutionId}{?platform}",
+      "templated": true
+    },
+    "tasks/executions/launch": {
+      "href": "http://localhost/tasks/executions/launch?name={name}{&properties,arguments}",
+      "templated": true
+    },
     "tasks/executions/name": {
       "href": "http://localhost/tasks/executions{?name}",
       "templated": true
@@ -130,7 +138,7 @@
       "href": "http://localhost/tasks/executions/current"
     },
     "tasks/executions/execution": {
-      "href": "http://localhost/tasks/executions/{id}",
+      "href": "http://localhost/tasks/executions/{id}{?schemaTarget}",
       "templated": true
     },
     "tasks/validation": {
@@ -138,7 +146,7 @@
       "templated": true
     },
     "tasks/info/executions": {
-      "href": "http://localhost/tasks/info/executions{?completed,name}",
+      "href": "http://localhost/tasks/info/executions{?completed,name,days}",
       "templated": true
     },
     "tasks/logs": {

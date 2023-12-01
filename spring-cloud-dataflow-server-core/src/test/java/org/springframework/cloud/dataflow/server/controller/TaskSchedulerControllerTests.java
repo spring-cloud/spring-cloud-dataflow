@@ -25,6 +25,8 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -206,45 +208,50 @@ public class TaskSchedulerControllerTests {
 		assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
 		assertEquals("mySchedule", auditRecord.getCorrelationId());
 
-		assertEquals("{\"commandlineArguments\":[]," +
+		JSONAssert.assertEquals("{\"commandlineArguments\":[\"--app.testApp.spring.cloud.task.initialize-enabled=false\",\"--app.testApp.spring.batch.jdbc.table-prefix=BATCH_\",\"--app.testApp.spring.cloud.task.tablePrefix=TASK_\",\"--app.testApp.spring.cloud.task.schemaTarget=boot2\",\"--app.testApp.spring.cloud.deployer.bootVersion=2\"]," +
 				"\"taskDefinitionName\":\"testDefinition\"," +
 				"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
 				"\"spring.datasource.username\":null,\"spring.datasource.url\":null," +
 				"\"spring.datasource.driverClassName\":null," +
 				"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
-				"\"spring.cloud.task.name\":\"testDefinition\"}," +
-				"\"deploymentProperties\":{\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}", auditRecord.getAuditData());
+				"\"spring.cloud.task.initialize-enabled\":\"false\",\"spring.batch.jdbc.table-prefix\":\"BATCH_\",\"spring.cloud.task.schemaTarget\":\"boot2\"," +
+				"\"spring.cloud.task.name\":\"testDefinition\",\"spring.cloud.task.tablePrefix\":\"TASK_\",\"spring.cloud.deployer.bootVersion\":\"2\"}," +
+				"\"deploymentProperties\":{\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}", auditRecord.getAuditData(), JSONCompareMode.LENIENT);
 	}
 
 	@Test
 	public void testCreateScheduleWithSensitiveFields() throws Exception {
 		String auditData = createScheduleWithArguments("argument1=foo password=secret");
-
-		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"],\"taskDefinitionName\":\"testDefinition\"," +
-						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
-						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
-						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
+		JSONAssert.assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"password=******\"," +
+						"\"--app.testApp.spring.cloud.task.initialize-enabled=false\",\"--app.testApp.spring.batch.jdbc.table-prefix=BATCH_\"," +
+						"\"--app.testApp.spring.cloud.task.tablePrefix=TASK_\",\"--app.testApp.spring.cloud.task.schemaTarget=boot2\"," +
+						"\"--app.testApp.spring.cloud.deployer.bootVersion=2\"],\"taskDefinitionName\":\"testDefinition\"," +
+						"\"taskDefinitionProperties\":{\"prop2.secret\":\"******\",\"spring.datasource.driverClassName\":null," +
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
-						"\"spring.cloud.task.name\":\"testDefinition\"}," +
-						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
-				auditData);
+						"\"spring.cloud.task.name\":\"testDefinition\",\"spring.cloud.deployer.bootVersion\":\"2\",\"management.metrics.tags.service\":\"task-application\"," +
+						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"spring.datasource.url\":null,\"spring.cloud.task.initialize-enabled\":\"false\"," +
+						"\"spring.batch.jdbc.table-prefix\":\"BATCH_\",\"spring.cloud.task.schemaTarget\":\"boot2\",\"spring.cloud.task.tablePrefix\":\"TASK_\"}," +
+						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
+				auditData, JSONCompareMode.LENIENT);
 	}
 
 	@Test
 	public void testCreateScheduleCommaDelimitedArgs() throws Exception {
 		String auditData = createScheduleWithArguments("argument1=foo spring.profiles.active=k8s,master argument3=bar");
 
-		assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\"," +
-						"\"argument3=bar\"],\"taskDefinitionName\":\"testDefinition\"," +
-						"\"taskDefinitionProperties\":{\"management.metrics.tags.service\":\"task-application\"," +
-						"\"prop1\":\"foo\",\"spring.datasource.username\":null,\"prop2.secret\":\"******\"," +
-						"\"spring.datasource.url\":null,\"spring.datasource.driverClassName\":null," +
+		JSONAssert.assertEquals("{\"commandlineArguments\":[\"argument1=foo\",\"spring.profiles.active=k8s,master\"," +
+						"\"argument3=bar\",\"--app.testApp.spring.cloud.task.initialize-enabled=false\",\"--app.testApp.spring.batch.jdbc.table-prefix=BATCH_\"," +
+						"\"--app.testApp.spring.cloud.task.tablePrefix=TASK_\",\"--app.testApp.spring.cloud.task.schemaTarget=boot2\"," +
+						"\"--app.testApp.spring.cloud.deployer.bootVersion=2\"],\"taskDefinitionName\":\"testDefinition\"," +
+						"\"taskDefinitionProperties\":{\"prop2.secret\":\"******\",\"spring.datasource.driverClassName\":null," +
 						"\"management.metrics.tags.application\":\"${spring.cloud.task.name:unknown}-${spring.cloud.task.executionid:unknown}\"," +
-						"\"spring.cloud.task.name\":\"testDefinition\"}," +
-						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\"," +
-						"\"spring.cloud.deployer.prop2.password\":\"******\",\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
-				auditData);
+						"\"spring.cloud.task.name\":\"testDefinition\",\"spring.cloud.deployer.bootVersion\":\"2\"," +
+						"\"management.metrics.tags.service\":\"task-application\",\"prop1\":\"foo\",\"spring.datasource.username\":null," +
+						"\"spring.datasource.url\":null,\"spring.cloud.task.initialize-enabled\":\"false\",\"spring.batch.jdbc.table-prefix\":\"BATCH_\"," +
+						"\"spring.cloud.task.schemaTarget\":\"boot2\",\"spring.cloud.task.tablePrefix\":\"TASK_\"}," +
+						"\"deploymentProperties\":{\"spring.cloud.deployer.prop1.secret\":\"******\",\"spring.cloud.deployer.prop2.password\":\"******\"," +
+						"\"spring.cloud.deployer.cron.expression\":\"* * * * *\"}}",
+				auditData, JSONCompareMode.LENIENT);
 	}
 
 	private String createScheduleWithArguments(String arguments) throws Exception {

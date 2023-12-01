@@ -68,6 +68,7 @@ public class DataflowTemplateTests {
 
 	@Before
 	public void setup() {
+		mapper = new ObjectMapper();
 		mapper.registerModule(new Jdk8Module());
 		mapper.registerModule(new Jackson2HalModule());
 		mapper.registerModule(new JavaTimeModule());
