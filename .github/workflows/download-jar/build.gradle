@@ -6,7 +6,7 @@ repositories {
         url 'https://repo.spring.io/milestone'
     }
     maven {
-        url 'https://repo.spring.io/libs-spring-dataflow-private-staging-release'
+        url 'https://repo.spring.io/libs-release-staging'
         credentials {
             username System.getenv('ARTIFACTORY_USERNAME')
             password System.getenv('ARTIFACTORY_PASSWORD')
