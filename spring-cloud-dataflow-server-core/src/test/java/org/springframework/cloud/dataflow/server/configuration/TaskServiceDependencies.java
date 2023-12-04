@@ -108,6 +108,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -217,7 +218,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	TaskLauncher taskLauncher() {
-		return mock(TaskLauncher.class);
+		TaskLauncher taskLauncher = mock(TaskLauncher.class);
+		when(taskLauncher.getLog(any())).thenReturn("");
+		return taskLauncher;
 	}
 
 	@Bean
