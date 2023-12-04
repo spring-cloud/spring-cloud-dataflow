@@ -1071,7 +1071,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			when(taskLauncherCF.getLog(any())).thenThrow(new IllegalArgumentException("could not find a GUID app id for the task guid id"));
 			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncherCF));
 			SchemaVersionTarget schemaVersionTarget = SchemaVersionTarget.defaultTarget();
-			assertEquals("Log could not be retrieved.  Verify that deployments are still available.", this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName()));
+			assertThat(this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName())).isEqualTo("Log could not be retrieved.  Verify that deployments are still available.");
 		}
 
 		@Test
@@ -1093,7 +1093,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskRepository taskRepository = taskRepositoryContainer.get(schemaVersionTarget.getName());
 			taskRepository.createTaskExecution(taskExecution);
 			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
-			assertEquals("", this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName()));
+			assertThat(this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName())).isEmpty();
 		}
 
 		@Test

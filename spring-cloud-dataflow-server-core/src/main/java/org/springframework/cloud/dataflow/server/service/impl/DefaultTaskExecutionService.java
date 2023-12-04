@@ -848,7 +848,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * given deployment ID (external execution ID).
 	 *
 	 * @param platformName the platform
-	 * @param taskId       the task id
+	 * @param taskId       the deploymentID (externalExecutionId) associated with the task execution.
 	 * @return the log of the specified task.
 	 */
 	@Override
