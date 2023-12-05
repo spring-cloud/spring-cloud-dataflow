@@ -84,7 +84,7 @@ public abstract class AbstractSmokeTest {
 
 	@Test
 	public void testTaskCreation() {
-		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(0);
+		long originalCount = taskExplorer.getTaskExecutionCount();
 		TransactionTemplate tx = new TransactionTemplate(transactionManager);
 		tx.execute(status -> {
 			for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
@@ -94,10 +94,11 @@ public abstract class AbstractSmokeTest {
 			}
 			return true;
 		});
-		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(2);
+		long expectedNewCount = originalCount + 2;
+		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(expectedNewCount);
 		List<AggregateTaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100)).getContent();
 		assertThat(taskExecutions)
-				.hasSize(2)
+				.hasSize((int)expectedNewCount)
 				.allSatisfy((taskExecution) -> assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L));
 	}
 
