@@ -35,11 +35,10 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -50,11 +49,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = {DataFlowServerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(properties = {
-	"spring.jpa.hibernate.ddl-auto=none"
-})
+@SpringBootTest(classes = DataFlowServerApplication.class,
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = "spring.jpa.hibernate.ddl-auto=none")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractSmokeTest {
+
 	private final static Logger logger = LoggerFactory.getLogger(AbstractSmokeTest.class);
 
 	protected static JdbcDatabaseContainer<?> container;
@@ -84,7 +84,7 @@ public abstract class AbstractSmokeTest {
 
 	@Test
 	public void testTaskCreation() {
-		logger.info("testTaskCreation:started:{}", getClass().getSimpleName());
+		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(0);
 		TransactionTemplate tx = new TransactionTemplate(transactionManager);
 		tx.execute(status -> {
 			for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
@@ -95,15 +95,12 @@ public abstract class AbstractSmokeTest {
 			return true;
 		});
 		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(2);
-		Page<AggregateTaskExecution> page = taskExplorer.findAll(Pageable.ofSize(100));
-		List<AggregateTaskExecution> taskExecutions = page.getContent();
-		logger.info("TaskExecutions:{}", taskExecutions);
-		assertThat(taskExecutions.size()).isEqualTo(2);
-		taskExecutions.forEach(taskExecution -> {
-			assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L);
-		});
-		logger.info("testTaskCreation:completed:{}", getClass().getSimpleName());
+		List<AggregateTaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100)).getContent();
+		assertThat(taskExecutions)
+				.hasSize(2)
+				.allSatisfy((taskExecution) -> assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L));
 	}
+
 	@Test
 	public void streamCreation() {
 		TransactionTemplate tx = new TransactionTemplate(transactionManager);
