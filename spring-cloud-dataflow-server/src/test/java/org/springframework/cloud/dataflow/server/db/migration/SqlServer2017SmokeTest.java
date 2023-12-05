@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.db.migration;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -26,7 +25,6 @@ import org.testcontainers.utility.DockerImageName;
  *
  * @author Corneil du Plessis
  */
-@Disabled("Will fix once PR is merged to run all tests")
 public class SqlServer2017SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
