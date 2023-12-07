@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
+import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +78,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AuditRecordControllerTests {
 
+	private static final int INITIAL_AUDIT_CREATE_COUNT = 7;
+
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
@@ -126,6 +130,10 @@ public class AuditRecordControllerTests {
 
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
+
+		// Verify that the 4 app create and 3 stream create audit records have been recorded before setting the end date.
+		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> auditRecordRepository.count() == INITIAL_AUDIT_CREATE_COUNT);
+
 
 		endDate = ZonedDateTime.now();
 
