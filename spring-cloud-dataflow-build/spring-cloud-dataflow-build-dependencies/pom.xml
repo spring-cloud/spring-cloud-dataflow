@@ -39,6 +39,7 @@
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
 		<junit.version>4.13.1</junit.version>
 		<junit-jupiter.version>5.9.2</junit-jupiter.version>
+		<logback.version>1.2.13</logback.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -84,13 +85,6 @@
 				<groupId>io.fabric8</groupId>
 				<artifactId>kubernetes-client-bom</artifactId>
 				<version>${kubernetes-fabric8-client.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>${spring-boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
