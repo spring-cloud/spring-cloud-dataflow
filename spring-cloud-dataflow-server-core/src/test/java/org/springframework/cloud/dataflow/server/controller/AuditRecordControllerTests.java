@@ -78,6 +78,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class AuditRecordControllerTests {
 
+	private static final int INITIAL_AUDIT_CREATE_COUNT = 7;
+
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;
 
@@ -129,7 +131,8 @@ public class AuditRecordControllerTests {
 		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
-		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> auditRecordRepository.count() == 7);
+		// Verify that the 4 app create and 3 stream create audit records have been recorded before setting the end date.
+		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> auditRecordRepository.count() == INITIAL_AUDIT_CREATE_COUNT);
 
 
 		endDate = ZonedDateTime.now();
