@@ -42,6 +42,12 @@ services:
       # Override the CTR form maven to docker
       - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.11.2-SNAPSHOT}${BP_JVM_VERSION:-}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
+    entrypoint: >
+      /bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
+         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
+         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
+         mv /tmp/docker/docker /usr/local/bin && /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -55,6 +61,12 @@ services:
       # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
+    entrypoint: >
+      /bin/sh -c "
+         apt-get update && apt-get install --no-install-recommends -y wget &&
+         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
+         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
+         mv /tmp/docker/docker /usr/local/bin && /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
