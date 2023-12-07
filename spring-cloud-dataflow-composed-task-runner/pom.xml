@@ -104,9 +104,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
+			<artifactId>spring-cloud-common-security-config-web</artifactId>
 			<scope>test</scope>
-			<type>test-jar</type>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
