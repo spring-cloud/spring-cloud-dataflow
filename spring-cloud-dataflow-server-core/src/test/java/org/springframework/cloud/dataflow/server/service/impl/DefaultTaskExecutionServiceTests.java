@@ -1057,7 +1057,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDeployment.setTaskDeploymentId(taskDeploymentId);
 			this.taskDeploymentRepository.save(taskDeployment);
 			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
-			when(taskLauncher.getLog(taskDefinitionName)).thenReturn("Logs");
+			when(taskLauncher.getLog("12345")).thenReturn("Logs");
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskDefinitionName, taskDefinitionReader);
 			assertEquals("Logs", this.taskExecutionService.getLog(taskDeployment.getPlatformName(), taskDeploymentId, schemaVersionTarget.getName()));
 		}
@@ -1067,9 +1067,11 @@ public abstract class DefaultTaskExecutionServiceTests {
 		public void getCFTaskLogByInvalidTaskId() {
 			String platformName = "cf-test-platform";
 			String taskDeploymentId = "12345";
-			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
+			TaskLauncher taskLauncherCF = mock(TaskLauncher.class);
+			when(taskLauncherCF.getLog(any())).thenThrow(new IllegalArgumentException("could not find a GUID app id for the task guid id"));
+			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncherCF));
 			SchemaVersionTarget schemaVersionTarget = SchemaVersionTarget.defaultTarget();
-			assertEquals("Log could not be retrieved as the task instance is not running by the ID: 12345", this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName()));
+			assertThat(this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName())).isEqualTo("Log could not be retrieved.  Verify that deployments are still available.");
 		}
 
 		@Test
@@ -1091,7 +1093,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskRepository taskRepository = taskRepositoryContainer.get(schemaVersionTarget.getName());
 			taskRepository.createTaskExecution(taskExecution);
 			this.launcherRepository.save(new Launcher(platformName, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
-			assertEquals("", this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName()));
+			assertThat(this.taskExecutionService.getLog(platformName, taskDeploymentId, schemaVersionTarget.getName())).isEmpty();
 		}
 
 		@Test
