@@ -45,6 +45,7 @@ import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -234,7 +235,7 @@ public class DefaultTaskJobService implements TaskJobService {
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
 			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
 					restartExecutionArgs(taskExecution.getArguments(),
-							taskJobExecution.getJobExecution().getJobParameters()));
+							taskJobExecution.getJobExecution().getJobParameters(), schemaTarget));
 		} else {
 			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
 					taskExecution.getTaskName(), taskJobExecution.getTaskId()));
@@ -252,8 +253,10 @@ public class DefaultTaskJobService implements TaskJobService {
 	 * @return deduped list of arguments that contains the original arguments and any
 	 * identifying job parameters not in the original task execution arguments.
 	 */
-	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters) {
+	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters, String schemaTarget) {
 		List<String> result = new ArrayList<>(taskExecutionArgs);
+		String boot3Version = SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT3).getName();
+		String type;
 		Map<String, JobParameter> jobParametersMap = jobParameters.getParameters();
 		for (String key : jobParametersMap.keySet()) {
 			if (!key.startsWith("-")) {
@@ -265,9 +268,27 @@ public class DefaultTaskJobService implements TaskJobService {
 					}
 				}
 				if (!existsFlag) {
-					result.add(String.format("%s(%s)=%s", key,
+					String param;
+					if (boot3Version.equals(schemaTarget)) {
+						if (JobParameter.ParameterType.LONG.equals(jobParametersMap.get(key).getType())) {
+							type = Long.class.getCanonicalName();
+						} else if (JobParameter.ParameterType.DATE.equals(jobParametersMap.get(key).getType())) {
+							type = Date.class.getCanonicalName();
+						} else if (JobParameter.ParameterType.DOUBLE.equals(jobParametersMap.get(key).getType())) {
+							type = Double.class.getCanonicalName();
+						} else if (JobParameter.ParameterType.STRING.equals(jobParametersMap.get(key).getType())) {
+							type = String.class.getCanonicalName();
+						} else  {
+							throw new IllegalArgumentException("Unable to convert " +
+								jobParametersMap.get(key).getType() + " to known type of JobParameters");
+						}
+						param = String.format("%s=%s,%s", key, jobParametersMap.get(key).getValue(), type);
+					} else {
+						param = String.format("%s(%s)=%s", key,
 							jobParametersMap.get(key).getType().toString().toLowerCase(),
-							jobParameters.getString(key)));
+							jobParameters.getString(key));
+					}
+					result.add(param);
 				}
 			}
 		}

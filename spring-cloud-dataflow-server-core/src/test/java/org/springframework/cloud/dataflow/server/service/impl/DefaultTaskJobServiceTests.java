@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
@@ -51,6 +53,7 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
@@ -72,7 +75,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -89,11 +92,20 @@ import static org.mockito.Mockito.when;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class DefaultTaskJobServiceTests {
 
+	private static final String SAVE_JOB_EXECUTION = "INSERT INTO BOOT3_BATCH_JOB_EXECUTION(JOB_EXECUTION_ID, " +
+		"JOB_INSTANCE_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, VERSION, CREATE_TIME, LAST_UPDATED) " +
+		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String SAVE_JOB_EXECUTION_PARAM = "INSERT INTO BOOT3_BATCH_JOB_EXECUTION_PARAMS (" +
+		"job_execution_id, parameter_name, parameter_type, parameter_value, identifying) " +
+		"VALUES (?, ?, ?, ?, ?)";
+
 	private final static String BASE_JOB_NAME = "myJob";
 
 	private final static String JOB_NAME_ORIG = BASE_JOB_NAME + "_ORIG";
 
 	private static long jobInstanceCount = 0;
+
+	private static long boot3JobInstanceCount = 0;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -109,6 +121,8 @@ public class DefaultTaskJobServiceTests {
 
 	@Autowired
 	DataSource dataSource;
+
+	JdbcTemplate jdbcTemplate;
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
@@ -139,18 +153,24 @@ public class DefaultTaskJobServiceTests {
 		jobParameterMap.put("identifying.param", new JobParameter("testparam"));
 		this.jobParameters = new JobParameters(jobParameterMap);
 
-		JdbcTemplate template = new JdbcTemplate(this.dataSource);
-		template.execute("DELETE FROM TASK_EXECUTION_PARAMS");
-		template.execute("DELETE FROM TASK_TASK_BATCH");
-		template.execute("DELETE FROM TASK_EXECUTION_METADATA");
-		template.execute("DELETE FROM TASK_EXECUTION;");
-		template.execute("ALTER SEQUENCE TASK_EXECUTION_METADATA_SEQ RESTART WITH 50");
-		template.execute("ALTER SEQUENCE TASK_SEQ RESTART WITH 1");
+		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+		resetTaskTables("TASK_");
 		initializeSuccessfulRegistry(this.appRegistry);
-		template.execute("INSERT INTO TASK_EXECUTION (TASK_EXECUTION_ID, TASK_NAME) VALUES (0, 'myTask_ORIG');");
+		resetTaskTables("BOOT3_TASK_");
+
 		reset(this.taskLauncher);
 		when(this.taskLauncher.launch(any())).thenReturn("1234");
 		clearLaunchers();
+	}
+
+	private void resetTaskTables(String prefix) {
+		this.jdbcTemplate.execute("DELETE FROM " + prefix  + "EXECUTION_PARAMS");
+		this.jdbcTemplate.execute("DELETE FROM " + prefix  + "TASK_BATCH");
+		this.jdbcTemplate.execute("DELETE FROM " + prefix  + "EXECUTION_METADATA");
+		this.jdbcTemplate.execute("DELETE FROM " + prefix  + "EXECUTION;");
+		this.jdbcTemplate.execute("ALTER SEQUENCE " + prefix  + "EXECUTION_METADATA_SEQ RESTART WITH 50");
+		this.jdbcTemplate.execute("ALTER SEQUENCE " + prefix  + "SEQ RESTART WITH 1");
+		this.jdbcTemplate.execute("INSERT INTO " + prefix  + "EXECUTION (TASK_EXECUTION_ID, TASK_NAME) VALUES (0, 'myTask_ORIG');");
 	}
 
 	@Test
@@ -164,6 +184,20 @@ public class DefaultTaskJobServiceTests {
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
 
 		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
+	}
+
+	@Test
+	public void testRestartBoot3() throws Exception {
+		SchemaVersionTarget schemaVersionTarget = new SchemaVersionTarget("boot3", AppBootSchemaVersion.BOOT3,
+			"BOOT3_TASK_", "BOOT3_BATCH_", "H2");
+		createBaseLaunchers();
+		initializeJobs(true, schemaVersionTarget);
+		this.taskJobService.restartJobExecution(boot3JobInstanceCount,
+			SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT3).getName());
+		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(this.taskLauncher, times(1)).launch(argument.capture());
+		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
+		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param=testparm,java.lang.String"));
 	}
 
 	@Test
@@ -189,8 +223,14 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	private void initializeJobs(boolean insertTaskExecutionMetadata) {
-		this.taskDefinitionRepository.save(new TaskDefinition(JOB_NAME_ORIG + jobInstanceCount, "some-name"));
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("some-name", taskDefinitionReader);
+		initializeJobs(insertTaskExecutionMetadata,
+			new SchemaVersionTarget("boot2", AppBootSchemaVersion.BOOT2, "TASK_",
+				"BATCH_", "H2"));
+	}
+	private void initializeJobs(boolean insertTaskExecutionMetadata, SchemaVersionTarget schemaVersionTarget) {
+		String definitionName = (AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) ?
+			"some-name-boot3" : "some-name";
+		this.taskDefinitionRepository.save(new TaskDefinition(JOB_NAME_ORIG + jobInstanceCount, definitionName  ));
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		TaskExecutionDao taskExecutionDao = taskExecutionDaoContainer.get(schemaVersionTarget.getName());
@@ -200,9 +240,15 @@ public class DefaultTaskJobServiceTests {
 				taskExecutionDao,
 				JOB_NAME_ORIG + jobInstanceCount,
 				BatchStatus.FAILED,
-				insertTaskExecutionMetadata
+				insertTaskExecutionMetadata,
+				schemaVersionTarget
 		);
-		jobInstanceCount++;
+		if(AppBootSchemaVersion.BOOT2.equals(schemaVersionTarget.getSchemaVersion())) {
+			jobInstanceCount++;
+		}
+		else {
+			boot3JobInstanceCount++;
+		}
 
 	}
 
@@ -212,7 +258,8 @@ public class DefaultTaskJobServiceTests {
 			TaskExecutionDao taskExecutionDao,
 			String jobName,
 			BatchStatus status,
-			boolean insertTaskExecutionMetadata
+			boolean insertTaskExecutionMetadata,
+			SchemaVersionTarget schemaVersionTarget
 	) {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 
@@ -221,13 +268,28 @@ public class DefaultTaskJobServiceTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 		if (insertTaskExecutionMetadata) {
-			template.execute(String.format("INSERT INTO TASK_EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
+			template.execute(String.format("INSERT INTO " + schemaVersionTarget.getTaskPrefix() + "EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
-		jobExecution = jobRepository.createJobExecution(instance,
+		if(AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) {
+			jobExecution = new JobExecution(instance, 1L, this.jobParameters, "foo");
+			jobExecution.setCreateTime(new Date());
+			jobExecution.setVersion(1);
+			Object[] jobExecutionParameters = new Object[] { 1, 1, new Date(), new Date(),
+				BatchStatus.COMPLETED, ExitStatus.COMPLETED,
+				ExitStatus.COMPLETED.getExitDescription(), 1, new Date(), new Date() };
+			Object[] jobExecutionParmParameters = new Object[] { 1,  "identifying.param", "java.lang.String", "testparm", "Y"};
+			this.jdbcTemplate.update(SAVE_JOB_EXECUTION, jobExecutionParameters,
+				new int[] { Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
+					Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP });
+			this.jdbcTemplate.update(SAVE_JOB_EXECUTION_PARAM, jobExecutionParmParameters, new int[] { Types.BIGINT,
+					Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.CHAR});
+		} else {
+			jobExecution = jobRepository.createJobExecution(instance,
 				this.jobParameters, null);
-		StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
-		stepExecution.setId(null);
-		jobRepository.add(stepExecution);
+				StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
+				stepExecution.setId(null);
+				jobRepository.add(stepExecution);
+		}
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
@@ -248,8 +310,10 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	private static void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
-		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(
+		when(appRegistry.find(eq("some-name"), any(ApplicationType.class))).thenReturn(
 				new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
+		when(appRegistry.find(eq("some-name-boot3"), any(ApplicationType.class))).thenReturn(
+			new AppRegistration("some-name-boot3", ApplicationType.task, "", URI.create("https://helloworld"), URI.create("https://helloworld"), AppBootSchemaVersion.fromBootVersion("3")));
 		try {
 			when(appRegistry.getAppResource(any())).thenReturn(new FileUrlResource("src/test/resources/apps/foo-task"));
 		}

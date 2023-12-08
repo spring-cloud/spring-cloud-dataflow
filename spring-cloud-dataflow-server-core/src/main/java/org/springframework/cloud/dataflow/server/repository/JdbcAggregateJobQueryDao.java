@@ -567,6 +567,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 					value = new JobParameter((Date) typedValue, identifying);
 				} else if (typedValue instanceof Double) {
 					value = new JobParameter((Double) typedValue, identifying);
+				} else if (typedValue instanceof Long) {
+					value = new JobParameter((Long) typedValue, identifying);
 				} else if (typedValue instanceof Number) {
 					value = new JobParameter(((Number) typedValue).doubleValue(), identifying);
 				} else if (typedValue instanceof Instant) {
