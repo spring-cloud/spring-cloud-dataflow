@@ -80,6 +80,7 @@ public class DropColumnSqlCommands extends SqlCommand {
 			try(ResultSet resultSet = connection.getMetaData().getSchemas()) {
 				while (resultSet.next()) {
 					String name = resultSet.getString("SCHEMA_NAME");
+					// determine the actual name used in specific database metadata. 
 					if(name.equalsIgnoreCase(schemaName)) {
 						actualSchemaName = name;
 						break;
@@ -91,12 +92,14 @@ public class DropColumnSqlCommands extends SqlCommand {
 		try(ResultSet resultSet = connection.getMetaData().getTables(null, actualSchemaName, null, new String[] {"TABLE"})) {
 			while (resultSet.next()) {
 				String name = resultSet.getString("TABLE_NAME");
+				// determine the actual name used in specific database metadata.
 				if(name.equalsIgnoreCase(tableName)) {
 					actualTableName = name;
 					break;
 				}
 			}
 		}
+		// actual names need to be same case as reported by meta data query for some databases.
 		try (ResultSet resultSet = connection.getMetaData().getColumns(null, actualSchemaName, actualTableName, null)) {
 			while (resultSet.next()) {
 				String foundColumnName = resultSet.getString("COLUMN_NAME");
