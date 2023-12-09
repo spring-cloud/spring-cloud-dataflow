@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.ext.ScriptUtils;
 import org.testcontainers.jdbc.JdbcDatabaseDelegate;
@@ -46,10 +47,13 @@ class AbstractDaoTests {
 		return this.jdbcTemplate;
 	}
 
+	protected  JdbcDatabaseContainer dbContainer;
+
 	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName) throws Exception {
 		this.dataSource = createDataSourceForContainer(dbContainer);
 		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
 		createDataFlowSchema(dbContainer, schemaName);
+		this.dbContainer = dbContainer;
 	}
 
 	protected DataSource createDataSourceForContainer(JdbcDatabaseContainer dbContainer) {
@@ -68,6 +72,10 @@ class AbstractDaoTests {
 			if (str.contains("dataflow"))
 				ScriptUtils.runInitScript(containerDelegate, "schemas/" + schemaName + "/" + str);
 		});
+	}
+
+	protected DatabaseType determineDatabaseType(DatabaseType databaseType) {
+		return (databaseType != DatabaseType.MARIADB) ? databaseType: DatabaseType.MYSQL;
 	}
 
 	private List<String> getResourceFiles(String path) throws IOException {

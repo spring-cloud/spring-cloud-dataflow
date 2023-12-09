@@ -33,10 +33,13 @@ public class JobServiceContainer {
 			SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
 			factoryBean.setDataSource(dataSource);
 			factoryBean.setTransactionManager(platformTransactionManager);
+			factoryBean.setJobServiceContainer(this);
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
 			factoryBean.setJobExplorer(jobExplorerContainer.get(target.getName()));
 			factoryBean.setJobRepository(jobRepositoryContainer.get(target.getName()));
 			factoryBean.setTablePrefix(target.getBatchPrefix());
+			factoryBean.setAppBootSchemaVersionTarget(target);
+			factoryBean.setSchemaService(schemaService);
 			try {
 				factoryBean.afterPropertiesSet();
 				container.put(target.getName(), factoryBean.getObject());

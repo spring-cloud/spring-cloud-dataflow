@@ -46,6 +46,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.step.NoSuchStepException;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -83,17 +85,24 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private JobOperator jsrJobOperator;
 
+	private final AggregateJobQueryDao aggregateJobQueryDao;
+
 	private int shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
+
+	private final SchemaVersionTarget schemaVersionTarget;
 
 	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
 							SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository,
-							ExecutionContextDao executionContextDao, JobOperator jsrJobOperator) {
+							ExecutionContextDao executionContextDao, JobOperator jsrJobOperator, AggregateJobQueryDao aggregateJobQueryDao,
+							SchemaVersionTarget schemaVersionTarget) {
 		super();
 		this.jobInstanceDao = jobInstanceDao;
 		this.jobExecutionDao = jobExecutionDao;
 		this.stepExecutionDao = stepExecutionDao;
 		this.jobRepository = jobRepository;
 		this.executionContextDao = executionContextDao;
+		this.aggregateJobQueryDao = aggregateJobQueryDao;
+		this.schemaVersionTarget = schemaVersionTarget;
 
 		if (jsrJobOperator == null) {
 			logger.warn("No JobOperator compatible with JSR-352 was provided.");
@@ -336,17 +345,13 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution getJobExecution(Long jobExecutionId) throws NoSuchJobExecutionException {
-		JobExecution jobExecution = jobExecutionDao.getJobExecution(jobExecutionId);
-		if (jobExecution == null) {
-			throw new NoSuchJobExecutionException("There is no JobExecution with id=" + jobExecutionId);
-		}
-		jobExecution.setJobInstance(Objects.requireNonNull(jobInstanceDao.getJobInstance(jobExecution)));
+		JobExecution jobExecution =  this.aggregateJobQueryDao.getJobExecution(jobExecutionId, this.schemaVersionTarget.getName()).getJobExecution();
+		jobExecution.setJobInstance(Objects.requireNonNull(this.jobInstanceDao.getJobInstance(jobExecution)));
 		try {
-			jobExecution.setExecutionContext(executionContextDao.getExecutionContext(jobExecution));
+			jobExecution.setExecutionContext(this.executionContextDao.getExecutionContext(jobExecution));
 		} catch (Exception e) {
-			logger.info("Cannot load execution context for job execution: " + jobExecution);
+			this.logger.info("Cannot load execution context for job execution: " + jobExecution);
 		}
-		stepExecutionDao.addStepExecutions(jobExecution);
 		return jobExecution;
 	}
 
@@ -412,10 +417,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobInstance getJobInstance(long jobInstanceId) throws NoSuchJobInstanceException {
-		JobInstance jobInstance = jobInstanceDao.getJobInstance(jobInstanceId);
-		if (jobInstance == null) {
-			throw new NoSuchJobInstanceException("JobInstance with id=" + jobInstanceId + " does not exist");
-		}
+		JobInstance jobInstance = this.aggregateJobQueryDao.getJobInstance(jobInstanceId, this.schemaVersionTarget.getName());
 		return jobInstance;
 	}
 
@@ -545,5 +547,4 @@ public class SimpleJobService implements JobService, DisposableBean {
 		}
 
 	}
-
 }

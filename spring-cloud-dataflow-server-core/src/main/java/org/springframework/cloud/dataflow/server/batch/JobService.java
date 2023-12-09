@@ -63,6 +63,7 @@ public interface JobService {
 	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
 	 * @throws JobParametersInvalidException thrown if job parameters are invalid
 	 */
+	@Deprecated
 	JobExecution launch(String jobName, JobParameters params) throws NoSuchJobException,
 			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
 			JobParametersInvalidException;
@@ -75,6 +76,7 @@ public interface JobService {
 	 * 
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+	@Deprecated
 	JobParameters getLastJobParameters(String jobName) throws NoSuchJobException;
 
 	/**
@@ -90,6 +92,7 @@ public interface JobService {
 	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
 	 * @throws JobParametersInvalidException thrown if job parameters are invalid
 	 */
+	@Deprecated
 	JobExecution restart(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException,
 			JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException;
 
@@ -108,6 +111,7 @@ public interface JobService {
 	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
 	 * @throws JobParametersInvalidException thrown if job parameters are invalid
 	 */
+	@Deprecated
 	JobExecution restart(Long jobExecutionId, JobParameters params)
 			throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException,
 			JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException;
@@ -138,6 +142,7 @@ public interface JobService {
 	 * @throws JobExecutionAlreadyRunningException thrown if the job is running (it should be
 	 *     stopped first)
 	 */
+	@Deprecated
 	JobExecution abandon(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException;
 
 	/**
@@ -149,6 +154,7 @@ public interface JobService {
 	 * @param count the maximum number of job names to return
 	 * @return a collection of job names
 	 */
+	@Deprecated
 	Collection<String> listJobs(int start, int count);
 
 	/**
@@ -156,6 +162,7 @@ public interface JobService {
 	 * 
 	 * @return the total number of jobs
 	 */
+	@Deprecated
 	int countJobs();
 
 	/**
@@ -177,6 +184,8 @@ public interface JobService {
 	 * @return a collection of {@link JobInstance job instances}
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+
+	@Deprecated
 	Collection<JobInstance> listJobInstances(String jobName, int start, int count) throws NoSuchJobException;
 
 	/**
@@ -187,6 +196,7 @@ public interface JobService {
 	 * @return the number of job instances available
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+	@Deprecated
 	int countJobInstances(String jobName) throws NoSuchJobException;
 
 	/**
@@ -199,6 +209,7 @@ public interface JobService {
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
 			throws NoSuchJobException;
 
@@ -210,6 +221,7 @@ public interface JobService {
 	 * @return the number of executions
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+	@Deprecated
 	int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException;
 
 	/**
@@ -222,6 +234,7 @@ public interface JobService {
 	 * @return all the job executions
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
+	@Deprecated
 	Collection<JobExecution> getJobExecutionsForJobInstance(String jobName, Long jobInstanceId)
 			throws NoSuchJobException;
 
@@ -233,6 +246,7 @@ public interface JobService {
 	 * @param count the maximum number of executions
 	 * @return a collection of {@link JobExecution}
 	 */
+	@Deprecated
 	Collection<JobExecution> listJobExecutions(int start, int count);
 
 	/**
@@ -243,6 +257,7 @@ public interface JobService {
 	 * @param count the maximum number of executions
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
+	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count);
 
 	/**
@@ -251,6 +266,7 @@ public interface JobService {
 	 * 
 	 * @return the number of job executions in the job repository
 	 */
+	@Deprecated
 	int countJobExecutions();
 
 	/**
@@ -271,6 +287,7 @@ public interface JobService {
 	 * 
 	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
 	 */
+	@Deprecated
 	Collection<StepExecution> getStepExecutions(Long jobExecutionId) throws NoSuchJobExecutionException;
 	Collection<StepExecution> getStepExecutions(JobExecution jobExecution) throws NoSuchJobExecutionException;
 	void addStepExecutions(JobExecution jobExecution);
@@ -305,6 +322,7 @@ public interface JobService {
 	 *
 	 * @return the number of executions.
 	 */
+	@Deprecated
 	int countStepExecutionsForJobExecution(long jobExecutionId);
 
 	/**
@@ -327,6 +345,7 @@ public interface JobService {
 	 * 
 	 * @return the number of executions affected
 	 */
+	@Deprecated
 	int stopAll();
 
 	/**
@@ -337,6 +356,7 @@ public interface JobService {
 	 * @return {@link Collection} of step names.
 	 * @throws NoSuchJobException thrown if the job name cannot be located
 	 */
+	@Deprecated
 	Collection<String> getStepNamesForJob(String jobName) throws NoSuchJobException;
 
 	/**
@@ -363,6 +383,7 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
+	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(Date fromDate,
 			Date toDate, int start, int count);
 
@@ -375,6 +396,7 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
+	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, int start, int count);
 
 	/**
@@ -386,5 +408,6 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
+	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, int start, int count);
 }

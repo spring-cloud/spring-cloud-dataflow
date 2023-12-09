@@ -41,6 +41,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.item.database.Order;
@@ -128,6 +129,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" from AGGREGATE_JOB_EXECUTION E" +
 			" join AGGREGATE_JOB_INSTANCE I ON E.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID AND E.SCHEMA_TARGET = I.SCHEMA_TARGET" +
 			" where and E.END_TIME is NULL";
+
+	private static final String GET_JOB_INSTANCE_BY_ID = "SELECT I.JOB_INSTANCE_ID, I.VERSION, I.JOB_NAME, I.JOB_KEY" +
+		" FROM AGGREGATE_JOB_INSTANCE I" +
+		" WHERE I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
 
 	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
 
@@ -282,6 +287,17 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			);
 		}
 		return jobInstanceExecution;
+	}
+
+	@Override
+	public JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException {
+		List<JobInstance> instances = jdbcTemplate.query(GET_JOB_INSTANCE_BY_ID, new JobInstanceExtractor(), id, schemaTarget);
+		if (ObjectUtils.isEmpty(instances)) {
+			throw new NoSuchJobInstanceException(String.format("JobInstance with id=%d does not exist", id));
+		} else if (instances.size() > 1) {
+			throw new NoSuchJobInstanceException(String.format("More than one Job Instance exists for ID %d ", id));
+		}
+		return instances.get(0);
 	}
 
 	@Override
@@ -664,6 +680,18 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				startDate,
 				endDate
 		);
+	}
+	private class JobInstanceExtractor implements ResultSetExtractor<List<JobInstance>> {
+
+		@Override
+		public List<JobInstance> extractData(ResultSet rs) throws SQLException,
+			DataAccessException {
+			List<JobInstance> jobInstances = new ArrayList();
+			while (rs.next()) {
+				jobInstances.add( new JobInstance(rs.getLong("JOB_INSTANCE_ID"), rs.getString("JOB_NAME")));
+			}
+			return jobInstances;
+		}
 	}
 
 	private class JobInstanceExecutionsExtractor implements ResultSetExtractor<List<JobInstanceExecutions>> {

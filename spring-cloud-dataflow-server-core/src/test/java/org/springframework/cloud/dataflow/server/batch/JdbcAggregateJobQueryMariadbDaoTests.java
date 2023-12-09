@@ -24,8 +24,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 
+
 @Testcontainers
-class JdbcJobSearchableExecutionMariadbDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
+public class JdbcAggregateJobQueryMariadbDaoTests extends AbstractJdbcAggregateJobQueryDaoTests{
 
 	@Container
 	private static final JdbcDatabaseContainer dbContainer = new MariaDBContainer("mariadb:10.9.3");

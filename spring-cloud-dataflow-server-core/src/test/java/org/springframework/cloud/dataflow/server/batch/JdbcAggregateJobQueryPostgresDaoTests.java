@@ -18,20 +18,21 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 
+
 @Testcontainers
-class JdbcJobSearchableExecutionMariadbDaoTests extends AbstractJdbcJobSearchableExecutionDaoTests {
+public class JdbcAggregateJobQueryPostgresDaoTests extends AbstractJdbcAggregateJobQueryDaoTests{
 
 	@Container
-	private static final JdbcDatabaseContainer dbContainer = new MariaDBContainer("mariadb:10.9.3");
+	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11.1");
 
 	@BeforeEach
 	void prepareForTest() throws Exception {
-		super.prepareForTest(dbContainer, "mariadb", determineDatabaseType(DatabaseType.MARIADB));
+		super.prepareForTest(dbContainer, "postgresql", DatabaseType.POSTGRES);
 	}
 }
