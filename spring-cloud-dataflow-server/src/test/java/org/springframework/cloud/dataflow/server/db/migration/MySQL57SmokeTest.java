@@ -24,9 +24,15 @@ import org.testcontainers.containers.MySQLContainer;
  * @author Corneil du Plessis
  */
 public class MySQL57SmokeTest extends AbstractSmokeTest {
+
 	@BeforeAll
 	static void startContainer() {
 		container = new MySQLContainer<>("mysql:5.7");
 		container.start();
+	}
+
+	@Override
+	protected boolean supportsRowNumberFunction() {
+		return false;
 	}
 }

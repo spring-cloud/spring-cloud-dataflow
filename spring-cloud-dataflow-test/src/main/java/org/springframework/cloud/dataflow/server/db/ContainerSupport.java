@@ -13,26 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MariaDBContainer;
+package org.springframework.cloud.dataflow.server.db;
 
-import org.springframework.test.context.TestPropertySource;
+import java.util.Locale;
 
-/**
- * Basic database schema and JPA tests for MariaDB 10.4 or later.
- *
- * @author Corneil du Plessis
- */
-@TestPropertySource(properties = {
-		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
-})
-public class MariaDBSmokeTest extends AbstractSmokeTest {
+public final class ContainerSupport {
 
-	@BeforeAll
-	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.6");
-		container.start();
+	private ContainerSupport() {
+
+	}
+
+	public static boolean runningOnMacArm64() {
+		String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+		String osArchitecture = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH);
+		return osName.contains("mac") && osArchitecture.equals("aarch64");
 	}
 }

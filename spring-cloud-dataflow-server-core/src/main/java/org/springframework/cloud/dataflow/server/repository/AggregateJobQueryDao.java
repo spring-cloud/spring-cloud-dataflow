@@ -33,6 +33,7 @@ import org.springframework.data.domain.Pageable;
  * Provides for reading job execution data for Batch 4 and 5 schema versions.
  *
  * @author Corneil du Plessis
+ * @since 2.11.0
  */
 public interface AggregateJobQueryDao {
 	Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException;

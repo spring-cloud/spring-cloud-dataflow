@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.db.oracle;
 
-import java.util.Locale;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -24,6 +22,7 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
+import org.springframework.cloud.dataflow.server.db.ContainerSupport;
 import org.springframework.core.log.LogAccessor;
 
 /**
@@ -41,7 +40,7 @@ public interface OracleContainerSupport {
 	EnvironmentVariables ENV_VARS = new EnvironmentVariables();
 
 	static OracleContainer startContainer() {
-		if (runningOnMacArm64()) {
+		if (ContainerSupport.runningOnMacArm64()) {
 			String wiki = "https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Oracle-on-Mac-ARM64";
 			LOG.warn(() -> "You are running on Mac ARM64. If this test fails, make sure Colima is running prior " +
 					"to test invocation. See " + wiki + " for details");
@@ -52,11 +51,5 @@ public interface OracleContainerSupport {
 				.withTag("18-slim-faststart"));
 		oracleContainer.start();
 		return oracleContainer;
-	}
-
-	static boolean runningOnMacArm64() {
-		String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-		String osArchitecture = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH);
-		return osName.contains("mac") && osArchitecture.equals("aarch64");
 	}
 }
