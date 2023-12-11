@@ -32,6 +32,7 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 
@@ -53,10 +54,13 @@ abstract class AbstractJdbcAggregateJobQueryDaoTests extends AbstractDaoTests {
 
 	private DatabaseType databaseType;
 
+	@Mock
+	private Environment environment;
+
 	protected void prepareForTest(JdbcDatabaseContainer dbContainer,  String schemaName, DatabaseType databaseType) throws Exception {
 		super.prepareForTest(dbContainer, schemaName);
 		this.jdbcAggregateJobQueryDao = new JdbcAggregateJobQueryDao(super.getDataSource(), new DefaultSchemaService(),
-			this.jobServiceContainer);
+			this.jobServiceContainer, this.environment);
 		jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
 		jdbcSearchableJobInstanceDao.setJdbcTemplate(super.getJdbcTemplate());
 		incrementerFactory = new MultiSchemaIncrementerFactory(super.getDataSource());

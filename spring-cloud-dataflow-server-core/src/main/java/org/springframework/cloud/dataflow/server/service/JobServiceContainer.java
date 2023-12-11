@@ -14,6 +14,7 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
+import org.springframework.core.env.Environment;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 
@@ -26,11 +27,12 @@ public class JobServiceContainer {
 			PlatformTransactionManager platformTransactionManager,
 			SchemaService schemaService,
 			JobRepositoryContainer jobRepositoryContainer,
-			JobExplorerContainer jobExplorerContainer
-	) {
+			JobExplorerContainer jobExplorerContainer,
+			Environment environment) {
 
 		for(SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
+			factoryBean.setEnvironment(environment);
 			factoryBean.setDataSource(dataSource);
 			factoryBean.setTransactionManager(platformTransactionManager);
 			factoryBean.setJobServiceContainer(this);

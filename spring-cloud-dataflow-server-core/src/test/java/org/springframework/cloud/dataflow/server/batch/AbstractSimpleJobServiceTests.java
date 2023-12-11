@@ -49,6 +49,7 @@ import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -241,6 +242,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		}
 		return StringUtils.replace(base, "%PREFIX%", tablePrefix);
 	}
+
 	protected static class SimpleJobTestConfiguration {
 
 		@Bean
@@ -271,11 +273,13 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 		@Bean
 		public JobServiceContainer jobServiceContainer(DataSource dataSource,
-										   PlatformTransactionManager platformTransactionManager,
-										   SchemaService schemaService,
-										   JobRepositoryContainer jobRepositoryContainer,
-										   JobExplorerContainer jobExplorerContainer) {
-			return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer, jobExplorerContainer);
+				PlatformTransactionManager platformTransactionManager,
+				SchemaService schemaService,
+				JobRepositoryContainer jobRepositoryContainer,
+				JobExplorerContainer jobExplorerContainer,
+				Environment environment) {
+			return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer,
+					jobExplorerContainer, environment);
 		}
 	}
 }

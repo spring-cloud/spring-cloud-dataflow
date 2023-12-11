@@ -55,6 +55,7 @@ import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -129,8 +130,11 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobServiceContainer jobServiceContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager, SchemaService schemaService, JobRepositoryContainer jobRepositoryContainer, JobExplorerContainer jobExplorerContainer) {
-		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer, jobExplorerContainer);
+	public JobServiceContainer jobServiceContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager,
+			SchemaService schemaService, JobRepositoryContainer jobRepositoryContainer,
+			JobExplorerContainer jobExplorerContainer, Environment environment) {
+		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer,
+				jobExplorerContainer, environment);
 	}
 
 	@Bean
@@ -151,17 +155,13 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService, JobServiceContainer jobServiceContainer) throws Exception {
-		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobServiceContainer);
+	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService,
+			JobServiceContainer jobServiceContainer, Environment environment) throws Exception {
+		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobServiceContainer, environment);
 	}
 
 	@Bean
 	public TaskBatchDaoContainer taskBatchDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		return new TaskBatchDaoContainer(dataSource, schemaService);
-	}
-
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.server.config.AggregateDataFlowContainerConfiguration");
 	}
 }

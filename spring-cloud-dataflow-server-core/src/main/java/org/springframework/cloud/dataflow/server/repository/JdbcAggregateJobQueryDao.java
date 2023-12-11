@@ -26,8 +26,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -43,10 +45,11 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
-import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
@@ -59,6 +62,7 @@ import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.data.convert.Jsr310Converters;
@@ -78,11 +82,12 @@ import org.springframework.util.StringUtils;
  * but contains Spring Cloud Data Flow specific operations. This functionality might
  * be migrated to Spring Batch itself eventually.
  *
- * @author Gunnar Hillert
  * @author Corneil du Plessis
+ * @since 2.11.0
  */
 public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
-	private final static Logger logger = LoggerFactory.getLogger(JdbcAggregateJobQueryDao.class);
+
+	private final static Logger LOG = LoggerFactory.getLogger(JdbcAggregateJobQueryDao.class);
 
 	private static final String GET_COUNT = "SELECT COUNT(1) from AGGREGATE_JOB_EXECUTION";
 
@@ -124,12 +129,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private static final String FIELDS_WITH_STEP_COUNT = FIELDS +
 			", (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND S.SCHEMA_TARGET = E.SCHEMA_TARGET) as STEP_COUNT";
 
-
-	private static final String GET_RUNNING_EXECUTIONS = "SELECT " + FIELDS +
-			" from AGGREGATE_JOB_EXECUTION E" +
-			" join AGGREGATE_JOB_INSTANCE I ON E.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID AND E.SCHEMA_TARGET = I.SCHEMA_TARGET" +
-			" where and E.END_TIME is NULL";
-
 	private static final String GET_JOB_INSTANCE_BY_ID = "SELECT I.JOB_INSTANCE_ID, I.VERSION, I.JOB_NAME, I.JOB_KEY" +
 		" FROM AGGREGATE_JOB_INSTANCE I" +
 		" WHERE I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
@@ -146,7 +145,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private static final String TASK_EXECUTION_ID_FILTER =
 			"B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.SCHEMA_TARGET = E.SCHEMA_TARGET AND B.TASK_EXECUTION_ID = ? AND E.SCHEMA_TARGET = ?";
-
 
 	private static final String FROM_CLAUSE_TASK_EXEC_BATCH = "JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
 			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET";
@@ -176,9 +174,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME, E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE, E.CREATE_TIME as CREATE_TIME," +
 			" E.LAST_UPDATED as LAST_UPDATED, E.VERSION as VERSION, T.TASK_EXECUTION_ID as TASK_EXECUTION_ID";
 
-	private static final String FIND_JOBS_FIELDS_WITH_STEP_COUNT = FIND_JOBS_FIELDS +
-			", (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND S.SCHEMA_TARGET = E.SCHEMA_TARGET) as STEP_COUNT";
-
 	private static final String FIND_JOBS_FROM = "LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
 
@@ -186,15 +181,15 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private static final String FIND_BY_ID_SCHEMA = "E.JOB_EXECUTION_ID = ? AND E.SCHEMA_TARGET = ?";
 
-	private final PagingQueryProvider allExecutionsPagingQueryProvider;
+	private static final String ROW_NUMBER_OPTIMIZATION_ENABLED_PROPERTY = DataFlowPropertyKeys.PREFIX + "task.jdbc.row-number-optimization.enabled";
 
+	private final PagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private final PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
 
 	private final PagingQueryProvider byStatusPagingQueryProvider;
 
 	private final PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
-
 
 	private final PagingQueryProvider executionsByDateRangeWithStepCountPagingQueryProvider;
 
@@ -210,7 +205,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private final PagingQueryProvider byJobExecutionIdAndSchemaPagingQueryProvider;
 
-
 	private final DataSource dataSource;
 
 	private final JdbcTemplate jdbcTemplate;
@@ -221,32 +215,40 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private final ConfigurableConversionService conversionService = new DefaultConversionService();
 
-	private final Map<String, StepExecutionDao> stepExecutionDaoContainer = new HashMap<>();
+	private final boolean useRowNumberOptimization;
 
-	public JdbcAggregateJobQueryDao(DataSource dataSource, SchemaService schemaService, JobServiceContainer jobServiceContainer) throws Exception {
+	public JdbcAggregateJobQueryDao(
+			DataSource dataSource,
+			SchemaService schemaService,
+			JobServiceContainer jobServiceContainer,
+			Environment environment) throws Exception {
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.schemaService = schemaService;
 		this.jobServiceContainer = jobServiceContainer;
+		this.useRowNumberOptimization = determineUseRowNumberOptimization(environment);
 
 		conversionService.addConverter(new DateToStringConverter());
 		conversionService.addConverter(new StringToDateConverter());
 		Jsr310Converters.getConvertersToRegister().forEach(conversionService::addConverter);
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, null);
-
 		executionsByDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, DATE_RANGE_FILTER);
 		allExecutionsPagingQueryProviderNoStepCount = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, null);
 		byStatusPagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, STATUS_FILTER);
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_AND_STATUS_FILTER);
 		byJobNamePagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
-
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
 		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING));
 		byJobExecutionIdAndSchemaPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
+	}
 
+	private boolean determineUseRowNumberOptimization(Environment environment) {
+		boolean supportsRowNumberFunction = determineSupportsRowNumberFunction(this.dataSource);
+		boolean rowNumberOptimizationEnabled = environment.getProperty(ROW_NUMBER_OPTIMIZATION_ENABLED_PROPERTY , Boolean.class, Boolean.TRUE);
+		return supportsRowNumberFunction && rowNumberOptimizationEnabled;
 	}
 
 	@Override
@@ -262,7 +264,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	@Override
 	public JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId) {
-		logger.debug("getJobInstanceExecution:{}:{}:{}", jobName, instanceId, FIND_JOB_BY_NAME_INSTANCE_ID);
+		LOG.debug("getJobInstanceExecution:{}:{}:{}", jobName, instanceId, FIND_JOB_BY_NAME_INSTANCE_ID);
 		List<JobInstanceExecutions> executions = jdbcTemplate.query(FIND_JOB_BY_NAME_INSTANCE_ID, new JobInstanceExecutionsExtractor(true), jobName, instanceId);
 		if (executions == null || executions.isEmpty()) {
 			return null;
@@ -374,8 +376,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			throw new NoSuchJobExecutionException(String.format("Job id %s for schema target %s not found", jobExecutionId, schemaTarget));
 		}
 		if (jobExecutions.size() > 1) {
-			logger.debug("Too many job executions:{}", jobExecutions);
-			logger.warn("Expected only 1 job for {}: not {}", jobExecutionId, jobExecutions.size());
+			LOG.debug("Too many job executions:{}", jobExecutions);
+			LOG.warn("Expected only 1 job for {}: not {}", jobExecutionId, jobExecutions.size());
 		}
 
 		TaskJobExecution taskJobExecution = jobExecutions.get(0);
@@ -396,7 +398,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private int countJobExecutions() {
-		logger.debug("countJobExecutions:{}", GET_COUNT);
+		LOG.debug("countJobExecutions:{}", GET_COUNT);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
 		return count != null ? count : 0;
 	}
@@ -404,34 +406,34 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private int countJobExecutionsByDate(Date fromDate, Date toDate) {
 		Assert.notNull(fromDate, "fromDate must not be null");
 		Assert.notNull(toDate, "toDate must not be null");
-		logger.debug("countJobExecutionsByDate:{}:{}:{}", fromDate, toDate, GET_COUNT_BY_DATE);
+		LOG.debug("countJobExecutionsByDate:{}:{}:{}", fromDate, toDate, GET_COUNT_BY_DATE);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_DATE, Integer.class, fromDate, toDate);
 		return count != null ? count : 0;
 	}
 
 	private int countJobExecutions(String jobName) {
-		logger.debug("countJobExecutions:{}:{}", jobName, GET_COUNT_BY_JOB_NAME);
+		LOG.debug("countJobExecutions:{}:{}", jobName, GET_COUNT_BY_JOB_NAME);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_NAME, Integer.class, jobName);
 		return count != null ? count : 0;
 	}
 
 	private int countJobExecutions(BatchStatus status) {
-		logger.debug("countJobExecutions:{}:{}", status, GET_COUNT_BY_STATUS);
+		LOG.debug("countJobExecutions:{}:{}", status, GET_COUNT_BY_STATUS);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_STATUS, Integer.class, status.name());
 		return count != null ? count : 0;
 	}
 
 	private int countJobExecutions(String jobName, BatchStatus status) {
-		logger.debug("countJobExecutions:{}:{}", jobName, status);
+		LOG.debug("countJobExecutions:{}:{}", jobName, status);
 		Integer count;
 		if (StringUtils.hasText(jobName) && status != null) {
-			logger.debug("countJobExecutions:{}:{}:{}", jobName, status, GET_COUNT_BY_JOB_NAME_AND_STATUS);
+			LOG.debug("countJobExecutions:{}:{}:{}", jobName, status, GET_COUNT_BY_JOB_NAME_AND_STATUS);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_NAME_AND_STATUS, Integer.class, jobName, status.name());
 		} else if (status != null) {
-			logger.debug("countJobExecutions:{}:{}", status, GET_COUNT_BY_STATUS);
+			LOG.debug("countJobExecutions:{}:{}", status, GET_COUNT_BY_STATUS);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_STATUS, Integer.class, status.name());
 		} else if (StringUtils.hasText(jobName)) {
-			logger.debug("countJobExecutions:{}:{}", jobName, GET_COUNT_BY_JOB_NAME);
+			LOG.debug("countJobExecutions:{}:{}", jobName, GET_COUNT_BY_JOB_NAME);
 			count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_NAME, Integer.class, jobName);
 		} else {
 			count = jdbcTemplate.queryForObject(GET_COUNT, Integer.class);
@@ -443,7 +445,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		logger.debug("countJobExecutionsByInstanceId:{}:{}:{}", jobInstanceId, schemaTarget, GET_COUNT_BY_JOB_INSTANCE_ID);
+		LOG.debug("countJobExecutionsByInstanceId:{}:{}:{}", jobInstanceId, schemaTarget, GET_COUNT_BY_JOB_INSTANCE_ID);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_JOB_INSTANCE_ID, Integer.class, jobInstanceId, schemaTarget);
 		return count != null ? count : 0;
 	}
@@ -452,7 +454,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		logger.debug("countJobExecutionsByTaskExecutionId:{}:{}:{}", taskExecutionId, schemaTarget, GET_COUNT_BY_TASK_EXECUTION_ID);
+		LOG.debug("countJobExecutionsByTaskExecutionId:{}:{}:{}", taskExecutionId, schemaTarget, GET_COUNT_BY_TASK_EXECUTION_ID);
 		Integer count = jdbcTemplate.queryForObject(GET_COUNT_BY_TASK_EXECUTION_ID, Integer.class, taskExecutionId, schemaTarget);
 		return count != null ? count : 0;
 	}
@@ -541,7 +543,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 						value = new JobParameter(rs.getTimestamp("DATE_VAL"), identifying);
 						break;
 					default:
-						logger.error("Unknown type:{} for {}", type, keyName);
+						LOG.error("Unknown type:{} for {}", type, keyName);
 						return;
 				}
 				map.put(keyName, value);
@@ -591,23 +593,23 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private <T, P extends PagingQueryProvider, M extends RowMapper<T>> List<T> queryForProvider(P pagingQueryProvider, M mapper, int start, int count, Object... arguments) {
 		if (start <= 0) {
 			String sql = pagingQueryProvider.generateFirstPageQuery(count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryFirstPage:{}:{}:{}:{}", sql, start, count, Arrays.asList(arguments));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryFirstPage:{}:{}:{}:{}", sql, start, count, Arrays.asList(arguments));
 			}
 			return jdbcTemplate.query(sql, mapper, arguments);
 		} else {
 			try {
 				String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
-				if (logger.isDebugEnabled()) {
-					logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 				}
 				Long startValue;
 				startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
 				List<Object> args = new ArrayList<>(Arrays.asList(arguments));
 				args.add(startValue);
 				String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
-				if (logger.isDebugEnabled()) {
-					logger.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
 				}
 				return jdbcTemplate.query(sql, mapper, args.toArray());
 			} catch (IncorrectResultSizeDataAccessException x) {
@@ -619,21 +621,21 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private <T, P extends PagingQueryProvider, R extends ResultSetExtractor<List<T>>> List<T> queryForProvider(P pagingQueryProvider, R extractor, int start, int count, Object... arguments) {
 		if (start <= 0) {
 			String sql = pagingQueryProvider.generateFirstPageQuery(count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryFirstPage:{}:{}:{}:{}", sql, start, count, Arrays.asList(arguments));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryFirstPage:{}:{}:{}:{}", sql, start, count, Arrays.asList(arguments));
 			}
 			return jdbcTemplate.query(sql, extractor, arguments);
 		} else {
 			String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 			}
 			Long startValue = jdbcTemplate.queryForObject(sqlJump, Long.class, arguments);
 			List<Object> args = new ArrayList<>(Arrays.asList(arguments));
 			args.add(startValue);
 			String sql = pagingQueryProvider.generateRemainingPagesQuery(count);
-			if (logger.isDebugEnabled()) {
-				logger.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("queryRemaining:{}:{}:{}:{}", sql, start, count, args);
 			}
 			return jdbcTemplate.query(sql, extractor, args.toArray());
 		}
@@ -805,13 +807,27 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		if (fields == null) {
 			fields = FIELDS;
 		}
+		if (fields.contains("E.JOB_EXECUTION_ID") && this.useRowNumberOptimization) {
+			Order order = sortKeys.get("E.JOB_EXECUTION_ID");
+			String orderString = Optional.ofNullable(order).map(orderKey -> orderKey == Order.DESCENDING ? "DESC" : "ASC").orElse("DESC");
+			fields += ", ROW_NUMBER() OVER (PARTITION BY E.JOB_EXECUTION_ID ORDER BY E.JOB_EXECUTION_ID " + orderString + ") as RN";
+		}
 		factory.setSelectClause(fields);
 		if (sortKeys.isEmpty()) {
 			sortKeys = Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING);
 		}
 		factory.setSortKeys(sortKeys);
 		factory.setWhereClause(whereClause);
-
 		return factory.getObject();
+	}
+
+	private boolean determineSupportsRowNumberFunction(DataSource dataSource) {
+		try {
+			return DatabaseType.supportsRowNumberFunction(dataSource);
+		}
+		catch (Exception e) {
+			LOG.warn("Unable to determine if DB supports ROW_NUMBER() function (reason: " + e.getMessage() + ")", e);
+		}
+		return false;
 	}
 }

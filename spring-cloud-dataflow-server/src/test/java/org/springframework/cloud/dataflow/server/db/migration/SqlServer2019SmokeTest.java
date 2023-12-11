@@ -19,6 +19,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import org.springframework.cloud.dataflow.server.db.ContainerSupport;
+
 
 /**
  * Basic database schema and JPA tests for MS SQL Server.
@@ -26,8 +28,12 @@ import org.testcontainers.utility.DockerImageName;
  * @author Corneil du Plessis
  */
 public class SqlServer2019SmokeTest extends AbstractSmokeTest {
+
 	@BeforeAll
 	static void startContainer() {
+		if (ContainerSupport.runningOnMacArm64()) {
+			throw new RuntimeException("Unable to run SQLServer tests on Mac OS");
+		}
 		container = new MSSQLServerContainer<>(
 			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
 		).acceptLicense();

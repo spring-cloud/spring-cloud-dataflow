@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.core.database.support;
 
+import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,6 +99,24 @@ public enum DatabaseType {
 		else {
 			return dbNameMap.get(productName);
 		}
+	}
+
+	/**
+	 * Determines if the Database that the datasource refers to supports the {@code ROW_NUMBER()} SQL function.
+	 * @param dataSource the datasource pointing to the DB in question
+	 * @return whether the database supports the SQL {@code ROW_NUMBER()} function
+	 * @throws MetaDataAccessException if error occurs
+	 */
+	public static boolean supportsRowNumberFunction(DataSource dataSource) throws MetaDataAccessException {
+		DatabaseType databaseType = DatabaseType.fromMetaData(dataSource);
+		if (databaseType == DatabaseType.H2 || databaseType == DatabaseType.HSQL) {
+			return false;
+		}
+		if (databaseType != DatabaseType.MYSQL) {
+			return true;
+		}
+		int majorVersion = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseMetaData::getDatabaseMajorVersion);
+		return (majorVersion >= 8);
 	}
 
 	private String getProductName() {

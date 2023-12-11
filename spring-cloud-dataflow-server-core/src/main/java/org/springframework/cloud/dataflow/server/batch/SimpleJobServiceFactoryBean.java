@@ -45,6 +45,8 @@ import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
@@ -60,7 +62,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  *
  */
-public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, InitializingBean {
+public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, InitializingBean, EnvironmentAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimpleJobServiceFactoryBean.class);
 
@@ -93,6 +95,8 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	private SchemaService schemaService;
 
 	private SchemaVersionTarget schemaVersionTarget;
+
+	private Environment environment;
 
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
@@ -130,6 +134,11 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 */
 	public void setMaxVarCharLength(int maxVarCharLength) {
 		this.maxVarCharLength = maxVarCharLength;
+	}
+
+	@Override
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
 	}
 
 	/**
@@ -301,10 +310,11 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 			return Types.CLOB;
 		}
 	}
+
 	protected AggregateJobQueryDao createAggregateJobQueryDao() throws Exception {
-		AggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(this.dataSource, this.schemaService, this.jobServiceContainer);
-		return dao;
+		return new JdbcAggregateJobQueryDao(this.dataSource, this.schemaService, this.jobServiceContainer, this.environment);
 	}
+
 	/**
 	 * Create a {@link SimpleJobService} from the configuration provided.
 	 *
