@@ -18,23 +18,20 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
+import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
-import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
-
+import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,13 +51,12 @@ abstract class AbstractJdbcAggregateJobQueryDaoTests extends AbstractDaoTests {
 
 	private DatabaseType databaseType;
 
-	@Mock
-	private Environment environment;
-
 	protected void prepareForTest(JdbcDatabaseContainer dbContainer,  String schemaName, DatabaseType databaseType) throws Exception {
 		super.prepareForTest(dbContainer, schemaName);
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("spring.cloud.dataflow.task.jdbc.row-number-optimization.enabled", "true");
 		this.jdbcAggregateJobQueryDao = new JdbcAggregateJobQueryDao(super.getDataSource(), new DefaultSchemaService(),
-			this.jobServiceContainer, this.environment);
+			this.jobServiceContainer, environment);
 		jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
 		jdbcSearchableJobInstanceDao.setJdbcTemplate(super.getJdbcTemplate());
 		incrementerFactory = new MultiSchemaIncrementerFactory(super.getDataSource());
