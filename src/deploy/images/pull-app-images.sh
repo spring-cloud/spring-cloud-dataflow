@@ -20,7 +20,7 @@ if [ "$1" != "" ]; then
     STREAM_APPS_VERSION=$1
 fi
 if [ "$STREAM_APPS_VERSION" = "" ]; then
-    STREAM_APPS_VERSION=4.0.0-SNAPSHOT
+    STREAM_APPS_VERSION=4.0.0
 fi
 if [[ "$STREAM_APPS_VERSION" = "202*" ]]; then
     echo "The version expected is not the release train version $STREAM_APPS_VERSION but the apps version."

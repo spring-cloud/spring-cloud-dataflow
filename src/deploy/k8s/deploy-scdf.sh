@@ -14,7 +14,7 @@ if [ ! -d "$K8S" ]; then
 fi
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.6.0-SNAPSHOT
+  DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
   export DATAFLOW_VERSION=2.11.2-SNAPSHOT
