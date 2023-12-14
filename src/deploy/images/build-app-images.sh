@@ -4,7 +4,7 @@ if [ -z "$BASH_VERSION" ]; then
     exit 1
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-ROOTDIR=$(realpath "$SCDIR/../..")
+ROOTDIR=$(realpath "$SCDIR/../../..")
 set -e
 pushd "$ROOTDIR/../spring-cloud-dataflow-samples/restaurant-stream-apps"  > /dev/null
 pushd scdf-app-kitchen  > /dev/null
