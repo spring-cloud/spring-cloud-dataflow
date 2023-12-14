@@ -45,7 +45,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
  * 
  * @author Dave Syer
  * @author Glenn Renfro
- * 
+ * @author Corneil du Plessis
  */
 public interface JobService {
 
@@ -287,7 +287,6 @@ public interface JobService {
 	 * 
 	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
 	 */
-	@Deprecated
 	Collection<StepExecution> getStepExecutions(Long jobExecutionId) throws NoSuchJobExecutionException;
 	Collection<StepExecution> getStepExecutions(JobExecution jobExecution) throws NoSuchJobExecutionException;
 	void addStepExecutions(JobExecution jobExecution);

@@ -21,7 +21,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
-import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -33,18 +32,14 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/jobs/executions/{jobExecutionId}/steps")
@@ -92,12 +87,8 @@ public class JobStepExecutionProgressController {
 			if (!StringUtils.hasText(schemaTarget)) {
 				schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 			}
-			TaskJobExecution taskJobExecution = taskJobService.getJobExecution(jobExecutionId, schemaTarget);
-			StepExecution stepExecution = taskJobExecution.getJobExecution().getStepExecutions()
-					.stream()
-					.filter(s -> s.getId().equals(stepExecutionId))
-					.findFirst()
-					.orElseThrow(() -> new NoSuchStepExecutionException("Step execution " + stepExecutionId + " for Job " + jobExecutionId + " not found"));
+			JobService jobService = jobServiceContainer.get(schemaTarget);
+			StepExecution stepExecution = jobService.getStepExecution(jobExecutionId, stepExecutionId);
 			String stepName = stepExecution.getStepName();
 			if (stepName.contains(":partition")) {
 				// assume we want to compare all partitions

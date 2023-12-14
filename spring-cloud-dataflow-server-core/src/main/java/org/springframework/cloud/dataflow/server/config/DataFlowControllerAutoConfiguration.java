@@ -158,6 +158,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Andy Clement
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("all")
 @Configuration
@@ -341,8 +342,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public JobStepExecutionController jobStepExecutionController(TaskJobService taskJobService) {
-			return new JobStepExecutionController(taskJobService);
+		public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
+			return new JobStepExecutionController(jobServiceContainer);
 		}
 
 		@Bean
