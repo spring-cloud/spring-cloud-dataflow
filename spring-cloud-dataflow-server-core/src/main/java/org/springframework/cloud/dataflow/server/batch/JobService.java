@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2010 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
  * 
  * @author Dave Syer
  * @author Glenn Renfro
- * 
+ * @author Corneil du Plessis
  */
 public interface JobService {
 
@@ -287,7 +287,6 @@ public interface JobService {
 	 * 
 	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
 	 */
-	@Deprecated
 	Collection<StepExecution> getStepExecutions(Long jobExecutionId) throws NoSuchJobExecutionException;
 	Collection<StepExecution> getStepExecutions(JobExecution jobExecution) throws NoSuchJobExecutionException;
 	void addStepExecutions(JobExecution jobExecution);

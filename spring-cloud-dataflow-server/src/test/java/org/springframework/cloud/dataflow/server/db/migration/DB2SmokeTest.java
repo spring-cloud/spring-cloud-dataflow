@@ -27,7 +27,7 @@ import org.testcontainers.containers.Db2Container;
 public class DB2SmokeTest extends AbstractSmokeTest {
 	@BeforeAll
 	static void startContainer() {
-		container = new Db2Container().acceptLicense();
+		container = new Db2Container("ibmcom/db2:11.5.0.0a").acceptLicense();
 		container.start();
 	}
 }

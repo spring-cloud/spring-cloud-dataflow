@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
-import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -45,6 +44,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @RestController
 @RequestMapping("/jobs/executions/{jobExecutionId}/steps")
@@ -92,12 +92,8 @@ public class JobStepExecutionProgressController {
 			if (!StringUtils.hasText(schemaTarget)) {
 				schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 			}
-			TaskJobExecution taskJobExecution = taskJobService.getJobExecution(jobExecutionId, schemaTarget);
-			StepExecution stepExecution = taskJobExecution.getJobExecution().getStepExecutions()
-					.stream()
-					.filter(s -> s.getId().equals(stepExecutionId))
-					.findFirst()
-					.orElseThrow(() -> new NoSuchStepExecutionException("Step execution " + stepExecutionId + " for Job " + jobExecutionId + " not found"));
+			JobService jobService = jobServiceContainer.get(schemaTarget);
+			StepExecution stepExecution = jobService.getStepExecution(jobExecutionId, stepExecutionId);
 			String stepName = stepExecution.getStepName();
 			if (stepName.contains(":partition")) {
 				// assume we want to compare all partitions
