@@ -79,6 +79,7 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  */
 public class DefaultSchedulerService implements SchedulerService {
+
 	private static final Logger logger = LoggerFactory.getLogger(DefaultSchedulerService.class);
 
 	private final static int MAX_SCHEDULE_NAME_LEN = 52;
@@ -362,9 +363,9 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	private static void addProperty(String property, String value, Map<String, String> properties) {
 		if (properties.containsKey(property)) {
-			logger.info("exists:{}={}", property, properties.get(property));
+			logger.debug("exists:{}={}", property, properties.get(property));
 		} else {
-			logger.info("adding:{}={}", property, value);
+			logger.debug("adding:{}={}", property, value);
 			properties.put(property, value);
 		}
 	}
@@ -390,9 +391,9 @@ public class DefaultSchedulerService implements SchedulerService {
 		if(commandLineArgs.stream().noneMatch(item -> item.startsWith(argPrefix))) {
 			String arg = argPrefix + value;
 			commandLineArgs.add(arg);
-			logger.info("adding:{}", arg);
+			logger.debug("adding:{}", arg);
 		} else {
-			logger.info("exists:{}", argPrefix);
+			logger.debug("exists:{}", argPrefix);
 		}
 	}
 
