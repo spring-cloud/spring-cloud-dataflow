@@ -127,7 +127,7 @@ public class TaskExecutionController {
 
 	private static final List<String> allowedSorts = Arrays.asList("TASK_EXECUTION_ID", "START_TIME", "END_TIME",
 			"TASK_NAME", "EXIT_CODE", "EXIT_MESSAGE", "ERROR_MESSAGE", "LAST_UPDATED", "EXTERNAL_EXECUTION_ID",
-			"PARENT_EXECUTION_ID");
+			"PARENT_EXECUTION_ID", "SCHEMA_TARGET");
 
 	/**
 	 * Creates a {@code TaskExecutionController} that retrieves Task Execution information
