@@ -8,7 +8,7 @@ SCDIR=$(realpath $SCDIR)
 if [ "$1" == "" ]; then
     echo "Usage is: "${BASH_SOURCE[0]}" <database> <broker> [compose-command] [options] [flags] [--no-wait]"
     echo "Where:"
-    echo "    database: is one of mariadb, mysql or postgres"
+    echo "    database: is one of mariadb, mysql, mssql or postgres"
     echo "    broker: is on of kafka or rabbitmq"
     echo "    compose-command: One of up,down,rm,kill,stop,start,run,restart,pull,pause,create,build. Default is up."
     echo "    options: one or more of ssl, zipkin, prometheus, influxdb, wavefront, ssl, dood, debug-dataflow, debug-skipper"
@@ -33,6 +33,9 @@ while [ "$1" != "" ]; do
         ;;
     "mysql")
         DATABASE=mysql
+        ;;
+    "mssql")
+        DATABASE=mssql
         ;;
     "maria" | "mariadb")
         DATABASE=mariadb
