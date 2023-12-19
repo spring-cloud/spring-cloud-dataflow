@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2019 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -60,6 +61,7 @@ import org.springframework.util.StringUtils;
  * ingredients as convenient as possible.
  *
  * @author Dave Syer
+ * @author Corneil du Plessis
  *
  */
 public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, InitializingBean, EnvironmentAware {
@@ -264,7 +266,8 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	protected SearchableJobExecutionDao createJobExecutionDao() throws Exception {
-		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao();
+		BatchVersion batchVersion = this.schemaVersionTarget.getSchemaVersion().equals(AppBootSchemaVersion.BOOT3) ? BatchVersion.BATCH_5 : BatchVersion.BATCH_4;
+		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao(batchVersion);
 		dao.setDataSource(dataSource);
 		dao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix
 				+ "JOB_EXECUTION_SEQ"));

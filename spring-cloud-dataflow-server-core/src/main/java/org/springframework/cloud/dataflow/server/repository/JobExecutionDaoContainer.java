@@ -16,20 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
-import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.batch.core.repository.dao.JobExecutionDao;
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
+import javax.sql.DataSource;
+
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.batch.BatchVersion;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
-import org.springframework.cloud.dataflow.server.repository.support.JdbcParameterUtils;
-import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,7 +39,8 @@ public class JobExecutionDaoContainer {
 
 	public JobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
+			BatchVersion batchVersion = target.getSchemaVersion().equals(AppBootSchemaVersion.BOOT3) ? BatchVersion.BATCH_5 : BatchVersion.BATCH_4;
+			JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao(batchVersion);
 			jdbcSearchableJobExecutionDao.setDataSource(dataSource);
 			jdbcSearchableJobExecutionDao.setTablePrefix(target.getBatchPrefix());
 			try {

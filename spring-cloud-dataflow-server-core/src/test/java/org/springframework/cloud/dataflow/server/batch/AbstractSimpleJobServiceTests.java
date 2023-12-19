@@ -86,7 +86,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName, DatabaseType databaseType) throws Exception {
 		this.databaseType = databaseType;
 		super.prepareForTest(dbContainer, schemaName);
-		this.jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
+		this.jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao(BatchVersion.BATCH_4);
 		this.jdbcSearchableJobExecutionDao.setDataSource(getDataSource());
 		this.jdbcSearchableJobExecutionDao.afterPropertiesSet();
 		this.jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
