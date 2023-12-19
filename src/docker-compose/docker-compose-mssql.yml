@@ -1,0 +1,38 @@
+version: '3'
+
+# Reconfigures the default docker-compose.yml to replace MariaDB by Postgres
+# Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
+services:
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: dataflow-mssql
+    restart: always
+    privileged: true
+    environment:
+      LANG: en_US.utf8
+      LC_ALL: en_US.utf8
+      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+      MSSQL_SA_PASSWORD: 'MSSqlServer_RootPassword1'
+      ACCEPT_EULA: 'Y'
+    expose:
+      - 1443
+    ports:
+      - '1443:1443'
+
+  dataflow-server:
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://mssql;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=MSSqlServer_RootPassword1
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+    depends_on:
+      - mssql
+  skipper-server:
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://mssql;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=MSSqlServer_RootPassword1
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+    depends_on:
+      - mssql
