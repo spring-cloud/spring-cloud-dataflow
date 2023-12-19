@@ -3,5 +3,4 @@
 	<include resource="org/springframework/boot/logging/logback/base.xml" />
 	<logger name="org.testcontainers" level="ERROR"/>
 	<logger name="com.github.dockerjava" level="ERROR"/>
-	<logger name="org.flywaydb" level="DEBUG"/>
 </configuration>
