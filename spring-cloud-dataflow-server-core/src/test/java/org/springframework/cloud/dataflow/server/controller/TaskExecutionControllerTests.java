@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.net.URI;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +23,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
@@ -82,6 +74,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.net.URI;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -107,6 +106,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author David Turanski
  * @author Gunnar Hillert
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SpringBootTest(
 		classes = { JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
@@ -636,6 +636,13 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(get("/tasks/executions").param("sort", "task_execution_id").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/tasks/executions").param("sort", "SCHEMA_TARGET").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk());
+		mockMvc.perform(get("/tasks/executions").param("sort", "schema_target").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk());
 
 		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())

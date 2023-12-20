@@ -15,24 +15,8 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.item.database.Order;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
@@ -53,6 +37,20 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provide aggregate data for Boot 3 and Boot &lt;=2 TaskExecutions.
@@ -180,6 +178,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		validSortColumns.add("LAST_UPDATED");
 		validSortColumns.add("EXTERNAL_EXECUTION_ID");
 		validSortColumns.add("PARENT_EXECUTION_ID");
+		validSortColumns.add("SCHEMA_TARGET");
 	}
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
