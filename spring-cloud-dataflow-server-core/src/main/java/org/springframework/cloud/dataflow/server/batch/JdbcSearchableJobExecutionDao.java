@@ -186,7 +186,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		Assert.notNull(job, "Job cannot be null.");
 		Assert.notNull(job.getId(), "Job Id cannot be null.");
 
-		final String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? FIND_JOB_EXECUTIONS_4 : FIND_JOB_EXECUTIONS_5;
+		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? FIND_JOB_EXECUTIONS_4 : FIND_JOB_EXECUTIONS_5;
 		return getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion, job), job.getId());
 
 	}
@@ -209,8 +209,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	@Override
 	public Set<JobExecution> findRunningJobExecutions(String jobName) {
-		final Set<JobExecution> result = new HashSet<>();
-		final String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_RUNNING_EXECUTIONS_4 : GET_RUNNING_EXECUTIONS_5;
+		Set<JobExecution> result = new HashSet<>();
+		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_RUNNING_EXECUTIONS_4 : GET_RUNNING_EXECUTIONS_5;
 		getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion), jobName);
 
 		return result;
@@ -219,7 +219,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public JobExecution getJobExecution(Long executionId) {
 		try {
-			final String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_EXECUTION_BY_ID_4 : GET_EXECUTION_BY_ID_5;
+			String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_EXECUTION_BY_ID_4 : GET_EXECUTION_BY_ID_5;
 			return getJdbcTemplate().queryForObject(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion), executionId);
 		}
 		catch (EmptyResultDataAccessException e) {
