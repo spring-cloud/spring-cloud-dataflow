@@ -130,7 +130,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
 
 	private DataSource dataSource;
-	private final BatchVersion batchVersion;
+	private BatchVersion batchVersion;
+	public JdbcSearchableJobExecutionDao() {
+		this.batchVersion = BatchVersion.BATCH_4;
+	}
 
     public JdbcSearchableJobExecutionDao(BatchVersion batchVersion) {
         this.batchVersion = batchVersion;
