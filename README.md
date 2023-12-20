@@ -100,6 +100,21 @@ You can follow the steps in the [Oracle on Mac ARM64](https://github.com/spring-
 
 ----
 
+## Running Locally w/ Microsoft SQL Server
+By default, the Dataflow server jar does not include the MSSQL database driver dependency.
+If you want to use MSSQL for development/testing when running locally, you can specify the `local-dev-mssql` Maven profile when building.
+The following command will include the MSSQL driver dependency in the jar:
+```
+$ ./mvnw -s .settings.xml clean package -Plocal-dev-mssql
+```
+You can follow the steps in the [Oracle on Mac ARM64](https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Oracle-on-Mac-ARM64/_edit#run-mssql-container-in-docker) Wiki to run MSSQL locally in Docker with Dataflow pointing at it.
+
+> **NOTE:** The above guide is for Oracle, but we temporarily hijacked a section for MSSQL 
+
+> **NOTE:** If you are not running Mac ARM64 just skip the steps related to Homebrew and Colima
+
+----
+
 ## Contributing
 
 We welcome contributions! See the [CONTRIBUTING](./CONTRIBUTING.adoc) guide for details.
