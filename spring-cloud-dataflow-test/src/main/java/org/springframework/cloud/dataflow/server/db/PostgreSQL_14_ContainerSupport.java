@@ -23,8 +23,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+/**
+ * Provides support for running a {@link PostgreSQLContainer PostgreSQL 14 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
 @Testcontainers(disabledWithoutDocker = true)
-public interface Postgres_14_ContainerSupport {
+public interface PostgreSQL_14_ContainerSupport {
 
 	@Container
 	PostgreSQLContainer container = new PostgreSQLContainer<>("postgres:14");

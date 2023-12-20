@@ -15,19 +15,17 @@
  */
 package org.springframework.cloud.skipper.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.cloud.dataflow.server.db.MariaDB_10_6_ContainerSupport;
+import org.springframework.test.context.TestPropertySource;
+
 
 /**
- * Basic database schema and JPA tests for MySQL 8 or later.
+ * Basic database schema and JPA tests for MariaDB 10.4 or later.
  *
  * @author Corneil du Plessis
  */
-public class MySQL8SkipperSmokeTest extends AbstractSkipperSmokeTest {
-	@BeforeAll
-	static void startContainer() {
-		container = new MySQLContainer<>(DockerImageName.parse("mysql:8"));
-		container.start();
-	}
+@TestPropertySource(properties = {
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
+})
+public class MariaDB_10_6_SkipperSmokeTest extends AbstractSkipperSmokeTest implements MariaDB_10_6_ContainerSupport {
 }

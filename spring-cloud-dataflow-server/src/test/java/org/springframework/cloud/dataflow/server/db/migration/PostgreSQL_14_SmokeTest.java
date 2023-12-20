@@ -15,27 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.cloud.dataflow.server.db.PostgreSQL_14_ContainerSupport;
 
-import org.springframework.cloud.dataflow.server.db.ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for MS SQL Server.
+ * Basic database schema and JPA tests for PostgreSQL 14 or later.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class SqlServer2017SmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		if (ContainerSupport.runningOnMacArm64()) {
-			throw new RuntimeException("Unable to run SQLServer tests on Mac OS");
-		}
-		container = new MSSQLServerContainer<>(DockerImageName.parse(
-			MSSQLServerContainer.IMAGE).withTag("2017-latest")
-		).acceptLicense();
-		container.start();
-	}
+public class PostgreSQL_14_SmokeTest extends AbstractSmokeTest implements PostgreSQL_14_ContainerSupport {
 }

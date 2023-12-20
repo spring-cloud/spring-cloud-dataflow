@@ -16,23 +16,35 @@
 
 package org.springframework.cloud.dataflow.server.db;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import org.springframework.cloud.dataflow.server.db.arm64.SqlServerArm64ContainerSupport;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@Testcontainers(disabledWithoutDocker = true)
-public interface SqlServer_2019_ContainerSupport {
+/**
+ * Provides support for running a {@link MSSQLServerContainer MSSQL 2019 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
+public interface SqlServer_2019_ContainerSupport extends SqlServerArm64ContainerSupport {
 
-	@Container
-	MSSQLServerContainer container = new MSSQLServerContainer(
-			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")).acceptLicense();
+	AtomicReference<MSSQLServerContainer> containerReference = new AtomicReference<>(null);
+
+	@BeforeAll
+	static void startContainer() {
+		MSSQLServerContainer container = SqlServerArm64ContainerSupport.startContainer(() ->
+				new MSSQLServerContainer(DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")).acceptLicense());
+		containerReference.set(container);
+	}
 
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
+		MSSQLServerContainer container = containerReference.get();
 		registry.add("spring.datasource.url", container::getJdbcUrl);
 		registry.add("spring.datasource.username", container::getUsername);
 		registry.add("spring.datasource.password", container::getPassword);

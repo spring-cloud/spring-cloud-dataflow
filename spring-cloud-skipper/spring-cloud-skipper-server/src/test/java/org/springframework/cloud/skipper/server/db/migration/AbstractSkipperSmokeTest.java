@@ -22,7 +22,6 @@ import javax.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -38,8 +37,6 @@ import org.springframework.cloud.skipper.server.domain.AppDeployerData;
 import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,8 +56,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public abstract class AbstractSkipperSmokeTest {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSkipperSmokeTest.class);
 
-	protected static JdbcDatabaseContainer<?> container;
-
 	@Autowired
 	AppDeployerDataRepository appDeployerDataRepository;
 
@@ -69,14 +64,6 @@ public abstract class AbstractSkipperSmokeTest {
 
 	@Autowired
 	EntityManagerFactory entityManagerFactory;
-
-	@DynamicPropertySource
-	static void databaseProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", container::getJdbcUrl);
-		registry.add("spring.datasource.username", container::getUsername);
-		registry.add("spring.datasource.password", container::getPassword);
-		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
-	}
 
 
 	@Test

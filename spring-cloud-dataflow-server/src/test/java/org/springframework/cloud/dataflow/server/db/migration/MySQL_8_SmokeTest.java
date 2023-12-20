@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.db.migration;
+package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MySQLContainer;
+import org.springframework.cloud.dataflow.server.db.MySQL_8_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for MySQL 5.7.
+ * Basic database schema and JPA tests for MySQL 8 or later.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class MySQL57SkipperSmokeTest extends AbstractSkipperSmokeTest {
-	@BeforeAll
-	static void startContainer() {
-		container = new MySQLContainer<>("mysql:5.7");
-		container.start();
-	}
+public class MySQL_8_SmokeTest extends AbstractSmokeTest implements MySQL_8_ContainerSupport {
 }

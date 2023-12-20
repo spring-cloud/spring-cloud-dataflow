@@ -15,29 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
-
-import org.springframework.cloud.dataflow.server.db.ContainerSupport;
+import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 
 
 /**
  * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class SqlServer2022SmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		if (ContainerSupport.runningOnMacArm64()) {
-			throw new RuntimeException("Unable to run SQLServer tests on Mac OS");
-		}
-		container = new MSSQLServerContainer<>(
-			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2022-latest")
-		).acceptLicense();
-		container.start();
-	}
-
+public class SqlServer_2022_SmokeTest extends AbstractSmokeTest implements SqlServer_2022_ContainerSupport {
 }

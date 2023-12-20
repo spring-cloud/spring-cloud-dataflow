@@ -24,6 +24,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
+/**
+ * Provides support for running a {@link MariaDBContainer MariaDB 11 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
 @Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
 		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
