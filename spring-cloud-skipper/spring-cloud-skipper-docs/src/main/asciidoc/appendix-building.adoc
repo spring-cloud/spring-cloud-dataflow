@@ -96,7 +96,7 @@ Working build file for _Maven_ would look like something shown below:
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.9.RELEASE</version>
+		<version>2.7.18</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -104,12 +104,11 @@ Working build file for _Maven_ would look like something shown below:
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		<spring-cloud.version>Dalston.SR5</spring-cloud.version>
+		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-cloud-skipper.version>{project-version}</spring-cloud-skipper.version>
 		<!--
-			reactor and flyway are managed by boot so only clean way with maven is to
-			change version properties. trying to import boms in dependencyManagement
-			would not actually change versions.
+			reactor and flyway are managed by boot so this is an illustration of how to modify the versions since
+			trying to import boms in dependencyManagement would not actually change versions.
 		-->
 		<reactor.version>3.0.7.RELEASE</reactor.version>
 		<flyway.version>5.0.5</flyway.version>
@@ -164,7 +163,7 @@ Working build file for _Gradle_ would look like something shown below:
 ----
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
+		springBootVersion = '2.7.18'
 	}
 	repositories {
 		mavenCentral()
@@ -192,7 +191,7 @@ repositories {
 
 
 ext {
-	springCloudVersion = 'Dalston.SR5'
+	springCloudVersion = '2021.0.9'
 	springCloudSkipperVersion = '{project-version}'
 	reactorVersion = 'Aluminium-SR3'
 	reactorNettyVersion = '0.6.6.RELEASE'
