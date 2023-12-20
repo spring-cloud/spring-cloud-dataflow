@@ -108,7 +108,7 @@ Working build file for _Maven_ would look like something shown below:
 		<spring-cloud-skipper.version>{project-version}</spring-cloud-skipper.version>
 		<!--
 			reactor and flyway are managed by boot so this is an illustration of how to modify the versions since
-            trying to import boms in dependencyManagement would not actually change versions.
+			trying to import boms in dependencyManagement would not actually change versions.
 		-->
 		<reactor.version>3.0.7.RELEASE</reactor.version>
 		<flyway.version>5.0.5</flyway.version>
