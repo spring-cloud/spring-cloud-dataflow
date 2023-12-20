@@ -16,9 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -30,15 +31,13 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.sql.DataSource;
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
 public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests{
 
 	@Container
-	private static final JdbcDatabaseContainer mariaDBContainer = new MariaDBContainer("mariadb:10.9.3");
+	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.9.3");
 
 	@BeforeEach
 	void setup() throws Exception {

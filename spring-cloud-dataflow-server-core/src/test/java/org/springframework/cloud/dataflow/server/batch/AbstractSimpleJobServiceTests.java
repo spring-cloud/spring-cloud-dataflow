@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
-import javax.sql.DataSource;
-
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -31,7 +33,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
@@ -68,9 +70,9 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	private static final String BASE_JOB_INST_NAME = "JOB_INST_";
 
 
-	private JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao;
 
-	private JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
+
+	private final Map<AppBootSchemaVersion, JdbcSearchableJobInstanceDao> jdbcSearchableJobInstanceDaoContainer = new HashMap<>();
 
 	private DataFieldMaxValueIncrementerFactory incrementerFactory;
 
@@ -79,26 +81,24 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private DatabaseType databaseType;
 
-	private TaskRepository taskRepositoryBoot2;
+	private final Map<AppBootSchemaVersion,TaskRepository> taskRepositoryContainer = new HashMap<>();
 
-	private TaskRepository taskRepositoryBoot3;
-
-	protected void prepareForTest(JdbcDatabaseContainer dbContainer, String schemaName, DatabaseType databaseType) throws Exception {
+	@Autowired
+	private SchemaService schemaService;
+	protected void prepareForTest(JdbcDatabaseContainer<?> dbContainer, String schemaName, DatabaseType databaseType) throws Exception {
 		this.databaseType = databaseType;
 		super.prepareForTest(dbContainer, schemaName);
-		this.jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao(BatchVersion.BATCH_4);
-		this.jdbcSearchableJobExecutionDao.setDataSource(getDataSource());
-		this.jdbcSearchableJobExecutionDao.afterPropertiesSet();
-		this.jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
-		this.jdbcSearchableJobInstanceDao.setJdbcTemplate(getJdbcTemplate());
-		incrementerFactory = new MultiSchemaIncrementerFactory(getDataSource());
-
-		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(databaseType.name(),
-			AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX + "JOB_SEQ"));
-		TaskExecutionDaoFactoryBean teFactory = new MultiSchemaTaskExecutionDaoFactoryBean(getDataSource(), "TASK_") ;
-		taskRepositoryBoot2 =  new SimpleTaskRepository(teFactory);
-		teFactory = new MultiSchemaTaskExecutionDaoFactoryBean(getDataSource(), "BOOT3_TASK_") ;
-		taskRepositoryBoot3 =  new SimpleTaskRepository(teFactory);
+		for(SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
+			JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
+			jdbcSearchableJobInstanceDao.setJdbcTemplate(getJdbcTemplate());
+			jdbcSearchableJobInstanceDao.setTablePrefix(schemaVersionTarget.getBatchPrefix());
+			incrementerFactory = new MultiSchemaIncrementerFactory(getDataSource());
+			jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(databaseType.name(), schemaVersionTarget.getBatchPrefix() + "JOB_SEQ"));
+			this.jdbcSearchableJobInstanceDaoContainer.put(schemaVersionTarget.getSchemaVersion(), jdbcSearchableJobInstanceDao);
+			TaskExecutionDaoFactoryBean teFactory = new MultiSchemaTaskExecutionDaoFactoryBean(getDataSource(), schemaVersionTarget.getTaskPrefix());
+			TaskRepository taskRepository =  new SimpleTaskRepository(teFactory);
+			taskRepositoryContainer.put(schemaVersionTarget.getSchemaVersion(), taskRepository);
+		}
 	}
 
 	@Test
@@ -131,7 +131,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 
 	@Test
-	void stoppingJobExecutionShouldLeaveJobExecutionwithStatusOfStopping() throws Exception{
+	void stoppingJobExecutionShouldLeaveJobExecutionWithStatusOfStopping() throws Exception{
 		JobExecution jobExecution = createJobExecution("BOOT3", AppBootSchemaVersion.BOOT3, true);
 		jobExecution = this.jobServiceContainer.get("boot3").getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.isRunning()).isTrue();
@@ -163,14 +163,9 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 
 	private JobInstance createJobInstance(String suffix, AppBootSchemaVersion appBootSchemaVersion) throws Exception {
-		String prefix = AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX;
+		JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao = this.jdbcSearchableJobInstanceDaoContainer.get(appBootSchemaVersion);
+		assertThat(jdbcSearchableJobInstanceDao).isNotNull();
 
-		if (appBootSchemaVersion.equals(AppBootSchemaVersion.BOOT3)) {
-			prefix = "BOOT3_BATCH_";
-		}
-		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(this.databaseType.name(),
-			prefix + "JOB_SEQ"));
-		this.jdbcSearchableJobInstanceDao.setTablePrefix(prefix);
 		return jdbcSearchableJobInstanceDao.createJobInstance(BASE_JOB_INST_NAME + suffix,
 			new JobParameters());
 	}
@@ -180,11 +175,9 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 	private JobExecution createJobExecution(String suffix, AppBootSchemaVersion appBootSchemaVersion, boolean isRunning)
 		throws Exception {
-		String prefix = AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX;
+		SchemaVersionTarget schemaVersionTarget = schemaService.getTargets().getSchemas().stream().filter(svt -> svt.getSchemaVersion().equals(appBootSchemaVersion)).findFirst().orElseThrow(() -> new RuntimeException("Cannot find SchemaTarget for " + appBootSchemaVersion));
+		String prefix = schemaVersionTarget.getBatchPrefix();
 
-		if (appBootSchemaVersion.equals(AppBootSchemaVersion.BOOT3)) {
-			prefix = "BOOT3_BATCH_";
-		}
 		JobInstance jobInstance = createJobInstance(suffix, appBootSchemaVersion);
 		JobExecution jobExecution = new JobExecution(jobInstance, null, "foo");
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(databaseType.name(),
@@ -221,12 +214,11 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 
 	private TaskExecution createTaskExecution(AppBootSchemaVersion appBootSchemaVersion, JobExecution jobExecution) {
-		TaskRepository taskRepository = this.taskRepositoryBoot2;
-		String taskPrefix = "TASK_";
-		if (appBootSchemaVersion.equals(AppBootSchemaVersion.BOOT3)) {
-			taskPrefix = "BOOT3_TASK_";
-			taskRepository = this.taskRepositoryBoot3;
-		}
+		SchemaVersionTarget schemaVersionTarget = schemaService.getTargets().getSchemas().stream().filter(svt -> svt.getSchemaVersion().equals(appBootSchemaVersion)).findFirst().orElseThrow(() -> new RuntimeException("Cannot find SchemaTarget for " + appBootSchemaVersion));
+
+		String taskPrefix = schemaVersionTarget.getTaskPrefix();
+		TaskRepository taskRepository = taskRepositoryContainer.get(appBootSchemaVersion);
+
 		TaskExecution taskExecution = new TaskExecution();
 		taskExecution.setStartTime(new Date());
 		taskExecution = taskRepository.createTaskExecution(taskExecution);
@@ -236,10 +228,8 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 
 	private String getQuery(String base, AppBootSchemaVersion appBootSchemaVersion) {
-		String tablePrefix = "BATCH_";
-		if(appBootSchemaVersion.equals(AppBootSchemaVersion.BOOT3)) {
-			tablePrefix = "BOOT3_BATCH_";
-		}
+		SchemaVersionTarget schemaVersionTarget = schemaService.getTargets().getSchemas().stream().filter(svt -> svt.getSchemaVersion().equals(appBootSchemaVersion)).findFirst().orElseThrow(() -> new RuntimeException("Cannot find SchemaTarget for " + appBootSchemaVersion));
+		String tablePrefix = schemaVersionTarget.getBatchPrefix();
 		return StringUtils.replace(base, "%PREFIX%", tablePrefix);
 	}
 
