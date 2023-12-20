@@ -399,5 +399,14 @@
 				</dependency>
 			</dependencies>
 		</profile>
+		<profile>
+			<id>local-dev-mssql</id>
+			<dependencies>
+				<dependency>
+					<groupId>com.microsoft.sqlserver</groupId>
+					<artifactId>mssql-jdbc</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
 	</profiles>
 </project>
