@@ -191,7 +191,7 @@ repositories {
 
 
 ext {
-	springCloudVersion = '2021.9'
+	springCloudVersion = '2021.0.9'
 	springCloudSkipperVersion = '{project-version}'
 	reactorVersion = 'Aluminium-SR3'
 	reactorNettyVersion = '0.6.6.RELEASE'
