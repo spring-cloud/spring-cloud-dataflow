@@ -15,24 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MySQLContainer;
+import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for MySQL 5.7.
+ * Basic database schema and JPA tests for Oracle XE.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class MySQL57SmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		container = new MySQLContainer<>("mysql:5.7");
-		container.start();
-	}
-
-	@Override
-	protected boolean supportsRowNumberFunction() {
-		return false;
-	}
+public class Oracle_XE_18_SmokeTest extends AbstractSmokeTest implements Oracle_XE_18_ContainerSupport {
 }

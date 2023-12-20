@@ -15,21 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 
 
 /**
- * Basic database schema and JPA tests for PostgreSQL 14 or later.
+ * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class PostgreSQLSmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:14"));
-		container.start();
-	}
+public class SqlServer_2019_SmokeTest extends AbstractSmokeTest implements SqlServer_2019_ContainerSupport {
 }

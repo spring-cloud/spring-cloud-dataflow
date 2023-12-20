@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
+package org.springframework.cloud.skipper.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.Db2Container;
-
+import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for DB2.
+ * Basic database schema and JPA tests for Oracle XE.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class DB2SmokeTest extends AbstractSmokeTest {
-	@BeforeAll
-	static void startContainer() {
-		container = new Db2Container("ibmcom/db2:11.5.0.0a").acceptLicense();
-		container.start();
-	}
+public class Oracle_XE_18_SkipperSmokeTest extends AbstractSkipperSmokeTest implements Oracle_XE_18_ContainerSupport {
 }

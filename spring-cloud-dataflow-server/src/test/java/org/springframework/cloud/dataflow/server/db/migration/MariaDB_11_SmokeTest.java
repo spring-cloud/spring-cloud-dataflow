@@ -15,28 +15,18 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
-
-import org.springframework.cloud.dataflow.server.db.ContainerSupport;
+import org.springframework.cloud.dataflow.server.db.MariaDB_11_ContainerSupport;
+import org.springframework.test.context.TestPropertySource;
 
 
 /**
- * Basic database schema and JPA tests for MS SQL Server.
+ * Basic database schema and JPA tests for MariaDB 10.4 or later.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class SqlServer2019SmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		if (ContainerSupport.runningOnMacArm64()) {
-			throw new RuntimeException("Unable to run SQLServer tests on Mac OS");
-		}
-		container = new MSSQLServerContainer<>(
-			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
-		).acceptLicense();
-		container.start();
-	}
+@TestPropertySource(properties = {
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
+})
+public class MariaDB_11_SmokeTest extends AbstractSmokeTest implements MariaDB_11_ContainerSupport {
 }

@@ -16,25 +16,39 @@
 
 package org.springframework.cloud.dataflow.server.db;
 
-import org.testcontainers.containers.OracleContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.testcontainers.containers.OracleContainer;
+import org.testcontainers.utility.DockerImageName;
+
+import org.springframework.cloud.dataflow.server.db.arm64.OracleArm64ContainerSupport;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@Testcontainers(disabledWithoutDocker = true)
-public interface Oracle_XE_18_ContainerSupport {
+/**
+ * Provides support for running an {@link OracleContainer Oracle XE 18 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
+public interface Oracle_XE_18_ContainerSupport extends OracleArm64ContainerSupport {
 
-	@Container
-	OracleContainer container = new OracleContainer("gvenzl/oracle-xe:18-slim-faststart");
+	AtomicReference<OracleContainer> containerReference = new AtomicReference<>(null);
+
+	@BeforeAll
+	static void startContainer() {
+		OracleContainer oracleContainer = OracleArm64ContainerSupport.startContainer(() ->
+				new OracleContainer(DockerImageName.parse("gvenzl/oracle-xe").withTag("18-slim-faststart")));
+		containerReference.set(oracleContainer);
+	}
 
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", container::getJdbcUrl);
-		registry.add("spring.datasource.username", container::getUsername);
-		registry.add("spring.datasource.password", container::getPassword);
-		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
+		OracleContainer oracleContainer = containerReference.get();
+		registry.add("spring.datasource.url", oracleContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", oracleContainer::getUsername);
+		registry.add("spring.datasource.password", oracleContainer::getPassword);
+		registry.add("spring.datasource.driver-class-name", oracleContainer::getDriverClassName);
 	}
 
 }

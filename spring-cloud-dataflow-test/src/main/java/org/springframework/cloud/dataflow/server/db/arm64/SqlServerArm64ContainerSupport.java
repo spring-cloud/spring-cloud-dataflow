@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.oracle;
+package org.springframework.cloud.dataflow.server.db.arm64;
+
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.OracleContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.containers.MSSQLServerContainer;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
@@ -26,30 +27,28 @@ import org.springframework.cloud.dataflow.server.db.ContainerSupport;
 import org.springframework.core.log.LogAccessor;
 
 /**
- * Provides support for testing against an {@link OracleContainer Oracle testcontainer}.
+ * Provides support for testing against an {@link MSSQLServerContainer MSSQL testcontainer} on Mac ARM64.
  *
- * @author Corneil du Plessis
  * @author Chris Bono
  */
 @ExtendWith(SystemStubsExtension.class)
-public interface OracleContainerSupport {
+public interface SqlServerArm64ContainerSupport {
 
-	LogAccessor LOG = new LogAccessor(OracleContainerSupport.class);
+	LogAccessor LOG = new LogAccessor(SqlServerArm64ContainerSupport.class);
 
 	@SystemStub
 	EnvironmentVariables ENV_VARS = new EnvironmentVariables();
 
-	static OracleContainer startContainer() {
+	static MSSQLServerContainer startContainer(Supplier<MSSQLServerContainer> mssqlContainerSupplier) {
 		if (ContainerSupport.runningOnMacArm64()) {
-			String wiki = "https://github.com/spring-cloud/spring-cloud-dataflow/wiki/Oracle-on-Mac-ARM64";
+			String wiki = "https://github.com/spring-cloud/spring-cloud-dataflow/wiki/MSSQL-on-Mac-ARM64";
 			LOG.warn(() -> "You are running on Mac ARM64. If this test fails, make sure Colima is running prior " +
 					"to test invocation. See " + wiki + " for details");
 			ENV_VARS.set("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock");
 			ENV_VARS.set("DOCKER_HOST", String.format("unix://%s/.colima/docker.sock", System.getProperty("user.home")));
 		}
-		OracleContainer oracleContainer = new OracleContainer(DockerImageName.parse("gvenzl/oracle-xe")
-				.withTag("18-slim-faststart"));
-		oracleContainer.start();
-		return oracleContainer;
+		MSSQLServerContainer mssqlContainer = mssqlContainerSupplier.get();
+		mssqlContainer.start();
+		return mssqlContainer;
 	}
 }

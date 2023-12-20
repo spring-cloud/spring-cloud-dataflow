@@ -13,22 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
+package org.springframework.cloud.skipper.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-
-import org.springframework.cloud.dataflow.server.db.oracle.OracleContainerSupport;
+import org.springframework.cloud.dataflow.server.db.MySQL_5_7_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for Oracle XE.
+ * Basic database schema and JPA tests for MySQL 5.7.
  *
  * @author Corneil du Plessis
- * @author Chris Bono
  */
-public class OracleSmokeTest extends AbstractSmokeTest implements OracleContainerSupport {
-
-	@BeforeAll
-	static void startContainer() {
-		container = OracleContainerSupport.startContainer();
-	}
+public class MySQL_5_7_SkipperSmokeTest extends AbstractSkipperSmokeTest implements MySQL_5_7_ContainerSupport {
 }

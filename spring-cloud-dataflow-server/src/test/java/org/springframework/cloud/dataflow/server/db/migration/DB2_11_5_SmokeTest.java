@@ -15,19 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MySQLContainer;
+import org.springframework.cloud.dataflow.server.db.DB2_11_5_ContainerSupport;
+
 
 /**
- * Basic database schema and JPA tests for MySQL 8 or later.
+ * Basic database schema and JPA tests for DB2.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class MySQL8SmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		container = new MySQLContainer<>("mysql:8");
-		container.start();
-	}
+public class DB2_11_5_SmokeTest extends AbstractSmokeTest implements DB2_11_5_ContainerSupport {
 }

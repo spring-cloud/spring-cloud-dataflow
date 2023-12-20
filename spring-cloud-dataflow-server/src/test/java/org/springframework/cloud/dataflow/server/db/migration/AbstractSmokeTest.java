@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobParameters;
@@ -57,8 +56,6 @@ import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.LinkedMultiValueMap;
@@ -77,16 +74,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ExtendWith(OutputCaptureExtension.class)
 public abstract class AbstractSmokeTest {
-
-	protected static JdbcDatabaseContainer<?> container;
-
-	@DynamicPropertySource
-	static void databaseProperties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", container::getJdbcUrl);
-		registry.add("spring.datasource.username", container::getUsername);
-		registry.add("spring.datasource.password", container::getPassword);
-		registry.add("spring.datasource.driver-class-name", container::getDriverClassName);
-	}
 
 	@Autowired
 	private SchemaService schemaService;

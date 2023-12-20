@@ -23,6 +23,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+/**
+ * Provides support for running a {@link Db2Container DB2 11.5 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
 @Testcontainers(disabledWithoutDocker = true)
 public interface DB2_11_5_ContainerSupport {
 

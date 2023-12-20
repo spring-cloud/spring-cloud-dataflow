@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration;
+package org.springframework.cloud.skipper.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MariaDBContainer;
-
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.cloud.dataflow.server.db.MySQL_8_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for MariaDB 10.4 or later.
+ * Basic database schema and JPA tests for MySQL 8 or later.
  *
  * @author Corneil du Plessis
  */
-@TestPropertySource(properties = {
-		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
-})
-public class MariaDBSmokeTest extends AbstractSmokeTest {
-
-	@BeforeAll
-	static void startContainer() {
-		container = new MariaDBContainer<>("mariadb:10.6");
-		container.start();
-	}
+public class MySQL_8_SkipperSmokeTest extends AbstractSkipperSmokeTest implements MySQL_8_ContainerSupport {
 }

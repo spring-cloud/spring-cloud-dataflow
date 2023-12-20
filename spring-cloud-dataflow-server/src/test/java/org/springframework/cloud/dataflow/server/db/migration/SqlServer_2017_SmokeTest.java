@@ -13,24 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.skipper.server.db.migration;
+package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.Db2Container;
-import org.testcontainers.utility.DockerImageName;
-
+import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 
 /**
- * Basic database schema and JPA tests for DB2.
+ * Basic database schema and JPA tests for MS SQL Server.
  *
  * @author Corneil du Plessis
+ * @author Chris Bono
  */
-public class DB2SkipperSmokeTest extends AbstractSkipperSmokeTest {
-	@BeforeAll
-	static void startContainer() {
-		container = new Db2Container(
-			DockerImageName.parse("ibmcom/db2").withTag("11.5.8.0")
-		).acceptLicense();
-		container.start();
-	}
+public class SqlServer_2017_SmokeTest extends AbstractSmokeTest implements SqlServer_2017_ContainerSupport {
 }

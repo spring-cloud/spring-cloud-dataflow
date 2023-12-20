@@ -23,6 +23,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+/**
+ * Provides support for running a {@link MySQLContainer MySQL 8 Testcontainer}.
+ *
+ * @author Chris Bono
+ */
 @Testcontainers(disabledWithoutDocker = true)
 public interface MySQL_8_ContainerSupport {
 

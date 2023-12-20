@@ -15,9 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.db.migration;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 
 
 /**
@@ -25,13 +23,5 @@ import org.testcontainers.utility.DockerImageName;
  *
  * @author Corneil du Plessis
  */
-public class SqlServerSkipperSmokeTest extends AbstractSkipperSmokeTest {
-	@SuppressWarnings("resource")
-	@BeforeAll
-	static void startContainer() {
-		container = new MSSQLServerContainer<>(
-			DockerImageName.parse(MSSQLServerContainer.IMAGE).withTag("2019-latest")
-		).acceptLicense();
-		container.start();
-	}
+public class SqlServer_2019_SkipperSmokeTest extends AbstractSkipperSmokeTest implements SqlServer_2019_ContainerSupport {
 }
