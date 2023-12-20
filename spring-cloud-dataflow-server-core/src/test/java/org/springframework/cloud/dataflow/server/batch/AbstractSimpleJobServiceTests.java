@@ -19,13 +19,18 @@ package org.springframework.cloud.dataflow.server.batch;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
+import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
@@ -73,6 +78,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 
 	private final Map<AppBootSchemaVersion, JdbcSearchableJobInstanceDao> jdbcSearchableJobInstanceDaoContainer = new HashMap<>();
+	private final Map<AppBootSchemaVersion,JdbcStepExecutionDao> stepExecutionDaoContainer = new HashMap<>();
 
 	private DataFieldMaxValueIncrementerFactory incrementerFactory;
 
@@ -95,6 +101,11 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 			incrementerFactory = new MultiSchemaIncrementerFactory(getDataSource());
 			jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(databaseType.name(), schemaVersionTarget.getBatchPrefix() + "JOB_SEQ"));
 			this.jdbcSearchableJobInstanceDaoContainer.put(schemaVersionTarget.getSchemaVersion(), jdbcSearchableJobInstanceDao);
+			JdbcStepExecutionDao stepExecutionDao = new JdbcStepExecutionDao();
+			stepExecutionDao.setJdbcTemplate(getJdbcTemplate());
+			stepExecutionDao.setTablePrefix(schemaVersionTarget.getBatchPrefix());
+			stepExecutionDao.setStepExecutionIncrementer(incrementerFactory.getIncrementer(databaseType.name(), schemaVersionTarget.getBatchPrefix() + "STEP_EXECUTION_SEQ"));
+			stepExecutionDaoContainer.put(schemaVersionTarget.getSchemaVersion(), stepExecutionDao);
 			TaskExecutionDaoFactoryBean teFactory = new MultiSchemaTaskExecutionDaoFactoryBean(getDataSource(), schemaVersionTarget.getTaskPrefix());
 			TaskRepository taskRepository =  new SimpleTaskRepository(teFactory);
 			taskRepositoryContainer.put(schemaVersionTarget.getSchemaVersion(), taskRepository);
@@ -103,19 +114,19 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	@Test
 	void getJobInstancesThatExist() throws Exception {
-		createJobInstance("BOOT2", AppBootSchemaVersion.BOOT2);
-		createJobInstance("BOOT3", AppBootSchemaVersion.BOOT3);
-		verifyJobInstance(1, "boot2", "BOOT2");
-		verifyJobInstance(1, "boot3", "BOOT3");
+		createJobInstance(BASE_JOB_INST_NAME+"BOOT2", AppBootSchemaVersion.BOOT2);
+		createJobInstance(BASE_JOB_INST_NAME+"BOOT3", AppBootSchemaVersion.BOOT3);
+		verifyJobInstance(1, "boot2", BASE_JOB_INST_NAME+"BOOT2");
+		verifyJobInstance(1, "boot3", BASE_JOB_INST_NAME+"BOOT3");
 	}
 
 	@Test
 	void getJobExecutionsThatExist() throws Exception {
-		createJobExecution("BOOT2", AppBootSchemaVersion.BOOT2);
-		verifyJobExecution(1, "boot2", "BOOT2");
-		createJobExecution("BOOT3", AppBootSchemaVersion.BOOT3);
-		createJobExecution("BOOT3A", AppBootSchemaVersion.BOOT3);
-		verifyJobExecution(2, "boot3", "BOOT3A");
+		createJobExecution(BASE_JOB_INST_NAME+"BOOT2", AppBootSchemaVersion.BOOT2);
+		verifyJobExecution(1, "boot2", BASE_JOB_INST_NAME+"BOOT2");
+		createJobExecution(BASE_JOB_INST_NAME+"BOOT3", AppBootSchemaVersion.BOOT3);
+		createJobExecution(BASE_JOB_INST_NAME+"BOOT3A", AppBootSchemaVersion.BOOT3);
+		verifyJobExecution(2, "boot3", BASE_JOB_INST_NAME+"BOOT3A");
 	}
 
 	@Test
@@ -132,7 +143,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	@Test
 	void stoppingJobExecutionShouldLeaveJobExecutionWithStatusOfStopping() throws Exception{
-		JobExecution jobExecution = createJobExecution("BOOT3", AppBootSchemaVersion.BOOT3, true);
+		JobExecution jobExecution = createJobExecution(BASE_JOB_INST_NAME+"BOOT3", AppBootSchemaVersion.BOOT3, true);
 		jobExecution = this.jobServiceContainer.get("boot3").getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.isRunning()).isTrue();
 		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
@@ -140,7 +151,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		jobExecution = this.jobServiceContainer.get("boot3").getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 
-		jobExecution = createJobExecution("BOOT2", AppBootSchemaVersion.BOOT2, true);
+		jobExecution = createJobExecution(BASE_JOB_INST_NAME+"BOOT2", AppBootSchemaVersion.BOOT2, true);
 		jobExecution = this.jobServiceContainer.get("boot2").getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.isRunning()).isTrue();
 		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
@@ -149,68 +160,93 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 	}
 
-	private void verifyJobInstance(long id, String schemaTarget, String suffix) throws Exception {
+	private void verifyJobInstance(long id, String schemaTarget, String name) throws Exception {
 		JobInstance jobInstance = this.jobServiceContainer.get(schemaTarget).getJobInstance(id);
 		assertThat(jobInstance).isNotNull();
-		assertThat(jobInstance.getJobName()).isEqualTo(BASE_JOB_INST_NAME + suffix);
+		assertThat(jobInstance.getJobName()).isEqualTo(name);
 	}
 
-	private void verifyJobExecution(long id, String schemaTarget, String suffix) throws Exception {
+	private void verifyJobExecution(long id, String schemaTarget, String name) throws Exception {
 		JobExecution jobExecution = this.jobServiceContainer.get(schemaTarget).getJobExecution(id);
 		assertThat(jobExecution).isNotNull();
 		assertThat(jobExecution.getId()).isEqualTo(id);
-		assertThat(jobExecution.getJobInstance().getJobName()).isEqualTo(BASE_JOB_INST_NAME + suffix);
+		assertThat(jobExecution.getJobInstance().getJobName()).isEqualTo(name);
 	}
 
-	private JobInstance createJobInstance(String suffix, AppBootSchemaVersion appBootSchemaVersion) throws Exception {
+	private JobInstance createJobInstance(String name, AppBootSchemaVersion appBootSchemaVersion) throws Exception {
 		JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao = this.jdbcSearchableJobInstanceDaoContainer.get(appBootSchemaVersion);
 		assertThat(jdbcSearchableJobInstanceDao).isNotNull();
 
-		return jdbcSearchableJobInstanceDao.createJobInstance(BASE_JOB_INST_NAME + suffix,
-			new JobParameters());
+		return jdbcSearchableJobInstanceDao.createJobInstance(name, new JobParameters());
 	}
-
-	private JobExecution createJobExecution(String suffix, AppBootSchemaVersion appBootSchemaVersion) throws Exception{
-		return createJobExecution(suffix, appBootSchemaVersion, false);
+	private JobExecution createJobExecution(String name, AppBootSchemaVersion appBootSchemaVersion) throws Exception{
+		return createJobExecution(name, BatchStatus.STARTING, appBootSchemaVersion,false);
 	}
-	private JobExecution createJobExecution(String suffix, AppBootSchemaVersion appBootSchemaVersion, boolean isRunning)
+	private JobExecution createJobExecution(String name, AppBootSchemaVersion appBootSchemaVersion, boolean isRunning) throws Exception {
+		return createJobExecution(name, BatchStatus.STARTING, appBootSchemaVersion, isRunning);
+	}
+	private JobExecution createJobExecution(String name, BatchStatus batchStatus, AppBootSchemaVersion appBootSchemaVersion, boolean isRunning) throws Exception{
+		return createJobExecutions(name, batchStatus, appBootSchemaVersion, isRunning, 1).stream().findFirst().orElse(null);
+	}
+	private List<JobExecution> createJobExecutions(String name, BatchStatus batchStatus, AppBootSchemaVersion appBootSchemaVersion, boolean isRunning, int numberOfJobs)
 		throws Exception {
 		SchemaVersionTarget schemaVersionTarget = schemaService.getTargets().getSchemas().stream().filter(svt -> svt.getSchemaVersion().equals(appBootSchemaVersion)).findFirst().orElseThrow(() -> new RuntimeException("Cannot find SchemaTarget for " + appBootSchemaVersion));
 		String prefix = schemaVersionTarget.getBatchPrefix();
-
-		JobInstance jobInstance = createJobInstance(suffix, appBootSchemaVersion);
-		JobExecution jobExecution = new JobExecution(jobInstance, null, "foo");
+		StepExecutionDao stepExecutionDao = this.stepExecutionDaoContainer.get(appBootSchemaVersion);
+		assertThat(stepExecutionDao).isNotNull();
+		List<JobExecution> result = new ArrayList<>();
+		JobInstance jobInstance = createJobInstance(name, appBootSchemaVersion);
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(databaseType.name(),
 			prefix+ "JOB_EXECUTION_SEQ");
-		jobExecution.setId(jobExecutionIncrementer.nextLongValue());
-		jobExecution.setStartTime(new Date());
-		if(!isRunning) {
-			jobExecution.setEndTime(new Date());
+		for(int i = 0; i < numberOfJobs;i++) {
+			JobExecution jobExecution = new JobExecution(jobInstance, null, "foo");
+			result.add(jobExecution);
+			jobExecution.setId(jobExecutionIncrementer.nextLongValue());
+			jobExecution.setStartTime(new Date());
+			if (!isRunning) {
+				jobExecution.setEndTime(new Date());
+			}
+			jobExecution.setVersion(3);
+			Timestamp startTime = jobExecution.getStartTime() == null ? null : Timestamp.valueOf(jobExecution.getStartTime().toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDateTime());
+			Timestamp endTime = jobExecution.getEndTime() == null ? null : Timestamp.valueOf(jobExecution.getEndTime().toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDateTime());
+			Timestamp createTime = jobExecution.getCreateTime() == null ? null : Timestamp.valueOf(jobExecution.getCreateTime().toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDateTime());
+			Timestamp lastUpdated = jobExecution.getLastUpdated() == null ? null : Timestamp.valueOf(jobExecution.getLastUpdated().toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDateTime());
+			Object[] parameters = new Object[]{
+				jobExecution.getId(),
+				jobExecution.getJobId(),
+				startTime,
+				endTime,
+				batchStatus,
+				jobExecution.getExitStatus().getExitCode(),
+				jobExecution.getExitStatus().getExitDescription(),
+				jobExecution.getVersion(),
+				createTime,
+				lastUpdated
+			};
+			getJdbcTemplate().update(getQuery(SAVE_JOB_EXECUTION, appBootSchemaVersion), parameters,
+				new int[]{Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
+					Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP});
+			// TODO remove if when save of Batch 5 version can be saved.
+			if(appBootSchemaVersion.equals(AppBootSchemaVersion.BOOT2)) {
+				StepExecution stepExecution = new StepExecution("StepOne", jobExecution);
+				// TODO we need a save step sql that works across both.
+				stepExecutionDao.saveStepExecution(stepExecution);
+				stepExecution = new StepExecution("StepTwo", jobExecution);
+				stepExecutionDao.saveStepExecution(stepExecution);
+				stepExecution = new StepExecution("StepThree", jobExecution);
+				stepExecutionDao.saveStepExecution(stepExecution);
+			}
+			createTaskExecution(appBootSchemaVersion, jobExecution);
 		}
-		jobExecution.setVersion(3);
-		Timestamp startTime = jobExecution.getStartTime() == null ? null
-			: Timestamp.valueOf(jobExecution.getStartTime().toInstant()
-			.atZone(ZoneId.systemDefault())
-			.toLocalDateTime());
-		Timestamp endTime = jobExecution.getEndTime() == null ? null : Timestamp.valueOf(jobExecution.getEndTime().toInstant()
-			.atZone(ZoneId.systemDefault())
-			.toLocalDateTime());
-		Timestamp createTime = jobExecution.getCreateTime() == null ? null
-			: Timestamp.valueOf(jobExecution.getCreateTime().toInstant()
-			.atZone(ZoneId.systemDefault())
-			.toLocalDateTime());
-		Timestamp lastUpdated = jobExecution.getLastUpdated() == null ? null
-			: Timestamp.valueOf(jobExecution.getLastUpdated().toInstant()
-			.atZone(ZoneId.systemDefault())
-			.toLocalDateTime());
-		Object[] parameters = new Object[] { jobExecution.getId(), jobExecution.getJobId(), startTime, endTime,
-			jobExecution.getStatus().toString(), jobExecution.getExitStatus().getExitCode(),
-			jobExecution.getExitStatus().getExitDescription(), jobExecution.getVersion(), createTime, lastUpdated };
-		getJdbcTemplate().update(getQuery(SAVE_JOB_EXECUTION, appBootSchemaVersion), parameters,
-			new int[] { Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
-				Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP });
-		createTaskExecution(appBootSchemaVersion, jobExecution);
-		return jobExecution;
+		return result;
 	}
 
 	private TaskExecution createTaskExecution(AppBootSchemaVersion appBootSchemaVersion, JobExecution jobExecution) {
