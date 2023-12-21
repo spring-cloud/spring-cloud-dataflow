@@ -24,15 +24,22 @@ import java.util.Date;
 
 import javax.sql.DataSource;
 
+import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobInstanceDao;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -129,5 +136,38 @@ class JobExecutionTestUtils
 
 	private Timestamp timestampFromDate(Date date) {
 		return (date != null) ? Timestamp.valueOf(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) : null;
+	}
+
+
+	/**
+	 * Test utility that generates hundreds of job executions which can be useful when debugging paging issues.
+	 * <p>To run, adjust the datasource properties accordingly and then execute the test manually in your editor.
+	 */
+	@Disabled
+	static class JobExecutionTestDataGenerator {
+
+		@Test
+		void generateJobExecutions() {
+			// Adjust these properties as necessary to point to your env
+			DataSourceProperties dataSourceProperties = new DataSourceProperties();
+			dataSourceProperties.setUrl("jdbc:oracle:thin:@localhost:1521/dataflow");
+			dataSourceProperties.setUsername("spring");
+			dataSourceProperties.setPassword("spring");
+			dataSourceProperties.setDriverClassName("oracle.jdbc.OracleDriver");
+
+			DataSource dataSource = dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+			SchemaService schemaService = new DefaultSchemaService();
+			TaskExecutionDaoContainer taskExecutionDaoContainer = new TaskExecutionDaoContainer(dataSource, schemaService);
+			TaskBatchDaoContainer taskBatchDaoContainer = new TaskBatchDaoContainer(dataSource, schemaService);
+			JobExecutionTestUtils generator = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDaoContainer);
+			generator.createSampleJob(jobName("boot2"), 200, BatchStatus.COMPLETED, new JobParameters(),
+					schemaService.getTarget("boot2"));
+			generator.createSampleJob(jobName("boot3"), 200, BatchStatus.COMPLETED, new JobParameters(),
+					schemaService.getTarget("boot3"));
+		}
+
+		private String jobName(String schemaTarget) {
+			return schemaTarget + "-job-" + System.currentTimeMillis();
+		}
 	}
 }

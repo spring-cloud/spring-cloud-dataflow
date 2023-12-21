@@ -52,7 +52,7 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<PagingQuer
 	private final static Map<DatabaseType, AbstractSqlPagingQueryProvider> providers;
 
 	static {
-		 Map<DatabaseType, AbstractSqlPagingQueryProvider> providerMap = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
+		Map<DatabaseType, AbstractSqlPagingQueryProvider> providerMap = new HashMap<DatabaseType, AbstractSqlPagingQueryProvider>();
 		providerMap.put(DatabaseType.HSQL, new HsqlPagingQueryProvider());
 		providerMap.put(DatabaseType.H2, new H2PagingQueryProvider());
 		providerMap.put(DatabaseType.MYSQL, new MySqlPagingQueryProvider());

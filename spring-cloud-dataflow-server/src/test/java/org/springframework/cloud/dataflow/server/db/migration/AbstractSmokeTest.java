@@ -144,6 +144,8 @@ public abstract class AbstractSmokeTest {
 		createdExecutionIdsBySchemaTarget.add(schemaVersionTarget, execution1.getExecutionId());
 		TaskExecution execution2 = testUtils.createSampleJob("job2", 3, BatchStatus.COMPLETED, new JobParameters(), schemaVersionTarget);
 		createdExecutionIdsBySchemaTarget.add(schemaVersionTarget, execution2.getExecutionId());
+
+		// Get all executions and ensure the count and that the row number function was (or not) used
 		jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(100));
 		assertThat(jobExecutions).hasSize(originalCount + 4);
 		String expectedSqlFragment = (this.supportsRowNumberFunction()) ?
@@ -151,6 +153,12 @@ public abstract class AbstractSmokeTest {
 				"as STEP_COUNT FROM AGGREGATE_JOB_INSTANCE";
 		Awaitility.waitAtMost(Duration.ofSeconds(5))
 				.untilAsserted(() -> assertThat(output).contains(expectedSqlFragment));
+
+		// Verify that paging works as well
+		jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(2).withPage(0));
+		assertThat(jobExecutions).hasSize(2);
+		jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(2).withPage(1));
+		assertThat(jobExecutions).hasSize(2);
 	}
 
 	static Stream<SchemaVersionTarget> schemaVersionTargetsProvider() {
