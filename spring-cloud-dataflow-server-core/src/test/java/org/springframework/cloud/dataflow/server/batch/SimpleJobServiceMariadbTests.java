@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -33,8 +34,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestPostgresConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
-public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests{
+public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
 
 	@Container
 	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.9.3");
@@ -46,6 +48,7 @@ public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests{
 
 	@Configuration
 	public static class SimpleJobTestPostgresConfiguration extends SimpleJobTestConfiguration {
+
 		@Bean
 		public DataSource dataSource() {
 			DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -55,5 +58,7 @@ public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests{
 			dataSource.setPassword(mariaDBContainer.getPassword());
 			return dataSource;
 		}
+
 	}
+
 }

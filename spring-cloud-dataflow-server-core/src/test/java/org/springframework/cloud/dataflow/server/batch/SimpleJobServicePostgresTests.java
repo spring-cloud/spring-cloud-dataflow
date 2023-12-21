@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.annotation.DirtiesContext;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -34,7 +35,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
-public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests{
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
 	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:11.1");
@@ -46,6 +48,7 @@ public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests
 
 	@Configuration
 	public static class SimpleJobTestPostgresConfiguration extends SimpleJobTestConfiguration {
+
 		@Bean
 		public DataSource dataSource() {
 			DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -55,5 +58,7 @@ public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests
 			dataSource.setPassword(postgreSQLContainer.getPassword());
 			return dataSource;
 		}
+
 	}
+
 }
