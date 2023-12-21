@@ -818,8 +818,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 		if (fields.contains("E.JOB_EXECUTION_ID") && this.useRowNumberOptimization) {
 			Order order = sortKeys.get("E.JOB_EXECUTION_ID");
-			String orderString = Optional.ofNullable(order)
-					.map(orderKey -> orderKey == Order.DESCENDING ? "DESC" : "ASC").orElse("DESC");
+			String orderString = (order == null || order == Order.DESCENDING) ? "DESC" : "ASC";
 			fields += ", ROW_NUMBER() OVER (PARTITION BY E.JOB_EXECUTION_ID ORDER BY E.JOB_EXECUTION_ID " + orderString + ") as RN";
 		}
 		factory.setSelectClause(fields);
