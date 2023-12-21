@@ -180,6 +180,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		validSortColumns.add("LAST_UPDATED");
 		validSortColumns.add("EXTERNAL_EXECUTION_ID");
 		validSortColumns.add("PARENT_EXECUTION_ID");
+		validSortColumns.add("SCHEMA_TARGET");
 	}
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
