@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -33,21 +35,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.core.AppRegistration;
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
@@ -77,6 +88,12 @@ public class TaskExecutionExplorerTests {
 	@Autowired
 	private TaskDefinitionReader taskDefinitionReader;
 
+	@Autowired
+	private AppRegistryService appRegistryService;
+
+	@Autowired
+	private TaskDefinitionRepository definitionRepository;
+
 	@BeforeEach
 	public void setup() throws Exception {
 		template = new JdbcTemplate(dataSource);
@@ -84,21 +101,25 @@ public class TaskExecutionExplorerTests {
 			String prefix = target.getTaskPrefix();
 			template.execute(SchemaUtilities.getQuery("DELETE FROM %PREFIX%EXECUTION", prefix));
 		}
+		TaskDefinition taskDefinition = new TaskDefinition("baz", "baz");
+		definitionRepository.save(taskDefinition);
 	}
 
 	@Test
 	public void testInitializer() {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			String prefix = target.getTaskPrefix();
-			int actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION", prefix), Integer.class);
+			int actual = template.queryForObject(
+					SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION", prefix), Integer.class);
 			assertThat(actual).isEqualTo(0);
-			actual = template.queryForObject(SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION_PARAMS", prefix), Integer.class);
+			actual = template.queryForObject(
+					SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION_PARAMS", prefix), Integer.class);
 			assertThat(actual).isEqualTo(0);
 		}
 	}
 
 	@Test
-	public void testExplorerFindAll(){
+	public void testExplorerFindAll() {
 		final int ENTRY_COUNT = 4;
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "foo");
@@ -133,6 +154,20 @@ public class TaskExecutionExplorerTests {
 		AggregateTaskExecution taskExecution = resultList.get(0);
 		assertThat(taskExecution.getExecutionId()).isEqualTo(0);
 		assertThat(taskExecution.getTaskName()).isEqualTo("fee");
+	}
+
+	@Test
+	public void testExplorerSort() throws Exception {
+		when(appRegistryService.find(eq("baz"), any(ApplicationType.class))).thenReturn(new AppRegistration("baz", ApplicationType.task, "1.0.0", new URI("file://src/test/resources/register-all.txt"),null, AppBootSchemaVersion.BOOT3));
+		insertTestExecutionDataIntoRepo(template, 3L, "foo");
+		insertTestExecutionDataIntoRepo(template, 2L, "bar");
+		insertTestExecutionDataIntoRepo(template, 1L, "baz");
+		insertTestExecutionDataIntoRepo(template, 0L, "fee");
+
+		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("SCHEMA_TARGET"))).getContent();
+		assertThat(resultList.size()).isEqualTo(4);
+		List<Long> ids = resultList.stream().map(AggregateTaskExecution::getExecutionId).collect(Collectors.toList());
+		assertThat(ids).containsExactly(0L, 2L, 3L, 1L);
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {
