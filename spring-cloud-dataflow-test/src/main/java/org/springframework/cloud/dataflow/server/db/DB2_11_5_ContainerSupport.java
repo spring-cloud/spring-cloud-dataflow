@@ -16,10 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.db;
 
-import org.testcontainers.containers.Db2Container;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.testcontainers.containers.Db2Container;
+
+import org.springframework.cloud.dataflow.server.db.arm64.Db2Arm64ContainerSupport;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -28,14 +30,20 @@ import org.springframework.test.context.DynamicPropertySource;
  *
  * @author Chris Bono
  */
-@Testcontainers(disabledWithoutDocker = true)
-public interface DB2_11_5_ContainerSupport {
+public interface DB2_11_5_ContainerSupport extends Db2Arm64ContainerSupport {
 
-	@Container
-	Db2Container container = new Db2Container("ibmcom/db2:11.5.0.0a").acceptLicense();
+	AtomicReference<Db2Container> containerReference = new AtomicReference<>(null);
+
+	@BeforeAll
+	static void startContainer() {
+		Db2Container container = Db2Arm64ContainerSupport.startContainer(() ->
+				new Db2Container("ibmcom/db2:11.5.0.0a").acceptLicense());
+		containerReference.set(container);
+	}
 
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
+		Db2Container container = containerReference.get();
 		registry.add("spring.datasource.url", container::getJdbcUrl);
 		registry.add("spring.datasource.username", container::getUsername);
 		registry.add("spring.datasource.password", container::getPassword);

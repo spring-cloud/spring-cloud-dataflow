@@ -49,6 +49,7 @@ import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.AbstractSqlPagingQueryProvider;
+import org.springframework.batch.item.database.support.Db2PagingQueryProvider;
 import org.springframework.batch.item.database.support.OraclePagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.database.support.SqlPagingQueryUtils;
@@ -841,8 +842,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	/**
-	 * A {@link SqlPagingQueryProviderFactoryBean} specialization that overrides the {@code Oracle} paging
-	 * {@link SafeOraclePagingQueryProvider provider} with an implementation that properly handles sort aliases.
+	 * A {@link SqlPagingQueryProviderFactoryBean} specialization that overrides the {@code Oracle, MSSQL, and DB2}
+	 * paging {@link SafeOraclePagingQueryProvider provider} with an implementation that properly handles sort aliases.
 	 * <p><b>NOTE:</b> nested within the aggregate DAO as this is the only place that needs this specialization.
 	 */
 	static class SafeSqlPagingQueryProviderFactoryBean extends SqlPagingQueryProviderFactoryBean {
@@ -863,6 +864,9 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			}
 			else if (provider instanceof SqlServerPagingQueryProvider) {
 				provider = new SafeSqlServerPagingQueryProvider((SqlServerPagingQueryProvider) provider, this.dataSource);
+			}
+			else if (provider instanceof Db2PagingQueryProvider) {
+				provider = new SafeDb2PagingQueryProvider((Db2PagingQueryProvider) provider, this.dataSource);
 			}
 			return provider;
 		}
@@ -967,6 +971,43 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	static class SafeSqlServerPagingQueryProvider extends SqlServerPagingQueryProvider {
 
 		SafeSqlServerPagingQueryProvider(SqlServerPagingQueryProvider delegate, DataSource dataSource) {
+			// Have to use reflection to retrieve the provider fields
+			this.setFromClause(extractField(delegate, "fromClause", String.class));
+			this.setWhereClause(extractField(delegate, "whereClause", String.class));
+			this.setSortKeys(extractField(delegate, "sortKeys", Map.class));
+			this.setSelectClause(extractField(delegate, "selectClause", String.class));
+			this.setGroupClause(extractField(delegate, "groupClause", String.class));
+			try {
+				this.init(dataSource);
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private <T> T extractField(AbstractSqlPagingQueryProvider target, String fieldName, Class<T> fieldType) {
+			Field field = ReflectionUtils.findField(AbstractSqlPagingQueryProvider.class, fieldName, fieldType);
+			ReflectionUtils.makeAccessible(field);
+			return (T) ReflectionUtils.getField(field, target);
+		}
+
+		@Override
+		protected String getOverClause() {
+			// Overrides the parent impl to use 'getSortKeys' instead of 'getSortKeysWithoutAliases'
+			StringBuilder sql = new StringBuilder();
+			sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this.getSortKeys()));
+			return sql.toString();
+		}
+
+	}
+
+	/**
+	 * A {@link Db2PagingQueryProvider paging provider} for {@code DB2} that works around the fact that the
+	 * DB2 provider in Spring Batch 4.x does not properly handle sort aliases when generating jump to page queries.
+	 */
+	static class SafeDb2PagingQueryProvider extends Db2PagingQueryProvider {
+
+		SafeDb2PagingQueryProvider(Db2PagingQueryProvider delegate, DataSource dataSource) {
 			// Have to use reflection to retrieve the provider fields
 			this.setFromClause(extractField(delegate, "fromClause", String.class));
 			this.setWhereClause(extractField(delegate, "whereClause", String.class));
