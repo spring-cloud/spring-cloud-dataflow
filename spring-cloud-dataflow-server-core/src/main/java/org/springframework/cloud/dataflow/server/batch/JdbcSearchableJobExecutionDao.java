@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -32,15 +33,22 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.server.converter.DateToStringConverter;
+import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
+import org.springframework.core.convert.support.ConfigurableConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.data.convert.Jsr310Converters;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer;
 import org.springframework.util.Assert;
@@ -53,7 +61,7 @@ import org.springframework.util.Assert;
  *
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
-
+	private static final String FIND_PARAMS_FROM_ID_5 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING FROM %PREFIX%JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID = ?";
 	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION";
 
 	private static final String GET_COUNT_BY_JOB_NAME = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION E " +
@@ -128,15 +136,18 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
 
 	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
-
+	private final ConfigurableConversionService conversionService;
 	private DataSource dataSource;
 	private BatchVersion batchVersion;
 	public JdbcSearchableJobExecutionDao() {
-		this.batchVersion = BatchVersion.BATCH_4;
+		this(BatchVersion.BATCH_4);
 	}
 
-    public JdbcSearchableJobExecutionDao(BatchVersion batchVersion) {
-        this.batchVersion = batchVersion;
+    @SuppressWarnings("deprecation")
+	public JdbcSearchableJobExecutionDao(BatchVersion batchVersion) {
+		this.batchVersion = batchVersion;
+		conversionService = new DefaultConversionService();
+		conversionService.addConverter(new StringToDateConverter());
     }
 
     /**
@@ -544,7 +555,54 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 
 	}
+	protected JobParameters getJobParametersBatch5(Long executionId) {
+		final Map<String, JobParameter> map = new HashMap<>();
+		RowCallbackHandler handler = rs -> {
+			String parameterName = rs.getString("PARAMETER_NAME");
 
+			Class<?> parameterType = null;
+			try {
+				parameterType = Class.forName(rs.getString("PARAMETER_TYPE"));
+			}
+			catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+			String stringValue = rs.getString("PARAMETER_VALUE");
+			Object typedValue = conversionService.convert(stringValue, parameterType);
+
+			boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
+
+			if (typedValue instanceof  String) {
+				map.put(parameterName, new JobParameter((String) typedValue, identifying));
+			} else if (typedValue instanceof Integer) {
+				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), identifying));
+			} else if (typedValue instanceof Long) {
+				map.put(parameterName, new JobParameter((Long) typedValue, identifying));
+			} else if (typedValue instanceof Float) {
+				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), identifying));
+			} else if (typedValue instanceof Double) {
+				map.put(parameterName, new JobParameter((Double) typedValue, identifying));
+			} else if (typedValue instanceof Timestamp) {
+				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), identifying));
+			} else if (typedValue instanceof Date) {
+				map.put(parameterName, new JobParameter((Date)typedValue, identifying));
+			} else {
+				map.put(parameterName, new JobParameter(typedValue != null ? typedValue.toString() : "null", identifying));
+			}
+		};
+
+		getJdbcTemplate().query(getQuery(FIND_PARAMS_FROM_ID_5), handler, executionId);
+
+		return new JobParameters(map);
+	}
+	@Override
+	protected JobParameters getJobParameters(Long executionId) {
+		if(batchVersion == BatchVersion.BATCH_4) {
+			return super.getJobParameters(executionId);
+		} else {
+			return getJobParametersBatch5(executionId);
+		}
+	}
 
 	JobExecution createJobExecutionFromResultSet(ResultSet rs, int rowNum)  throws SQLException{
 		Long id = rs.getLong(1);
