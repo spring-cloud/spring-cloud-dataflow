@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -47,7 +48,12 @@ import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
+import org.springframework.batch.item.database.support.AbstractSqlPagingQueryProvider;
+import org.springframework.batch.item.database.support.Db2PagingQueryProvider;
+import org.springframework.batch.item.database.support.OraclePagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.batch.item.database.support.SqlPagingQueryUtils;
+import org.springframework.batch.item.database.support.SqlServerPagingQueryProvider;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
@@ -75,6 +81,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -802,7 +809,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	 * @throws Exception if page provider is not created.
 	 */
 	private PagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause, Map<String, Order> sortKeys) throws Exception {
-		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
+		SqlPagingQueryProviderFactoryBean factory = new SafeSqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
 		fromClause = "AGGREGATE_JOB_INSTANCE I JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID=E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET=E.SCHEMA_TARGET" + (fromClause == null ? "" : " " + fromClause);
 		factory.setFromClause(fromClause);
@@ -811,7 +818,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 		if (fields.contains("E.JOB_EXECUTION_ID") && this.useRowNumberOptimization) {
 			Order order = sortKeys.get("E.JOB_EXECUTION_ID");
-			String orderString = Optional.ofNullable(order).map(orderKey -> orderKey == Order.DESCENDING ? "DESC" : "ASC").orElse("DESC");
+			String orderString = (order == null || order == Order.DESCENDING) ? "DESC" : "ASC";
 			fields += ", ROW_NUMBER() OVER (PARTITION BY E.JOB_EXECUTION_ID ORDER BY E.JOB_EXECUTION_ID " + orderString + ") as RN";
 		}
 		factory.setSelectClause(fields);
@@ -831,5 +838,202 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			LOG.warn("Unable to determine if DB supports ROW_NUMBER() function (reason: " + e.getMessage() + ")", e);
 		}
 		return false;
+	}
+
+	/**
+	 * A {@link SqlPagingQueryProviderFactoryBean} specialization that overrides the {@code Oracle, MSSQL, and DB2}
+	 * paging {@link SafeOraclePagingQueryProvider provider} with an implementation that properly handles sort aliases.
+	 * <p><b>NOTE:</b> nested within the aggregate DAO as this is the only place that needs this specialization.
+	 */
+	static class SafeSqlPagingQueryProviderFactoryBean extends SqlPagingQueryProviderFactoryBean {
+
+		private DataSource dataSource;
+
+		@Override
+		public void setDataSource(DataSource dataSource) {
+			super.setDataSource(dataSource);
+			this.dataSource = dataSource;
+		}
+
+		@Override
+		public PagingQueryProvider getObject() throws Exception {
+			PagingQueryProvider provider = super.getObject();
+			if (provider instanceof OraclePagingQueryProvider) {
+				provider = new SafeOraclePagingQueryProvider((AbstractSqlPagingQueryProvider) provider, this.dataSource);
+			}
+			else if (provider instanceof SqlServerPagingQueryProvider) {
+				provider = new SafeSqlServerPagingQueryProvider((SqlServerPagingQueryProvider) provider, this.dataSource);
+			}
+			else if (provider instanceof Db2PagingQueryProvider) {
+				provider = new SafeDb2PagingQueryProvider((Db2PagingQueryProvider) provider, this.dataSource);
+			}
+			return provider;
+		}
+
+	}
+
+	/**
+	 * A {@link AbstractSqlPagingQueryProvider paging provider} for {@code Oracle} that works around the fact that the
+	 * Oracle provider in Spring Batch 4.x does not properly handle sort aliases when using nested {@code ROW_NUMBER}
+	 * clauses.
+	 */
+	static class SafeOraclePagingQueryProvider extends AbstractSqlPagingQueryProvider {
+
+		SafeOraclePagingQueryProvider(AbstractSqlPagingQueryProvider delegate, DataSource dataSource) {
+			// Have to use reflection to retrieve the provider fields
+			this.setFromClause(extractField(delegate, "fromClause", String.class));
+			this.setWhereClause(extractField(delegate, "whereClause", String.class));
+			this.setSortKeys(extractField(delegate, "sortKeys", Map.class));
+			this.setSelectClause(extractField(delegate, "selectClause", String.class));
+			this.setGroupClause(extractField(delegate, "groupClause", String.class));
+			try {
+				this.init(dataSource);
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private <T> T extractField(AbstractSqlPagingQueryProvider target, String fieldName, Class<T> fieldType) {
+			Field field = ReflectionUtils.findField(AbstractSqlPagingQueryProvider.class, fieldName, fieldType);
+			ReflectionUtils.makeAccessible(field);
+			return (T) ReflectionUtils.getField(field, target);
+		}
+
+		@Override
+		public String generateFirstPageQuery(int pageSize) {
+			return generateRowNumSqlQuery(false, pageSize);
+		}
+
+		@Override
+		public String generateRemainingPagesQuery(int pageSize) {
+			return generateRowNumSqlQuery(true, pageSize);
+		}
+
+		@Override
+		public String generateJumpToItemQuery(int itemIndex, int pageSize) {
+			int page = itemIndex / pageSize;
+			int offset = (page * pageSize);
+			offset = (offset == 0) ? 1 : offset;
+			String sortKeyInnerSelect = this.getSortKeySelect(true);
+			String sortKeyOuterSelect = this.getSortKeySelect(false);
+			return SqlPagingQueryUtils.generateRowNumSqlQueryWithNesting(this, sortKeyInnerSelect, sortKeyOuterSelect,
+					false, "TMP_ROW_NUM = " + offset);
+		}
+
+		private String getSortKeySelect(boolean withAliases) {
+			StringBuilder sql = new StringBuilder();
+			Map<String, Order> sortKeys = (withAliases) ? this.getSortKeys() : this.getSortKeysWithoutAliases();
+			sql.append(sortKeys.keySet().stream().collect(Collectors.joining(",")));
+			return sql.toString();
+		}
+
+		// Taken from SqlPagingQueryUtils.generateRowNumSqlQuery but use sortKeysWithoutAlias
+		// for outer sort condition.
+		private String generateRowNumSqlQuery(boolean remainingPageQuery, int pageSize) {
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT * FROM (SELECT ").append(getSelectClause());
+			sql.append(" FROM ").append(this.getFromClause());
+			if (StringUtils.hasText(this.getWhereClause())) {
+				sql.append(" WHERE ").append(this.getWhereClause());
+			}
+			if (StringUtils.hasText(this.getGroupClause())) {
+				sql.append(" GROUP BY ").append(this.getGroupClause());
+			}
+			// inner sort by
+			sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this));
+			sql.append(") WHERE ").append("ROWNUM <= " + pageSize);
+			if (remainingPageQuery) {
+				sql.append(" AND ");
+				// For the outer sort we want to use sort keys w/o aliases. However,
+				// SqlPagingQueryUtils.buildSortConditions does not allow sort keys to be passed in.
+				// Therefore, we temporarily set the 'sortKeys' for the call to 'buildSortConditions'.
+				// The alternative is to clone the 'buildSortConditions' method here and allow the sort keys to be
+				// passed in BUT method is gigantic and this approach is the lesser of the two evils.
+				Map<String, Order> originalSortKeys = this.getSortKeys();
+				this.setSortKeys(this.getSortKeysWithoutAliases());
+				try {
+					SqlPagingQueryUtils.buildSortConditions(this, sql);
+				}
+				finally {
+					this.setSortKeys(originalSortKeys);
+				}
+			}
+			return sql.toString();
+		}
+	}
+
+	/**
+	 * A {@link SqlServerPagingQueryProvider paging provider} for {@code MSSQL} that works around the fact that the
+	 * MSSQL provider in Spring Batch 4.x does not properly handle sort aliases when generating jump to page queries.
+	 */
+	static class SafeSqlServerPagingQueryProvider extends SqlServerPagingQueryProvider {
+
+		SafeSqlServerPagingQueryProvider(SqlServerPagingQueryProvider delegate, DataSource dataSource) {
+			// Have to use reflection to retrieve the provider fields
+			this.setFromClause(extractField(delegate, "fromClause", String.class));
+			this.setWhereClause(extractField(delegate, "whereClause", String.class));
+			this.setSortKeys(extractField(delegate, "sortKeys", Map.class));
+			this.setSelectClause(extractField(delegate, "selectClause", String.class));
+			this.setGroupClause(extractField(delegate, "groupClause", String.class));
+			try {
+				this.init(dataSource);
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private <T> T extractField(AbstractSqlPagingQueryProvider target, String fieldName, Class<T> fieldType) {
+			Field field = ReflectionUtils.findField(AbstractSqlPagingQueryProvider.class, fieldName, fieldType);
+			ReflectionUtils.makeAccessible(field);
+			return (T) ReflectionUtils.getField(field, target);
+		}
+
+		@Override
+		protected String getOverClause() {
+			// Overrides the parent impl to use 'getSortKeys' instead of 'getSortKeysWithoutAliases'
+			StringBuilder sql = new StringBuilder();
+			sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this.getSortKeys()));
+			return sql.toString();
+		}
+
+	}
+
+	/**
+	 * A {@link Db2PagingQueryProvider paging provider} for {@code DB2} that works around the fact that the
+	 * DB2 provider in Spring Batch 4.x does not properly handle sort aliases when generating jump to page queries.
+	 */
+	static class SafeDb2PagingQueryProvider extends Db2PagingQueryProvider {
+
+		SafeDb2PagingQueryProvider(Db2PagingQueryProvider delegate, DataSource dataSource) {
+			// Have to use reflection to retrieve the provider fields
+			this.setFromClause(extractField(delegate, "fromClause", String.class));
+			this.setWhereClause(extractField(delegate, "whereClause", String.class));
+			this.setSortKeys(extractField(delegate, "sortKeys", Map.class));
+			this.setSelectClause(extractField(delegate, "selectClause", String.class));
+			this.setGroupClause(extractField(delegate, "groupClause", String.class));
+			try {
+				this.init(dataSource);
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private <T> T extractField(AbstractSqlPagingQueryProvider target, String fieldName, Class<T> fieldType) {
+			Field field = ReflectionUtils.findField(AbstractSqlPagingQueryProvider.class, fieldName, fieldType);
+			ReflectionUtils.makeAccessible(field);
+			return (T) ReflectionUtils.getField(field, target);
+		}
+
+		@Override
+		protected String getOverClause() {
+			// Overrides the parent impl to use 'getSortKeys' instead of 'getSortKeysWithoutAliases'
+			StringBuilder sql = new StringBuilder();
+			sql.append(" ORDER BY ").append(SqlPagingQueryUtils.buildSortClause(this.getSortKeys()));
+			return sql.toString();
+		}
+
 	}
 }

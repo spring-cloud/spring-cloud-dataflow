@@ -113,6 +113,19 @@ You can follow the steps in the [MSSQL on Mac ARM64](https://github.com/spring-c
 
 ----
 
+## Running Locally w/ IBM DB2
+By default, the Dataflow server jar does not include the DB2 database driver dependency.
+If you want to use DB2 for development/testing when running locally, you can specify the `local-dev-db2` Maven profile when building.
+The following command will include the DB2 driver dependency in the jar:
+```
+$ ./mvnw -s .settings.xml clean package -Plocal-dev-db2
+```
+You can follow the steps in the [DB2 on Mac ARM64](https://github.com/spring-cloud/spring-cloud-dataflow/wiki/DB2-on-Mac-ARM64#running-dataflow-locally-against-db2) Wiki to run DB2 locally in Docker with Dataflow pointing at it.
+
+> **NOTE:** If you are not running Mac ARM64 just skip the steps related to Homebrew and Colima
+
+----
+
 ## Contributing
 
 We welcome contributions! See the [CONTRIBUTING](./CONTRIBUTING.adoc) guide for details.
