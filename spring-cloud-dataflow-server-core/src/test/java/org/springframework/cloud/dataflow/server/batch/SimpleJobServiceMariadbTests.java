@@ -17,44 +17,47 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.JdbcDatabaseContainer;
+
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
-
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestPostgresConfiguration.class)
+@JdbcTest(properties = { "spring.jpa.hibernate.ddl-auto=none",
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect" })
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestMariaDBConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
-public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests{
+public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final JdbcDatabaseContainer mariaDBContainer = new MariaDBContainer("mariadb:10.9.3");
+	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.6");
 
 	@BeforeEach
 	void setup() throws Exception {
 		super.prepareForTest(mariaDBContainer, "mariadb", determineDatabaseType(DatabaseType.MARIADB));
 	}
 
-	@Configuration
-	public static class SimpleJobTestPostgresConfiguration extends SimpleJobTestConfiguration {
-		@Bean
-		public DataSource dataSource() {
-			DriverManagerDataSource dataSource = new DriverManagerDataSource();
-			dataSource.setDriverClassName(mariaDBContainer.getDriverClassName());
-			dataSource.setUrl(mariaDBContainer.getJdbcUrl());
-			dataSource.setUsername(mariaDBContainer.getUsername());
-			dataSource.setPassword(mariaDBContainer.getPassword());
-			return dataSource;
-		}
+	@DynamicPropertySource
+	static void databaseProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", mariaDBContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", mariaDBContainer::getUsername);
+		registry.add("spring.datasource.password", mariaDBContainer::getPassword);
+		registry.add("spring.datasource.driver-class-name", mariaDBContainer::getDriverClassName);
 	}
+
+	@SpringBootConfiguration
+	public static class SimpleJobTestMariaDBConfiguration extends SimpleJobTestConfiguration {
+
+	}
+
 }

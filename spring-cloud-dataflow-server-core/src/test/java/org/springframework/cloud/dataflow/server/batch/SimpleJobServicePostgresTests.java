@@ -17,44 +17,46 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testcontainers.containers.JdbcDatabaseContainer;
+
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.sql.DataSource;
-
-@ExtendWith(SpringExtension.class)
+@JdbcTest(properties = "spring.jpa.hibernate.ddl-auto=none")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
-public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests{
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final JdbcDatabaseContainer postgreSQLContainer = new PostgreSQLContainer("postgres:11.1");
+	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:11.1");
 
 	@BeforeEach
 	void setup() throws Exception {
 		super.prepareForTest(postgreSQLContainer, "postgresql", determineDatabaseType(DatabaseType.POSTGRES));
 	}
 
-	@Configuration
-	public static class SimpleJobTestPostgresConfiguration extends SimpleJobTestConfiguration {
-		@Bean
-		public DataSource dataSource() {
-			DriverManagerDataSource dataSource = new DriverManagerDataSource();
-			dataSource.setDriverClassName(postgreSQLContainer.getDriverClassName());
-			dataSource.setUrl(postgreSQLContainer.getJdbcUrl());
-			dataSource.setUsername(postgreSQLContainer.getUsername());
-			dataSource.setPassword(postgreSQLContainer.getPassword());
-			return dataSource;
-		}
+	@DynamicPropertySource
+	static void databaseProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+		registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+		registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+		registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
 	}
+
+	@SpringBootConfiguration
+	public static class SimpleJobTestPostgresConfiguration extends SimpleJobTestConfiguration {
+
+	}
+
 }

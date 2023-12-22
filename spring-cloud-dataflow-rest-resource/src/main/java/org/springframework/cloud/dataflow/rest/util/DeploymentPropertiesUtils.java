@@ -334,7 +334,7 @@ public final class DeploymentPropertiesUtils {
 				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().startsWith(wildcardPrefix)
 								? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
-								: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
+								: "spring.cloud.deployer." + kv.getKey().substring(appLength), Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
 		logger.debug("extractAndQualifyDeployerProperties:{}", result);
 		return result;
@@ -361,12 +361,12 @@ public final class DeploymentPropertiesUtils {
 				.filter(kv -> kv.getKey().startsWith(wildcardPrefix) || kv.getKey().startsWith(appPrefix))
 				.collect(Collectors.toMap(kv -> kv.getKey().startsWith(wildcardPrefix)
 								? "spring.cloud.deployer." + kv.getKey().substring(wildcardLength)
-								: "spring.cloud.deployer." + kv.getKey().substring(appLength), kv -> kv.getValue(),
+								: "spring.cloud.deployer." + kv.getKey().substring(appLength), Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
 
 		Map<String, String> resultApp = new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> !kv.getKey().startsWith(wildcardPrefix) && !kv.getKey().startsWith(appPrefix))
-				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue(),
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue,
 						(fromWildcard, fromApp) -> fromApp));
 
 		resultDeployer.putAll(resultApp);
@@ -441,8 +441,8 @@ public final class DeploymentPropertiesUtils {
 					}
 					start = regexMatcher.start();
 				}
-				if (param != null && param.length() > 0) {
-					String p = removeQuoting(param.substring(start, param.length()).trim());
+				if (param != null && !param.isEmpty()) {
+					String p = removeQuoting(param.substring(start).trim());
 					if (StringUtils.hasText(p)) {
 						paramsToUse.add(p);
 					}
