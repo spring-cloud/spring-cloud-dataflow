@@ -15,11 +15,23 @@
  */
 package org.springframework.cloud.dataflow.server.batch;
 
+import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
+import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.util.Assert;
+
 /**
  * Provides enumeration of Batch Schema versions needed to be supported.
  * @author Corneil du Plessis
  */
 public enum BatchVersion {
 	BATCH_4,
-	BATCH_5
+	BATCH_5;
+	public static BatchVersion from(AppBootSchemaVersion bootSchemaVersion) {
+		Assert.notNull(bootSchemaVersion, "bootSchemaVersion required");
+		return AppBootSchemaVersion.BOOT3.equals(bootSchemaVersion) ? BATCH_5 : BATCH_4;
+	}
+	public static BatchVersion from(SchemaVersionTarget versionTarget) {
+		Assert.notNull(versionTarget, "versionTarget required");
+		return from(versionTarget.getSchemaVersion());
+	}
 }

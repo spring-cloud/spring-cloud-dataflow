@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.Types;
-
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -266,7 +264,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	protected SearchableJobExecutionDao createJobExecutionDao() throws Exception {
-		BatchVersion batchVersion = this.schemaVersionTarget.getSchemaVersion().equals(AppBootSchemaVersion.BOOT3) ? BatchVersion.BATCH_5 : BatchVersion.BATCH_4;
+		BatchVersion batchVersion = BatchVersion.from(this.schemaVersionTarget);
 		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao(batchVersion);
 		dao.setDataSource(dataSource);
 		dao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix

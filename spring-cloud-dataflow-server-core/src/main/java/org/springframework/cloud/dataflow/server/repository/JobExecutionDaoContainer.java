@@ -18,10 +18,8 @@ package org.springframework.cloud.dataflow.server.repository;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.BatchVersion;
@@ -39,7 +37,7 @@ public class JobExecutionDaoContainer {
 
 	public JobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			BatchVersion batchVersion = target.getSchemaVersion().equals(AppBootSchemaVersion.BOOT3) ? BatchVersion.BATCH_5 : BatchVersion.BATCH_4;
+			BatchVersion batchVersion = BatchVersion.from(target);
 			JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao(batchVersion);
 			jdbcSearchableJobExecutionDao.setDataSource(dataSource);
 			jdbcSearchableJobExecutionDao.setTablePrefix(target.getBatchPrefix());
