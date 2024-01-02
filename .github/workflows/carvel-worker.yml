@@ -12,7 +12,7 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: 'main'
       # zoo extract and ensure

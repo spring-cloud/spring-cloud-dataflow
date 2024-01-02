@@ -15,7 +15,7 @@ jobs:
 #        group: [mariadb, mssql, postgres] // let's move mssql to pro tests along with Oracle
         group: [mariadb, postgres]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: actions/setup-java@v3
       with:
         java-version: '8'
