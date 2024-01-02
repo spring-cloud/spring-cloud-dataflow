@@ -24,15 +24,15 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 
-
 @Testcontainers
-public class JdbcAggregateJobQueryPostgresDaoTests extends AbstractJdbcAggregateJobQueryDaoTests{
+public class JdbcAggregateJobQueryPostgresDaoTests extends AbstractJdbcAggregateJobQueryDaoTests {
 
 	@Container
-	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11.1");
+	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11");
 
 	@BeforeEach
 	void prepareForTest() throws Exception {
 		super.prepareForTest(dbContainer, "postgresql", DatabaseType.POSTGRES);
 	}
+
 }
