@@ -13,7 +13,7 @@ jobs:
     environment: promote
     steps:
     # need repo to push release branch and a tag
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: jfrog/setup-jfrog-cli@v1
       with:
         version: 1.46.4

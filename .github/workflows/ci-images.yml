@@ -18,7 +18,7 @@ jobs:
     name: Prepare Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         if: ${{ inputs.version == null || inputs.version == '' }}
       - uses: actions/setup-java@v3
         if: ${{ inputs.version == null || inputs.version == '' }}
