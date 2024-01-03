@@ -31,7 +31,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@JdbcTest(properties = "spring.jpa.hibernate.ddl-auto=none")
+@JdbcTest(properties = {"spring.jpa.hibernate.ddl-auto=none", "spring.test.context.cache.maxSize=4"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
