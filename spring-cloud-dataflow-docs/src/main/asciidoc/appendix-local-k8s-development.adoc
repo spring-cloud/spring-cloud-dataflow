@@ -78,7 +78,7 @@ Since these scripts export environmental variable they need to be executes as in
 
 [source,shell]
 ....
-source ./k8s/use-mk-docker.sh test-ns postgresql rabbitmq
+source ./k8s/use-mk-docker.sh postgresql rabbitmq --namespace test-ns
 ....
 
 ===== TMC or GKE Cluster in Cloud

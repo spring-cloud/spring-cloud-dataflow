@@ -64,6 +64,9 @@ while [ "$1" != "" ]; do
     shift
 done
 echo "Namespace: $NS"
+if [ "$NS" = "" ]; then
+    NS=scdf
+fi
 export NS
 if [ "$BROKER" != "" ]; then
     echo "BROKER: $BROKER"
