@@ -39,7 +39,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:11");
+	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
 
 	@BeforeEach
 	void setup() throws Exception {

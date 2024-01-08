@@ -28,7 +28,7 @@ import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 public class JdbcAggregateJobQueryPostgresDaoTests extends AbstractJdbcAggregateJobQueryDaoTests {
 
 	@Container
-	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:11");
+	private static final JdbcDatabaseContainer dbContainer = new PostgreSQLContainer("postgres:14");
 
 	@BeforeEach
 	void prepareForTest() throws Exception {
