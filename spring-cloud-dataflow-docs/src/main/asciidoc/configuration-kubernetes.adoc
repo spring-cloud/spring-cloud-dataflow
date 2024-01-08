@@ -399,11 +399,11 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |<none>
 
 |initContainer
-|An Init Container expressed in YAML format to be applied to a pod. e.g. ```{containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}```
+|An Init Container expressed in YAML format to be applied to a pod. e.g. ```{containerName: 'test', imageName: 'busybox:1', commands: ['sh', '-c', 'echo hello']}```
 |<none>
 
 |additionalContainers
-|Additional containers expressed in YAML format to be applied to a pod. e.g. ```[{name: 'c1', image: 'busybox:latest', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]}, {name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]```
+|Additional containers expressed in YAML format to be applied to a pod. e.g. ```[{name: 'c1', image: 'busybox:1', command: ['sh', '-c', 'echo hello1'], volumeMounts: [{name: 'test-volume', mountPath: '/tmp', readOnly: true}]}, {name: 'c2', image: 'busybox:1.26.1', command: ['sh', '-c', 'echo hello2']}]```
 |<none>
 |===
 
