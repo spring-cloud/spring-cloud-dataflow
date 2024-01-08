@@ -12,6 +12,16 @@ scdf:
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
         value: "true"
   skipper:
+    config:
+      spring:
+        cloud:
+          skipper:
+            server:
+              platform:
+                kubernetes:
+                  accounts:
+                    default:
+                      environmentVariables: 'LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
   registry:
     secret:
       ref: "reg-creds-dockerhub"
