@@ -50,23 +50,19 @@ public class StreamDeployerUtil {
 		}
 		DeploymentState result = DeploymentState.partial;
 		if (states.isEmpty() || states.contains(DeploymentState.error)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.error);
 			result = DeploymentState.error;
 		}
 		else if (states.contains(DeploymentState.deployed) && states.contains(DeploymentState.failed)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.partial);
 			result = DeploymentState.partial;
 		}
 		else if (states.contains(DeploymentState.failed)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.failed);
 			result = DeploymentState.failed;
 		}
 		else if (states.contains(DeploymentState.deploying)) {
-			logger.debug("aggregateState: Returning " + DeploymentState.deploying);
 			result = DeploymentState.deploying;
 		}
 
-		logger.debug("aggregateState: Returning " + DeploymentState.partial);
+		logger.debug("aggregateState: Returning " + result);
 		return result;
 	}
 }

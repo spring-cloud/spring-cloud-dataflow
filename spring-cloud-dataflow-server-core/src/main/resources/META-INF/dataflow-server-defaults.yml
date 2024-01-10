@@ -175,6 +175,7 @@ spring:
             - GET    /runtime/streams/**             => hasRole('ROLE_VIEW')
             - GET    /runtime/apps                   => hasRole('ROLE_VIEW')
             - GET    /runtime/apps/**                => hasRole('ROLE_VIEW')
+            - POST   /runtime/apps/**                => hasRole('ROLE_CREATE')
 
             # Schema Versions
             - GET   /schema/versions                 => hasRole('ROLE_VIEW')
