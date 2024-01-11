@@ -19,7 +19,6 @@ spec:
       containers:
       - name: kafka-zk
         image: confluentinc/cp-zookeeper:5.5.2
-        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 2181
         env:

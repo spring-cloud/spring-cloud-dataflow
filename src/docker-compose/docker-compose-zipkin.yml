@@ -6,7 +6,7 @@ version: '3'
 services:
 
   zipkin-server:
-    image: openzipkin/zipkin:2
+    image: openzipkin/zipkin:2.23.2
     container_name: zipkin-server
     expose:
       - '9411'
