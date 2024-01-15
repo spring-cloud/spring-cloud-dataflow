@@ -123,22 +123,12 @@ jobs:
             --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
             --notes-file $RELEASE_NOTES_FILE
           # retrieve spring-cloud-dataflow-package and upload to github release
-          set +e
           export PACKAGE_VERSION=${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
-          mvn -gs .github/settings.xml \
-              dependency:copy \
-              -Dartifact=org.springframework.cloud:spring-cloud-dataflow-package:${PACKAGE_VERSION}:zip \
-              -DoutputDirectory=./spring-cloud-dataflow-package/target
-          RC=$?
-          if ((RC!=0)); then            
-            ./spring-cloud-dataflow-package/set-package-version.sh
-            ./mvnw -pl spring-cloud-dataflow-package          
-          fi
-          PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-oss-install-${PACKAGE_VERSION}.zip"
-          DL_PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-package-${PACKAGE_VERSION}.zip"
-          if [ ! -f $PACKAGE_FILE ]; then 
-            cp -f $DL_PACKAGE_FILE $PACKAGE_FILE
-          fi
+          pushd spring-cloud-dataflow-package 
+            ./set-package-version.sh
+            ../mvnw package
+          popd
+          PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-oss-install-${PACKAGE_VERSION}.zip"          
           gh release upload v$PACKAGE_VERSION $PACKAGE_FILE --clobber
         # zoo success
       - name: Notify Build Success Zoo Handler Controller
