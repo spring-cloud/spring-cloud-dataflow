@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.persistence.EntityManager;
-import javax.servlet.Filter;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.ObjectProvider;

@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletContext;
 
 import org.junit.Test;
 

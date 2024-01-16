@@ -20,12 +20,12 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.util.Assert;
