@@ -228,10 +228,10 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 
 				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths()
+						.requestMatchers(this.authorizationProperties.getPermitAllPaths()
 								.toArray(new String[0]))
 						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths()
+						.requestMatchers(this.authorizationProperties.getAuthenticatedPaths()
 								.toArray(new String[0]))
 						.authenticated();
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);

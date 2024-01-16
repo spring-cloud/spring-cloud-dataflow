@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;

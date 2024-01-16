@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;

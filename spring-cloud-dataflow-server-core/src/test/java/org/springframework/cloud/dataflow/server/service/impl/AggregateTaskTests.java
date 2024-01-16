@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;

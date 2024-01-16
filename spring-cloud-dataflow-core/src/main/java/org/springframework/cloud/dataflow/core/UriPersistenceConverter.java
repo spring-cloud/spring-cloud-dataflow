@@ -17,8 +17,8 @@ package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 import org.springframework.util.StringUtils;
 

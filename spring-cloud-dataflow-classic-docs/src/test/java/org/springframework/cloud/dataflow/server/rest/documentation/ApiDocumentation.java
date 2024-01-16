@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import javax.servlet.RequestDispatcher;
+import jakarta.servlet.RequestDispatcher;
 
 import org.junit.Test;
 
