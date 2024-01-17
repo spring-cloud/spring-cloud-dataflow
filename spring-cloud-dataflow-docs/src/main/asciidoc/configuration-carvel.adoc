@@ -125,11 +125,11 @@ The environmental variables can also be configured manually to override the valu
 
 |DATAFLOW_VERSION
 |Version of Spring Cloud Data Flow
-|2.10.3
+|2.11.2
 
 |SKIPPER_VERSION
 |Version of Spring Cloud Skipper
-|2.9.3
+|2.11.2
 
 |REGISTRY
 |Url and repository of package registry. Format `<private-registry-host/repo-name>`. This will be used to prefix the carvel repo and package.
