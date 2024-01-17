@@ -754,14 +754,14 @@ The following steps will provide help.</p>
 <div class="sect2">
 <h3 id="_prepare_cluster_and_add_repository">Prepare cluster and add repository</h3>
 <div class="paragraph">
-<p>Login to docker and optionally registry.pivotal.io for Spring Cloud Data Flow Pro.</p>
+<p>Login to docker and optionally registry.tanzu.vmware.com for Spring Cloud Data Flow Pro.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell"># When deploying SCDF Pro.
 export TANZU_DOCKER_USERNAME=&quot;&lt;tanzu-net-username&gt;&quot;
 export TANZU_DOCKER_PASSWORD=&quot;&lt;tanzu-net-password&gt;&quot;
-docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.pivotal.io
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.tanzu.vmware.com
 
 # Always required to ensure you don't experience rate limiting with Docker HUB
 export DOCKER_HUB_USERNAME=&quot;&lt;docker-hub-username&gt;&quot;

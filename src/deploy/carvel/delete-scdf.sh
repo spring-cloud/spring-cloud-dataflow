@@ -26,7 +26,7 @@ case $SCDF_TYPE in
 "pro")
   APP_NAME=scdf-pro-app
   PACKAGE_NAME=scdf-pro.tanzu.vmware.com
-  REGISTRY=dev.registry.pivotal.io
+  REGISTRY=dev.registry.tanzu.vmware.com
   REPO_NAME="p-scdf-for-kubernetes/scdf-pro-repo"
   ;;
 "oss")

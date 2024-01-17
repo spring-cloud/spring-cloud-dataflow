@@ -33,7 +33,7 @@ case $SCDF_TYPE in
 "pro")
     PACKAGE_NAME=scdf-pro.tanzu.vmware.com
     if [ "$PACKAGE_REPO" = "" ]; then
-        PACKAGE_REPO="dev.registry.pivotal.io/p-scdf-for-kubernetes"
+        PACKAGE_REPO="dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes"
     fi
     if [ "$REPO_NAME" = "" ]; then
         REPO_NAME="scdf-pro-repo"

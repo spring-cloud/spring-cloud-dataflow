@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: scdf-server
-          image: dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server:${DATAFLOW_PRO_VERSION}
+          image: dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:${DATAFLOW_PRO_VERSION}
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - name: config

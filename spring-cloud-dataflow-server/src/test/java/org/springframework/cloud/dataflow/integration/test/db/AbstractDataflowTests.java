@@ -85,7 +85,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2,
-			"dev.registry.pivotal.io/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2",
+			"dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2",
 			TagNames.ORACLE),
 		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
 		ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
