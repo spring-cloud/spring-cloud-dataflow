@@ -28,7 +28,7 @@ if [ "$TARGET_DIR" != "" ]; then
 fi
 export SERVER_VERSION=$DATAFLOW_VERSION
 if [ "$SCDF_TYPE" = "pro" ]; then
-    export SERVER_REPOSITORY="dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server"
+    export SERVER_REPOSITORY="dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server"
 else
     export SERVER_REPOSITORY="springcloud/spring-cloud-dataflow-server"
 fi

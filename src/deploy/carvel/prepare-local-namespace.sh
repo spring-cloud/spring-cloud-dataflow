@@ -43,7 +43,7 @@ $SCDIR/add-local-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_U
 if [ "$SCDF_TYPE" = "pro" ]; then
     check_env TANZU_DOCKER_USERNAME
     check_env TANZU_DOCKER_PASSWORD
-    $SCDIR/add-local-registry-secret.sh reg-creds-dev-registry dev.registry.pivotal.io "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+    $SCDIR/add-local-registry-secret.sh reg-creds-dev-registry dev.registry.tanzu.vmware.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
     patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name": "reg-creds-dev-registry"}]}'
 else
     patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"}]}'

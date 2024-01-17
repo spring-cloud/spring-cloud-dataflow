@@ -3,7 +3,7 @@ scdf:
     type: rabbit
   server:
     image:
-      repository: dev.registry.pivotal.io/p-scdf-for-kubernetes/scdf-pro-server
+      repository: dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server
       tag: 1.6.0
     service:
       type: LoadBalancer

@@ -34,9 +34,9 @@ public class ContainerImageParserTests {
 	@Test
 	public void testParseWithoutDefaults2() {
 		ContainerImage containerImageName =
-				containerImageNameParser.parse("dev.registry.pivotal.io/p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner@sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
+				containerImageNameParser.parse("dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner@sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
 
-		assertThat(containerImageName.getHostname()).isEqualTo("dev.registry.pivotal.io");
+		assertThat(containerImageName.getHostname()).isEqualTo("dev.registry.tanzu.vmware.com");
 		assertThat(containerImageName.getRepositoryNamespace()).isEqualTo("p-scdf-for-kubernetes");
 		assertThat(containerImageName.getRepositoryName()).isEqualTo("spring-cloud-dataflow-composed-task-runner");
 		assertThat(containerImageName.getRepositoryTag()).isNull();
@@ -44,10 +44,10 @@ public class ContainerImageParserTests {
 		assertThat(containerImageName.getRepositoryDigest()).isEqualTo("sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
 		assertThat(containerImageName.getRepositoryReferenceType()).isEqualTo(ContainerImage.RepositoryReferenceType.digest);
 
-		assertThat(containerImageName.getRegistryHost()).isEqualTo("dev.registry.pivotal.io");
+		assertThat(containerImageName.getRegistryHost()).isEqualTo("dev.registry.tanzu.vmware.com");
 		assertThat(containerImageName.getRepository()).isEqualTo("p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner");
 
-		assertThat(containerImageName.getCanonicalName()).isEqualTo("dev.registry.pivotal.io/p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner@sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
+		assertThat(containerImageName.getCanonicalName()).isEqualTo("dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner@sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
 	}
 
 	@Test
