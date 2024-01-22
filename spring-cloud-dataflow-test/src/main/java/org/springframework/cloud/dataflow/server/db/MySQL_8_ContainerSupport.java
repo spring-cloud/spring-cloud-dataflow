@@ -32,7 +32,7 @@ import org.springframework.test.context.DynamicPropertySource;
 public interface MySQL_8_ContainerSupport {
 
 	@Container
-	MySQLContainer container = new MySQLContainer<>("mysql:8");
+	MySQLContainer container = new MySQLContainer<>("mysql:8.0");
 
 	@DynamicPropertySource
 	static void databaseProperties(DynamicPropertyRegistry registry) {
