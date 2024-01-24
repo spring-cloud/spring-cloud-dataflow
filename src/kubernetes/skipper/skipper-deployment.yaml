@@ -69,20 +69,6 @@ spec:
           value: 'false'
         - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
           value: /etc/secrets
-      initContainers:
-      - name: init-mariadb-wait
-        image: busybox:1
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
-      - name: init-mariadb-database
-        image: mariadb:10.4
-        env:
-        - name: MARIADB_PWD
-          valueFrom:
-            secretKeyRef:
-              name: mariadb
-              key: database-password
-        command: ['sh', '-c', 'mariadb -h mariadb -u root --password=$MARIADB_PWD -e "CREATE DATABASE IF NOT EXISTS skipper;"']
       serviceAccountName: scdf-sa
       volumes:
         - name: config

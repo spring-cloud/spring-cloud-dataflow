@@ -80,11 +80,6 @@ spec:
           # Provide the Skipper service location
         - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
           value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
-      initContainers:
-      - name: init-mariadb-wait
-        image: busybox:1
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c', 'until nc -w3 -z mariadb 3306; do echo waiting for mariadb; sleep 3; done;']
       serviceAccountName: scdf-sa
       volumes:
         - name: config
