@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-java@v3
         if: ${{ inputs.version == null || inputs.version == '' }}
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Version from POM
         if: ${{ inputs.version == null || inputs.version == '' }}

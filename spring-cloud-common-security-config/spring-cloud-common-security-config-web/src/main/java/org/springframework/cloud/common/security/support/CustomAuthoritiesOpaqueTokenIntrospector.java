@@ -27,8 +27,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DefaultOAuth2AuthenticatedPrincipal;
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames;
 import org.springframework.security.oauth2.server.resource.introspection.NimbusOpaqueTokenIntrospector;
-import org.springframework.security.oauth2.server.resource.introspection.OAuth2IntrospectionClaimNames;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
 
 /**
@@ -63,7 +63,7 @@ public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntr
 	}
 
 	private Collection<GrantedAuthority> extractAuthorities(OAuth2AuthenticatedPrincipal principal, String token) {
-		final List<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
+		final List<String> scopes = principal.getAttribute(OAuth2TokenIntrospectionClaimNames.SCOPE);
 		final Set<String> scopesAsSet = new HashSet<>(scopes);
 		final Set<GrantedAuthority> authorities = this.authorityMapper.mapScopesToAuthorities(null, scopesAsSet, token);
 		final Set<GrantedAuthority> authorities2 = this.authorityMapper.mapClaimsToAuthorities(null, Arrays.asList("groups", "roles"));

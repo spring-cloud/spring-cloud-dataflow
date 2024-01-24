@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-skipper-parent</artifactId>
-	<version>2.11.3-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>Spring Cloud Skipper</name>
 	<description>Spring Cloud Skipper</description>
 	<packaging>pom</packaging>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.11.3-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-build</relativePath>
 	</parent>
 
@@ -51,6 +51,7 @@
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
 		<build-helper-maven-plugin>3.0.0</build-helper-maven-plugin>
+		<http-client>5.2.4</http-client>
 	</properties>
 
 	<modules>
@@ -83,6 +84,11 @@
 				<version>${spring-cloud-deployer.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${http-client}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>

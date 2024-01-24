@@ -88,11 +88,6 @@ public class MySQL57Database extends Database<MySQLConnection> {
     }
 
     @Override
-    public boolean supportsChangingCurrentSchema() {
-        return delegateDatabase.supportsChangingCurrentSchema();
-    }
-
-    @Override
     public String getBooleanTrue() {
         return delegateDatabase.getBooleanTrue();
     }
