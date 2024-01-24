@@ -29,7 +29,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
-                "ref": "main",
+                "ref": "main-3",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
@@ -39,7 +39,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-ui",
-                "ref": "main",
+                "ref": "main-3",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
@@ -49,7 +49,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "main-3",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
@@ -59,7 +59,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "main-3",
                 "workflow": "carvel-worker.yml"
               }
             },

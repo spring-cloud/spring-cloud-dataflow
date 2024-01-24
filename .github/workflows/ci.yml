@@ -5,8 +5,9 @@ on:
   push:
     branches:
       - 'main'
+      - 'main-3'
+      - '2.11.x'
       - '2.10.x'
-      - '2.9.x'
     paths-ignore:
       - '.github/**'
 

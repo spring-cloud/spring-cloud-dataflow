@@ -3,7 +3,7 @@ name: Fix Deployment Files
 on:
   push:
     branches:
-      - main
+      - main-3
 
 jobs:
   build:
@@ -44,4 +44,3 @@ jobs:
         assignees: ilayaperumalg
         reviewers: jvalkeal,ilayaperumalg
         branch: github-actions/update-deployment-files
-
