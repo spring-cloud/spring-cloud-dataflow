@@ -27,7 +27,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
-                "ref": "main",
+                "ref": "2.11.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -37,7 +37,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-ui",
-                "ref": "main",
+                "ref": "2.11.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },
@@ -47,7 +47,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow",
-                "ref": "main",
+                "ref": "2.11.x",
                 "workflow": "next-dev-version-worker.yml"
               }
             },

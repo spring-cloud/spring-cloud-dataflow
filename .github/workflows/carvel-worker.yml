@@ -13,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: 'main'
       # zoo extract and ensure
       - name: Extract Zoo Context Properties
         uses: jvalkeal/build-zoo-handler@v0.0.4
