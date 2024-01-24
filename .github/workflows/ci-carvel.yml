@@ -3,7 +3,7 @@ name: CI Carvel
 on:
   push:
     branches:
-      - main
+      - 2.11.x
     paths:
       - 'src/carvel/**'
   workflow_dispatch:
@@ -21,8 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: 'main'
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.branch && inputs.branch || github.ref }}

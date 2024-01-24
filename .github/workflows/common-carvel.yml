@@ -54,8 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: 'main'
     - name: Ensure scripts are executable
       shell: bash
       run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;

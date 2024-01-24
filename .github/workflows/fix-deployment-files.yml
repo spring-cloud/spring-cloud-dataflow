@@ -3,7 +3,7 @@ name: Fix Deployment Files
 on:
   push:
     branches:
-      - main
+      - 2.11.x
 
 jobs:
   build:
