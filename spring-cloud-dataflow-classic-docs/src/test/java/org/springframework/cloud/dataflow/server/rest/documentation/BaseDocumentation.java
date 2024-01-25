@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,14 +33,7 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
@@ -203,28 +197,6 @@ public abstract class BaseDocumentation {
 								delete("/streams/definitions/{name}", name))
 						.andExpect(status().isOk())
 		);
-	}
-
-	protected DataflowTaskExecutionMetadataDaoContainer createDataFlowTaskExecutionMetadataDaoContainer(SchemaService schemaService) {
-		DataflowTaskExecutionMetadataDaoContainer result = new DataflowTaskExecutionMetadataDaoContainer();
-		MultiSchemaIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
-		String databaseType;
-		try {
-			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		} catch (MetaDataAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			DataflowTaskExecutionMetadataDao dao = new JdbcDataflowTaskExecutionMetadataDao(
-					dataSource,
-					incrementerFactory.getIncrementer(databaseType,
-							SchemaUtilities.getQuery("%PREFIX%EXECUTION_METADATA_SEQ", target.getTaskPrefix())
-					),
-					target.getTaskPrefix()
-			);
-			result.add(target.getName(), dao);
-		}
-		return result;
 	}
 
 	/**

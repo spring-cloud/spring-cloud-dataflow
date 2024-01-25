@@ -37,7 +37,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,7 +83,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				)
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
-								requestParameters(
+								queryParameters(
 										parameterWithName("name").description("The name of the task definition to launch"),
 										parameterWithName("properties")
 												.description("Application and Deployer properties to use while launching. (optional)"),
@@ -109,7 +109,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				)
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
-								requestParameters(
+								queryParameters(
 										parameterWithName("name").description("The name of the task definition to launch"),
 										parameterWithName("properties")
 												.description("Application and Deployer properties to use while launching. (optional)"),
@@ -148,7 +148,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						pathParameters(
 								parameterWithName("id").description("The id of an existing task execution (required)")
 						),
-						requestParameters(
+						queryParameters(
 								parameterWithName("schemaTarget").description("The schemaTarget provided in Task execution detail")
 						),
 						responseFields(
@@ -203,7 +203,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						pathParameters(
 								parameterWithName("externalExecutionId").description("The external ExecutionId of an existing task execution (required)")
 						),
-						requestParameters(
+						queryParameters(
 								parameterWithName("platform").description("The name of the platform.")
 						),
 						responseFields(
@@ -246,7 +246,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								.param("size", "2"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -273,7 +273,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				)
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -306,7 +306,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								pathParameters(
 										parameterWithName("id").description("The ids of an existing task execution (required)")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("schemaTarget").description("The schemaTarget provided in Task execution detail. (optional)"))
 						)
 				);
@@ -327,7 +327,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(parameterWithName("action").description("Optional. Defaults to: CLEANUP.")),
+						queryParameters(parameterWithName("action").description("Optional. Defaults to: CLEANUP.")),
 						pathParameters(parameterWithName("ids")
 								.description("The id of an existing task execution (required). Multiple comma separated values are accepted."))
 				));
@@ -340,7 +340,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously."),
 								parameterWithName("schemaTarget").description("Schema target for task. (optional)")
 						),

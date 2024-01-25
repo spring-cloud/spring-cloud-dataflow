@@ -18,8 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,7 +34,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -189,7 +192,7 @@ public class TaskExecutionControllerTests {
 
 
 	@BeforeEach
-	public void setupMockMVC() {
+	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
@@ -221,16 +224,15 @@ public class TaskExecutionControllerTests {
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 			TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 			TaskExecution taskExecution1 =
-					dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar");
+					dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
 
-			dao.createTaskExecution(TASK_NAME_ORIG, new Date(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
-			dao.createTaskExecution(TASK_NAME_FOO, new Date(), SAMPLE_ARGUMENT_LIST, null);
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, new Date(), SAMPLE_ARGUMENT_LIST,
+			dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
+			dao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
+			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
 					null);
 			SchemaVersionTarget fooBarTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_FOOBAR, taskDefinitionReader);
 			JobRepository jobRepository = jobRepositoryContainer.get(fooBarTarget.getName());
-			JobInstance instance = jobRepository.createJobInstance(TASK_NAME_FOOBAR, new JobParameters());
-			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
 			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(fooBarTarget.getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();

@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -388,22 +390,22 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(databaseType.name(),
 				prefix + "JOB_EXECUTION_SEQ");
 		for (int i = 0; i < numberOfJobs; i++) {
-			JobExecution jobExecution = new JobExecution(jobInstance, null, name);
+			JobExecution jobExecution = new JobExecution(jobInstance, new JobParameters());
 			result.add(jobExecution);
 			jobExecution.setId(jobExecutionIncrementer.nextLongValue());
-			jobExecution.setStartTime(new Date());
+			jobExecution.setStartTime(LocalDateTime.now());
 			if (!isRunning) {
-				jobExecution.setEndTime(new Date());
+				jobExecution.setEndTime(LocalDateTime.now());
 			}
 			jobExecution.setVersion(3);
 			Timestamp startTime = jobExecution.getStartTime() == null ? null : Timestamp
-				.valueOf(jobExecution.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				.valueOf(jobExecution.getStartTime().toInstant(OffsetDateTime.now().getOffset()).atZone(ZoneId.systemDefault()).toLocalDateTime());
 			Timestamp endTime = jobExecution.getEndTime() == null ? null : Timestamp
-				.valueOf(jobExecution.getEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				.valueOf(jobExecution.getEndTime().toInstant(OffsetDateTime.now().getOffset()).atZone(ZoneId.systemDefault()).toLocalDateTime());
 			Timestamp createTime = jobExecution.getCreateTime() == null ? null : Timestamp
-				.valueOf(jobExecution.getCreateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				.valueOf(jobExecution.getCreateTime().toInstant(OffsetDateTime.now().getOffset()).atZone(ZoneId.systemDefault()).toLocalDateTime());
 			Timestamp lastUpdated = jobExecution.getLastUpdated() == null ? null : Timestamp
-				.valueOf(jobExecution.getLastUpdated().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				.valueOf(jobExecution.getLastUpdated().toInstant(OffsetDateTime.now().getOffset()).atZone(ZoneId.systemDefault()).toLocalDateTime());
 			Object[] parameters = new Object[] { jobExecution.getId(), jobExecution.getJobId(), startTime, endTime,
 					batchStatus, jobExecution.getExitStatus().getExitCode(),
 					jobExecution.getExitStatus().getExitDescription(), jobExecution.getVersion(), createTime,
@@ -432,7 +434,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 			stepExecution.setId(stepExecutionIncrementer.nextLongValue());
 		}
 		if (stepExecution.getStartTime() == null) {
-			stepExecution.setStartTime(new Date());
+			stepExecution.setStartTime(LocalDateTime.now());
 		}
 		boolean isBatch4 = schemaVersionTarget.getSchemaVersion().equals(AppBootSchemaVersion.BOOT2);
 		Object[] parameters = isBatch4
@@ -441,7 +443,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 						stepExecution.getStatus().toString(), stepExecution.getLastUpdated() }
 				: new Object[] { stepExecution.getId(), stepExecution.getStepName(), stepExecution.getJobExecutionId(),
 						stepExecution.getStartTime(), stepExecution.getEndTime(), stepExecution.getVersion(),
-						stepExecution.getStatus().toString(), stepExecution.getLastUpdated(), new Date() };
+						stepExecution.getStatus().toString(), stepExecution.getLastUpdated(), LocalDateTime.now() };
 		String sql = getQuery(isBatch4 ? SAVE_STEP_EXECUTION_4 : SAVE_STEP_EXECUTION_5, schemaVersionTarget);
 		int[] argTypes4 = { Types.BIGINT, Types.VARCHAR, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.INTEGER,
 				Types.VARCHAR, Types.TIMESTAMP };
@@ -462,7 +464,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		TaskRepository taskRepository = taskRepositoryContainer.get(appBootSchemaVersion);
 
 		TaskExecution taskExecution = new TaskExecution();
-		taskExecution.setStartTime(new Date());
+		taskExecution.setStartTime(LocalDateTime.now());
 		taskExecution = taskRepository.createTaskExecution(taskExecution);
 		getJdbcTemplate().execute(
 				String.format(INSERT_TASK_BATCH, taskPrefix, taskExecution.getExecutionId(), jobExecution.getJobId()));

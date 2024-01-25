@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +27,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -105,7 +108,7 @@ public class JobInstanceControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 			.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -161,17 +164,17 @@ public class JobInstanceControllerTests {
 			.andExpect(content().string(containsString("NoSuchJobException")));
 	}
 
-	private void createSampleJob(String jobName, int jobExecutionCount) {
+	private void createSampleJob(String jobName, int jobExecutionCount)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		JobRepository jobRepository = jobRepositoryContainer.get(defaultSchemaTarget);
-		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 
 		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
 		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(defaultSchemaTarget);
 		for (int i = 0; i < jobExecutionCount; i++) {
-			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
 			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
 			stepExecution.setId(null);
 			jobRepository.add(stepExecution);

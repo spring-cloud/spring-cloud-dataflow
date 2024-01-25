@@ -33,7 +33,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,7 +77,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 					.param("deploy", "false"))
 			.andExpect(status().isCreated())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("name").description("The name for the created task definitions"),
 					parameterWithName("definition").description("The definition for the stream, using Data Flow DSL"),
 					parameterWithName("description").description("The description of the stream definition"),
@@ -107,7 +107,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("search").description("The search string performed on the name (optional)"),
 					parameterWithName("sort").description("The sort on the list (optional)"),
@@ -179,7 +179,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-                requestParameters(
+                queryParameters(
                     parameterWithName("nested")
                         .description("Should we recursively findByTaskNameContains for related stream definitions (optional)"),
                     parameterWithName("page").description("The zero-based page number (optional)"),

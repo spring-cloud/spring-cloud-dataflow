@@ -157,14 +157,14 @@ public class HttpCommands {
 		restTemplate.setErrorHandler(new ResponseErrorHandler() {
 			@Override
 			public boolean hasError(ClientHttpResponse response) throws IOException {
-				HttpStatus status = response.getStatusCode();
+				HttpStatus status = (HttpStatus) response.getStatusCode();
 				return (status == HttpStatus.BAD_GATEWAY || status == HttpStatus.GATEWAY_TIMEOUT
 						|| status == HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
 			@Override
 			public void handleError(ClientHttpResponse response) throws IOException {
-				outputError(response.getStatusCode(), buffer);
+				outputError((HttpStatus)response.getStatusCode(), buffer);
 			}
 		});
 
@@ -181,7 +181,7 @@ public class HttpCommands {
 	}
 
 	private void outputResponse(ResponseEntity<String> response, StringBuilder buffer) {
-		buffer.append("> ").append(response.getStatusCode().value()).append(" ").append(response.getStatusCode().name())
+		buffer.append("> ").append(response.getStatusCode().value()).append(" ").append(((HttpStatus)response.getStatusCode()).name())
 				.append(System.lineSeparator());
 		String maybeJson = response.getBody();
 		if (maybeJson != null) {

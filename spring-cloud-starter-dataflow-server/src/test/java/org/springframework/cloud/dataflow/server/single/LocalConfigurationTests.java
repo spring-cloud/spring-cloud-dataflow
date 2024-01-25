@@ -38,7 +38,6 @@ import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoa
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.util.TestSocketUtils;
-import org.springframework.util.SocketUtils;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

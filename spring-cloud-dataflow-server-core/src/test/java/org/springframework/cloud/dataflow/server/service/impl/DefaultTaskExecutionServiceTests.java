@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -250,7 +250,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			this.launcherRepository.save(new Launcher(TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE, taskLauncher));
 			initializeSuccessfulRegistry(appRegistry);
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
-			TaskExecution taskExecution = new TaskExecution(1, 0, TASK_NAME_ORIG, new Date(), new Date(), "", Collections.emptyList(), "", null, null);
+			TaskExecution taskExecution = new TaskExecution(1, 0, TASK_NAME_ORIG, LocalDateTime.now(), LocalDateTime.now(), "", Collections.emptyList(), "", null, null);
 			TaskRepository taskRepository = taskRepositoryContainer.get(schemaVersionTarget.getName());
 			taskRepository.createTaskExecution(taskExecution);
 			TaskManifest taskManifest = new TaskManifest();
@@ -395,8 +395,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
+			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, LocalDateTime.now(), null);
 
 
 			when(taskLauncher.launch(any())).thenReturn("0");
@@ -420,7 +420,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
 			long firstTaskExecutionId = launchResponse.getExecutionId();
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
-			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
@@ -446,7 +446,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
 			long firstTaskExecutionId = launchResponse.getExecutionId();
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
-			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 
@@ -471,7 +471,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask("t1", properties, new LinkedList<>());
 			long firstTaskExecutionId = launchResponse.getExecutionId();
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
-			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 
@@ -485,7 +485,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			long secondTaskExecutionId = launchResponse2.getExecutionId();
 
 			taskRepository = taskRepositoryContainer.get(launchResponse2.getSchemaTarget());
-			taskRepository.completeTaskExecution(secondTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(secondTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse2.getSchemaTarget());
 			lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t1");
 			// without passing version, we should not get back to default app, in this case foo-task100
@@ -511,7 +511,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			long firstTaskExecutionId = launchResponse.getExecutionId();
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("t2", taskDefinitionReader);
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
-			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest("t2");
 
@@ -536,7 +536,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, properties, new LinkedList<>());
 			long firstTaskExecutionId = launchResponse.getExecutionId();
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
-			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, new Date(), "all done");
+			taskRepository.completeTaskExecution(firstTaskExecutionId, 0, LocalDateTime.now(), "all done");
 			this.taskExecutionService.executeTask(TASK_NAME_ORIG, Collections.emptyMap(), new LinkedList<>());
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(launchResponse.getSchemaTarget());
 			TaskManifest lastManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(TASK_NAME_ORIG);
@@ -575,7 +575,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
 			taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
 			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.running, new HashMap<>()));
@@ -602,7 +602,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
 			taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
 			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.failed, new HashMap<>()));
@@ -627,8 +627,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
+			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, LocalDateTime.now(), null);
 			taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "0");
 
 			initializeSuccessfulRegistry(appRegistry);
@@ -688,8 +688,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
+			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, LocalDateTime.now(), null);
 
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -725,8 +725,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
+			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, LocalDateTime.now(), null);
 
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -757,8 +757,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 			manifest.setTaskDeploymentRequest(request);
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
-			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, new Date(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
+			taskRepository.completeTaskExecution(myTask.getExecutionId(), 0, LocalDateTime.now(), null);
 
 			initializeSuccessfulRegistry(appRegistry);
 
@@ -796,7 +796,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = this.dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			dataflowTaskExecutionMetadataDao.save(myTask, manifest);
-			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, new Date(), new ArrayList<>(), null);
+			taskRepository.startTaskExecution(myTask.getExecutionId(), TASK_NAME_ORIG, LocalDateTime.now(), new ArrayList<>(), null);
 			taskRepository.updateExternalExecutionId(myTask.getExecutionId(), "abc");
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
 			when(this.taskLauncher.status("abc")).thenReturn(new TaskStatus("abc", LaunchState.running, new HashMap<>()));
@@ -928,7 +928,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
-			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", 1L);
+			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", LocalDateTime.now(), LocalDateTime.now(), "", Collections.emptyList(), "", "1234A", 1L);
 			taskRepository.createTaskExecution(taskExecution);
 			Set<Long> executionIds = new HashSet<>(1);
 			executionIds.add(2L);
@@ -945,7 +945,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			LaunchResponse launchResponse = this.taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 			assertThat(launchResponse.getExecutionId()).isEqualTo(1L);
-			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", new Date(), new Date(), "", Collections.emptyList(), "", "1234A", null);
+			TaskExecution taskExecution = new TaskExecution(2L, 0, "childTask", LocalDateTime.now(), LocalDateTime.now(), "", Collections.emptyList(), "", "1234A", null);
 			TaskRepository taskRepository = taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			taskRepository.createTaskExecution(taskExecution);
 			Set<Long> executionIds = new HashSet<>(1);
@@ -981,7 +981,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 			TaskRepository taskRepository = this.taskRepositoryContainer.get(launchResponse.getSchemaTarget());
 			TaskExecution taskExecution = taskRepository.createTaskExecution();
-			taskRepository.startTaskExecution(taskExecution.getExecutionId(), "invalidChildTaskExecution", new Date(), Collections.emptyList(), null, 1L);
+			taskRepository.startTaskExecution(taskExecution.getExecutionId(), "invalidChildTaskExecution", LocalDateTime.now(), Collections.emptyList(), null, 1L);
 			validateFailedTaskStop(2, launchResponse.getSchemaTarget());
 		}
 
@@ -1086,7 +1086,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			taskDeployment.setTaskDefinitionName(taskName);
 			this.taskDeploymentRepository.save(taskDeployment);
 			TaskExecution taskExecution = new TaskExecution();
-			taskExecution.setStartTime(new Date());
+			taskExecution.setStartTime(LocalDateTime.now());
 			taskExecution.setTaskName(taskName);
 			taskExecution.setExternalExecutionId("12346");
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);

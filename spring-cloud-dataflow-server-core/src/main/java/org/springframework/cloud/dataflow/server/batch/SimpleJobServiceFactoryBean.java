@@ -21,10 +21,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.jsr.JsrJobParametersConverter;
-import org.springframework.batch.core.jsr.launch.JsrJobOperator;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
@@ -323,13 +323,14 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 */
 	@Override
 	public JobService getObject() throws Exception {
-		JsrJobParametersConverter jobParametersConverter = new JsrJobParametersConverter(dataSource);
-		jobParametersConverter.afterPropertiesSet();
-		JsrJobOperator jsrJobOperator = new JsrJobOperator(jobExplorer, jobRepository, jobParametersConverter,
-				transactionManager);
-		jsrJobOperator.afterPropertiesSet();
+
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+		jobOperator.setJobExplorer(this.jobExplorer);
+		jobOperator.setJobLauncher(this.jobLauncher);
+		jobOperator.setJobRepository(this.jobRepository);
+		jobOperator.setJobRegistry(new MapJobRegistry());
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-			jobRepository, createExecutionContextDao(), jsrJobOperator, createAggregateJobQueryDao(), schemaVersionTarget);
+			jobRepository, createExecutionContextDao(), jobOperator, createAggregateJobQueryDao(), schemaVersionTarget);
 	}
 
 	/**

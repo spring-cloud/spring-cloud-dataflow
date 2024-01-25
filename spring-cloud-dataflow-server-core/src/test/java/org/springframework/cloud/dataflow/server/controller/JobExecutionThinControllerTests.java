@@ -24,6 +24,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -89,7 +92,7 @@ public class JobExecutionThinControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepositoryContainer,
 				taskBatchDaoContainer,

@@ -121,21 +121,39 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
+	private DataflowPagingQueryProvider dataflowAllExecutionsPagingQueryProvider;
+
 	private PagingQueryProvider byJobNamePagingQueryProvider;
+
+	private DataflowPagingQueryProvider dataflowByJobNamePagingQueryProvider;
 
 	private PagingQueryProvider byStatusPagingQueryProvider;
 
+	private DataflowPagingQueryProvider dataflowByStatusPagingQueryProvider;
+
 	private PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
+
+	private DataflowPagingQueryProvider dataflowByJobNameAndStatusPagingQueryProvider;
 
 	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
+	private DataflowPagingQueryProvider dataflowByJobNameWithStepCountPagingQueryProvider;
+
 	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
+
+	private DataflowPagingQueryProvider dataflowExecutionsWithStepCountPagingQueryProvider;
 
 	private PagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
 
+	private DataflowPagingQueryProvider dataflowByDateRangeWithStepCountPagingQueryProvider;
+
 	private PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
 
+	private DataflowPagingQueryProvider dataflowByJobInstanceIdWithStepCountPagingQueryProvider;
+
 	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
+
+	private DataflowPagingQueryProvider dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider;
 
 	private final ConfigurableConversionService conversionService;
 
@@ -180,17 +198,42 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		});
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
+		dataflowAllExecutionsPagingQueryProvider = getDataflowPagingQueryProvider();
+
+
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
+
+		dataflowExecutionsWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
+
+
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
+		dataflowByJobNamePagingQueryProvider =getDataflowPagingQueryProvider(NAME_FILTER);
+
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
+		dataflowByStatusPagingQueryProvider = getDataflowPagingQueryProvider(STATUS_FILTER);
+
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
+		dataflowByJobNameAndStatusPagingQueryProvider = getDataflowPagingQueryProvider(NAME_AND_STATUS_FILTER);
+
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
+
+		dataflowByJobNameWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
+
+
 		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
 				DATE_RANGE_FILTER);
+		dataflowByDateRangeWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
+			DATE_RANGE_FILTER);
+
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
 				JOB_INSTANCE_ID_FILTER);
+		dataflowByJobInstanceIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
+			JOB_INSTANCE_ID_FILTER);
+
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
 				FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
+		dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
+			FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
 
 		super.afterPropertiesSet();
 
@@ -254,12 +297,31 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} for all job executions with the provided
+	 * @return a {@link PagingQueryProvider} for all job executions
+	 * @throws Exception if page provider is not created.
+	 */
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider() throws Exception {
+		return getDataflowPagingQueryProvider(null);
+	}
+
+	/**
+	 * @return a {@link DataflowPagingQueryProvider} for all job executions with the provided
 	 * where clause
 	 * @throws Exception if page provider is not created.
 	 */
 	private PagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
 		return getPagingQueryProvider(null, whereClause);
+	}
+
+	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
+	/**
+	 * @return a {@link DataflowPagingQueryProvider} for all job executions with the provided
+	 * where clause
+	 * @throws Exception if page provider is not created.
+	 */
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String whereClause) {
+		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
+			"generateJumpToItemQuery");
 	}
 
 	/**
@@ -291,6 +353,16 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		factory.setWhereClause(whereClause);
 
 		return factory.getObject();
+	}
+
+	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
+	/**
+	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
+	 * @throws Exception if page provider is not created.
+	 */
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause) {
+		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
+			"generateJumpToItemQuery");
 	}
 
 	/**
@@ -339,7 +411,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byDateRangeWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					dataflowByDateRangeWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					fromDate, toDate);
 			return getJdbcTemplate().query(
 					byDateRangeWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -360,7 +432,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byJobInstanceIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					dataflowByJobInstanceIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					jobInstanceId);
 			return getJdbcTemplate().query(
 					byJobInstanceIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -381,7 +453,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byTaskExecutionIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					taskExecutionId);
 			return getJdbcTemplate().query(
 					byTaskExecutionIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -411,7 +483,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byJobNameAndStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName,
+					dataflowByJobNameAndStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName,
 					status.name());
 			return getJdbcTemplate().query(byJobNameAndStatusPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), jobName, status.name(), startAfterValue);
@@ -432,7 +504,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
+					dataflowByJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
 			return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), jobName, startAfterValue);
 		}
@@ -449,7 +521,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, status.name());
+					dataflowByStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, status.name());
 			return getJdbcTemplate().query(byStatusPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), status.name(), startAfterValue);
 		}
@@ -469,7 +541,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					byJobNameWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					dataflowByJobNameWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					jobName);
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), jobName, startAfterValue);
@@ -490,7 +562,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate()
-				.queryForObject(allExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+				.queryForObject(dataflowAllExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(allExecutionsPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), startAfterValue);
 		}
@@ -507,7 +579,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					executionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+					dataflowExecutionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(
 					executionsWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), startAfterValue);
@@ -570,8 +642,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	}
 
+	//TODO: Boot3x followup - need to handle LocalDateTime and possibly Integer
 	protected JobParameters getJobParametersBatch5(Long executionId) {
-		Map<String, JobParameter> map = new HashMap<>();
+		Map<String, JobParameter<?>> map = new HashMap<>();
 		RowCallbackHandler handler = rs -> {
 			String parameterName = rs.getString("PARAMETER_NAME");
 
@@ -588,29 +661,29 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
 
 			if (typedValue instanceof String) {
-				map.put(parameterName, new JobParameter((String) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, String.class, identifying));
 			}
 			else if (typedValue instanceof Integer) {
-				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), identifying));
+				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), Integer.class, identifying));
 			}
 			else if (typedValue instanceof Long) {
-				map.put(parameterName, new JobParameter((Long) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Long.class, identifying));
 			}
 			else if (typedValue instanceof Float) {
-				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), identifying));
+				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), Float.class, identifying));
 			}
 			else if (typedValue instanceof Double) {
-				map.put(parameterName, new JobParameter((Double) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Double.class, identifying));
 			}
 			else if (typedValue instanceof Timestamp) {
-				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), identifying));
+				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), Timestamp.class, identifying));
 			}
 			else if (typedValue instanceof Date) {
-				map.put(parameterName, new JobParameter((Date) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Date.class, identifying));
 			}
 			else {
 				map.put(parameterName,
-						new JobParameter(typedValue != null ? typedValue.toString() : "null", identifying));
+						new JobParameter(typedValue != null ? typedValue.toString() : "null", String.class, identifying));
 			}
 		};
 
@@ -639,12 +712,12 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		jobExecution = new JobExecution(jobInstance, jobParameters);
 		jobExecution.setId(id);
 
-		jobExecution.setStartTime(rs.getTimestamp(2));
-		jobExecution.setEndTime(rs.getTimestamp(3));
+		jobExecution.setStartTime(rs.getTimestamp(2).toLocalDateTime());
+		jobExecution.setEndTime(rs.getTimestamp(3).toLocalDateTime());
 		jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 		jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-		jobExecution.setCreateTime(rs.getTimestamp(7));
-		jobExecution.setLastUpdated(rs.getTimestamp(8));
+		jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());
+		jobExecution.setLastUpdated(rs.getTimestamp(8).toLocalDateTime());
 		jobExecution.setVersion(rs.getInt(9));
 		return jobExecution;
 	}
@@ -669,20 +742,19 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			Long id = rs.getLong(1);
 			JobParameters jobParameters = getJobParameters(id);
 			JobExecution jobExecution;
-			String jobConfigurationLocation = batchVersion.equals(BatchVersion.BATCH_4) ? rs.getString(10) : null;
 			if (jobInstance == null) {
-				jobExecution = new JobExecution(id, jobParameters, jobConfigurationLocation);
+				jobExecution = new JobExecution(id, jobParameters);
 			}
 			else {
-				jobExecution = new JobExecution(jobInstance, id, jobParameters, jobConfigurationLocation);
+				jobExecution = new JobExecution(jobInstance, id, jobParameters);
 			}
 
-			jobExecution.setStartTime(rs.getTimestamp(2));
-			jobExecution.setEndTime(rs.getTimestamp(3));
+			jobExecution.setStartTime(rs.getTimestamp(2).toLocalDateTime());
+			jobExecution.setEndTime(rs.getTimestamp(3).toLocalDateTime());
 			jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 			jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-			jobExecution.setCreateTime(rs.getTimestamp(7));
-			jobExecution.setLastUpdated(rs.getTimestamp(8));
+			jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());
+			jobExecution.setLastUpdated(rs.getTimestamp(8).toLocalDateTime());
 			jobExecution.setVersion(rs.getInt(9));
 			return jobExecution;
 		}

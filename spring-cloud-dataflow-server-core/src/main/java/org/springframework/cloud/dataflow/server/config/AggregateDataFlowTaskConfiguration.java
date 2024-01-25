@@ -58,6 +58,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.sql.SQLException;
+
 /**
  * Configuration for DAO Containers use for multiple schema targets.
  *
@@ -78,7 +80,8 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public DataflowTaskExecutionDaoContainer dataflowTaskExecutionDao(DataSource dataSource, SchemaService schemaService, TaskProperties taskProperties) {
+	public DataflowTaskExecutionDaoContainer dataflowTaskExecutionDao(DataSource dataSource, SchemaService schemaService,
+																	  TaskProperties taskProperties) {
 		DataflowTaskExecutionDaoContainer result = new DataflowTaskExecutionDaoContainer();
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			TaskProperties properties = new TaskProperties();
@@ -91,7 +94,9 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDao(DataSource dataSource, SchemaService schemaService) {
+	public DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDao(DataSource dataSource,
+																					  SchemaService schemaService)
+		throws SQLException {
 		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 		String databaseType;
 		try {

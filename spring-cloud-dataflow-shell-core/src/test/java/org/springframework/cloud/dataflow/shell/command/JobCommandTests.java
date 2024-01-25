@@ -17,8 +17,8 @@
 package org.springframework.cloud.dataflow.shell.command;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,10 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
@@ -113,21 +116,22 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		}
 	}
 
-	private static long createSampleJob(String jobName, int jobExecutionCount) {
+	private static long createSampleJob(String jobName, int jobExecutionCount)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
 		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<>(), null);
-		Map<String, JobParameter> jobParameterMap = new HashMap<>();
-		jobParameterMap.put("foo", new JobParameter("FOO", true));
-		jobParameterMap.put("bar", new JobParameter("BAR", false));
+		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
+		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
+		jobParameterMap.put("foo", new JobParameter("FOO", String.class, true));
+		jobParameterMap.put("bar", new JobParameter("BAR", String.class, false));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution;
 		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		for (int i = 0; i < jobExecutionCount; i++) {
-			jobExecution = jobRepository.createJobExecution(instance, jobParameters, null);
+			jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			StepExecution stepExecution = new StepExecution("foobar", jobExecution);
 			jobRepository.add(stepExecution);

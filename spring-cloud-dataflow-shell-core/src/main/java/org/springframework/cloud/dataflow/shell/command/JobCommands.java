@@ -150,13 +150,13 @@ public class JobCommands {
 				.addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
 		modelBuilder.addRow().addValue("Schema Target").addValue(jobExecutionResource.getSchemaTarget());
 		modelBuilder.addRow().addValue("Job Parameters ").addValue("");
-		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution()
+		for (Map.Entry<String, JobParameter<?>> jobParameterEntry : jobExecutionResource.getJobExecution()
 				.getJobParameters().getParameters().entrySet()) {
 			String key = org.springframework.util.StringUtils.trimLeadingCharacter(jobParameterEntry.getKey(), '-');
 			if (!jobParameterEntry.getValue().isIdentifying()) {
 				key = "-" + key;
 			}
-			String updatedKey = String.format("%s(%s) ", key, jobParameterEntry.getValue().getType().name());
+			String updatedKey = String.format("%s(%s) ", key, jobParameterEntry.getValue().getType().getName());
 			modelBuilder.addRow().addValue(updatedKey).addValue(new ArgumentSanitizer().sanitize(key, String.valueOf(jobParameterEntry.getValue())));
 		}
 

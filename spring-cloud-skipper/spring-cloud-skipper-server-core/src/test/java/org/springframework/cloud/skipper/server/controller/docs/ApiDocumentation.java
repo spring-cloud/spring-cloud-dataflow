@@ -17,7 +17,6 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import jakarta.servlet.RequestDispatcher;
-
 import org.junit.Test;
 
 import org.springframework.test.context.ActiveProfiles;

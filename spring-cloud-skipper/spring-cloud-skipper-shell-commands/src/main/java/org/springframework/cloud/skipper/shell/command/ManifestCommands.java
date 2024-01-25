@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.shell.command;
 
 import jakarta.validation.constraints.NotNull;
-
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 

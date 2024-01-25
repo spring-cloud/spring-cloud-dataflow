@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.rest.job;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import org.springframework.batch.core.StepExecution;
 

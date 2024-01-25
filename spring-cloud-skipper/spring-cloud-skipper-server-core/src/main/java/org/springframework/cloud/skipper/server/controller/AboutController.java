@@ -15,9 +15,14 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +98,7 @@ public class AboutController {
 			String version) {
 		String result = defaultValue;
 		if (result == null && StringUtils.hasText(url)) {
-			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLHostnameVerifier(new NoopHostnameVerifier())
+			CloseableHttpClient httpClient = httpClientBuilder()
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory
 					= new HttpComponentsClientHttpRequestFactory();
@@ -115,7 +119,14 @@ public class AboutController {
 		}
 		return result;
 	}
-
+	private HttpClientBuilder httpClientBuilder() {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
+	}
 	private void updateDependency(Dependency dependency, VersionInfoProperties.DependencyAboutInfo dependencyAboutInfo) {
 		dependency.setName(dependencyAboutInfo.getName());
 		if (dependencyAboutInfo.getUrl() != null) {

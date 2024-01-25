@@ -66,20 +66,20 @@ public class ArgumentSanitizerTest {
 	public void testSanitizeJobParameters() {
 		String[] JOB_PARAM_KEYS = {"username", "password", "name", "C", "D", "E"};
 		Date testDate = new Date();
-		JobParameter[] PARAMETERS = {new JobParameter("foo", true),
-				new JobParameter("bar", true),
-				new JobParameter("baz", true),
-				new JobParameter(1L, true),
-				new JobParameter(1D, true),
-				new JobParameter(testDate, false)};
+		JobParameter[] PARAMETERS = {new JobParameter("foo", String.class, true),
+				new JobParameter("bar", String.class, true),
+				new JobParameter("baz", String.class, true),
+				new JobParameter(1L, Long.class, true),
+				new JobParameter(1D, Double.class, true),
+				new JobParameter(testDate, Date.class, false)};
 
-		Map<String, JobParameter> jobParamMap = new LinkedHashMap<>();
+		Map<String, JobParameter<?>> jobParamMap = new LinkedHashMap<>();
 		for (int paramCount = 0; paramCount < JOB_PARAM_KEYS.length; paramCount++) {
 			jobParamMap.put(JOB_PARAM_KEYS[paramCount], PARAMETERS[paramCount]);
 		}
 		JobParameters jobParameters = new JobParameters(jobParamMap);
 		JobParameters sanitizedJobParameters = this.sanitizer.sanitizeJobParameters(jobParameters);
-		for(Map.Entry<String, JobParameter> entry : sanitizedJobParameters.getParameters().entrySet()) {
+		for(Map.Entry<String, JobParameter<?>> entry : sanitizedJobParameters.getParameters().entrySet()) {
 			if (entry.getKey().equals("username") || entry.getKey().equals("password")) {
 				Assert.assertEquals("******", entry.getValue().getValue());
 			}

@@ -79,7 +79,7 @@ public class SpringDocAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public WebSecurityCustomizer springDocWebSecurityCustomizer() {
-		return (webSecurity -> webSecurity.ignoring().antMatchers(
+		return (webSecurity -> webSecurity.ignoring().requestMatchers(
 				"/swagger-ui/**",
 				getApiDocsPathContext() + "/**",
 				swaggerUiConfigProperties.getPath(),

@@ -28,7 +28,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -80,7 +80,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
 					parameterWithName("operations").description("Comma-separated list of Audit Operations (optional)"),

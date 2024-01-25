@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +41,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -136,7 +135,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
 								.description("The name of an existing stream definition (required)")),
-						requestParameters(parameterWithName("reuse-deployment-properties")
+						queryParameters(parameterWithName("reuse-deployment-properties")
 								.description(parameterWithName("The name of the flag to reuse the deployment properties")))
 				));
 	}

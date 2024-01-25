@@ -126,7 +126,7 @@ public class SpringDocAutoConfigurationTests {
 		WebSecurity webSecurity = mock(WebSecurity.class, Answers.RETURNS_DEEP_STUBS);
 		customizer.customize(webSecurity);
 		ArgumentCaptor<String> antMatchersCaptor = ArgumentCaptor.forClass(String.class);
-		verify(webSecurity.ignoring()).antMatchers(antMatchersCaptor.capture());
+		verify(webSecurity.ignoring()).requestMatchers(antMatchersCaptor.capture());
 		assertThat(antMatchersCaptor.getAllValues()).containsExactly(expected);
 	}
 

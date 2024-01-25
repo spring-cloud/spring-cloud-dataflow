@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.awaitility.Awaitility;
@@ -141,8 +141,8 @@ public class TaskExecutionControllerCleanupAsyncTests {
 
 		List<String> taskArgs = new ArrayList<>();
 		taskArgs.add("foo=bar");
-		TaskExecution taskExecution1 = taskExecutionDao.createTaskExecution(taskName, new Date(), taskArgs, taskExecutionId);
-		taskExecutionDao.createTaskExecution(taskName, new Date(), taskArgs, taskExecutionId, taskExecution1.getExecutionId());
+		TaskExecution taskExecution1 = taskExecutionDao.createTaskExecution(taskName, LocalDateTime.now(), taskArgs, taskExecutionId);
+		taskExecutionDao.createTaskExecution(taskName, LocalDateTime.now(), taskArgs, taskExecutionId, taskExecution1.getExecutionId());
 
 		TaskDeployment taskDeployment = new TaskDeployment();
 		taskDeployment.setTaskDefinitionName(taskName);

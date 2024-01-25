@@ -138,6 +138,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		}
 
 		PagingQueryProvider queryProvider = getPagingQueryProvider(whereClause);
+		DataflowPagingQueryProvider dataflowQueryProvider = getDataflowPagingQueryProvider(whereClause);
 
 		List<StepExecution> stepExecutions;
 		if (start <= 0) {
@@ -147,7 +148,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		else {
 			try {
 				Long startAfterValue = getJdbcTemplate().queryForObject(
-						queryProvider.generateJumpToItemQuery(start, count), Long.class, jobName, stepName);
+						dataflowQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName, stepName);
 				stepExecutions = getJdbcTemplate().query(queryProvider.generateRemainingPagesQuery(count),
 						new StepExecutionRowMapper(), jobName, stepName, startAfterValue);
 			}
@@ -198,13 +199,24 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		}
 	}
 
+	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
+	/**
+	 * @return a {@link DataflowPagingQueryProvider} with a where clause to narrow the
+	 * query
+	 * @throws Exception
+	 */
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String whereClause) {
+		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
+			"generateJumpToItemQuery");
+	}
+
 	private static class StepExecutionRowMapper implements RowMapper<StepExecution> {
 
 		public StepExecution mapRow(ResultSet rs, int rowNum) throws SQLException {
 			StepExecution stepExecution = new StepExecution(rs.getString(2), null);
 			stepExecution.setId(rs.getLong(1));
-			stepExecution.setStartTime(rs.getTimestamp(3));
-			stepExecution.setEndTime(rs.getTimestamp(4));
+			stepExecution.setStartTime(rs.getTimestamp(3).toLocalDateTime());
+			stepExecution.setEndTime(rs.getTimestamp(4).toLocalDateTime());
 			stepExecution.setStatus(BatchStatus.valueOf(rs.getString(5)));
 			stepExecution.setCommitCount(rs.getInt(6));
 			stepExecution.setReadCount(rs.getInt(7));
@@ -215,7 +227,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 			stepExecution.setWriteSkipCount(rs.getInt(13));
 			stepExecution.setProcessSkipCount(rs.getInt(14));
 			stepExecution.setRollbackCount(rs.getInt(15));
-			stepExecution.setLastUpdated(rs.getTimestamp(16));
+			stepExecution.setLastUpdated(rs.getTimestamp(16).toLocalDateTime());
 			stepExecution.setVersion(rs.getInt(17));
 			return stepExecution;
 		}
