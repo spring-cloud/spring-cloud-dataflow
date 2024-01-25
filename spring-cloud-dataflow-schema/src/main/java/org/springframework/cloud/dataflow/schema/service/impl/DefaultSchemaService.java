@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersions;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTargets;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.stereotype.Service;
 
 /**
  * Implements a simple service to provide Schema versions and targets.

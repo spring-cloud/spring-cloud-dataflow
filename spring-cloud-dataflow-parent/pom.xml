@@ -55,7 +55,6 @@
 		<guava.version>32.1.3-jre</guava.version>
 		<logback.version>1.2.13</logback.version>
 		<json-path.version>2.9.0</json-path.version>
-		<http-client>5.2.4</http-client>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -307,11 +306,6 @@
 				<version>${spring-cloud-deployer.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>${http-client}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

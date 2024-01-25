@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.dataflow.container.registry.authorization.support.S3SignedRedirectRequestServerApplication;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.util.SocketUtils;
+import org.springframework.test.util.TestSocketUtils;
 
 /**
  * @author Adam J. Weigold
@@ -43,7 +43,7 @@ public class S3SignedRedirectRequestServerResource extends ExternalResource {
     @Override
     protected void before() throws Throwable {
 
-        this.s3SignedRedirectServerPort = SocketUtils.findAvailableTcpPort();
+        this.s3SignedRedirectServerPort = TestSocketUtils.findAvailableTcpPort();
 
         logger.info("Setting S3 Signed Redirect Server port to " + this.s3SignedRedirectServerPort);
 
