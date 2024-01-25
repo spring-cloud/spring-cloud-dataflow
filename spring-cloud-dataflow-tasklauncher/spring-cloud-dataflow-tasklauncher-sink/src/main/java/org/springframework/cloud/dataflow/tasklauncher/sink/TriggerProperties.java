@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.tasklauncher.sink;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.schema.service;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +40,4 @@ public class SchemaServiceConfiguration {
 		}
 	}
 
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration");
-	}
 }

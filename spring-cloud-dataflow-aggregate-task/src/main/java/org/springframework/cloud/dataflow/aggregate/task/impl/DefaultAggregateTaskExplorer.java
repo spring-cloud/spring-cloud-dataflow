@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -278,8 +277,4 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		return aggregateExecutionSupport.from(taskExplorer.getLatestTaskExecutionForTaskName(taskName), target.getName(), getPlatformName(taskName));
 	}
 
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateTaskExplorer");
-	}
 }

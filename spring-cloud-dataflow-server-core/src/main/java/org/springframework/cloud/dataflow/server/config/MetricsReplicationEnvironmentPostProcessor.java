@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.InfluxProperties;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusProperties;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.wavefront.WavefrontProperties;
+import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.cloud.dataflow.core.RelaxedNames;

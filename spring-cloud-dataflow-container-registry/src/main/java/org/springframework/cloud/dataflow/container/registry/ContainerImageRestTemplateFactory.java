@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.container.registry;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -25,16 +28,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderRequestRedirectStrategy;
@@ -42,6 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
 
 /**
  * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
@@ -174,16 +181,22 @@ public class ContainerImageRestTemplateFactory {
 
 		// Create a RestTemplate that uses custom request factory
 		return initRestTemplate(
-				HttpClients.custom()
-						.setSSLContext(sslContext)
-						.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE),
+				httpClientBuilder(sslContext),
 				withHttpProxy,
 				extra);
 	}
-
+	private HttpClientBuilder httpClientBuilder(SSLContext sslContext) {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
+	}
 	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
-		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
+		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.RELAXED).build());
 
 		// Set the HTTP proxy if configured.
 		if (withHttpProxy) {
@@ -199,7 +212,7 @@ public class ContainerImageRestTemplateFactory {
 						clientBuilder
 								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy(extra))
 								// Azure redirects may contain double slashes and on default those are normilised
-								.setDefaultRequestConfig(RequestConfig.custom().setNormalizeUri(false).build())
+								.setDefaultRequestConfig(RequestConfig.custom().build())
 								.build());
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.

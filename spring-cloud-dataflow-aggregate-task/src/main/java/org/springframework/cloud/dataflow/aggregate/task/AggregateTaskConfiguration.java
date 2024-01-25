@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
@@ -91,8 +90,4 @@ public class AggregateTaskConfiguration {
 				taskDeploymentReader);
 	}
 
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration");
-	}
 }

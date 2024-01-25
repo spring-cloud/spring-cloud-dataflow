@@ -54,6 +54,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.SocketUtils;
@@ -145,7 +146,7 @@ public class LocalDataflowResource extends ExternalResource {
 	protected void before() {
 		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
 
-		this.dataflowServerPort = SocketUtils.findAvailableTcpPort();
+		this.dataflowServerPort = TestSocketUtils.findAvailableTcpPort();
 
 		logger.info("Setting Dataflow Server port to " + this.dataflowServerPort);
 

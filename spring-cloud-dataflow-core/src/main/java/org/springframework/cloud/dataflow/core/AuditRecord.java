@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import java.sql.Types;
 import java.time.Instant;
 
 import jakarta.persistence.Column;
@@ -29,7 +30,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -58,7 +59,7 @@ public class AuditRecord {
 	private String correlationId;
 
 	@Lob
-	@Type(type = "org.hibernate.type.TextType")
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	@Column(name = "audit_data")
 	private String auditData;
 

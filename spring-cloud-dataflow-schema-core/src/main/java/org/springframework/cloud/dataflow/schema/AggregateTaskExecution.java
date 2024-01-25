@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.schema;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -227,12 +229,13 @@ public class AggregateTaskExecution {
 				'}';
 	}
 
+	//TODO: Boot3x followup
 	public TaskExecution toTaskExecution() {
 		return new TaskExecution(executionId,
 				exitCode,
 				taskName,
-				startTime,
-				endTime,
+				LocalDateTime.ofInstant(startTime.toInstant(), ZoneId.systemDefault()),
+				LocalDateTime.ofInstant(endTime.toInstant(), ZoneId.systemDefault()),
 				exitMessage,
 				arguments,
 				errorMessage,

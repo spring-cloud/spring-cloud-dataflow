@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;

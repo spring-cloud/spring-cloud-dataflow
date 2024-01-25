@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.schema.service.impl;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -31,7 +30,6 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersions;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTargets;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.stereotype.Service;
 
 /**
  * Implements a simple service to provide Schema versions and targets.
@@ -68,9 +66,5 @@ public class DefaultSchemaService implements SchemaService {
 			name = getDefaultSchemaTarget();
 		}
 		return targets.get(name);
-	}
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService");
 	}
 }

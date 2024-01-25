@@ -15,17 +15,18 @@
  */
 package org.springframework.cloud.dataflow.rest.util;
 
+import org.apache.hc.core5.ssl.SSLContexts;
+
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.ssl.SSLContexts;
+
 
 /**
- * Provides utilities for the Apache {@link HttpClient}, used to make REST calls
+ * Provides utilities for the Apache {@code HttpClient}, used to make REST calls
  *
  * @author Gunnar Hillert
  */

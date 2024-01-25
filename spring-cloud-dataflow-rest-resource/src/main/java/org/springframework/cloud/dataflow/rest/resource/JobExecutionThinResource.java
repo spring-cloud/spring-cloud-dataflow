@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.text.DateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -72,7 +75,7 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private String startTime = "";
 
-	private Date startDateTime = null;
+	private LocalDateTime startDateTime = null;
 
 	private String duration = "";
 
@@ -140,8 +143,8 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		if (jobExecution.getStartTime() != null) {
 			this.startDate = dateFormat.format(jobExecution.getStartTime());
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
-			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
-			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
+			this.duration = durationFormat.format(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.MILLIS));
 			this.startDateTime = jobExecution.getStartTime();
 		}
 
@@ -207,7 +210,7 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		return status;
 	}
 
-	public Date getStartDateTime() {
+	public LocalDateTime getStartDateTime() {
 		return startDateTime;
 	}
 

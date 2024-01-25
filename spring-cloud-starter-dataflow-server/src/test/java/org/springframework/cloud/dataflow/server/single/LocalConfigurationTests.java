@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.server.single.nodataflowapp.LocalTestN
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.util.SocketUtils;
 
 import static org.hamcrest.Matchers.is;
@@ -68,7 +69,7 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfig() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		int randomPort = SocketUtils.findAvailableTcpPort();
+		int randomPort = TestSocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
 		context = app.run(new String[] { "--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl });
 		assertNotNull(context.getBean(AppRegistryService.class));

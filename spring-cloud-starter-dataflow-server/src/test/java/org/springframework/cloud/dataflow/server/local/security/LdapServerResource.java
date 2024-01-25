@@ -24,6 +24,7 @@ import org.junit.rules.TemporaryFolder;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.ldap.server.ApacheDSContainer;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.SocketUtils;
@@ -81,7 +82,7 @@ public class LdapServerResource extends ExternalResource {
 		temporaryFolder.create();
 		apacheDSContainer = new ApacheDSContainer("dc=springframework,dc=org",
 				"classpath:org/springframework/cloud/dataflow/server/local/security/" + this.ldapFileName);
-		int ldapPort = SocketUtils.findAvailableTcpPort();
+		int ldapPort = TestSocketUtils.findAvailableTcpPort();
 		if (enabledSsl) {
 
 			apacheDSContainer.setLdapOverSslEnabled(true);

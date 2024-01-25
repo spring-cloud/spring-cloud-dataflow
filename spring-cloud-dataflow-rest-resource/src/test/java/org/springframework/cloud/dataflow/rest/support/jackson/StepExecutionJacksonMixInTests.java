@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 
@@ -82,7 +83,7 @@ public class StepExecutionJacksonMixInTests {
 	}
 
 	private StepExecution getStepExecution() {
-		JobExecution jobExecution = new JobExecution(1L, null, "hi");
+		JobExecution jobExecution = new JobExecution(1L, new JobParameters());
 		final StepExecution stepExecution = new StepExecution("step1", jobExecution);
 		jobExecution.createStepExecution("step1");
 		final ExecutionContext executionContext = stepExecution.getExecutionContext();
