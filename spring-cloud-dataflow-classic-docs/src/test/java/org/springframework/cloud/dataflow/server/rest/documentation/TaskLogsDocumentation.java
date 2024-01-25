@@ -33,7 +33,7 @@ import java.time.Duration;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,7 +76,7 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("platformName").description("The name of the platform the task is launched."))
 				));
 	}

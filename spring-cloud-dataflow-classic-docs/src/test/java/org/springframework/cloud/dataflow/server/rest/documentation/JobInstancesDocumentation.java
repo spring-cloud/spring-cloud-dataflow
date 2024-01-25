@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +26,10 @@ import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
@@ -49,7 +52,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -93,7 +96,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 						.param("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 						parameterWithName("page")
 								.description("The zero-based page number (optional)"),
 						parameterWithName("size")
@@ -117,7 +120,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 					pathParameters(
 						parameterWithName("id").description("The id of an existing job instance (required)")
 					),
-					requestParameters(
+					queryParameters(
 							parameterWithName("schemaTarget").description("Schema target").optional()
 					),
 					responseFields(
@@ -138,16 +141,16 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
 	}
 
-	private void createJobExecution(String name, BatchStatus status) {
+	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
 		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
+		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
 		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
-		JobExecution jobExecution = jobRepository.createJobExecution(jobRepository.createJobInstance(name, new JobParameters()), new JobParameters(), null);
+		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
 		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
-		jobExecution.setStartTime(new Date());
+		jobExecution.setStartTime(LocalDateTime.now());
 		jobRepository.update(jobExecution);
 	}
 }

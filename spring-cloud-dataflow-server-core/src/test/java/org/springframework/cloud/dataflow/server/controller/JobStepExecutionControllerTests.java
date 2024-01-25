@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +27,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -126,7 +128,7 @@ public class JobStepExecutionControllerTests {
 	TaskJobService taskJobService;
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -193,11 +195,11 @@ public class JobStepExecutionControllerTests {
 				.andExpect(jsonPath("$.stepExecutionHistory.commitCount.count", is(0)));
 	}
 
-	private void createStepExecution(String jobName, String... stepNames) {
+	private void createStepExecution(String jobName, String... stepNames)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
-		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+		JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
 		for (String stepName : stepNames) {
 			StepExecution stepExecution = new StepExecution(stepName, jobExecution, 1L);
 			stepExecution.setId(null);
@@ -207,7 +209,7 @@ public class JobStepExecutionControllerTests {
 			jobRepository.add(stepExecution);
 		}
 		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}

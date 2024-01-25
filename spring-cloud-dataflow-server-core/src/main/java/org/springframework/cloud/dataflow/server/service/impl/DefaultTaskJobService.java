@@ -254,10 +254,12 @@ public class DefaultTaskJobService implements TaskJobService {
 	 * identifying job parameters not in the original task execution arguments.
 	 */
 	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters, String schemaTarget) {
+		if(schemaTarget.equals(SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT2).getName())) {
+			throw new UnsupportedOperationException("Boot 2 operations are not supported");
+		}
 		List<String> result = new ArrayList<>(taskExecutionArgs);
-		String boot3Version = SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT3).getName();
 		String type;
-		Map<String, JobParameter> jobParametersMap = jobParameters.getParameters();
+		Map<String, JobParameter<?>> jobParametersMap = jobParameters.getParameters();
 		for (String key : jobParametersMap.keySet()) {
 			if (!key.startsWith("-")) {
 				boolean existsFlag = false;
@@ -268,27 +270,8 @@ public class DefaultTaskJobService implements TaskJobService {
 					}
 				}
 				if (!existsFlag) {
-					String param;
-					if (boot3Version.equals(schemaTarget)) {
-						if (JobParameter.ParameterType.LONG.equals(jobParametersMap.get(key).getType())) {
-							type = Long.class.getCanonicalName();
-						} else if (JobParameter.ParameterType.DATE.equals(jobParametersMap.get(key).getType())) {
-							type = Date.class.getCanonicalName();
-						} else if (JobParameter.ParameterType.DOUBLE.equals(jobParametersMap.get(key).getType())) {
-							type = Double.class.getCanonicalName();
-						} else if (JobParameter.ParameterType.STRING.equals(jobParametersMap.get(key).getType())) {
-							type = String.class.getCanonicalName();
-						} else  {
-							throw new IllegalArgumentException("Unable to convert " +
-								jobParametersMap.get(key).getType() + " to known type of JobParameters");
-						}
-						param = String.format("%s=%s,%s", key, jobParametersMap.get(key).getValue(), type);
-					} else {
-						param = String.format("%s(%s)=%s", key,
-							jobParametersMap.get(key).getType().toString().toLowerCase(),
-							jobParameters.getString(key));
-					}
-					result.add(param);
+					type = jobParametersMap.get(key).getType().getCanonicalName();
+					result.add(String.format("%s=%s,%s", key, jobParametersMap.get(key).getValue(), type));
 				}
 			}
 		}
@@ -325,14 +308,14 @@ public class DefaultTaskJobService implements TaskJobService {
 		return taskJobExecutions;
 	}
 
+	//TODO: Boot3x followup Brute force replacement when checking for schema target.   Need to have executions only look for boot3
 	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionWithStepCount jobExecutionWithStepCount) {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobExecutionWithStepCount.getJobConfigurationName(), taskDefinitionReader);
 		return new TaskJobExecution(
-				getTaskExecutionId(jobExecutionWithStepCount, schemaVersionTarget.getName()),
+				getTaskExecutionId(jobExecutionWithStepCount, "boot3"),
 				jobExecutionWithStepCount,
 				isTaskDefined(jobExecutionWithStepCount),
 				jobExecutionWithStepCount.getStepCount(),
-				schemaVersionTarget.getName()
+				"boot3"
 		);
 	}
 

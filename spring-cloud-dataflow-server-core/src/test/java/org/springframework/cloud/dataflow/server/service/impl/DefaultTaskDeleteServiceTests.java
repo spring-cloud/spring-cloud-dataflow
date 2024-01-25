@@ -17,10 +17,10 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -176,9 +176,9 @@ public abstract class DefaultTaskDeleteServiceTests {
 		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 		for (int i = 1; i <= numberOfExecutions; i++) {
 			TaskExecution taskExecution = taskRepository.createTaskExecution(new TaskExecution(i, 0, TASK_NAME_ORIG,
-					new Date(), new Date(), "", args, "", null,
+					LocalDateTime.now(), LocalDateTime.now(), "", args, "", null,
 					null));
-			taskRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, new Date(), "complete");
+			taskRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, LocalDateTime.now(), "complete");
 			JobExecution jobExecution = this.jobLauncherTestUtils.launchJob();
 			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(SchemaVersionTarget.defaultTarget().getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);

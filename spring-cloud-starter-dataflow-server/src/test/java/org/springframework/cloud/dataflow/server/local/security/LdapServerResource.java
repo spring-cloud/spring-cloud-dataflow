@@ -27,7 +27,6 @@ import org.springframework.security.ldap.server.ApacheDSContainer;
 import org.springframework.test.util.TestSocketUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SocketUtils;
 
 /**
  * @author Marius Bogoevici

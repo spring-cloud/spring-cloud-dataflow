@@ -25,7 +25,9 @@ import java.util.stream.Collectors;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 
 import org.hibernate.HibernateException;
+
 import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
@@ -39,7 +41,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -102,7 +103,7 @@ public class SchemaGenerationTests {
 		final MetadataSources metadata = new MetadataSources(
 				new StandardServiceRegistryBuilder()
 					.applySetting("hibernate.dialect", "org.hibernate.dialect." + dialect + "Dialect")
-					.applySetting("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName())
+					.applySetting("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getName())
 					.applySetting("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName())
 					.build());
 

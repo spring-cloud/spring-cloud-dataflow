@@ -32,7 +32,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -83,7 +83,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("name").description("The name of the application to register"),
 										parameterWithName("version").description("The version of the application to register")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").description("URI where the application bits reside"),
 										parameterWithName("metadata-uri").optional()
 												.description("URI where the application metadata jar can be found"),
@@ -108,7 +108,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").optional().description("URI where a properties file containing registrations can be fetched. Exclusive with `apps`."),
 										parameterWithName("apps").optional().description("Inline set of registrations. Exclusive with `uri`."),
 										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
@@ -133,7 +133,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("search").description("The search string performed on the name (optional)"),
 								parameterWithName("type")
 										.description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())),
@@ -167,7 +167,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("type").description("The type of application to query. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to query")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("exhaustive").optional()
 												.description("Return all application properties, including common Spring Boot properties")
 								),
@@ -205,7 +205,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("type").description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to register")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").description("URI where the application bits reside"),
 										parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
 										parameterWithName("bootVersion").optional().description("The Spring Boot version of the application.Default is 2"),

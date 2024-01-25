@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -61,6 +60,7 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.batch.DataflowPagingQueryProvider;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.converter.DateToStringConverter;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
@@ -192,25 +192,48 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private final PagingQueryProvider allExecutionsPagingQueryProvider;
 
+	private final DataflowPagingQueryProvider dataflowAllExecutionsPagingQueryProvider;
+
 	private final PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
+
+	private final DataflowPagingQueryProvider dataflowByJobNameAndStatusPagingQueryProvider;
 
 	private final PagingQueryProvider byStatusPagingQueryProvider;
 
+	private final DataflowPagingQueryProvider dataflowByStatusPagingQueryProvider;
+
 	private final PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
+
+	private final DataflowPagingQueryProvider dataflowByJobNameWithStepCountPagingQueryProvider;
 
 	private final PagingQueryProvider executionsByDateRangeWithStepCountPagingQueryProvider;
 
+	private final DataflowPagingQueryProvider dataflowExecutionsByDateRangeWithStepCountPagingQueryProvider;
+
 	private final PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
+
+	private final DataflowPagingQueryProvider dataflowByJobInstanceIdWithStepCountPagingQueryProvider;
 
 	private final PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
 
+	private final DataflowPagingQueryProvider dataflowByTaskExecutionIdWithStepCountPagingQueryProvider;
+
+
 	private final PagingQueryProvider jobExecutionsPagingQueryProviderByName;
+
+	private final DataflowPagingQueryProvider dataflowJobExecutionsPagingQueryProviderByName;
 
 	private final PagingQueryProvider allExecutionsPagingQueryProviderNoStepCount;
 
+	private final DataflowPagingQueryProvider dataflowAllExecutionsPagingQueryProviderNoStepCount;
+
 	private final PagingQueryProvider byJobNamePagingQueryProvider;
 
+	private final DataflowPagingQueryProvider dataflowByJobNamePagingQueryProvider;
+
 	private final PagingQueryProvider byJobExecutionIdAndSchemaPagingQueryProvider;
+
+	private final DataflowPagingQueryProvider dataflowByJobExecutionIdAndSchemaPagingQueryProvider;
 
 	private final DataSource dataSource;
 
@@ -240,16 +263,38 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		Jsr310Converters.getConvertersToRegister().forEach(conversionService::addConverter);
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, null);
+		dataflowAllExecutionsPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, null);
+
+		dataflowExecutionsByDateRangeWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, DATE_RANGE_FILTER);
 		executionsByDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, DATE_RANGE_FILTER);
+
 		allExecutionsPagingQueryProviderNoStepCount = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, null);
+		dataflowAllExecutionsPagingQueryProviderNoStepCount = getDataflowPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, null);
+
 		byStatusPagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, STATUS_FILTER);
+		dataflowByStatusPagingQueryProvider = getDataflowPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, STATUS_FILTER);
+
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_AND_STATUS_FILTER);
+		dataflowByJobNameAndStatusPagingQueryProvider = getDataflowPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_AND_STATUS_FILTER);
+
 		byJobNamePagingQueryProvider = getPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
+		dataflowByJobNamePagingQueryProvider = getDataflowPagingQueryProvider(FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
+
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
+		dataflowByJobNameWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, NAME_FILTER);
+
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
+		dataflowByJobInstanceIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, JOB_INSTANCE_ID_FILTER);
+
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
+		dataflowByTaskExecutionIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, TASK_EXECUTION_ID_FILTER);
+
 		jobExecutionsPagingQueryProviderByName = getPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING));
+		dataflowJobExecutionsPagingQueryProviderByName = getDataflowPagingQueryProvider(FIND_JOBS_FIELDS, FIND_JOBS_FROM, FIND_JOBS_WHERE, Collections.singletonMap("E.JOB_EXECUTION_ID", Order.DESCENDING));
+
 		byJobExecutionIdAndSchemaPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
+		dataflowByJobExecutionIdAndSchemaPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_EXEC_BATCH, FIND_BY_ID_SCHEMA);
+
 	}
 
 	private boolean determineUseRowNumberOptimization(Environment environment) {
@@ -266,7 +311,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 		List<JobInstanceExecutions> taskJobInstancesForJobName = getTaskJobInstancesForJobName(jobName, pageable);
 		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
-
 	}
 
 	@Override
@@ -395,6 +439,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private List<TaskJobExecution> getJobExecutionPage(long jobExecutionId, String schemaTarget) {
 		return queryForProvider(
+				dataflowByJobExecutionIdAndSchemaPagingQueryProvider,
 				byJobExecutionIdAndSchemaPagingQueryProvider,
 				new JobExecutionRowMapper(true),
 				0,
@@ -476,6 +521,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return queryForProvider(
+				dataflowByJobInstanceIdWithStepCountPagingQueryProvider,
 				byJobInstanceIdWithStepCountPagingQueryProvider,
 				new JobExecutionRowMapper(true),
 				start,
@@ -495,6 +541,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
 		return queryForProvider(
+				dataflowByTaskExecutionIdWithStepCountPagingQueryProvider,
 				byTaskExecutionIdWithStepCountPagingQueryProvider,
 				new JobExecutionRowMapper(true),
 				start,
@@ -506,91 +553,67 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private List<TaskJobExecution> getJobExecutions(String jobName, BatchStatus status, int start, int count) throws NoSuchJobExecutionException {
 		if (StringUtils.hasText(jobName) && status != null) {
-			return queryForProvider(byJobNameAndStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName, status.name());
+			return queryForProvider(dataflowByJobNameAndStatusPagingQueryProvider, byJobNameAndStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName, status.name());
 		} else if (status != null) {
-			return queryForProvider(byStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, status.name());
+			return queryForProvider(dataflowByStatusPagingQueryProvider, byStatusPagingQueryProvider, new JobExecutionRowMapper(false), start, count, status.name());
 		} else if (StringUtils.hasText(jobName)) {
-			return queryForProvider(byJobNamePagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName);
+			return queryForProvider(dataflowByJobNamePagingQueryProvider, byJobNamePagingQueryProvider, new JobExecutionRowMapper(false), start, count, jobName);
 		}
-		return queryForProvider(allExecutionsPagingQueryProviderNoStepCount, new JobExecutionRowMapper(false), start, count);
+		return queryForProvider(dataflowAllExecutionsPagingQueryProviderNoStepCount,
+			allExecutionsPagingQueryProviderNoStepCount, new JobExecutionRowMapper(false), start, count);
 	}
 
 	private List<TaskJobExecution> getJobExecutionsWithStepCount(String jobName, int start, int count) {
-		return queryForProvider(byJobNameWithStepCountPagingQueryProvider, new JobExecutionRowMapper(true), start, count, jobName);
+		return queryForProvider(dataflowByJobNameWithStepCountPagingQueryProvider, byJobNameWithStepCountPagingQueryProvider, new JobExecutionRowMapper(true), start, count, jobName);
 	}
 
 	public List<TaskJobExecution> getJobExecutionsWithStepCount(int start, int count) {
-		return queryForProvider(allExecutionsPagingQueryProvider, new JobExecutionRowMapper(true), start, count);
+		return queryForProvider(dataflowAllExecutionsPagingQueryProvider, allExecutionsPagingQueryProvider, new JobExecutionRowMapper(true), start, count);
 	}
 
+	//TODO: Boot3x followup   This was a brute force conversion removing the boot2 components.
 	protected JobParameters getJobParameters(Long executionId, String schemaTarget) {
-		final Map<String, JobParameter> map = new HashMap<>();
+		final Map<String, JobParameter<?>> map = new HashMap<>();
 		final SchemaVersionTarget schemaVersionTarget = schemaService.getTarget(schemaTarget);
 		boolean boot2 = AppBootSchemaVersion.BOOT2 == schemaVersionTarget.getSchemaVersion();
 		RowCallbackHandler handler;
-		if (boot2) {
-			handler = rs -> {
-				String keyName = rs.getString("KEY_NAME");
-				JobParameter.ParameterType type = JobParameter.ParameterType.valueOf(rs.getString("TYPE_CD"));
-				boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
-				JobParameter value;
-				switch (type) {
-					case STRING:
-						value = new JobParameter(rs.getString("STRING_VAL"), identifying);
-						break;
-					case LONG:
-						long longValue = rs.getLong("LONG_VAL");
-						value = new JobParameter(rs.wasNull() ? null : longValue, identifying);
-						break;
-					case DOUBLE:
-						double doubleValue = rs.getDouble("DOUBLE_VAL");
-						value = new JobParameter(rs.wasNull() ? null : doubleValue, identifying);
-						break;
-					case DATE:
-						value = new JobParameter(rs.getTimestamp("DATE_VAL"), identifying);
-						break;
-					default:
-						LOG.error("Unknown type:{} for {}", type, keyName);
-						return;
-				}
-				map.put(keyName, value);
-			};
-		} else {
-			handler = rs -> {
-				String parameterName = rs.getString("PARAMETER_NAME");
-				Class<?> parameterType = null;
-				try {
-					parameterType = Class.forName(rs.getString("PARAMETER_TYPE"));
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException(e);
-				}
-				String stringValue = rs.getString("PARAMETER_VALUE");
-				boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
-				Object typedValue = conversionService.convert(stringValue, parameterType);
-				JobParameter value;
-				if (typedValue instanceof String) {
-					value = new JobParameter((String) typedValue, identifying);
-				} else if (typedValue instanceof Date) {
-					value = new JobParameter((Date) typedValue, identifying);
-				} else if (typedValue instanceof Double) {
-					value = new JobParameter((Double) typedValue, identifying);
-				} else if (typedValue instanceof Long) {
-					value = new JobParameter((Long) typedValue, identifying);
-				} else if (typedValue instanceof Number) {
-					value = new JobParameter(((Number) typedValue).doubleValue(), identifying);
-				} else if (typedValue instanceof Instant) {
-					value = new JobParameter(new Date(((Instant) typedValue).toEpochMilli()), identifying);
-				} else {
-
-					value = new JobParameter(typedValue != null ? typedValue.toString() : null, identifying);
-				}
-				map.put(parameterName, value);
-			};
+		if(boot2) {
+			throw new UnsupportedOperationException("BOOT2 applications are no longer supported");
 		}
+		handler = rs -> {
+			String parameterName = rs.getString("PARAMETER_NAME");
+			Class<?> parameterType = null;
+			try {
+				parameterType = Class.forName(rs.getString("PARAMETER_TYPE"));
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+			String stringValue = rs.getString("PARAMETER_VALUE");
+			boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
+			Object typedValue = conversionService.convert(stringValue, parameterType);
+			JobParameter value;
+			if (typedValue instanceof String) {
+				value = new JobParameter(typedValue, String.class, identifying);
+			} else if (typedValue instanceof Date) {
+				value = new JobParameter(typedValue, Date.class, identifying);
+			} else if (typedValue instanceof Double) {
+				value = new JobParameter(typedValue, Double.class, identifying);
+			} else if (typedValue instanceof Long) {
+				value = new JobParameter(typedValue, Long.class, identifying);
+			} else if (typedValue instanceof Number) {
+				value = new JobParameter(((Number) typedValue).doubleValue(), Number.class, identifying);
+			} else if (typedValue instanceof Instant) {
+				value = new JobParameter(new Date(((Instant) typedValue).toEpochMilli()), Instant.class, identifying);
+			} else {
+
+				value = new JobParameter(typedValue != null ? typedValue.toString() : null, String.class, identifying);
+			}
+			map.put(parameterName, value);
+		};
 
 		jdbcTemplate.query(
 				getQuery(
-						boot2 ? FIND_PARAMS_FROM_ID2 : FIND_PARAMS_FROM_ID3,
+						FIND_PARAMS_FROM_ID3,
 						schemaVersionTarget.getBatchPrefix()
 				),
 				handler,
@@ -599,7 +622,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		return new JobParameters(map);
 	}
 
-	private <T, P extends PagingQueryProvider, M extends RowMapper<T>> List<T> queryForProvider(P pagingQueryProvider, M mapper, int start, int count, Object... arguments) {
+	private <T, D extends DataflowPagingQueryProvider, P extends PagingQueryProvider, M extends RowMapper<T>> List<T> queryForProvider(D dataflowPagingQueryProvider, P pagingQueryProvider, M mapper, int start, int count, Object... arguments) {
 		if (start <= 0) {
 			String sql = pagingQueryProvider.generateFirstPageQuery(count);
 			if (LOG.isDebugEnabled()) {
@@ -608,7 +631,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			return jdbcTemplate.query(sql, mapper, arguments);
 		} else {
 			try {
-				String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
+				String sqlJump = dataflowPagingQueryProvider.generateJumpToItemQuery(start, count);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 				}
@@ -627,7 +650,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 	}
 
-	private <T, P extends PagingQueryProvider, R extends ResultSetExtractor<List<T>>> List<T> queryForProvider(P pagingQueryProvider, R extractor, int start, int count, Object... arguments) {
+	private <T, P extends DataflowPagingQueryProvider, B extends PagingQueryProvider, R extends ResultSetExtractor<List<T>>> List<T> queryForProvider(P dataFlowPagingQueryProvider, B pagingQueryProvider, R extractor, int start, int count, Object... arguments) {
 		if (start <= 0) {
 			String sql = pagingQueryProvider.generateFirstPageQuery(count);
 			if (LOG.isDebugEnabled()) {
@@ -635,7 +658,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			}
 			return jdbcTemplate.query(sql, extractor, arguments);
 		} else {
-			String sqlJump = pagingQueryProvider.generateJumpToItemQuery(start, count);
+			String sqlJump = dataFlowPagingQueryProvider.generateJumpToItemQuery(start, count);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("queryJumpToItem:{}:{}:{}:{}", sqlJump, start, count, Arrays.asList(arguments));
 			}
@@ -655,7 +678,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		Assert.notNull(jobName, "jobName must not be null");
 		int start = getPageOffset(pageable);
 		int count = pageable.getPageSize();
-		return queryForProvider(jobExecutionsPagingQueryProviderByName, new JobInstanceExecutionsExtractor(false), start, count, jobName);
+		return queryForProvider(dataflowJobExecutionsPagingQueryProviderByName, jobExecutionsPagingQueryProviderByName, new JobInstanceExecutionsExtractor(false), start, count, jobName);
 	}
 
 	private TaskJobExecution createJobExecutionFromResultSet(ResultSet rs, int row, boolean readStepCount) throws SQLException {
@@ -669,12 +692,12 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		jobExecution = new JobExecution(jobInstance, jobParameters);
 		jobExecution.setId(jobExecutionId);
 
-		jobExecution.setStartTime(rs.getTimestamp("START_TIME"));
-		jobExecution.setEndTime(rs.getTimestamp("END_TIME"));
+		jobExecution.setStartTime(rs.getTimestamp("START_TIME").toLocalDateTime());
+		jobExecution.setEndTime(rs.getTimestamp("END_TIME").toLocalDateTime());
 		jobExecution.setStatus(BatchStatus.valueOf(rs.getString("STATUS")));
 		jobExecution.setExitStatus(new ExitStatus(rs.getString("EXIT_CODE"), rs.getString("EXIT_MESSAGE")));
-		jobExecution.setCreateTime(rs.getTimestamp("CREATE_TIME"));
-		jobExecution.setLastUpdated(rs.getTimestamp("LAST_UPDATED"));
+		jobExecution.setCreateTime(rs.getTimestamp("CREATE_TIME").toLocalDateTime());
+		jobExecution.setLastUpdated(rs.getTimestamp("LAST_UPDATED").toLocalDateTime());
 		jobExecution.setVersion(rs.getInt("VERSION"));
 
 		return readStepCount ?
@@ -684,6 +707,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private List<TaskJobExecution> getTaskJobExecutionsByDate(Date startDate, Date endDate, int start, int count) {
 		return queryForProvider(
+				dataflowExecutionsByDateRangeWithStepCountPagingQueryProvider,
 				executionsByDateRangeWithStepCountPagingQueryProvider,
 				new JobExecutionRowMapper(true),
 				start,
@@ -733,7 +757,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 					List<TaskJobExecution> executions = taskJobExecutions.computeIfAbsent(id, k -> new ArrayList<>());
 					long jobExecutionId = rs.getLong("JOB_EXECUTION_ID");
 					JobParameters jobParameters = getJobParameters(jobExecutionId, schemaTarget);
-					JobExecution jobExecution = new JobExecution(jobInstance, jobExecutionId, jobParameters, null);
+					JobExecution jobExecution = new JobExecution(jobInstance, jobExecutionId, jobParameters);
 
 					int stepCount = readStepCount ? rs.getInt("STEP_COUNT") : 0;
 					TaskJobExecution execution = new TaskJobExecution(taskId, jobExecution, true, stepCount, schemaTarget);
@@ -799,6 +823,15 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		return getPagingQueryProvider(null, fromClause, whereClause, Collections.emptyMap());
 	}
 
+	/**
+	 * @return a {@link PagingQueryProvider} with a where clause to narrow the
+	 * query
+	 * @throws Exception if page provider is not created.
+	 */
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fromClause, String whereClause) throws Exception {
+		return getDataflowPagingQueryProvider(null, fromClause, whereClause, Collections.emptyMap());
+	}
+
 	private PagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause) throws Exception {
 		return getPagingQueryProvider(fields, fromClause, whereClause, Collections.emptyMap());
 	}
@@ -828,6 +861,15 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		factory.setSortKeys(sortKeys);
 		factory.setWhereClause(whereClause);
 		return factory.getObject();
+	}
+
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause, Map<String, Order> sortKeys) throws Exception {
+		throw new UnsupportedOperationException("Need to create DataflowPagingQueryProvider so that dataflow can call " +
+			"generateRowNumSqlQueryWithNesting");
+	}
+
+	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause) throws Exception {
+		return getDataflowPagingQueryProvider(fields, fromClause, whereClause, Collections.emptyMap());
 	}
 
 	private boolean determineSupportsRowNumberFunction(DataSource dataSource) {
@@ -910,14 +952,13 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			return generateRowNumSqlQuery(true, pageSize);
 		}
 
-		@Override
 		public String generateJumpToItemQuery(int itemIndex, int pageSize) {
 			int page = itemIndex / pageSize;
 			int offset = (page * pageSize);
 			offset = (offset == 0) ? 1 : offset;
 			String sortKeyInnerSelect = this.getSortKeySelect(true);
 			String sortKeyOuterSelect = this.getSortKeySelect(false);
-			return SqlPagingQueryUtils.generateRowNumSqlQueryWithNesting(this, sortKeyInnerSelect, sortKeyOuterSelect,
+			return DataflowSqlPagingQueryUtils.generateRowNumSqlQueryWithNesting(this, sortKeyInnerSelect, sortKeyOuterSelect,
 					false, "TMP_ROW_NUM = " + offset);
 		}
 

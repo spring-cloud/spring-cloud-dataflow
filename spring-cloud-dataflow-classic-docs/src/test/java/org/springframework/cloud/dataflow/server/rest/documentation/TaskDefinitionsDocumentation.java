@@ -32,7 +32,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,7 +65,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.param("description", "Demo task definition for testing"))
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("name").description("The name for the created task definition"),
 					parameterWithName("definition").description("The definition for the task, using Data Flow DSL"),
 					parameterWithName("description").description("The description of the task definition")
@@ -97,7 +97,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
 					parameterWithName("search").description("The search string performed on the name (optional)"),
@@ -122,7 +122,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")
 				),
-				requestParameters(
+				queryParameters(
 					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
 				),
 				responseFields(
@@ -149,7 +149,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 			.andDo(this.documentationHandler.document(
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")),
-				requestParameters(
+				queryParameters(
 						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleaned up")
 				)
 			));

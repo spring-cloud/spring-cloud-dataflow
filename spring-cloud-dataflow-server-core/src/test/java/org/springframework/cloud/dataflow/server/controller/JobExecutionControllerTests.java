@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -27,7 +27,10 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -99,7 +102,7 @@ public class JobExecutionControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@Before
-	public void setupMockMVC() {
+	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepositoryContainer,
 				taskBatchDaoContainer,
@@ -342,14 +345,12 @@ public class JobExecutionControllerTests {
 				);
 	}
 
-	private void createDirtyJob() {
+	private void createDirtyJob() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		JobRepository jobRepository = jobRepositoryContainer.get(SchemaVersionTarget.defaultTarget().getName());
-		JobInstance instance = jobRepository.createJobInstance(JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK",
-				new JobParameters());
 		JobExecution jobExecution = jobRepository.createJobExecution(
-				instance, new JobParameters(), null);
+			JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK", new JobParameters());
 		jobExecution.setStatus(BatchStatus.STOPPED);
-		jobExecution.setEndTime(new Date());
+		jobExecution.setEndTime(LocalDateTime.now());
 		jobRepository.update(jobExecution);
 	}
 

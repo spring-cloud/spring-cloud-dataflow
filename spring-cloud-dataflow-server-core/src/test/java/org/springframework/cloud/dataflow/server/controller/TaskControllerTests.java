@@ -17,9 +17,9 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -196,14 +196,14 @@ public class TaskControllerTests {
 
 		TaskExecution taskExecutionRunning = this.taskExecutionCreationService.createTaskExecution("myTask", null);
 		assertThat(taskExecutionRunning.getExecutionId()).isGreaterThan(0L);
-		taskExecutionRunning.setStartTime(new Date());
+		taskExecutionRunning.setStartTime(LocalDateTime.now());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
 
 		TaskExecutionDao taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget.getName());
 		taskExecutionDao.startTaskExecution(taskExecutionRunning.getExecutionId(),
 				taskExecutionRunning.getTaskName(),
-				new Date(),
+				LocalDateTime.now(),
 				SAMPLE_ARGUMENT_LIST,
 				Long.toString(taskExecutionRunning.getExecutionId()));
 		taskExecutionRunning = taskExecutionDao.getTaskExecution(taskExecutionRunning.getExecutionId());
@@ -216,10 +216,10 @@ public class TaskControllerTests {
 		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
 		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(),
 				taskExecutionComplete.getTaskName(),
-				new Date(),
+				LocalDateTime.now(),
 				SAMPLE_ARGUMENT_LIST,
 				Long.toString(taskExecutionComplete.getExecutionId()));
-		taskExecutionDao.completeTaskExecution(taskExecutionComplete.getExecutionId(), 0, new Date(), null);
+		taskExecutionDao.completeTaskExecution(taskExecutionComplete.getExecutionId(), 0, LocalDateTime.now(), null);
 		taskExecutionComplete = taskExecutionDao.getTaskExecution(taskExecutionComplete.getExecutionId());
 		dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget2.getName());
 		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
@@ -754,8 +754,8 @@ public class TaskControllerTests {
 		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");
-		taskExecutionComplete.setStartTime(new Date());
-		taskExecutionComplete.setEndTime(new Date());
+		taskExecutionComplete.setStartTime(LocalDateTime.now());
+		taskExecutionComplete.setEndTime(LocalDateTime.now());
 		taskExecutionComplete.setExitCode(0);
 		repository.save(new TaskDefinition("myTask3", "foo"));
 		this.registry.save("foo", ApplicationType.task,

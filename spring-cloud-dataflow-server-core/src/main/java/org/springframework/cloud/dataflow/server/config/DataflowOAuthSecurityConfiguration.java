@@ -21,6 +21,7 @@ import org.springframework.cloud.common.security.support.OnOAuth2SecurityEnabled
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 
 /**
  * Setup Spring Security OAuth for the Rest Endpoints of Spring Cloud Data Flow.
@@ -34,8 +35,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 public class DataflowOAuthSecurityConfiguration extends OAuthSecurityConfiguration {
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		super.configure(http);
+	protected HttpBasicConfigurer configure(HttpSecurity http) throws Exception {
+		return super.configure(http);
 	}
 
 }

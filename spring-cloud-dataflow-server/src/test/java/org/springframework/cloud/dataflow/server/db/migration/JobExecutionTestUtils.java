@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.server.db.migration;
 
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.sql.DataSource;
 
@@ -88,13 +87,13 @@ class JobExecutionTestUtils
 		// BATCH_JOB_EXECUTION differs and the DAO can not be used for BATCH4/5 inserting
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(incrementerFallbackType.name(), schemaVersionTarget.getBatchPrefix() + "JOB_EXECUTION_SEQ");
 		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersion);
-		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), new ArrayList<>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
 		JobInstance jobInstance = jobInstanceDao.createJobInstance(jobName, jobParameters);
 		for (int i = 0; i < jobExecutionCount; i++) {
 			JobExecution jobExecution = new JobExecution(jobInstance, new JobParameters());
 			jobExecution.setStatus(batchStatus);
 			jobExecution.setId(jobExecutionIncrementer.nextLongValue());
-			jobExecution.setStartTime(new Date());
+			jobExecution.setStartTime(LocalDateTime.now());
 			saveJobExecution(jobExecution, jdbcTemplate, schemaVersionTarget);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		}
@@ -115,7 +114,7 @@ class JobExecutionTestUtils
 	}
 
 	private JobExecution saveJobExecution(JobExecution jobExecution, JdbcTemplate jdbcTemplate, SchemaVersionTarget schemaVersionTarget) {
-		jobExecution.setStartTime(new Date());
+		jobExecution.setStartTime(LocalDateTime.now());
 		jobExecution.setVersion(1);
 		Timestamp startTime = timestampFromDate(jobExecution.getStartTime());
 		Timestamp endTime = timestampFromDate(jobExecution.getEndTime());
@@ -134,8 +133,8 @@ class JobExecutionTestUtils
 		return jobExecution;
 	}
 
-	private Timestamp timestampFromDate(Date date) {
-		return (date != null) ? Timestamp.valueOf(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) : null;
+	private Timestamp timestampFromDate(LocalDateTime date) {
+		return (date != null) ? Timestamp.valueOf(date) : null;
 	}
 
 

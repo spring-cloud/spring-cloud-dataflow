@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -39,7 +40,10 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -149,8 +153,8 @@ public class DefaultTaskJobServiceTests {
 
 	@Before
 	public void setup() {
-		Map<String, JobParameter> jobParameterMap = new HashMap<>();
-		jobParameterMap.put("identifying.param", new JobParameter("testparam"));
+		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
+		jobParameterMap.put("identifying.param", new JobParameter("testparam", String.class));
 		this.jobParameters = new JobParameters(jobParameterMap);
 
 		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
@@ -201,7 +205,8 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	@Test
-	public void testRestartNoPlatform() {
+	public void testRestartNoPlatform()
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		createBaseLaunchers();
 		initializeJobs(false);
 		Exception exception = assertThrows(IllegalStateException.class, () -> {
@@ -222,12 +227,14 @@ public class DefaultTaskJobServiceTests {
 		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
 	}
 
-	private void initializeJobs(boolean insertTaskExecutionMetadata) {
+	private void initializeJobs(boolean insertTaskExecutionMetadata)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		initializeJobs(insertTaskExecutionMetadata,
 			new SchemaVersionTarget("boot2", AppBootSchemaVersion.BOOT2, "TASK_",
 				"BATCH_", "H2"));
 	}
-	private void initializeJobs(boolean insertTaskExecutionMetadata, SchemaVersionTarget schemaVersionTarget) {
+	private void initializeJobs(boolean insertTaskExecutionMetadata, SchemaVersionTarget schemaVersionTarget)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		String definitionName = (AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) ?
 			"some-name-boot3" : "some-name";
 		this.taskDefinitionRepository.save(new TaskDefinition(JOB_NAME_ORIG + jobInstanceCount, definitionName  ));
@@ -260,10 +267,10 @@ public class DefaultTaskJobServiceTests {
 			BatchStatus status,
 			boolean insertTaskExecutionMetadata,
 			SchemaVersionTarget schemaVersionTarget
-	) {
+	) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 
-		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, new Date(), Collections.emptyList(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), Collections.emptyList(), null);
 		JobExecution jobExecution;
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
@@ -271,12 +278,12 @@ public class DefaultTaskJobServiceTests {
 			template.execute(String.format("INSERT INTO " + schemaVersionTarget.getTaskPrefix() + "EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
 		if(AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) {
-			jobExecution = new JobExecution(instance, 1L, this.jobParameters, "foo");
-			jobExecution.setCreateTime(new Date());
+			jobExecution = new JobExecution(instance, 1L, this.jobParameters);
+			jobExecution.setCreateTime(LocalDateTime.now());
 			jobExecution.setVersion(1);
-			Object[] jobExecutionParameters = new Object[] { 1, 1, new Date(), new Date(),
+			Object[] jobExecutionParameters = new Object[] { 1, 1, LocalDateTime.now(), LocalDateTime.now(),
 				BatchStatus.COMPLETED, ExitStatus.COMPLETED,
-				ExitStatus.COMPLETED.getExitDescription(), 1, new Date(), new Date() };
+				ExitStatus.COMPLETED.getExitDescription(), 1, LocalDateTime.now(), LocalDateTime.now() };
 			Object[] jobExecutionParmParameters = new Object[] { 1,  "identifying.param", "java.lang.String", "testparm", "Y"};
 			this.jdbcTemplate.update(SAVE_JOB_EXECUTION, jobExecutionParameters,
 				new int[] { Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
@@ -284,15 +291,15 @@ public class DefaultTaskJobServiceTests {
 			this.jdbcTemplate.update(SAVE_JOB_EXECUTION_PARAM, jobExecutionParmParameters, new int[] { Types.BIGINT,
 					Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.CHAR});
 		} else {
-			jobExecution = jobRepository.createJobExecution(instance,
-				this.jobParameters, null);
+			jobExecution = jobRepository.createJobExecution(jobName,
+				this.jobParameters);
 				StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
 				stepExecution.setId(null);
 				jobRepository.add(stepExecution);
 		}
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
-		jobExecution.setStartTime(new Date());
+		jobExecution.setStartTime(LocalDateTime.now());
 		jobRepository.update(jobExecution);
 	}
 

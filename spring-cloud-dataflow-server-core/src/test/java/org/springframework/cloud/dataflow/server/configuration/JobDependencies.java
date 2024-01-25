@@ -25,7 +25,7 @@ import java.util.Map;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -111,7 +111,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -412,9 +411,9 @@ public class JobDependencies {
 
 
 	@Bean
-	public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
-																					  ResourceLoader resourceLoader, BatchProperties properties) {
-		return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
+	public BatchDataSourceScriptDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+																									BatchProperties properties) {
+		return new BatchDataSourceScriptDatabaseInitializer(dataSource, properties.getJdbc());
 	}
 
 	@Bean
