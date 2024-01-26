@@ -37,6 +37,7 @@ import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Lookup;
 import org.apache.hc.core5.http.config.Registry;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -177,22 +178,22 @@ public class ContainerImageRestTemplateFactory {
 		SSLContext sslContext = SSLContext.getInstance("SSL");
 		// Install trust manager to SSL Context.
 		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-		ConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-
-		Registry<ConnectionSocketFactory> socketFactoryRegistry =
-			RegistryBuilder.<ConnectionSocketFactory> create()
-				.register("https", sslsf)
-				.register("http", new PlainConnectionSocketFactory())
-				.build();
-		final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(socketFactoryRegistry);
 
 		// Create a RestTemplate that uses custom request factory
 		return initRestTemplate(
-				HttpClients.custom().setConnectionManager(connectionManager),
+				httpClientBuilder(sslContext),
 				withHttpProxy,
 				extra);
 	}
-
+	private HttpClientBuilder httpClientBuilder(SSLContext sslContext) {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
+	}
 	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.RELAXED).build());
