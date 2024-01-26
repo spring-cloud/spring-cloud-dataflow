@@ -49,7 +49,7 @@ spec:
           resources:
             requests:
               cpu: 1500m
-              memory: 1024Mi
+              memory: 1536Mi
           env:
             - name: LANG
               value: en_US.utf8

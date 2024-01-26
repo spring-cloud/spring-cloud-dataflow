@@ -42,5 +42,6 @@ data:
                   default:
                     imagePullPolicy: IfNotPresent
                     imagePullSecret: registry-key
-                    limits:
+                    requests:
+                      cpu: 1500m
                       memory: 1024Mi
