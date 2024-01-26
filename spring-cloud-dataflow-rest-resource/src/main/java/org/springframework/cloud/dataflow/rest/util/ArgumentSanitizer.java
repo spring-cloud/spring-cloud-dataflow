@@ -140,11 +140,11 @@ public class ArgumentSanitizer {
 	 * @return the sanitized job parameters
 	 */
 	public JobParameters sanitizeJobParameters(JobParameters jobParameters) {
-		Map<String, JobParameter> newJobParameters = new HashMap<>();
+		Map<String, JobParameter<?>> newJobParameters = new HashMap<>();
 		jobParameters.getParameters().forEach((key, jobParameter) -> {
 			String updatedKey = !jobParameter.isIdentifying() ? "-" + key : key;
-			if (jobParameter.getType().equals(JobParameter.ParameterType.STRING)) {
-				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString())));
+			if (jobParameter.getType().isInstance(String.class)) {
+				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString()), String.class));
 			} else {
 				newJobParameters.put(updatedKey, jobParameter);
 			}

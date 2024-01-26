@@ -18,11 +18,12 @@ package org.springframework.cloud.dataflow.rest.util;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
@@ -42,7 +43,7 @@ public class ResourceBasedAuthorizationInterceptor implements HttpRequestInterce
 	}
 
 	@Override
-	public void process(HttpRequest httpRequest, HttpContext httpContext) throws HttpException, IOException {
+	public void process(HttpRequest httpRequest, EntityDetails entityDetails, HttpContext httpContext) throws HttpException, IOException {
 		final String credentials = StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8).trim();
 		resource.check();
 		httpRequest.addHeader(HttpHeaders.AUTHORIZATION, credentials);

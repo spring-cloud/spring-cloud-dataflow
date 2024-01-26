@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 

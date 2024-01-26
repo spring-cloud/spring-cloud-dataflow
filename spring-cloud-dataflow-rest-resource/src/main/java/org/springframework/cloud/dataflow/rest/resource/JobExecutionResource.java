@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.text.DateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -131,8 +134,9 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 		if (jobExecution.getStartTime() != null) {
 			this.startDate = dateFormat.format(jobExecution.getStartTime());
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
-			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
-			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			//TODO: Boot3x followup
+			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
+			this.duration = durationFormat.format(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.MILLIS));
 		}
 	}
 
