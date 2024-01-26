@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.schema.service.impl;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
