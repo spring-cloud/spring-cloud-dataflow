@@ -17,7 +17,7 @@
 
 	<packaging>jar</packaging>
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
 		<failIfNoTests>true</failIfNoTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>

@@ -22,7 +22,7 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 
 		<spring-statemachine.version>2.5.1</spring-statemachine.version>
 		<spring-cloud-deployer.version>2.9.3-SNAPSHOT</spring-cloud-deployer.version>
@@ -46,7 +46,7 @@
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
 		<jruby.version>9.2.11.1</jruby.version>
-		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+		<maven-antrun-plugin.version>17</maven-antrun-plugin.version>
 		<ant-contrib.version>1.0b3</ant-contrib.version>
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
