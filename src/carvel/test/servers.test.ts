@@ -573,11 +573,11 @@ describe('servers', () => {
     const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
     const skipperContainer = deploymentContainer(skipperDeployment, SKIPPER_NAME);
 
-    expect(dataflowContainer?.resources?.requests?.cpu).toBe('500m');
-    expect(dataflowContainer?.resources?.requests?.memory).toBe('1024Mi');
+    expect(dataflowContainer?.resources?.requests?.cpu).toBe('1500m');
+    expect(dataflowContainer?.resources?.requests?.memory).toBe('1536Mi');
 
-    expect(skipperContainer?.resources?.requests?.cpu).toBe('500m');
-    expect(skipperContainer?.resources?.requests?.memory).toBe('1024Mi');
+    expect(skipperContainer?.resources?.requests?.cpu).toBe('1500m');
+    expect(skipperContainer?.resources?.requests?.memory).toBe('1536Mi');
   });
 
   it('should change resources', async () => {
