@@ -47,11 +47,8 @@ spec:
             initialDelaySeconds: 60
             periodSeconds: 5
           resources:
-            limits:
-              cpu: 1.0
-              memory: 2048Mi
             requests:
-              cpu: 0.5
+              cpu: 1500m
               memory: 1024Mi
           env:
             - name: LANG

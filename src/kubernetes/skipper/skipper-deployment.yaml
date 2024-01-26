@@ -50,7 +50,7 @@ spec:
           timeoutSeconds: 3
         resources:
           requests:
-            cpu: 1.0
+            cpu: 1500m
             memory: 1024Mi
         env:
         - name: LANG

@@ -47,8 +47,8 @@ spec:
             periodSeconds: 3
           resources:
             requests:
-              cpu: '0.5'
-              memory: 1024Mi
+              cpu: 1500m
+              memory: 1536Mi
           env:
             - name: LANG
               value: en_US.utf8
