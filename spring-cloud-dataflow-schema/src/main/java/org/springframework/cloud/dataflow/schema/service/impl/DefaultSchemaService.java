@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.schema.service.impl;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -67,9 +66,5 @@ public class DefaultSchemaService implements SchemaService {
 			name = getDefaultSchemaTarget();
 		}
 		return targets.get(name);
-	}
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService");
 	}
 }

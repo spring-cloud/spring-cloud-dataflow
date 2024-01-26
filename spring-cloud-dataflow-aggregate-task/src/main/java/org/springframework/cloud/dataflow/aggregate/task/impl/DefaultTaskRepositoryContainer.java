@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,8 +64,4 @@ public class DefaultTaskRepositoryContainer implements TaskRepositoryContainer {
 		return repository;
 	}
 
-	@PostConstruct
-	public void setup() {
-		logger.info("created: org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer");
-	}
 }

@@ -23,7 +23,7 @@
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
 		<spring-cloud-deployer.version>3.0.0-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-task.version>2.4.6</spring-cloud-task.version>
+		<spring-cloud-task.version>3.1.0</spring-cloud-task.version>
 		<spring-cloud-common-security-config.version>${dataflow.version}</spring-cloud-common-security-config.version>
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
@@ -310,6 +310,10 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+		</dependency>
 		<!-- Allow Surefire to run both Junit 4 and 5 by providing Junit4 libs and engine -->
 		<dependency>
 			<groupId>junit</groupId>
