@@ -16,7 +16,12 @@
 package org.springframework.cloud.skipper.domain;
 
 import java.io.IOException;
+import java.sql.Types;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -28,13 +33,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.util.StringUtils;
@@ -71,15 +70,17 @@ public class Release extends AbstractEntity {
 	@JsonIgnore
 	private Long repositoryId;
 
+	//TODO: Boot3x followup
 	@Lob
-	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
+	//TODO: Boot3x followup
 	@Lob
-	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })
