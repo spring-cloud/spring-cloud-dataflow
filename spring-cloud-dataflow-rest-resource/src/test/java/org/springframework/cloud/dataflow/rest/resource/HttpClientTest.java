@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -66,7 +67,7 @@ public class HttpClientTest {
 		final URI targetHost = new URI("http://test.com");
 		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
-				.addInterceptor((request, context) -> {
+				.addInterceptor((request, entityDetails, context) -> {
 					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
 					Assertions.assertThat(authorization).isEqualTo(credentials);
 
@@ -90,7 +91,7 @@ public class HttpClientTest {
 		final URI targetHost = new URI("http://test.com");
 		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
-				.addInterceptor((request, context) -> {
+				.addInterceptor((request, entityDetails, context) -> {
 					final String authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION).getValue();
 					Assertions.assertThat(authorization).isEqualTo(credentials);
 

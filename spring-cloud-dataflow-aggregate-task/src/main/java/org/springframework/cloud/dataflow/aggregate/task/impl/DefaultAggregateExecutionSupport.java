@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.aggregate.task.impl;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -148,8 +149,8 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 					execution.getExecutionId(),
 					execution.getExitCode(),
 					execution.getTaskName(),
-					execution.getStartTime(),
-					execution.getEndTime(),
+					java.util.Date.from(execution.getStartTime().toInstant(ZoneId.systemDefault().getRules().getOffset(execution.getStartTime()))),
+					java.util.Date.from(execution.getEndTime().toInstant(ZoneId.systemDefault().getRules().getOffset(execution.getEndTime()))),
 					execution.getExitMessage(),
 					execution.getArguments(),
 					execution.getErrorMessage(),

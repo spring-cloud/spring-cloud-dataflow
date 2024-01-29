@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
@@ -143,7 +144,7 @@ public class TaskExecutionResourceTests {
 			taskExecutionResource = new TaskExecutionResource(taskJobExecutionRel);
 			assertThat(taskExecutionResource.getPlatformName()).isNull();
 			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.COMPLETE);
-			JobExecution jobExecution = new JobExecution(1L, null, "foo");
+			JobExecution jobExecution = new JobExecution(1L, new JobParameters());
 			jobExecution.setExitStatus(ExitStatus.FAILED);
 
 			TaskJobExecution ctrTaskJobExecution = new TaskJobExecution(1, jobExecution, true, target.getName());

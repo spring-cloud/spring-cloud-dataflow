@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.rest.util;
 import java.lang.reflect.Field;
 import java.net.URI;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,7 +34,7 @@ import static org.junit.Assert.fail;
 public class HttpClientConfigurerTests {
 
 	/**
-	 * Basic test ensuring that the {@link HttpClient} is built successfully.
+	 * Basic test ensuring that the {@code HttpClient} is built successfully.
 	 */
 	@Test
 	public void testThatHttpClientWithProxyIsCreated() throws Exception {
@@ -47,7 +46,7 @@ public class HttpClientConfigurerTests {
 	}
 
 	/**
-	 * Basic test ensuring that the {@link HttpClient} is built successfully with
+	 * Basic test ensuring that the {@code HttpClient} is built successfully with
 	 * null username and password.
 	 */
 	@Test
@@ -107,8 +106,8 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
-		Assert.assertNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
+		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null));
+		Assert.assertNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null));
 	}
 
 	/**
@@ -124,7 +123,7 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80)));
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80)));
+		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null));
+		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null));
 	}
 }
