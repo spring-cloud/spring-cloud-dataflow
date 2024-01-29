@@ -29,14 +29,18 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /management/health
+            path: /management/health/liveness
             port: 8080
-          initialDelaySeconds: 45
+          initialDelaySeconds: 0
         readinessProbe:
           httpGet:
-            path: /management/info
+            path: /management/health/readiness
             port: 8080
-          initialDelaySeconds: 45
+          initialDelaySeconds: 0
+        startupProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
         resources:
           limits:
             cpu: 1.0

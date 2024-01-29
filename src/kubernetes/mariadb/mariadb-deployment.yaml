@@ -29,9 +29,10 @@ spec:
         ports:
           - containerPort: 3306
             name: mariadb
-        requests:
-          cpu: 2000m
-          memory: 1Gi
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 1Gi
         volumeMounts:
           - name: data
             mountPath: /var/lib/mariadb

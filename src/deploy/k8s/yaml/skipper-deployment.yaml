@@ -32,12 +32,12 @@ spec:
           name: jdwp-skipper
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /actuator/health/liveness
             port: 7577
           initialDelaySeconds: 1
         readinessProbe:
           httpGet:
-            path: /actuator/info
+            path: /actuator/health/readiness
             port: 7577
           initialDelaySeconds: 1
         startupProbe:

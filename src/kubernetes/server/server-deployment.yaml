@@ -29,14 +29,14 @@ spec:
         - containerPort: 9393
         livenessProbe:
           httpGet:
-            path: /management/health
+            path: /management/health/liveness
             port: 9393
-          initialDelaySeconds: 45
+          initialDelaySeconds: 0
         readinessProbe:
           httpGet:
-            path: /management/info
+            path: /management/health/readiness
             port: 9393
-          initialDelaySeconds: 45
+          initialDelaySeconds: 0
         startupProbe:
           tcpSocket:
             port: 9393

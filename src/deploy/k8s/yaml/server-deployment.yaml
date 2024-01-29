@@ -30,12 +30,12 @@ spec:
               name: http
           livenessProbe:
             httpGet:
-              path: /management/health
+              path: /management/health/liveness
               port: 9393
             initialDelaySeconds: 1
           readinessProbe:
             httpGet:
-              path: /management/info
+              path: /management/health/readiness
               port: 9393
             initialDelaySeconds: 1
           startupProbe:
