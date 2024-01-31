@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.spi.PersistenceUnitInfo;
-
 import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
