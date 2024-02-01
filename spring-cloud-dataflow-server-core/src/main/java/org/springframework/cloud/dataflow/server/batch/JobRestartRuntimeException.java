@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
+//TODO: Boot3x followup
 public class JobRestartRuntimeException extends RuntimeException {
 
 	public JobRestartRuntimeException(Long jobExecutionId, Exception cause) {
