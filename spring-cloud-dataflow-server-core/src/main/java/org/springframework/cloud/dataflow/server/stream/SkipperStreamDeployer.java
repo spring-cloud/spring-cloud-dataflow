@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
@@ -446,7 +447,7 @@ public class SkipperStreamDeployer implements StreamDeployer {
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 		dumperOptions.setPrettyFlow(false);
 		dumperOptions.setSplitLines(false);
-		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(dumperOptions), dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 		configValues.setRaw(yaml.dump(configValueMap));
 
         pkg.setConfigValues(configValues);
