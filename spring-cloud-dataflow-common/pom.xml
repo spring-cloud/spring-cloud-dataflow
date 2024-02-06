@@ -18,8 +18,7 @@
 	</parent>
 
 	<properties>
-		<jayway-awaitility.version>1.7.0</jayway-awaitility.version>
-		<java-semver.version>0.9.0</java-semver.version>
+		<java-semver.version>0.10.2</java-semver.version>
 		<joda-time.version>2.12.7</joda-time.version>
 	</properties>
 
@@ -33,11 +32,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.jayway.awaitility</groupId>
-				<artifactId>awaitility</artifactId>
-				<version>${jayway-awaitility.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>com.github.zafarkhaja</groupId>
 				<artifactId>java-semver</artifactId>
