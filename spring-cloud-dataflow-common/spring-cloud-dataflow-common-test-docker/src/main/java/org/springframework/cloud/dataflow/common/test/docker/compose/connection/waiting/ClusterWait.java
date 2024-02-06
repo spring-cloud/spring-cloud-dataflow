@@ -15,16 +15,17 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
-import com.jayway.awaitility.Awaitility;
-import com.jayway.awaitility.core.ConditionTimeoutException;
-
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 import org.joda.time.ReadableDuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Cluster;
 
 public class ClusterWait {

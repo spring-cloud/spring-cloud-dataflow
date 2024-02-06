@@ -15,13 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.apache.commons.lang3.Validate.validState;
-import static org.joda.time.Duration.standardMinutes;
-
-import com.github.zafarkhaja.semver.Version;
-import com.jayway.awaitility.Awaitility;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -29,10 +22,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.io.IOUtils;
+import org.awaitility.Awaitility;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
@@ -41,6 +38,10 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.connection.
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Ports;
 import org.springframework.util.StringUtils;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.lang3.Validate.validState;
+import static org.joda.time.Duration.standardMinutes;
 
 public class DefaultDockerCompose implements DockerCompose {
 
