@@ -37,6 +37,15 @@ public class LaunchRequest {
 	@JsonProperty("name")
 	private String taskName;
 
+	public LaunchRequest() {
+	}
+
+	public LaunchRequest(String taskName, List<String> commandlineArguments, Map<String, String> deploymentProperties) {
+		this.commandlineArguments = commandlineArguments;
+		this.deploymentProperties = deploymentProperties;
+		this.taskName = taskName;
+	}
+
 	public List<String> getCommandlineArguments() {
 		return commandlineArguments;
 	}
@@ -62,5 +71,14 @@ public class LaunchRequest {
 	public void setTaskName(String taskName) {
 		Assert.hasText(taskName, "'taskName' cannot be blank.");
 		this.taskName = taskName;
+	}
+
+	@Override
+	public String toString() {
+		return "LaunchRequest{" +
+			"commandlineArguments=" + commandlineArguments +
+			", deploymentProperties=" + deploymentProperties +
+			", taskName='" + taskName + '\'' +
+			'}';
 	}
 }

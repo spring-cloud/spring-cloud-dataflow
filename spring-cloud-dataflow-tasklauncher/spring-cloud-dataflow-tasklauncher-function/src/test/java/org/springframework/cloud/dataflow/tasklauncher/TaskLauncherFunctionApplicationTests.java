@@ -41,6 +41,7 @@ import org.springframework.hateoas.PagedModel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -61,10 +62,8 @@ public class TaskLauncherFunctionApplicationTests {
 	public void successfulLaunch() {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
-		setCurrentExecutionState(0);
-		Optional<LaunchResponse> response = taskLauncherFunction.apply(launchRequest);
-		assertThat(response.isPresent()).isTrue();
-		assertThat(response.get().getTaskId()).isEqualTo(1L);
+		setCurrentExecutionState(1);
+		taskLauncherFunction.accept(launchRequest);
 
 		verify(taskOperations).launch("someTask",
 				Collections.singletonMap(TaskLauncherFunction.TASK_PLATFORM_NAME, "default"),
@@ -76,8 +75,9 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
-		Optional<LaunchResponse> taskId = taskLauncherFunction.apply(launchRequest);
-		assertThat(taskId.isPresent()).isFalse();
+		assertThatThrownBy(() -> {
+		taskLauncherFunction.accept(launchRequest);
+		}).isInstanceOf(CannotHandleRequestException.class);
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class TaskLauncherFunctionApplicationTests {
 		launchRequest
 				.setDeploymentProperties(Collections.singletonMap(TaskLauncherFunction.TASK_PLATFORM_NAME, "other"));
 		setCurrentExecutionState(0);
-		assertThatIllegalStateException().isThrownBy(() -> taskLauncherFunction.apply(launchRequest))
+		assertThatIllegalStateException().isThrownBy(() -> taskLauncherFunction.accept(launchRequest))
 				.withStackTraceContaining("does not match the platform configured for the Task Launcher");
 	}
 
@@ -99,17 +99,6 @@ public class TaskLauncherFunctionApplicationTests {
 		when(taskOperations.currentTaskExecutions())
 				.thenReturn(Collections.singletonList(currentTaskExecutionsResource));
 		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L, SchemaVersionTarget.defaultTarget().getName()));
-	}
-
-	@Test
-	public void noLaunchersConfigured() {
-		ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(TestConfig.class);
-		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> contextRunner
-				.withPropertyValues("spring.profiles.active=nolaunchers")
-				.run(context -> context.start()))
-				.withCauseInstanceOf(BeanCreationException.class)
-				.withRootCauseInstanceOf(IllegalArgumentException.class)
-				.withStackTraceContaining("The Data Flow Server has no task platforms configured");
 	}
 
 	@Configuration

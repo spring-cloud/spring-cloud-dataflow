@@ -16,25 +16,20 @@
 
 package org.springframework.cloud.dataflow.tasklauncher.sink;
 
-import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.dataflow.tasklauncher.CannotHandleRequestException;
+import org.springframework.cloud.dataflow.tasklauncher.LaunchRequest;
 import org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunction;
 import org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunctionConfiguration;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.binder.DefaultPollableMessageSource;
-import org.springframework.cloud.stream.binder.PollableMessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.util.DynamicPeriodicTrigger;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.retry.support.RetryTemplate;
+import org.springframework.retry.support.RetryTemplateBuilder;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration class for the TaskLauncher Data Flow Sink.
@@ -42,58 +37,40 @@ import org.springframework.messaging.support.MessageBuilder;
  * @author David Turanski
  * @author Gunnar Hillert
  */
-@EnableBinding(PollingSink.class)
-@EnableConfigurationProperties({ TriggerProperties.class })
+@EnableConfigurationProperties({ RetryProperties.class })
 @Import(TaskLauncherFunctionConfiguration.class)
 public class TaskLauncherSinkConfiguration {
 
-	@Value("${autostart:true}")
-	private boolean autoStart;
+	private final static Logger logger = LoggerFactory.getLogger(TaskLauncherSinkConfiguration.class);
 
-	@Bean
-	public DynamicPeriodicTrigger periodicTrigger(TriggerProperties triggerProperties) {
-		DynamicPeriodicTrigger trigger = new DynamicPeriodicTrigger(triggerProperties.getPeriod());
-		trigger.setInitialDuration(Duration.ofMillis(triggerProperties.getInitialDelay()));
-		return trigger;
+	static class LaunchRequestConsumer implements LaunchRequestMessageConsumer {
+
+		private final TaskLauncherFunction taskLauncherFunction;
+
+		public LaunchRequestConsumer(TaskLauncherFunction taskLauncherFunction) {
+			this.taskLauncherFunction = taskLauncherFunction;
+		}
+
+		@Override
+		public void accept(Message<LaunchRequest> message) {
+			taskLauncherFunction.accept(message.getPayload());
+		}
+
 	}
 
-	/*
-	 * For backward compatibility with spring-cloud-stream-2.1.x
-	 */
-	@Bean
-	public BeanPostProcessor addInterceptorToPollableMessageSource() {
-		return new BeanPostProcessor() {
-			@Override
-			public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-				if (bean instanceof DefaultPollableMessageSource) {
-					DefaultPollableMessageSource pollableMessageSource = (DefaultPollableMessageSource) bean;
-					pollableMessageSource.addInterceptor(new ChannelInterceptor() {
-						@Override
-						public Message<?> preSend(Message<?> message, MessageChannel channel) {
-							Message<?> newMessage = message;
-							if (message.getHeaders().containsKey("originalContentType")) {
-								newMessage = MessageBuilder.fromMessage(message)
-										.setHeader(MessageHeaders.CONTENT_TYPE,
-												message.getHeaders().get("originalContentType"))
-										.build();
-							}
-							return newMessage;
-						}
-					});
-				}
-				return bean;
-			}
-		};
+	@Bean(name = "launchRequestConsumer")
+	LaunchRequestConsumer launchRequestConsumer(TaskLauncherFunction taskLauncherFunction) {
+		return new LaunchRequestConsumer(taskLauncherFunction);
 	}
 
-	@Bean
-	public LaunchRequestConsumer launchRequestConsumer(PollableMessageSource input,
-			TaskLauncherFunction taskLauncherFunction, DynamicPeriodicTrigger trigger,
-			TriggerProperties triggerProperties) {
+	@Bean(name = "launchRequestConsumerRetry")
+	public RetryTemplate retryTemplate(@Validated RetryProperties retryProperties) {
 
-		LaunchRequestConsumer consumer = new LaunchRequestConsumer(input,
-				trigger, triggerProperties.getMaxPeriod(), taskLauncherFunction);
-		consumer.setAutoStartup(autoStart);
-		return consumer;
+		logger.debug("retryTemplate:retryProperties={}", retryProperties);
+		return new RetryTemplateBuilder().retryOn(CannotHandleRequestException.class)
+			.exponentialBackoff(retryProperties.getInitialDelay(), retryProperties.getMultiplier(),
+					retryProperties.getMaxPeriod())
+			.maxAttempts(retryProperties.getMaxAttempts())
+			.build();
 	}
 }

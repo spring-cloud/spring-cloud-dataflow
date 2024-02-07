@@ -17,26 +17,28 @@
 package org.springframework.cloud.dataflow.tasklauncher.sink;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * @author David Turanski
  **/
-@ConfigurationProperties(prefix = "trigger")
+@ConfigurationProperties(prefix = "retry")
 @Validated
-public class TriggerProperties {
+public class RetryProperties {
 	/**
 	 * The initial delay in milliseconds.
 	 */
 	private int initialDelay = 1000;
 
 	/**
-	 * The polling period in milliseconds.
+	 * The multiplier used by retry template
 	 */
-	private int period = 1000;
+	private double multiplier = 1.5;
 
 	/**
 	 * The maximum polling period in milliseconds. Will be set to period if period >
@@ -44,7 +46,12 @@ public class TriggerProperties {
 	 */
 	private int maxPeriod = 30000;
 
-	@Min(0)
+	/**
+	 * Maximum number of attempts
+	 */
+	private int maxAttempts = 3;
+
+	@Min(100)
 	public int getInitialDelay() {
 		return initialDelay;
 	}
@@ -53,13 +60,13 @@ public class TriggerProperties {
 		this.initialDelay = initialDelay;
 	}
 
-	@Min(0)
-	public int getPeriod() {
-		return period;
+	@DecimalMin("1.0")
+	public double getMultiplier() {
+		return multiplier;
 	}
 
-	public void setPeriod(int period) {
-		this.period = period;
+	public void setMultiplier(double multiplier) {
+		this.multiplier = multiplier;
 	}
 
 	@Min(1000)
@@ -71,8 +78,23 @@ public class TriggerProperties {
 		this.maxPeriod = maxPeriod;
 	}
 
+	@Min(1)
+	public int getMaxAttempts() {
+		return maxAttempts;
+	}
+
+	public void setMaxAttempts(int maxAttempts) {
+		this.maxAttempts = maxAttempts;
+	}
+
 	@PostConstruct
 	public void checkMaxPeriod() {
-		maxPeriod = Integer.max(maxPeriod, period);
+		Assert.isTrue(maxPeriod > initialDelay, "maxPeriod must be greater than initialDelay");
+	}
+
+	@Override
+	public String toString() {
+		return "RetryProperties{" + "initialDelay=" + initialDelay + ", multiplier=" + multiplier + ", maxPeriod="
+				+ maxPeriod + '}';
 	}
 }

@@ -33,8 +33,7 @@ import org.springframework.context.annotation.Configuration;
 public class TaskLauncherFunctionConfiguration {
 
 	@Bean
-	public TaskLauncherFunction taskLauncherFunction(
-		DataFlowOperations dataFlowOperations, TaskLauncherFunctionProperties functionProperties) {
+	public TaskLauncherFunction taskLauncherFunction(DataFlowOperations dataFlowOperations, TaskLauncherFunctionProperties functionProperties) {
 
 		if (dataFlowOperations.taskOperations() == null) {
 			throw new IllegalArgumentException("The SCDF server does not support task operations");
