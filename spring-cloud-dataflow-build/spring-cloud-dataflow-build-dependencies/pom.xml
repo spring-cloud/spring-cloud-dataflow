@@ -25,7 +25,6 @@
 		<spring-shell.version>2.1.13</spring-shell.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<commons-text.version>1.11.0</commons-text.version>
-		<testcontainers.version>1.17.6</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
@@ -68,19 +67,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-compress</artifactId>
-					</exclusion>
-				</exclusions>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.fabric8</groupId>
