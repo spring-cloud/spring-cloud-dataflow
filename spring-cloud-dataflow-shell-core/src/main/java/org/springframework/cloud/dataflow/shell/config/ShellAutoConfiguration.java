@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.config;
 import org.jline.terminal.Terminal;
 
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -27,7 +28,6 @@ import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
 import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.boot.NonInteractiveShellRunnerCustomizer;
 import org.springframework.shell.result.ThrowableResultHandler;
 import org.springframework.web.client.RestTemplate;
@@ -41,7 +41,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gunnar Hillert
  * @author Chris Bono
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @EnableConfigurationProperties({
 		ShellProperties.class,
 		DataFlowShellProperties.class
@@ -63,7 +63,6 @@ public class ShellAutoConfiguration {
 		return new TablesInfoResultHandler(terminal);
 	}
 
-	@Configuration(proxyBeanMethods = false)
 	static class ShellRunnerConfiguration {
 
 		@Bean

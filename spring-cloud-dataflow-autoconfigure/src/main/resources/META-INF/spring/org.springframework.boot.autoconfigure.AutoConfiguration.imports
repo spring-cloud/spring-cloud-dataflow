@@ -1,0 +1,3 @@
+org.springframework.cloud.dataflow.autoconfigure.StreamDefinitionServiceAutoConfiguration
+org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration
+org.springframework.cloud.dataflow.autoconfigure.local.LocalSchedulerAutoConfiguration

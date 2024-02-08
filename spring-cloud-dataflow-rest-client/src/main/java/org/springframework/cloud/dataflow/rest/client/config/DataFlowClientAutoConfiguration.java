@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -39,7 +40,6 @@ import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -60,6 +60,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -68,7 +69,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Vinicius Carvalho
  * @author Gunnar Hillert
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(DataFlowClientProperties.class)
 public class DataFlowClientAutoConfiguration {
 
@@ -111,8 +112,8 @@ public class DataFlowClientAutoConfiguration {
 					clientRegistrations, this.properties.getAuthentication().getClientId()));
 			logger.debug("Configured OAuth2 Client Credentials for accessing the Data Flow Server");
 		}
-		else if(!StringUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
-				!StringUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){
+		else if(!ObjectUtils.isEmpty(properties.getAuthentication().getBasic().getUsername()) &&
+				!ObjectUtils.isEmpty(properties.getAuthentication().getBasic().getPassword())){
 			httpClientConfigurer.basicAuthCredentials(properties.getAuthentication().getBasic().getUsername(),
 					properties.getAuthentication().getBasic().getPassword());
 			template.setRequestFactory(httpClientConfigurer.buildClientHttpRequestFactory());
@@ -141,7 +142,6 @@ public class DataFlowClientAutoConfiguration {
 	}
 
 	@ConditionalOnProperty(prefix = DataFlowPropertyKeys.PREFIX + "client.authentication", name = "client-id")
-	@Configuration
 	static class ClientCredentialsConfiguration {
 
 		@Bean

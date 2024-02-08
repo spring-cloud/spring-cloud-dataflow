@@ -36,6 +36,7 @@ import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider.Builder
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,7 +58,6 @@ import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.cloud.skipper.server.config.EnableSkipperServerConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -68,7 +68,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Janne Valkealahti
  * @author David Turanski
  */
-@Configuration
+@AutoConfiguration
 @ConditionalOnBean(EnableSkipperServerConfiguration.Marker.class)
 @EnableConfigurationProperties(CloudFoundryPlatformProperties.class)
 @Import(CloudFoundrySkipperServerConfiguration.class)
@@ -176,9 +176,9 @@ public class CloudFoundryPlatformAutoConfiguration {
 				restTemplate, cfAppDeployer, cloudFoundryProperties
 				.getDeployment().getAppAdmin());
 			Deployer deployer = new Deployer(account, "cloudfoundry", cfAppDeployer, actuatorOperations);
-			deployer.setDescription(String.format("org = [%s], space = [%s], url = [%s]",
-				connectionProperties.getOrg(), connectionProperties.getSpace(),
-				connectionProperties.getUrl()));
+			deployer.setDescription("org = [%s], space = [%s], url = [%s]".formatted(
+					connectionProperties.getOrg(), connectionProperties.getSpace(),
+					connectionProperties.getUrl()));
 			return deployer;
 		} catch (Exception e) {
 			logger.error("Cloud Foundry platform account [{}] could not be registered: {}",

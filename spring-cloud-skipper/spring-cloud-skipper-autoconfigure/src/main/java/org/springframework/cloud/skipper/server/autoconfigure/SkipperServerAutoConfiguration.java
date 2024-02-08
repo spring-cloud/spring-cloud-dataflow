@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.autoconfigure;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +26,6 @@ import org.springframework.cloud.skipper.server.config.SkipperServerConfiguratio
 import org.springframework.cloud.skipper.server.config.SkipperServerPlatformConfiguration;
 import org.springframework.cloud.skipper.server.config.SpringDataRestConfiguration;
 import org.springframework.cloud.skipper.server.config.security.SkipperOAuthSecurityConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -33,11 +33,11 @@ import org.springframework.context.annotation.Import;
  *
  * @author Janne Valkealahti
  */
-@Configuration
+@AutoConfiguration
 @ConditionalOnBean(EnableSkipperServerConfiguration.Marker.class)
-@AutoConfigureBefore({ErrorMvcAutoConfiguration.class, CommonSecurityAutoConfiguration.class })
+@AutoConfigureBefore({ErrorMvcAutoConfiguration.class, CommonSecurityAutoConfiguration.class})
 @Import({SkipperServerConfiguration.class, SkipperServerPlatformConfiguration.class,
-		SpringDataRestConfiguration.class, SkipperOAuthSecurityConfiguration.class })
+		SpringDataRestConfiguration.class, SkipperOAuthSecurityConfiguration.class})
 @ConditionalOnProperty(prefix = "spring.cloud.skipper.server", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SkipperServerAutoConfiguration {
 }
