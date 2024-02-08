@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.config;
 import org.jline.terminal.Terminal;
 
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.rest.client.DataFlowTemplate;
@@ -41,7 +42,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gunnar Hillert
  * @author Chris Bono
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @EnableConfigurationProperties({
 		ShellProperties.class,
 		DataFlowShellProperties.class
