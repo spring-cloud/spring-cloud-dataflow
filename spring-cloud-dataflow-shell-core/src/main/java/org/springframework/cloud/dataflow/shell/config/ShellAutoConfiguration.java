@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.ConfigCommands;
 import org.springframework.cloud.dataflow.shell.command.support.ShellUtils;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.shell.boot.NonInteractiveShellRunnerCustomizer;
 import org.springframework.shell.result.ThrowableResultHandler;
 import org.springframework.web.client.RestTemplate;
@@ -63,6 +64,7 @@ public class ShellAutoConfiguration {
 		return new TablesInfoResultHandler(terminal);
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	static class ShellRunnerConfiguration {
 
 		@Bean

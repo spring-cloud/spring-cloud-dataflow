@@ -133,6 +133,7 @@ import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperClientResponseErrorHandler;
 import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -222,7 +223,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 
-
+	@Configuration(proxyBeanMethods = false)
 	public static class AppRegistryConfiguration {
 
 		@Bean
@@ -266,6 +267,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnTasksEnabled
 	public static class TaskEnabledConfiguration {
 
@@ -390,6 +392,7 @@ public class DataFlowControllerAutoConfiguration {
 
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnStreamsEnabled
 	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class StreamEnabledConfiguration {
@@ -531,7 +534,9 @@ public class DataFlowControllerAutoConfiguration {
 		return new TaskSchedulerController(schedulerService);
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	public static class AuditingConfiguration {
+
 		@Bean
 		public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
 													 ObjectMapper objectMapper) {
@@ -545,6 +550,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 	}
 
+	@Configuration(proxyBeanMethods = false)
 	public static class SecurityConfiguration {
 
 		@Bean

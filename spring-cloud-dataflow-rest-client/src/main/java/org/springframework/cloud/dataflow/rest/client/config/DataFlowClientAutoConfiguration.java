@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.rest.client.dsl.Stream;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -142,6 +143,7 @@ public class DataFlowClientAutoConfiguration {
 	}
 
 	@ConditionalOnProperty(prefix = DataFlowPropertyKeys.PREFIX + "client.authentication", name = "client-id")
+	@Configuration(proxyBeanMethods = false)
 	static class ClientCredentialsConfiguration {
 
 		@Bean
