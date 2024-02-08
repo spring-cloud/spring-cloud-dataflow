@@ -130,7 +130,7 @@ class DockerComposeTests {
     }
 
     @Test
-    void callDockerComposeWithTheFollowFlagWhenTheVersionIsAtLeast170OnLogs() throws IOException {
+    void callDockerComposeWithTheFollowFlagWhenVersionIsAtLeast_1_7_0_OnLogs() throws IOException {
         when(executedProcess.getInputStream()).thenReturn(
                 toInputStream("id"),
                 toInputStream("docker-compose version 1.7.0, build 1ad8866"),
@@ -187,7 +187,7 @@ class DockerComposeTests {
     }
 
     @Test
-    void failIfDockerComposeVersionIsPriorTo17OnDockerComposeExec() {
+    void failOnDockerComposeExecCommandIfVersionIsNotAtLeast_1_7_0() {
         when(executedProcess.getInputStream()).thenReturn(toInputStream("docker-compose version 1.5.6, build 1ad8866"));
         assertThatIllegalStateException()
                 .isThrownBy(() -> compose.exec(options("-d"), "container_1", arguments("ls")))
