@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author David Turanski
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @Configuration
 @EnableConfigurationProperties({TaskLauncherFunctionProperties.class, DataFlowClientProperties.class})
 public class TaskLauncherFunctionConfiguration {
 
 	@Bean
-	public TaskLauncherFunction taskLauncherFunction(
-		DataFlowOperations dataFlowOperations, TaskLauncherFunctionProperties functionProperties) {
+	public TaskLauncherFunction taskLauncherFunction(DataFlowOperations dataFlowOperations, TaskLauncherFunctionProperties functionProperties) {
 
 		if (dataFlowOperations.taskOperations() == null) {
 			throw new IllegalArgumentException("The SCDF server does not support task operations");

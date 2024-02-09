@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.dataflow.tasklauncher.sink;
-
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.binder.PollableMessageSource;
+package org.springframework.cloud.dataflow.tasklauncher;
 
 /**
- * @author David Turanski
+ * @author Corneil du Plessis
  **/
-public interface PollingSink {
-	/**
-	 * The input name.
-	 */
-	String INPUT = "input";
+public class CannotHandleRequestException extends RuntimeException {
 
-	@Input(PollingSink.INPUT)
-	PollableMessageSource input();
+	public CannotHandleRequestException() {
+	}
+
 }

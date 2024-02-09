@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.support.jackson;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 
 import org.springframework.batch.core.JobExecution;
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertThat;
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class StepExecutionJacksonMixInTests {
 
@@ -64,6 +66,7 @@ public class StepExecutionJacksonMixInTests {
 	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
 
 		objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 		objectMapper.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);

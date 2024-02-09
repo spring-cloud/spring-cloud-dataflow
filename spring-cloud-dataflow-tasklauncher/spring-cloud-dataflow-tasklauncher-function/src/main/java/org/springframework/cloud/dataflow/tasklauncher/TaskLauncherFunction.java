@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -42,14 +42,15 @@ import org.springframework.util.StringUtils;
  * task launch request, otherwise it will return and log a warning message.
  *
  * @author David Turanski
+ * @author Corneil du Plessis
  **/
-public class TaskLauncherFunction implements Function<LaunchRequest, Optional<LaunchResponse>>, InitializingBean {
+public class TaskLauncherFunction implements Consumer<LaunchRequest>, InitializingBean {
+
 	private static final Log log = LogFactory.getLog(TaskLauncherFunction.class);
 
-	static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
 	private final TaskOperations taskOperations;
-
 	private String platformName = "default";
 
 	public TaskLauncherFunction(TaskOperations taskOperations) {
@@ -57,20 +58,20 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 		this.taskOperations = taskOperations;
 	}
 
-	/**
-	 *
-	 * @param launchRequest the task launch request for the Data Flow server.
-	 * @return an {@code Optional<Long>} containing the task Id if the request is accepted or
-	 * empty otherwise.
-	 */
 	@Override
-	public Optional<LaunchResponse> apply(LaunchRequest launchRequest) {
+	public void accept(LaunchRequest request) {
 		if (platformIsAcceptingNewTasks()) {
-			return Optional.of(launchTask(launchRequest));
+			if(log.isDebugEnabled()) {
+				log.debug("task-launcher-function:request:" + request);
+			}
+			LaunchResponse response = launchTask(request);
+			if(log.isDebugEnabled()) {
+				log.debug("task-launcher-function:response:" + response);
+			}
+		} else {
+			log.warn("Platform is at capacity. Did not submit task launch request for task " + request.getTaskName());
+			throw new CannotHandleRequestException();
 		}
-		log.warn(String.format("Platform is at capacity. Did not submit task launch request for task %s.",
-				launchRequest.getTaskName()));
-		return Optional.empty();
 	}
 
 	public boolean platformIsAcceptingNewTasks() {
@@ -128,8 +129,7 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {
 		if (!deploymentProperties.containsKey(TASK_PLATFORM_NAME)) {
-			Map<String, String> enrichedProperties = new HashMap<>();
-			enrichedProperties.putAll(deploymentProperties);
+			Map<String, String> enrichedProperties = new HashMap<>(deploymentProperties);
 			enrichedProperties.put(TASK_PLATFORM_NAME, platformName);
 			return enrichedProperties;
 		}

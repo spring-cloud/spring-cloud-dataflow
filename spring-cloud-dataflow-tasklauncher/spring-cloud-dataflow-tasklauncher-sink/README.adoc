@@ -56,6 +56,13 @@ The **$$dataflow-tasklauncher$$** $$sink$$ supports the following configuration 
 Properties grouped by prefix:
 
 
+=== retry
+
+$$initial-delay$$:: $$The initial delay in milliseconds.$$ *($$Integer$$, default: `$$1000$$`)*
+$$max-attempts$$:: $$Maximum number of attempts$$ *($$Integer$$, default: `$$-1$$`)*
+$$max-period$$:: $$The maximum polling period in milliseconds. Will be set to period if period > maxPeriod.$$ *($$Integer$$, default: `$$30000$$`)*
+$$multiplier$$:: $$The multiplier used by retry template$$ *($$Double$$, default: `$$1.5$$`)*
+
 === spring.cloud.dataflow.client.authentication
 
 $$access-token$$:: $$OAuth2 Access Token.$$ *($$String$$, default: `$$<none>$$`)*
