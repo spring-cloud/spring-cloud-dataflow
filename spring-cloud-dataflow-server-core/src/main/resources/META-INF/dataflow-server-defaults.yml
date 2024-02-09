@@ -52,6 +52,8 @@ server:
   error:
     include-message: always
 spring:
+  config:
+    use-legacy-processing: true
   mvc.async.request-timeout: 120000
   batch:
     initialize-schema: never
