@@ -1,0 +1,2 @@
+org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryDataFlowServerConfiguration
+org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration

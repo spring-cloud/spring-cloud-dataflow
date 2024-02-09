@@ -1,0 +1,3 @@
+org.springframework.cloud.skipper.server.autoconfigure.CloudFoundryPlatformAutoConfiguration
+org.springframework.cloud.skipper.server.autoconfigure.KubernetesPlatformAutoConfiguration
+org.springframework.cloud.skipper.server.autoconfigure.SkipperServerAutoConfiguration

@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.autoconfigure.local;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.server.config.OnLocalPlatform;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
@@ -26,13 +27,12 @@ import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Mark Pollack
  */
-@Configuration
-@Conditional({ OnLocalPlatform.class, SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class })
+@AutoConfiguration
+@Conditional({OnLocalPlatform.class, SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
 public class LocalSchedulerAutoConfiguration {
 
 	@Bean

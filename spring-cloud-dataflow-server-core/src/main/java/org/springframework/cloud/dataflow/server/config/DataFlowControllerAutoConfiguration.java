@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.BuildInfoContributor;
 import org.springframework.boot.actuate.info.GitInfoContributor;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -160,8 +161,8 @@ import org.springframework.web.client.RestTemplate;
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
+@AutoConfiguration
 @SuppressWarnings("all")
-@Configuration
 @Import(CompletionConfiguration.class)
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class})
 @EnableConfigurationProperties({FeaturesProperties.class, VersionInfoProperties.class,
@@ -222,8 +223,7 @@ public class DataFlowControllerAutoConfiguration {
 	}
 
 
-
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class AppRegistryConfiguration {
 
 		@Bean
@@ -267,7 +267,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnTasksEnabled
 	public static class TaskEnabledConfiguration {
 
@@ -392,7 +392,7 @@ public class DataFlowControllerAutoConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnStreamsEnabled
 	@EnableConfigurationProperties(SkipperClientProperties.class)
 	public static class StreamEnabledConfiguration {
@@ -534,8 +534,9 @@ public class DataFlowControllerAutoConfiguration {
 		return new TaskSchedulerController(schedulerService);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class AuditingConfiguration {
+
 		@Bean
 		public AuditRecordService auditRecordService(AuditRecordRepository auditRecordRepository,
 													 ObjectMapper objectMapper) {
@@ -549,7 +550,7 @@ public class DataFlowControllerAutoConfiguration {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class SecurityConfiguration {
 
 		@Bean

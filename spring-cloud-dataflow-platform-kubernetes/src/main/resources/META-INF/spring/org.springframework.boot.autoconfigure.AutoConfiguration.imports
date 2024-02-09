@@ -1,0 +1,2 @@
+org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesSchedulerAutoConfiguration
+org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration
