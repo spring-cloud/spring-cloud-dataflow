@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.tasklauncher.sink;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
@@ -44,8 +44,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -63,31 +67,41 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = { TaskLauncherSinkTests.TestConfig.class },
 	properties = {
 		"spring.cloud.function.definition=launchRequestConsumer",
-		"spring.cloud.stream.function.bindings.launcherRequestConsumer-in-0=input",
-		"spring.cloud.stream.bindings.input.consumer.retry-template-name=launchRequestConsumerRetry",
 		"retry.initial-delay=100",
-		"retry.max-period=1000"
+				"retry.max-period=3000", "retry.max-attempts=6"
 })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class TaskLauncherSinkTests {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskLauncherSinkTests.class);
 
 	@Autowired
 	ApplicationContext context;
-	@Test
-	public void consumerPausesWhenMaxTaskExecutionsReached() {
-		AtomicBoolean errorReceived = new AtomicBoolean();
-		errorReceived.set(false);
-		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
-		errorChannel.subscribe(message -> {
+
+	static class ErrorHandler implements MessageHandler {
+
+		final AtomicInteger errorsReceived = new AtomicInteger(0);
+
+		@Override
+		public void handleMessage(Message<?> message) throws MessagingException {
 			try {
 				logger.info("received:error:{}", message);
-				errorReceived.set(true);
+				errorsReceived.incrementAndGet();
 			}
 			catch (Exception e) {
 				fail(e.toString());
 			}
-		});
+		}
+		public boolean hasErrors() {
+			return errorsReceived.get() > 0;
+		}
+	}
+	@Test
+	public void consumerPausesWhenMaxTaskExecutionsReached() {
+
+		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
+		ErrorHandler errorHandler = new ErrorHandler();
+		errorChannel.subscribe(errorHandler);
 		CurrentTaskExecutionsResource resource = new CurrentTaskExecutionsResource();
 		resource.setRunningExecutionCount(8);
 		resource.setMaximumTaskExecutions(8);
@@ -101,26 +115,19 @@ public class TaskLauncherSinkTests {
 		logger.info("sending:input={}", launchRequest);
 		long start = System.currentTimeMillis();
 		inputDestination.send(new GenericMessage<>(launchRequest));
-		Awaitility.await("Error produced").until(errorReceived::get);
+		Awaitility.await("Error produced").until(errorHandler::hasErrors);
 		long total = System.currentTimeMillis() - start;
 		assertThat(total).isGreaterThan(600L);
-		// TODO add back when retry template is properly initialised and used assertThat(total).isLessThan(3000L);
+		assertThat(total).isLessThan(1500L);
+		assertThat(errorHandler.errorsReceived).hasValue(1);
 	}
 
 	@Test
 	public void launchValidRequest() {
-		AtomicBoolean errorReceived = new AtomicBoolean();
-		errorReceived.set(false);
+
 		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
-		errorChannel.subscribe(message -> {
-			try {
-				logger.info("received:error:{}", message);
-				errorReceived.set(true);
-			}
-			catch (Exception e) {
-				fail(e.toString());
-			}
-		});
+		ErrorHandler errorHandler = new ErrorHandler();
+		errorChannel.subscribe(errorHandler);
 		CurrentTaskExecutionsResource resource = new CurrentTaskExecutionsResource();
 		resource.setRunningExecutionCount(0);
 		resource.setMaximumTaskExecutions(8);
@@ -135,24 +142,17 @@ public class TaskLauncherSinkTests {
 		logger.info("sending:input={}", launchRequest);
 		inputDestination.send(new GenericMessage<>(launchRequest));
 		verify(taskOperations, times(1)).launch(anyString(), anyMap(), anyList());
-		assertThat(errorReceived).isFalse();
+		assertThat(errorHandler.hasErrors()).isFalse();
 	}
 
 	@Test
 	public void launchRequestFailure() {
 
-		AtomicBoolean errorReceived = new AtomicBoolean();
-		errorReceived.set(false);
+
 		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
-		errorChannel.subscribe(message -> {
-			try {
-				logger.info("received:error:{}", message);
-				errorReceived.set(true);
-			}
-			catch (Exception e) {
-				fail(e.toString());
-			}
-		});
+		ErrorHandler errorHandler = new ErrorHandler();
+		errorChannel.subscribe(errorHandler);
+
 		CurrentTaskExecutionsResource resource = new CurrentTaskExecutionsResource();
 		resource.setRunningExecutionCount(0);
 		resource.setMaximumTaskExecutions(8);
@@ -165,7 +165,7 @@ public class TaskLauncherSinkTests {
 		LaunchRequest launchRequest = new LaunchRequest("test", Collections.emptyList(), Collections.emptyMap());
 		logger.info("sending:input={}", launchRequest);
 		inputDestination.send(new GenericMessage<>(launchRequest));
-		Awaitility.await("Expecting error").until(errorReceived::get);
+		Awaitility.await("Expecting error").until(errorHandler::hasErrors);
 	}
 
 	@SpringBootApplication(exclude = { BatchAutoConfiguration.class, TaskBatchAutoConfiguration.class,

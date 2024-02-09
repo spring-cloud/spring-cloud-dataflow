@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.tasklauncher;
 /**
  * @author Corneil du Plessis
  **/
-public class CannotHandleRequestException extends RuntimeException {
+public class SystemAtMaxCapacityException extends RuntimeException {
 
-	public CannotHandleRequestException() {
+	public SystemAtMaxCapacityException() {
 	}
 
 }

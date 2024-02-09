@@ -92,7 +92,11 @@ public class RetryProperties {
 
 	@Override
 	public String toString() {
-		return "RetryProperties{" + "initialDelay=" + initialDelay + ", multiplier=" + multiplier + ", maxPeriod="
-				+ maxPeriod + '}';
+		return "RetryProperties{" +
+			"initialDelay=" + initialDelay +
+			", multiplier=" + multiplier +
+			", maxPeriod=" + maxPeriod +
+			", maxAttempts=" + maxAttempts +
+			'}';
 	}
 }

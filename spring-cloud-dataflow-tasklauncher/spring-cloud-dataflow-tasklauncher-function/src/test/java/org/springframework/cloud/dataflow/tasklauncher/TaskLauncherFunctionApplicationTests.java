@@ -71,7 +71,7 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
-		assertThatThrownBy(() -> taskLauncherFunction.accept(launchRequest)).isInstanceOf(CannotHandleRequestException.class);
+		assertThatThrownBy(() -> taskLauncherFunction.accept(launchRequest)).isInstanceOf(SystemAtMaxCapacityException.class);
 	}
 
 	@Test

@@ -70,7 +70,7 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 			}
 		} else {
 			log.warn("Platform is at capacity. Did not submit task launch request for task " + request.getTaskName());
-			throw new CannotHandleRequestException();
+			throw new SystemAtMaxCapacityException();
 		}
 	}
 

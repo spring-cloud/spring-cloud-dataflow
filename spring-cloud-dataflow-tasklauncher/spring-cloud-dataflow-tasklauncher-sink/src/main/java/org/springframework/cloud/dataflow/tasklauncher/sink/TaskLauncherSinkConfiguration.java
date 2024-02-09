@@ -20,10 +20,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.tasklauncher.CannotHandleRequestException;
+import org.springframework.cloud.dataflow.tasklauncher.SystemAtMaxCapacityException;
 import org.springframework.cloud.dataflow.tasklauncher.LaunchRequest;
 import org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunction;
 import org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunctionConfiguration;
+import org.springframework.cloud.stream.annotation.StreamRetryTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.messaging.Message;
@@ -64,15 +65,16 @@ public class TaskLauncherSinkConfiguration {
 		return new LaunchRequestConsumer(taskLauncherFunction);
 	}
 
-	@Bean(name = "launchRequestConsumerRetry")
+	@StreamRetryTemplate
 	public RetryTemplate retryTemplate(@Validated RetryProperties retryProperties) {
 		if (log.isDebugEnabled()) {
 			log.debug("retryTemplate:retryProperties=" + retryProperties);
 		}
 		RetryTemplateBuilder builder = new RetryTemplateBuilder();
-		builder.retryOn(CannotHandleRequestException.class)
-			.exponentialBackoff(retryProperties.getInitialDelay(), retryProperties.getMultiplier(),
-					retryProperties.getMaxPeriod());
+		builder.retryOn(SystemAtMaxCapacityException.class)
+			.traversingCauses()
+			.exponentialBackoff(retryProperties.getInitialDelay(), retryProperties.getMultiplier(), retryProperties.getMaxPeriod());
+
 		if (retryProperties.getMaxAttempts() >= 0) {
 			builder.maxAttempts(retryProperties.getMaxAttempts());
 		}
