@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,14 @@
 
 package org.springframework.cloud.dataflow.tasklauncher.sink;
 
-import org.springframework.cloud.stream.annotation.Input;
-import org.springframework.cloud.stream.binder.PollableMessageSource;
+import java.util.function.Consumer;
+
+import org.springframework.cloud.dataflow.tasklauncher.LaunchRequest;
+import org.springframework.messaging.Message;
 
 /**
- * @author David Turanski
+ * @author Corneil du Plessis
  **/
-public interface PollingSink {
-	/**
-	 * The input name.
-	 */
-	String INPUT = "input";
+interface LaunchRequestMessageConsumer extends Consumer<Message<LaunchRequest>> {
 
-	@Input(PollingSink.INPUT)
-	PollableMessageSource input();
 }

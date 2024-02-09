@@ -78,7 +78,7 @@
 		<module>spring-cloud-starter-dataflow-ui</module>
 		<module>spring-cloud-dataflow-server</module>
 <!--		TODO: Boot3x followup -->
-<!--		<module>spring-cloud-dataflow-tasklauncher</module>-->
+		<module>spring-cloud-dataflow-tasklauncher</module>
 <!--		<module>spring-cloud-dataflow-single-step-batch-job</module>-->
 <!--		<module>spring-cloud-dataflow-composed-task-runner</module>-->
 		<module>spring-cloud-dataflow-test</module>
@@ -97,7 +97,7 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>3.0.19</version>
+			<version>3.0.20</version>
 			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
