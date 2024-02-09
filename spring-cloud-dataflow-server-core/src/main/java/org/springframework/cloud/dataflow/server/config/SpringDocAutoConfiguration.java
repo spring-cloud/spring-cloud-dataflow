@@ -20,9 +20,9 @@ import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.core.SpringDocConfigProperties;
-import org.springdoc.core.SpringDocConfiguration;
-import org.springdoc.core.SwaggerUiConfigProperties;
+import org.springdoc.core.configuration.SpringDocConfiguration;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springdoc.webmvc.ui.SwaggerConfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;

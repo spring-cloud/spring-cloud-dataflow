@@ -19,11 +19,11 @@ package org.springframework.cloud.dataflow.server.config;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
-import org.springdoc.core.Constants;
-import org.springdoc.core.SpringDocConfigProperties;
-import org.springdoc.core.SpringDocConfiguration;
-import org.springdoc.core.SwaggerUiConfigProperties;
-import org.springdoc.core.SwaggerUiOAuthProperties;
+import org.springdoc.core.configuration.SpringDocConfiguration;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springdoc.core.properties.SwaggerUiOAuthProperties;
+import org.springdoc.core.utils.Constants;
 import org.springdoc.webmvc.ui.SwaggerConfig;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;

@@ -43,7 +43,7 @@
 		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.7</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
-		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
+		<springdoc-openapi.version>2.3.0</springdoc-openapi.version>
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
 		<spring-security.version>5.7.11</spring-security.version>
 		<guava.version>32.1.3-jre</guava.version>
@@ -221,8 +221,8 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-ui</artifactId>
-				<version>${springdoc-openapi-ui.version}</version>
+				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+				<version>${springdoc-openapi.version}</version>
 			</dependency>
 			<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 			<dependency>
