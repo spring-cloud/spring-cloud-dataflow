@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -48,6 +49,11 @@ import org.springframework.core.io.Resource;
 public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultEnvironmentPostProcessor.class);
+
+	/**
+	 * The order for the processor - must run before the {@link ConfigDataEnvironmentPostProcessor}.
+	 */
+	public static final int ORDER = ConfigDataEnvironmentPostProcessor.ORDER - 5;
 
 	private final Resource serverResource = new ClassPathResource("/dataflow-server.yml");
 
@@ -106,6 +112,6 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 	@Override
 	public int getOrder() {
-		return 0;
+		return ORDER;
 	}
 }
