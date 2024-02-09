@@ -26,14 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.dataflow.rest.util.CheckableResource;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
 import org.springframework.cloud.dataflow.rest.util.ResourceBasedAuthorizationInterceptor;
-import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,8 +49,8 @@ public class HttpClientTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpClientTest.class);
 
-	@Autowired
-	private ServletWebServerApplicationContext webServerAppCtxt;
+	@LocalServerPort
+	private int port;
 	static final class TestException extends IOException {
 		TestException() {
 			super("It broke");
@@ -80,7 +79,7 @@ public class HttpClientTest {
 
 		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
 
-		final URI targetHost = new URI("http://localhost:" + webServerAppCtxt.getWebServer().getPort());
+		final URI targetHost = new URI("http://localhost:" + port);
 		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
 				.addInterceptor((request, entityDetails, context) -> {
@@ -106,7 +105,7 @@ public class HttpClientTest {
 
 		final CheckableResource resource = new ByteArrayCheckableResource(credentials.getBytes(), new TestException());
 
-		final URI targetHost = new URI("http://localhost:" + webServerAppCtxt.getWebServer().getPort());
+		final URI targetHost = new URI("http://localhost:" + port);
 		try (final CloseableHttpClient client = HttpClientConfigurer.create(targetHost)
 				.addInterceptor(new ResourceBasedAuthorizationInterceptor(resource))
 				.addInterceptor((request, entityDetails, context) -> {
@@ -123,7 +122,8 @@ public class HttpClientTest {
 		}
 	}
 
-	@SpringBootApplication(exclude = { SimpleTaskAutoConfiguration.class })
+	@EnableAutoConfiguration
+	@SpringBootApplication
 	static class HttpClientTestApp {
 
 		@RestController
