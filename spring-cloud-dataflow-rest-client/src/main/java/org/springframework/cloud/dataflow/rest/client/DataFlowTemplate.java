@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gary Russell
  * @author Eric Bottard
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class DataFlowTemplate implements DataFlowOperations {
 
@@ -151,19 +152,19 @@ public class DataFlowTemplate implements DataFlowOperations {
 
 		if (resourceSupport != null) {
 			if (resourceSupport.getApiRevision() == null) {
-				throw new IllegalStateException("Incompatible version of Data Flow server detected.\n"
-						+ "Follow instructions in the documentation for the version of the server you are "
-						+ "using to download a compatible version of the shell.\n"
-						+ "Documentation can be accessed at https://cloud.spring.io/spring-cloud-dataflow/");
+				throw new IllegalStateException("""
+                        Incompatible version of Data Flow server detected.
+                        Follow instructions in the documentation for the version of the server you are using to download a compatible version of the shell.
+                        Documentation can be accessed at https://cloud.spring.io/spring-cloud-dataflow/""");
 			}
 			String serverRevision = resourceSupport.getApiRevision().toString();
 			if (!String.valueOf(Version.REVISION).equals(serverRevision)) {
 				String downloadURL = getLink(resourceSupport, "dashboard").getHref() + "#about";
 				throw new IllegalStateException(String.format(
-						"Incompatible version of Data Flow server detected.\n"
-								+ "Trying to use shell which supports revision %s, while server revision is %s. Both "
-								+ "revisions should be aligned.\n"
-								+ "Follow instructions at %s to download a compatible version of the shell.",
+                        """
+                                Incompatible version of Data Flow server detected.
+                                Trying to use shell which supports revision %s, while server revision is %s. Both revisions should be aligned.
+                                Follow instructions at %s to download a compatible version of the shell.""",
 						Version.REVISION, serverRevision, downloadURL));
 			}
 
@@ -252,16 +253,14 @@ public class DataFlowTemplate implements DataFlowOperations {
 		boolean containsMappingJackson2HttpMessageConverter = false;
 
 		for (HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
-			if (converter instanceof MappingJackson2HttpMessageConverter) {
+			if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
-				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
-				DataFlowTemplate.prepareObjectMapper(jacksonConverter.getObjectMapper());
+                DataFlowTemplate.prepareObjectMapper(jacksonConverter.getObjectMapper());
 			}
 		}
 
 		if (!containsMappingJackson2HttpMessageConverter) {
-			throw new IllegalArgumentException(
-					"The RestTemplate does not contain a required " + "MappingJackson2HttpMessageConverter.");
+			throw new IllegalArgumentException("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.");
 		}
 		return restTemplate;
 	}
@@ -276,7 +275,7 @@ public class DataFlowTemplate implements DataFlowOperations {
 	public static ObjectMapper prepareObjectMapper(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "The objectMapper must not be null.");
 		return objectMapper
-				.registerModules(new Jackson2HalModule(), new Jackson2DataflowModule());
+				.registerModules(new Jackson2HalModule(), new Jackson2DataflowModule(), new JavaTimeModule());
 	}
 
 	/**
