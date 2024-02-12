@@ -25,39 +25,23 @@
 		<spring-shell.version>2.1.13</spring-shell.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<commons-text.version>1.11.0</commons-text.version>
-		<testcontainers.version>1.17.6</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
-		<snakeyaml.version>1.33</snakeyaml.version>
-		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.24.0</commons-compress.version>
-		<postgresql.version>42.4.3</postgresql.version>
 		<prometheus-rsocket.version>1.5.2</prometheus-rsocket.version>
 		<java-cfenv.version>2.3.0</java-cfenv.version>
 		<spring-cloud-services-starter-config-client.version>3.5.4</spring-cloud-services-starter-config-client.version>
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
 		<junit.version>4.13.1</junit.version>
-		<junit-jupiter.version>5.9.2</junit-jupiter.version>
-		<logback.version>1.2.13</logback.version>
 		<json-path.version>2.9.0</json-path.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>net.minidev</groupId>
-				<artifactId>json-smart</artifactId>
-				<version>${json-smart.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>${nimbus-jose-jwt.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${snakeyaml.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xerial.snappy</groupId>
@@ -68,19 +52,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-compress</artifactId>
-					</exclusion>
-				</exclusions>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>io.fabric8</groupId>
@@ -112,11 +83,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons-text.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.micrometer.prometheus</groupId>
@@ -162,13 +128,6 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>${junit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

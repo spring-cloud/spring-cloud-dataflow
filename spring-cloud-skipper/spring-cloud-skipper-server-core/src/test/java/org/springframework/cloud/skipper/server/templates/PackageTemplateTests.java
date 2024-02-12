@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -68,7 +69,7 @@ public class PackageTemplateTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testMustasche() throws IOException {
-		Yaml yaml = new Yaml(new SafeConstructor());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Map model = (Map) yaml.load(valuesResource.getInputStream());
 		String templateAsString = StreamUtils.copyToString(nestedMapResource.getInputStream(),
 				Charset.defaultCharset());

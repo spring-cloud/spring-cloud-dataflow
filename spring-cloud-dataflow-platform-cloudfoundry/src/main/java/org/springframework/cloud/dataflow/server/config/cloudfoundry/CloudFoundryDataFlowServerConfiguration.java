@@ -18,13 +18,13 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import reactor.core.publisher.Hooks;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnCloudPlatform;
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
@@ -34,8 +34,8 @@ import org.springframework.context.event.EventListener;
  * @author Eric Bottard
  * @author Corneil du Plessis
  */
+@AutoConfiguration
 @ConditionalOnCloudPlatform(CloudPlatform.CLOUD_FOUNDRY)
-@Configuration(proxyBeanMethods = false)
 public class CloudFoundryDataFlowServerConfiguration {
 	private CloudFoundryServerConfigurationProperties cloudFoundryServerConfigurationProperties = new CloudFoundryServerConfigurationProperties();
 	@Bean

@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -275,7 +276,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	protected void assertConfigValues(Package pkg) {
 		// Note same config values for both time and log
 		ConfigValues configValues = pkg.getConfigValues();
-		Yaml yaml = new Yaml(new SafeConstructor());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Map<String, Object> logConfigValueMap = (Map<String, Object>) yaml.load(configValues.getRaw());
 		assertThat(logConfigValueMap).containsKeys("version", "spec");
 		if (pkg.getMetadata().getName().equals("log")) {
