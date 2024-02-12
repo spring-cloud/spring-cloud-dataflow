@@ -41,6 +41,8 @@ server:
 spring:
   main:
     banner-mode: "off"
+  config:
+    use-legacy-processing: true
   data:
     rest:
       base-path: /api
