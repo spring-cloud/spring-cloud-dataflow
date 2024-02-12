@@ -20,24 +20,27 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.hateoas.PagedModel;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -45,6 +48,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author David Turanski
+ * @author Corneil du Plessis
+ */
 @SpringBootTest
 public class TaskLauncherFunctionApplicationTests {
 
@@ -71,7 +78,7 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
-		assertThatThrownBy(() -> taskLauncherFunction.accept(launchRequest)).isInstanceOf(SystemAtMaxCapacityException.class);
+		assertThatExceptionOfType(SystemAtMaxCapacityException.class).isThrownBy(() -> taskLauncherFunction.accept(launchRequest));
 	}
 
 	@Test
@@ -95,6 +102,17 @@ public class TaskLauncherFunctionApplicationTests {
 		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L, SchemaVersionTarget.defaultTarget().getName()));
 	}
 
+	@Test
+	public void noLaunchersConfigured() {
+		ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(TaskLauncherFunctionApplicationTests.TestConfig.class);
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> contextRunner
+				.withPropertyValues("spring.profiles.active=nolaunchers")
+				.run(Lifecycle::start))
+			.withCauseInstanceOf(BeanCreationException.class)
+			.withRootCauseInstanceOf(IllegalArgumentException.class)
+			.withStackTraceContaining("The Data Flow Server has no task platforms configured");
+	}
+
 	@Configuration
 	@Import(TaskLauncherFunctionConfiguration.class)
 	static class TestConfig {
@@ -107,16 +125,15 @@ public class TaskLauncherFunctionApplicationTests {
 			when(launcherResource.getName()).thenReturn("default");
 
 			when(taskOperations.listPlatforms()).thenReturn(PagedModel.of(
-					Collections.singletonList(launcherResource), (PagedModel.PageMetadata) null));
+				Collections.singletonList(launcherResource), (PagedModel.PageMetadata) null));
 			return taskOperations;
 		}
-
 		@Bean
 		@Profile("nolaunchers")
 		TaskOperations taskOperationsNoLaunchers() {
 			TaskOperations taskOperations = mock(TaskOperations.class);
 			when(taskOperations.listPlatforms()).thenReturn(PagedModel.of(
-					Collections.emptyList(), (PagedModel.PageMetadata) null));
+				Collections.emptyList(), (PagedModel.PageMetadata) null));
 			return taskOperations;
 		}
 

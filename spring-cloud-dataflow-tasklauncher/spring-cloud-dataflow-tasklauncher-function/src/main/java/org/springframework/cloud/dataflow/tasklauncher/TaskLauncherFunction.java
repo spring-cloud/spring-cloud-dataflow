@@ -48,6 +48,7 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 
 	private static final Log log = LogFactory.getLog(TaskLauncherFunction.class);
 
+	// VisibleForTesting
 	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
 	private final TaskOperations taskOperations;
