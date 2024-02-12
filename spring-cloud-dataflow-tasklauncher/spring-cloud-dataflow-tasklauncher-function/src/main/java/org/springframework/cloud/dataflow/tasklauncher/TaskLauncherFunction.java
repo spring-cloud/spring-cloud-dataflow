@@ -23,14 +23,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
+import org.springframework.core.log.LogAccessor;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -46,7 +44,7 @@ import org.springframework.util.StringUtils;
  **/
 public class TaskLauncherFunction implements Consumer<LaunchRequest>, InitializingBean {
 
-	private static final Log log = LogFactory.getLog(TaskLauncherFunction.class);
+	private static final LogAccessor log = new LogAccessor(TaskLauncherFunction.class);
 
 	// VisibleForTesting
 	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
@@ -62,15 +60,11 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 	@Override
 	public void accept(LaunchRequest request) {
 		if (platformIsAcceptingNewTasks()) {
-			if(log.isDebugEnabled()) {
-				log.debug("task-launcher-function:request:" + request);
-			}
+			log.debug(() -> "TaskLauncher - LaunchRequest = " + request);
 			LaunchResponse response = launchTask(request);
-			if(log.isDebugEnabled()) {
-				log.debug("task-launcher-function:response:" + response);
-			}
+			log.debug(() -> "TaskLauncher - LaunchResponse = " + response);
 		} else {
-			log.warn("Platform is at capacity. Did not submit task launch request for task " + request.getTaskName());
+			log.warn(() -> "Platform is at capacity. Did not submit task launch request for task " + request.getTaskName());
 			throw new SystemAtMaxCapacityException();
 		}
 	}
@@ -98,10 +92,11 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 
 		availableForNewTasks = runningExecutionCount < maximumTaskExecutions;
 		if (!availableForNewTasks) {
-			log.warn(String.format(
+			int finalMaximumTaskExecutions = maximumTaskExecutions;
+			log.warn(() -> String.format(
 					"The data Flow task platform %s has reached its concurrent task execution limit: (%d)",
 					platformName,
-					maximumTaskExecutions));
+				finalMaximumTaskExecutions));
 		}
 
 		return availableForNewTasks;
@@ -120,11 +115,11 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 							request.getDeploymentProperties().get(TASK_PLATFORM_NAME),
 							platformName));
 		}
-		log.info(String.format("Launching Task %s on platform %s", request.getTaskName(), platformName));
+		log.info(() -> String.format("Launching Task %s on platform %s", request.getTaskName(), platformName));
 		LaunchResponseResource response = taskOperations.launch(request.getTaskName(),
 				enrichDeploymentProperties(request.getDeploymentProperties()),
 				request.getCommandlineArguments());
-		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
+		log.info(() -> String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
 		return new LaunchResponse(response.getExecutionId(), response.getSchemaTarget());
 	}
 

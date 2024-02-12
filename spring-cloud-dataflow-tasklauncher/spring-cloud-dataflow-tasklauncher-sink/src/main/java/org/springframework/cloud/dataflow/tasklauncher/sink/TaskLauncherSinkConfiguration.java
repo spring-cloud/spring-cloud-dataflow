@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.tasklauncher.sink;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.tasklauncher.SystemAtMaxCapacityException;
 import org.springframework.cloud.dataflow.tasklauncher.LaunchRequest;
@@ -27,6 +24,7 @@ import org.springframework.cloud.dataflow.tasklauncher.TaskLauncherFunctionConfi
 import org.springframework.cloud.stream.annotation.StreamRetryTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.log.LogAccessor;
 import org.springframework.messaging.Message;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.retry.support.RetryTemplateBuilder;
@@ -43,7 +41,7 @@ import org.springframework.validation.annotation.Validated;
 @Import(TaskLauncherFunctionConfiguration.class)
 public class TaskLauncherSinkConfiguration {
 
-	private static final Log log = LogFactory.getLog(TaskLauncherSinkConfiguration.class);
+	private static final LogAccessor log = new LogAccessor(TaskLauncherSinkConfiguration.class);
 
 	static class LaunchRequestConsumer implements LaunchRequestMessageConsumer {
 
@@ -67,9 +65,7 @@ public class TaskLauncherSinkConfiguration {
 
 	@StreamRetryTemplate
 	public RetryTemplate retryTemplate(@Validated RetryProperties retryProperties) {
-		if (log.isDebugEnabled()) {
-			log.debug("retryTemplate:retryProperties=" + retryProperties);
-		}
+		log.debug(() -> "RetryTemplate RetryProperties = " + retryProperties);
 		RetryTemplateBuilder builder = new RetryTemplateBuilder();
 		builder.retryOn(SystemAtMaxCapacityException.class)
 			.traversingCauses()
