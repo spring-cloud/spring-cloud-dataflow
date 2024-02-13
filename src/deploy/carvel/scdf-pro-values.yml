@@ -17,17 +17,7 @@ scdf:
   skipper:
     image:
       repository: springcloud/spring-cloud-skipper-server
-      tag: 2.11.1
-    config:
-      spring:
-        cloud:
-          skipper:
-            server:
-              platform:
-                kubernetes:
-                  accounts:
-                    default:
-                      environmentVariables: 'LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+      tag: 2.11.2
   registry:
     secret:
       ref: "reg-creds-dev-registry"

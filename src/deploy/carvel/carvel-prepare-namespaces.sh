@@ -39,7 +39,7 @@ if ((PRESENT > 0)); then
 fi
 kubectl create serviceaccount "$SA" --namespace $NS
 
-$SCDIR/carvel-add-registry-secret.sh scdf-metadata-default docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
+$SCDIR/carvel-add-registry-secret.sh scdfmetadata docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 $SCDIR/carvel-add-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 
 

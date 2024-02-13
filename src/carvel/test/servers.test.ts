@@ -252,7 +252,7 @@ describe('servers', () => {
     const container = deploymentContainer(deployment, SKIPPER_NAME);
     const envs = containerEnvValues(container);
     expect(envs).toBeTruthy();
-    expect(envs).toHaveLength(6);
+    expect(envs).toHaveLength(7);
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

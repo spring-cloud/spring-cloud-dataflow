@@ -58,7 +58,8 @@ else
     PACKAGE="$PACKAGE_REPO/$REPO_NAME:$PACKAGE_VERSION"
 fi
 echo "Adding repository for $PACKAGE"
-$SCDIR/carvel-add-package.sh "$PACKAGE" "$PACKAGE_NAME" "$NS"
+"$SCDIR/carvel-add-package.sh" "$PACKAGE" "$PACKAGE_NAME" "$NS"
+
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Setup SCDF Carvel Repo in ${bold}$elapsed${end} seconds"
