@@ -7,10 +7,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-debug: true
-logging:
-  level:
-    org:
-      springframework:
-        cloud:
-          dataflow: debug

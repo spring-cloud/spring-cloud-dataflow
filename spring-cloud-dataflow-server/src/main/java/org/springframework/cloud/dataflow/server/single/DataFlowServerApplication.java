@@ -17,7 +17,11 @@
 package org.springframework.cloud.dataflow.server.single;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.InfluxMetricsExportAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.metrics.export.wavefront.WavefrontMetricsExportAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -36,7 +40,16 @@ import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
  * @author Ilayaperumal Gopinathan
  * @author Janne Valkealahti
  */
+//TODO: Boot3x followup - remove the following exclusions once we have identified the proper way to handle metrics:
+// 		WavefrontMetricsExportAutoConfiguration.class,
+//		WavefrontAutoConfiguration.class,
+//		ObservationAutoConfiguration.class,
+//		InfluxMetricsExportAutoConfiguration.class,
 @SpringBootApplication(exclude = {
+		WavefrontMetricsExportAutoConfiguration.class,
+		WavefrontAutoConfiguration.class,
+		ObservationAutoConfiguration.class,
+		InfluxMetricsExportAutoConfiguration.class,
 		ObservationTaskAutoConfiguration.class,
 		SessionAutoConfiguration.class,
 		SimpleTaskAutoConfiguration.class,
