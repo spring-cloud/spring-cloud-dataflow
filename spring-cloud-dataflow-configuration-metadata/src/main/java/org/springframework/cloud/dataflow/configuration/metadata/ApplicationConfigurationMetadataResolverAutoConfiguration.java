@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
  * @author Christian Tzolov
  */
 @AutoConfiguration
-@Configuration
 public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean

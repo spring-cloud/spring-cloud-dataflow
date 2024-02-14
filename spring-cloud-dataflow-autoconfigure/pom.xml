@@ -74,6 +74,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>META-INF/spring.factories</include>
+					<include>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</include>
 				</includes>
 			</resource>
 		</resources>
