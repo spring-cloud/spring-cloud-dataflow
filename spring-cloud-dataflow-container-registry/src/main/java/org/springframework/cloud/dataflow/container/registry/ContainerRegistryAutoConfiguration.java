@@ -46,7 +46,6 @@ import org.springframework.util.StringUtils;
  * @author Ilayaperumal Gopinathan
  */
 @AutoConfiguration
-@Configuration
 @EnableConfigurationProperties({ContainerRegistryProperties.class})
 public class ContainerRegistryAutoConfiguration {
 
