@@ -22,13 +22,13 @@ import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractRemoveBatch4Task2Tables;
 
 /**
- * Prefixes Task V2 tables and V4 Batch tables with a V2_prefix as well as remove the BOOT3_ prefix for V3 task and v5 batch tables.
+ * Prefixes Task V2 tables and V4 Batch tables with a V2_ prefix as well as remove the BOOT3_ prefix for V3 task and v5 batch tables.
  *
  * @author Glenn Renfro
  */
 public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
 
-	/**
+	/*
 	 * Scripts to remove views used for Task V2/Batch V4 Task V3/Batch V5 queries.
 	 */
 	private final static String DROP_VIEW_AGGREGATE_TASK_EXECUTION =
@@ -49,7 +49,7 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	private final static String DROP_VIEW_AGGREGATE_STEP_EXECUTION =
 		"DROP VIEW AGGREGATE_STEP_EXECUTION";
 
-	/**
+	/*
 	 * Scripts to rename Task V2 tables removing BOOT_ prefix.
 	 */
 	private final static String RENAME_TASK_EXECUTION_V2_TABLE =
@@ -73,7 +73,7 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	private final static String RENAME_TASK_EXECUTION_METADATA_V2_SEQ =
 		"RENAME TASK_EXECUTION_METADATA_SEQ TO V2_TASK_EXECUTION_METADATA_SEQ";
 
-	/**
+	/*
 	 * Scripts to rename Batch V5 tables removing BOOT_ prefix.
 	 */
 
@@ -104,7 +104,7 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	private final static String RENAME_BATCH_JOB_V4_SEQ =
 		"RENAME BATCH_JOB_SEQ TO V2_BATCH_JOB_SEQ";
 
-	/**
+	/*
 	 * Scripts to rename Task V3 tables removing BOOT_ prefix.
 	 */
 	private final static String RENAME_TASK_EXECUTION_V3_TABLE =
@@ -128,7 +128,7 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	private final static String RENAME_TASK_EXECUTION_METADATA_V3_SEQ =
 			"RENAME BOOT3_TASK_EXECUTION_METADATA_SEQ TO TASK_EXECUTION_METADATA_SEQ";
 
-	/**
+	/*
 	 * Scripts to rename Batch V5 tables removing BOOT_ prefix.
 	 */
 

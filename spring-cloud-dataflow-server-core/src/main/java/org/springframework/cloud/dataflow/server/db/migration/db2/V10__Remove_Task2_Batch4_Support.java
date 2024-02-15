@@ -22,13 +22,13 @@ import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractRemoveBatch4Task2Tables;
 
 /**
- * Prefixes Task V2 tables and V4 Batch tables with a V2_prefix as well as remove the BOOT3_ prefix for V3 task and v5 batch tables.
+ * Prefixes Task V2 tables and V4 Batch tables with a V2_ prefix as well as remove the BOOT3_ prefix for V3 task and v5 batch tables.
  *
  * @author Glenn Renfro
  */
 public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
 
-	/**
+	/*
 	 * Scripts to remove views used for Task V2/Batch V4 Task V3/Batch V5 queries.
 	 */
 	private final static String DROP_VIEW_AGGREGATE_TASK_EXECUTION =
@@ -49,7 +49,7 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	private final static String DROP_VIEW_AGGREGATE_STEP_EXECUTION =
 		"DROP VIEW AGGREGATE_STEP_EXECUTION";
 
-	/**
+	/*
 	 * Scripts to rename table Task V2 tables removing BOOT_ prefix.
 	 */
 	private final static String RENAME_TASK_EXECUTION_V2_TABLE =
@@ -180,7 +180,7 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
    			DROP SEQUENCE TASK_EXECUTION_METADATA_SEQ;
 			""";
 
-	/**
+	/*
 	 * Scripts to rename table Batch V5 tables removing BOOT_ prefix.
 	 */
 
@@ -366,7 +366,7 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 		"""
    			DROP SEQUENCE BATCH_JOB_SEQ;
 			""";
-	/**
+	/*
 	 * Scripts to rename table Task V3 tables removing BOOT_ prefix.
 	 */
 	private final static String RENAME_TASK_EXECUTION_V3_TABLE =
@@ -508,7 +508,7 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 		"""
    			DROP SEQUENCE BOOT3_TASK_EXECUTION_METADATA_SEQ;
 			""";
-	/**
+	/*
 	 * Scripts to rename table Batch V5 tables removing BOOT_ prefix.
 	 */
 
@@ -732,57 +732,57 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	@Override
 	public List<SqlCommand> renameTask3Tables() {
 		return Arrays.asList(
-				SqlCommand.from(RENAME_TASK_EXECUTION_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_PARAMS_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_TASK_BATCH_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_V3_SEQ),
-				SqlCommand.from(RENAME_TASK_LOCK_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_SEQ),
-				SqlCommand.from(POPULATE_TASK_EXECUTION_V3_TABLE),
-				SqlCommand.from(POPULATE_TASK_EXECUTION_PARAMS_V3_TABLE),
-				SqlCommand.from(POPULATE_TASK_TASK_BATCH_V3_TABLE),
-				SqlCommand.from(POPULATE_TASK_LOCK_V3_TABLE),
-				SqlCommand.from(POPULATE_TASK_EXECUTION_METADATA_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_EXECUTION_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_EXECUTION_PARAMS_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_TASK_BATCH_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_V3_SEQ),
-				SqlCommand.from(CLEANUP_TASK_LOCK_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_EXECUTION_METADATA_V3_TABLE),
-				SqlCommand.from(CLEANUP_TASK_EXECUTION_METADATA_V3_SEQ)
+			SqlCommand.from(RENAME_TASK_EXECUTION_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_PARAMS_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_TASK_BATCH_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_V3_SEQ),
+			SqlCommand.from(RENAME_TASK_LOCK_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_SEQ),
+			SqlCommand.from(POPULATE_TASK_EXECUTION_V3_TABLE),
+			SqlCommand.from(POPULATE_TASK_EXECUTION_PARAMS_V3_TABLE),
+			SqlCommand.from(POPULATE_TASK_TASK_BATCH_V3_TABLE),
+			SqlCommand.from(POPULATE_TASK_LOCK_V3_TABLE),
+			SqlCommand.from(POPULATE_TASK_EXECUTION_METADATA_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_EXECUTION_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_EXECUTION_PARAMS_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_TASK_BATCH_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_V3_SEQ),
+			SqlCommand.from(CLEANUP_TASK_LOCK_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_EXECUTION_METADATA_V3_TABLE),
+			SqlCommand.from(CLEANUP_TASK_EXECUTION_METADATA_V3_SEQ)
 		);
 	}
 
 	@Override
 	public List<SqlCommand> renameBatch5Tables() {
 		return Arrays.asList(
-				SqlCommand.from(RENAME_BATCH_JOB_INSTANCE_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_SEQ),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_SEQ),
-				SqlCommand.from(RENAME_BATCH_JOB_V5_SEQ),
+			SqlCommand.from(RENAME_BATCH_JOB_INSTANCE_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_SEQ),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_SEQ),
+			SqlCommand.from(RENAME_BATCH_JOB_V5_SEQ),
 
-				SqlCommand.from(POPULATE_BATCH_JOB_INSTANCE_V5_TABLE),
-				SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_V5_TABLE),
-				SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
-				SqlCommand.from(POPULATE_BATCH_STEP_EXECUTION_V5_TABLE),
-				SqlCommand.from(POPULATE_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_JOB_INSTANCE_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_STEP_EXECUTION_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(POPULATE_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
 
-				SqlCommand.from(CLEANUP_BATCH_JOB_INSTANCE_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_V5_SEQ),
-				SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_V5_SEQ),
-				SqlCommand.from(CLEANUP_BATCH_JOB_V5_SEQ)
+			SqlCommand.from(CLEANUP_BATCH_JOB_INSTANCE_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(CLEANUP_BATCH_STEP_EXECUTION_V5_SEQ),
+			SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_V5_SEQ),
+			SqlCommand.from(CLEANUP_BATCH_JOB_V5_SEQ)
 		);
 	}
 
@@ -840,7 +840,7 @@ public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 			SqlCommand.from(CLEANUP_BATCH_JOB_EXECUTION_V4_SEQ),
 			SqlCommand.from(CLEANUP_BATCH_JOB_V4_SEQ)
 
-			);
+		);
 	}
 
 }
