@@ -27,7 +27,7 @@ import org.springframework.cloud.dataflow.server.repository.support.PagingQueryP
  * needed by SCDF.  This comment will be need to be updated prior to release to
  * discuss that it implements extra features needed beyond the {@code SqlPagingQueryProviderFactoryBean}.
  */
-public abstract class DataflowSqlPagingQueryProvider implements DataflowPagingQueryProvider {
+public  class DataflowSqlPagingQueryProvider implements DataflowPagingQueryProvider {
 	public String generateJumpToItemQuery(int start, int count) {
 		throw new UnsupportedOperationException("This method is not yet supported by SCDF.");
 	}

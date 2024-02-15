@@ -451,6 +451,7 @@ public class DataFlowControllerAutoConfiguration {
 			return new StreamLogsController(streamDeployer);
 		}
 
+
 		@Bean
 		@ConditionalOnMissingBean(name = "runtimeAppsStatusFJPFB")
 		public ForkJoinPoolFactoryBean runtimeAppsStatusFJPFB() {

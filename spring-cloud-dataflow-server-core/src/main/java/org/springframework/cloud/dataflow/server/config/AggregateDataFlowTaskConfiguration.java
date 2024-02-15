@@ -129,8 +129,8 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobExplorerContainer jobExplorerContainer(DataSource dataSource, SchemaService schemaService) {
-		return new JobExplorerContainer(dataSource, schemaService);
+	public JobExplorerContainer jobExplorerContainer(DataSource dataSource, SchemaService schemaService, PlatformTransactionManager platformTransactionManager) {
+		return new JobExplorerContainer(dataSource, schemaService, platformTransactionManager);
 	}
 
 	@Bean

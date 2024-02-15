@@ -9,16 +9,18 @@ import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
 
 public class JobExplorerContainer {
 	private final Map<String, JobExplorer> container = new HashMap<>();
 
-	public JobExplorerContainer(DataSource dataSource, SchemaService schemaService) {
+	public JobExplorerContainer(DataSource dataSource, SchemaService schemaService, PlatformTransactionManager platformTransactionManager) {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
 			factoryBean.setDataSource(dataSource);
 			factoryBean.setTablePrefix(target.getBatchPrefix());
+			factoryBean.setTransactionManager(platformTransactionManager);
 			try {
 				factoryBean.afterPropertiesSet();
 				container.put(target.getName(), factoryBean.getObject());

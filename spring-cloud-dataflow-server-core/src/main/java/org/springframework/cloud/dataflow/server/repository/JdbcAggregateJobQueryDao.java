@@ -61,6 +61,7 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.DataflowPagingQueryProvider;
+import org.springframework.cloud.dataflow.server.batch.DataflowSqlPagingQueryProvider;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.converter.DateToStringConverter;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
@@ -864,8 +865,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause, Map<String, Order> sortKeys) throws Exception {
-		throw new UnsupportedOperationException("Need to create DataflowPagingQueryProvider so that dataflow can call " +
-			"generateRowNumSqlQueryWithNesting");
+		return new DataflowSqlPagingQueryProvider();
 	}
 
 	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause) throws Exception {

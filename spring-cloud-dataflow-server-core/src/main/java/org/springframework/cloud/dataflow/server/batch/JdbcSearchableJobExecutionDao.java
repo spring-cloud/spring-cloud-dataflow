@@ -320,8 +320,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 * @throws Exception if page provider is not created.
 	 */
 	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String whereClause) {
-		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
-			"generateJumpToItemQuery");
+		return new DataflowSqlPagingQueryProvider();
 	}
 
 	/**
@@ -361,8 +360,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 * @throws Exception if page provider is not created.
 	 */
 	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause) {
-		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
-			"generateJumpToItemQuery");
+		return new DataflowSqlPagingQueryProvider();
 	}
 
 	/**
