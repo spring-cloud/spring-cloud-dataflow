@@ -84,7 +84,7 @@ public class ArgumentSanitizerTest {
 				Assert.assertEquals("******", entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("name")) {
-				Assert.assertEquals("baz", entry.getValue().getValue());
+				Assert.assertEquals("{value=baz, type=class java.lang.String, identifying=true}", entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("C")) {
 				Assert.assertEquals(1L, entry.getValue().getValue());

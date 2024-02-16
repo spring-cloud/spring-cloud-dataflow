@@ -78,10 +78,10 @@ public class SchemaGenerationTests {
 
 		supportedHibernateDialects.add("H2");
 		supportedHibernateDialects.add("HSQL");
-		supportedHibernateDialects.add("MySQL5");
+		supportedHibernateDialects.add("MySQL8");
 		supportedHibernateDialects.add("MariaDB106");
-		supportedHibernateDialects.add("Oracle10g");
-		supportedHibernateDialects.add("PostgreSQL94");
+		supportedHibernateDialects.add("Oracle");
+		supportedHibernateDialects.add("PostgreSQL");
 		supportedHibernateDialects.add("DB2");
 		supportedHibernateDialects.add("SQLServer2012");
 
@@ -90,6 +90,7 @@ public class SchemaGenerationTests {
 				+ supportedHibernateDialects.stream().map((db) -> db + "Dialect").collect(Collectors.joining("\n")) + "\n");
 
 		for (String supportedHibernateDialect : supportedHibernateDialects) {
+			System.out.println(supportedHibernateDialect);
 			generateDdlFiles(supportedHibernateDialect, tempDir, persistenceUnitInfo);
 		}
 
