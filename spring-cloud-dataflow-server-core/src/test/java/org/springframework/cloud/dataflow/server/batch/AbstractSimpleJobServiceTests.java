@@ -73,9 +73,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private static final String SAVE_JOB_EXECUTION = "INSERT INTO %PREFIX%JOB_EXECUTION(JOB_EXECUTION_ID, JOB_INSTANCE_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, VERSION, CREATE_TIME, LAST_UPDATED) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	private static final String SAVE_STEP_EXECUTION_4 = "INSERT into %PREFIX%STEP_EXECUTION(STEP_EXECUTION_ID, STEP_NAME, JOB_EXECUTION_ID, START_TIME, END_TIME, VERSION, STATUS, LAST_UPDATED) values(?, ?, ?, ?, ?, ?, ?, ?)";
-
-	private static final String SAVE_STEP_EXECUTION_5 = "INSERT into %PREFIX%STEP_EXECUTION(STEP_EXECUTION_ID, STEP_NAME, JOB_EXECUTION_ID, START_TIME, END_TIME, VERSION, STATUS, LAST_UPDATED, CREATE_TIME) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	private static final String SAVE_STEP_EXECUTION = "INSERT into %PREFIX%STEP_EXECUTION(STEP_EXECUTION_ID, STEP_NAME, JOB_EXECUTION_ID, START_TIME, END_TIME, VERSION, STATUS, LAST_UPDATED, CREATE_TIME) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	private static final String INSERT_TASK_BATCH = "INSERT INTO %sTASK_BATCH (TASK_EXECUTION_ID, JOB_EXECUTION_ID) VALUES (%d, %d)";
 
@@ -436,20 +434,14 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		if (stepExecution.getStartTime() == null) {
 			stepExecution.setStartTime(LocalDateTime.now());
 		}
-		boolean isBatch4 = schemaVersionTarget.getSchemaVersion().equals(AppBootSchemaVersion.BOOT2);
-		Object[] parameters = isBatch4
-				? new Object[] { stepExecution.getId(), stepExecution.getStepName(), stepExecution.getJobExecutionId(),
-						stepExecution.getStartTime(), stepExecution.getEndTime(), stepExecution.getVersion(),
-						stepExecution.getStatus().toString(), stepExecution.getLastUpdated() }
-				: new Object[] { stepExecution.getId(), stepExecution.getStepName(), stepExecution.getJobExecutionId(),
+		Object[] parameters = new Object[] { stepExecution.getId(), stepExecution.getStepName(), stepExecution.getJobExecutionId(),
 						stepExecution.getStartTime(), stepExecution.getEndTime(), stepExecution.getVersion(),
 						stepExecution.getStatus().toString(), stepExecution.getLastUpdated(), LocalDateTime.now() };
-		String sql = getQuery(isBatch4 ? SAVE_STEP_EXECUTION_4 : SAVE_STEP_EXECUTION_5, schemaVersionTarget);
-		int[] argTypes4 = { Types.BIGINT, Types.VARCHAR, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.INTEGER,
-				Types.VARCHAR, Types.TIMESTAMP };
-		int[] argTypes5 = { Types.BIGINT, Types.VARCHAR, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.INTEGER,
+		String sql = getQuery(SAVE_STEP_EXECUTION, schemaVersionTarget);
+
+		int[] argTypes = { Types.BIGINT, Types.VARCHAR, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.INTEGER,
 				Types.VARCHAR, Types.TIMESTAMP, Types.TIMESTAMP };
-		getJdbcTemplate().update(sql, parameters, isBatch4 ? argTypes4 : argTypes5);
+		getJdbcTemplate().update(sql, parameters, argTypes);
 	}
 
 	private TaskExecution createTaskExecution(AppBootSchemaVersion appBootSchemaVersion, JobExecution jobExecution) {

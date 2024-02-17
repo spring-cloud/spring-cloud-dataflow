@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.batch;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -710,12 +711,12 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		jobExecution = new JobExecution(jobInstance, jobParameters);
 		jobExecution.setId(id);
 
-		jobExecution.setStartTime(rs.getTimestamp(2).toLocalDateTime());
-		jobExecution.setEndTime(rs.getTimestamp(3).toLocalDateTime());
+		jobExecution.setStartTime(rs.getObject(2, LocalDateTime.class));
+		jobExecution.setEndTime(rs.getObject(3, LocalDateTime.class));
 		jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 		jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-		jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());
-		jobExecution.setLastUpdated(rs.getTimestamp(8).toLocalDateTime());
+		jobExecution.setCreateTime(rs.getObject(7, LocalDateTime.class));
+		jobExecution.setLastUpdated(rs.getObject(8, LocalDateTime.class));
 		jobExecution.setVersion(rs.getInt(9));
 		return jobExecution;
 	}
