@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,8 +33,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -55,9 +55,8 @@ public class Status extends NonVersionedAbstractEntity {
 	private StatusCode statusCode;
 
 	// Status from the underlying platform
-	//TODO: Boot3x followup
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String platformStatus;
 
 	public Status() {

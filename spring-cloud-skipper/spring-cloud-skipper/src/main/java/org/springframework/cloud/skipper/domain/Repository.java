@@ -15,15 +15,15 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.sql.Types;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 
 
 /**
@@ -48,19 +48,17 @@ public class Repository extends AbstractEntity {
 	 * The root url that points to the location of an index.yaml file and other files
 	 * supporting the index e.g. myapp-1.0.0.zip, icons-64x64.zip
 	 */
-	//TODO: Boot3x followup
 	@NotNull
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String url;
 
 	/**
 	 * The url that points to the source package files that was used to create the index and
 	 * packages.
 	 */
-	//TODO: Boot3x followup
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String sourceUrl;
 
 	/**

@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.sql.Types;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -28,7 +26,9 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 
 
 /**
@@ -92,14 +92,14 @@ public class PackageMetadata extends AbstractEntity {
 	 * Location to source code for this package.
 	 */
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String packageSourceUrl;
 
 	/**
 	 * The home page of the package
 	 */
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String packageHomeUrl;
 
 	/**
@@ -115,7 +115,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * A comma separated list of tags to use for searching
 	 */
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String tags;
 
 	/**
@@ -127,7 +127,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Brief description of the package. The packages README.md will contain more information.
 	 */
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String description;
 
 	/**
@@ -139,7 +139,7 @@ public class PackageMetadata extends AbstractEntity {
 	 * Url location of a icon.
 	 */
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String iconUrl;
 
 	public PackageMetadata() {

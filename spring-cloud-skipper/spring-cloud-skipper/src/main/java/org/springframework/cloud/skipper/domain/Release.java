@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.domain;
 
 import java.io.IOException;
-import java.sql.Types;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,8 +32,9 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
 
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.util.StringUtils;
 
@@ -70,17 +70,15 @@ public class Release extends AbstractEntity {
 	@JsonIgnore
 	private Long repositoryId;
 
-	//TODO: Boot3x followup
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String pkgJsonString;
 
 	@Transient
 	private ConfigValues configValues = new ConfigValues();
 
-	//TODO: Boot3x followup
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String configValuesString;
 
 	@OneToOne(cascade = { CascadeType.ALL })

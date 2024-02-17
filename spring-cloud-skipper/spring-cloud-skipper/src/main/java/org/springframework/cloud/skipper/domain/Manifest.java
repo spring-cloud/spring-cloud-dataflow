@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import java.sql.Types;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 
 
 /**
@@ -31,10 +31,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 @Table(name = "SkipperManifest")
 public class Manifest extends AbstractEntity {
 
-	//TODO: Boot3x followup
 	@NotNull
 	@Lob
-	@JdbcTypeCode(Types.LONGVARCHAR)
+	@Type(DatabaseAwareLobUserType.class)
 	private String data;
 
 	public Manifest() {
