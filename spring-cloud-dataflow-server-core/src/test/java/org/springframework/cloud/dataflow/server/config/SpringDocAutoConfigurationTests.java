@@ -34,6 +34,7 @@ import org.springframework.boot.test.context.assertj.AssertableWebApplicationCon
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.dataflow.server.support.SpringDocJsonDecodeFilter;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.util.AntPathMatcher;
@@ -57,6 +58,7 @@ public class SpringDocAutoConfigurationTests {
 	private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
 			.withPropertyValues("spring.config.additional-location=classpath:/META-INF/dataflow-server-defaults.yml")
 			.withInitializer(new ConfigDataApplicationContextInitializer())
+			.withBean("mvcConversionService", FormattingConversionService.class, () -> mock(FormattingConversionService.class))
 			.withConfiguration(AutoConfigurations.of(
 					ConfigurationPropertiesAutoConfiguration.class,
 					SpringDocConfiguration.class,
@@ -125,7 +127,7 @@ public class SpringDocAutoConfigurationTests {
 		WebSecurityCustomizer customizer = context.getBean("springDocWebSecurityCustomizer", WebSecurityCustomizer.class);
 		WebSecurity webSecurity = mock(WebSecurity.class, Answers.RETURNS_DEEP_STUBS);
 		customizer.customize(webSecurity);
-		ArgumentCaptor<String> antMatchersCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<String[]> antMatchersCaptor = ArgumentCaptor.forClass(String[].class);
 		verify(webSecurity.ignoring()).requestMatchers(antMatchersCaptor.capture());
 		assertThat(antMatchersCaptor.getAllValues()).containsExactly(expected);
 	}
