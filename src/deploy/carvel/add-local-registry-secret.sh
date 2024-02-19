@@ -21,14 +21,17 @@ SECRET_NAME=$1
 REGISTRY_NAME=$2
 REGISTRY_USER=$3
 REGISTRY_PWD=$4
+SECRET_NS=$NS
 if [ "$5" != "" ]; then
-    NS=$5
+    SECRET_NS=$5
 fi
-check_env NS
-kubectl create secret docker-registry "$SECRET_NAME" \
-    --docker-server="$REGISTRY_NAME" \
-    --docker-username="$REGISTRY_USER" \
-    --docker-password="$REGISTRY_PWD" \
-    --namespace "$NS"
+check_env SECRET_NAME
+check_env SECRET_NS
 
+#kubectl create secret docker-registry "$SECRET_NAME" \
+#    --docker-server="$REGISTRY_NAME" \
+#    --docker-username="$REGISTRY_USER" \
+#    --docker-password="$REGISTRY_PWD" \
+#    --namespace "$NS"
 
+"$SCDIR/carvel-import-secret.sh" "$SECRET_NAME" "$SECRET_NS"
