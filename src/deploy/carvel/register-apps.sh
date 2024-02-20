@@ -11,7 +11,11 @@ start_time=$(date +%s)
 function register_app() {
     set +e
     echo "Registering $1 as $2"
-    wget -q -O- "$DATAFLOW_URL/apps/$1" --post-data="uri=$2"
+    DATA="uri=$2"
+    if [ "$3" != "" ]; then
+        DATA="$DATA&$3"
+    fi
+    wget -q -O- "$DATAFLOW_URL/apps/$1" --post-data="$DATA"
     RC=$?
     if ((RC > 0)); then
         echo "Error registering $1: $RC"
@@ -85,8 +89,8 @@ wget -qO- "$DATAFLOW_URL/apps" --post-data="uri=$TASK_URI"
 # replace with individual calls to register only what is required.
 #register_app "task/timestamp" "docker:springcloudtask/timestamp-task:2.0.2"
 #register_app "task/timestamp-batch" "docker:springcloudtask/timestamp-batch-task:2.0.2"
-register_app "task/timestamp3" "docker:springcloudtask/timestamp-task:3.0.0"
-register_app "task/timestamp-batch3" "docker:springcloudtask/timestamp-batch-task:3.0.0"
+register_app "task/timestamp3" "docker:springcloudtask/timestamp-task:3.0.0" "bootVersion=3"
+register_app "task/timestamp-batch3" "docker:springcloudtask/timestamp-batch-task:3.0.0" "bootVersion=3"
 register_app "task/task-demo-metrics-prometheus" "docker:springcloudtask/task-demo-metrics-prometheus:2.0.1-SNAPSHOT"
 
 end_time=$(date +%s)
