@@ -26,13 +26,20 @@ management:
             enabled: true # true is default to Boot 2.3.2 at least.
             percentiles-histogram: true
     export:
-      influx:
-        enabled: false
       prometheus:
-        enabled: false
         rsocket:
           enabled: false
-      wavefront:
+  influx:
+    metrics:
+      export:
+        enabled: false
+  prometheus:
+    metrics:
+      export:
+        enabled: false
+  wavefront:
+    metrics:
+      export:
         enabled: false
 server:
   port: 7577
