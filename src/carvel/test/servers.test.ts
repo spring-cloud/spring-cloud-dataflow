@@ -535,8 +535,8 @@ describe('servers', () => {
 
     const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
     const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
-    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/management/health');
-    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/management/info');
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/management/health/liveness');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/management/health/readiness');
   });
 
   it('should change server servlet context path', async () => {
@@ -556,8 +556,8 @@ describe('servers', () => {
 
     const dataflowDeployment = findDeployment(yaml, SCDF_SERVER_NAME);
     const dataflowContainer = deploymentContainer(dataflowDeployment, SCDF_SERVER_NAME);
-    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/scdf/management/health');
-    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/scdf/management/info');
+    expect(dataflowContainer?.livenessProbe?.httpGet?.path).toBe('/scdf/management/health/liveness');
+    expect(dataflowContainer?.readinessProbe?.httpGet?.path).toBe('/scdf/management/health/readiness');
   });
 
   it('should have default resources', async () => {

@@ -96,11 +96,11 @@ def has_context_path():
 end
 
 def dataflow_liveness_path():
-  return data.values.scdf.server.contextPath + "/management/health"
+  return data.values.scdf.server.contextPath + "/management/health/liveness"
 end
 
 def dataflow_readiness_path():
-  return data.values.scdf.server.contextPath + "/management/info"
+  return data.values.scdf.server.contextPath + "/management/health/readiness"
 end
 
 def dataflow_has_password():
