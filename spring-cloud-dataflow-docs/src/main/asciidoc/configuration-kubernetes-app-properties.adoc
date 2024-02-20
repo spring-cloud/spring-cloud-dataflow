@@ -104,7 +104,7 @@ This overrides the JVM memory setting for the desired `<application>` (replace `
 [[getting-started-kubernetes-probes]]
 ==== Liveness, Readiness and Startup Probes
 
-The `liveness` and `readiness` probes use paths called `/health` and `/info`, respectively. They use a `delay` of `1` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. The liveness and readiness probes are applied only to streams.
+The `liveness` and `readiness` probes use paths called `/health/liveness` and `/health/readiness`, respectively. They use a `delay` of `1` for both and a `period` of `60` and `10` respectively. You can change these defaults when you deploy the stream by using deployer properties. The liveness and readiness probes are applied only to streams.
 
 The `startup` probe will use the `/health` path and a delay of 30 and period for 3 with a failure threshold of 20 times before the container restarts the application.
 
@@ -113,11 +113,16 @@ The following example changes the `liveness` and `startup` probes (replace `<app
 ====
 [source]
 ----
-deployer.<application>.kubernetes.livenessProbePath=/health
+deployer.<application>.kubernetes.livenessProbePath=/health/livesness
 deployer.<application>.kubernetes.livenessProbeDelay=1
 deployer.<application>.kubernetes.livenessProbePeriod=60
 deployer.<application>.kubernetes.livenessProbeSuccess=1
 deployer.<application>.kubernetes.livenessProbeFailure=3
+deployer.<application>.kubernetes.readinessProbePath=/health/readiness
+deployer.<application>.kubernetes.readinessProbeDelay=1
+deployer.<application>.kubernetes.readinessProbePeriod=60
+deployer.<application>.kubernetes.readinessProbeSuccess=1
+deployer.<application>.kubernetes.readinessProbeFailure=3
 deployer.<application>.kubernetes.startupHttpProbePath=/health
 deployer.<application>.kubernetes.startupProbedelay=20
 deployer.<application>.kubernetes.startupProbeSuccess=1
@@ -142,7 +147,7 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    livenessHttpProbePath: /health
+                    livenessHttpProbePath: /health/liveness
                     livenessProbeDelay: 1
                     livenessProbePeriod: 60
                     livenessProbeSuccess: 1
