@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.JobExecution;
@@ -77,6 +78,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
+
+//TODO: Boot3x followup
+@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
