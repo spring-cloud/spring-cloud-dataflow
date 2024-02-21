@@ -124,9 +124,9 @@ public class AuditRecordControllerTests {
 
 		startDate = ZonedDateTime.now();
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream").param("definition", "time | log")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1").param("definition", "time | log")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream1").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
 		// Verify that the 4 app create and 2 stream create audit records have been recorded before setting the between date.
@@ -134,7 +134,7 @@ public class AuditRecordControllerTests {
 
 		betweenDate = ZonedDateTime.now();
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2").param("definition", "time | log")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream2").param("definition", "time | log")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 
 		// Verify that the 4 app create and 3 stream create audit records have been recorded before setting the end date.

@@ -190,7 +190,7 @@ public class TaskSchedulerControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", scheduleName).param("properties", "scheduler.cron.expression=* * * * *")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
@@ -258,7 +258,7 @@ public class TaskSchedulerControllerTests {
 		this.registry.save("testApp", ApplicationType.task, "1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "mySchedule")
 				.param("properties",
 						"scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
@@ -288,7 +288,7 @@ public class TaskSchedulerControllerTests {
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
-		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
+		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "myScheduleBadCron")
 				.param("properties",
 						"scheduler.cron.expression=" + SimpleTestScheduler.INVALID_CRON_EXPRESSION)

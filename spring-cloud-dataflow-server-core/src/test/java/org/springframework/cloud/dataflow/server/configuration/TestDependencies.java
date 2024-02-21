@@ -238,7 +238,17 @@ import static org.mockito.Mockito.when;
 @EnableJpaAuditing
 @EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
-public class TestDependencies extends WebMvcConfigurationSupport {
+public class TestDependencies implements WebMvcConfigurer {
+
+	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+		configurer.setUseSuffixPatternMatch(false);
+	}
+
+	@Override
+	public void addFormatters(FormatterRegistry registry) {
+		registry.addConverter(new AppBootVersionConverter());
+	}
 
 	@Bean
 	public RestControllerAdvice restControllerAdvice() {
@@ -853,22 +863,6 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
 		return transactionManager;
-	}
-
-	@Bean
-	public WebMvcConfigurer configurer() {
-		return new WebMvcConfigurer() {
-
-			@Override
-			public void configurePathMatch(PathMatchConfigurer configurer) {
-				configurer.setUseSuffixPatternMatch(false);
-			}
-
-			@Override
-			public void addFormatters(FormatterRegistry registry) {
-				registry.addConverter(new AppBootVersionConverter());
-			}
-		};
 	}
 
 }

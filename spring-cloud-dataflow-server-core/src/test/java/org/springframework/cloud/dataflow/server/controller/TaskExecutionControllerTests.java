@@ -360,7 +360,7 @@ public class TaskExecutionControllerTests {
 	@Test
 	void getAllExecutions() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
-				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
+				mockMvc.perform(get("/tasks/executions").accept(MediaType.APPLICATION_JSON))
 						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
@@ -407,7 +407,7 @@ public class TaskExecutionControllerTests {
 		mapper.registerModule(new Jackson2DataflowModule());
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
-						get("/tasks/executions/" + resource.getExecutionId())
+						get("/tasks/executions" + resource.getExecutionId())
 								.accept(MediaType.APPLICATION_JSON)
 								.queryParam("schemaTarget", resource.getSchemaTarget())
 				)
@@ -481,7 +481,7 @@ public class TaskExecutionControllerTests {
 		mapper.registerModule(new Jackson2DataflowModule());
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
-						get("/tasks/executions/" + resource.getExecutionId())
+						get("/tasks/executions" + resource.getExecutionId())
 								.accept(MediaType.APPLICATION_JSON)
 								.queryParam("schemaTarget", resource.getSchemaTarget())
 				)
