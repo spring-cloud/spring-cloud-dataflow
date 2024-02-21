@@ -47,11 +47,15 @@ export BROKER
 yq ".scdf.binder.type=\"$BINDER_NAME\"" -i ./scdf-values.yml
 
 if [ "$BROKER" = "rabbitmq" ]; then
-    yq ".scdf.binder.rabbit.host=\"rabbitmq.rabbitmq\"" -i ./scdf-values.yml
+    # RABBITMQ_HOST=$(kubectl get --namespace rabbitmq services rabbitmq | grep -F rabbitmq | awk '{ print $3 }')
+    RABBITMQ_HOST="rabbitmq.rabbitmq"
+    yq ".scdf.binder.rabbit.host=\"$RABBITMQ_HOST\"" -i ./scdf-values.yml
     yq ".scdf.binder.rabbit.port=5672" -i ./scdf-values.yml
 else
+    # KAFKA_HOST=$(kubectl get --namespace kafka services kafka | grep -F kafka | awk '{ print $3 }')
+    KAFKA_HOST="kafka.kafka"
     yq ".scdf.binder.type=\"kafka\"" -i ./scdf-values.yml
-    yq ".scdf.binder.kafka.broker.host=\"kafka-broker.kafka\"" -i ./scdf-values.yml
+    yq ".scdf.binder.kafka.broker.host=\"$KAFKA_HOST\"" -i ./scdf-values.yml
     yq ".scdf.binder.kafka.zk.host=\"kafka-zk.kafka\"" -i ./scdf-values.yml
 fi
 end_time=$(date +%s)

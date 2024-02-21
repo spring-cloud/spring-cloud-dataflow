@@ -29,14 +29,14 @@ spec:
         - containerPort: 7577
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /actuator/health/liveness
             port: 7577
           initialDelaySeconds: 1
           periodSeconds: 60
           timeoutSeconds: 5
         readinessProbe:
           httpGet:
-            path: /actuator/info
+            path: /actuator/health/readiness
             port: 7577
           initialDelaySeconds: 1
           periodSeconds: 10
@@ -50,7 +50,7 @@ spec:
           timeoutSeconds: 3
         resources:
           requests:
-            cpu: 1.0
+            cpu: 1500m
             memory: 1024Mi
         env:
         - name: LANG

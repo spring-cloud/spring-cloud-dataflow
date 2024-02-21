@@ -7,13 +7,16 @@ load("monitoring/monitoring.star", "grafana_enabled")
 load("monitoring/monitoring.star", "prometheus_rsocket_proxy_enabled")
 load("common/common.star", "non_empty_string")
 def env_config():
-  env = ""
+  env = [] 
+  env.append("LANG=en_US.utf8")
+  env.append("LC_ALL=en_US.utf8")
+  env.append("JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8")
   if external_rabbitmq_enabled():
-    env = external_rabbitmq_env_str()
+    env.append(external_rabbitmq_env_str())
   elif external_kafka_enabled():
-    env = external_kafka_env_str()
+    env.append(external_kafka_env_str())
   end
-  return env
+  return ",".join(env)
 end
 
 def skipper_image():
@@ -32,6 +35,7 @@ def skipper_container_env():
   envs = []
   envs.extend([{"name": "LANG", "value": "en_US.utf8"}])
   envs.extend([{"name": "LC_ALL", "value": "en_US.utf8"}])
+  envs.extend([{"name": "JDK_JAVA_OPTIONS", "value": "-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8"}])
   envs.extend([{"name": "SPRING_CLOUD_CONFIG_ENABLED", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API", "value": "false"}])
   envs.extend([{"name": "SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API", "value": "false"}])

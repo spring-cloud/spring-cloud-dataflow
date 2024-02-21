@@ -60,7 +60,7 @@ spec:
         resources:
           requests:
             cpu: 2000m
-            memory: 1Gi
+            memory: 2Gi
         volumeMounts:
           - name: data
             mountPath: /var/lib/postgresql

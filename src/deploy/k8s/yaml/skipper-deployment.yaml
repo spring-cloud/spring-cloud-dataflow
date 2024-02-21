@@ -32,12 +32,12 @@ spec:
           name: jdwp-skipper
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /actuator/health/liveness
             port: 7577
           initialDelaySeconds: 1
         readinessProbe:
           httpGet:
-            path: /actuator/info
+            path: /actuator/health/readiness
             port: 7577
           initialDelaySeconds: 1
         startupProbe:
@@ -49,8 +49,8 @@ spec:
           periodSeconds: 3
         resources:
           requests:
-            cpu: '0.5'
-            memory: 640Mi
+            cpu: 1500m
+            memory: 1536Mi
         env:
           - name: LANG
             value: en_US.utf8

@@ -21,7 +21,9 @@ fi
 if [ "$1" != "" ]; then
     export K8S_VERSION="$1"
 else
-    export K8S_VERSION="1.25"
+    if [ "$K8S_VERSION" == "" ]; then
+        export K8S_VERSION="1.28"
+    fi
 fi
 set +e
 case "$K8S_DRIVER" in

@@ -30,29 +30,25 @@ spec:
               containerPort: 9393
           livenessProbe:
             httpGet:
-              path: /management/health
+              path: /management/health/liveness
               port: 9393
             initialDelaySeconds: 45
           readinessProbe:
             httpGet:
-              path: /management/info
+              path: /management/health/readiness
               port: 9393
             initialDelaySeconds: 45
           startupProbe:
-            httpGet:
+            tcpSocket:
               port: 9393
-              path: /management/health
             failureThreshold: 3
             timeoutSeconds: 3
             initialDelaySeconds: 60
             periodSeconds: 5
           resources:
-            limits:
-              cpu: 1.0
-              memory: 2048Mi
             requests:
-              cpu: 0.5
-              memory: 1024Mi
+              cpu: 1500m
+              memory: 1536Mi
           env:
             - name: LANG
               value: en_US.utf8

@@ -49,9 +49,8 @@ spec:
         ports:
         - containerPort: 9393
         startupProbe:
-          httpGet:
+          tcpSocket:
             port: 9393
-            path: #@ dataflow_liveness_path()
           failureThreshold: 4
           initialDelaySeconds: 10
           timeoutSeconds: 3

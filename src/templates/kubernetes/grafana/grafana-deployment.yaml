@@ -30,12 +30,9 @@ spec:
           ports:
             - containerPort: 3000
           resources:
-            limits:
-              cpu: 500m
-              memory: 2500Mi
             requests:
-              cpu: 100m
-              memory: 100Mi
+              cpu: 500m
+              memory: 256Mi
           volumeMounts:
             - name: config
               mountPath: "/etc/grafana/provisioning/datasources/datasources.yaml"
