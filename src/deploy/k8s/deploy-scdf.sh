@@ -120,7 +120,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     case $BROKER in
     "kafka")
         # TODO get version from yaml spec.template.spec.containers[0].image
-        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka:5"
+        sh "$SCDIR/load-image.sh" "confluentinc/cp-kafka:5.5.2"
         sh "$SCDIR/load-image.sh" "confluentinc/cp-zookeeper:5"
         ;;
     "rabbit" | "rabbitmq")

@@ -51,6 +51,10 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 | [scdf-type] (oss, pro)
 | Creates `scdf-values.yml` in current directory based on `scdf-pro-values.yml` or `scdf-oss-values.yml`
 
+| carvel-import-secret.sh
+| <secret-name> <namespace> [secret-namespace] [--import|--placeholder]
+| [--plarholder] Creates place holder secret in namespace. [--import] Creates `SecretImport` for secretgen-controller.
+
 | setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
 | Creates the namespace and installs the relevant Carvel package and credentials. If the optional _scdf-type_ is not provided the environmental variable `SCDF_TYPE` will be used.

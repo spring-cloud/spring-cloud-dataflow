@@ -37,6 +37,11 @@ set -e
 kubectl rollout status deployment --namespace "$DATABASE" $DATABASE
 set +e
 
+JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
+"$SCDIR/configure-database.sh" dataflow $DATABASE "$JDBC_URL" $DATABASE database-username database-password
+"$SCDIR/configure-database.sh" skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password
+export DATABASE
+echo "Deployed $DATABASE. Host:$DATABASE.$DATABASE"
 FILE="$(mktemp).yml"
 cat >$FILE <<EOF
 apiVersion: secretgen.carvel.dev/v1alpha1
@@ -52,13 +57,7 @@ if [ "$DEBUG" = "true" ]; then
     cat $FILE
 fi
 kubectl apply -f $FILE
-
-JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
-$SCDIR/configure-database.sh dataflow $DATABASE "$JDBC_URL" $DATABASE database-username database-password
-$SCDIR/configure-database.sh skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password
-"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE"
-export DATABASE
-echo "Deployed $DATABASE. Host:$DATABASE.$DATABASE"
+"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE" --import
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed $DATABASE in ${bold}$elapsed${end} seconds"
