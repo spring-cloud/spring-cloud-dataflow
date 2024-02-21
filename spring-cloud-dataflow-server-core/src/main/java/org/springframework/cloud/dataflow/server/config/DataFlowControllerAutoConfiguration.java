@@ -60,6 +60,7 @@ import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnStreamsEnabled;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
@@ -104,7 +105,6 @@ import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepo
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
@@ -342,13 +342,13 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-			return new JobStepExecutionController(jobServiceContainer);
+		public JobStepExecutionController jobStepExecutionController(JobService jobService) {
+			return new JobStepExecutionController(jobService);
 		}
 
 		@Bean
-		public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
-			return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
+		public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
+			return new JobStepExecutionProgressController(jobService, taskJobService);
 		}
 
 		@Bean

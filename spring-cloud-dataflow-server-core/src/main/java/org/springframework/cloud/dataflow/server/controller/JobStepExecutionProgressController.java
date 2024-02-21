@@ -26,7 +26,6 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionProgressInfo;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
@@ -53,20 +52,20 @@ public class JobStepExecutionProgressController {
 
 	private final TaskJobService taskJobService;
 
-	private final JobServiceContainer jobServiceContainer;
+	private final JobService jobService;
 
 	/**
 	 * Creates a {@code JobStepProgressInfoExecutionsController} that retrieves Job Step
-	 * Progress Execution information from a the {@link JobServiceContainer}
+	 * Progress Execution information from a the {@link JobService}
 	 *
-	 * @param jobServiceContainer A container of JobServices that this controller will use for retrieving job step
+	 * @param jobService  The JobService this controller will use for retrieving job step
 	 *                            progress execution information.
 	 * @param taskJobService      Queries both schemas.
 	 */
 	@Autowired
-	public JobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
+	public JobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
 		this.taskJobService = taskJobService;
-		this.jobServiceContainer = jobServiceContainer;
+		this.jobService = jobService;
 	}
 
 	/**
@@ -92,7 +91,6 @@ public class JobStepExecutionProgressController {
 			if (!StringUtils.hasText(schemaTarget)) {
 				schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 			}
-			JobService jobService = jobServiceContainer.get(schemaTarget);
 			StepExecution stepExecution = jobService.getStepExecution(jobExecutionId, stepExecutionId);
 			String stepName = stepExecution.getStepName();
 			if (stepName.contains(":partition")) {
@@ -118,7 +116,6 @@ public class JobStepExecutionProgressController {
 	 * @return the step execution history for the given step
 	 */
 	private StepExecutionHistory computeHistory(String jobName, String stepName, String schemaTarget) {
-		JobService jobService = jobServiceContainer.get(schemaTarget);
 		int total = jobService.countStepExecutionsForStep(jobName, stepName);
 		StepExecutionHistory stepExecutionHistory = new StepExecutionHistory(stepName);
 		for (int i = 0; i < total; i += 1000) {

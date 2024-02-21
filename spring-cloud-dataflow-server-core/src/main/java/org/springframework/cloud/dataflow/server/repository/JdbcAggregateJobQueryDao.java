@@ -65,7 +65,6 @@ import org.springframework.cloud.dataflow.server.batch.DataflowSqlPagingQueryPro
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.converter.DateToStringConverter;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.impl.OffsetOutOfBoundsException;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -242,7 +241,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 
 	private final SchemaService schemaService;
 
-	private final JobServiceContainer jobServiceContainer;
+	private final JobService jobService;
 
 	private final ConfigurableConversionService conversionService = new DefaultConversionService();
 
@@ -251,12 +250,12 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	public JdbcAggregateJobQueryDao(
 			DataSource dataSource,
 			SchemaService schemaService,
-			JobServiceContainer jobServiceContainer,
+			JobService jobService,
 			Environment environment) throws Exception {
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.schemaService = schemaService;
-		this.jobServiceContainer = jobServiceContainer;
+		this.jobService = jobService;
 		this.useRowNumberOptimization = determineUseRowNumberOptimization(environment);
 
 		conversionService.addConverter(new DateToStringConverter());
@@ -337,7 +336,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		JobInstanceExecutions jobInstanceExecution = executions.get(0);
 		if (!ObjectUtils.isEmpty(jobInstanceExecution.getTaskJobExecutions())) {
 			jobInstanceExecution.getTaskJobExecutions().forEach((execution) ->
-				jobServiceContainer.get(execution.getSchemaTarget()).addStepExecutions(execution.getJobExecution())
+				jobService.addStepExecutions(execution.getJobExecution())
 			);
 		}
 		return jobInstanceExecution;
@@ -433,7 +432,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		}
 
 		TaskJobExecution taskJobExecution = jobExecutions.get(0);
-		JobService jobService = jobServiceContainer.get(taskJobExecution.getSchemaTarget());
 		jobService.addStepExecutions(taskJobExecution.getJobExecution());
 		return taskJobExecution;
 	}

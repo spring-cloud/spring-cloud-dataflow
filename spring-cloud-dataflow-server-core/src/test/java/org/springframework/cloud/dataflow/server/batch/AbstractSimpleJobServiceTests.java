@@ -30,6 +30,9 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.testcontainers.containers.JdbcDatabaseContainer;
@@ -52,8 +55,6 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
-import org.springframework.cloud.dataflow.server.service.JobExplorerContainer;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -86,7 +87,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	private DataFieldMaxValueIncrementerFactory incrementerFactory;
 
 	@Autowired
-	private JobServiceContainer jobServiceContainer;
+	private JobService jobService;
 
 	private DatabaseType databaseType;
 
@@ -132,7 +133,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	}
 
 	private void doRetrieveJobExecutionCountBeforeAndAfter(SchemaVersionTarget schemaVersionTarget) throws Exception {
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		assertThat(jobService.countJobExecutions()).isEqualTo(0);
 		createJobExecution(BASE_JOB_INST_NAME, schemaVersionTarget.getSchemaVersion());
 		assertThat(jobService.countJobExecutions()).isEqualTo(1);
@@ -150,7 +150,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private void doRetrieveJobExecutionsByTypeAfter(SchemaVersionTarget schemaVersionTarget) throws Exception {
 		String suffix = "_BY_NAME";
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 5).size())
 			.isEqualTo(0);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, schemaVersionTarget.getSchemaVersion(),
@@ -179,7 +178,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	private void doRetrieveJobExecutionCountWithoutFilter(SchemaVersionTarget schemaVersionTarget) throws Exception {
 		String suffix = "_BY_NAME";
 		String suffixFailed = suffix + "_FAILED";
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
 			.isEqualTo(0);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, schemaVersionTarget.getSchemaVersion(),
@@ -204,7 +202,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private void doRetrieveJobExecutionCountFilteredByName(SchemaVersionTarget schemaVersionTarget) throws Exception {
 		String suffix = "COUNT_BY_NAME";
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20).size()).isEqualTo(0);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, schemaVersionTarget.getSchemaVersion(),
 				false, 5);
@@ -225,7 +222,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private void doRetrieveJobExecutionCountFilteredByStatus(SchemaVersionTarget schemaVersionTarget) throws Exception {
 		String suffix = "_COUNT_BY_NAME";
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		assertThat(jobService.countJobExecutionsForJob(null, BatchStatus.COMPLETED)).isEqualTo(0);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, schemaVersionTarget.getSchemaVersion(),
 				false, 5);
@@ -246,7 +242,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private void doRetrieveJobExecutionCountFilteredNameAndStatus(SchemaVersionTarget schemaVersionTarget)
 			throws Exception {
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		String suffix = "_COUNT_BY_NAME_STATUS";
 		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
 			.isEqualTo(0);
@@ -272,7 +267,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	private void doRetrieveJobExecutionWithStepCount(SchemaVersionTarget schemaVersionTarget) throws Exception {
 		String suffix = "_JOB_EXECUTIONS_WITH_STEP_COUNT";
-		JobService jobService = jobServiceContainer.get(schemaVersionTarget.getName());
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, schemaVersionTarget.getSchemaVersion(),
 				false, 5);
 		Collection<JobExecutionWithStepCount> jobExecutionsWithStepCount = jobService.listJobExecutionsWithStepCount(0,
@@ -288,8 +282,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	void getJobInstancesThatExist() throws Exception {
 		createJobInstance(BASE_JOB_INST_NAME + "BOOT2", AppBootSchemaVersion.BOOT2);
 		createJobInstance(BASE_JOB_INST_NAME + "BOOT3", AppBootSchemaVersion.BOOT3);
-		verifyJobInstance(1, "boot2", BASE_JOB_INST_NAME + "BOOT2");
-		verifyJobInstance(1, "boot3", BASE_JOB_INST_NAME + "BOOT3");
+		verifyJobInstance(1,  BASE_JOB_INST_NAME + "BOOT3");
 	}
 
 	@Test
@@ -304,40 +297,29 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	@Test
 	void exceptionsShouldBeThrownIfRequestForNonExistingJobInstance() {
 		assertThatThrownBy(() -> {
-			this.jobServiceContainer.get("boot2").getJobInstance(1);
-		}).isInstanceOf(NoSuchJobInstanceException.class).hasMessageContaining("JobInstance with id=1 does not exist");
-		assertThatThrownBy(() -> {
-			this.jobServiceContainer.get("boot3").getJobInstance(1);
+			jobService.getJobInstance(1);
 		}).isInstanceOf(NoSuchJobInstanceException.class).hasMessageContaining("JobInstance with id=1 does not exist");
 	}
 
 	@Test
 	void stoppingJobExecutionShouldLeaveJobExecutionWithStatusOfStopping() throws Exception {
-		JobExecution jobExecution = createJobExecution(BASE_JOB_INST_NAME + "BOOT3", AppBootSchemaVersion.BOOT3, true);
-		jobExecution = this.jobServiceContainer.get("boot3").getJobExecution(jobExecution.getId());
+		JobExecution jobExecution = createJobExecution(BASE_JOB_INST_NAME, AppBootSchemaVersion.BOOT3, true);
+		jobExecution = jobService.getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.isRunning()).isTrue();
 		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
-		this.jobServiceContainer.get("boot3").stop(jobExecution.getId());
-		jobExecution = this.jobServiceContainer.get("boot3").getJobExecution(jobExecution.getId());
-		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
-
-		jobExecution = createJobExecution(BASE_JOB_INST_NAME + "BOOT2", AppBootSchemaVersion.BOOT2, true);
-		jobExecution = this.jobServiceContainer.get("boot2").getJobExecution(jobExecution.getId());
-		assertThat(jobExecution.isRunning()).isTrue();
-		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
-		this.jobServiceContainer.get("boot2").stop(jobExecution.getId());
-		jobExecution = this.jobServiceContainer.get("boot2").getJobExecution(jobExecution.getId());
+		jobService.stop(jobExecution.getId());
+		jobExecution = jobService.getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 	}
 
-	private void verifyJobInstance(long id, String schemaTarget, String name) throws Exception {
-		JobInstance jobInstance = this.jobServiceContainer.get(schemaTarget).getJobInstance(id);
+	private void verifyJobInstance(long id, String name) throws Exception {
+		JobInstance jobInstance = jobService.getJobInstance(id);
 		assertThat(jobInstance).isNotNull();
 		assertThat(jobInstance.getJobName()).isEqualTo(name);
 	}
 
 	private void verifyJobExecution(long id, String schemaTarget, String name) throws Exception {
-		JobExecution jobExecution = this.jobServiceContainer.get(schemaTarget).getJobExecution(id);
+		JobExecution jobExecution = jobService.getJobExecution(id);
 		assertThat(jobExecution).isNotNull();
 		assertThat(jobExecution.getId()).isEqualTo(id);
 		assertThat(jobExecution.getJobInstance().getJobName()).isEqualTo(name);
@@ -511,17 +493,38 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		}
 
 		@Bean
-		public JobExplorerContainer jobExplorerContainer(DataSource dataSource, SchemaService schemaService, PlatformTransactionManager platformTransactionManager) {
-			return new JobExplorerContainer(dataSource, schemaService, platformTransactionManager);
+		public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+			throws Exception {
+			JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobExplorer", x);
+			}
+			return factoryBean.getObject();
 		}
 
 		@Bean
-		public JobServiceContainer jobServiceContainer(DataSource dataSource,
-				PlatformTransactionManager platformTransactionManager, SchemaService schemaService,
-				JobRepository jobRepository, JobExplorerContainer jobExplorerContainer,
-				Environment environment) {
-			return new JobServiceContainer(dataSource, platformTransactionManager, schemaService,
-					jobRepository, jobExplorerContainer, environment);
+		public JobService jobService(DataSource dataSource,
+				PlatformTransactionManager platformTransactionManager,
+				JobRepository jobRepository, JobExplorer jobExplorer,
+				Environment environment) throws Exception {
+			SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
+			factoryBean.setEnvironment(environment);
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+			factoryBean.setJobLauncher(new SimpleJobLauncher());
+			factoryBean.setJobExplorer(jobExplorer);
+			factoryBean.setJobRepository(jobRepository);
+			factoryBean.setSerializer(new AllInOneExecutionContextSerializer());
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobService", x);
+			}
+			return factoryBean.getObject();
 		}
 
 	}

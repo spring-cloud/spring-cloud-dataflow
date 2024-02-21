@@ -60,6 +60,7 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -80,7 +81,6 @@ import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutio
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -196,13 +196,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		return new JobStepExecutionController(jobServiceContainer);
+	public JobStepExecutionController jobStepExecutionController(JobService jobService) {
+		return new JobStepExecutionController(jobService);
 	}
 
 	@Bean
-	public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
-		return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
+		return new JobStepExecutionProgressController(jobService, taskJobService);
 	}
 
 	@Bean
@@ -261,7 +261,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(
-			JobServiceContainer jobServiceContainer,
+			JobService jobService,
 			AggregateTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
@@ -271,7 +271,7 @@ public class JobDependencies {
 			TaskDefinitionReader taskDefinitionReader
 	) {
 		return new DefaultTaskJobService(
-				jobServiceContainer,
+				jobService,
 				taskExplorer,
 				taskDefinitionRepository,
 				taskExecutionService,

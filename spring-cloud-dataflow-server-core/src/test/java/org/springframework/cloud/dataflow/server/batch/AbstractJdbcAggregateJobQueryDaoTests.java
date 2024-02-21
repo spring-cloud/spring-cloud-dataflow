@@ -30,7 +30,6 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +42,7 @@ abstract class AbstractJdbcAggregateJobQueryDaoTests extends AbstractDaoTests {
 	public JdbcSearchableJobInstanceDao jdbcSearchableJobInstanceDao;
 
 	@Mock
-	private JobServiceContainer jobServiceContainer;
+	private JobService jobService;
 
 	private JdbcAggregateJobQueryDao jdbcAggregateJobQueryDao;
 
@@ -56,7 +55,7 @@ abstract class AbstractJdbcAggregateJobQueryDaoTests extends AbstractDaoTests {
 		MockEnvironment environment = new MockEnvironment();
 		environment.setProperty("spring.cloud.dataflow.task.jdbc.row-number-optimization.enabled", "true");
 		this.jdbcAggregateJobQueryDao = new JdbcAggregateJobQueryDao(super.getDataSource(), new DefaultSchemaService(),
-			this.jobServiceContainer, environment);
+			this.jobService, environment);
 		jdbcSearchableJobInstanceDao = new JdbcSearchableJobInstanceDao();
 		jdbcSearchableJobInstanceDao.setJdbcTemplate(super.getJdbcTemplate());
 		incrementerFactory = new MultiSchemaIncrementerFactory(super.getDataSource());

@@ -55,7 +55,6 @@ import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
@@ -83,7 +82,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private final AggregateTaskExplorer taskExplorer;
 
-	private final JobServiceContainer jobServiceContainer;
+	private final JobService jobService;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -96,7 +95,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	private final TaskDefinitionReader taskDefinitionReader;
 
 	public DefaultTaskJobService(
-			JobServiceContainer jobServiceContainer,
+			JobService jobService,
 			AggregateTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
@@ -105,14 +104,14 @@ public class DefaultTaskJobService implements TaskJobService {
 			AggregateJobQueryDao aggregateJobQueryDao,
 			TaskDefinitionReader taskDefinitionReader) {
 		this.aggregateJobQueryDao = aggregateJobQueryDao;
-		Assert.notNull(jobServiceContainer, "jobService must not be null");
+		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
 		Assert.notNull(taskDefinitionReader, "taskDefinitionReader must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(aggregateExecutionSupport, "CompositeExecutionSupport must not be null");
-		this.jobServiceContainer = jobServiceContainer;
+		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskDefinitionReader = taskDefinitionReader;
@@ -284,7 +283,6 @@ public class DefaultTaskJobService implements TaskJobService {
 		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
 		BatchStatus status = jobService.stop(jobExecutionId).getStatus();
 		logger.info("stopped:{}:{}:status={}", jobExecutionId, schemaTarget, status);
 	}

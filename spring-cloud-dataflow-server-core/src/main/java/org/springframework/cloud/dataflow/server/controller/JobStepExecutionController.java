@@ -28,7 +28,6 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -55,17 +54,17 @@ import org.springframework.web.bind.annotation.RestController;
 @ExposesResourceFor(StepExecutionResource.class)
 public class JobStepExecutionController {
 
-	private final JobServiceContainer jobServiceContainer;
+	private final JobService jobService;
 	/**
 	 * Creates a {@code JobStepExecutionsController} that retrieves Job Step Execution
-	 * information from a the {@link JobServiceContainer}
+	 * information from a the {@link JobService}
 	 *
-	 * @param jobServiceContainer JobServiceContainer to select the JobService
+	 * @param jobService JobService used for this controller
 	 */
 	@Autowired
-	public JobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		Assert.notNull(jobServiceContainer, "jobServiceContainer required");
-        this.jobServiceContainer = jobServiceContainer;
+	public JobStepExecutionController(JobService jobService) {
+		Assert.notNull(jobService, "jobService required");
+        this.jobService = jobService;
 	}
 
 	/**
@@ -89,7 +88,6 @@ public class JobStepExecutionController {
 		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
 		List<StepExecution> result = new ArrayList<>(jobService.getStepExecutions(id));
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
 		final Assembler stepAssembler = new Assembler(schemaTarget);
@@ -116,7 +114,6 @@ public class JobStepExecutionController {
 		if(!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobService jobService = jobServiceContainer.get(schemaTarget);
 		StepExecution stepExecution = jobService.getStepExecution(id, stepId);
 		final Assembler stepAssembler = new Assembler(schemaTarget);
 		return stepAssembler.toModel(stepExecution);
