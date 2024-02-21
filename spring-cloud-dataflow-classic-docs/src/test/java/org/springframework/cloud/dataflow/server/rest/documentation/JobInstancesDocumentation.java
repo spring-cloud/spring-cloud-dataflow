@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -71,7 +70,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	private final static String JOB_NAME = "DOCJOB";
 
 	private static boolean initialized;
-	private JobRepositoryContainer jobRepositoryContainer;
+	private JobRepository jobRepository;
 	private TaskExecutionDaoContainer daoContainer;
 	private TaskBatchDaoContainer taskBatchDaoContainer;
 	private AggregateExecutionSupport aggregateExecutionSupport;
@@ -136,7 +135,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	private void initialize() {
 		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
-		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
+		this.jobRepository = context.getBean(JobRepository.class);
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
 		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
 	}
@@ -145,7 +144,6 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
 		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
-		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
 		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);

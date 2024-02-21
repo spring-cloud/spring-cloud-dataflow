@@ -23,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
@@ -51,7 +52,6 @@ import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.service.JobExplorerContainer;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -496,9 +496,18 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		}
 
 		@Bean
-		public JobRepositoryContainer jobRepositoryContainer(DataSource dataSource,
-				PlatformTransactionManager transactionManager, SchemaService schemaService) {
-			return new JobRepositoryContainer(dataSource, transactionManager, schemaService);
+		public JobRepository jobRepository(DataSource dataSource,
+										   PlatformTransactionManager transactionManager) throws Exception {
+			JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(transactionManager);
+
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobRepository", x);
+			}
+			return factoryBean.getObject();
 		}
 
 		@Bean
@@ -509,10 +518,10 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		@Bean
 		public JobServiceContainer jobServiceContainer(DataSource dataSource,
 				PlatformTransactionManager platformTransactionManager, SchemaService schemaService,
-				JobRepositoryContainer jobRepositoryContainer, JobExplorerContainer jobExplorerContainer,
+				JobRepository jobRepository, JobExplorerContainer jobExplorerContainer,
 				Environment environment) {
 			return new JobServiceContainer(dataSource, platformTransactionManager, schemaService,
-					jobRepositoryContainer, jobExplorerContainer, environment);
+					jobRepository, jobExplorerContainer, environment);
 		}
 
 	}

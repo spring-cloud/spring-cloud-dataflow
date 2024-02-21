@@ -19,14 +19,12 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.time.LocalDateTime;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Disabled;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -44,12 +42,11 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -73,8 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 //TODO: Boot3x followup
-@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
-@RunWith(SpringRunner.class)
+//@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
@@ -86,7 +83,7 @@ public class JobExecutionControllerTests {
 	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
 	TaskBatchDaoContainer taskBatchDaoContainer;
@@ -105,10 +102,10 @@ public class JobExecutionControllerTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
-				jobRepositoryContainer,
+				jobRepository,
 				taskBatchDaoContainer,
 				daoContainer,
 				aggregateExecutionSupport,
@@ -175,7 +172,6 @@ public class JobExecutionControllerTests {
 				.andDo(print())
 				.andExpect(status().isOk());
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STARTED, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();
@@ -193,7 +189,6 @@ public class JobExecutionControllerTests {
 				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STOPPED, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();
@@ -350,7 +345,6 @@ public class JobExecutionControllerTests {
 	}
 
 	private void createDirtyJob() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		JobRepository jobRepository = jobRepositoryContainer.get(SchemaVersionTarget.defaultTarget().getName());
 		JobExecution jobExecution = jobRepository.createJobExecution(
 			JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK", new JobParameters());
 		jobExecution.setStatus(BatchStatus.STOPPED);

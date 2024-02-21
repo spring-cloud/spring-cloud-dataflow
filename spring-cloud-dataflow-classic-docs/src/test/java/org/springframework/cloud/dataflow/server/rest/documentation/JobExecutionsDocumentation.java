@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -83,7 +82,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private static boolean initialized;
 
-	private JobRepositoryContainer jobRepositoryContainer;
+	private JobRepository jobRepository;
 
 	private TaskExecutionDaoContainer daoContainer;
 
@@ -370,7 +369,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private void initialize() {
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
 		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
-		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
+		this.jobRepository = context.getBean(JobRepository.class);
 		this.dataflowTaskExecutionMetadataDaoContainer = context.getBean(DataflowTaskExecutionMetadataDaoContainer.class);
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
 		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
@@ -383,13 +382,12 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
-		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
-		JobExecution jobExecution = jobRepository.createJobExecution(name, jobParameters);
+		JobExecution jobExecution = this.jobRepository.createJobExecution(name, jobParameters);
 		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(LocalDateTime.now());
-		jobRepository.update(jobExecution);
+		this.jobRepository.update(jobExecution);
 		final TaskManifest manifest = new TaskManifest();
 		manifest.setPlatformName("default");
 		DataflowTaskExecutionMetadataDao metadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());

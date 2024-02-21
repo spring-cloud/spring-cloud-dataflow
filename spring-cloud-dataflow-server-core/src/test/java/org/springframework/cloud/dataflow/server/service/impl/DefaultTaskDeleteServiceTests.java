@@ -51,7 +51,6 @@ import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -116,7 +115,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	TaskExecutionService taskExecutionService;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
 	TaskBatchDaoContainer taskBatchDaoContainer;
@@ -224,7 +223,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 
 	public JobLauncherTestUtils jobLauncherTestUtils() {
 		JobLauncherTestUtils jobLauncherTestUtils = new JobLauncherTestUtils();
-		JobRepository jobRepository = jobRepositoryContainer.get(SchemaVersionTarget.defaultTarget().getName());
 		jobLauncherTestUtils.setJobRepository(jobRepository);
 		jobLauncherTestUtils.setJobLauncher(jobLauncher(jobRepository));
 		jobLauncherTestUtils.setJob(new Job() {

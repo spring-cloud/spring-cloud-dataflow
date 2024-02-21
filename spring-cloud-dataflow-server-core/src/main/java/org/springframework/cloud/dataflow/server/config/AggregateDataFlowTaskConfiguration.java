@@ -20,6 +20,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,7 +44,6 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecu
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
@@ -124,8 +125,18 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobRepositoryContainer jobRepositoryContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager, SchemaService schemaService) {
-		return new JobRepositoryContainer(dataSource, platformTransactionManager, schemaService);
+	public JobRepository jobRepositoryContainer(DataSource dataSource,
+												PlatformTransactionManager platformTransactionManager) throws Exception{
+		JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobRepository", x);
+		}
+		return factoryBean.getObject();
 	}
 
 	@Bean
@@ -135,9 +146,9 @@ public class AggregateDataFlowTaskConfiguration {
 
 	@Bean
 	public JobServiceContainer jobServiceContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager,
-			SchemaService schemaService, JobRepositoryContainer jobRepositoryContainer,
+			SchemaService schemaService, JobRepository jobRepository,
 			JobExplorerContainer jobExplorerContainer, Environment environment) {
-		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer,
+		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepository,
 				jobExplorerContainer, environment);
 	}
 

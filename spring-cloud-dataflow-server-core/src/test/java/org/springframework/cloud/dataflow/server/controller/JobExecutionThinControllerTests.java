@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -40,7 +41,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.http.MediaType;
@@ -77,7 +77,7 @@ public class JobExecutionThinControllerTests {
 	private TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	private JobRepositoryContainer jobRepositoryContainer;
+	private JobRepository jobRepository;
 
 	@Autowired
 	private TaskBatchDaoContainer taskBatchDaoContainer;
@@ -98,7 +98,7 @@ public class JobExecutionThinControllerTests {
 	@Before
 	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
-				jobRepositoryContainer,
+				jobRepository,
 				taskBatchDaoContainer,
 				daoContainer,
 				aggregateExecutionSupport,

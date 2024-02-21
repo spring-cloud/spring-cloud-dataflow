@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -47,7 +46,6 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -109,7 +107,7 @@ public class JobStepExecutionControllerTests {
 	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
 	TaskBatchDaoContainer taskBatchDaoContainer;
@@ -202,7 +200,6 @@ public class JobStepExecutionControllerTests {
 	private void createStepExecution(String jobName, String... stepNames)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
 		for (String stepName : stepNames) {
 			StepExecution stepExecution = new StepExecution(stepName, jobExecution, 1L);

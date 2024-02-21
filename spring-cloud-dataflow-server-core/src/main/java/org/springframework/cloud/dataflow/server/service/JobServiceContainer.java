@@ -24,13 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.core.env.Environment;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.util.StringUtils;
@@ -48,7 +48,7 @@ public class JobServiceContainer {
 			DataSource dataSource,
 			PlatformTransactionManager platformTransactionManager,
 			SchemaService schemaService,
-			JobRepositoryContainer jobRepositoryContainer,
+			JobRepository jobRepository,
 			JobExplorerContainer jobExplorerContainer,
 			Environment environment) {
 
@@ -60,7 +60,7 @@ public class JobServiceContainer {
 			factoryBean.setJobServiceContainer(this);
 			factoryBean.setJobLauncher(new SimpleJobLauncher());
 			factoryBean.setJobExplorer(jobExplorerContainer.get(target.getName()));
-			factoryBean.setJobRepository(jobRepositoryContainer.get(target.getName()));
+			factoryBean.setJobRepository(jobRepository);
 			factoryBean.setTablePrefix(target.getBatchPrefix());
 			factoryBean.setAppBootSchemaVersionTarget(target);
 			factoryBean.setSchemaService(schemaService);

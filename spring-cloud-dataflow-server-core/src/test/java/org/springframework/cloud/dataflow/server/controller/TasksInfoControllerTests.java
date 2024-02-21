@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -51,7 +50,6 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
@@ -106,7 +104,7 @@ public class TasksInfoControllerTests {
     TaskExecutionDaoContainer daoContainer;
 
     @Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
     @Autowired
     TaskDefinitionRepository taskDefinitionRepository;
@@ -178,7 +176,6 @@ public class TasksInfoControllerTests {
             dao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
             TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
                     null);
-			JobRepository jobRepository = jobRepositoryContainer.get(target.getName());
             JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
 			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(target.getName());
             taskBatchDao.saveRelationship(taskExecution, jobExecution);

@@ -41,7 +41,6 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
@@ -73,7 +72,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static TaskExecutionDaoContainer daoContainer;
 
-	private static JobRepositoryContainer jobRepositoryContainer;
+	private static JobRepository jobRepository;
 
 	private static TaskBatchDaoContainer taskBatchDaoContainer;
 
@@ -91,7 +90,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		taskDefinitionReader = applicationContext.getBean(TaskDefinitionReader.class);
 		aggregateExecutionSupport = applicationContext.getBean(AggregateExecutionSupport.class);
 		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
-		jobRepositoryContainer = applicationContext.getBean(JobRepositoryContainer.class);
+		jobRepository = applicationContext.getBean(JobRepository.class);
 		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
 
 		taskExecutionIds.add(createSampleJob(JOB_NAME_ORIG, 1));
@@ -119,7 +118,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	private static long createSampleJob(String jobName, int jobExecutionCount)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
 		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
