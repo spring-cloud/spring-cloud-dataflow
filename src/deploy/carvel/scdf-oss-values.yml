@@ -2,8 +2,6 @@ scdf:
   binder:
     type: rabbit
   server:
-#    image: # uncomment to use a different tag
-#      tag: 2.11.2
     service:
       type: LoadBalancer
     env:
@@ -13,12 +11,6 @@ scdf:
         value: "true"
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
         value: "true"
-#  skipper:
-#    image: # uncomment to use a different tag
-#      tag: 2.11.2
-#  ctr:
-#    image: # uncomment to use a different tag
-#      tag: 2.11.2
   registry:
     secret:
       ref: "reg-creds-dockerhub"

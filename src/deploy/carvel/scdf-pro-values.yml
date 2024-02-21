@@ -2,8 +2,9 @@ scdf:
   binder:
     type: rabbit
   server:
-#    image: # uncomment to use a different tag
-#      tag: 1.6.1
+    image:
+      repository: dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server
+      tag: 1.6.0
     service:
       type: LoadBalancer
     env:
@@ -13,12 +14,10 @@ scdf:
         value: "true"
       - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
         value: "true"
-#  skipper:
-#    image: # pro uses a skipper image from registry.tanzu.vmware.com that is tagged with package version
-#      tag: 1.6.1
-#  ctr:
-#    image: # uncomment to use a different tag
-#      tag: 2.11.2
+  skipper:
+    image:
+      repository: springcloud/spring-cloud-skipper-server
+      tag: 2.11.2
   registry:
     secret:
       ref: "reg-creds-dev-registry"
