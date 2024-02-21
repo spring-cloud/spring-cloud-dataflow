@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -60,6 +62,7 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
@@ -80,7 +83,6 @@ import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutio
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -161,6 +163,20 @@ import static org.mockito.Mockito.mock;
 public class JobDependencies {
 
 	@Bean
+	public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+		throws Exception {
+		JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobExplorer", x);
+		}
+		return factoryBean.getObject();
+	}
+
+	@Bean
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
 		return (builder) -> {
 			builder.dateFormat(new ISO8601DateFormatWithMilliSeconds());
@@ -196,13 +212,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		return new JobStepExecutionController(jobServiceContainer);
+	public JobStepExecutionController jobStepExecutionController(JobService jobService) {
+		return new JobStepExecutionController(jobService);
 	}
 
 	@Bean
-	public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
-		return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
+		return new JobStepExecutionProgressController(jobService, taskJobService);
 	}
 
 	@Bean
@@ -261,7 +277,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(
-			JobServiceContainer jobServiceContainer,
+			JobService jobService,
 			AggregateTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
@@ -271,7 +287,7 @@ public class JobDependencies {
 			TaskDefinitionReader taskDefinitionReader
 	) {
 		return new DefaultTaskJobService(
-				jobServiceContainer,
+				jobService,
 				taskExplorer,
 				taskDefinitionRepository,
 				taskExecutionService,

@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -27,7 +28,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +59,7 @@ class JdbcAggregateJobQueryDaoRowNumberOptimizationTests {
 	@Test
 	void shouldUseOptimizationWhenPropertyNotSpecified() throws Exception {
 		MockEnvironment mockEnv = new MockEnvironment();
-		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobServiceContainer.class), mockEnv);
+		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobService.class), mockEnv);
 		assertThat(dao).hasFieldOrPropertyWithValue("useRowNumberOptimization", true);
 	}
 
@@ -67,7 +67,7 @@ class JdbcAggregateJobQueryDaoRowNumberOptimizationTests {
 	void shouldUseOptimizationWhenPropertyEnabled() throws Exception {
 		MockEnvironment mockEnv = new MockEnvironment();
 		mockEnv.setProperty("spring.cloud.dataflow.task.jdbc.row-number-optimization.enabled", "true");
-		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobServiceContainer.class), mockEnv);
+		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobService.class), mockEnv);
 		assertThat(dao).hasFieldOrPropertyWithValue("useRowNumberOptimization", true);
 	}
 
@@ -75,7 +75,7 @@ class JdbcAggregateJobQueryDaoRowNumberOptimizationTests {
 	void shouldNotUseOptimizationWhenPropertyDisabled() throws Exception {
 		MockEnvironment mockEnv = new MockEnvironment();
 		mockEnv.setProperty("spring.cloud.dataflow.task.jdbc.row-number-optimization.enabled", "false");
-		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobServiceContainer.class), mockEnv);
+		JdbcAggregateJobQueryDao dao = new JdbcAggregateJobQueryDao(dataSource, mock(SchemaService.class), mock(JobService.class), mockEnv);
 		assertThat(dao).hasFieldOrPropertyWithValue("useRowNumberOptimization", false);
 	}
 }

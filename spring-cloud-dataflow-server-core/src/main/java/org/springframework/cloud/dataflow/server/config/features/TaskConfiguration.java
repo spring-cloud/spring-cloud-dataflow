@@ -40,6 +40,7 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
+import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -52,7 +53,6 @@ import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymen
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.DeployerConfigurationMetadataResolver;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherInitializationService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -264,7 +264,7 @@ public class TaskConfiguration {
 	public static class TaskJobServiceConfig {
 		@Bean
 		public TaskJobService taskJobExecutionRepository(
-				JobServiceContainer serviceContainer,
+				JobService service,
 				AggregateTaskExplorer taskExplorer,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionService taskExecutionService,
@@ -274,7 +274,7 @@ public class TaskConfiguration {
 				TaskDefinitionReader taskDefinitionReader
 		) {
 			return new DefaultTaskJobService(
-					serviceContainer,
+					service,
 					taskExplorer,
 					taskDefinitionRepository,
 					taskExecutionService,

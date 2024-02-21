@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,6 +32,9 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
@@ -42,14 +49,11 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecu
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
-import org.springframework.cloud.dataflow.server.service.JobExplorerContainer;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
@@ -124,21 +128,38 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobRepositoryContainer jobRepositoryContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager, SchemaService schemaService) {
-		return new JobRepositoryContainer(dataSource, platformTransactionManager, schemaService);
+	public JobRepository jobRepositoryContainer(DataSource dataSource,
+												PlatformTransactionManager platformTransactionManager) throws Exception{
+		JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobRepository", x);
+		}
+		return factoryBean.getObject();
 	}
 
 	@Bean
-	public JobExplorerContainer jobExplorerContainer(DataSource dataSource, SchemaService schemaService, PlatformTransactionManager platformTransactionManager) {
-		return new JobExplorerContainer(dataSource, schemaService, platformTransactionManager);
-	}
-
-	@Bean
-	public JobServiceContainer jobServiceContainer(DataSource dataSource, PlatformTransactionManager platformTransactionManager,
-			SchemaService schemaService, JobRepositoryContainer jobRepositoryContainer,
-			JobExplorerContainer jobExplorerContainer, Environment environment) {
-		return new JobServiceContainer(dataSource, platformTransactionManager, schemaService, jobRepositoryContainer,
-				jobExplorerContainer, environment);
+	public JobService jobService(DataSource dataSource, PlatformTransactionManager platformTransactionManager,
+								 JobRepository jobRepository, JobExplorer jobExplorer, Environment environment)
+		throws Exception{
+		SimpleJobServiceFactoryBean factoryBean = new SimpleJobServiceFactoryBean();
+		factoryBean.setEnvironment(environment);
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+		factoryBean.setJobLauncher(new SimpleJobLauncher());
+		factoryBean.setJobExplorer(jobExplorer);
+		factoryBean.setJobRepository(jobRepository);
+		factoryBean.setSerializer(new AllInOneExecutionContextSerializer());
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobService", x);
+		}
+		return factoryBean.getObject();
 	}
 
 	@Bean
@@ -160,8 +181,8 @@ public class AggregateDataFlowTaskConfiguration {
 
 	@Bean
 	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService,
-			JobServiceContainer jobServiceContainer, Environment environment) throws Exception {
-		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobServiceContainer, environment);
+			JobService jobService, Environment environment) throws Exception {
+		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobService, environment);
 	}
 
 	@Bean

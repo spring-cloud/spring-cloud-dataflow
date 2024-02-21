@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import javax.sql.DataSource;
 import java.net.ConnectException;
 
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -49,6 +52,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -171,6 +175,20 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public ContainerRegistryService containerRegistryService() {
 			return mock(ContainerRegistryService.class);
+		}
+
+		@Bean
+		public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+			throws Exception {
+			JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobExplorer", x);
+			}
+			return factoryBean.getObject();
 		}
 	}
 }

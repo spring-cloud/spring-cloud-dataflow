@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -44,7 +43,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -94,7 +92,7 @@ public class JobInstanceControllerTests {
 	TaskExecutionDaoContainer daoContainer;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
 	TaskBatchDaoContainer taskBatchDaoContainer;
@@ -170,7 +168,6 @@ public class JobInstanceControllerTests {
 	private void createSampleJob(String jobName, int jobExecutionCount)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		JobRepository jobRepository = jobRepositoryContainer.get(defaultSchemaTarget);
 
 		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.server.batch.BatchVersion;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.controller.NoSuchSchemaTargetException;
@@ -37,8 +36,7 @@ public class JobExecutionDaoContainer {
 
 	public JobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
 		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			BatchVersion batchVersion = BatchVersion.from(target);
-			JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao(batchVersion);
+			JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
 			jdbcSearchableJobExecutionDao.setDataSource(dataSource);
 			jdbcSearchableJobExecutionDao.setTablePrefix(target.getBatchPrefix());
 			try {
