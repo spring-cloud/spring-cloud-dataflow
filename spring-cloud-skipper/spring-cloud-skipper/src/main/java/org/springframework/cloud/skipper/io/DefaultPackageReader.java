@@ -29,6 +29,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.inspector.TagInspector;
 import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.commons.FileUtils;
 
@@ -163,6 +164,8 @@ public class DefaultPackageReader implements PackageReader {
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
 		LoaderOptions loaderOptions = new LoaderOptions();
+		TagInspector taginspector = tag -> tag.getClassName().equals(PackageMetadata.class.getName());
+		loaderOptions.setTagInspector(taginspector);
 		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class, loaderOptions), representer);
 		String fileContents = null;
 		try {
