@@ -252,7 +252,7 @@ public class TaskControllerTests {
 	public void testSaveErrorNotInRegistry() throws Exception {
 		assertThat(repository.count()).isZero();
 
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound());
 
 		assertThat(repository.count()).isZero();
@@ -262,7 +262,7 @@ public class TaskControllerTests {
 	public void testSave() throws Exception {
 		assertThat(repository.count()).isZero();
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 
 		assertThat(repository.count()).isEqualTo(1);
@@ -281,7 +281,7 @@ public class TaskControllerTests {
 	public void testSaveDuplicate() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
 		repository.save(new TaskDefinition("myTask", "task"));
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask").param("definition", "task")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
 		assertThat(repository.count()).isEqualTo(1);
 	}
@@ -290,7 +290,7 @@ public class TaskControllerTests {
 	public void testSaveWithParameters() throws Exception {
 
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
 						.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 
@@ -309,7 +309,7 @@ public class TaskControllerTests {
 	@Test
 	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
 						.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/definitions/myTask")
@@ -330,7 +330,7 @@ public class TaskControllerTests {
 	public void testSaveCompositeTaskWithParameters() throws Exception {
 
 		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null, null);
-		mockMvc.perform(post("/tasks/definitions/").param("name", "myTask")
+		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
 						.param("definition", "t1: task --foo='bar rab' && t2: task --foo='one two'")
 						.accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -460,7 +460,7 @@ public class TaskControllerTests {
 
 		assertThat(repository.count()).isEqualTo(3);
 
-		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)));
 
 		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -476,7 +476,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask-2", "task"));
 
 		assertThat(repository.count()).isEqualTo(3);
-		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)));
 
 		mockMvc.perform(delete("/tasks/definitions/myTask-1").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -494,7 +494,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("a1-t1", "task"));
 		repository.save(new TaskDefinition("a1-t2", "task"));
 
-		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(4)))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("a1")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].composedTaskElement", is(false)))
@@ -517,7 +517,7 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("a1-t1", "task"));
 		repository.save(new TaskDefinition("a1-t2", "task"));
 
-		mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(4)))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("a1")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].composedTaskElement", is(false)))
@@ -725,7 +725,7 @@ public class TaskControllerTests {
 		assertThat(repository.count()).isEqualTo(3);
 
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskDefinitionResourceList[0].lastTaskExecution.",
-				mockMvc.perform(get("/tasks/definitions/").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 						.andDo(print()))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(3)))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[*].name",

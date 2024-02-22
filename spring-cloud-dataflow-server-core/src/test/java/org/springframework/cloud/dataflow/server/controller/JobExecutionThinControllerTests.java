@@ -123,7 +123,7 @@ public class JobExecutionThinControllerTests {
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+		mockMvc.perform(get("/jobs/thinexecutions").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -135,7 +135,7 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByDateRange() throws Exception {
 		final Date toDate = new Date();
 		final Date fromDate = DateUtils.addMinutes(toDate, -10);
-		mockMvc.perform(get("/jobs/thinexecutions/")
+		mockMvc.perform(get("/jobs/thinexecutions")
 				.param("fromDate",
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(fromDate))
@@ -150,7 +150,7 @@ public class JobExecutionThinControllerTests {
 
 	@Test
 	public void testGetExecutionsByJobInstanceId() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("jobInstanceId", "1")
+		mockMvc.perform(get("/jobs/thinexecutions").param("jobInstanceId", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -161,7 +161,7 @@ public class JobExecutionThinControllerTests {
 
 	@Test
 	public void testGetExecutionsByTaskExecutionId() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("taskExecutionId", "4")
+		mockMvc.perform(get("/jobs/thinexecutions").param("taskExecutionId", "4")
 				.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())

@@ -264,7 +264,7 @@ public class AppRegistryControllerTests {
 	public void testVersionOverrideNonExistentApp() throws Exception {
 		this.mockMvc.perform(post("/apps/sink/log1").param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isCreated());
-		MvcResult mvcResult = this.mockMvc.perform(put("/apps/sink/log1/1.3.0.RELEASE/")).andDo(print()).andExpect(status().is4xxClientError()).andReturn();
+		MvcResult mvcResult = this.mockMvc.perform(put("/apps/sink/log1/1.3.0.RELEASE")).andDo(print()).andExpect(status().is4xxClientError()).andReturn();
 		Assert.isInstanceOf(NoSuchAppRegistrationException.class, mvcResult.getResolvedException());
 	}
 

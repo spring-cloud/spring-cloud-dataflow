@@ -227,7 +227,7 @@ public class JobExecutionControllerTests {
 	public void testGetAllExecutionsFailed() throws Exception {
 		createDirtyJob();
 		// expecting to ignore dirty job
-		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)));
@@ -235,7 +235,7 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)))
@@ -244,13 +244,13 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
-		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions/"));
-		verifyBorderCaseForMaxInt(get("/jobs/executions/"));
+		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions"));
+		verifyBorderCaseForMaxInt(get("/jobs/executions"));
 	}
 
 	@Test
 	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -262,13 +262,13 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(
-				get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
-		verifyBorderCaseForMaxInt(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+				get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+		verifyBorderCaseForMaxInt(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 	}
 
 	@Test
 	public void testGetExecutionsByNameMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
+		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -281,7 +281,7 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testFilteringByStatusAndName_EmptyNameAndStatusGiven() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", "")
 						.param("status", "FAILED")
 						.accept(MediaType.APPLICATION_JSON))
@@ -296,7 +296,7 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testFilteringByUnknownStatus() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+		mockMvc.perform(get("/jobs/executions")
 						.param("status", "UNKNOWN")
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -306,7 +306,7 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
 						.param("status", "COMPLETED")
 						.accept(MediaType.APPLICATION_JSON))
@@ -319,14 +319,14 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/jobs/executions").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testWildcardMatchMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -339,7 +339,7 @@ public class JobExecutionControllerTests {
 
 	@Test
 	public void testWildcardMatchSingleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())

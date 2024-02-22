@@ -183,7 +183,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSaveNoDeployJsonEncoded() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 				.param("name", "myStream")
 				.param("definition", "time | log")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -199,7 +199,7 @@ public class StreamControllerTests {
 		MultiValueMap<String, String> values = new LinkedMultiValueMap<>();
 		values.add("name", "myStream");
 		values.add("definition", "time | log");
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 				.params(values)
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.accept(MediaType.APPLICATION_JSON))
@@ -230,7 +230,7 @@ public class StreamControllerTests {
 		assertThat(repository.count()).isZero();
 		String definition = "time | log";
 		String streamName = "testSaveAndDeploy-stream";
-		MockHttpServletRequestBuilder requestBuilder = post("/streams/definitions/")
+		MockHttpServletRequestBuilder requestBuilder = post("/streams/definitions")
 			.param("name", streamName)
 			.param("definition", definition)
 			.param("deploy", "true")
@@ -281,7 +281,7 @@ public class StreamControllerTests {
 	@Test
 	public void testSaveWithSensitiveProperties() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream2")
 			.param("definition", "time --some.password=foobar --another-secret=kenny | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(repository.count()).isEqualTo(1);
@@ -302,19 +302,19 @@ public class StreamControllerTests {
 	@Test
 	public void testFindRelatedStreams() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream1")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myAnotherStream1")
 				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream2")
 			.param("definition", ":myStream1 > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream3")
 				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream4")
 				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
 		assertThat(repository.count()).isEqualTo(5);
@@ -336,15 +336,15 @@ public class StreamControllerTests {
 
 	@Test
 	public void testStreamSearchNameContainsSubstring() throws Exception {
-		mockMvc.perform(post("/streams/definitions/").param("name", "foo")
+		mockMvc.perform(post("/streams/definitions").param("name", "foo")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "foaz")
+		mockMvc.perform(post("/streams/definitions").param("name", "foaz")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "ooz")
+		mockMvc.perform(post("/streams/definitions").param("name", "ooz")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(repository.count()).isEqualTo(3);
@@ -376,7 +376,7 @@ public class StreamControllerTests {
 	public void testFindRelatedStreams_gh2150() throws Exception {
 		assertThat(repository.count()).isZero();
 		// Bad definition, recursive reference
-		mockMvc.perform(post("/streams/definitions/").param("name", "mapper")
+		mockMvc.perform(post("/streams/definitions").param("name", "mapper")
 			.param("definition", ":mapper.time > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(repository.count()).isEqualTo(1);
@@ -394,10 +394,10 @@ public class StreamControllerTests {
 	@Test
 	public void testFindRelatedStreams2_gh2150() throws Exception {
 		// bad streams, recursively referencing via each other
-		mockMvc.perform(post("/streams/definitions/").param("name", "foo")
+		mockMvc.perform(post("/streams/definitions").param("name", "foo")
 			.param("definition", ":bar.time > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "bar")
+		mockMvc.perform(post("/streams/definitions").param("name", "bar")
 			.param("definition", ":foo.time > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(repository.count()).isEqualTo(2);
@@ -422,37 +422,37 @@ public class StreamControllerTests {
 	@Test
 	public void testFindRelatedAndNestedStreams() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream1")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myAnotherStream1")
 				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream2")
 			.param("definition", ":myStream1 > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnmyStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "TapOnmyStream2")
 				.param("definition", ":myStream2 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream3")
 				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnMyStream3")
+		mockMvc.perform(post("/streams/definitions").param("name", "TapOnMyStream3")
 				.param("definition", ":myStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "MultipleNestedTaps")
+		mockMvc.perform(post("/streams/definitions").param("name", "MultipleNestedTaps")
 				.param("definition", ":TapOnMyStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream4")
 				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream5")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream5")
 			.param("definition", "time | log --secret=foo")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream6")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream6")
 				.param("definition", ":myStream5.time > log --password=bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
@@ -499,31 +499,31 @@ public class StreamControllerTests {
 	@Test
 	public void testFindAll() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream1")
 			.param("definition", "time --password=foo| log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream1A")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream1A")
 			.param("definition", "time --foo=bar| log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myAnotherStream1")
+		mockMvc.perform(post("/streams/definitions").param("name", "myAnotherStream1")
 				.param("definition", "time | log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream2")
 			.param("definition", ":myStream1 > log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnmyStream2")
+		mockMvc.perform(post("/streams/definitions").param("name", "TapOnmyStream2")
 				.param("definition", ":myStream2 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream3")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream3")
 				.param("definition", ":myStream1.time > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "TapOnMyStream3")
+		mockMvc.perform(post("/streams/definitions").param("name", "TapOnMyStream3")
 				.param("definition", ":myStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "MultipleNestedTaps")
+		mockMvc.perform(post("/streams/definitions").param("name", "MultipleNestedTaps")
 				.param("definition", ":TapOnMyStream3 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream4")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream4")
 				.param("definition", ":myAnotherStream1 > log").accept(MediaType.APPLICATION_JSON)).andDo(print())
 			.andExpect(status().isCreated());
 		mockMvc.perform(post("/streams/definitions")
@@ -534,21 +534,21 @@ public class StreamControllerTests {
 		mockMvc.perform(post("/streams/definitions").param("name", "timelogDoubleTick")
 			.param("definition", "a: time --format=\"YYYY MM DD\" | log")
 			.param("deploy", "false")).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "twoPassword")
+		mockMvc.perform(post("/streams/definitions").param("name", "twoPassword")
 			.param("definition", "time --password='foo'| log --password=bar")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "nameChannelPassword")
+		mockMvc.perform(post("/streams/definitions").param("name", "nameChannelPassword")
 			.param("definition", "time --password='foo'> :foobar")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "twoParam")
+		mockMvc.perform(post("/streams/definitions").param("name", "twoParam")
 			.param("definition", "time --password=foo --arg=foo | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
-		mockMvc.perform(post("/streams/definitions/").param("name", "twoPipeInQuotes")
+		mockMvc.perform(post("/streams/definitions").param("name", "twoPipeInQuotes")
 			.param("definition", "time --password='fo|o' --arg=bar | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 
 		assertThat(repository.count()).isEqualTo(15);
-		mockMvc.perform(get("/streams/definitions/").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/streams/definitions").accept(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
 
@@ -572,7 +572,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveInvalidAppDefinitions() throws Exception {
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 				.param("name", "myStream")
 				.param("definition", "foo | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
@@ -585,7 +585,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testSaveInvalidAppDefinitionsDueToParseException() throws Exception {
-		mockMvc.perform(post("/streams/definitions/").param("name", "myStream")
+		mockMvc.perform(post("/streams/definitions").param("name", "myStream")
 				.param("definition", "foo --.spring.cloud.stream.metrics.properties=spring* | bar")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("_embedded.errors[0].logref", is("InvalidStreamDefinitionException"))).andExpect(
@@ -596,7 +596,7 @@ public class StreamControllerTests {
 	public void testSaveDuplicate() throws Exception {
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		assertThat(repository.count()).isEqualTo(1);
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isConflict());
@@ -607,7 +607,7 @@ public class StreamControllerTests {
 	public void testSaveWithParameters() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = "time --fixedDelay=500 --timeUnit=milliseconds | log";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -627,7 +627,7 @@ public class StreamControllerTests {
 	public void testStreamWithProcessor() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = "time | filter | log";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -656,7 +656,7 @@ public class StreamControllerTests {
 	public void testSourceDestinationWithSingleApp() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = ":foo > log";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -675,7 +675,7 @@ public class StreamControllerTests {
 	public void testSourceDestinationWithTwoApps() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = ":foo > filter | log";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -700,7 +700,7 @@ public class StreamControllerTests {
 	public void testSinkDestinationWithSingleApp() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = "time > :foo";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -718,7 +718,7 @@ public class StreamControllerTests {
 	public void testSinkDestinationWithTwoApps() throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = "time | filter > :foo";
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream")
 			.param("definition", definition)
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
@@ -743,7 +743,7 @@ public class StreamControllerTests {
 		assertThat(repository.count()).isZero();
 		String definition = ":bar > filter > :foo";
 
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 				.param("name", "myStream")
 				.param("definition", definition)
 				.param("deploy", "true").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -1474,7 +1474,7 @@ public class StreamControllerTests {
 	@Test
 	public void testValidateStream() throws Exception {
 		assertThat(repository.count()).isZero();
-		mockMvc.perform(post("/streams/definitions/")
+		mockMvc.perform(post("/streams/definitions")
 			.param("name", "myStream1")
 			.param("definition", "time | log")
 			.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
