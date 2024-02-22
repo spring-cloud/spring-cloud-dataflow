@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,12 +30,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import org.testcontainers.containers.MariaDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-@JdbcTest(properties = { "spring.jpa.hibernate.ddl-auto=none",
-		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect" })
+@JdbcTest(properties = {
+	"spring.jpa.hibernate.ddl-auto=none",
+	"spring.test.context.cache.maxSize=2",
+	"spring.datasource.hikari.maximum-pool-size=2",
+	"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
+})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestMariaDBConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
