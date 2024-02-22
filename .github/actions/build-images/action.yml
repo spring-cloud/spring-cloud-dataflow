@@ -23,7 +23,7 @@ runs:
 
     # docker hub login
   - name: Login to docker.io
-    uses: docker/login-action@v1
+    uses: docker/login-action@v3
     with:
       username: ${{ inputs.dockerhub-username }}
       password: ${{ inputs.dockerhub-password }}
