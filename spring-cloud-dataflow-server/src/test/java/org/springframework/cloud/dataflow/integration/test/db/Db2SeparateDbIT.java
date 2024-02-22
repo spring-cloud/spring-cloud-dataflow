@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2022-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,6 @@ public class Db2SeparateDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {
-		return TagNames.DB2_11_5_0_0a;
+		return TagNames.DB2_11_5_8_0;
 	}
 }

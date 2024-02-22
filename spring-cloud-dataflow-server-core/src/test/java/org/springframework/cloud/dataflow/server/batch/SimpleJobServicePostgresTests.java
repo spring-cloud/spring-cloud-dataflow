@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -28,18 +30,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
-@JdbcTest(properties = {"spring.jpa.hibernate.ddl-auto=none", "spring.test.context.cache.maxSize=4"})
+@JdbcTest(properties = {
+	"spring.jpa.hibernate.ddl-auto=none",
+	"spring.test.context.cache.maxSize=2",
+	"spring.datasource.hikari.maximum-pool-size=2"
+})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-// TODO Re-enable test. Change postgres version to 14 and set hikari connection pool to 2
-// Test disabled because of intermittent connection pool failures.
-@Disabled
 public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
