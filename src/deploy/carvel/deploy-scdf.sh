@@ -52,14 +52,53 @@ if [ "$1" != "" ]; then
     APP_NAME="$1"
 fi
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
+SERVER_TAG=$(yq '.scdf.server.image.tag' ./scdf-values.yml)
 if [ "$DATAFLOW_VERSION" != "" ]; then
-    yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
-    yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
-    echo "Overriding Data Flow version=$DATAFLOW_VERSION"
+    if [ "$SCDF_TYPE" == "oss" ]; then
+        if [ "$SERVER_TAG" == "null" ] || [ "$SERVER_TAG" == "" ]; then
+            yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+            echo "Overriding Data Flow version=$DATAFLOW_VERSION"
+        else
+            echo "Using Data Flow version=$SERVER_TAG"
+        fi
+    fi
+    CTR_TAG=$(yq '.scdf.ctr.image.tag' ./scdf-values.yml)
+    if [ "$CTR_TAG" == "null" ] || [ "$CTR_TAG" == "" ]; then
+        yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
+        echo "Overriding Composed Task Runner version=$DATAFLOW_VERSION"
+    else
+        echo "Using Composed Task Runner version=$CTR_TAG"
+    fi
+else
+    if [ "$SCDF_TYPE" == "oss" ] && [ "$SERVER_TAG" != "null" ] && [ "$SERVER_TAG" != "" ]; then
+        echo "Using Data Flow version=$SERVER_TAG"
+    fi
 fi
+SERVER_TAG=$(yq '.scdf.server.image.tag' ./scdf-values.yml)
+if [ "$DATAFLOW_PRO_VERSION" != "" ] && [ "$SCDF_TYPE" == "pro" ]; then
+    if [ "$SERVER_TAG" == "null" ] || [ "$SERVER_TAG" == "" ]; then
+        yq ".scdf.server.image.tag=\"$DATAFLOW_PRO_VERSION\"" -i ./scdf-values.yml
+        echo "Overriding Data Flow Pro version=$DATAFLOW_PRO_VERSION"
+    else
+        echo "Using Data Flow Pro version=$SERVER_TAG"
+    fi
+else
+    if [ "$SERVER_TAG" != "null" ] && [ "$SERVER_TAG" != "" ]; then
+        echo "Using Data Flow Pro version=$SERVER_TAG"
+    fi
+fi
+SKIPPER_TAG=$(yq '.scdf.skipper.image.tag' ./scdf-values.yml)
 if [ "$SKIPPER_VERSION" != "" ]; then
-    yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
-    echo "Overriding Skipper version=$SKIPPER_VERSION"
+    if [ "$SKIPPER_TAG" == "null" ] || [ "$SKIPPER_TAG" == "" ]; then
+        yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
+        echo "Overriding Skipper version=$SKIPPER_VERSION"
+    else
+        echo "Using Skipper version=$SKIPPER_TAG"
+    fi
+else
+    if [ "$SKIPPER_TAG" != "null" ] && [ "$SKIPPER_TAG" != "" ]; then
+        echo "Using Skipper version=$SKIPPER_TAG"
+    fi
 fi
 
 "$SCDIR/carvel-import-secret.sh" "scdfmetadata" "$NS"
