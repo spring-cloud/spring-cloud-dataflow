@@ -44,7 +44,12 @@ jobs:
         version: 1.46.4
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-    # setup frog cli
+    - name: Login dockerhub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # setup frog cli
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
