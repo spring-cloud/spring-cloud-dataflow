@@ -28,6 +28,7 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepositoryCustom;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -121,14 +122,7 @@ public class AuditRecordRepositoryImpl implements AuditRecordRepositoryCustom {
 
 		final List<AuditRecord> resultList = typedQuery.getResultList();
 
-		final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		countQuery.select(cb.count(countQuery.from(AuditRecord.class)));
-
-		if (!finalQueryPredicates.isEmpty()) {
-			countQuery.where(finalQueryPredicates.toArray(new Predicate[0]));
-		}
-
-		final Long totalCount = entityManager.createQuery(countQuery)
+		final Long totalCount = (Long)entityManager.createQuery(((SqmSelectStatement)select).createCountQuery())
 				  .getSingleResult();
 
 		return new PageImpl<>(resultList, pageable, totalCount);
