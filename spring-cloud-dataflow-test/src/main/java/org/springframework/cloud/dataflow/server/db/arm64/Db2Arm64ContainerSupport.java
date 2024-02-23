@@ -49,6 +49,7 @@ public interface Db2Arm64ContainerSupport {
 			ENV_VARS.set("DOCKER_HOST", String.format("unix://%s/.colima/docker.sock", System.getProperty("user.home")));
 		}
 		Db2Container container = db2ContainerSupplier.get();
+		LOG.info(() -> "Starting:" + container.getContainerId());
 		container.start();
 		return container;
 	}
