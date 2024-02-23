@@ -49,6 +49,7 @@ public interface OracleArm64ContainerSupport {
 			ENV_VARS.set("DOCKER_HOST", String.format("unix://%s/.colima/docker.sock", System.getProperty("user.home")));
 		}
 		OracleContainer oracleContainer = oracleContainerSupplier.get();
+		LOG.info(() -> "Starting:" + oracleContainer.getContainerId());
 		oracleContainer.start();
 		return oracleContainer;
 	}
