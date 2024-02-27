@@ -58,7 +58,6 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
@@ -144,7 +143,7 @@ public class TaskControllerTests {
 	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
 
 	@Autowired
-	private TaskExecutionDaoContainer taskExecutionDaoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	private TaskExecutionCreationService taskExecutionCreationService;
@@ -200,7 +199,6 @@ public class TaskControllerTests {
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
 
-		TaskExecutionDao taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget.getName());
 		taskExecutionDao.startTaskExecution(taskExecutionRunning.getExecutionId(),
 				taskExecutionRunning.getTaskName(),
 				LocalDateTime.now(),
@@ -213,7 +211,6 @@ public class TaskControllerTests {
 		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
-		taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersionTarget2.getName());
 		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(),
 				taskExecutionComplete.getTaskName(),
 				LocalDateTime.now(),

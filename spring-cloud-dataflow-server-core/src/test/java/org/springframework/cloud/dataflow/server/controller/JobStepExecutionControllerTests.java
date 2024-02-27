@@ -43,11 +43,8 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -102,13 +99,13 @@ public class JobStepExecutionControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	TaskExecutionDaoContainer daoContainer;
+	TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -197,7 +194,6 @@ public class JobStepExecutionControllerTests {
 
 	private void createStepExecution(String jobName, String... stepNames)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
 		JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
 		for (String stepName : stepNames) {
 			StepExecution stepExecution = new StepExecution(stepName, jobExecution, 1L);
@@ -207,9 +203,7 @@ public class JobStepExecutionControllerTests {
 			stepExecution.setExecutionContext(context);
 			jobRepository.add(stepExecution);
 		}
-		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }

@@ -43,8 +43,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -84,9 +82,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private JobRepository jobRepository;
 
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -367,8 +365,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	private void initialize() {
-		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
-		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
+		this.taskExecutionDao = context.getBean(TaskExecutionDao.class);
+		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 		this.jobRepository = context.getBean(JobRepository.class);
 		this.dataflowTaskExecutionMetadataDaoContainer = context.getBean(DataflowTaskExecutionMetadataDaoContainer.class);
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
@@ -378,12 +376,10 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
-		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(name, LocalDateTime.now(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution = this.jobRepository.createJobExecution(name, jobParameters);
-		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(LocalDateTime.now());

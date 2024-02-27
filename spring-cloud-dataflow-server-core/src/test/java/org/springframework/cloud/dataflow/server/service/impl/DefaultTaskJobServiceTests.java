@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
@@ -61,9 +59,7 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
@@ -93,13 +89,6 @@ import static org.mockito.Mockito.when;
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 public class DefaultTaskJobServiceTests {
-
-	private static final String SAVE_JOB_EXECUTION = "INSERT INTO BOOT3_BATCH_JOB_EXECUTION(JOB_EXECUTION_ID, " +
-		"JOB_INSTANCE_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, VERSION, CREATE_TIME, LAST_UPDATED) " +
-		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	private static final String SAVE_JOB_EXECUTION_PARAM = "INSERT INTO BOOT3_BATCH_JOB_EXECUTION_PARAMS (" +
-		"job_execution_id, parameter_name, parameter_type, parameter_value, identifying) " +
-		"VALUES (?, ?, ?, ?, ?)";
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -133,10 +122,10 @@ public class DefaultTaskJobServiceTests {
 	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	@Autowired
-	TaskExecutionDaoContainer taskExecutionDaoContainer;
+	TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	TaskJobService taskJobService;
@@ -158,8 +147,6 @@ public class DefaultTaskJobServiceTests {
 		this.jdbcTemplate = new JdbcTemplate(this.dataSource);
 		resetTaskTables("TASK_");
 		initializeSuccessfulRegistry(this.appRegistry);
-		resetTaskTables("BOOT3_TASK_");
-
 		reset(this.taskLauncher);
 		when(this.taskLauncher.launch(any())).thenReturn("1234");
 		clearLaunchers();
@@ -189,20 +176,6 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	@Test
-	public void testRestartBoot3() throws Exception {
-		SchemaVersionTarget schemaVersionTarget = new SchemaVersionTarget("boot3", AppBootSchemaVersion.BOOT3,
-			"BOOT3_TASK_", "BOOT3_BATCH_", "H2");
-		createBaseLaunchers();
-		initializeJobs(true, schemaVersionTarget);
-		this.taskJobService.restartJobExecution(boot3JobInstanceCount,
-			SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT3).getName());
-		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
-		verify(this.taskLauncher, times(1)).launch(argument.capture());
-		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
-		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param=testparm,java.lang.String"));
-	}
-
-	@Test
 	public void testRestartNoPlatform()
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		createBaseLaunchers();
@@ -227,33 +200,17 @@ public class DefaultTaskJobServiceTests {
 
 	private void initializeJobs(boolean insertTaskExecutionMetadata)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		initializeJobs(insertTaskExecutionMetadata,
-			new SchemaVersionTarget("boot2", AppBootSchemaVersion.BOOT2, "TASK_",
-				"BATCH_", "H2"));
-	}
-	private void initializeJobs(boolean insertTaskExecutionMetadata, SchemaVersionTarget schemaVersionTarget)
-		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		String definitionName = (AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) ?
-			"some-name-boot3" : "some-name";
+		String definitionName =  "some-name";
 		this.taskDefinitionRepository.save(new TaskDefinition(JOB_NAME_ORIG + jobInstanceCount, definitionName  ));
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
-		TaskExecutionDao taskExecutionDao = taskExecutionDaoContainer.get(schemaVersionTarget.getName());
 		createSampleJob(
 				jobRepository,
 				taskBatchDao,
 				taskExecutionDao,
 				JOB_NAME_ORIG + jobInstanceCount,
 				BatchStatus.FAILED,
-				insertTaskExecutionMetadata,
-				schemaVersionTarget
+				insertTaskExecutionMetadata
 		);
-		if(AppBootSchemaVersion.BOOT2.equals(schemaVersionTarget.getSchemaVersion())) {
 			jobInstanceCount++;
-		}
-		else {
-			boot3JobInstanceCount++;
-		}
-
 	}
 
 	private void createSampleJob(
@@ -262,8 +219,7 @@ public class DefaultTaskJobServiceTests {
 			TaskExecutionDao taskExecutionDao,
 			String jobName,
 			BatchStatus status,
-			boolean insertTaskExecutionMetadata,
-			SchemaVersionTarget schemaVersionTarget
+			boolean insertTaskExecutionMetadata
 	) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 
@@ -272,28 +228,13 @@ public class DefaultTaskJobServiceTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 		if (insertTaskExecutionMetadata) {
-			template.execute(String.format("INSERT INTO " + schemaVersionTarget.getTaskPrefix() + "EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
+			template.execute(String.format("INSERT INTO TASK_EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
-		if(AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) {
-			jobExecution = new JobExecution(instance, 1L, this.jobParameters);
-			jobExecution.setCreateTime(LocalDateTime.now());
-			jobExecution.setVersion(1);
-			Object[] jobExecutionParameters = new Object[] { 1, 1, LocalDateTime.now(), LocalDateTime.now(),
-				BatchStatus.COMPLETED, ExitStatus.COMPLETED,
-				ExitStatus.COMPLETED.getExitDescription(), 1, LocalDateTime.now(), LocalDateTime.now() };
-			Object[] jobExecutionParmParameters = new Object[] { 1,  "identifying.param", "java.lang.String", "testparm", "Y"};
-			this.jdbcTemplate.update(SAVE_JOB_EXECUTION, jobExecutionParameters,
-				new int[] { Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
-					Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP });
-			this.jdbcTemplate.update(SAVE_JOB_EXECUTION_PARAM, jobExecutionParmParameters, new int[] { Types.BIGINT,
-					Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.CHAR});
-		} else {
-			jobExecution = jobRepository.createJobExecution(jobName,
-				this.jobParameters);
-				StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
-				stepExecution.setId(null);
-				jobRepository.add(stepExecution);
-		}
+		jobExecution = jobRepository.createJobExecution(jobName,
+			this.jobParameters);
+		StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
+		stepExecution.setId(null);
+		jobRepository.add(stepExecution);
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(LocalDateTime.now());

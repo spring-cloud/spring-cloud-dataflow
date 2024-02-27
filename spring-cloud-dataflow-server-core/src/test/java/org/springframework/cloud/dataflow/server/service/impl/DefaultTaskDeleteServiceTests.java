@@ -47,11 +47,9 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.server.batch.SearchableJobExecutionDao;
+import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -118,10 +116,10 @@ public abstract class DefaultTaskDeleteServiceTests {
 	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	@Autowired
-	JobExecutionDaoContainer jobExecutionDaoContainer;
+	JdbcSearchableJobExecutionDao searchableJobExecutionDao;
 
 	@Autowired
 	AggregateExecutionSupport aggregateExecutionSupport;
@@ -147,11 +145,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 			this.taskDeleteService.deleteTaskExecutions(taskName, true);
 		}
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(0);
-		for(SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			SearchableJobExecutionDao searchableJobExecutionDao = jobExecutionDaoContainer.get(target.getName());
-			assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(0);
-		}
-
+		assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(0);
 	}
 
 
@@ -163,7 +157,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 		assertThat(target).isNotNull();
 		this.taskDeleteService.deleteTaskExecutions(Collections.singleton(taskExplorer.getLatestTaskExecutionForTaskName(TASK_NAME_ORIG).getExecutionId()), target.getName());
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(49);
-		SearchableJobExecutionDao searchableJobExecutionDao = jobExecutionDaoContainer.get(target.getName());
 		assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(49);
 	}
 
@@ -179,7 +172,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 					null));
 			taskRepository.completeTaskExecution(taskExecution.getExecutionId(), 0, LocalDateTime.now(), "complete");
 			JobExecution jobExecution = this.jobLauncherTestUtils.launchJob();
-			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(SchemaVersionTarget.defaultTarget().getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		}
 	}
@@ -194,12 +186,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION_PARAMS");
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION_CONTEXT;");
 		template.execute("DELETE FROM BATCH_JOB_EXECUTION");
-		template.execute("DELETE FROM BOOT3_TASK_EXECUTION_PARAMS");
-		template.execute("DELETE FROM BOOT3_TASK_TASK_BATCH;");
-		template.execute("DELETE FROM BOOT3_TASK_EXECUTION;");
-		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION_PARAMS");
-		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION_CONTEXT;");
-		template.execute("DELETE FROM BOOT3_BATCH_JOB_EXECUTION");
 	}
 
 	@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)

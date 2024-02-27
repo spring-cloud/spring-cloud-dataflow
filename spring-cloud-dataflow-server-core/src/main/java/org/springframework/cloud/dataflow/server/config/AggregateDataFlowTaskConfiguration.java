@@ -17,13 +17,9 @@ package org.springframework.cloud.dataflow.server.config;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -33,6 +29,7 @@ import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncre
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
+import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -48,13 +45,13 @@ import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQuer
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
+import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +68,6 @@ import java.sql.SQLException;
  */
 @Configuration
 public class AggregateDataFlowTaskConfiguration {
-	private static final Logger logger = LoggerFactory.getLogger(AggregateDataFlowTaskConfiguration.class);
 
 	@Bean
 	public DataflowJobExecutionDaoContainer dataflowJobExecutionDao(DataSource dataSource, SchemaService schemaService) {
@@ -123,23 +119,18 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public TaskExecutionDaoContainer taskExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
-		return new TaskExecutionDaoContainer(dataSource, schemaService);
-	}
-
-	@Bean
-	public JobRepository jobRepositoryContainer(DataSource dataSource,
-												PlatformTransactionManager platformTransactionManager) throws Exception{
-		JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
-		factoryBean.setDataSource(dataSource);
-		factoryBean.setTransactionManager(platformTransactionManager);
-
+	public TaskExecutionDao taskExecutionDaoContainer(DataSource dataSource) throws Exception{
+		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
+		JdbcTaskExecutionDao dao = new JdbcTaskExecutionDao(dataSource);
+		String databaseType;
 		try {
-			factoryBean.afterPropertiesSet();
-		} catch (Throwable x) {
-			throw new RuntimeException("Exception creating JobRepository", x);
+			databaseType = DatabaseType.fromMetaData(dataSource).name();
 		}
-		return factoryBean.getObject();
+		catch (MetaDataAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		dao.setTaskIncrementer(incrementerFactory.getIncrementer(databaseType, "TASK_SEQ"));
+		return dao;
 	}
 
 	@Bean
@@ -163,8 +154,15 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobExecutionDaoContainer jobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
-		return new JobExecutionDaoContainer(dataSource, schemaService);
+	public JdbcSearchableJobExecutionDao jobExecutionDao(DataSource dataSource) {
+		JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
+		jdbcSearchableJobExecutionDao.setDataSource(dataSource);
+		try {
+			jdbcSearchableJobExecutionDao.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JdbcSearchableJobExecutionDao", x);
+		}
+		return jdbcSearchableJobExecutionDao;
 	}
 
 	@Bean
@@ -186,7 +184,7 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public TaskBatchDaoContainer taskBatchDaoContainer(DataSource dataSource, SchemaService schemaService) {
-		return new TaskBatchDaoContainer(dataSource, schemaService);
+	public JdbcTaskBatchDao taskBatchDao(DataSource dataSource) {
+		return new JdbcTaskBatchDao(dataSource);
 	}
 }

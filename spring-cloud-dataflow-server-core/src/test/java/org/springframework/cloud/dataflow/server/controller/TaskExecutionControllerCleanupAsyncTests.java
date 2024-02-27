@@ -50,7 +50,6 @@ import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -84,7 +83,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TaskExecutionControllerCleanupAsyncTests {
 
 	@Autowired
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
@@ -140,7 +139,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 	private void setupTaskExecutions(String taskName, String taskExecutionId) {
 		taskDefinitionRepository.save(new TaskDefinition(taskName, "taskDslGoesHere"));
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		TaskExecutionDao taskExecutionDao = daoContainer.get(schemaVersionTarget.getName());
 
 		List<String> taskArgs = new ArrayList<>();
 		taskArgs.add("foo=bar");

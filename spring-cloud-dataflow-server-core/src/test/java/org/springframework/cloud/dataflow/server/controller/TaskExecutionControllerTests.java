@@ -64,10 +64,8 @@ import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfigu
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -137,7 +135,7 @@ public class TaskExecutionControllerTests {
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
 	@Autowired
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -146,7 +144,7 @@ public class TaskExecutionControllerTests {
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	@Autowired
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	@Autowired
 	private AppRegistryService appRegistryService;
@@ -224,17 +222,15 @@ public class TaskExecutionControllerTests {
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
-			TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 			TaskExecution taskExecution1 =
-					dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
+				taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
 
-			dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
-			dao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
-			TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
+			taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
+			taskExecutionDao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
+			TaskExecution taskExecution = taskExecutionDao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
 					null);
 			SchemaVersionTarget fooBarTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_FOOBAR, taskDefinitionReader);
 			JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
-			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(fooBarTarget.getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();
 			taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);

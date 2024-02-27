@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -187,6 +189,21 @@ public class DataFlowServerConfigurationTests {
 				factoryBean.afterPropertiesSet();
 			} catch (Throwable x) {
 				throw new RuntimeException("Exception creating JobExplorer", x);
+			}
+			return factoryBean.getObject();
+		}
+
+		@Bean
+		public JobRepository jobRepository(DataSource dataSource,
+										   PlatformTransactionManager platformTransactionManager) throws Exception {
+			JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobRepository", x);
 			}
 			return factoryBean.getObject();
 		}
