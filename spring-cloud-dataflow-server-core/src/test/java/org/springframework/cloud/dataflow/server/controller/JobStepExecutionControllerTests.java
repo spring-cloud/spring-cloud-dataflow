@@ -46,7 +46,6 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -108,7 +107,7 @@ public class JobStepExecutionControllerTests {
 	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -209,7 +208,6 @@ public class JobStepExecutionControllerTests {
 		}
 		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 	}
 }

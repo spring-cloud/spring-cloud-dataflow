@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -95,7 +94,7 @@ public class JobInstanceControllerTests {
 	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -172,7 +171,6 @@ public class JobInstanceControllerTests {
 		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
 		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(defaultSchemaTarget);
 		for (int i = 0; i < jobExecutionCount; i++) {
 			JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
 			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);

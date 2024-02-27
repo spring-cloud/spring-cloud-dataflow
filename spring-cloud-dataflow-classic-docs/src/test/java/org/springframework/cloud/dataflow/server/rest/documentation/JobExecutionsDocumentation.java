@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -86,7 +85,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private TaskExecutionDaoContainer daoContainer;
 
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	private JdbcTemplate jdbcTemplate;
 
@@ -368,7 +367,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private void initialize() {
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
-		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
+		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 		this.jobRepository = context.getBean(JobRepository.class);
 		this.dataflowTaskExecutionMetadataDaoContainer = context.getBean(DataflowTaskExecutionMetadataDaoContainer.class);
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
@@ -383,7 +382,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution = this.jobRepository.createJobExecution(name, jobParameters);
-		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(LocalDateTime.now());

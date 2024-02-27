@@ -64,7 +64,6 @@ import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfigu
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
@@ -146,7 +145,7 @@ public class TaskExecutionControllerTests {
 	private TaskDefinitionRepository taskDefinitionRepository;
 
 	@Autowired
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	@Autowired
 	private AppRegistryService appRegistryService;
@@ -234,7 +233,6 @@ public class TaskExecutionControllerTests {
 					null);
 			SchemaVersionTarget fooBarTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_FOOBAR, taskDefinitionReader);
 			JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
-			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(fooBarTarget.getName());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();
 			taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);

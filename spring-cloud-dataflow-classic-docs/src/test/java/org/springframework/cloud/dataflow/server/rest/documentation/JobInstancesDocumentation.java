@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -72,7 +71,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	private static boolean initialized;
 	private JobRepository jobRepository;
 	private TaskExecutionDaoContainer daoContainer;
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 	private AggregateExecutionSupport aggregateExecutionSupport;
 	private TaskDefinitionReader taskDefinitionReader;
 
@@ -137,7 +136,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
 		this.jobRepository = context.getBean(JobRepository.class);
 		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
-		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
+		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 	}
 
 	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
@@ -145,7 +144,6 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
 		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
-		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(LocalDateTime.now());

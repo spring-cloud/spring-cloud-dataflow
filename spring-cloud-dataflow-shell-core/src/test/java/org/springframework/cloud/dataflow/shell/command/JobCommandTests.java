@@ -41,7 +41,6 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -74,7 +73,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static JobRepository jobRepository;
 
-	private static TaskBatchDaoContainer taskBatchDaoContainer;
+	private static TaskBatchDao taskBatchDao;
 
 	private static AggregateExecutionSupport aggregateExecutionSupport;
 
@@ -89,9 +88,8 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		Thread.sleep(2000);
 		taskDefinitionReader = applicationContext.getBean(TaskDefinitionReader.class);
 		aggregateExecutionSupport = applicationContext.getBean(AggregateExecutionSupport.class);
-		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
+		taskBatchDao = applicationContext.getBean(TaskBatchDao.class);
 		jobRepository = applicationContext.getBean(JobRepository.class);
-		taskBatchDaoContainer = applicationContext.getBean(TaskBatchDaoContainer.class);
 
 		taskExecutionIds.add(createSampleJob(JOB_NAME_ORIG, 1));
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOO, 1));
@@ -127,7 +125,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		jobParameterMap.put("bar", new JobParameter("BAR", String.class, false));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution;
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);

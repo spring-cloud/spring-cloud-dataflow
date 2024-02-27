@@ -41,8 +41,8 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
+import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -80,7 +80,7 @@ public class JobExecutionThinControllerTests {
 	private JobRepository jobRepository;
 
 	@Autowired
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -99,7 +99,7 @@ public class JobExecutionThinControllerTests {
 	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepository,
-				taskBatchDaoContainer,
+				taskBatchDao,
 				daoContainer,
 				aggregateExecutionSupport,
 				taskDefinitionReader,

@@ -50,7 +50,6 @@ import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
@@ -110,7 +109,7 @@ public class TasksInfoControllerTests {
     TaskDefinitionRepository taskDefinitionRepository;
 
     @Autowired
-    private TaskBatchDaoContainer taskBatchDaoContainer;
+    private TaskBatchDao taskBatchDao;
 
     private MockMvc mockMvc;
 
@@ -177,7 +176,6 @@ public class TasksInfoControllerTests {
             TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
                     null);
             JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
-			TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(target.getName());
             taskBatchDao.saveRelationship(taskExecution, jobExecution);
             TaskDeployment taskDeployment = new TaskDeployment();
             taskDeployment.setTaskDefinitionName(TASK_NAME_ORIG);

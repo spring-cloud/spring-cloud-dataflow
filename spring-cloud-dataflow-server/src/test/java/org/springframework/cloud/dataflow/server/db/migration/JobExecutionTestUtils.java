@@ -39,9 +39,9 @@ import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncre
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
+import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -59,14 +59,14 @@ class JobExecutionTestUtils
 {
 	private final TaskExecutionDaoContainer taskExecutionDaoContainer;
 
-	private final TaskBatchDaoContainer taskBatchDaoContainer;
+	private final TaskBatchDao taskBatchDao;
 
 	JobExecutionTestUtils(
 			TaskExecutionDaoContainer taskExecutionDaoContainer,
-			TaskBatchDaoContainer taskBatchDaoContainer
+			TaskBatchDao taskBatchDao
 		) {
 		this.taskExecutionDaoContainer = taskExecutionDaoContainer;
-		this.taskBatchDaoContainer = taskBatchDaoContainer;
+		this.taskBatchDao = taskBatchDao;
 	}
 
 	TaskExecution createSampleJob(String jobName, int jobExecutionCount, BatchStatus batchStatus, JobParameters jobParameters, SchemaVersionTarget schemaVersionTarget) {
@@ -86,7 +86,6 @@ class JobExecutionTestUtils
 
 		// BATCH_JOB_EXECUTION differs and the DAO can not be used for BATCH4/5 inserting
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(incrementerFallbackType.name(), schemaVersionTarget.getBatchPrefix() + "JOB_EXECUTION_SEQ");
-		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersion);
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
 		JobInstance jobInstance = jobInstanceDao.createJobInstance(jobName, jobParameters);
 		for (int i = 0; i < jobExecutionCount; i++) {
@@ -157,8 +156,8 @@ class JobExecutionTestUtils
 			DataSource dataSource = dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
 			SchemaService schemaService = new DefaultSchemaService();
 			TaskExecutionDaoContainer taskExecutionDaoContainer = new TaskExecutionDaoContainer(dataSource, schemaService);
-			TaskBatchDaoContainer taskBatchDaoContainer = new TaskBatchDaoContainer(dataSource, schemaService);
-			JobExecutionTestUtils generator = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDaoContainer);
+			JdbcTaskBatchDao taskBatchDao = new JdbcTaskBatchDao(dataSource);
+			JobExecutionTestUtils generator = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDao);
 			generator.createSampleJob(jobName("boot2"), 200, BatchStatus.COMPLETED, new JobParameters(),
 					schemaService.getTarget("boot2"));
 			generator.createSampleJob(jobName("boot3"), 200, BatchStatus.COMPLETED, new JobParameters(),

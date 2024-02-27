@@ -46,11 +46,11 @@ import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
+import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.data.domain.Page;
@@ -136,10 +136,10 @@ public abstract class AbstractSmokeTest {
 			CapturedOutput output,
 			@Autowired TaskJobService taskJobService,
 			@Autowired TaskExecutionDaoContainer taskExecutionDaoContainer,
-			@Autowired TaskBatchDaoContainer taskBatchDaoContainer) throws NoSuchJobExecutionException {
+			@Autowired TaskBatchDao taskBatchDao) throws NoSuchJobExecutionException {
 		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(100));
 		int originalCount = jobExecutions.getContent().size();
-		JobExecutionTestUtils testUtils = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDaoContainer);
+		JobExecutionTestUtils testUtils = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDao);
 		TaskExecution execution1 = testUtils.createSampleJob("job1", 1, BatchStatus.STARTED, new JobParameters(), schemaVersionTarget);
 		createdExecutionIdsBySchemaTarget.add(schemaVersionTarget, execution1.getExecutionId());
 		TaskExecution execution2 = testUtils.createSampleJob("job2", 3, BatchStatus.COMPLETED, new JobParameters(), schemaVersionTarget);

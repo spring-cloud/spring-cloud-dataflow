@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncre
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
+import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
@@ -48,12 +49,11 @@ import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQuer
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.JobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
+import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.annotation.Bean;
@@ -163,8 +163,15 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public JobExecutionDaoContainer jobExecutionDaoContainer(DataSource dataSource, SchemaService schemaService) {
-		return new JobExecutionDaoContainer(dataSource, schemaService);
+	public JdbcSearchableJobExecutionDao jobExecutionDaoContainer(DataSource dataSource) {
+		JdbcSearchableJobExecutionDao jdbcSearchableJobExecutionDao = new JdbcSearchableJobExecutionDao();
+		jdbcSearchableJobExecutionDao.setDataSource(dataSource);
+		try {
+			jdbcSearchableJobExecutionDao.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JdbcSearchableJobExecutionDao", x);
+		}
+		return jdbcSearchableJobExecutionDao;
 	}
 
 	@Bean
@@ -186,7 +193,7 @@ public class AggregateDataFlowTaskConfiguration {
 	}
 
 	@Bean
-	public TaskBatchDaoContainer taskBatchDaoContainer(DataSource dataSource, SchemaService schemaService) {
-		return new TaskBatchDaoContainer(dataSource, schemaService);
+	public JdbcTaskBatchDao taskBatchDao(DataSource dataSource) {
+		return new JdbcTaskBatchDao(dataSource);
 	}
 }
