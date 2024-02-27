@@ -131,19 +131,18 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	}
 
 	/**
-	 * Checks if the management.metrics.export.<meter-registry>.enabled property is set to ture for the provided
-	 * meterRegistryPropertyClass.
+	 * Checks if the 'management.<meter-registry>.metrics.export.enabled' property is set to true for the specified
+	 * meter registry.
 	 *
-	 * @param meterRegistryPropertyClass Property class that follows Boot's meter-registry properties convention.
-	 * @param environment Spring configuration environment.
-	 * @return Returns true if the provide class contains {@link ConfigurationProperties} prefix of type:
-	 *         management.<meter-registry>.metrics.export and the management.<meter-registry>.metrics.export.enabled
-	 *         property is set to true. Returns false otherwise.
+	 * @param meterRegistryConfigPropsClass the SpringBoot configuration properties for the meter registry
+	 * @param environment the application environment
+	 * @return whether the 'management.<meter-registry>.metrics.export.enabled' property is set to true for the
+	 * specified meter registry class.
 	 */
-	private boolean isMetricsRegistryEnabled(Class<?> meterRegistryPropertyClass, ConfigurableEnvironment environment) {
-		String metricsPrefix = retrievePropertyPrefix(meterRegistryPropertyClass);
+	private boolean isMetricsRegistryEnabled(Class<?> meterRegistryConfigPropsClass, ConfigurableEnvironment environment) {
+		String metricsPrefix = retrievePropertyPrefix(meterRegistryConfigPropsClass);
 		if (!StringUtils.hasText(metricsPrefix)) {
-			logger.warn("Meter registry properties class %s is not a @ConfigurationProperties".formatted(meterRegistryPropertyClass));
+			logger.warn("Meter registry properties class %s is not a @ConfigurationProperties".formatted(meterRegistryConfigPropsClass));
 			return false;
 		}
 		// Some metrics props have their 'metrics.export' portion factored into nested classes (e.g. Wavefront) but
