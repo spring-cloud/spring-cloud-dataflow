@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2021 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.mockito.Mockito;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.info.BuildInfoContributor;
 import org.springframework.boot.actuate.info.GitInfoContributor;
@@ -183,7 +185,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.Mockito.mock;
@@ -239,6 +240,20 @@ import static org.mockito.Mockito.when;
 @EnableMapRepositories("org.springframework.cloud.dataflow.server.job")
 @EnableTransactionManagement
 public class TestDependencies implements WebMvcConfigurer {
+	@Bean
+	public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+		throws Exception {
+		JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobExplorer", x);
+		}
+		return factoryBean.getObject();
+	}
+
 
 	@Override
 	public void configurePathMatch(PathMatchConfigurer configurer) {

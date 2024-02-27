@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.batch.BatchDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -159,6 +161,20 @@ import static org.mockito.Mockito.mock;
 		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
+
+	@Bean
+	public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+		throws Exception {
+		JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobExplorer", x);
+		}
+		return factoryBean.getObject();
+	}
 
 	@Bean
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {

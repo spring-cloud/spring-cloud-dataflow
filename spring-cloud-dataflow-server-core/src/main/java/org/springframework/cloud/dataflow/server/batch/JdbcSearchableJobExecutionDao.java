@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2014 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.util.Assert;
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
 
-	private static final String FIND_PARAMS_FROM_ID_5 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING FROM %PREFIX%JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID = ?";
+	private static final String FIND_PARAMS_FROM_ID = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING FROM %PREFIX%JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID = ?";
 
 	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION";
 
@@ -94,28 +94,16 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String TASK_EXECUTION_ID_FILTER = "B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
 
-	private static final String FIND_JOB_EXECUTIONS_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
+	private static final String FIND_JOB_EXECUTIONS = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_INSTANCE_ID = ? order by JOB_EXECUTION_ID desc";
 
-	private static final String FIND_JOB_EXECUTIONS_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
-			+ " from %PREFIX%JOB_EXECUTION where JOB_INSTANCE_ID = ? order by JOB_EXECUTION_ID desc";
-
-	private static final String GET_LAST_EXECUTION_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
+	private static final String GET_LAST_EXECUTION = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION E where JOB_INSTANCE_ID = ? and JOB_EXECUTION_ID in (SELECT max(JOB_EXECUTION_ID) from %PREFIX%JOB_EXECUTION E2 where E2.JOB_INSTANCE_ID = ?)";
 
-	private static final String GET_LAST_EXECUTION_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
-			+ " from %PREFIX%JOB_EXECUTION E where JOB_INSTANCE_ID = ? and JOB_EXECUTION_ID in (SELECT max(JOB_EXECUTION_ID) from %PREFIX%JOB_EXECUTION E2 where E2.JOB_INSTANCE_ID = ?)";
-
-	private static final String GET_RUNNING_EXECUTIONS_4 = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
-			+ "E.JOB_INSTANCE_ID, E.JOB_CONFIGURATION_LOCATION from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? and E.START_TIME is not NULL and E.END_TIME is NULL order by E.JOB_EXECUTION_ID desc";
-
-	private static final String GET_RUNNING_EXECUTIONS_5 = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
+	private static final String GET_RUNNING_EXECUTIONS_BY_JOB_NAME = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
 			+ "E.JOB_INSTANCE_ID from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? and E.START_TIME is not NULL and E.END_TIME is NULL order by E.JOB_EXECUTION_ID desc";
 
-	private static final String GET_EXECUTION_BY_ID_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
-			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
-
-	private static final String GET_EXECUTION_BY_ID_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
+	private static final String GET_EXECUTION_BY_ID = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
 
 	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%PREFIX%TASK_BATCH B";
@@ -160,15 +148,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private DataSource dataSource;
 
-	private BatchVersion batchVersion;
-
 	public JdbcSearchableJobExecutionDao() {
-		this(BatchVersion.BATCH_4);
-	}
-
-	@SuppressWarnings("deprecation")
-	public JdbcSearchableJobExecutionDao(BatchVersion batchVersion) {
-		this.batchVersion = batchVersion;
 		conversionService = new DefaultConversionService();
 		conversionService.addConverter(new StringToDateConverter());
 	}
@@ -245,17 +225,17 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		Assert.notNull(job, "Job cannot be null.");
 		Assert.notNull(job.getId(), "Job Id cannot be null.");
 
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? FIND_JOB_EXECUTIONS_4 : FIND_JOB_EXECUTIONS_5;
-		return getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion, job), job.getId());
+		String sqlQuery = FIND_JOB_EXECUTIONS;
+		return getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(job), job.getId());
 
 	}
 
 	@Override
 	public JobExecution getLastJobExecution(JobInstance jobInstance) {
 		Long id = jobInstance.getId();
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_LAST_EXECUTION_4 : GET_LAST_EXECUTION_5;
+		String sqlQuery = GET_LAST_EXECUTION;
 		List<JobExecution> executions = getJdbcTemplate().query(getQuery(sqlQuery),
-				new JobExecutionRowMapper(batchVersion, jobInstance), id, id);
+				new JobExecutionRowMapper(jobInstance), id, id);
 
 		Assert.state(executions.size() <= 1, "There must be at most one latest job execution");
 
@@ -270,9 +250,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public Set<JobExecution> findRunningJobExecutions(String jobName) {
 		Set<JobExecution> result = new HashSet<>();
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_RUNNING_EXECUTIONS_4
-				: GET_RUNNING_EXECUTIONS_5;
-		getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion), jobName);
+		String sqlQuery = GET_RUNNING_EXECUTIONS_BY_JOB_NAME;
+		getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(), jobName);
 
 		return result;
 	}
@@ -280,8 +259,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public JobExecution getJobExecution(Long executionId) {
 		try {
-			String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_EXECUTION_BY_ID_4 : GET_EXECUTION_BY_ID_5;
-			return getJdbcTemplate().queryForObject(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion),
+			String sqlQuery = GET_EXECUTION_BY_ID;
+			return getJdbcTemplate().queryForObject(getQuery(sqlQuery), new JobExecutionRowMapper(),
 					executionId);
 		}
 		catch (EmptyResultDataAccessException e) {
@@ -642,7 +621,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	//TODO: Boot3x followup - need to handle LocalDateTime and possibly Integer
-	protected JobParameters getJobParametersBatch5(Long executionId) {
+	protected JobParameters getJobParameters(Long executionId) {
 		Map<String, JobParameter<?>> map = new HashMap<>();
 		RowCallbackHandler handler = rs -> {
 			String parameterName = rs.getString("PARAMETER_NAME");
@@ -686,19 +665,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			}
 		};
 
-		getJdbcTemplate().query(getQuery(FIND_PARAMS_FROM_ID_5), handler, executionId);
+		getJdbcTemplate().query(getQuery(FIND_PARAMS_FROM_ID), handler, executionId);
 
 		return new JobParameters(map);
-	}
-
-	@Override
-	protected JobParameters getJobParameters(Long executionId) {
-		if (batchVersion == BatchVersion.BATCH_4) {
-			return super.getJobParameters(executionId);
-		}
-		else {
-			return getJobParametersBatch5(executionId);
-		}
 	}
 
 	JobExecution createJobExecutionFromResultSet(ResultSet rs, int rowNum) throws SQLException {
@@ -723,16 +692,13 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private final class JobExecutionRowMapper implements RowMapper<JobExecution> {
 
-		private final BatchVersion batchVersion;
-
 		private JobInstance jobInstance;
 
-		public JobExecutionRowMapper(BatchVersion batchVersion) {
-			this.batchVersion = batchVersion;
+		public JobExecutionRowMapper() {
+
 		}
 
-		public JobExecutionRowMapper(BatchVersion batchVersion, JobInstance jobInstance) {
-			this.batchVersion = batchVersion;
+		public JobExecutionRowMapper(JobInstance jobInstance) {
 			this.jobInstance = jobInstance;
 		}
 

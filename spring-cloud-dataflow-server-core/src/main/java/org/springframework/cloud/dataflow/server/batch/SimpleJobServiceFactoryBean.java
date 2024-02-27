@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 the original author or authors.
+ * Copyright 2009-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,8 +263,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	protected SearchableJobExecutionDao createJobExecutionDao() throws Exception {
-		BatchVersion batchVersion = BatchVersion.from(this.schemaVersionTarget);
-		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao(batchVersion);
+		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao();
 		dao.setDataSource(dataSource);
 		dao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix
 				+ "JOB_EXECUTION_SEQ"));
