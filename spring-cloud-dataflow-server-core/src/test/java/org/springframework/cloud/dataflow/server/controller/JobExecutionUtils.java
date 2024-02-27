@@ -34,12 +34,9 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -86,30 +83,29 @@ class JobExecutionUtils
 	static MockMvc createBaseJobExecutionMockMvc(
 			JobRepository jobRepository,
 			TaskBatchDao taskBatchDao,
-			TaskExecutionDaoContainer taskExecutionDaoContainer,
-			AggregateExecutionSupport aggregateExecutionSupport,
+			TaskExecutionDao taskExecutionDao,
 			TaskDefinitionReader taskDefinitionReader,
 			WebApplicationContext wac,
 			RequestMappingHandlerAdapter adapter)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_ORIG, 1, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_FOO, 1, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport,JOB_NAME_FOOBAR, 2, BatchStatus.COMPLETED,taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_STARTED, 1, BatchStatus.STARTED, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_STOPPED, 1, BatchStatus.STOPPED, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_FAILED1, 1, BatchStatus.FAILED, taskDefinitionReader);
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer, aggregateExecutionSupport, JOB_NAME_FAILED2, 1, BatchStatus.FAILED, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_ORIG, 1, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_FOO, 1, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao,JOB_NAME_FOOBAR, 2, BatchStatus.COMPLETED,taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_COMPLETED, 1, BatchStatus.COMPLETED, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_STARTED, 1, BatchStatus.STARTED, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_STOPPED, 1, BatchStatus.STOPPED, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_FAILED1, 1, BatchStatus.FAILED, taskDefinitionReader);
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao, JOB_NAME_FAILED2, 1, BatchStatus.FAILED, taskDefinitionReader);
 
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		String dateInString = "07-Jun-2023";
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.US);
 		LocalDateTime date = LocalDate.parse(dateInString, formatter).atStartOfDay();
 		jobParameterMap.put("javaUtilDate", new JobParameter( date, LocalDateTime.class,false));
-		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDaoContainer,
-			aggregateExecutionSupport, JOB_NAME_ORIG_WITH_PARAM, 1, BatchStatus.UNKNOWN, taskDefinitionReader,
+		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao,
+			JOB_NAME_ORIG_WITH_PARAM, 1, BatchStatus.UNKNOWN, taskDefinitionReader,
 			new JobParameters(jobParameterMap));
 
 		for (HttpMessageConverter<?> converter : adapter.getMessageConverters()) {
@@ -125,8 +121,7 @@ class JobExecutionUtils
 	private static void createSampleJob(
 			JobRepository jobRepository,
 			TaskBatchDao taskBatchDao,
-			TaskExecutionDaoContainer taskExecutionDaoContainer,
-			AggregateExecutionSupport aggregateExecutionSupport,
+			TaskExecutionDao taskExecutionDao,
 			String jobName,
 			int jobExecutionCount,
 			TaskDefinitionReader taskDefinitionReader
@@ -134,8 +129,7 @@ class JobExecutionUtils
 		createSampleJob(
 				jobRepository,
 				taskBatchDao,
-				taskExecutionDaoContainer,
-				aggregateExecutionSupport,
+				taskExecutionDao,
 				jobName,
 				jobExecutionCount,
 				BatchStatus.UNKNOWN,
@@ -147,8 +141,7 @@ class JobExecutionUtils
 	private static void createSampleJob(
 		JobRepository jobRepository,
 		TaskBatchDao taskBatchDao,
-		TaskExecutionDaoContainer taskExecutionDaoContainer,
-		AggregateExecutionSupport aggregateExecutionSupport,
+		TaskExecutionDao taskExecutionDao,
 		String jobName,
 		int jobExecutionCount,
 		BatchStatus status,
@@ -157,8 +150,7 @@ class JobExecutionUtils
 		createSampleJob(
 			jobRepository,
 			taskBatchDao,
-			taskExecutionDaoContainer,
-			aggregateExecutionSupport,
+			taskExecutionDao,
 			jobName,
 			jobExecutionCount,
 			status,
@@ -170,16 +162,13 @@ class JobExecutionUtils
 	private static void createSampleJob(
 			JobRepository jobRepository,
 			TaskBatchDao taskBatchDao,
-			TaskExecutionDaoContainer taskExecutionDaoContainer,
-			AggregateExecutionSupport aggregateExecutionSupport,
+			TaskExecutionDao taskExecutionDao,
 			String jobName,
 			int jobExecutionCount,
 			BatchStatus status,
 			TaskDefinitionReader taskDefinitionReader,
 			JobParameters jobParameters
 	) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
-		TaskExecutionDao taskExecutionDao = taskExecutionDaoContainer.get(schemaVersionTarget.getName());
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
 		JobExecution jobExecution;
 		for (int i = 0; i < jobExecutionCount; i++) {

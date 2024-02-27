@@ -41,7 +41,6 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -69,7 +68,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobCommandTests.class);
 
-	private static TaskExecutionDaoContainer daoContainer;
+	private static TaskExecutionDao taskExecutionDao;
 
 	private static JobRepository jobRepository;
 
@@ -118,8 +117,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
-		TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("foo", new JobParameter("FOO", String.class, true));
 		jobParameterMap.put("bar", new JobParameter("BAR", String.class, false));

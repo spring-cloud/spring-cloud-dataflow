@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.db.migration;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
@@ -39,7 +40,6 @@ import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncre
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -57,22 +57,21 @@ import org.springframework.util.StringUtils;
  */
 class JobExecutionTestUtils
 {
-	private final TaskExecutionDaoContainer taskExecutionDaoContainer;
+	private final TaskExecutionDao taskExecutionDao;
 
 	private final TaskBatchDao taskBatchDao;
 
 	JobExecutionTestUtils(
-			TaskExecutionDaoContainer taskExecutionDaoContainer,
+			TaskExecutionDao taskExecutionDao,
 			TaskBatchDao taskBatchDao
 		) {
-		this.taskExecutionDaoContainer = taskExecutionDaoContainer;
+		this.taskExecutionDao = taskExecutionDao;
 		this.taskBatchDao = taskBatchDao;
 	}
 
 	TaskExecution createSampleJob(String jobName, int jobExecutionCount, BatchStatus batchStatus, JobParameters jobParameters, SchemaVersionTarget schemaVersionTarget) {
 		String schemaVersion = schemaVersionTarget.getName();
 
-		TaskExecutionDao taskExecutionDao = this.taskExecutionDaoContainer.get(schemaVersion);
 		DataSource dataSource = (DataSource) ReflectionTestUtils.getField(taskExecutionDao, JdbcTaskExecutionDao.class, "dataSource");
 		NamedParameterJdbcTemplate namedParamJdbcTemplate = (NamedParameterJdbcTemplate) ReflectionTestUtils.getField(taskExecutionDao, JdbcTaskExecutionDao.class, "jdbcTemplate");
 		JdbcTemplate jdbcTemplate = namedParamJdbcTemplate.getJdbcTemplate();
@@ -145,7 +144,7 @@ class JobExecutionTestUtils
 	static class JobExecutionTestDataGenerator {
 
 		@Test
-		void generateJobExecutions() {
+		void generateJobExecutions() throws SQLException {
 			// Adjust these properties as necessary to point to your env
 			DataSourceProperties dataSourceProperties = new DataSourceProperties();
 			dataSourceProperties.setUrl("jdbc:oracle:thin:@localhost:1521/dataflow");
@@ -155,9 +154,18 @@ class JobExecutionTestUtils
 
 			DataSource dataSource = dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
 			SchemaService schemaService = new DefaultSchemaService();
-			TaskExecutionDaoContainer taskExecutionDaoContainer = new TaskExecutionDaoContainer(dataSource, schemaService);
+			DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
+			JdbcTaskExecutionDao taskExecutionDao = new JdbcTaskExecutionDao(dataSource);
+			String databaseType;
+			try {
+				databaseType = org.springframework.cloud.task.repository.support.DatabaseType.fromMetaData(dataSource).name();
+			}
+			catch (MetaDataAccessException e) {
+				throw new IllegalStateException(e);
+			}
+			taskExecutionDao.setTaskIncrementer(incrementerFactory.getIncrementer(databaseType, "TASK_SEQ"));
 			JdbcTaskBatchDao taskBatchDao = new JdbcTaskBatchDao(dataSource);
-			JobExecutionTestUtils generator = new JobExecutionTestUtils(taskExecutionDaoContainer, taskBatchDao);
+			JobExecutionTestUtils generator = new JobExecutionTestUtils(taskExecutionDao, taskBatchDao);
 			generator.createSampleJob(jobName("boot2"), 200, BatchStatus.COMPLETED, new JobParameters(),
 					schemaService.getTarget("boot2"));
 			generator.createSampleJob(jobName("boot3"), 200, BatchStatus.COMPLETED, new JobParameters(),

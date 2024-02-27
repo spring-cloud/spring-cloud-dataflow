@@ -524,7 +524,17 @@ public class TaskLauncherTaskletTests {
 
 		@Bean
 		TaskExecutionDao taskExecutionDao(DataSource dataSource) {
-			return new JdbcTaskExecutionDao(dataSource);
+			DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
+			JdbcTaskExecutionDao dao = new JdbcTaskExecutionDao(dataSource);
+			String databaseType;
+			try {
+				databaseType = DatabaseType.fromMetaData(dataSource).name();
+			}
+			catch (MetaDataAccessException e) {
+				throw new IllegalStateException(e);
+			}
+			dao.setTaskIncrementer(incrementerFactory.getIncrementer(databaseType, "TASK_SEQ"));
+			return dao;
 		}
 
 	}

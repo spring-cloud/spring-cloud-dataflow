@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -198,6 +200,21 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
 		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
 		return transactionManager;
+	}
+
+	@Bean
+	public JobRepository jobRepository(DataSource dataSource,
+									   PlatformTransactionManager platformTransactionManager) throws Exception{
+		JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobRepository", x);
+		}
+		return factoryBean.getObject();
 	}
 
 	@Bean

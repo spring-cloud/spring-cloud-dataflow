@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -88,7 +87,7 @@ public class JobInstanceControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	TaskExecutionDaoContainer daoContainer;
+	TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	JobRepository jobRepository;
@@ -166,10 +165,8 @@ public class JobInstanceControllerTests {
 
 	private void createSampleJob(String jobName, int jobExecutionCount)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
 
-		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
 		for (int i = 0; i < jobExecutionCount; i++) {
 			JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());

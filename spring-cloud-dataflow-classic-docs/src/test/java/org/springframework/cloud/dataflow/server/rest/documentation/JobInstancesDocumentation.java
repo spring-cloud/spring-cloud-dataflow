@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -70,7 +69,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 
 	private static boolean initialized;
 	private JobRepository jobRepository;
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 	private TaskBatchDao taskBatchDao;
 	private AggregateExecutionSupport aggregateExecutionSupport;
 	private TaskDefinitionReader taskDefinitionReader;
@@ -135,14 +134,13 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
 		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
 		this.jobRepository = context.getBean(JobRepository.class);
-		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
+		this.taskExecutionDao = context.getBean(TaskExecutionDao.class);
 		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 	}
 
 	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
-		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
 		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);

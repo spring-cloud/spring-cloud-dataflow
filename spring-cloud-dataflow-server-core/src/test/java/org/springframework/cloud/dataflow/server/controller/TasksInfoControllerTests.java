@@ -52,7 +52,6 @@ import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -100,7 +99,7 @@ public class TasksInfoControllerTests {
     private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
     @Autowired
-    TaskExecutionDaoContainer daoContainer;
+    TaskExecutionDao taskExecutionDao;
 
     @Autowired
 	JobRepository jobRepository;
@@ -166,14 +165,13 @@ public class TasksInfoControllerTests {
             taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
 
 			SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget("demo", taskDefinitionReader);
-			TaskExecutionDao dao = daoContainer.get(target.getName());
 
             TaskExecution taskExecution1 =
-                    dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
+				taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
             assertThat(taskExecution1.getExecutionId()).isGreaterThan(0L);
-            dao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
-            dao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
-            TaskExecution taskExecution = dao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
+			taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar", taskExecution1.getExecutionId());
+			taskExecutionDao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
+            TaskExecution taskExecution = taskExecutionDao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
                     null);
             JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
             taskBatchDao.saveRelationship(taskExecution, jobExecution);
