@@ -24,7 +24,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>17</java.version>
 
-		<spring-statemachine.version>2.5.1</spring-statemachine.version>
+		<spring-statemachine.version>4.0.0</spring-statemachine.version>
 		<spring-cloud-deployer.version>2.9.3-SNAPSHOT</spring-cloud-deployer.version>
 
 		<zeroturnaround.version>1.15</zeroturnaround.version>
