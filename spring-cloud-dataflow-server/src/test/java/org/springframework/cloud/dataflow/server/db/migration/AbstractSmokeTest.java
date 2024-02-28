@@ -37,7 +37,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
@@ -79,7 +78,7 @@ public abstract class AbstractSmokeTest {
 	private SchemaService schemaService;
 
 	@Autowired
-	private TaskRepositoryContainer taskRepositoryContainer;
+	private TaskRepository taskRepository;
 
 	@Autowired
 	private AggregateTaskExplorer taskExplorer;
@@ -114,7 +113,6 @@ public abstract class AbstractSmokeTest {
 		TransactionTemplate tx = new TransactionTemplate(transactionManager);
 		tx.execute(status -> {
 			for (SchemaVersionTarget schemaVersionTarget : schemaService.getTargets().getSchemas()) {
-				TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 				TaskExecution taskExecution = taskRepository.createTaskExecution(schemaVersionTarget.getName() + "_test_task");
 				createdExecutionIdsBySchemaTarget.add(schemaVersionTarget, taskExecution.getExecutionId());
 				assertThat(taskExecution.getExecutionId()).isGreaterThan(0L);

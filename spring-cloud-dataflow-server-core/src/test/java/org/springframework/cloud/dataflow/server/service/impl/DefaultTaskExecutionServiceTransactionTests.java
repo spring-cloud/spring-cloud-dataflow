@@ -37,7 +37,6 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -48,8 +47,8 @@ import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -60,6 +59,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -93,7 +93,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
 	@Autowired
-	TaskRepositoryContainer taskRepositoryContainer;
+	TaskRepository taskRepository;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -132,10 +132,10 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Autowired
-	DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
+	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	@Autowired
 	DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao;
@@ -161,7 +161,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				applicationContext.getEnvironment(),
 				launcherRepository,
 				auditRecordService,
-				taskRepositoryContainer,
+				taskRepository,
 				taskExecutionInfoService,
 				mock(TaskDeploymentRepository.class),
 				taskDefinitionRepository,
@@ -169,8 +169,8 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
-				dataflowTaskExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao,
 				dataflowTaskExecutionQueryDao,
 				mock(OAuth2TokenUtilsService.class),
 				taskSaveService,

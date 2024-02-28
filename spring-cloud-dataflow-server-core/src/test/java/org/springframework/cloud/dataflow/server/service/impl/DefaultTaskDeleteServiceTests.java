@@ -42,7 +42,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
@@ -83,7 +82,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	private final static String JOB_NAME = "testjob";
 
 	@Autowired
-	TaskRepositoryContainer taskRepositoryContainer;
+	TaskRepository taskRepository;
 
 	@Autowired
 	DataSourceProperties dataSourceProperties;
@@ -165,7 +164,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 		args.add("test=value");
 		args.add("anothertest=anotherValue");
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
-		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaVersionTarget.getName());
 		for (int i = 1; i <= numberOfExecutions; i++) {
 			TaskExecution taskExecution = taskRepository.createTaskExecution(new TaskExecution(i, 0, TASK_NAME_ORIG,
 					LocalDateTime.now(), LocalDateTime.now(), "", args, "", null,

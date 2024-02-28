@@ -42,21 +42,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
@@ -140,7 +136,7 @@ public class TaskControllerTests {
 	private TaskDeleteService taskDeleteService;
 
 	@Autowired
-	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	@Autowired
 	private TaskExecutionDao taskExecutionDao;
@@ -150,12 +146,6 @@ public class TaskControllerTests {
 
 	@Autowired
 	private CommonApplicationProperties appsProperties;
-
-	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
 
 	private boolean initialized = false;
 
@@ -197,7 +187,6 @@ public class TaskControllerTests {
 		assertThat(taskExecutionRunning.getExecutionId()).isGreaterThan(0L);
 		taskExecutionRunning.setStartTime(LocalDateTime.now());
 		taskExecutionRunning.setArguments(SAMPLE_ARGUMENT_LIST);
-		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask", taskDefinitionReader);
 
 		taskExecutionDao.startTaskExecution(taskExecutionRunning.getExecutionId(),
 				taskExecutionRunning.getTaskName(),
@@ -205,12 +194,10 @@ public class TaskControllerTests {
 				SAMPLE_ARGUMENT_LIST,
 				Long.toString(taskExecutionRunning.getExecutionId()));
 		taskExecutionRunning = taskExecutionDao.getTaskExecution(taskExecutionRunning.getExecutionId());
-		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		dataflowTaskExecutionMetadataDao.save(taskExecutionRunning, taskManifest);
 
 		TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask2", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
-		SchemaVersionTarget schemaVersionTarget2 = this.aggregateExecutionSupport.findSchemaVersionTarget("myTask2", taskDefinitionReader);
 		taskExecutionDao.startTaskExecution(taskExecutionComplete.getExecutionId(),
 				taskExecutionComplete.getTaskName(),
 				LocalDateTime.now(),
@@ -218,7 +205,6 @@ public class TaskControllerTests {
 				Long.toString(taskExecutionComplete.getExecutionId()));
 		taskExecutionDao.completeTaskExecution(taskExecutionComplete.getExecutionId(), 0, LocalDateTime.now(), null);
 		taskExecutionComplete = taskExecutionDao.getTaskExecution(taskExecutionComplete.getExecutionId());
-		dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget2.getName());
 		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, taskManifest);
 	}
 
@@ -747,7 +733,6 @@ public class TaskControllerTests {
 
 	@Test
 	public void testTaskLaunchNoManifest() throws Exception {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget("myTask3", taskDefinitionReader);
 		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");
@@ -757,7 +742,6 @@ public class TaskControllerTests {
 		repository.save(new TaskDefinition("myTask3", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null, null);
-		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		dataflowTaskExecutionMetadataDao.save(taskExecutionComplete, null);
 		mockMvc.perform(get("/tasks/definitions/myTask3").param("manifest", "true").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isOk());

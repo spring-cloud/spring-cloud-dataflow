@@ -32,10 +32,11 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
@@ -45,9 +46,9 @@ import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskCon
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -71,6 +72,8 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveSer
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -195,11 +198,11 @@ public class TaskConfiguration {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepositoryContainer taskRepositoryContainer,
+			TaskRepository taskRepository,
 			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader
 	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepositoryContainer, aggregateExecutionSupport, taskDefinitionReader);
+		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
 	}
 
 	@Bean
@@ -211,6 +214,19 @@ public class TaskConfiguration {
 				metadataResolver, dataflowServerUri);
 	}
 
+	@Bean
+	public TaskRepository taskRepository(DataSource dataSource) {
+		MultiSchemaTaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, "TASK_");
+		return new SimpleTaskRepository(taskExecutionDaoFactoryBean);
+	}
+
+	@Bean
+	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
+		DataSource dataSource,
+		SchemaService schemaService) {
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
+	}
+
 	@Configuration
 	public static class TaskExecutionServiceConfig {
 		@Bean
@@ -220,14 +236,14 @@ public class TaskConfiguration {
 				ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
 				LauncherRepository launcherRepository,
 				AuditRecordService auditRecordService,
-				TaskRepositoryContainer taskRepositoryContainer,
+				TaskRepository taskRepository,
 				TaskExecutionInfoService taskExecutionInfoService,
 				TaskDeploymentRepository taskDeploymentRepository,
 				TaskExecutionCreationService taskExecutionRepositoryService,
 				TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 				AggregateTaskExplorer taskExplorer,
-				DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-				DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+				DataflowTaskExecutionDao dataflowTaskExecutionDao,
+				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 				DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 				@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
 				TaskSaveService taskSaveService,
@@ -239,7 +255,7 @@ public class TaskConfiguration {
 					propertyResolver,
 					launcherRepository,
 					auditRecordService,
-					taskRepositoryContainer,
+					taskRepository,
 					taskExecutionInfoService,
 					taskDeploymentRepository,
 					taskDefinitionRepository,
@@ -247,8 +263,8 @@ public class TaskConfiguration {
 					taskExecutionRepositoryService,
 					taskAppDeploymentRequestCreator,
 					taskExplorer,
-					dataflowTaskExecutionDaoContainer,
-					dataflowTaskExecutionMetadataDaoContainer,
+					dataflowTaskExecutionDao,
+					dataflowTaskExecutionMetadataDao,
 					dataflowTaskExecutionQueryDao,
 					oauth2TokenUtilsService,
 					taskSaveService,
@@ -295,9 +311,9 @@ public class TaskConfiguration {
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskDeploymentRepository taskDeploymentRepository,
 				AuditRecordService auditRecordService,
-				DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-				DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
-				DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+				DataflowTaskExecutionDao dataflowTaskExecutionDao,
+				DataflowJobExecutionDao dataflowJobExecutionDao,
+				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 				TaskConfigurationProperties taskConfigurationProperties,
 				DataSource dataSource,
 				SchemaService schemaService,
@@ -309,9 +325,9 @@ public class TaskConfiguration {
 					taskDefinitionRepository,
 					taskDeploymentRepository,
 					auditRecordService,
-					dataflowTaskExecutionDaoContainer,
-					dataflowJobExecutionDaoContainer,
-					dataflowTaskExecutionMetadataDaoContainer,
+					dataflowTaskExecutionDao,
+					dataflowJobExecutionDao,
+					dataflowTaskExecutionMetadataDao,
 					schedulerService,
 					schemaService,
 					taskConfigurationProperties,

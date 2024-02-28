@@ -51,11 +51,8 @@ import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -108,11 +105,11 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	protected final AuditRecordService auditRecordService;
 
-	protected final DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
+	protected final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	protected final DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer;
+	protected final DataflowJobExecutionDao dataflowJobExecutionDao;
 
-	protected final DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	protected final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	private final SchedulerService schedulerService;
 
@@ -130,9 +127,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
 			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
@@ -143,9 +140,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskDeploymentRepository, "TaskDeploymentRepository must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
-		Assert.notNull(dataflowTaskExecutionDaoContainer, "DataflowTaskExecutionDaoContainer must not be null");
-		Assert.notNull(dataflowJobExecutionDaoContainer, "DataflowJobExecutionDaoContainer must not be null");
-		Assert.notNull(dataflowTaskExecutionMetadataDaoContainer, "DataflowTaskExecutionMetadataDaoContainer must not be null");
+		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
+		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
 		Assert.notNull(taskConfigurationProperties, "TaskConfigurationProperties must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 
@@ -154,9 +151,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskDeploymentRepository = taskDeploymentRepository;
 		this.auditRecordService = auditRecordService;
-		this.dataflowTaskExecutionDaoContainer = dataflowTaskExecutionDaoContainer;
-		this.dataflowJobExecutionDaoContainer = dataflowJobExecutionDaoContainer;
-		this.dataflowTaskExecutionMetadataDaoContainer = dataflowTaskExecutionMetadataDaoContainer;
+		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.schedulerService = schedulerService;
 		this.schemaService = schemaService;
 		this.taskDeleteChunkSize = taskConfigurationProperties.getExecutionDeleteChunkSize();
@@ -337,9 +334,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		logger.info("performDeleteTaskExecutions:{}:{}", schemaTarget, taskExecutionIds);
 		Assert.notEmpty(taskExecutionIds, "You must provide at least 1 task execution id.");
 
-		final DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(schemaTarget);
-		final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
-
 		final Set<Long> taskExecutionIdsWithChildren = new HashSet<>(taskExecutionIds);
 		final Set<Long> childTaskExecutionIds = dataflowTaskExecutionDao.findChildTaskExecutionIds(taskExecutionIds);
 		logger.info("Found {} child task execution ids: {}.",
@@ -434,7 +428,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds, int chunkSize, String schemaTarget) {
 		final Set<Long> stepExecutionIds = ConcurrentHashMap.newKeySet();
-		DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
 		if (chunkSize <= 0) {
 			stepExecutionIds.addAll(dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIds));
 		} else {
@@ -453,7 +446,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			AtomicInteger numberOfDeletedBatchStepExecutionContextRows,
 			String schemaTarget
 	) {
-		final DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
 		if (chunkSize <= 0) {
 			numberOfDeletedBatchStepExecutionContextRows.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds));
 
@@ -473,7 +465,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			AtomicInteger numberOfDeletedBatchStepExecutionContextRows,
 			String schemaTarget
 	) {
-		DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
 		final AtomicInteger numberOfDeletedBatchStepExecutionRows = new AtomicInteger(0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionContextRows = new AtomicInteger(0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionParamRows = new AtomicInteger(0);
@@ -564,7 +555,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	public void deleteTaskDefinition(String name, boolean cleanup) {
 		if (cleanup) {
 			for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-				DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(target.getName());
 				Set<Long> taskExecutionIds = dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(name);
 				final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>();
 				actionsAsSet.add(TaskExecutionControllerDeleteAction.CLEANUP);

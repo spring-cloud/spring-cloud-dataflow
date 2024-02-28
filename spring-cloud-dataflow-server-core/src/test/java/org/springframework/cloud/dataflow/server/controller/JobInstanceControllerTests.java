@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -169,7 +171,9 @@ public class JobInstanceControllerTests {
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
 		for (int i = 0; i < jobExecutionCount; i++) {
-			JobExecution jobExecution = jobRepository.createJobExecution(jobName, new JobParameters());
+			JobParameters jobParameters =
+				new JobParameters(Collections.singletonMap("parm", new JobParameter<>(i, Integer.class)));
+			JobExecution jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
 			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
 			stepExecution.setId(null);
 			jobRepository.add(stepExecution);

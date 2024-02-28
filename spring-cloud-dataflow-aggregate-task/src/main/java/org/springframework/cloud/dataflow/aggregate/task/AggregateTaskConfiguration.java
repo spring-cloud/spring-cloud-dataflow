@@ -17,13 +17,8 @@ package org.springframework.cloud.dataflow.aggregate.task;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
@@ -40,16 +35,6 @@ import org.springframework.util.Assert;
 @Configuration
 @Import(SchemaServiceConfiguration.class)
 public class AggregateTaskConfiguration {
-	private static final Logger logger = LoggerFactory.getLogger(AggregateTaskConfiguration.class);
-
-
-	@Bean
-	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
-			DataSource dataSource,
-			SchemaService schemaService
-	) {
-		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
-	}
 
 	@Bean
 	public AggregateExecutionSupport aggregateExecutionSupport(
@@ -57,14 +42,6 @@ public class AggregateTaskConfiguration {
 			SchemaService schemaService
 	) {
 		return new DefaultAggregateExecutionSupport(registryService, schemaService);
-	}
-
-	@Bean
-	public TaskRepositoryContainer taskRepositoryContainer(
-			DataSource dataSource,
-			SchemaService schemaService
-	) {
-		return new DefaultTaskRepositoryContainer(dataSource, schemaService);
 	}
 
 	@Bean

@@ -56,7 +56,7 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfigurat
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -69,6 +69,7 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
+import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -120,9 +121,9 @@ import org.springframework.cloud.dataflow.server.controller.assembler.StreamDefi
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
@@ -166,6 +167,8 @@ import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -270,6 +273,19 @@ public class TestDependencies implements WebMvcConfigurer {
 			throw new RuntimeException("Exception creating JobRepository", x);
 		}
 		return factoryBean.getObject();
+	}
+
+	@Bean
+	public TaskRepository taskRepository(DataSource dataSource) {
+		MultiSchemaTaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, "TASK_");
+		return new SimpleTaskRepository(taskExecutionDaoFactoryBean);
+	}
+
+	@Bean
+	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
+		DataSource dataSource,
+		SchemaService schemaService) {
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
 	}
 
 	@Override
@@ -647,9 +663,9 @@ public class TestDependencies implements WebMvcConfigurer {
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDao,
-			DataflowJobExecutionDaoContainer dataflowJobExecutionDao,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDao,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
 			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
@@ -680,11 +696,11 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepositoryContainer taskRepositoryContainer,
+			TaskRepository taskRepository,
 			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader
 	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepositoryContainer, aggregateExecutionSupport, taskDefinitionReader);
+		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
 	}
 
 	@Bean
@@ -701,14 +717,14 @@ public class TestDependencies implements WebMvcConfigurer {
 			ApplicationContext applicationContext,
 			LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
-			TaskRepositoryContainer taskRepositoryContainer,
+			TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 			AggregateTaskExplorer taskExplorer,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService,
@@ -722,7 +738,7 @@ public class TestDependencies implements WebMvcConfigurer {
 				applicationContext.getEnvironment(),
 				launcherRepository,
 				auditRecordService,
-				taskRepositoryContainer,
+				taskRepository,
 				taskExecutionInfoService,
 				taskDeploymentRepository,
 				taskDefinitionRepository,
@@ -730,8 +746,8 @@ public class TestDependencies implements WebMvcConfigurer {
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
-				dataflowTaskExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao,
 				dataflowTaskExecutionQueryDao,
 				oauth2TokenUtilsService,
 				taskSaveService,

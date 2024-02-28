@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
@@ -34,11 +33,8 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
@@ -47,7 +43,6 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
@@ -70,32 +65,21 @@ import java.sql.SQLException;
 public class AggregateDataFlowTaskConfiguration {
 
 	@Bean
-	public DataflowJobExecutionDaoContainer dataflowJobExecutionDao(DataSource dataSource, SchemaService schemaService) {
-		DataflowJobExecutionDaoContainer result = new DataflowJobExecutionDaoContainer();
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			DataflowJobExecutionDao dao = new JdbcDataflowJobExecutionDao(dataSource, target.getBatchPrefix());
-			result.add(target.getName(), dao);
-		}
-		return result;
+	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
+			return new JdbcDataflowJobExecutionDao(dataSource, "BATCH_");
 	}
 
 	@Bean
-	public DataflowTaskExecutionDaoContainer dataflowTaskExecutionDao(DataSource dataSource, SchemaService schemaService,
+	public DataflowTaskExecutionDao dataflowTaskExecutionDao(DataSource dataSource,
 																	  TaskProperties taskProperties) {
-		DataflowTaskExecutionDaoContainer result = new DataflowTaskExecutionDaoContainer();
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			TaskProperties properties = new TaskProperties();
 			BeanUtils.copyProperties(taskProperties, properties);
-			properties.setTablePrefix(target.getTaskPrefix());
-			DataflowTaskExecutionDao dao = new JdbcDataflowTaskExecutionDao(dataSource, properties);
-			result.add(target.getName(), dao);
-		}
-		return result;
+			properties.setTablePrefix("TASK_");
+			return new JdbcDataflowTaskExecutionDao(dataSource, properties);
 	}
 
 	@Bean
-	public DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDao(DataSource dataSource,
-																					  SchemaService schemaService)
+	public DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao(DataSource dataSource)
 		throws SQLException {
 		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 		String databaseType;
@@ -104,22 +88,15 @@ public class AggregateDataFlowTaskConfiguration {
 		} catch (MetaDataAccessException e) {
 			throw new IllegalStateException(e);
 		}
-		DataflowTaskExecutionMetadataDaoContainer result = new DataflowTaskExecutionMetadataDaoContainer();
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
 			DataflowTaskExecutionMetadataDao dao = new JdbcDataflowTaskExecutionMetadataDao(
 					dataSource,
-					incrementerFactory.getIncrementer(databaseType,
-							SchemaUtilities.getQuery("%PREFIX%EXECUTION_METADATA_SEQ", target.getTaskPrefix())
-					),
-					target.getTaskPrefix()
-			);
-			result.add(target.getName(), dao);
-		}
-		return result;
+					incrementerFactory.getIncrementer(databaseType, "TASK_EXECUTION_METADATA_SEQ"),
+				"TASK_");
+		return dao;
 	}
 
 	@Bean
-	public TaskExecutionDao taskExecutionDaoContainer(DataSource dataSource) throws Exception{
+	public TaskExecutionDao taskExecutionDao(DataSource dataSource) throws Exception{
 		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 		JdbcTaskExecutionDao dao = new JdbcTaskExecutionDao(dataSource);
 		String databaseType;

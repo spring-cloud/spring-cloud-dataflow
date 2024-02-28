@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSuppo
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -60,9 +59,7 @@ import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -131,7 +128,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	/**
 	 * Used to create TaskExecutions.
 	 */
-	private final TaskRepositoryContainer taskRepositoryContainer;
+	private final TaskRepository taskRepository;
 
 	private final TaskExecutionInfoService taskExecutionInfoService;
 
@@ -143,9 +140,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final AggregateTaskExplorer taskExplorer;
 
-	private final DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
+	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	private final DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	private final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	private final OAuth2TokenUtilsService oauth2TokenUtilsService;
 
@@ -183,7 +180,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param propertyResolver                          the spring application context
 	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
 	 * @param auditRecordService                        the audit record service
-	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
+	 * @param taskRepository                 			the repository to use for accessing and updating task executions
 	 * @param taskExecutionInfoService                  the service used to setup a task execution
 	 * @param taskDeploymentRepository                  the repository to track task deployment
 	 * @param taskDefinitionRepository                  the repository to query the task definition
@@ -191,8 +188,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskExecutionRepositoryService            the service used to create the task execution
 	 * @param taskAppDeploymentRequestCreator           the task app deployment request creator
 	 * @param taskExplorer                              the task explorer
-	 * @param dataflowTaskExecutionDaoContainer         the dataflow task execution dao
-	 * @param dataflowTaskExecutionMetadataDaoContainer repository used to manipulate task manifests
+	 * @param dataflowTaskExecutionDao			        the dataflow task execution dao
+	 * @param dataflowTaskExecutionMetadataDao          repository used to manipulate task manifests
 	 * @param dataflowTaskExecutionQueryDao             repository to query aggregate TaskExecution data
 	 * @param oauth2TokenUtilsService                   the oauth2 token server
 	 * @param taskSaveService                           the task save service
@@ -204,7 +201,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		PropertyResolver propertyResolver,
 		LauncherRepository launcherRepository,
 		AuditRecordService auditRecordService,
-		TaskRepositoryContainer taskRepositoryContainer,
+		TaskRepository taskRepository,
 		TaskExecutionInfoService taskExecutionInfoService,
 		TaskDeploymentRepository taskDeploymentRepository,
 		TaskDefinitionRepository taskDefinitionRepository,
@@ -212,8 +209,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 		AggregateTaskExplorer taskExplorer,
-		DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-		DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+		DataflowTaskExecutionDao dataflowTaskExecutionDao,
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 		OAuth2TokenUtilsService oauth2TokenUtilsService,
 		TaskSaveService taskSaveService,
@@ -223,7 +220,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this(propertyResolver,
 			launcherRepository,
 			auditRecordService,
-			taskRepositoryContainer,
+			taskRepository,
 			taskExecutionInfoService,
 			taskDeploymentRepository,
 			taskDefinitionRepository,
@@ -231,8 +228,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			taskExecutionRepositoryService,
 			taskAppDeploymentRequestCreator,
 			taskExplorer,
-			dataflowTaskExecutionDaoContainer,
-			dataflowTaskExecutionMetadataDaoContainer,
+			dataflowTaskExecutionDao,
+			dataflowTaskExecutionMetadataDao,
 			dataflowTaskExecutionQueryDao,
 			oauth2TokenUtilsService,
 			taskSaveService,
@@ -247,7 +244,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param propertyResolver                          the spring application context
 	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
 	 * @param auditRecordService                        the audit record service
-	 * @param taskRepositoryContainer                   the container of repositories to use for accessing and updating task executions
+	 * @param taskRepository		                  	the repository to use for accessing and updating task executions
 	 * @param taskExecutionInfoService                  the task execution info service
 	 * @param taskDeploymentRepository                  the repository to track task deployment
 	 * @param taskDefinitionRepository                  the repository to query the task definition
@@ -255,8 +252,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskExecutionRepositoryService            the service used to create the task execution
 	 * @param taskAppDeploymentRequestCreator           the task app deployment request creator
 	 * @param taskExplorer                              the task explorer
-	 * @param dataflowTaskExecutionDaoContainer         the dataflow task execution dao
-	 * @param dataflowTaskExecutionMetadataDaoContainer repository used to manipulate task manifests
+	 * @param dataflowTaskExecutionDao			        the dataflow task execution dao
+	 * @param dataflowTaskExecutionMetadataDao			repository used to manipulate task manifests
 	 * @param dataflowTaskExecutionQueryDao             repository to query aggregate task execution data.
 	 * @param oauth2TokenUtilsService                   the oauth2 token server
 	 * @param taskSaveService                           the task save service
@@ -268,7 +265,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		PropertyResolver propertyResolver,
 		LauncherRepository launcherRepository,
 		AuditRecordService auditRecordService,
-		TaskRepositoryContainer taskRepositoryContainer,
+		TaskRepository taskRepository,
 		TaskExecutionInfoService taskExecutionInfoService,
 		TaskDeploymentRepository taskDeploymentRepository,
 		TaskDefinitionRepository taskDefinitionRepository,
@@ -276,8 +273,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 		AggregateTaskExplorer taskExplorer,
-		DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-		DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+		DataflowTaskExecutionDao dataflowTaskExecutionDao,
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 		OAuth2TokenUtilsService oauth2TokenUtilsService,
 		TaskSaveService taskSaveService,
@@ -289,14 +286,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
 		Assert.notNull(auditRecordService, "auditRecordService must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
-		Assert.notNull(taskRepositoryContainer, "taskRepositoryContainer must not be null");
+		Assert.notNull(taskRepository, "taskRepository must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
 		Assert.notNull(taskDeploymentRepository, "taskDeploymentRepository must not be null");
 		Assert.notNull(taskExecutionRepositoryService, "taskExecutionRepositoryService must not be null");
 		Assert.notNull(taskAppDeploymentRequestCreator, "taskAppDeploymentRequestCreator must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
-		Assert.notNull(dataflowTaskExecutionDaoContainer, "dataflowTaskExecutionDaoContainer must not be null");
-		Assert.notNull(dataflowTaskExecutionMetadataDaoContainer, "dataflowTaskExecutionMetadataDaoContainer must not be null");
+		Assert.notNull(dataflowTaskExecutionDao, "dataflowTaskExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "dataflowTaskExecutionMetadataDao must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");
 		Assert.notNull(taskConfigurationProperties, "taskConfigurationProperties must not be null");
 		Assert.notNull(aggregateExecutionSupport, "compositeExecutionSupport must not be null");
@@ -307,7 +304,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.oauth2TokenUtilsService = oauth2TokenUtilsService;
 		this.launcherRepository = launcherRepository;
 		this.auditRecordService = auditRecordService;
-		this.taskRepositoryContainer = taskRepositoryContainer;
+		this.taskRepository = taskRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.taskDeploymentRepository = taskDeploymentRepository;
 		this.taskDefinitionRepository = taskDefinitionRepository;
@@ -315,8 +312,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.taskExecutionRepositoryService = taskExecutionRepositoryService;
 		this.taskAppDeploymentRequestCreator = taskAppDeploymentRequestCreator;
 		this.taskExplorer = taskExplorer;
-		this.dataflowTaskExecutionDaoContainer = dataflowTaskExecutionDaoContainer;
-		this.dataflowTaskExecutionMetadataDaoContainer = dataflowTaskExecutionMetadataDaoContainer;
+		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.taskSaveService = taskSaveService;
 		this.taskConfigurationProperties = taskConfigurationProperties;
 		this.aggregateExecutionSupport = aggregateExecutionSupport;
@@ -383,7 +380,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinition);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 
-		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 		// Get the previous manifest
 		TaskManifest previousManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 		Map<String, String> previousTaskDeploymentProperties = previousManifest != null
@@ -413,7 +409,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				version = appVersion;
 			}
 			schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
-			dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
 			addPrefixCommandLineArgs(schemaVersionTarget, "app." + appId + ".", commandLineArguments);
 			addPrefixProperties(schemaVersionTarget, "app." + appId + ".", deploymentProperties);
 			String regex = String.format("app\\.%s\\.\\d+=", appId);
@@ -511,7 +506,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 			dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 			taskDeploymentId = taskLauncher.launch(request);
-			saveExternalExecutionId(taskExecution, version, taskDeploymentId);
+			saveExternalExecutionId(taskExecution, taskDeploymentId);
 		} finally {
 			if (this.tasksBeingUpgraded.containsKey(taskName)) {
 				List<String> platforms = this.tasksBeingUpgraded.get(taskName);
@@ -691,12 +686,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskExecution    task execution id to associate the external execution id with
 	 * @param taskDeploymentId platform specific execution id
 	 */
-	private void saveExternalExecutionId(TaskExecution taskExecution, String version, String taskDeploymentId) {
+	private void saveExternalExecutionId(TaskExecution taskExecution, String taskDeploymentId) {
 		if (!StringUtils.hasText(taskDeploymentId)) {
 			throw new IllegalStateException("Deployment ID is null for the task:" + taskExecution.getTaskName());
 		}
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskExecution.getTaskName(), version, taskDefinitionReader);
-		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId, schemaVersionTarget.getName());
+		this.updateExternalExecutionId(taskExecution.getExecutionId(), taskDeploymentId);
 		taskExecution.setExternalExecutionId(taskDeploymentId);
 	}
 
@@ -883,7 +877,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public TaskManifest findTaskManifestById(Long id, String schemaTarget) {
-		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "Expected dataflowTaskExecutionMetadataDao using " + schemaTarget);
 		AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
 		return taskExecution != null ? dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId()) : null;
@@ -900,7 +893,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	private Set<AggregateTaskExecution> getValidStopChildExecutions(Set<Long> ids, String schemaTarget) {
-		DataflowTaskExecutionDao dataflowTaskExecutionDao = this.dataflowTaskExecutionDaoContainer.get(schemaTarget);
 		Set<Long> childTaskExecutionIds = dataflowTaskExecutionDao.findChildTaskExecutionIds(ids);
 		Set<AggregateTaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds, schemaTarget);
 		validateExternalExecutionIds(childTaskExecutions);
@@ -944,8 +936,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return taskLauncher;
 	}
 
-	protected void updateExternalExecutionId(long executionId, String taskLaunchId, String schemaTarget) {
-		TaskRepository taskRepository = this.taskRepositoryContainer.get(schemaTarget);
+	protected void updateExternalExecutionId(long executionId, String taskLaunchId) {
 		taskRepository.updateExternalExecutionId(executionId, taskLaunchId);
 	}
 
@@ -1023,8 +1014,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public Set<Long> getAllTaskExecutionIds(boolean onlyCompleted, String taskName) {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(schemaVersionTarget.getName());
 		return dataflowTaskExecutionDao.getAllTaskExecutionIds(onlyCompleted, taskName);
 	}
 
