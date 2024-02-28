@@ -7,7 +7,6 @@ on:
       - 'main'
       - 'main-3'
       - '2.11.x'
-      - '2.10.x'
     paths-ignore:
       - '.github/**'
 
@@ -23,6 +22,9 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v4
+    - uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
     # cache maven repo
     - uses: actions/cache@v3
       with:
