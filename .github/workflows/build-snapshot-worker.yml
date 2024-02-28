@@ -17,6 +17,9 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
     - uses: actions/setup-java@v3
       with:
         java-version: '8'
