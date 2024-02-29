@@ -26,7 +26,8 @@ jobs:
         tool-cache: false
         dotnet: false
         docker-images: false
-        swap-storage: false
+        swap-storage: false      
+        large-packages: false
     # cache maven repo
     - uses: actions/cache@v3
       with:
