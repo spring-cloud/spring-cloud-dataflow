@@ -136,7 +136,7 @@ public class TaskLauncherSinkTests {
 		TaskOperations taskOperations = context.getBean(TaskOperations.class);
 		when(taskOperations.currentTaskExecutions()).thenReturn(Collections.singletonList(resource));
 		when(taskOperations.launch(anyString(), anyMap(), anyList()))
-			.thenReturn(new LaunchResponseResource(1, "boot3"));
+			.thenReturn(new LaunchResponseResource(1));
 		InputDestination inputDestination = context.getBean(InputDestination.class);
 		LaunchRequest launchRequest = new LaunchRequest("test", Collections.emptyList(), Collections.emptyMap());
 		logger.info("sending:input={}", launchRequest);

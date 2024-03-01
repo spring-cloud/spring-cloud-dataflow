@@ -377,9 +377,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 		String taskAppName = taskDefinition != null ? taskDefinition.getRegisteredAppName() : taskName;
 
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, taskDefinition);
-		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
-
 		// Get the previous manifest
 		TaskManifest previousManifest = dataflowTaskExecutionMetadataDao.getLatestManifest(taskName);
 		Map<String, String> previousTaskDeploymentProperties = previousManifest != null
@@ -408,9 +405,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			if (StringUtils.hasText(appVersion)) {
 				version = appVersion;
 			}
-			schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
-			addPrefixCommandLineArgs(schemaVersionTarget, "app." + appId + ".", commandLineArguments);
-			addPrefixProperties(schemaVersionTarget, "app." + appId + ".", deploymentProperties);
 			String regex = String.format("app\\.%s\\.\\d+=", appId);
 			commandLineArguments = commandLineArguments.stream()
 				.map(arg -> arg.replaceFirst(regex, ""))
@@ -419,7 +413,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 
 		TaskLauncher taskLauncher = findTaskLauncher(platformName);
-		addDefaultDeployerProperties(platformType, schemaVersionTarget, deploymentProperties);
 		if (taskExecutionInformation.isComposed()) {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskName);
 			if (taskDefinition != null) {
@@ -427,8 +420,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			} else {
 				logger.info("composedTask:appNames:{}", appNames);
 			}
-			addPrefixProperties(schemaVersionTarget, "app.composed-task-runner.", deploymentProperties);
-			addPrefixProperties(schemaVersionTarget, "app." + taskName + ".", deploymentProperties);
 			for (String appName : appNames) {
 				List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
 				String registeredName = names.get(0);
@@ -532,7 +523,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				request.getCommandlineArguments()
 			), platformName);
 
-		return new LaunchResponse(taskExecution.getExecutionId(), schemaVersionTarget.getName());
+		return new LaunchResponse(taskExecution.getExecutionId());
 	}
 
 	private void addDefaultDeployerProperties(
@@ -703,7 +694,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param taskLauncher  the TaskLauncher used to verify the status of a recorded task execution.
 	 */
 	private void verifyTaskIsNotRunning(String taskName, TaskExecution taskExecution, TaskLauncher taskLauncher) {
-		Page<AggregateTaskExecution> runningTaskExecutions =
+		Page<TaskExecution> runningTaskExecutions =
 			this.taskExplorer.findRunningTaskExecutions(taskName, PageRequest.of(0, 1));
 
 		//Found only the candidate TaskExecution
@@ -717,7 +708,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		 * Use the TaskLauncher to verify the actual state.
 		 */
 		if (runningTaskExecutions.getTotalElements() > 0) {
-			AggregateTaskExecution latestRunningExecution = runningTaskExecutions.toList().get(0);
+			TaskExecution latestRunningExecution = runningTaskExecutions.toList().get(0);
 			if (latestRunningExecution.getExternalExecutionId() == null) {
 				logger.warn("Task repository shows a running task execution for task {} with no externalExecutionId.",
 					taskName);
@@ -846,7 +837,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @return the log of the specified task.
 	 */
 	@Override
-	public String getLog(String platformName, String taskId, String schemaTarget) {
+	public String getLog(String platformName, String taskId) {
 		String result;
 		try {
 			result = findTaskLauncher(platformName).getLog(taskId);
@@ -858,17 +849,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	@Override
-	public void stopTaskExecution(Set<Long> ids, String schemaTarget) {
-		stopTaskExecution(ids, schemaTarget, null);
+	public void stopTaskExecution(Set<Long> ids) {
+		stopTaskExecution(ids, null);
 	}
 
 	@Override
-	public void stopTaskExecution(Set<Long> ids, String schemaTarget, String platform) {
+	public void stopTaskExecution(Set<Long> ids, String platform) {
 		logger.info("Stopping {} task executions.", ids.size());
 
-		Set<AggregateTaskExecution> taskExecutions = getValidStopExecutions(ids, schemaTarget);
-		Set<AggregateTaskExecution> childTaskExecutions = getValidStopChildExecutions(ids, schemaTarget);
-		for (AggregateTaskExecution taskExecution : taskExecutions) {
+		Set<TaskExecution> taskExecutions = getValidStopExecutions(ids);
+		Set<TaskExecution> childTaskExecutions = getValidStopChildExecutions(ids);
+		for (TaskExecution taskExecution : taskExecutions) {
 			cancelTaskExecution(taskExecution, platform);
 		}
 		childTaskExecutions.forEach(childTaskExecution -> cancelTaskExecution(childTaskExecution, platform));
@@ -876,9 +867,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	}
 
 	@Override
-	public TaskManifest findTaskManifestById(Long id, String schemaTarget) {
-		Assert.notNull(dataflowTaskExecutionMetadataDao, "Expected dataflowTaskExecutionMetadataDao using " + schemaTarget);
-		AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
+	public TaskManifest findTaskManifestById(Long id) {
+		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
 		return taskExecution != null ? dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId()) : null;
 	}
 
@@ -886,15 +876,15 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
 	}
 
-	private Set<AggregateTaskExecution> getValidStopExecutions(Set<Long> ids, String schemaTarget) {
-		Set<AggregateTaskExecution> taskExecutions = getTaskExecutions(ids, schemaTarget);
+	private Set<TaskExecution> getValidStopExecutions(Set<Long> ids) {
+		Set<TaskExecution> taskExecutions = getTaskExecutions(ids);
 		validateExternalExecutionIds(taskExecutions);
 		return taskExecutions;
 	}
 
-	private Set<AggregateTaskExecution> getValidStopChildExecutions(Set<Long> ids, String schemaTarget) {
+	private Set<TaskExecution> getValidStopChildExecutions(Set<Long> ids) {
 		Set<Long> childTaskExecutionIds = dataflowTaskExecutionDao.findChildTaskExecutionIds(ids);
-		Set<AggregateTaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds, schemaTarget);
+		Set<TaskExecution> childTaskExecutions = getTaskExecutions(childTaskExecutionIds);
 		validateExternalExecutionIds(childTaskExecutions);
 		return childTaskExecutions;
 	}
@@ -906,9 +896,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			numberOfExecutionsStopped + " Task Execution Stopped", auditData, null);
 	}
 
-	private void validateExternalExecutionIds(Set<AggregateTaskExecution> taskExecutions) {
+	private void validateExternalExecutionIds(Set<TaskExecution> taskExecutions) {
 		Set<Long> invalidIds = new HashSet<>();
-		for (AggregateTaskExecution taskExecution : taskExecutions) {
+		for (TaskExecution taskExecution : taskExecutions) {
 			if (taskExecution.getExternalExecutionId() == null) {
 				invalidIds.add(taskExecution.getExecutionId());
 			}
@@ -952,18 +942,17 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return auditedData;
 	}
 
-	private void cancelTaskExecution(AggregateTaskExecution taskExecution, String platformName) {
+	private void cancelTaskExecution(TaskExecution taskExecution, String platformName) {
 		String platformNameToUse;
 		if (StringUtils.hasText(platformName)) {
 			platformNameToUse = platformName;
 		} else {
-			AggregateTaskExecution platformTaskExecution = taskExecution;
+			TaskExecution platformTaskExecution = taskExecution;
 			TaskDeployment taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
 			// If TaskExecution does not have an associated platform see if parent task has the platform information.
 			if (taskDeployment == null) {
 				if (platformTaskExecution.getParentExecutionId() != null) {
-					platformTaskExecution = this.taskExplorer.getTaskExecution(platformTaskExecution.getParentExecutionId(),
-						platformTaskExecution.getSchemaTarget());
+					platformTaskExecution = this.taskExplorer.getTaskExecution(platformTaskExecution.getParentExecutionId());
 					taskDeployment = this.taskDeploymentRepository.findByTaskDeploymentId(platformTaskExecution.getExternalExecutionId());
 				}
 				if (taskDeployment == null) {
@@ -978,11 +967,11 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	}
 
-	private Set<AggregateTaskExecution> getTaskExecutions(Set<Long> ids, String schemaTarget) {
-		Set<AggregateTaskExecution> taskExecutions = new HashSet<>();
+	private Set<TaskExecution> getTaskExecutions(Set<Long> ids) {
+		Set<TaskExecution> taskExecutions = new HashSet<>();
 		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
 		for (Long id : ids) {
-			final AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
+			final TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
 			if (taskExecution == null) {
 				nonExistingTaskExecutions.add(id);
 			} else {
@@ -991,9 +980,9 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		}
 		if (!nonExistingTaskExecutions.isEmpty()) {
 			if (nonExistingTaskExecutions.size() == 1) {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first(), schemaTarget);
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
 			} else {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions, schemaTarget);
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
 			}
 		}
 		return taskExecutions;

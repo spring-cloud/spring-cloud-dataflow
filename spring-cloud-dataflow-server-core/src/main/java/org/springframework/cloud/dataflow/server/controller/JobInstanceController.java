@@ -113,7 +113,7 @@ public class JobInstanceController {
 		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
 		}
-		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
+		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
 		if (jobInstance == null) {
 			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d' and schema target '%s'", id, schemaTarget));
 		}
@@ -121,7 +121,7 @@ public class JobInstanceController {
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link RepresentationModelAssemblerSupport} implementation that converts
 	 * {@link JobInstance}s to {@link JobInstanceResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {

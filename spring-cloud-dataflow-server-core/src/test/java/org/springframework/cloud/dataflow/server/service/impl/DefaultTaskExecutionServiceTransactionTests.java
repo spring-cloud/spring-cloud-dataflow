@@ -186,7 +186,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 		initializeSuccessfulRegistry(this.appRegistry);
 		LaunchResponse taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
 		assertEquals(1L, taskExecution.getExecutionId());
-		assertEquals("boot2", taskExecution.getSchemaTarget());
 	}
 
 	private static class TaskLauncherStub implements TaskLauncher {

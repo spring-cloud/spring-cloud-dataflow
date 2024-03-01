@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.controller.assembler;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
@@ -36,27 +35,22 @@ public class DefaultTaskDefinitionAssemblerProvider implements TaskDefinitionAss
 
 	private final TaskJobService taskJobService;
 
-	private final AggregateExecutionSupport aggregateExecutionSupport;
-
 	public DefaultTaskDefinitionAssemblerProvider(
 			TaskExecutionService taskExecutionService,
 			TaskJobService taskJobService,
-			AggregateTaskExplorer taskExplorer,
-			AggregateExecutionSupport aggregateExecutionSupport
+			AggregateTaskExplorer taskExplorer
 	) {
 		Assert.notNull(taskExecutionService, "taskExecutionService required");
 		Assert.notNull(taskJobService, "taskJobService required");
 		Assert.notNull(taskExplorer, "taskExplorer required");
-		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport required");
 		this.taskExecutionService = taskExecutionService;
 		this.taskJobService = taskJobService;
 		this.taskExplorer = taskExplorer;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
 	}
 
 	@Override
 	public DefaultTaskDefinitionAssembler getTaskDefinitionAssembler(boolean enableManifest) {
 		return new DefaultTaskDefinitionAssembler(taskExecutionService, enableManifest,
-				TaskDefinitionResource.class, taskJobService, taskExplorer, aggregateExecutionSupport);
+				TaskDefinitionResource.class, taskJobService, taskExplorer);
 	}
 }

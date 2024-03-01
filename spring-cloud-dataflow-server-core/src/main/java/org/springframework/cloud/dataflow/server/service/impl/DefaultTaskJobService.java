@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,9 +45,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -57,7 +55,9 @@ import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinition
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -153,11 +153,19 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(
 			Pageable pageable,
-			int jobInstanceId,
-			String schemaTarget
-	) {
+			int jobInstanceId) {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(jobInstanceId, schemaTarget, pageable);
+		List <TaskJobExecution> jobExecutions =  getTaskJobExecutionsWithStepCountForList(
+			jobService.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(jobInstanceId, getPageOffset(pageable),
+				pageable.getPageSize()));
+		long total = 0;
+        try {
+            JobInstance jobInstance = jobService.getJobInstance(jobInstanceId);
+			total = jobService.getJobExecutionsForJobInstance(jobInstance.getJobName(), jobInstance.getInstanceId()).size();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+        return new PageImpl<>(jobExecutions, pageable, total);
 	}
 
 	@Override
@@ -177,12 +185,9 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException {
-		logger.info("getJobExecution:{}:{}", id, schemaTarget);
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		return aggregateJobQueryDao.getJobExecution(id, schemaTarget);
+	public TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException {
+		logger.info("getJobExecution:{}", id);
+		return aggregateJobQueryDao.getJobExecution(id);
 	}
 
 	@Override
@@ -193,14 +198,14 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public JobInstanceExecutions getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException, NoSuchJobException {
-		return aggregateJobQueryDao.getJobInstanceExecutions(id, schemaTarget);
+	public JobInstanceExecutions getJobInstance(long id) throws NoSuchJobInstanceException, NoSuchJobException {
+		return getJobInstanceExecution(jobService.getJobInstance(id));
 	}
 
 	@Override
-	public void restartJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException {
-		logger.info("restarting job:{}:{}", jobExecutionId, schemaTarget);
-		final TaskJobExecution taskJobExecution = this.getJobExecution(jobExecutionId, schemaTarget);
+	public void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException {
+		logger.info("restarting job:{}", jobExecutionId);
+		final TaskJobExecution taskJobExecution = this.getJobExecution(jobExecutionId);
 		final JobExecution jobExecution = taskJobExecution.getJobExecution();
 
 		if (!JobUtils.isJobExecutionRestartable(taskJobExecution.getJobExecution())) {
@@ -209,8 +214,8 @@ public class DefaultTaskJobService implements TaskJobService {
 							jobExecution.getId(), taskJobExecution.getJobExecution().getStatus()));
 		}
 
-		AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget());
-		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
+		TaskExecution taskExecution = this.taskExplorer.getTaskExecution(taskJobExecution.getTaskId());
+		TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId());
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskExecution.getTaskName())
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskExecution.getTaskName()));
 		String platformName = null;
@@ -234,7 +239,7 @@ public class DefaultTaskJobService implements TaskJobService {
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
 			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
 					restartExecutionArgs(taskExecution.getArguments(),
-							taskJobExecution.getJobExecution().getJobParameters(), schemaTarget));
+							taskJobExecution.getJobExecution().getJobParameters()));
 		} else {
 			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
 					taskExecution.getTaskName(), taskJobExecution.getTaskId()));
@@ -253,10 +258,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	 * @return deduped list of arguments that contains the original arguments and any
 	 * identifying job parameters not in the original task execution arguments.
 	 */
-	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters, String schemaTarget) {
-		if(schemaTarget.equals(SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT2).getName())) {
-			throw new UnsupportedOperationException("Boot 2 operations are not supported");
-		}
+	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters) {
 		List<String> result = new ArrayList<>(taskExecutionArgs);
 		String type;
 		Map<String, JobParameter<?>> jobParametersMap = jobParameters.getParameters();
@@ -279,23 +281,18 @@ public class DefaultTaskJobService implements TaskJobService {
 	}
 
 	@Override
-	public void stopJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
+	public void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
 		BatchStatus status = jobService.stop(jobExecutionId).getStatus();
-		logger.info("stopped:{}:{}:status={}", jobExecutionId, schemaTarget, status);
+		logger.info("stopped:{}:status={}", jobExecutionId, status);
 	}
 
 
-	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution, String schemaTarget) {
+	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution) {
 		return new TaskJobExecution(
-				getTaskExecutionId(jobExecution, schemaTarget),
+				getTaskExecutionId(jobExecution),
 				jobExecution,
 				isTaskDefined(jobExecution),
-				jobExecution.getStepExecutions().size(),
-				schemaTarget
-		);
+				jobExecution.getStepExecutions().size());
 	}
 
 	private List<TaskJobExecution> getTaskJobExecutionsWithStepCountForList(Collection<JobExecutionWithStepCount> jobExecutions) {
@@ -307,21 +304,18 @@ public class DefaultTaskJobService implements TaskJobService {
 		return taskJobExecutions;
 	}
 
-	//TODO: Boot3x followup Brute force replacement when checking for schema target.   Need to have executions only look for boot3
 	private TaskJobExecution getTaskJobExecutionWithStepCount(JobExecutionWithStepCount jobExecutionWithStepCount) {
 		return new TaskJobExecution(
-				getTaskExecutionId(jobExecutionWithStepCount, "boot3"),
+				getTaskExecutionId(jobExecutionWithStepCount),
 				jobExecutionWithStepCount,
 				isTaskDefined(jobExecutionWithStepCount),
-				jobExecutionWithStepCount.getStepCount(),
-				"boot3"
-		);
+				jobExecutionWithStepCount.getStepCount());
 	}
 
-	private Long getTaskExecutionId(JobExecution jobExecution, String schemaTarget) {
+	private Long getTaskExecutionId(JobExecution jobExecution) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 
-		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), schemaTarget);
+		Long taskExecutionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId());
 		if (taskExecutionId == null) {
 			String message = String.format("No corresponding taskExecutionId " +
 					"for jobExecutionId %s.  This indicates that Spring " +
@@ -341,15 +335,25 @@ public class DefaultTaskJobService implements TaskJobService {
 		return (int) pageable.getOffset();
 	}
 
-	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance) {
+	private List<TaskJobExecution> getTaskJobExecutionsForList(Collection<JobExecution> jobExecutions) {
+		Assert.notNull(jobExecutions, "jobExecutions must not be null");
+		List<TaskJobExecution> taskJobExecutions = new ArrayList<>();
+		for (JobExecution jobExecution : jobExecutions) {
+			taskJobExecutions.add(getTaskJobExecution(jobExecution));
+		}
+		return taskJobExecutions;
+	}
+
+	private JobInstanceExecutions getJobInstanceExecution(JobInstance jobInstance) throws NoSuchJobException {
 		Assert.notNull(jobInstance, "jobInstance must not be null");
-		return aggregateJobQueryDao.getJobInstanceExecution(jobInstance.getJobName(), jobInstance.getInstanceId());
+		List<JobExecution> jobExecutions = new ArrayList<>(
+			jobService.getJobExecutionsForJobInstance(jobInstance.getJobName(), jobInstance.getInstanceId()));
+		return new JobInstanceExecutions(jobInstance, getTaskJobExecutionsForList(jobExecutions));
 	}
 
 	private boolean isTaskDefined(JobExecution jobExecution) {
-		SchemaVersionTarget versionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobExecution.getJobInstance().getJobName(), taskDefinitionReader);
-		Long executionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId(), versionTarget.getName());
-		AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(executionId, versionTarget.getName());
+		Long executionId = taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecution.getId());
+		TaskExecution taskExecution = taskExplorer.getTaskExecution(executionId);
 		return taskDefinitionRepository.findById(taskExecution.getTaskName()).isPresent();
 	}
 }

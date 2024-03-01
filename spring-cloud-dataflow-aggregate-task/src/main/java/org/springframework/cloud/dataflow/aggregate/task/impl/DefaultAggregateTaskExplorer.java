@@ -18,13 +18,9 @@ package org.springframework.cloud.dataflow.aggregate.task.impl;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +32,10 @@ import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -57,7 +50,7 @@ import org.springframework.util.StringUtils;
 public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	private final static Logger logger = LoggerFactory.getLogger(DefaultAggregateTaskExplorer.class);
 
-	private final Map<String, TaskExplorer> taskExplorers;
+	private final TaskExplorer taskExplorer;
 
 	private final AggregateExecutionSupport aggregateExecutionSupport;
 
@@ -70,7 +63,6 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	public DefaultAggregateTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
-			SchemaService schemaService,
 			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader,
 			TaskDeploymentReader taskDeploymentReader
@@ -79,21 +71,11 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		this.aggregateExecutionSupport = aggregateExecutionSupport;
 		this.taskDefinitionReader = taskDefinitionReader;
 		this.taskDeploymentReader = taskDeploymentReader;
-		Map<String, TaskExplorer> result = new HashMap<>();
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			TaskExplorer explorer = new SimpleTaskExplorer(new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, target.getTaskPrefix()));
-			result.put(target.getName(), explorer);
-		}
-		taskExplorers = Collections.unmodifiableMap(result);
+    	this.taskExplorer = new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource, "TASK_"));
 	}
 
 	@Override
-	public AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget) {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		TaskExplorer taskExplorer = taskExplorers.get(schemaTarget);
-		Assert.notNull(taskExplorer, "Expected taskExplorer for " + schemaTarget);
+	public TaskExecution getTaskExecution(long executionId) {
 		TaskExecution taskExecution = taskExplorer.getTaskExecution(executionId);
 		TaskDeployment deployment = null;
 		if (taskExecution != null) {
@@ -108,11 +90,11 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 				}
 			}
 		}
-		return aggregateExecutionSupport.from(taskExecution, schemaTarget, deployment != null ? deployment.getPlatformName() : null);
+		return taskExecution;
 	}
 
 	@Override
-	public AggregateTaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform) {
+	public TaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform) {
 		TaskDeployment deployment = taskDeploymentReader.getDeployment(externalExecutionId, platform);
 		if (deployment != null) {
 			return this.taskExecutionQueryDao.geTaskExecutionByExecutionId(externalExecutionId, deployment.getTaskDefinitionName());
@@ -121,21 +103,18 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findChildTaskExecutions(long executionId, String schemaTarget) {
-		return this.taskExecutionQueryDao.findChildTaskExecutions(executionId, schemaTarget);
+	public List<TaskExecution> findChildTaskExecutions(long executionId) {
+		return this.taskExecutionQueryDao.findChildTaskExecutions(executionId);
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget) {
-		return this.taskExecutionQueryDao.findChildTaskExecutions(parentIds, schemaTarget);
+	public List<TaskExecution> findChildTaskExecutions(Collection<Long> parentIds) {
+		return this.taskExecutionQueryDao.findChildTaskExecutions(parentIds);
 	}
 
 	@Override
-	public Page<AggregateTaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable) {
-		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
-		TaskExplorer taskExplorer = taskExplorers.get(target.getName());
-		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
+	public Page<TaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable) {
+		Assert.notNull(taskExplorer, "Expected TaskExplorer");
 		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
 		if (definition == null) {
 			logger.warn("Cannot find TaskDefinition for " + taskName);
@@ -143,72 +122,47 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		TaskDeployment deployment = definition != null ? taskDeploymentReader.findByDefinitionName(definition.getName()) : null;
 		final String platformName = deployment != null ? deployment.getPlatformName() : null;
 		Page<TaskExecution> executions = taskExplorer.findRunningTaskExecutions(taskName, pageable);
-		List<AggregateTaskExecution> taskExecutions = executions.getContent()
-				.stream()
-				.map(execution -> aggregateExecutionSupport.from(execution, target.getName(), platformName))
-				.collect(Collectors.toList());
+		List<TaskExecution> taskExecutions = executions.getContent();
 		return new PageImpl<>(taskExecutions, executions.getPageable(), executions.getTotalElements());
 	}
 
 	@Override
 	public List<String> getTaskNames() {
-		List<String> result = new ArrayList<>();
-		for (TaskExplorer explorer : taskExplorers.values()) {
-			result.addAll(explorer.getTaskNames());
-		}
-		return result;
+		return taskExplorer.getTaskNames();
 	}
 
 	@Override
 	public long getTaskExecutionCountByTaskName(String taskName) {
-		long result = 0;
-		for (TaskExplorer explorer : taskExplorers.values()) {
-			result += explorer.getTaskExecutionCountByTaskName(taskName);
-		}
-		return result;
+		return taskExplorer.getTaskExecutionCountByTaskName(taskName);
 	}
 
 	@Override
 	public long getTaskExecutionCount() {
-		long result = 0;
-		for (TaskExplorer explorer : taskExplorers.values()) {
-			result += explorer.getTaskExecutionCount();
-		}
-		return result;
+		return taskExplorer.getTaskExecutionCount();
 	}
 
 	@Override
 	public long getRunningTaskExecutionCount() {
-		long result = 0;
-		for (TaskExplorer explorer : taskExplorers.values()) {
-			result += explorer.getRunningTaskExecutionCount();
-		}
-		return result;
+		return taskExplorer.getRunningTaskExecutionCount();
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed) {
+	public List<TaskExecution> findTaskExecutions(String taskName, boolean completed) {
 		return this.taskExecutionQueryDao.findTaskExecutions(taskName, completed);
 	}
 
 	@Override
-	public List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime) {
+	public List<TaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime) {
 		return this.taskExecutionQueryDao.findTaskExecutionsBeforeEndTime(taskName, endTime);
 	}
 
 	@Override
-	public Page<AggregateTaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable) {
+	public Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable) {
 
 		String platformName = getPlatformName(taskName);
-		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
-		TaskExplorer taskExplorer = taskExplorers.get(target.getName());
-		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
+		Assert.notNull(taskExplorer, "Expected TaskExplorer");
 		Page<TaskExecution> executions = taskExplorer.findTaskExecutionsByName(taskName, pageable);
-		List<AggregateTaskExecution> taskExecutions = executions.getContent()
-				.stream()
-				.map(execution -> aggregateExecutionSupport.from(execution, target.getName(), platformName))
-				.collect(Collectors.toList());
+		List<TaskExecution> taskExecutions = executions.getContent();
 		return new PageImpl<>(taskExecutions, executions.getPageable(), executions.getTotalElements());
 	}
 
@@ -225,56 +179,37 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
-	public Page<AggregateTaskExecution> findAll(Pageable pageable) {
+	public Page<TaskExecution> findAll(Pageable pageable) {
 		return taskExecutionQueryDao.findAll(pageable);
 	}
 
 	@Override
-	public Long getTaskExecutionIdByJobExecutionId(long jobExecutionId, String schemaTarget) {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		TaskExplorer taskExplorer = taskExplorers.get(schemaTarget);
-		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + schemaTarget);
+	public Long getTaskExecutionIdByJobExecutionId(long jobExecutionId) {
+		Assert.notNull(taskExplorer, "Expected TaskExplorer");
 		return taskExplorer.getTaskExecutionIdByJobExecutionId(jobExecutionId);
 	}
 
 	@Override
-	public Set<Long> getJobExecutionIdsByTaskExecutionId(long taskExecutionId, String schemaTarget) {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		TaskExplorer taskExplorer = taskExplorers.get(schemaTarget);
-		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + schemaTarget);
+	public Set<Long> getJobExecutionIdsByTaskExecutionId(long taskExecutionId) {
 		return taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecutionId);
 	}
 
 	@Override
-	public List<AggregateTaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames) {
-		List<AggregateTaskExecution> result = new ArrayList<>();
+	public List<TaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames) {
+		List<TaskExecution> result = new ArrayList<>();
 		for (String taskName : taskNames) {
-			SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 			String platformName = getPlatformName(taskName);
-			Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
-			TaskExplorer taskExplorer = taskExplorers.get(target.getName());
-			Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
-			List<AggregateTaskExecution> taskExecutions = taskExplorer.getLatestTaskExecutionsByTaskNames(taskNames)
-					.stream()
-					.map(execution -> aggregateExecutionSupport.from(execution, target.getName(), platformName))
-					.collect(Collectors.toList());
+			Assert.notNull(taskExplorer, "Expected TaskExplorer");
+			List<TaskExecution> taskExecutions = taskExplorer.getLatestTaskExecutionsByTaskNames(taskNames);
 			result.addAll(taskExecutions);
 		}
 		return result;
 	}
 
 	@Override
-	public AggregateTaskExecution getLatestTaskExecutionForTaskName(String taskName) {
-
-		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
-		TaskExplorer taskExplorer = taskExplorers.get(target.getName());
-		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
-		return aggregateExecutionSupport.from(taskExplorer.getLatestTaskExecutionForTaskName(taskName), target.getName(), getPlatformName(taskName));
+	public TaskExecution getLatestTaskExecutionForTaskName(String taskName) {
+		Assert.notNull(taskExplorer, "Expected TaskExplorer");
+		return taskExplorer.getLatestTaskExecutionForTaskName(taskName);
 	}
 
 }

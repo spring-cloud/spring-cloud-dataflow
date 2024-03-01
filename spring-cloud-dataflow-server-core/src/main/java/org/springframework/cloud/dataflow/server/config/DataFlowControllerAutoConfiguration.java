@@ -308,10 +308,9 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
 				TaskExecutionService taskExecutionService,
 				TaskJobService taskJobService,
-				AggregateTaskExplorer taskExplorer,
-				AggregateExecutionSupport aggregateExecutionSupport
+				AggregateTaskExplorer taskExplorer
 		) {
-			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer, aggregateExecutionSupport);
+			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 		}
 
 		@Bean

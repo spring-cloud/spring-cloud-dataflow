@@ -401,9 +401,7 @@ public class TaskExecutionControllerTests {
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
 						get("/tasks/executions" + resource.getExecutionId())
-								.accept(MediaType.APPLICATION_JSON)
-								.queryParam("schemaTarget", resource.getSchemaTarget())
-				)
+								.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp3\"}"));
@@ -475,9 +473,7 @@ public class TaskExecutionControllerTests {
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
 						get("/tasks/executions" + resource.getExecutionId())
-								.accept(MediaType.APPLICATION_JSON)
-								.queryParam("schemaTarget", resource.getSchemaTarget())
-				)
+								.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp2\"}"));

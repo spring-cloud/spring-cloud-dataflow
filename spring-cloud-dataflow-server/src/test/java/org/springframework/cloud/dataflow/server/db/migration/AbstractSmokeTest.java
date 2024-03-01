@@ -39,7 +39,6 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
@@ -121,7 +120,7 @@ public abstract class AbstractSmokeTest {
 		});
 		long expectedNewCount = originalCount + 2;
 		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(expectedNewCount);
-		List<AggregateTaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100)).getContent();
+		List<TaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100)).getContent();
 		assertThat(taskExecutions)
 				.hasSize((int)expectedNewCount)
 				.allSatisfy((taskExecution) -> assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L));
@@ -169,7 +168,7 @@ public abstract class AbstractSmokeTest {
 		actions.add(TaskExecutionControllerDeleteAction.CLEANUP);
 		actions.add(TaskExecutionControllerDeleteAction.REMOVE_DATA);
 		createdExecutionIdsBySchemaTarget.forEach((schemaTarget, executionIds) ->
-				this.taskDeleteService.cleanupExecutions(actions, new HashSet<>(executionIds), schemaTarget.getName()));
+				this.taskDeleteService.cleanupExecutions(actions, new HashSet<>(executionIds)));
 	}
 
 	protected boolean supportsRowNumberFunction() {

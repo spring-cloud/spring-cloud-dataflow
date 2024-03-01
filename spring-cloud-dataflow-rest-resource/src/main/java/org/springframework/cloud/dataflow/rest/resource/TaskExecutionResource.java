@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -62,12 +63,12 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	/**
 	 * Time of when the task was started.
 	 */
-	private Date startTime;
+	private LocalDateTime startTime;
 
 	/**
 	 * Timestamp of when the task was completed/terminated.
 	 */
-	private Date endTime;
+	private LocalDateTime endTime;
 
 	/**
 	 * Message returned from the task.
@@ -122,8 +123,6 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	private String composedTaskJobExecutionStatus;
 
-	private String schemaTarget;
-
 	public TaskExecutionResource() {
 		arguments = new ArrayList<>();
 	}
@@ -147,8 +146,9 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		this.endTime = taskJobExecutionRel.getTaskExecution().getEndTime();
 		this.errorMessage = taskJobExecutionRel.getTaskExecution().getErrorMessage();
 		this.externalExecutionId = taskJobExecutionRel.getTaskExecution().getExternalExecutionId();
-		this.schemaTarget = taskJobExecutionRel.getTaskExecution().getSchemaTarget();
-		this.platformName = taskJobExecutionRel.getTaskExecution().getPlatformName();
+		if(taskJobExecutionRel.getTaskManifest() != null) {
+			this.platformName = taskJobExecutionRel.getTaskManifest().getPlatformName();
+		}
 		if (taskJobExecutionRel.getJobExecutionIds() == null) {
 			this.jobExecutionIds = Collections.emptyList();
 		}
@@ -176,12 +176,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskExecution contains the {@link TaskExecution}
 	 * @param composedTaskJobExecution the optional composed task execution.
 	 */
-	public TaskExecutionResource(AggregateTaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
+	public TaskExecutionResource(TaskExecution taskExecution, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
-		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();
@@ -201,13 +200,12 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 	 * @param taskManifest contains the (@link TaskManifest}
 	 * @param composedTaskJobExecution The optional composed task execution.
 	 */
-	public TaskExecutionResource(AggregateTaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
+	public TaskExecutionResource(TaskExecution taskExecution, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		Assert.notNull(taskManifest, "taskManifest must not be null");
 		this.executionId = taskExecution.getExecutionId();
 		this.exitCode = taskExecution.getExitCode();
 		this.taskName = taskExecution.getTaskName();
-		this.schemaTarget = taskExecution.getSchemaTarget();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.arguments = Collections.unmodifiableList(taskExecution.getArguments());
 		this.startTime = taskExecution.getStartTime();
@@ -238,11 +236,11 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 		return taskName;
 	}
 
-	public Date getStartTime() {
+	public LocalDateTime getStartTime() {
 		return startTime;
 	}
 
-	public Date getEndTime() {
+	public LocalDateTime getEndTime() {
 		return endTime;
 	}
 
@@ -288,14 +286,6 @@ public class TaskExecutionResource extends RepresentationModel<TaskExecutionReso
 
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
-	}
-
-	public String getSchemaTarget() {
-		return schemaTarget;
-	}
-
-	public void setSchemaTarget(String schemaTarget) {
-		this.schemaTarget = schemaTarget;
 	}
 
 	public void setTaskExecutionStatus(String taskExecutionStatus) {

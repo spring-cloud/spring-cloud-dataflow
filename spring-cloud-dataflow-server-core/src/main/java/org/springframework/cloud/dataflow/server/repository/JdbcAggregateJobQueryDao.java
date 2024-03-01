@@ -421,10 +421,10 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	@Override
-	public TaskJobExecution getJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException {
-		List<TaskJobExecution> jobExecutions = getJobExecutionPage(jobExecutionId, schemaTarget);
+	public TaskJobExecution getJobExecution(long jobExecutionId) throws NoSuchJobExecutionException {
+		List<TaskJobExecution> jobExecutions = getJobExecutionPage(jobExecutionId);
 		if (jobExecutions.isEmpty()) {
-			throw new NoSuchJobExecutionException(String.format("Job id %s for schema target %s not found", jobExecutionId, schemaTarget));
+			throw new NoSuchJobExecutionException(String.format("Job id %s not found", jobExecutionId));
 		}
 		if (jobExecutions.size() > 1) {
 			LOG.debug("Too many job executions:{}", jobExecutions);
@@ -436,15 +436,14 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		return taskJobExecution;
 	}
 
-	private List<TaskJobExecution> getJobExecutionPage(long jobExecutionId, String schemaTarget) {
+	private List<TaskJobExecution> getJobExecutionPage(long jobExecutionId) {
 		return queryForProvider(
 				dataflowByJobExecutionIdAndSchemaPagingQueryProvider,
 				byJobExecutionIdAndSchemaPagingQueryProvider,
 				new JobExecutionRowMapper(true),
 				0,
 				2,
-				jobExecutionId,
-				schemaTarget
+				jobExecutionId
 		);
 	}
 
@@ -700,8 +699,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		jobExecution.setVersion(rs.getInt("VERSION"));
 
 		return readStepCount ?
-				new TaskJobExecution(taskExecutionId, jobExecution, true, rs.getInt("STEP_COUNT"), schemaTarget) :
-				new TaskJobExecution(taskExecutionId, jobExecution, true, schemaTarget);
+				new TaskJobExecution(taskExecutionId, jobExecution, true, rs.getInt("STEP_COUNT")) :
+				new TaskJobExecution(taskExecutionId, jobExecution, true);
 	}
 
 	private List<TaskJobExecution> getTaskJobExecutionsByDate(Date startDate, Date endDate, int start, int count) {
@@ -759,7 +758,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 					JobExecution jobExecution = new JobExecution(jobInstance, jobExecutionId, jobParameters);
 
 					int stepCount = readStepCount ? rs.getInt("STEP_COUNT") : 0;
-					TaskJobExecution execution = new TaskJobExecution(taskId, jobExecution, true, stepCount, schemaTarget);
+					TaskJobExecution execution = new TaskJobExecution(taskId, jobExecution, true, stepCount);
 					executions.add(execution);
 				}
 			}

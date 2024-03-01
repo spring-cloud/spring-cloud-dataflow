@@ -61,7 +61,6 @@ public class AggregateTaskConfiguration {
 		Assert.notNull(taskDeploymentReader, "taskDeploymentReader required");
 		return new DefaultAggregateTaskExplorer(dataSource,
 				taskExecutionQueryDao,
-				schemaService,
 				aggregateExecutionSupport,
 				taskDefinitionReader,
 				taskDeploymentReader);

@@ -558,10 +558,8 @@ public class TestDependencies implements WebMvcConfigurer {
 	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
 			TaskExecutionService taskExecutionService,
 			TaskJobService taskJobService,
-			AggregateTaskExplorer taskExplorer,
-			AggregateExecutionSupport aggregateExecutionSupport
-	) {
-		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer, aggregateExecutionSupport);
+			AggregateTaskExplorer taskExplorer) {
+		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 	}
 
 	@Bean

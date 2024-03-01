@@ -55,7 +55,6 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -167,7 +166,7 @@ public class DefaultTaskJobServiceTests {
 		createBaseLaunchers();
 		initializeJobs(true);
 
-		this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
+		this.taskJobService.restartJobExecution(jobInstanceCount);
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
@@ -181,7 +180,7 @@ public class DefaultTaskJobServiceTests {
 		createBaseLaunchers();
 		initializeJobs(false);
 		Exception exception = assertThrows(IllegalStateException.class, () -> {
-			this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
+			this.taskJobService.restartJobExecution(jobInstanceCount);
 		});
 		assertTrue(exception.getMessage().contains("Did not find platform for taskName=[myJob_ORIG"));
 	}
@@ -191,7 +190,7 @@ public class DefaultTaskJobServiceTests {
 		this.launcherRepository.save(new Launcher("demo", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, this.taskLauncher));
 
 		initializeJobs(false);
-		this.taskJobService.restartJobExecution(jobInstanceCount, SchemaVersionTarget.defaultTarget().getName());
+		this.taskJobService.restartJobExecution(jobInstanceCount);
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);

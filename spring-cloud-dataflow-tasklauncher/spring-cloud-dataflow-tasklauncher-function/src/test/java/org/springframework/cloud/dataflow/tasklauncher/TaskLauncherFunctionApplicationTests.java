@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -99,7 +98,7 @@ public class TaskLauncherFunctionApplicationTests {
 		currentTaskExecutionsResource.setName("default");
 		when(taskOperations.currentTaskExecutions())
 				.thenReturn(Collections.singletonList(currentTaskExecutionsResource));
-		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L, SchemaVersionTarget.defaultTarget().getName()));
+		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L));
 	}
 
 	@Test
