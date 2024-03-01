@@ -120,7 +120,7 @@ public class TaskLauncherFunction implements Consumer<LaunchRequest>, Initializi
 				enrichDeploymentProperties(request.getDeploymentProperties()),
 				request.getCommandlineArguments());
 		log.info(() -> String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
-		return new LaunchResponse(response.getExecutionId(), response.getSchemaTarget());
+		return new LaunchResponse(response.getExecutionId());
 	}
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {

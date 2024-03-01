@@ -46,9 +46,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -58,8 +56,6 @@ import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
@@ -158,9 +154,6 @@ public class TaskExecutionControllerTests {
 	private AggregateTaskExplorer taskExplorer;
 
 	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
 	private TaskExecutionService taskExecutionService;
 
 	@Autowired
@@ -183,12 +176,6 @@ public class TaskExecutionControllerTests {
 
 	@Autowired
 	private TaskJobService taskJobService;
-
-	@Autowired
-	private SchemaService schemaService;
-
-	@Autowired
-	TaskDefinitionReader taskDefinitionReader;
 
 
 	@BeforeEach
@@ -221,7 +208,6 @@ public class TaskExecutionControllerTests {
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 			TaskExecution taskExecution1 =
 				taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");
 
@@ -229,7 +215,6 @@ public class TaskExecutionControllerTests {
 			taskExecutionDao.createTaskExecution(TASK_NAME_FOO, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, null);
 			TaskExecution taskExecution = taskExecutionDao.createTaskExecution(TASK_NAME_FOOBAR, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST,
 					null);
-			SchemaVersionTarget fooBarTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_FOOBAR, taskDefinitionReader);
 			JobExecution jobExecution = jobRepository.createJobExecution(TASK_NAME_FOOBAR, new JobParameters());
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			TaskDeployment taskDeployment = new TaskDeployment();
@@ -246,10 +231,9 @@ public class TaskExecutionControllerTests {
 	void taskExecutionControllerConstructorMissingExplorer() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				null,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader, taskExecutionInfoService,
+				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService));
 	}
@@ -258,10 +242,8 @@ public class TaskExecutionControllerTests {
 	void taskExecutionControllerConstructorMissingTaskService() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				taskExplorer,
-				aggregateExecutionSupport,
 				null,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService));
@@ -271,10 +253,9 @@ public class TaskExecutionControllerTests {
 	void taskExecutionControllerConstructorMissingTaskDefinitionRepository() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(
 				taskExplorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				null,
-				taskDefinitionReader, taskExecutionInfoService,
+				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService));
 	}
@@ -282,10 +263,9 @@ public class TaskExecutionControllerTests {
 	@Test
 	void taskExecutionControllerConstructorMissingTaskDefinitionRetriever() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader, null,
+				null,
 				taskDeleteService,
 				taskJobService));
 	}
@@ -293,10 +273,9 @@ public class TaskExecutionControllerTests {
 	@Test
 	void taskExecutionControllerConstructorMissingDeleteTaskService() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader, taskExecutionInfoService,
+				taskExecutionInfoService,
 				null,
 				taskJobService));
 	}
@@ -304,10 +283,9 @@ public class TaskExecutionControllerTests {
 	@Test
 	void taskExecutionControllerConstructorMissingDeleteTaskJobService() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new TaskExecutionController(taskExplorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader, taskExecutionInfoService,
+				taskExecutionInfoService,
 				taskDeleteService,
 				null));
 	}
@@ -401,9 +379,7 @@ public class TaskExecutionControllerTests {
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
 						get("/tasks/executions" + resource.getExecutionId())
-								.accept(MediaType.APPLICATION_JSON)
-								.queryParam("schemaTarget", resource.getSchemaTarget())
-				)
+								.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp3\"}"));
@@ -475,9 +451,7 @@ public class TaskExecutionControllerTests {
 		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
 		resultActions = mockMvc.perform(
 						get("/tasks/executions" + resource.getExecutionId())
-								.accept(MediaType.APPLICATION_JSON)
-								.queryParam("schemaTarget", resource.getSchemaTarget())
-				)
+								.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp2\"}"));

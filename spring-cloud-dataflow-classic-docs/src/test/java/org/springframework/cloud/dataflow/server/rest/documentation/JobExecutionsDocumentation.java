@@ -36,8 +36,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
@@ -87,10 +85,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private JdbcTemplate jdbcTemplate;
 
 	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
-
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	private TaskDefinitionReader taskDefinitionReader;
 
 
 	@Before
@@ -367,9 +361,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 		this.jobRepository = context.getBean(JobRepository.class);
 		this.dataflowTaskExecutionMetadataDao = context.getBean(DataflowTaskExecutionMetadataDao.class);
-		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
-		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
-
 	}
 
 	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {

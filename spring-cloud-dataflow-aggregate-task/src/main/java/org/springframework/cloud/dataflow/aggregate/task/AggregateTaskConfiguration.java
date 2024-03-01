@@ -17,9 +17,7 @@ package org.springframework.cloud.dataflow.aggregate.task;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateTaskExplorer;
-import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -37,32 +35,20 @@ import org.springframework.util.Assert;
 public class AggregateTaskConfiguration {
 
 	@Bean
-	public AggregateExecutionSupport aggregateExecutionSupport(
-			AppRegistryService registryService,
-			SchemaService schemaService
-	) {
-		return new DefaultAggregateExecutionSupport(registryService, schemaService);
-	}
-
-	@Bean
 	public AggregateTaskExplorer aggregateTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
 			SchemaService schemaService,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader,
 			TaskDeploymentReader taskDeploymentReader
 	) {
 		Assert.notNull(dataSource, "dataSource required");
 		Assert.notNull(taskExecutionQueryDao, "taskExecutionQueryDao required");
 		Assert.notNull(schemaService, "schemaService required");
-		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport required");
 		Assert.notNull(taskDefinitionReader, "taskDefinitionReader required");
 		Assert.notNull(taskDeploymentReader, "taskDeploymentReader required");
 		return new DefaultAggregateTaskExplorer(dataSource,
 				taskExecutionQueryDao,
-				schemaService,
-				aggregateExecutionSupport,
 				taskDefinitionReader,
 				taskDeploymentReader);
 	}

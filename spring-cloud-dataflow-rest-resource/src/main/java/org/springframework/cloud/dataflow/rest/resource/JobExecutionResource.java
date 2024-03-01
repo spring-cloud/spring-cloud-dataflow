@@ -89,8 +89,6 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private TimeZone timeZone;
 
-	private String schemaTarget;
-
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
@@ -108,13 +106,11 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
@@ -201,10 +197,6 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	public boolean isDefined() {
 		return defined;
-	}
-
-	public String getSchemaTarget() {
-		return schemaTarget;
 	}
 
 	/**

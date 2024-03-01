@@ -33,10 +33,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -75,9 +72,6 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private TaskBatchDao taskBatchDao;
 
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	private TaskDefinitionReader taskDefinitionReader;
 
 	@Before
 	public void setup() throws Exception {
@@ -167,16 +161,13 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 
 	private void initialize() {
-		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
 		this.jobRepository = context.getBean(JobRepository.class);
 		this.taskExecutionDao = context.getBean(TaskExecutionDao.class);
 		this.taskBatchDao = context.getBean(TaskBatchDao.class);
-		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
 	}
 
 	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException,
 		JobExecutionAlreadyRunningException, JobRestartException {
-		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
 		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
 		StepExecution stepExecution = new StepExecution(name + "_STEP", jobExecution, jobExecution.getId());

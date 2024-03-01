@@ -20,7 +20,7 @@ import java.util.Set;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 
 /**
- * This enum is used by the {@link TaskExecutionController#cleanup(Set, TaskExecutionControllerDeleteAction[], String)}.
+ * This enum is used by the {@link TaskExecutionController#cleanup(Set, TaskExecutionControllerDeleteAction[])}.
  *
  * @author Gunnar Hillert
  *

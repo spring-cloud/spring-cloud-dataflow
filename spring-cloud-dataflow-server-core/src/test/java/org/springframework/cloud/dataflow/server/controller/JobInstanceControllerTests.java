@@ -40,9 +40,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -101,9 +99,6 @@ public class JobInstanceControllerTests {
 
 	@Autowired
 	WebApplicationContext wac;
-
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;

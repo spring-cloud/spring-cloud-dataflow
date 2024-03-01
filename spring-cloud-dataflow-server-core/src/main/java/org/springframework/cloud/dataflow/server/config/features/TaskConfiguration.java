@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
@@ -198,11 +197,9 @@ public class TaskConfiguration {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepository taskRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
+			TaskRepository taskRepository
 	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
+		return new DefaultTaskExecutionRepositoryService(taskRepository);
 	}
 
 	@Bean
@@ -239,6 +236,7 @@ public class TaskConfiguration {
 				TaskRepository taskRepository,
 				TaskExecutionInfoService taskExecutionInfoService,
 				TaskDeploymentRepository taskDeploymentRepository,
+				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionCreationService taskExecutionRepositoryService,
 				TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
 				AggregateTaskExplorer taskExplorer,
@@ -246,10 +244,7 @@ public class TaskConfiguration {
 				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 				DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 				@Nullable OAuth2TokenUtilsService oauth2TokenUtilsService,
-				TaskSaveService taskSaveService,
-				AggregateExecutionSupport aggregateExecutionSupport,
-				TaskDefinitionRepository taskDefinitionRepository,
-				TaskDefinitionReader taskDefinitionReader
+				TaskSaveService taskSaveService
 		) {
 			DefaultTaskExecutionService defaultTaskExecutionService = new DefaultTaskExecutionService(
 					propertyResolver,
@@ -259,7 +254,6 @@ public class TaskConfiguration {
 					taskExecutionInfoService,
 					taskDeploymentRepository,
 					taskDefinitionRepository,
-					taskDefinitionReader,
 					taskExecutionRepositoryService,
 					taskAppDeploymentRequestCreator,
 					taskExplorer,
@@ -269,7 +263,6 @@ public class TaskConfiguration {
 					oauth2TokenUtilsService,
 					taskSaveService,
 					taskConfigurationProperties,
-					aggregateExecutionSupport,
 					composedTaskRunnerConfigurationProperties);
 			defaultTaskExecutionService.setAutoCreateTaskDefinitions(taskConfigurationProperties.isAutoCreateTaskDefinitions());
 			return defaultTaskExecutionService;
@@ -285,9 +278,7 @@ public class TaskConfiguration {
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionService taskExecutionService,
 				LauncherRepository launcherRepository,
-				AggregateExecutionSupport aggregateExecutionSupport,
-				AggregateJobQueryDao aggregateJobQueryDao,
-				TaskDefinitionReader taskDefinitionReader
+				AggregateJobQueryDao aggregateJobQueryDao
 		) {
 			return new DefaultTaskJobService(
 					service,
@@ -295,9 +286,7 @@ public class TaskConfiguration {
 					taskDefinitionRepository,
 					taskExecutionService,
 					launcherRepository,
-					aggregateExecutionSupport,
-					aggregateJobQueryDao,
-					taskDefinitionReader
+					aggregateJobQueryDao
 			);
 		}
 	}

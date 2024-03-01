@@ -641,7 +641,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getCommandlineArguments()).hasSize(9);
+		assertThat(request.getCommandlineArguments()).hasSize(4);
 		// don't assume order in a list
 		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
 		assertThat(request.getDefinition().getProperties()).containsKey("spring.cloud.task.name");

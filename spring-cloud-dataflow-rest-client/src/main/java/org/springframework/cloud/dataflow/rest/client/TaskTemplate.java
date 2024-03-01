@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -208,7 +207,6 @@ public class TaskTemplate implements TaskOperations {
 			if(id != null) {
 				LaunchResponseResource response = new LaunchResponseResource();
 				response.setExecutionId(id);
-				response.setSchemaTarget(SchemaVersionTarget.defaultTarget().getName());
 				return response;
 			} else {
 				throw new RuntimeException("Expected id");
@@ -217,21 +215,15 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void stop(String ids, String schemaTarget) {
+	public void stop(String ids) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
 	}
 
 	@Override
-	public void stop(String ids, String schemaTarget, String platform) {
+	public void stop(String ids, String platform) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("platform", platform);
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
 	}
 
@@ -263,12 +255,9 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskExecutionResource taskExecutionStatus(long id, String schemaTarget) {
+	public TaskExecutionResource taskExecutionStatus(long id) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("id", id);
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		String url = executionLink.expand(values).getHref();
 		return restTemplate.getForObject(url, TaskExecutionResource.class);
 	}
@@ -296,12 +285,12 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void cleanup(long id, String schemaTarget) {
-		cleanup(id, schemaTarget, false);
+	public void cleanup(long id) {
+		cleanup(id, false);
 	}
 
 	@Override
-	public void cleanup(long id, String schemaTarget, boolean removeData) {
+	public void cleanup(long id,  boolean removeData) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 
 		String uriTemplate = executionLink.expand(id).getHref();
@@ -310,10 +299,6 @@ public class TaskTemplate implements TaskOperations {
 			uriTemplate = uriTemplate + "?action=CLEANUP,REMOVE_DATA";
 		}
 
-		if (StringUtils.hasText(schemaTarget)) {
-			String schemaVal =  (removeData) ?  "&schemaTarget=" + schemaTarget : "?schemaTarget=" + schemaTarget;
-			uriTemplate = uriTemplate + schemaVal;
-		}
 		restTemplate.delete(uriTemplate);
 	}
 

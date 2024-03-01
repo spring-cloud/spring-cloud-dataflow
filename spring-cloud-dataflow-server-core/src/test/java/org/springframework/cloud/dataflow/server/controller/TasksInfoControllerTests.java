@@ -40,13 +40,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -127,12 +124,6 @@ public class TasksInfoControllerTests {
     @Autowired
     TaskDeploymentRepository taskDeploymentRepository;
 
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
-	TaskDefinitionReader taskDefinitionReader;
-
 	@Before
     public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
@@ -163,8 +154,6 @@ public class TasksInfoControllerTests {
             SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
             taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
-
-			SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget("demo", taskDefinitionReader);
 
             TaskExecution taskExecution1 =
 				taskExecutionDao.createTaskExecution(TASK_NAME_ORIG, LocalDateTime.now(), SAMPLE_ARGUMENT_LIST, "foobar");

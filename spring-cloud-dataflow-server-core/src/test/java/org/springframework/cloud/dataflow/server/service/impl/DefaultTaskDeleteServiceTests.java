@@ -39,12 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
@@ -120,9 +118,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 	@Autowired
 	JdbcSearchableJobExecutionDao searchableJobExecutionDao;
 
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
 	JobLauncherTestUtils jobLauncherTestUtils;
 
 	@Autowired
@@ -152,9 +147,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	public void deleteSetTest() throws Exception{
 		createTaskExecutions(50);
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(50);
-		SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
-		assertThat(target).isNotNull();
-		this.taskDeleteService.deleteTaskExecutions(Collections.singleton(taskExplorer.getLatestTaskExecutionForTaskName(TASK_NAME_ORIG).getExecutionId()), target.getName());
+		this.taskDeleteService.deleteTaskExecutions(Collections.singleton(taskExplorer.getLatestTaskExecutionForTaskName(TASK_NAME_ORIG).getExecutionId()));
 		assertThat(this.taskExplorer.getTaskExecutionCount()).isEqualTo(49);
 		assertThat(searchableJobExecutionDao.countJobExecutions(JOB_NAME)).isEqualTo(49);
 	}
@@ -163,7 +156,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 		List<String> args = new ArrayList<>();
 		args.add("test=value");
 		args.add("anothertest=anotherValue");
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 		for (int i = 1; i <= numberOfExecutions; i++) {
 			TaskExecution taskExecution = taskRepository.createTaskExecution(new TaskExecution(i, 0, TASK_NAME_ORIG,
 					LocalDateTime.now(), LocalDateTime.now(), "", args, "", null,

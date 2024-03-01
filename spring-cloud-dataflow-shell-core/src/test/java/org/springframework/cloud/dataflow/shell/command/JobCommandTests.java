@@ -38,9 +38,6 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -74,19 +71,13 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static TaskBatchDao taskBatchDao;
 
-	private static AggregateExecutionSupport aggregateExecutionSupport;
-
 	private static List<JobInstance> jobInstances = new ArrayList<>();
 
 	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
-	private static TaskDefinitionReader taskDefinitionReader;
-
 	@BeforeAll
 	public static void setUp() throws Exception {
 		Thread.sleep(2000);
-		taskDefinitionReader = applicationContext.getBean(TaskDefinitionReader.class);
-		aggregateExecutionSupport = applicationContext.getBean(AggregateExecutionSupport.class);
 		taskBatchDao = applicationContext.getBean(TaskBatchDao.class);
 		jobRepository = applicationContext.getBean(JobRepository.class);
 
@@ -114,7 +105,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private static long createSampleJob(String jobName, int jobExecutionCount)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(jobName, taskDefinitionReader);
 		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
 		jobInstances.add(instance);
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);

@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.controller.support;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;
 
@@ -30,7 +29,7 @@ public class TaskExecutionAwareTaskDefinition {
 
 	final TaskDefinition taskDefinition;
 
-	final AggregateTaskExecution latestTaskExecution;
+	final TaskExecution latestTaskExecution;
 
 	/**
 	 * Initialized the {@link TaskExecutionAwareTaskDefinition} with the provided
@@ -39,7 +38,7 @@ public class TaskExecutionAwareTaskDefinition {
 	 * @param taskDefinition Must not be null
 	 * @param latestTaskExecution Must not be null
 	 */
-	public TaskExecutionAwareTaskDefinition(TaskDefinition taskDefinition, AggregateTaskExecution latestTaskExecution) {
+	public TaskExecutionAwareTaskDefinition(TaskDefinition taskDefinition, TaskExecution latestTaskExecution) {
 		super();
 
 		Assert.notNull(taskDefinition, "The provided taskDefinition must not be null.");
@@ -79,7 +78,7 @@ public class TaskExecutionAwareTaskDefinition {
 	 *
 	 * @return May return null
 	 */
-	public AggregateTaskExecution getLatestTaskExecution() {
+	public TaskExecution getLatestTaskExecution() {
 		return latestTaskExecution;
 	}
 }

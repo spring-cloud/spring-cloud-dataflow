@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.data.domain.Page;
@@ -39,28 +38,25 @@ public interface DataflowTaskExecutionQueryDao {
 	 * Retrieves a task execution from the task repository.
 	 *
 	 * @param executionId the id associated with the task execution.
-	 * @param schemaTarget the schema target.
 	 * @return a fully qualified TaskExecution instance.
 	 */
-	AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget);
+	TaskExecution getTaskExecution(long executionId);
 
 	/**
 	 * Retrieves a list of task executions where the provided execution id and schemaTarget represents the parent of task execution.
 	 *
 	 * @param executionId  parent task execution id
-	 * @param schemaTarget parent task schema target
 	 * @return the task executions
 	 */
-	List<AggregateTaskExecution> findChildTaskExecutions(long executionId, String schemaTarget);
+	List<TaskExecution> findChildTaskExecutions(long executionId);
 
 	/**
 	 * Retrieves a list of task executions where the provided execution ids and schemaTarget represents the parents of task executions.
 	 *
 	 * @param parentIds    parent task execution ids
-	 * @param schemaTarget parent task schema target
 	 * @return the task executions
 	 */
-	List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget);
+	List<TaskExecution> findChildTaskExecutions(Collection<Long> parentIds);
 
 	/**
 	 * Find task executions by task name and completion status.
@@ -69,7 +65,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param completed whether to include only completed task executions.
 	 * @return list of task executions
 	 */
-	List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean completed);
+	List<TaskExecution> findTaskExecutions(String taskName, boolean completed);
 
 	/**
 	 * Find task executions by task name whose end date is before the specified date.
@@ -78,7 +74,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param endTime the time before the task ended.
 	 * @return list of task executions.
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NonNull Date endTime);
+	List<TaskExecution> findTaskExecutionsBeforeEndTime(String taskName, @NonNull Date endTime);
 
 	/**
 	 * Retrieves current number of task executions for a taskName.
@@ -135,7 +131,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param pageable the constraints for the search.
 	 * @return set of running task executions.
 	 */
-	Page<AggregateTaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable);
+	Page<TaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable);
 
 	/**
 	 * Retrieves a subset of task executions by task name, start location and size.
@@ -145,7 +141,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @return a list that contains task executions from the query bound by the start
 	 * position and count specified by the user.
 	 */
-	Page<AggregateTaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
+	Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
 
 	/**
 	 * Retrieves a sorted list of distinct task names for the task executions.
@@ -161,7 +157,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @return page containing the results from the search
 	 */
 
-	Page<AggregateTaskExecution> findAll(Pageable pageable);
+	Page<TaskExecution> findAll(Pageable pageable);
 
 	/**
 	 * Returns a {@link List} of the latest {@link TaskExecution} for 1 or more task
@@ -181,7 +177,7 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @param taskNames At least 1 task name must be provided
 	 * @return List of TaskExecutions. May be empty but never null.
 	 */
-	List<AggregateTaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames);
+	List<TaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames);
 
 	/**
 	 * Returns the latest task execution for a given task name. Will ultimately apply the
@@ -192,8 +188,8 @@ public interface DataflowTaskExecutionQueryDao {
 	 * @return The latest Task Execution or null
 	 * @see #getLatestTaskExecutionsByTaskNames(String...)
 	 */
-	AggregateTaskExecution getLatestTaskExecutionForTaskName(String taskName);
+	TaskExecution getLatestTaskExecutionForTaskName(String taskName);
 
-	AggregateTaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
+	TaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
 
 }

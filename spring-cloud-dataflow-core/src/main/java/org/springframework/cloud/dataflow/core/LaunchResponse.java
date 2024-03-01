@@ -1,18 +1,13 @@
 package org.springframework.cloud.dataflow.core;
 
-import java.util.Objects;
-
 public class LaunchResponse {
 	private long executionId;
-
-	private String schemaTarget;
 
 	public LaunchResponse() {
 	}
 
-	public LaunchResponse(long executionId, String schemaTarget) {
+	public LaunchResponse(long executionId) {
 		this.executionId = executionId;
-		this.schemaTarget = schemaTarget;
 	}
 
 	public long getExecutionId() {
@@ -23,14 +18,6 @@ public class LaunchResponse {
 		this.executionId = executionId;
 	}
 
-	public String getSchemaTarget() {
-		return schemaTarget;
-	}
-
-	public void setSchemaTarget(String schemaTarget) {
-		this.schemaTarget = schemaTarget;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -39,13 +26,13 @@ public class LaunchResponse {
 		LaunchResponse that = (LaunchResponse) o;
 
 		if (executionId != that.executionId) return false;
-		return Objects.equals(schemaTarget, that.schemaTarget);
+		return true;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = (int) (executionId ^ (executionId >>> 32));
-		result = 31 * result + (schemaTarget != null ? schemaTarget.hashCode() : 0);
+		result = 31 * result;
 		return result;
 	}
 
@@ -53,7 +40,6 @@ public class LaunchResponse {
 	public String toString() {
 		return "LaunchResponse{" +
 				"taskId=" + executionId +
-				", schemaTarget='" + schemaTarget + '\'' +
 				'}';
 	}
 }

@@ -154,14 +154,10 @@ public class JobExecutionThinController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByJobInstanceId(
 			@RequestParam("jobInstanceId") int jobInstanceId,
-			@RequestParam(value = "schemaTarget", required = false) String schemaTarget,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
 		Page<TaskJobExecution> jobExecutions = taskJobService
-				.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(pageable, jobInstanceId, schemaTarget);
+				.listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(pageable, jobInstanceId);
 		return assembler.toModel(jobExecutions, jobAssembler);
 	}
 
@@ -222,12 +218,12 @@ public class JobExecutionThinController {
 		public JobExecutionThinResource instantiateModel(TaskJobExecution taskJobExecution) {
 			JobExecutionThinResource resource = new JobExecutionThinResource(taskJobExecution, timeZone);
 			try {
-				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget())).withSelfRel());
+				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId())).withSelfRel());
 				if (taskJobExecution.getJobExecution().isRunning()) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("stop"));
 				}
 				if (taskJobExecution.getJobExecution().getEndTime() != null && !taskJobExecution.getJobExecution().isRunning()) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("restart"));
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("restart"));
 				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);

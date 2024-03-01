@@ -7,3 +7,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  cloud:
+    task:
+      transaction-manager: transactionManager

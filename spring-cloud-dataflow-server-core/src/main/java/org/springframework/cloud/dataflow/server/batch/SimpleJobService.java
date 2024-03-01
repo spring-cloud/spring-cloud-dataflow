@@ -348,7 +348,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution getJobExecution(Long jobExecutionId) throws NoSuchJobExecutionException {
-		JobExecution jobExecution =  this.aggregateJobQueryDao.getJobExecution(jobExecutionId, this.schemaVersionTarget.getName()).getJobExecution();
+		JobExecution jobExecution =  this.aggregateJobQueryDao.getJobExecution(jobExecutionId).getJobExecution();
 		jobExecution.setJobInstance(Objects.requireNonNull(this.jobInstanceDao.getJobInstance(jobExecution)));
 		try {
 			jobExecution.setExecutionContext(this.executionContextDao.getExecutionContext(jobExecution));

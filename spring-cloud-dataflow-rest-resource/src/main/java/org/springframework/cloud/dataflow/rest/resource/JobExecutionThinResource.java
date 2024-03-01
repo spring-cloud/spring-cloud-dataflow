@@ -96,8 +96,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private BatchStatus status;
 
-	private String schemaTarget;
-
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
@@ -113,7 +111,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
@@ -219,9 +216,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		return defined;
 	}
 
-	public String getSchemaTarget() {
-		return schemaTarget;
-	}
 
 	/**
 	 * @param oldParameters the latest job parameters

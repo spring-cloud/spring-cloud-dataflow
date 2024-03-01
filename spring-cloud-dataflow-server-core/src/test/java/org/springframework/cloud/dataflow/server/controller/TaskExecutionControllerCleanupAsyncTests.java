@@ -36,13 +36,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -94,9 +92,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
 	private TaskLauncher taskLauncher;
 
 	@Autowired
@@ -138,7 +133,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 
 	private void setupTaskExecutions(String taskName, String taskExecutionId) {
 		taskDefinitionRepository.save(new TaskDefinition(taskName, "taskDslGoesHere"));
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 
 		List<String> taskArgs = new ArrayList<>();
 		taskArgs.add("foo=bar");

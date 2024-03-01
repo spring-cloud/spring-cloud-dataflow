@@ -51,7 +51,7 @@ public interface AggregateJobQueryDao {
 
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable) throws NoSuchJobException;
 
-	TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException;
+	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
 	JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId);
 

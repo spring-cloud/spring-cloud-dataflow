@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,10 +34,9 @@ public interface AggregateTaskExplorer {
 	 * find a task execution given an execution id and schema target.
 	 *
 	 * @param executionId  the task execution id
-	 * @param schemaTarget the schema target
 	 * @return the task execution
 	 */
-	AggregateTaskExecution getTaskExecution(long executionId, String schemaTarget);
+	TaskExecution getTaskExecution(long executionId);
 
 	/**
 	 * find a task execution given an external execution id and platform name.
@@ -47,11 +45,11 @@ public interface AggregateTaskExplorer {
 	 * @param platform            the platform name
 	 * @return the task execution
 	 */
-	AggregateTaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform);
+	TaskExecution getTaskExecutionByExternalExecutionId(String externalExecutionId, String platform);
 
-	List<AggregateTaskExecution> findChildTaskExecutions(long executionId, String schemaTarget);
+	List<TaskExecution> findChildTaskExecutions(long executionId);
 
-	List<AggregateTaskExecution> findChildTaskExecutions(Collection<Long> parentIds, String schemaTarget);
+	List<TaskExecution> findChildTaskExecutions(Collection<Long> parentIds);
 
 	/**
 	 * Retrieve a collection of taskExecutions that have the task name provided.
@@ -60,7 +58,7 @@ public interface AggregateTaskExplorer {
 	 * @param pageable the constraints for the search
 	 * @return the set of running executions for tasks with the specified name
 	 */
-	Page<AggregateTaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable);
+	Page<TaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable);
 
 	/**
 	 * Retrieve a list of available task names.
@@ -98,7 +96,7 @@ public interface AggregateTaskExplorer {
 	 * @param onlyCompleted whether to include only completed tasks
 	 * @return list of task executions
 	 */
-	List<AggregateTaskExecution> findTaskExecutions(String taskName, boolean onlyCompleted);
+	List<TaskExecution> findTaskExecutions(String taskName, boolean onlyCompleted);
 
 	/**
 	 * Get a list of executions for a task by name, completion status and end time.
@@ -108,7 +106,7 @@ public interface AggregateTaskExplorer {
 	 * @return list of task executions
 	 * @since 2.11.0
 	 */
-	List<AggregateTaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime);
+	List<TaskExecution> findTaskExecutionsBeforeEndTime(String taskName, Date endTime);
 
 	/**
 	 * Get a collection/page of executions.
@@ -117,7 +115,7 @@ public interface AggregateTaskExplorer {
 	 * @param pageable the constraints for the search
 	 * @return list of task executions
 	 */
-	Page<AggregateTaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
+	Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
 
 	/**
 	 * Retrieves all the task executions within the pageable constraints sorted by start
@@ -126,28 +124,26 @@ public interface AggregateTaskExplorer {
 	 * @param pageable the constraints for the search
 	 * @return page containing the results from the search
 	 */
-	Page<AggregateTaskExecution> findAll(Pageable pageable);
+	Page<TaskExecution> findAll(Pageable pageable);
 
 	/**
 	 * Returns the id of the TaskExecution that the requested Spring Batch job execution
 	 * was executed within the context of. Returns null if none were found.
 	 *
 	 * @param jobExecutionId the id of the JobExecution
-	 * @param schemaTarget the schema target
 	 * @return the id of the {@link TaskExecution}
 	 */
-	Long getTaskExecutionIdByJobExecutionId(long jobExecutionId, String schemaTarget);
+	Long getTaskExecutionIdByJobExecutionId(long jobExecutionId);
 
 	/**
 	 * Returns a Set of JobExecution ids for the jobs that were executed within the scope
 	 * of the requested task.
 	 *
 	 * @param taskExecutionId id of the {@link TaskExecution}
-	 * @param schemaTarget the schema target
 	 * @return a <code>Set</code> of the ids of the job executions executed within the
 	 * task.
 	 */
-	Set<Long> getJobExecutionIdsByTaskExecutionId(long taskExecutionId, String schemaTarget);
+	Set<Long> getJobExecutionIdsByTaskExecutionId(long taskExecutionId);
 
 	/**
 	 * Returns a {@link List} of the latest {@link TaskExecution} for 1 or more task
@@ -167,7 +163,7 @@ public interface AggregateTaskExplorer {
 	 * @param taskNames At least 1 task name must be provided
 	 * @return List of TaskExecutions. May be empty but never null.
 	 */
-	List<AggregateTaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames);
+	List<TaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames);
 
 	/**
 	 * Returns the latest task execution for a given task name. Will ultimately apply the
@@ -178,5 +174,5 @@ public interface AggregateTaskExplorer {
 	 * @return The latest Task Execution or null
 	 * @see #getLatestTaskExecutionsByTaskNames(String...)
 	 */
-	AggregateTaskExecution getLatestTaskExecutionForTaskName(String taskName);
+	TaskExecution getLatestTaskExecutionForTaskName(String taskName);
 }
