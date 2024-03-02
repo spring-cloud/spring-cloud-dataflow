@@ -1,2 +1,2 @@
 management:
-  contextPath: /bar
+  context-path: /foo
