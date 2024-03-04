@@ -36,7 +36,7 @@
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
-		<commons-compress.version>1.24.0</commons-compress.version>
+		<commons-compress.version>1.26.0</commons-compress.version>
 
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
