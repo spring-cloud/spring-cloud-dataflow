@@ -584,6 +584,11 @@ Establish the transaction isolation level for the Composed Task Runner.
 A list of available transaction isolation levels can be found  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/transaction/TransactionDefinition.html[here].
 Default is `ISOLATION_REPEATABLE_READ`.
 
+* `max-start-wait-time`
+The maximum amount of time, in milliseconds, that the Composed Task Runner will wait for the
+`start_time` of a steps `taskExecution` to be set before the execution of the Composed task is failed (Integer, default: 0).
+Determines the maximum time each child task is allowed for application startup. The default of `0` indicates no timeout.
+
 * `max-wait-time`
 The maximum amount of time, in milliseconds, that an individual step can run before the execution of the Composed task is failed (Integer, default: 0).
 Determines the maximum time each child task is allowed to run before the CTR ends with a failure. The default of `0` indicates no timeout.

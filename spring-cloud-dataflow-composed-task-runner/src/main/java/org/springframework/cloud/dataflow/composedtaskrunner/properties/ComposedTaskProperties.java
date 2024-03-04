@@ -35,6 +35,8 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 @ConfigurationProperties
 public class ComposedTaskProperties {
 
+	public static final int MAX_START_WAIT_TIME_DEFAULT = 0;
+
 	public static final int MAX_WAIT_TIME_DEFAULT = 0;
 
 	public static final int INTERVAL_TIME_BETWEEN_CHECKS_DEFAULT = 10000;
@@ -46,6 +48,12 @@ public class ComposedTaskProperties {
 	public static final int SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT = Integer.MAX_VALUE;
 
 	public static final int SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT = Integer.MAX_VALUE;
+
+	/**
+	 * The maximum amount of time in millis that the ComposedTaskRunner will wait for the
+	 * start_time of a steps taskExecution to be set before the execution of the Composed task is failed.
+	 */
+	private int maxStartWaitTime = MAX_START_WAIT_TIME_DEFAULT;
 
 	/**
 	 * The maximum amount of time in millis that a individual step can run before
@@ -219,6 +227,14 @@ public class ComposedTaskProperties {
 		catch (URISyntaxException e) {
 			throw new IllegalStateException("Invalid Spring Cloud Data Flow Server URI", e);
 		}
+	}
+
+	public int getMaxStartWaitTime() {
+		return this.maxStartWaitTime;
+	}
+
+	public void setMaxStartWaitTime(int maxStartWaitTime) {
+		this.maxStartWaitTime = maxStartWaitTime;
 	}
 
 	public int getMaxWaitTime() {
