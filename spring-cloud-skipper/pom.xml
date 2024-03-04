@@ -41,7 +41,7 @@
 		<jmockit.version>1.24</jmockit.version>
 
 		<testcontainers.version>1.17.6</testcontainers.version>
-		<commons-compress.version>1.24.0</commons-compress.version>
+		<commons-compress.version>1.26.0</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
