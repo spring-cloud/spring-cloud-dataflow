@@ -46,7 +46,6 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -128,9 +127,6 @@ public class DefaultTaskJobServiceTests {
 
 	@Autowired
 	TaskJobService taskJobService;
-
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
 
 	private JobParameters jobParameters;
 

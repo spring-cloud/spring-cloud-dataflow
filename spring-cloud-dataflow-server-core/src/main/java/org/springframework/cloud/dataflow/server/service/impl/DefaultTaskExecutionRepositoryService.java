@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -33,21 +32,13 @@ import org.springframework.util.Assert;
 public class DefaultTaskExecutionRepositoryService implements TaskExecutionCreationService {
 
 	private final TaskRepository taskRepository;
-	private final AggregateExecutionSupport aggregateExecutionSupport;
 
-	private final TaskDefinitionReader taskDefinitionReader;
 
 	public DefaultTaskExecutionRepositoryService(
-			TaskRepository taskRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
-	) {
+			TaskRepository taskRepository) {
 		Assert.notNull(taskRepository, "taskRepository must not be null");
-		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport must not be null");
-		Assert.notNull(taskDefinitionReader, "taskDefinitionReader must not be null");
 		this.taskRepository = taskRepository;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
-		this.taskDefinitionReader = taskDefinitionReader;
+
 	}
 
 	@Override

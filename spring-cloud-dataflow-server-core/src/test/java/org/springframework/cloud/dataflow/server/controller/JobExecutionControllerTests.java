@@ -36,9 +36,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -92,9 +90,6 @@ public class JobExecutionControllerTests {
 
 	@Autowired
 	RequestMappingHandlerAdapter adapter;
-
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
@@ -167,7 +162,6 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isOk());
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STARTED, taskDefinitionReader);
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();
@@ -184,7 +178,6 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STOPPED, taskDefinitionReader);
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();

@@ -51,7 +51,6 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
@@ -579,7 +578,6 @@ public class TestDependencies implements WebMvcConfigurer {
 	@Bean
 	public TaskExecutionController taskExecutionController(
 			AggregateTaskExplorer explorer,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryService appRegistry,
 			LauncherRepository launcherRepository,
@@ -587,7 +585,6 @@ public class TestDependencies implements WebMvcConfigurer {
 			CommonApplicationProperties commonApplicationProperties,
 			TaskValidationService taskValidationService,
 			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionService taskExecutionService,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeleteService taskDeleteService,
@@ -595,10 +592,8 @@ public class TestDependencies implements WebMvcConfigurer {
 	) {
 		return new TaskExecutionController(
 				explorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService
@@ -694,11 +689,9 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepository taskRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
+			TaskRepository taskRepository
 	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
+		return new DefaultTaskExecutionRepositoryService(taskRepository);
 	}
 
 	@Bean
@@ -727,10 +720,8 @@ public class TestDependencies implements WebMvcConfigurer {
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService,
 			TaskConfigurationProperties taskConfigurationProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader
+			TaskDefinitionRepository taskDefinitionRepository
 	) {
 		return new DefaultTaskExecutionService(
 				applicationContext.getEnvironment(),
@@ -740,7 +731,6 @@ public class TestDependencies implements WebMvcConfigurer {
 				taskExecutionInfoService,
 				taskDeploymentRepository,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
@@ -750,7 +740,6 @@ public class TestDependencies implements WebMvcConfigurer {
 				oauth2TokenUtilsService,
 				taskSaveService,
 				taskConfigurationProperties,
-				aggregateExecutionSupport,
 				composedTaskRunnerConfigurationProperties);
 	}
 
@@ -791,8 +780,6 @@ public class TestDependencies implements WebMvcConfigurer {
 			AuditRecordService auditRecordService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			PropertyResolver propertyResolver,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
@@ -806,8 +793,6 @@ public class TestDependencies implements WebMvcConfigurer {
 				metaDataResolver,
 				new SchedulerServiceProperties(),
 				auditRecordService,
-				aggregateExecutionSupport,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				propertyResolver,
 				composedTaskRunnerConfigurationProperties

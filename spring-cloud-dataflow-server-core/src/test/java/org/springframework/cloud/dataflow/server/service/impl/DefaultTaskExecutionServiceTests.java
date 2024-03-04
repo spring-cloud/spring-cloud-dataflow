@@ -45,10 +45,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -196,9 +194,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	TaskConfigurationProperties taskConfigurationProperties;
 
 	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
 	ApplicationContext applicationContext;
 
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -206,9 +201,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		DataSource dataSource;
-
-		@Autowired
-		TaskDefinitionReader taskDefinitionReader;
 
 		@BeforeEach
 		public void setup() {
@@ -325,9 +317,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	public static class CICDTaskTests extends DefaultTaskExecutionServiceTests {
 
 		private Launcher launcher;
-
-		@Autowired
-		TaskDefinitionReader taskDefinitionReader;
 
 		@BeforeEach
 		public void setup() {
@@ -769,9 +758,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
 	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
-		@Autowired
-		TaskDefinitionReader taskDefinitionReader;
-
 		@BeforeEach
 		public void setup() {
 			this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, taskLauncher));
@@ -1101,7 +1087,13 @@ public abstract class DefaultTaskExecutionServiceTests {
 			TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties = new ComposedTaskRunnerConfigurationProperties();
 			TaskExecutionInfoService taskExecutionInfoService = new DefaultTaskExecutionInfoService(this.dataSourceProperties, this.appRegistry, this.taskExplorer, mock(TaskDefinitionRepository.class), taskConfigurationProperties, mock(LauncherRepository.class), Collections.singletonList(mock(TaskPlatform.class)), composedTaskRunnerConfigurationProperties);
-			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(applicationContext.getEnvironment(), launcherRepository, auditRecordService, taskRepository, taskExecutionInfoService, mock(TaskDeploymentRepository.class), taskDefinitionRepository, taskDefinitionReader, taskExecutionRepositoryService, taskAppDeploymentRequestCreator, this.taskExplorer, this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao, this.dataflowTaskExecutionQueryDao, mock(OAuth2TokenUtilsService.class), this.taskSaveService, taskConfigurationProperties, aggregateExecutionSupport, composedTaskRunnerConfigurationProperties);
+			TaskExecutionService taskExecutionService = new DefaultTaskExecutionService(applicationContext.getEnvironment(),
+				launcherRepository, auditRecordService, taskRepository, taskExecutionInfoService,
+				mock(TaskDeploymentRepository.class), taskDefinitionRepository,
+				taskExecutionRepositoryService, taskAppDeploymentRequestCreator, this.taskExplorer,
+				this.dataflowTaskExecutionDao, this.dataflowTaskExecutionMetadataDao,
+				this.dataflowTaskExecutionQueryDao, mock(OAuth2TokenUtilsService.class), this.taskSaveService,
+				taskConfigurationProperties, composedTaskRunnerConfigurationProperties);
 			assertThatThrownBy(() -> taskExecutionService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>())).isInstanceOf(NoSuchTaskDefinitionException.class).hasMessageContaining("Could not find task definition named " + TASK_NAME_ORIG);
 		}
 
@@ -1213,9 +1205,6 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		TaskDefinitionRepository taskDefinitionRepository;
-
-		@Autowired
-		private TaskDefinitionReader taskDefinitionReader;
 
 		@BeforeEach
 		public void setup() throws MalformedURLException {

@@ -29,9 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -106,10 +104,6 @@ public class TaskExecutionController {
 
 	private final AggregateTaskExplorer explorer;
 
-	private final AggregateExecutionSupport aggregateExecutionSupport;
-
-	private final TaskDefinitionReader taskDefinitionReader;
-
 	private final TaskJobService taskJobService;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
@@ -131,23 +125,18 @@ public class TaskExecutionController {
 	 *
 	 * @param explorer                  the explorer this controller will use for retrieving task execution
 	 *                                  information.
-	 * @param aggregateExecutionSupport provides schemaTarget for a task by name.
 	 * @param taskExecutionService      used to launch tasks
 	 * @param taskDefinitionRepository  the task definition repository
-	 * @param taskDefinitionReader      uses task definition repository to provide Task Definition to aggregateExecutionSupport
 	 * @param taskExecutionInfoService  the task execution information service
 	 * @param taskDeleteService         the task deletion service
 	 * @param taskJobService            the task job service
 	 */
 	public TaskExecutionController(AggregateTaskExplorer explorer,
-								   AggregateExecutionSupport aggregateExecutionSupport,
 								   TaskExecutionService taskExecutionService,
 								   TaskDefinitionRepository taskDefinitionRepository,
-								   TaskDefinitionReader taskDefinitionReader,
 								   TaskExecutionInfoService taskExecutionInfoService,
 								   TaskDeleteService taskDeleteService,
 								   TaskJobService taskJobService) {
-		this.taskDefinitionReader = taskDefinitionReader;
 		Assert.notNull(explorer, "explorer must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
@@ -156,7 +145,6 @@ public class TaskExecutionController {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskExecutionService = taskExecutionService;
 		this.explorer = explorer;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.taskDeleteService = taskDeleteService;

@@ -39,8 +39,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -49,7 +47,6 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.SimpleTestScheduler;
@@ -145,12 +142,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	private Scheduler scheduler;
 
 	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
-
-	@Autowired
 	private TaskExecutionInfoService taskExecutionInfoService;
 
 	@Autowired
@@ -236,8 +227,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				this.metaDataResolver,
 				this.schedulerServiceProperties,
 				this.auditRecordService,
-				this.aggregateExecutionSupport,
-				this.taskDefinitionReader,
 				this.taskExecutionInfoService,
 				this.propertyResolver,
 				this.composedTaskRunnerConfigurationProperties
@@ -420,9 +409,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
 
-		AggregateExecutionSupport mockAggExecSupport = mock(AggregateExecutionSupport.class);
-		when(mockAggExecSupport.findSchemaVersionTarget(anyString(), anyString(), any(TaskDefinition.class)))
-				.thenReturn(SchemaVersionTarget.defaultTarget());
 
 		Launcher launcher = new Launcher("default", "defaultType", null, mockScheduler);
 		List<Launcher> launchers = new ArrayList<>();
@@ -440,8 +426,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				mock(ApplicationConfigurationMetadataResolver.class),
 				mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class),
-				mockAggExecSupport,
-				mock(TaskDefinitionReader.class),
 				mock(TaskExecutionInfoService.class),
 				mock(PropertyResolver.class),
 				this.composedTaskRunnerConfigurationProperties);

@@ -36,15 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.PageRequest;
@@ -79,16 +76,7 @@ public class TaskExecutionExplorerTests {
 	@Autowired
 	private AggregateTaskExplorer explorer;
 
-	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
 	private JdbcTemplate template;
-
-	@Autowired
-	private SchemaService schemaService;
-
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
 
 	@Autowired
 	private AppRegistryService appRegistryService;

@@ -36,9 +36,7 @@ import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
@@ -88,11 +86,9 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private final LauncherRepository launcherRepository;
 
-	private final AggregateExecutionSupport aggregateExecutionSupport;
 
 	private final AggregateJobQueryDao aggregateJobQueryDao;
 
-	private final TaskDefinitionReader taskDefinitionReader;
 
 	public DefaultTaskJobService(
 			JobService jobService,
@@ -100,24 +96,18 @@ public class DefaultTaskJobService implements TaskJobService {
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
 			LauncherRepository launcherRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			AggregateJobQueryDao aggregateJobQueryDao,
-			TaskDefinitionReader taskDefinitionReader) {
+			AggregateJobQueryDao aggregateJobQueryDao) {
 		this.aggregateJobQueryDao = aggregateJobQueryDao;
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
-		Assert.notNull(taskDefinitionReader, "taskDefinitionReader must not be null");
 		Assert.notNull(taskExecutionService, "taskExecutionService must not be null");
 		Assert.notNull(launcherRepository, "launcherRepository must not be null");
-		Assert.notNull(aggregateExecutionSupport, "CompositeExecutionSupport must not be null");
 		this.jobService = jobService;
 		this.taskExplorer = taskExplorer;
 		this.taskDefinitionRepository = taskDefinitionRepository;
-		this.taskDefinitionReader = taskDefinitionReader;
 		this.taskExecutionService = taskExecutionService;
 		this.launcherRepository = launcherRepository;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
 	}
 
 	@Override

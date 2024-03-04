@@ -39,7 +39,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
@@ -114,9 +113,6 @@ public class JobStepExecutionControllerTests {
 
 	@Autowired
 	RequestMappingHandlerAdapter adapter;
-
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;

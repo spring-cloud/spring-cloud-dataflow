@@ -18,17 +18,12 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -61,8 +56,6 @@ import org.springframework.core.io.ResourceLoader;
 		SchedulerServiceProperties.class })
 public class SchedulerConfiguration {
 
-	private static Logger logger = LoggerFactory.getLogger(SchedulerConfiguration.class);
-
 	@Value("${spring.cloud.dataflow.server.uri:}")
 	private String dataflowServerUri;
 
@@ -76,8 +69,6 @@ public class SchedulerConfiguration {
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,
 			AuditRecordService auditRecordService,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			PropertyResolver propertyResolver,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
@@ -92,8 +83,6 @@ public class SchedulerConfiguration {
 				metaDataResolver,
 				schedulerServiceProperties,
 				auditRecordService,
-				aggregateExecutionSupport,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				propertyResolver,
 				composedTaskRunnerConfigurationProperties

@@ -33,10 +33,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -140,13 +138,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@Autowired
 	DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao;
 
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
 	private TaskExecutionService transactionTaskService;
-
-	@Autowired
-	TaskDefinitionReader taskDefinitionReader;
 
 	@Autowired
 	ApplicationContext applicationContext;
@@ -165,7 +157,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				taskExecutionInfoService,
 				mock(TaskDeploymentRepository.class),
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
@@ -175,7 +166,6 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				mock(OAuth2TokenUtilsService.class),
 				taskSaveService,
 				taskConfigurationProperties,
-				aggregateExecutionSupport,
 				null
 		);
 	}

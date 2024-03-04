@@ -41,11 +41,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -261,20 +259,16 @@ public class JobDependencies {
 	@Bean
 	public TaskExecutionController taskExecutionController(
 			AggregateTaskExplorer explorer,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskExecutionService taskExecutionService,
 			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeleteService taskDeleteService,
 			TaskJobService taskJobService
 	) {
 		return new TaskExecutionController(
 				explorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService
@@ -309,9 +303,7 @@ public class JobDependencies {
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
 			LauncherRepository launcherRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			AggregateJobQueryDao aggregateJobQueryDao,
-			TaskDefinitionReader taskDefinitionReader
+			AggregateJobQueryDao aggregateJobQueryDao
 	) {
 		return new DefaultTaskJobService(
 				jobService,
@@ -319,10 +311,7 @@ public class JobDependencies {
 				taskDefinitionRepository,
 				taskExecutionService,
 				launcherRepository,
-				aggregateExecutionSupport,
-				aggregateJobQueryDao,
-				taskDefinitionReader
-		);
+				aggregateJobQueryDao);
 	}
 
 	@Bean
@@ -365,11 +354,8 @@ public class JobDependencies {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepository taskRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
-	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
+			TaskRepository taskRepository) {
+		return new DefaultTaskExecutionRepositoryService(taskRepository);
 	}
 
 	@Bean
@@ -398,10 +384,8 @@ public class JobDependencies {
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService,
 			TaskConfigurationProperties taskConfigurationProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader
+			TaskDefinitionRepository taskDefinitionRepository
 	) {
 		return new DefaultTaskExecutionService(
 				applicationContext.getEnvironment(),
@@ -411,7 +395,6 @@ public class JobDependencies {
 				taskExecutionInfoService,
 				taskDeploymentRepository,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
@@ -420,7 +403,6 @@ public class JobDependencies {
 				dataflowTaskExecutionQueryDao,
 				oauth2TokenUtilsService,
 				taskSaveService, taskConfigurationProperties,
-				aggregateExecutionSupport,
 				composedTaskRunnerConfigurationProperties);
 	}
 

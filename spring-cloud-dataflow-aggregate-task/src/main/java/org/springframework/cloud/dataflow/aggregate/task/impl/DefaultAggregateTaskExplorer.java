@@ -25,7 +25,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
@@ -40,7 +39,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Implements CompositeTaskExplorer. This class will be responsible for retrieving task execution data for all schema targets.
@@ -52,8 +50,6 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 
 	private final TaskExplorer taskExplorer;
 
-	private final AggregateExecutionSupport aggregateExecutionSupport;
-
 	private final DataflowTaskExecutionQueryDao taskExecutionQueryDao;
 
 	private final TaskDefinitionReader taskDefinitionReader;
@@ -63,12 +59,10 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	public DefaultAggregateTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			TaskDefinitionReader taskDefinitionReader,
 			TaskDeploymentReader taskDeploymentReader
 	) {
 		this.taskExecutionQueryDao = taskExecutionQueryDao;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
 		this.taskDefinitionReader = taskDefinitionReader;
 		this.taskDeploymentReader = taskDeploymentReader;
     	this.taskExplorer = new SimpleTaskExplorer(new TaskExecutionDaoFactoryBean(dataSource, "TASK_"));
@@ -76,21 +70,7 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 
 	@Override
 	public TaskExecution getTaskExecution(long executionId) {
-		TaskExecution taskExecution = taskExplorer.getTaskExecution(executionId);
-		TaskDeployment deployment = null;
-		if (taskExecution != null) {
-			if (StringUtils.hasText(taskExecution.getExternalExecutionId())) {
-				deployment = taskDeploymentReader.getDeployment(taskExecution.getExternalExecutionId());
-			} else {
-				TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskExecution.getTaskName());
-				if (definition == null) {
-					logger.warn("Cannot find definition for " + taskExecution.getTaskName());
-				} else {
-					deployment = taskDeploymentReader.findByDefinitionName(definition.getName());
-				}
-			}
-		}
-		return taskExecution;
+		return taskExplorer.getTaskExecution(executionId);
 	}
 
 	@Override
@@ -115,12 +95,6 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	@Override
 	public Page<TaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable) {
 		Assert.notNull(taskExplorer, "Expected TaskExplorer");
-		TaskDefinition definition = taskDefinitionReader.findTaskDefinition(taskName);
-		if (definition == null) {
-			logger.warn("Cannot find TaskDefinition for " + taskName);
-		}
-		TaskDeployment deployment = definition != null ? taskDeploymentReader.findByDefinitionName(definition.getName()) : null;
-		final String platformName = deployment != null ? deployment.getPlatformName() : null;
 		Page<TaskExecution> executions = taskExplorer.findRunningTaskExecutions(taskName, pageable);
 		List<TaskExecution> taskExecutions = executions.getContent();
 		return new PageImpl<>(taskExecutions, executions.getPageable(), executions.getTotalElements());
@@ -159,7 +133,6 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	@Override
 	public Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable) {
 
-		String platformName = getPlatformName(taskName);
 		Assert.notNull(taskExplorer, "Expected TaskExplorer");
 		Page<TaskExecution> executions = taskExplorer.findTaskExecutionsByName(taskName, pageable);
 		List<TaskExecution> taskExecutions = executions.getContent();

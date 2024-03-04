@@ -39,11 +39,9 @@ import org.springframework.boot.autoconfigure.transaction.TransactionManagerCust
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -304,11 +302,9 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 	@Bean
 	@ConditionalOnMissingBean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepository taskRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
+			TaskRepository taskRepository
 	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepository, aggregateExecutionSupport, taskDefinitionReader);
+		return new DefaultTaskExecutionRepositoryService(taskRepository);
 	}
 
 	@Bean
@@ -336,9 +332,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader
+			TaskDefinitionRepository taskDefinitionRepository
 	) {
 		DefaultTaskExecutionService taskExecutionService = new DefaultTaskExecutionService(
 				applicationContext.getEnvironment(),
@@ -348,7 +342,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				taskExecutionInfoService,
 				taskDeploymentRepository,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
@@ -358,7 +351,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				oauth2TokenUtilsService,
 				taskSaveService,
 				this.taskConfigurationProperties,
-				aggregateExecutionSupport,
 				this.composedTaskRunnerConfigurationProperties);
 		taskExecutionService.setAutoCreateTaskDefinitions(this.taskConfigurationProperties.isAutoCreateTaskDefinitions());
 		return taskExecutionService;
@@ -409,8 +401,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			AuditRecordService auditRecordService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSourceProperties dataSourceProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			PropertyResolver propertyResolver,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
@@ -426,8 +416,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				metaDataResolver,
 				schedulerServiceProperties,
 				auditRecordService,
-				aggregateExecutionSupport,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				propertyResolver,
 				composedTaskRunnerConfigurationProperties);

@@ -39,8 +39,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -138,11 +136,6 @@ public class DefaultSchedulerServiceTests {
 
 	@Autowired
 	private  AuditRecordService auditRecordService;
-
-	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
 	@Autowired
 	private TaskExecutionInfoService taskExecutionInfoService;
 
@@ -234,8 +227,6 @@ public class DefaultSchedulerServiceTests {
 				this.metaDataResolver,
 				this.schedulerServiceProperties,
 				this.auditRecordService,
-				aggregateExecutionSupport,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				propertyResolver,
 				this.composedTaskRunnerConfigurationProperties);
@@ -452,8 +443,6 @@ public class DefaultSchedulerServiceTests {
 				mock(ApplicationConfigurationMetadataResolver.class),
 				mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class),
-				this.aggregateExecutionSupport,
-				this.taskDefinitionReader,
 				this.taskExecutionInfoService,
 				this.propertyResolver,
 				this.composedTaskRunnerConfigurationProperties
