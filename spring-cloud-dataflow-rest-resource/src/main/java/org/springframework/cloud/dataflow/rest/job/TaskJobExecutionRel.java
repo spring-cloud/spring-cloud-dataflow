@@ -22,7 +22,6 @@ import java.util.List;
 
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;
 
