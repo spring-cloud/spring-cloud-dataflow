@@ -24,6 +24,7 @@ import org.jline.reader.impl.DefaultParser;
 import org.springframework.shell.Input;
 import org.springframework.shell.Shell;
 import org.springframework.shell.Utils;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +63,9 @@ public class ShellCommandRunner {
 	public Object executeCommand(String command) {
 		Parser parser = new DefaultParser();
 		ParsedLine parsedLine = parser.parse(command, command.length() + 1);
-		Object rawResult = this.shell.evaluate(new ParsedLineInput(parsedLine));
+		// TODO: evaluate is not private method in spring-shell so calling it via
+		//       reflection until we refactor to use new shell testing system
+		Object rawResult = ReflectionTestUtils.invokeMethod(this.shell, "evaluate", new ParsedLineInput(parsedLine));
 		if (!this.validateCommandSuccess) {
 			assertThat(rawResult).isNotNull();
 			assertThat(rawResult).isNotInstanceOf(Exception.class);
