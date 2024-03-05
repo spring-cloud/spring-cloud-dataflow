@@ -389,6 +389,7 @@
 						</execution>
 					</executions>
 					<configuration>
+						<loaderImplementation>CLASSIC</loaderImplementation>
 						<mainClass>${start-class}</mainClass>
 					</configuration>
 				</plugin>
