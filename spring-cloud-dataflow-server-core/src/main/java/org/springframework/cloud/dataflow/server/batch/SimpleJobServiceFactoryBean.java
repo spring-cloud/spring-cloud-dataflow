@@ -39,7 +39,6 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
@@ -93,20 +92,10 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	private SchemaService schemaService;
 
-	private SchemaVersionTarget schemaVersionTarget;
-
 	private Environment environment;
 
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
-	}
-
-	/**
-	 * Set the schemaVersionTarget to be used by the created SimpleJobService.
-	 * @param schemaVersionTarget the schemaVersionTarget to be associated with this service.
-	 */
-	public void setAppBootSchemaVersionTarget(SchemaVersionTarget schemaVersionTarget) {
-		this.schemaVersionTarget = schemaVersionTarget;
 	}
 
 	/**
@@ -328,7 +317,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		jobOperator.setJobRepository(this.jobRepository);
 		jobOperator.setJobRegistry(new MapJobRegistry());
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-			jobRepository, createExecutionContextDao(), jobOperator, createAggregateJobQueryDao(), schemaVersionTarget);
+			jobRepository, createExecutionContextDao(), jobOperator, createAggregateJobQueryDao());
 	}
 
 	/**

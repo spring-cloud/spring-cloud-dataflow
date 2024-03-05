@@ -93,9 +93,6 @@ public class RootController {
 		root.add(linkTo(UiController.class).withRel("dashboard"));
 		root.add(linkTo(AuditRecordController.class).withRel("audit-records"));
 
-		root.add(linkTo(methodOn(SchemaController.class).getVersions()).withRel("schema/versions"));
-		root.add(linkTo(methodOn(SchemaController.class).getTargets()).withRel("schema/targets"));
-
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));

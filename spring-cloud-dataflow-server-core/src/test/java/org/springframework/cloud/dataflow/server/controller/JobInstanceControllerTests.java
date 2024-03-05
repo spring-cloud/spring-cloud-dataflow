@@ -18,15 +18,13 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Disabled;
-import org.junit.runner.RunWith;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -48,11 +46,12 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -62,13 +61,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-//TODO: Boot3x followup
-@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
 /**
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {JobDependencies.class,
 	PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
@@ -103,7 +100,7 @@ public class JobInstanceControllerTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 			.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -115,9 +112,9 @@ public class JobInstanceControllerTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test()
 	public void testJobInstanceControllerConstructorMissingRepository() {
-		new JobInstanceController(null);
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->new JobInstanceController(null));
 	}
 
 	@Test
@@ -166,9 +163,10 @@ public class JobInstanceControllerTests {
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
 		for (int i = 0; i < jobExecutionCount; i++) {
-			JobParameters jobParameters =
-				new JobParameters(Collections.singletonMap("parm", new JobParameter<>(i, Integer.class)));
+			JobParameters jobParameters = new JobParameters();
 			JobExecution jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
+			jobExecution.setStatus(BatchStatus.COMPLETED);
+			jobRepository.update(jobExecution);
 			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
 			stepExecution.setId(null);
 			jobRepository.add(stepExecution);

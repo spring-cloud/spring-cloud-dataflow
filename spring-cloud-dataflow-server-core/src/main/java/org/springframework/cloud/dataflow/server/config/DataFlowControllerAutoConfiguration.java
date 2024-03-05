@@ -78,7 +78,6 @@ import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsController;
-import org.springframework.cloud.dataflow.server.controller.SchemaController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
@@ -268,11 +267,6 @@ public class DataFlowControllerAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnTasksEnabled
 	public static class TaskEnabledConfiguration {
-
-		@Bean
-		public SchemaController schemaController(SchemaService schemaService) {
-			return new SchemaController(schemaService);
-		}
 
 		@Bean
 		public TaskExecutionController taskExecutionController(

@@ -35,8 +35,6 @@ import org.springframework.data.domain.Pageable;
  * @since 2.11.0
  */
 public interface AggregateJobQueryDao {
-	Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException;
-
 	Page<TaskJobExecution> listJobExecutions(String jobName, BatchStatus status, Pageable pageable) throws NoSuchJobExecutionException;
 
 	Page<TaskJobExecution> listJobExecutionsBetween(Date fromDate, Date toDate, Pageable pageable);
@@ -45,17 +43,11 @@ public interface AggregateJobQueryDao {
 
 	Page<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable);
 
-	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, String schemaTarget, Pageable pageable);
-
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, String schemaTarget, Pageable pageable);
 
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(String jobName, Pageable pageable) throws NoSuchJobException;
 
 	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
-
-	JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId);
-
-	JobInstanceExecutions getJobInstanceExecutions(long id, String schemaTarget);
 
 	JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException;
 

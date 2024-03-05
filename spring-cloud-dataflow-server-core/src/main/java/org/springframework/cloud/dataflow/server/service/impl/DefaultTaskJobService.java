@@ -32,6 +32,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
@@ -113,31 +114,48 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public Page<TaskJobExecution> listJobExecutions(Pageable pageable) throws NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsWithSteps(pageable);
+		long total = jobService.countJobExecutions();
+		List<JobExecution> jobExecutions = new ArrayList<>(
+			jobService.listJobExecutions(getPageOffset(pageable), pageable.getPageSize()));
+		for (JobExecution jobExecution : jobExecutions) {
+			Collection<StepExecution> stepExecutions = jobService.getStepExecutions(jobExecution.getId());
+			List<StepExecution> validStepExecutions = new ArrayList<>();
+			for (StepExecution stepExecution : stepExecutions) {
+				if (stepExecution.getId() != null) {
+					validStepExecutions.add(stepExecution);
+				}
+			}
+			jobExecution.addStepExecutions(validStepExecutions);
+		}
+		return new PageImpl<>(getTaskJobExecutionsForList(jobExecutions), pageable, total);
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsWithStepCount(Pageable pageable) {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsWithStepCount(pageable);
+		List<JobExecutionWithStepCount> jobExecutions = new ArrayList<>(
+			jobService.listJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize()));
+		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsWithStepCountForList(jobExecutions);
+		return new PageImpl<>(taskJobExecutions, pageable, jobService.countJobExecutions());
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJob(Pageable pageable, String jobName, BatchStatus status) throws NoSuchJobException, NoSuchJobExecutionException {
 		Assert.notNull(pageable, "pageable must not be null");
-		if(status != null) {
-			return aggregateJobQueryDao.listJobExecutions(jobName, status, pageable);
-		} else if(StringUtils.hasText(jobName)) {
-			return aggregateJobQueryDao.listJobExecutionsForJobWithStepCount(jobName, pageable);
-		} else {
-			return aggregateJobQueryDao.listJobExecutionsWithSteps(pageable);
-		}
+		long total = jobService.countJobExecutionsForJob(jobName, status);
+		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsForList(
+			jobService.listJobExecutionsForJob(jobName, status, getPageOffset(pageable), pageable.getPageSize()));
+		return new PageImpl<>(taskJobExecutions, pageable, total);
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, Date fromDate, Date toDate) {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsBetween(fromDate, toDate, pageable);
+
+		List<TaskJobExecution> taskJobExecutions =  getTaskJobExecutionsWithStepCountForList(
+			jobService.listJobExecutionsForJobWithStepCount(fromDate, toDate, getPageOffset(pageable),
+				pageable.getPageSize()));
+		return new PageImpl<>(taskJobExecutions, pageable, taskJobExecutions.size());
 	}
 
 	@Override
@@ -165,26 +183,41 @@ public class DefaultTaskJobService implements TaskJobService {
 			String schemaTarget
 	) {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(taskExecutionId, schemaTarget, pageable);
+		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsWithStepCountForList(
+			jobService.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(taskExecutionId, getPageOffset(pageable),
+				pageable.getPageSize()));
+		return new PageImpl<>(taskJobExecutions, pageable, taskJobExecutions.size());
 	}
 
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCount(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
-		return aggregateJobQueryDao.listJobExecutionsForJobWithStepCount(jobName, pageable);
+		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsWithStepCountForList(
+			jobService.listJobExecutionsForJobWithStepCount(jobName, getPageOffset(pageable), pageable.getPageSize()));
+		return new PageImpl<>(taskJobExecutions, pageable, jobService.countJobExecutionsForJob(jobName, null));
 	}
 
 	@Override
 	public TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException {
-		logger.info("getJobExecution:{}", id);
-		return aggregateJobQueryDao.getJobExecution(id);
+		logger.debug("getJobExecution:{}", id);
+		JobExecution jobExecution = jobService.getJobExecution(id);
+		return getTaskJobExecution(jobExecution);
 	}
 
 	@Override
 	public Page<JobInstanceExecutions> listTaskJobInstancesForJobName(Pageable pageable, String jobName) throws NoSuchJobException {
 		Assert.notNull(pageable, "pageable must not be null");
 		Assert.notNull(jobName, "jobName must not be null");
-		return aggregateJobQueryDao.listJobInstances(jobName, pageable);
+		long total = jobService.countJobExecutionsForJob(jobName, null);
+		if (total == 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
+		}
+		List<JobInstanceExecutions> taskJobInstances = new ArrayList<>();
+		for (JobInstance jobInstance : jobService.listJobInstances(jobName, getPageOffset(pageable),
+			pageable.getPageSize())) {
+			taskJobInstances.add(getJobInstanceExecution(jobInstance));
+		}
+		return new PageImpl<>(taskJobInstances, pageable, total);
 	}
 
 	@Override

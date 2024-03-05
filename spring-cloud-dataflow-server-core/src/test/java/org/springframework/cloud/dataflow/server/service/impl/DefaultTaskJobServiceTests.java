@@ -26,9 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.batch.core.BatchStatus;
@@ -66,10 +65,9 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -77,7 +75,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
 		TaskServiceDependencies.class,
 		JobDependencies.class,
@@ -93,8 +90,6 @@ public class DefaultTaskJobServiceTests {
 	private final static String JOB_NAME_ORIG = BASE_JOB_NAME + "_ORIG";
 
 	private static long jobInstanceCount = 0;
-
-	private static long boot3JobInstanceCount = 0;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -133,7 +128,7 @@ public class DefaultTaskJobServiceTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("identifying.param", new JobParameter("testparam", String.class));
@@ -167,7 +162,7 @@ public class DefaultTaskJobServiceTests {
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
 
-		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
+		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String");
 	}
 
 	@Test
@@ -178,7 +173,7 @@ public class DefaultTaskJobServiceTests {
 		Exception exception = assertThrows(IllegalStateException.class, () -> {
 			this.taskJobService.restartJobExecution(jobInstanceCount);
 		});
-		assertTrue(exception.getMessage().contains("Did not find platform for taskName=[myJob_ORIG"));
+		assertThat(exception.getMessage()).contains("Did not find platform for taskName=[myJob_ORIG");
 	}
 
 	@Test
@@ -190,7 +185,7 @@ public class DefaultTaskJobServiceTests {
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
-		assertTrue(appDeploymentRequest.getCommandlineArguments().contains("identifying.param(string)=testparam"));
+		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String");
 	}
 
 	private void initializeJobs(boolean insertTaskExecutionMetadata)

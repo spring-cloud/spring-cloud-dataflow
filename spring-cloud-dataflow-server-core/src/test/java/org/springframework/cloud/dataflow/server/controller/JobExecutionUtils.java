@@ -103,7 +103,7 @@ class JobExecutionUtils
 		String dateInString = "07-Jun-2023";
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.US);
 		LocalDateTime date = LocalDate.parse(dateInString, formatter).atStartOfDay();
-		jobParameterMap.put("javaUtilDate", new JobParameter( date, LocalDateTime.class,false));
+		jobParameterMap.put("javaUtilDate", new JobParameter( date, LocalDateTime.class,true));
 		JobExecutionUtils.createSampleJob(jobRepository, taskBatchDao, taskExecutionDao,
 			JOB_NAME_ORIG_WITH_PARAM, 1, BatchStatus.UNKNOWN, taskDefinitionReader,
 			new JobParameters(jobParameterMap));

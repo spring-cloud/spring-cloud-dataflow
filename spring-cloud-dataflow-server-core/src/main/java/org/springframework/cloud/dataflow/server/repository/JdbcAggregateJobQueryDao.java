@@ -156,9 +156,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	private static final String FROM_CLAUSE_TASK_EXEC_BATCH = "JOIN AGGREGATE_TASK_BATCH B ON E.JOB_EXECUTION_ID = B.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = B.SCHEMA_TARGET" +
 			" JOIN AGGREGATE_TASK_EXECUTION T ON B.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND B.SCHEMA_TARGET = T.SCHEMA_TARGET";
 
-	private static final String FIND_PARAMS_FROM_ID2 = "SELECT JOB_EXECUTION_ID, KEY_NAME, TYPE_CD, "
-			+ "STRING_VAL, DATE_VAL, LONG_VAL, DOUBLE_VAL, IDENTIFYING, 'boot2' as SCHEMA_TARGET from %PREFIX%JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID = ?";
-
 	private static final String FIND_PARAMS_FROM_ID3 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING, 'boot3' as SCHEMA_TARGET" +
 			" from %PREFIX%JOB_EXECUTION_PARAMS where JOB_EXECUTION_ID = ?";
 
@@ -170,12 +167,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" JOIN AGGREGATE_JOB_EXECUTION E ON I.JOB_INSTANCE_ID = E.JOB_INSTANCE_ID AND I.SCHEMA_TARGET = E.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
-
-	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
-			" where I.JOB_NAME = ? AND I.JOB_INSTANCE_ID = ?";
-
-	private static final String FIND_JOB_BY_INSTANCE_ID_SCHEMA = FIND_JOB_BY +
-			" where I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
 
 	private static final String FIND_JOBS_FIELDS = "I.JOB_INSTANCE_ID as JOB_INSTANCE_ID, I.JOB_NAME as JOB_NAME, I.SCHEMA_TARGET as SCHEMA_TARGET," +
 			" E.JOB_EXECUTION_ID as JOB_EXECUTION_ID, E.START_TIME as START_TIME, E.END_TIME as END_TIME, E.STATUS as STATUS, E.EXIT_CODE as EXIT_CODE, E.EXIT_MESSAGE as EXIT_MESSAGE, E.CREATE_TIME as CREATE_TIME," +
@@ -304,45 +295,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	@Override
-	public Page<JobInstanceExecutions> listJobInstances(String jobName, Pageable pageable) throws NoSuchJobException {
-		int total = countJobExecutions(jobName);
-		if (total == 0) {
-			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
-		}
-		List<JobInstanceExecutions> taskJobInstancesForJobName = getTaskJobInstancesForJobName(jobName, pageable);
-		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
-	}
-
-	@Override
-	public JobInstanceExecutions getJobInstanceExecution(String jobName, long instanceId) {
-		LOG.debug("getJobInstanceExecution:{}:{}:{}", jobName, instanceId, FIND_JOB_BY_NAME_INSTANCE_ID);
-		List<JobInstanceExecutions> executions = jdbcTemplate.query(FIND_JOB_BY_NAME_INSTANCE_ID, new JobInstanceExecutionsExtractor(true), jobName, instanceId);
-		if (executions == null || executions.isEmpty()) {
-			return null;
-		} else if (executions.size() > 1) {
-			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
-		}
-		return executions.get(0);
-	}
-
-	@Override
-	public JobInstanceExecutions getJobInstanceExecutions(long jobInstanceId, String schemaTarget) {
-		List<JobInstanceExecutions> executions = jdbcTemplate.query(FIND_JOB_BY_INSTANCE_ID_SCHEMA, new JobInstanceExecutionsExtractor(true), jobInstanceId, schemaTarget);
-		if (executions == null || executions.isEmpty()) {
-			return null;
-		} else if (executions.size() > 1) {
-			throw new RuntimeException("Expected a single JobInstanceExecutions not " + executions.size());
-		}
-		JobInstanceExecutions jobInstanceExecution = executions.get(0);
-		if (!ObjectUtils.isEmpty(jobInstanceExecution.getTaskJobExecutions())) {
-			jobInstanceExecution.getTaskJobExecutions().forEach((execution) ->
-				jobService.addStepExecutions(execution.getJobExecution())
-			);
-		}
-		return jobInstanceExecution;
-	}
-
-	@Override
 	public JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException {
 		List<JobInstance> instances = jdbcTemplate.query(GET_JOB_INSTANCE_BY_ID, new JobInstanceExtractor(), id, schemaTarget);
 		if (ObjectUtils.isEmpty(instances)) {
@@ -385,15 +337,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		int total = countJobExecutions();
 		List<TaskJobExecution> jobExecutions = total > 0
 				? getJobExecutionsWithStepCount(getPageOffset(pageable), pageable.getPageSize())
-				: Collections.emptyList();
-		return new PageImpl<>(jobExecutions, pageable, total);
-	}
-
-	@Override
-	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, String schemaTarget, Pageable pageable) {
-		int total = countJobExecutionsByInstanceId(jobInstanceId, schemaTarget);
-		List<TaskJobExecution> jobExecutions = total > 0
-				? getJobExecutionsWithStepCountFilteredByJobInstanceId(jobInstanceId, schemaTarget, getPageOffset(pageable), pageable.getPageSize())
 				: Collections.emptyList();
 		return new PageImpl<>(jobExecutions, pageable, total);
 	}

@@ -72,7 +72,6 @@ import org.springframework.cloud.dataflow.server.controller.JobInstanceControlle
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
-import org.springframework.cloud.dataflow.server.controller.SchemaController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
@@ -196,9 +195,8 @@ public class JobDependencies {
 
 	@Bean
 	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
-		DataSource dataSource,
-		SchemaService schemaService) {
-		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
+		DataSource dataSource) {
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource);
 	}
 
 	@Bean
@@ -249,11 +247,6 @@ public class JobDependencies {
 	@Bean
 	public JobInstanceController jobInstanceController(TaskJobService repository) {
 		return new JobInstanceController(repository);
-	}
-
-	@Bean
-	public SchemaController schemaController(SchemaService schemaService) {
-		return new SchemaController(schemaService);
 	}
 
 	@Bean

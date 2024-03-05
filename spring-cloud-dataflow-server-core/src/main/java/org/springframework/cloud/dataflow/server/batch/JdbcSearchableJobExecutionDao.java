@@ -106,7 +106,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String GET_EXECUTION_BY_ID = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
 
-	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%PREFIX%TASK_BATCH B";
+	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "TASK_TASK_BATCH B";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
@@ -713,9 +713,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			else {
 				jobExecution = new JobExecution(jobInstance, id, jobParameters);
 			}
-
-			jobExecution.setStartTime(rs.getTimestamp(2).toLocalDateTime());
-			jobExecution.setEndTime(rs.getTimestamp(3).toLocalDateTime());
+			Timestamp startTime = rs.getTimestamp(2);
+			Timestamp endTime = rs.getTimestamp(3);
+			jobExecution.setStartTime((startTime != null) ? startTime.toLocalDateTime() : null);
+			jobExecution.setEndTime((endTime != null) ? endTime.toLocalDateTime() : null);
 			jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 			jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
 			jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());

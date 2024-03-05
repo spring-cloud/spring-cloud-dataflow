@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -45,13 +44,10 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.step.NoSuchStepException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -94,12 +90,9 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private int shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
 
-	private final SchemaVersionTarget schemaVersionTarget;
-
 	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
 							SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository,
-							ExecutionContextDao executionContextDao, JobOperator jobOperator, AggregateJobQueryDao aggregateJobQueryDao,
-							SchemaVersionTarget schemaVersionTarget) {
+							ExecutionContextDao executionContextDao, JobOperator jobOperator, AggregateJobQueryDao aggregateJobQueryDao) {
 		super();
 		this.jobInstanceDao = jobInstanceDao;
 		this.jobExecutionDao = jobExecutionDao;
@@ -107,7 +100,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 		this.jobRepository = jobRepository;
 		this.executionContextDao = executionContextDao;
 		this.aggregateJobQueryDao = aggregateJobQueryDao;
-		this.schemaVersionTarget = schemaVersionTarget;
 		this.jobOperator = Objects.requireNonNull(jobOperator, "jobOperator must not be null");
 	}
 
@@ -289,7 +281,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 			jobOperator.stop(jobExecutionId);
 			jobExecution = getJobExecution(jobExecutionId);
 		} else {
-			throw new JobStopException(jobExecution.getId());
+			jobExecution.setStatus(BatchStatus.STOPPED);
+			jobRepository.update(jobExecution);
 		}
 		return jobExecution;
 
@@ -348,13 +341,18 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution getJobExecution(Long jobExecutionId) throws NoSuchJobExecutionException {
-		JobExecution jobExecution =  this.aggregateJobQueryDao.getJobExecution(jobExecutionId).getJobExecution();
-		jobExecution.setJobInstance(Objects.requireNonNull(this.jobInstanceDao.getJobInstance(jobExecution)));
-		try {
-			jobExecution.setExecutionContext(this.executionContextDao.getExecutionContext(jobExecution));
-		} catch (Exception e) {
-			this.logger.info("Cannot load execution context for job execution: " + jobExecution);
+		JobExecution jobExecution = jobExecutionDao.getJobExecution(jobExecutionId);
+		if (jobExecution == null) {
+			throw new NoSuchJobExecutionException("There is no JobExecution with id=" + jobExecutionId);
 		}
+		jobExecution.setJobInstance(jobInstanceDao.getJobInstance(jobExecution));
+		try {
+			jobExecution.setExecutionContext(executionContextDao.getExecutionContext(jobExecution));
+		}
+		catch (Exception e) {
+			logger.info("Cannot load execution context for job execution: " + jobExecution);
+		}
+		stepExecutionDao.addStepExecutions(jobExecution);
 		return jobExecution;
 	}
 
@@ -420,7 +418,10 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobInstance getJobInstance(long jobInstanceId) throws NoSuchJobInstanceException {
-		JobInstance jobInstance = this.aggregateJobQueryDao.getJobInstance(jobInstanceId, this.schemaVersionTarget.getName());
+		JobInstance jobInstance = jobInstanceDao.getJobInstance(jobInstanceId);
+		if (jobInstance == null) {
+			throw new NoSuchJobInstanceException("JobInstance with id=" + jobInstanceId + " does not exist");
+		}
 		return jobInstance;
 	}
 

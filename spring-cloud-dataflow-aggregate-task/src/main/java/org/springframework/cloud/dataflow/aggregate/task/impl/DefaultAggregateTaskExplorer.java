@@ -153,7 +153,7 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 
 	@Override
 	public Page<TaskExecution> findAll(Pageable pageable) {
-		return taskExecutionQueryDao.findAll(pageable);
+		return taskExplorer.findAll(pageable);
 	}
 
 	@Override

@@ -20,9 +20,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -44,7 +44,6 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -52,6 +51,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -62,14 +62,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author  Corneil du Plessis
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-//TODO: Boot3x followup
-@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
 public class JobExecutionThinControllerTests {
 
 	@Autowired
@@ -92,7 +89,7 @@ public class JobExecutionThinControllerTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepository,
@@ -104,9 +101,9 @@ public class JobExecutionThinControllerTests {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testJobExecutionThinControllerConstructorMissingRepository() {
-		new JobExecutionThinController(null);
+		assertThrows(IllegalArgumentException.class, () -> new JobExecutionThinController(null));
 	}
 
 	@Test

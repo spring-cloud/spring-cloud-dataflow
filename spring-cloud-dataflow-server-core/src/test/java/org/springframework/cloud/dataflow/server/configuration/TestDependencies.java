@@ -100,7 +100,6 @@ import org.springframework.cloud.dataflow.server.controller.RootController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppInstanceController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeAppsController;
 import org.springframework.cloud.dataflow.server.controller.RuntimeStreamsController;
-import org.springframework.cloud.dataflow.server.controller.SchemaController;
 import org.springframework.cloud.dataflow.server.controller.StreamDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.StreamDeploymentController;
 import org.springframework.cloud.dataflow.server.controller.StreamLogsController;
@@ -281,9 +280,8 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Bean
 	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
-		DataSource dataSource,
-		SchemaService schemaService) {
-		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
+		DataSource dataSource) {
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource);
 	}
 
 	@Override
@@ -843,11 +841,6 @@ public class TestDependencies implements WebMvcConfigurer {
 	@Bean
 	public RootController rootController(EntityLinks entityLinks) {
 		return new RootController(entityLinks);
-	}
-
-	@Bean
-	public SchemaController schemaController(SchemaService schemaService) {
-		return new SchemaController(schemaService);
 	}
 
 	@Bean

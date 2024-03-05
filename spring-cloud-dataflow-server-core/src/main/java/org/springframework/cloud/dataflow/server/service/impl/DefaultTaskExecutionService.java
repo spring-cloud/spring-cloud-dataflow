@@ -986,7 +986,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	@Override
 	public Integer getAllTaskExecutionsCount(boolean onlyCompleted, String taskName) {
-		return getAllTaskExecutionsCount(onlyCompleted, taskName, null);
+		return this.dataflowTaskExecutionDao.getAllTaskExecutionsCount(onlyCompleted, taskName);
 	}
 
 	@Override
@@ -996,7 +996,8 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			return (int) dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskNameAndBeforeDate(taskName, dateBeforeDays);
 		} else {
 			return (int) (onlyCompleted ? dataflowTaskExecutionQueryDao.getCompletedTaskExecutionCountByTaskName(taskName)
-				: dataflowTaskExecutionQueryDao.getTaskExecutionCountByTaskName(taskName));
+				: taskName.isEmpty()?taskExplorer.getTaskExecutionCount(): taskExplorer.getTaskExecutionCountByTaskName(taskName));
 		}
+
 	}
 }

@@ -125,32 +125,6 @@ public interface DataflowTaskExecutionQueryDao {
 	long getTaskExecutionCount();
 
 	/**
-	 * Retrieves a set of task executions that are running for a taskName.
-	 *
-	 * @param taskName the name of the task to search for in the repository.
-	 * @param pageable the constraints for the search.
-	 * @return set of running task executions.
-	 */
-	Page<TaskExecution> findRunningTaskExecutions(String taskName, Pageable pageable);
-
-	/**
-	 * Retrieves a subset of task executions by task name, start location and size.
-	 *
-	 * @param taskName the name of the task to search for in the repository.
-	 * @param pageable the constraints for the search.
-	 * @return a list that contains task executions from the query bound by the start
-	 * position and count specified by the user.
-	 */
-	Page<TaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable);
-
-	/**
-	 * Retrieves a sorted list of distinct task names for the task executions.
-	 *
-	 * @return a list of distinct task names from the task repository..
-	 */
-	List<String> getTaskNames();
-
-	/**
 	 * Retrieves all the task executions within the pageable constraints.
 	 *
 	 * @param pageable the constraints for the search

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -49,12 +50,6 @@ import org.springframework.util.Assert;
 public class JobExecutionThinResource extends RepresentationModel<JobExecutionThinResource> {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
-	private static final DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
-
-	private static final DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
-
-	private static final DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
 
 	private Long executionId;
 
@@ -129,16 +124,20 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 			this.name = "?";
 		}
 
+		//TODO: Boot3x followup 2.x used timzezone but we need to switch to local for date conversions
+		//2.x used timzezone but we need to switch to local for date conversions.Currently set to default location.
+		//Duration needs to be set to the correct format for gmt
+
 		// Duration is always in GMT
-		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
+		DateTimeFormatter durationFormat = DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN);
 		// The others can be localized
-		timeFormat.setTimeZone(timeZone);
-		dateFormat.setTimeZone(timeZone);
+		DateTimeFormatter timeFormat =  DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_TIME_FORMAT_PATTERN);
+		DateTimeFormatter dateFormat =  DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_DATE_FORMAT_PATTERN);
 		if (jobExecution.getStartTime() != null) {
 			this.startDate = dateFormat.format(jobExecution.getStartTime());
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
 			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
-			this.duration = durationFormat.format(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.MILLIS));
+			this.duration = String.valueOf(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.NANOS));
 			this.startDateTime = jobExecution.getStartTime();
 		}
 

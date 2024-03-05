@@ -356,9 +356,8 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
-		DataSource dataSource,
-		SchemaService schemaService) {
-		return new AggregateDataFlowTaskExecutionQueryDao(dataSource, schemaService);
+		DataSource dataSource) {
+		return new AggregateDataFlowTaskExecutionQueryDao(dataSource);
 	}
 	@Bean
 	@ConditionalOnMissingBean

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -49,11 +50,9 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	private DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
+	private DateTimeFormatter dateFormat = DateTimeFormatter.ISO_LOCAL_DATE;
 
-	private DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
-
-	private DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
+	private DateTimeFormatter timeFormat = DateTimeFormatter.ISO_LOCAL_TIME;
 
 	private Long executionId;
 
@@ -121,17 +120,15 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 			this.name = "?";
 		}
 
-		// Duration is always in GMT
-		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
 		// The others can be localized
-		timeFormat.setTimeZone(timeZone);
-		dateFormat.setTimeZone(timeZone);
+//		timeFormat.setTimeZone(timeZone);
+//		dateFormat.setTimeZone(timeZone);
 		if (jobExecution.getStartTime() != null) {
 			this.startDate = dateFormat.format(jobExecution.getStartTime());
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
 			//TODO: Boot3x followup
 			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
-			this.duration = durationFormat.format(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.MILLIS));
+			this.duration = String.valueOf(Duration.between(jobExecution.getStartTime(), endTime));
 		}
 	}
 
