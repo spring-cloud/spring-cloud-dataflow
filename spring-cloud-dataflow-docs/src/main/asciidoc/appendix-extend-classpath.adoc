@@ -6,43 +6,15 @@ Users may require the addition of dependencies to the existing Stream applicatio
 
 NOTE: The Spring Cloud Dataflow repository contains scripts to help with this task. The examples below assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/templates/add-deps`.
 
-
-==== Containers
-
-In order to add dependencies to existing container the following steps will be the approach.
-
-* Create a folder with the extra dependencies.
-* Create a new container image while copying the files to the libraries folder.
-* Push the image to a private registry.
-
-===== Environmental variables
-
-* `DEPS_FOLDER` should be a full filename or path expression for files to copy to the container.
-* `CONTAINER_REPO` the source docker image name.
-* `CONTAINER_TAG` the tag of source image.
-* `PRIVATE_REGISTRY` the host name of the private registry.
-
-===== Examples
-
-[source,shell]
-....
-export CONTAINER_REPO="springcloud/spring-cloud-dataflow-server"
-export CONTAINER_TAG="2.9.5-jdk17"
-export PRIVATE_REGISTRY="our.private.registry"
-export DEPS_FOLDER="./extra-libs/"
-docker build -f Dockerfile -t "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
-docker push "$PRIVATE_REGISTRY/$CONTAINER_REPO:$CONTAINER_TAG"
-....
-
-NOTE: As pointed out above, the `Dockerfile` lives in the `spring-cloud-dataflow` repository under `src/add-deps`.
-
 ==== JAR File
 
-When using CloudFoundry or local deployment you will need to update jar before publishing it to a private registry or Maven Local.
+_We suggest you publish the updated jar it to a private Maven repository and that the Maven Coordinates of the private registry is then used to register application with SCDF._
 
 ===== Example
 
-This example adds the dependencies and then installs the jar to Maven local.
+This example:
+* assumes the jar is downloaded to `${appFolder}/${appName}-${appVersion}.jar`
+* adds the dependencies and then publishes the jar to Maven local.
 
 [source,shell]
 ....
@@ -50,8 +22,26 @@ This example adds the dependencies and then installs the jar to Maven local.
     -P appFolder="." \
     -P appGroup="org.springframework.cloud" \
     -P appName="spring-cloud-dataflow-server" \
-    -P appVersion="2.9.5" \
+    -P appVersion="2.11.2" \
     -P depFolder="./extra-libs"
 ....
 
 NOTE: Use the `publishMavenPublicationToMavenRepository` task to publish to a remote repository. Update the `gradle.properties` with the remote repository details. Alternatively move `repoUser` and `repoPassword` to ~/.gradle/gradle.properties
+
+==== Containers
+
+In order to create a container we suggest using https://buildpacks.io/docs/for-platform-operators/how-to/integrate-ci/pack[paketo pack cli] to create a container from the jar created in previous step.
+
+[source, shell]
+....
+REPO=springcloud/spring-cloud-dataflow-server
+TAG=2.11.2
+JAR=build/spring-cloud-dataflow-server-${TAG}.jar
+JAVA_VERSION=8
+pack build --builder gcr.io/paketo-buildpacks/builder:base \
+            --path "$JAR" \
+            --trust-builder --verbose \
+            --env BP_JVM_VERSION=${JAVA_VERSION} "$REPO:$TAG-jdk${JAVA_VERSION}-extra"
+....
+
+NOTE: Publish the container to a private container registry and register the application docker uri with SCDF.
