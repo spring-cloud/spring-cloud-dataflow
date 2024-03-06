@@ -90,6 +90,7 @@ spring:
     task:
       initialize:
         enable: false
+      transaction-manager: transactionManager
     dataflow:
       rdbms:
         initialize:
