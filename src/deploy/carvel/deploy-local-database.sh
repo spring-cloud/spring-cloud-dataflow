@@ -12,12 +12,21 @@ if [ "$1" = "" ]; then
     echo "<database> must be provided. Choose one of postgresql or mariadb"
     exit 1
 fi
+JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
 case $1 in
 "postgresql" | "postgres")
     DATABASE=postgresql
     ;;
 "mariadb" | "maria")
     DATABASE=mariadb
+    ;;
+#"oracle")
+#    DATABASE=oracle
+#    JDBC_URL="jdbc:oracle:thin:@oracle.oracle:1521"
+#    ;;
+"mysql57")
+    DATABASE=mysql57
+    JDBC_URL="jdbc:mysql://$DATABASE.$DATABASE/dataflow?permitMysqlScheme"
     ;;
 *)
     echo "Unsupported or invalid database $1"
@@ -37,7 +46,6 @@ set -e
 kubectl rollout status deployment --namespace "$DATABASE" $DATABASE
 set +e
 
-JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
 "$SCDIR/configure-database.sh" dataflow $DATABASE "$JDBC_URL" $DATABASE database-username database-password
 "$SCDIR/configure-database.sh" skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password
 export DATABASE

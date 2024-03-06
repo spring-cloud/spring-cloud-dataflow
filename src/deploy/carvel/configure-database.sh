@@ -42,6 +42,9 @@ case $2 in
 "mysql57")
     DATABASE=mysql57
     ;;
+"oracle")
+    DATABASE=oracle
+    ;;
 *)
     echo "Unsupported or invalid database $2"
     exit 1
@@ -61,6 +64,9 @@ case $DATABASE in
     ;;
 "postgresql")
     JDBC_DRIVER_CLASS=org.postgresql.Driver
+    ;;
+"oracle")
+    JDBC_DRIVER_CLASS=oracle.jdbc.OracleDriver
     ;;
 *)
     echo "Unsupported $DATABASE."

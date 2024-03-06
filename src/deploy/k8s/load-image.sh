@@ -91,7 +91,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
     else
         echo "Loading:$IMAGE:$DOCKER_IDS"
     fi
-    minikube image load --pull=$PULL "$IMAGE"
+    OPTIONS="--overwrite true --daemon true --pull $PULL"
+    if [ "$PULL" == "false" ]; then
+        OPTIONS="$OPTIONS --remote false"
+    fi
+    minikube image load "$IMAGE" $OPTIONS
     MK_IDS=$(minikube image ls --format table | grep -F "$NAME" | grep -F "$TAG" | awk '{print $6}')
     for did in $DOCKER_IDS; do
       for mid in $MK_IDS; do

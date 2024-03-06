@@ -10,7 +10,7 @@ task combinedJar(type: Zip) {
     into('BOOT-INF/lib') {
         from file(depsFolder)
     }
-    archiveFileName = "${appName}.jar"
+    archiveFileName = "${appName}-${appVersion}.jar"
     destinationDirectory = project.buildDir
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
