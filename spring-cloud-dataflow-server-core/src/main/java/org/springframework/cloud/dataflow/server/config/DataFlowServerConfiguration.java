@@ -18,9 +18,7 @@ package org.springframework.cloud.dataflow.server.config;
 
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.Filter;
-import javax.sql.DataSource;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,7 +38,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -88,11 +85,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@Primary
-	public PlatformTransactionManager transactionManager(
-			ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+	PlatformTransactionManager transactionManager(TransactionManagerCustomizers transactionManagerCustomizers) {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
-		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
+		transactionManagerCustomizers.customize(transactionManager);
 		return transactionManager;
 	}
 

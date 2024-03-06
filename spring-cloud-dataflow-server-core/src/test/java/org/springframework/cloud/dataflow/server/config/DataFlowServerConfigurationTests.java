@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
@@ -74,6 +75,7 @@ public class DataFlowServerConfigurationTests {
 			.withAllowBeanDefinitionOverriding(true)
 			.withUserConfiguration(
 					DataFlowServerConfigurationTests.TestConfiguration.class,
+					TransactionManagerCustomizationAutoConfiguration.class,
 					SecurityAutoConfiguration.class,
 					DataFlowServerAutoConfiguration.class,
 					DataFlowControllerAutoConfiguration.class,
