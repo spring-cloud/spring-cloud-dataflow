@@ -27,6 +27,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
@@ -128,7 +129,8 @@ public abstract class AbstractSkipperSmokeTest {
 	@SpringBootApplication(exclude = {CloudFoundryDeployerAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		KubernetesAutoConfiguration.class,
-		SessionAutoConfiguration.class
+		SessionAutoConfiguration.class,
+		CommonSecurityAutoConfiguration.class
 	})
 	@EnableSkipperServer
 	public static class LocalTestSkipperServer {
