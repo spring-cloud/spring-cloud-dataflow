@@ -64,7 +64,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.3"),
-		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.0")
+		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.2")
 	);
 
 	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
@@ -72,7 +72,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
 		ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
 		ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.3"),
-		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.0")
+		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.2")
 	);
 
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
@@ -84,9 +84,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.MSSQL_2019_CU10_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU10-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
-		ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2,
-			"dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2",
-			TagNames.ORACLE),
+		ClusterContainer.from(TagNames.ORACLE_XE_18, "gvenzl/oracle-xe:18-slim-faststart", TagNames.ORACLE),
 		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
 		ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
 	);

@@ -45,8 +45,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 	 */
 	@Test
 	@DataflowMain
-	public void testLatestSharedDb() {
-		log.info("Running testLatestSharedDb()");
+	public void testLatestDb() {
+		log.info("Running testLatestDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -62,8 +62,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk8() {
-		log.info("Running testLatestSharedDb()");
+	public void testLatestDbJdk8() {
+		log.info("Running testLatestDbJdk8()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -79,8 +79,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk11() {
-		log.info("Running testLatestSharedDb()");
+	public void testLatestDbJdk11() {
+		log.info("Running testLatestDbJdk11()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -96,8 +96,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk17() {
-		log.info("Running testLatestSharedDb()");
+	public void testLatestDbJdk17() {
+		log.info("Running testLatestDbJdk17()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());

@@ -21,13 +21,6 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v4
-    - uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        dotnet: false
-        docker-images: false
-        swap-storage: false      
-        large-packages: false
     # cache maven repo
     - uses: actions/cache@v3
       with:
@@ -50,6 +43,10 @@ jobs:
         version: 1.46.4
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+    - name: Setup Testcontainers Cloud Client
+      uses: atomicjar/testcontainers-cloud-setup-action@v1
+      with:
+        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:

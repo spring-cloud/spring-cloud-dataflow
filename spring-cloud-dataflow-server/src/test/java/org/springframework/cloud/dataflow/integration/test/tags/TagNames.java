@@ -53,12 +53,12 @@ public abstract class TagNames {
 
 
 	public static final String ORACLE = "oracle";
-	public static final String ORACLE_12_2_0_1_se2 = "oracle_12_2_0_1_se2";
+	public static final String ORACLE_XE_18 = "oracle_xe_18";
 
 	public static final String DB2 = "db2";
 	public static final String DB2_11_5_0_0a = "db2_11_5_0_0a";
 	public static final String DB2_11_5_8_0 = "db2_11_5_8_0";
-	public static final String DB2_10_5_0_5_3_10_0 = "db2_10_5_0_5_3_10_0";
+
 
 	public static final String OAUTH = "oauth";
 	public static final String UAA = "uaa";
