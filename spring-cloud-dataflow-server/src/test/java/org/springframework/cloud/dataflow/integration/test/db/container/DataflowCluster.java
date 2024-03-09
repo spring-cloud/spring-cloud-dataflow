@@ -328,7 +328,6 @@ public class DataflowCluster implements Startable {
 			} else if (clusterContainer.tag.startsWith(TagNames.ORACLE)) {
 				OracleContainer databaseContainer = new CustomOracleContainer(clusterContainer.image);
 				databaseContainer.withExposedPorts(ORACLE_PORT);
-				// databaseContainer.withDatabaseName("ORCLPDB1");
 				databaseContainer.withUsername("spring");
 				databaseContainer.withPassword("spring");
 				databaseContainer.withNetworkAliases(databaseAlias);

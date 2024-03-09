@@ -31,6 +31,6 @@ public class OracleSeparateDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {
-		return TagNames.ORACLE_12_2_0_1_se2;
+		return TagNames.ORACLE_XE_18;
 	}
 }

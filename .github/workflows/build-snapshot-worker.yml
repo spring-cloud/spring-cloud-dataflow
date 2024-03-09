@@ -17,9 +17,6 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
-    - uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
     - uses: actions/setup-java@v3
       with:
         java-version: '8'
@@ -28,6 +25,10 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - name: Setup Testcontainers Cloud Client
+      uses: atomicjar/testcontainers-cloud-setup-action@v1
+      with:
+        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
     - uses: jfrog/setup-jfrog-cli@v1
       with:
         version: 1.46.4
