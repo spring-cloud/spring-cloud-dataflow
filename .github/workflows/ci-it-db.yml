@@ -24,6 +24,10 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - name: Setup Testcontainers Cloud Client
+      uses: atomicjar/testcontainers-cloud-setup-action@v1
+      with:
+        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
@@ -43,7 +47,7 @@ jobs:
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
       with:
-        name: Integration Tests
+        name: Integration Tests - ${{ matrix.group }}
         path: '**/failsafe-reports/*IT.xml'
         reporter: java-junit
         list-tests: failed
@@ -52,7 +56,7 @@ jobs:
       run: |
         echo "Test report for ${{ matrix.group }} published at ${{ steps.test_report.outputs.url_html }}"
     - name: 'Action: Upload Unit Test Results'
-      if: ${{ always() }}
+      if: ${{ success() || failure() }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.group }}-test-results-surefire
@@ -60,7 +64,7 @@ jobs:
         retention-days: 7
         if-no-files-found: ignore
     - name: 'Action: Upload Integration Test Results'
-      if: ${{ always() }}
+      if: ${{ success() || failure() }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.group }}-test-results-failsafe
