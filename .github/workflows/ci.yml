@@ -67,6 +67,8 @@ jobs:
         echo spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
     # build and publish
     - name: Build and Publish
+      shell: bash
+      timeout-minutes: 75
       run: |
         mvn clean
         ./spring-cloud-dataflow-package/set-package-version.sh
