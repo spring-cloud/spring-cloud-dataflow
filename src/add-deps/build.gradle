@@ -4,7 +4,7 @@ plugins {
 
 defaultTasks 'publishToMavenLocal'
 
-task combinedJar(type: Jar) {
+task combinedJar(type: Zip) {
     def appFile = "${appFolder}/${appName}-${appVersion}.jar"
     from zipTree(appFile)
     into('BOOT-INF/lib') {
