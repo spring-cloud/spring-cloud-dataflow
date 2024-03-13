@@ -44,6 +44,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -1313,6 +1314,8 @@ public class DataFlowIT {
 		assertThat(taskBuilder.allTasks().size()).isEqualTo(0);
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x followup Wait for composed Task runner to be ported to 3.x")
 	@Test
 	public void multipleComposedTaskWithArguments() {
 		logger.info("task-multiple-composed-task-with-arguments-test");

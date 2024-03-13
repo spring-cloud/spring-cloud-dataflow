@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,8 +115,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3 followup")
 	@Test
 	void cleanupAll() throws Exception {
 		String taskExecutionId = "asyncCleanupAllTaskExecId";

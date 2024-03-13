@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -82,8 +81,6 @@ public class AboutControllerTests {
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("Need to investigate why we can't get the RESTTemplate to resolve a https")
 	@Test
 	public void testListApplications() throws Exception {
 		ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
@@ -394,8 +391,6 @@ public class AboutControllerTests {
 					.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		}
 
-		//TODO: Boot3x followup
-		@Disabled("Need to investigate why we can't get the RESTTemplate to resolve a https")
 		@Test
 		public void testAbout() throws Exception {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
@@ -422,8 +417,6 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.monitoringDashboardInfo.refreshInterval", is(30)));
 		}
 
-		//TODO: Boot3x followup
-		@Disabled("Need to investigate why we can't get the RESTTemplate to resolve a https")
 		@Test
 		public void testAboutWithMissingSkipper() throws Exception {
 			reset(this.skipperClient);

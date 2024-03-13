@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.aggregate.task.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -484,11 +485,12 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			if (rs.wasNull()) {
 				parentExecutionId = null;
 			}
+			Timestamp endTimestamp = rs.getTimestamp("END_TIME");
 			return new TaskExecution(id,
 					getNullableExitCode(rs),
 					rs.getString("TASK_NAME"),
 					rs.getTimestamp("START_TIME").toLocalDateTime(),
-					rs.getTimestamp("END_TIME").toLocalDateTime(),
+					(endTimestamp != null) ? endTimestamp.toLocalDateTime() : null,
 					rs.getString("EXIT_MESSAGE"),
 					getTaskArguments(id),
 					rs.getString("ERROR_MESSAGE"),

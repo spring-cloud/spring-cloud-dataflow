@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
-//TODO: Boot3x followup
 public class JobStartRuntimeException extends RuntimeException {
 
 	public JobStartRuntimeException(String jobName, Exception cause) {

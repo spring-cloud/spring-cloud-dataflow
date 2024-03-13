@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -61,8 +60,6 @@ import static org.mockito.Mockito.when;
  * @author Corneil du Plessis
  */
 
-//TODO: Boot3x followup
-@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
@@ -148,10 +145,10 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("SCHEMA_TARGET"))).getContent();
+		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("TASK_EXECUTION_ID"))).getContent();
 		assertThat(resultList.size()).isEqualTo(4);
 		List<Long> ids = resultList.stream().map(TaskExecution::getExecutionId).collect(Collectors.toList());
-		assertThat(ids).containsExactly(0L, 2L, 3L, 1L);
+		assertThat(ids).containsExactly(0L, 1L, 2L, 3L);
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {
