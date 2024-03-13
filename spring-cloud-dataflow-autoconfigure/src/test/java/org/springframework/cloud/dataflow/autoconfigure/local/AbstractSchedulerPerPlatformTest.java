@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
@@ -75,6 +76,11 @@ public abstract class AbstractSchedulerPerPlatformTest {
 		@Bean
 		public TaskDeploymentReader taskDeploymentReader() {
 			return mock(TaskDeploymentReader.class);
+		}
+
+		@Bean
+		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao() {
+			return mock(DataflowTaskExecutionQueryDao.class);
 		}
 
 		@Configuration

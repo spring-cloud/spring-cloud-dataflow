@@ -233,8 +233,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 					.stream()
 					.map(TaskExecution::getExecutionId)
 					.collect(Collectors.toCollection(TreeSet::new));
-				this.performDeleteTaskExecutions(childIds);
-				this.performDeleteTaskExecutions(parentIds);
+				if(childIds.size() > 0) {
+					this.performDeleteTaskExecutions(childIds);
+				}
+				if(parentIds.size() > 0) {
+					this.performDeleteTaskExecutions(parentIds);
+				}
 			}
 		}
 	}
