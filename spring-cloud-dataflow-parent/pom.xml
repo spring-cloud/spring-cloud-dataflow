@@ -41,7 +41,7 @@
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
-		<aws-java-sdk-ecr.version>1.12.513</aws-java-sdk-ecr.version>
+		<aws-java-sdk-ecr.version>1.12.676</aws-java-sdk-ecr.version>
 		<testcontainers.version>1.17.6</testcontainers.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>3.2.1</stream-applications.version>
