@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
@@ -276,16 +275,13 @@ public class TaskConfiguration {
 				AggregateTaskExplorer taskExplorer,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionService taskExecutionService,
-				LauncherRepository launcherRepository,
-				AggregateJobQueryDao aggregateJobQueryDao
-		) {
+				LauncherRepository launcherRepository) {
 			return new DefaultTaskJobService(
 					service,
 					taskExplorer,
 					taskDefinitionRepository,
 					taskExecutionService,
-					launcherRepository,
-					aggregateJobQueryDao
+					launcherRepository
 			);
 		}
 	}

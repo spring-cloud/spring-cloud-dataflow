@@ -81,7 +81,6 @@ import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutio
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -295,16 +294,14 @@ public class JobDependencies {
 			AggregateTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
-			LauncherRepository launcherRepository,
-			AggregateJobQueryDao aggregateJobQueryDao
+			LauncherRepository launcherRepository
 	) {
 		return new DefaultTaskJobService(
 				jobService,
 				taskExplorer,
 				taskDefinitionRepository,
 				taskExecutionService,
-				launcherRepository,
-				aggregateJobQueryDao);
+				launcherRepository);
 	}
 
 	@Bean

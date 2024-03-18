@@ -26,18 +26,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.SimpleJobServiceFactoryBean;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.repository.DefaultTaskDeploymentReader;
-import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
@@ -152,12 +149,6 @@ public class AggregateDataFlowTaskConfiguration {
 	@ConditionalOnMissingBean
 	public TaskDeploymentReader taskDeploymentReader(TaskDeploymentRepository repository) {
 		return new DefaultTaskDeploymentReader(repository);
-	}
-
-	@Bean
-	public AggregateJobQueryDao aggregateJobQueryDao(DataSource dataSource, SchemaService schemaService,
-			JobService jobService, Environment environment) throws Exception {
-		return new JdbcAggregateJobQueryDao(dataSource, schemaService, jobService, environment);
 	}
 
 	@Bean

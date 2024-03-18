@@ -48,7 +48,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.step.NoSuchStepException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -86,20 +85,18 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	private JobOperator jobOperator;
 
-	private final AggregateJobQueryDao aggregateJobQueryDao;
 
 	private int shutdownTimeout = DEFAULT_SHUTDOWN_TIMEOUT;
 
 	public SimpleJobService(SearchableJobInstanceDao jobInstanceDao, SearchableJobExecutionDao jobExecutionDao,
 							SearchableStepExecutionDao stepExecutionDao, JobRepository jobRepository,
-							ExecutionContextDao executionContextDao, JobOperator jobOperator, AggregateJobQueryDao aggregateJobQueryDao) {
+							ExecutionContextDao executionContextDao, JobOperator jobOperator) {
 		super();
 		this.jobInstanceDao = jobInstanceDao;
 		this.jobExecutionDao = jobExecutionDao;
 		this.stepExecutionDao = stepExecutionDao;
 		this.jobRepository = jobRepository;
 		this.executionContextDao = executionContextDao;
-		this.aggregateJobQueryDao = aggregateJobQueryDao;
 		this.jobOperator = Objects.requireNonNull(jobOperator, "jobOperator must not be null");
 	}
 
