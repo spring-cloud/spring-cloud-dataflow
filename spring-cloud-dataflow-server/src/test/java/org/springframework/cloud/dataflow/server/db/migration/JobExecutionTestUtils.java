@@ -37,9 +37,6 @@ import org.springframework.batch.item.database.support.DataFieldMaxValueIncremen
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -149,7 +146,6 @@ class JobExecutionTestUtils
 			dataSourceProperties.setDriverClassName("oracle.jdbc.OracleDriver");
 
 			DataSource dataSource = dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
-			SchemaService schemaService = new DefaultSchemaService();
 			DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
 			JdbcTaskExecutionDao taskExecutionDao = new JdbcTaskExecutionDao(dataSource);
 			String databaseType;

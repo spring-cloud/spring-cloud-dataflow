@@ -18,12 +18,10 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
 
-import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -32,18 +30,19 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-@JdbcTest(properties = {"spring.jpa.hibernate.ddl-auto=none", "spring.test.context.cache.maxSize=4"})
+@JdbcTest(properties = {
+	"spring.jpa.hibernate.ddl-auto=none",
+	"spring.test.context.cache.maxSize=2",
+	"spring.datasource.hikari.maximum-pool-size=4"
+})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-// TODO Re-enable test. Change postgres version to 14 and set hikari connection pool to 2
-// Test disabled because of intermittent connection pool failures.
-@Disabled
 public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
+	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14")
+		.withCommand("-c", "max_connections=500");;
 
 	@BeforeEach
 	void setup() throws Exception {

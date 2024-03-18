@@ -45,7 +45,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -54,7 +54,6 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
@@ -148,7 +147,7 @@ public class TaskExecutionControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private AggregateTaskExplorer taskExplorer;
+	private CompositeTaskExplorer taskExplorer;
 
 	@Autowired
 	private TaskExecutionService taskExecutionService;
@@ -347,14 +346,13 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
-	void boot3Execution() throws Exception {
+	void taskExecution() throws Exception {
 		if (appRegistryService.getDefaultApp("timestamp3", ApplicationType.task) == null) {
 			appRegistryService.save("timestamp3",
 					ApplicationType.task,
 					"3.0.0",
 					new URI("file:src/test/resources/apps/foo-task"),
-					null,
-					AppBootSchemaVersion.BOOT3);
+					null);
 		}
 		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
 		when(taskLauncher.launch(any())).thenReturn("abc");
@@ -392,52 +390,6 @@ public class TaskExecutionControllerTests {
 		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
 	}
 
-	@Test
-	void bootExecution() throws Exception {
-		if (appRegistryService.getDefaultApp("timestamp2", ApplicationType.task) == null) {
-			appRegistryService.save("timestamp2",
-					ApplicationType.task,
-					"2.0.1",
-					new URI("file:src/test/resources/apps/foo-task"),
-					null,
-					AppBootSchemaVersion.BOOT2);
-		}
-		taskDefinitionRepository.save(new TaskDefinition("timestamp2", "timestamp2"));
-		when(taskLauncher.launch(any())).thenReturn("abc");
-
-		ResultActions resultActions = mockMvc.perform(
-						post("/tasks/executions/launch")
-								.queryParam("name", "timestamp2")
-								.queryParam("properties", "app.timestamp2.foo3=bar3,app.timestamp2.bar3=3foo")
-								.accept(MediaType.APPLICATION_JSON)
-				).andDo(print())
-				.andExpect(status().isCreated());
-
-		String response = resultActions.andReturn().getResponse().getContentAsString();
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		mapper.registerModule(new Jdk8Module());
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.registerModule(new Jackson2DataflowModule());
-		LaunchResponseResource resource = mapper.readValue(response, LaunchResponseResource.class);
-		resultActions = mockMvc.perform(
-						get("/tasks/executions/" + resource.getExecutionId())
-								.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(content().json("{taskName: \"timestamp2\"}"));
-		response = resultActions.andReturn().getResponse().getContentAsString();
-		System.out.println("response=" + response);
-		JsonNode json;
-		try (JsonParser parser = new ObjectMapper().createParser(response)) {
-			json = parser.readValueAs(JsonNode.class);
-		}
-		System.out.println("json=" + json.toPrettyString());
-		assertThat(json.findValue("deploymentProperties")).isNotNull();
-		JsonNode deploymentProperties = json.findValue("deploymentProperties");
-		System.out.println("deploymentProperties=" + deploymentProperties.toPrettyString());
-
-	}
 
 	@Test
 	void getExecutionsByName() throws Exception {

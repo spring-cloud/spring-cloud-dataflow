@@ -39,10 +39,10 @@ import org.springframework.boot.autoconfigure.transaction.TransactionManagerCust
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.impl.AggregateDataFlowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -53,12 +53,9 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
-import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.config.DataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -92,6 +89,7 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
@@ -127,9 +125,8 @@ import static org.mockito.Mockito.when;
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import({
 		CompletionConfiguration.class,
-		SchemaServiceConfiguration.class,
-		AggregateTaskConfiguration.class,
-		AggregateDataFlowTaskConfiguration.class
+		CompositeTaskConfiguration.class,
+		DataFlowTaskConfiguration.class
 })
 @ImportAutoConfiguration({
 		TransactionManagerCustomizationAutoConfiguration.class,
@@ -258,7 +255,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskDeleteService deleteTaskService(
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
@@ -267,7 +264,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			@Autowired(required = false) SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -279,7 +275,6 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
 				schedulerService,
-				schemaService,
 				taskConfigurationProperties,
 				dataSource);
 	}
@@ -318,7 +313,7 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -350,20 +345,20 @@ public class TaskServiceDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public TaskRepository taskRepository(DataSource dataSource) {
-		MultiSchemaTaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, "TASK_");
+		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource);
 		return new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 	}
 
 	@Bean
 	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
 		DataSource dataSource) {
-		return new AggregateDataFlowTaskExecutionQueryDao(dataSource);
+		return new DefaultDataFlowTaskExecutionQueryDao(dataSource);
 	}
 	@Bean
 	@ConditionalOnMissingBean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
 			LauncherRepository launcherRepository,

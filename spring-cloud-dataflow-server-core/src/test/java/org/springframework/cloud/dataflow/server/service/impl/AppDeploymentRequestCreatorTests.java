@@ -54,15 +54,13 @@ public class AppDeploymentRequestCreatorTests {
 	public ExpectedException thrown = ExpectedException.none();
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
-	@Autowired
-	protected PropertyResolver propertyResolver;
+
 	@Before
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
-				new DefaultStreamDefinitionService(),
-				propertyResolver);
+				new DefaultStreamDefinitionService());
 	}
 
 	@Test

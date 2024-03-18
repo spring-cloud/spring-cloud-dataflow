@@ -28,8 +28,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -55,12 +53,9 @@ public class TaskExecutionResourceTests {
 
 	@Test
 	public void testTaskExecutionStatusWithNoStartTime() {
-		for (AppBootSchemaVersion version : AppBootSchemaVersion.values()) {
-			SchemaVersionTarget target = SchemaVersionTarget.createDefault(version);
-			final TaskExecution taskExecution = new TaskExecution();
-			final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
-			assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.UNKNOWN);
-		}
+		final TaskExecution taskExecution = new TaskExecution();
+		final TaskExecutionResource taskExecutionResource = new TaskExecutionResource(taskExecution, null);
+		assertThat(taskExecutionResource.getTaskExecutionStatus()).isEqualTo(TaskExecutionStatus.UNKNOWN);
 	}
 
 	@Test

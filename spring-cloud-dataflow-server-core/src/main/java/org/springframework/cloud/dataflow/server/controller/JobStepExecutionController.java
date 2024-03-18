@@ -24,7 +24,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
 import org.springframework.cloud.dataflow.server.job.support.StepExecutionResourceBuilder;
@@ -37,11 +36,9 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,16 +78,13 @@ public class JobStepExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<StepExecutionResource> stepExecutions(
 			@PathVariable("jobExecutionId") long id,
-			@RequestParam(name = "schemaTarget", required = false) String schemaTarget,
 			Pageable pageable,
 			PagedResourcesAssembler<StepExecution> assembler
 	) throws NoSuchJobExecutionException {
-		if(!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
+
 		List<StepExecution> result = new ArrayList<>(jobService.getStepExecutions(id));
 		Page<StepExecution> page = new PageImpl<>(result, pageable, result.size());
-		final Assembler stepAssembler = new Assembler(schemaTarget);
+		final Assembler stepAssembler = new Assembler();
 		return assembler.toModel(page, stepAssembler);
 	}
 
@@ -108,14 +102,10 @@ public class JobStepExecutionController {
 	@ResponseStatus(HttpStatus.OK)
 	public StepExecutionResource getStepExecution(
 			@PathVariable("jobExecutionId") Long id,
-			@PathVariable("stepExecutionId") Long stepId,
-			@RequestParam(name = "schemaTarget", required = false) String schemaTarget)
+			@PathVariable("stepExecutionId") Long stepId)
 			throws NoSuchStepExecutionException, NoSuchJobExecutionException {
-		if(!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
 		StepExecution stepExecution = jobService.getStepExecution(id, stepId);
-		final Assembler stepAssembler = new Assembler(schemaTarget);
+		final Assembler stepAssembler = new Assembler();
 		return stepAssembler.toModel(stepExecution);
 	}
 
@@ -124,20 +114,18 @@ public class JobStepExecutionController {
 	 * {@link StepExecution}s to {@link StepExecutionResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<StepExecution, StepExecutionResource> {
-		private final String schemaTarget;
-		public Assembler(String schemaTarget) {
+		public Assembler() {
 			super(JobStepExecutionController.class, StepExecutionResource.class);
-			this.schemaTarget = schemaTarget;
 		}
 
 		@Override
 		public StepExecutionResource toModel(StepExecution stepExecution) {
-			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
+			return StepExecutionResourceBuilder.toModel(stepExecution);
 		}
 
 		@Override
 		public StepExecutionResource instantiateModel(StepExecution stepExecution) {
-			return StepExecutionResourceBuilder.toModel(stepExecution, schemaTarget);
+			return StepExecutionResourceBuilder.toModel(stepExecution);
 		}
 	}
 }

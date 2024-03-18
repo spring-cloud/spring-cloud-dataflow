@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,7 @@ import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskManifest;
@@ -48,7 +47,6 @@ import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskBatchException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
@@ -60,7 +58,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Repository that retrieves Tasks and JobExecutions/Instances and the associations
@@ -79,7 +76,7 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private final TaskExecutionService taskExecutionService;
 
-	private final AggregateTaskExplorer taskExplorer;
+	private final CompositeTaskExplorer taskExplorer;
 
 	private final JobService jobService;
 
@@ -88,17 +85,12 @@ public class DefaultTaskJobService implements TaskJobService {
 	private final LauncherRepository launcherRepository;
 
 
-	private final AggregateJobQueryDao aggregateJobQueryDao;
-
-
 	public DefaultTaskJobService(
 			JobService jobService,
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
-			LauncherRepository launcherRepository,
-			AggregateJobQueryDao aggregateJobQueryDao) {
-		this.aggregateJobQueryDao = aggregateJobQueryDao;
+			LauncherRepository launcherRepository) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
@@ -179,8 +171,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
 			Pageable pageable,
-			int taskExecutionId,
-			String schemaTarget
+			int taskExecutionId
 	) {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsWithStepCountForList(

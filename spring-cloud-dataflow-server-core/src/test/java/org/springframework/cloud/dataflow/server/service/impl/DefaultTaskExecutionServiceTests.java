@@ -45,8 +45,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -59,7 +59,6 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
@@ -161,7 +160,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	TaskExecutionService taskExecutionService;
 
 	@Autowired
-	AggregateTaskExplorer taskExplorer;
+    CompositeTaskExplorer taskExplorer;
 
 	@Autowired
 	LauncherRepository launcherRepository;
@@ -1199,7 +1198,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue", "spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	public static class Boot3TaskTests extends DefaultTaskExecutionServiceTests {
+	public static class TaskTests extends DefaultTaskExecutionServiceTests {
 
 		public static final String TIMESTAMP_3 = "timestamp3";
 
@@ -1208,8 +1207,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@BeforeEach
 		public void setup() throws MalformedURLException {
-			when(appRegistry.find(eq(TIMESTAMP_3), eq(ApplicationType.task))).thenReturn(new AppRegistration(TIMESTAMP_3, ApplicationType.task, "3.0.0", URI.create("https://timestamp3"), null, AppBootSchemaVersion.BOOT3));
-			when(appRegistry.find(not(eq(TIMESTAMP_3)), any(ApplicationType.class))).thenReturn(new AppRegistration("some-task", ApplicationType.task, "1.0.0", URI.create("https://timestamp3"), null, AppBootSchemaVersion.BOOT2));
+			when(appRegistry.find(eq(TIMESTAMP_3), eq(ApplicationType.task))).thenReturn(new AppRegistration(TIMESTAMP_3, ApplicationType.task, "3.0.0", URI.create("https://timestamp3"), null));
+			when(appRegistry.find(not(eq(TIMESTAMP_3)), any(ApplicationType.class))).thenReturn(new AppRegistration("some-task", ApplicationType.task, "1.0.0", URI.create("https://timestamp3"), null));
 			when(appRegistry.getAppResource(any())).thenReturn(new FileUrlResource("src/test/resources/apps/foo-task"));
 			assertThat(this.launcherRepository.findByName("default")).isNull();
 			this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, taskLauncher));
@@ -1217,7 +1216,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void launchBoot3CheckProperties() throws IOException {
+		public void launchCheckProperties() throws IOException {
 			this.taskDefinitionRepository.save(new TaskDefinition(TIMESTAMP_3, TIMESTAMP_3));
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
 			this.taskExecutionService.executeTask(TIMESTAMP_3, new HashMap<>(), new LinkedList<>());
@@ -1231,7 +1230,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void launchBoot3WithName() throws IOException {
+		public void launchWithName() throws IOException {
 			this.taskDefinitionRepository.save(new TaskDefinition("ts3", TIMESTAMP_3));
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
 			this.taskExecutionService.executeTask("ts3", new HashMap<>(), new LinkedList<>());
@@ -1244,7 +1243,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 		@Test
 		@DirtiesContext
-		public void launchBoot3WithNameAndVersion() throws IOException {
+		public void launchWithNameAndVersion() throws IOException {
 			DefaultTaskExecutionServiceTests.initializeMultiVersionRegistry(appRegistry);
 			this.taskDefinitionRepository.save(new TaskDefinition("ts3", "s1: some-name"));
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
@@ -1259,7 +1258,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 		}
 		@Test
 		@DirtiesContext
-		public void launchBoot3WithVersion() throws IOException {
+		public void launchWithVersion() throws IOException {
 			DefaultTaskExecutionServiceTests.initializeMultiVersionRegistry(appRegistry);
 			this.taskDefinitionRepository.save(new TaskDefinition("s3", "some-name"));
 			when(this.taskLauncher.launch(any())).thenReturn("abc");
@@ -1521,9 +1520,9 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 		@Test
 		@DirtiesContext
-		public void executeComposedTaskWithUserCTRNameBoot3Task() {
+		public void executeComposedTaskWithUserCTRNameTask() {
 			String dsl = "a1: AAA && b2: BBB";
-			when(appRegistry.find(eq("AAA"), eq(ApplicationType.task))).thenReturn(new AppRegistration("AAA", ApplicationType.task, "3.0.0", URI.create("https://helloworld"), null, AppBootSchemaVersion.BOOT3));
+			when(appRegistry.find(eq("AAA"), eq(ApplicationType.task))).thenReturn(new AppRegistration("AAA", ApplicationType.task, "3.0.0", URI.create("https://helloworld"), null));
 			when(appRegistry.find(not(eq("AAA")), any(ApplicationType.class))).thenReturn(new AppRegistration("some-name", ApplicationType.task, URI.create("https://helloworld")));
 			try {
 				when(appRegistry.getAppResource(any())).thenReturn(new FileUrlResource("src/test/resources/apps/foo-task"));
@@ -1919,7 +1918,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	private static void initializeMultiVersionRegistry(AppRegistryService appRegistry) throws MalformedURLException {
 		AppRegistration appRegistration100 = new AppRegistration("some-name", ApplicationType.task, "1.0.0", URI.create("https://helloworld/some-name-1.0.0.jar"), null);
 		AppRegistration appRegistration101 = new AppRegistration("some-name", ApplicationType.task, "1.0.1", URI.create("https://helloworld/some-name-1.0.1.jar"), null);
-		AppRegistration appRegistration102 = new AppRegistration("some-name", ApplicationType.task, "1.0.2", URI.create("https://helloworld/some-name-1.0.2.jar"), null, AppBootSchemaVersion.BOOT3);
+		AppRegistration appRegistration102 = new AppRegistration("some-name", ApplicationType.task, "1.0.2", URI.create("https://helloworld/some-name-1.0.2.jar"), null);
 		when(appRegistry.find(anyString(), any(ApplicationType.class))).thenReturn(appRegistration100);
 		when(appRegistry.find(anyString(), any(ApplicationType.class), eq("1.0.0"))).thenReturn(appRegistration100);
 		when(appRegistry.find(anyString(), any(ApplicationType.class), eq("1.0.1"))).thenReturn(appRegistration101);

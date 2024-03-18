@@ -1,4 +1,4 @@
-package org.springframework.cloud.dataflow.aggregate.task;
+package org.springframework.cloud.dataflow.composite.task;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 

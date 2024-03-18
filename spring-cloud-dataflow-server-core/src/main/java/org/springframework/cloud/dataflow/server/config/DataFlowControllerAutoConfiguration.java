@@ -56,7 +56,6 @@ import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.StreamDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -101,7 +100,7 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
@@ -270,7 +269,7 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public TaskExecutionController taskExecutionController(
-				AggregateTaskExplorer explorer,
+				CompositeTaskExplorer explorer,
 			   	TaskExecutionService taskExecutionService,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionInfoService taskExecutionInfoService,
@@ -296,14 +295,14 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
 				TaskExecutionService taskExecutionService,
 				TaskJobService taskJobService,
-				AggregateTaskExplorer taskExplorer
+				CompositeTaskExplorer taskExplorer
 		) {
 			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 		}
 
 		@Bean
 		public TaskDefinitionController taskDefinitionController(
-				AggregateTaskExplorer taskExplorer,
+				CompositeTaskExplorer taskExplorer,
 				TaskDefinitionRepository repository,
 				TaskSaveService taskSaveService,
 																 TaskDeleteService taskDeleteService,
@@ -499,10 +498,9 @@ public class DataFlowControllerAutoConfiguration {
 		public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 																		   CommonApplicationProperties commonApplicationProperties,
 																		   ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
-																		   StreamDefinitionService streamDefinitionService,
-																		   PropertyResolver propertyResolver) {
+																		   StreamDefinitionService streamDefinitionService) {
 			return new AppDeploymentRequestCreator(appRegistry, commonApplicationProperties,
-					applicationConfigurationMetadataResolver, streamDefinitionService, propertyResolver);
+					applicationConfigurationMetadataResolver, streamDefinitionService);
 		}
 
 		@Bean

@@ -398,9 +398,9 @@ public class DefaultStreamServiceIntegrationTests {
 
 	private void createTickTock() throws URISyntaxException {
 		String timeUri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
-		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null, null);
+		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null);
 		String logUri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
-		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null, null);
+		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null);
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");

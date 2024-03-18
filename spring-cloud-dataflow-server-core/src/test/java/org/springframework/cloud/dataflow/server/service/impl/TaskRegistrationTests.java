@@ -42,14 +42,11 @@ import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRep
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -62,7 +59,7 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(
-		classes = {AggregateTaskTests.TestConfiguration.class},
+		classes = {TaskRegistrationTests.TestConfiguration.class},
 		properties = {"spring.main.allow-bean-definition-overriding=true"}
 )
 @ImportAutoConfiguration({
@@ -81,31 +78,26 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class AggregateTaskTests {
+public class TaskRegistrationTests {
 	@Autowired
 	AppRegistryService appRegistryService;
 
 	@Test
-	public void testBoot3Registration() throws URISyntaxException {
+	public void testRegistration() throws URISyntaxException {
 		// given
-		appRegistryService.save("timestamp", ApplicationType.task, "2.0.2", new URI("maven://io.spring:timestamp-task:2.0.2"), null, null);
-		appRegistryService.save("timestamp", ApplicationType.task, "3.0.0", new URI("maven://io.spring:timestamp-task:3.0.0"), null, AppBootSchemaVersion.BOOT3);
+		appRegistryService.save("timestamp", ApplicationType.task, "2.0.2", new URI("maven://io.spring:timestamp-task:2.0.2"), null);
+		appRegistryService.save("timestamp", ApplicationType.task, "3.0.0", new URI("maven://io.spring:timestamp-task:3.0.0"), null);
 		// when
 		AppRegistration timestamp = appRegistryService.find("timestamp", ApplicationType.task, "2.0.2");
 		AppRegistration timestamp3 = appRegistryService.find("timestamp", ApplicationType.task, "3.0.0");
 		// then
 		assertThat(timestamp).isNotNull();
-		assertThat(timestamp.getBootVersion()).isNotNull();
-		assertThat(timestamp.getBootVersion()).isEqualTo(AppBootSchemaVersion.defaultVersion());
+
 		assertThat(timestamp3).isNotNull();
-		assertThat(timestamp3.getBootVersion()).isNotNull();
-		assertThat(timestamp3.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
+
 	}
 
 
-	@Import({
-			SchemaServiceConfiguration.class
-	})
 	@Configuration
 	static class TestConfiguration {
 

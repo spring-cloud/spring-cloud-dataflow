@@ -58,9 +58,7 @@
 		<module>spring-cloud-dataflow-container-registry</module>
 		<module>spring-cloud-dataflow-configuration-metadata</module>
 		<module>spring-cloud-dataflow-core-dsl</module>
-		<module>spring-cloud-dataflow-schema-core</module>
 		<module>spring-cloud-dataflow-core</module>
-		<module>spring-cloud-dataflow-schema</module>
 		<module>spring-cloud-dataflow-aggregate-task</module>
 		<module>spring-cloud-dataflow-server-core</module>
 		<module>spring-cloud-dataflow-rest-resource</module>

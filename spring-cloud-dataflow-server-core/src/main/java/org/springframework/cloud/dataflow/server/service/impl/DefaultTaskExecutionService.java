@@ -37,8 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -53,7 +53,6 @@ import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.core.dsl.visitor.ComposedTaskRunnerVisitor;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
@@ -135,7 +134,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
-	private final AggregateTaskExplorer taskExplorer;
+	private final CompositeTaskExplorer taskExplorer;
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
@@ -198,7 +197,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-		AggregateTaskExplorer taskExplorer,
+		CompositeTaskExplorer taskExplorer,
 		DataflowTaskExecutionDao dataflowTaskExecutionDao,
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -256,7 +255,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-		AggregateTaskExplorer taskExplorer,
+		CompositeTaskExplorer taskExplorer,
 		DataflowTaskExecutionDao dataflowTaskExecutionDao,
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -504,37 +503,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		return new LaunchResponse(taskExecution.getExecutionId());
 	}
 
-	private void addDefaultDeployerProperties(
-		String platformType,
-		SchemaVersionTarget schemaVersionTarget,
-		Map<String, String> deploymentProperties
-	) {
-		String bootVersion = schemaVersionTarget.getSchemaVersion().getBootVersion();
-		switch (platformType) {
-			case TaskPlatformFactory.LOCAL_PLATFORM_TYPE: {
-				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
-				if (StringUtils.hasText(javaHome)) {
-					String property = "spring.cloud.deployer.local.javaHomePath." + bootVersion;
-					addProperty(property, javaHome, deploymentProperties);
-				}
-				break;
-			}
-			case TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE: {
-				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
-				if (StringUtils.hasText(buildpack)) {
-					String property = "spring.cloud.deployer.cloudfoundry.buildpack";
-					addProperty(property, buildpack, deploymentProperties);
-				}
-				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
-				if (StringUtils.hasText(buildpacks)) {
-					String property = "spring.cloud.deployer.cloudfoundry.buildpacks";
-					addProperty(property, buildpacks, deploymentProperties);
-				}
-				break;
-			}
-		}
-	}
-
 	private static void addProperty(String property, String value, Map<String, String> properties) {
 		if (properties.containsKey(property)) {
 			logger.info("overriding:{}={}", property, properties.get(property));
@@ -542,28 +510,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 			logger.info("adding:{}={}", property, value);
 		}
 		properties.put(property, value);
-	}
-
-	private static void addPrefixProperties(SchemaVersionTarget schemaVersionTarget, String prefix, Map<String, String> deploymentProperties) {
-		addProperty(prefix + "spring.cloud.task.initialize-enabled", "false", deploymentProperties);
-		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.deployer.bootVersion", schemaVersionTarget.getSchemaVersion().getBootVersion(), deploymentProperties);
-	}
-
-	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
-		addCommandLine(prefix + "spring.cloud.task.initialize-enabled", "false", commandLineArgs);
-		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.deployer.bootVersion", schemaVersionTarget.getSchemaVersion().getBootVersion(), commandLineArgs);
-	}
-
-	private static void addCommandLine(String property, String value, List<String> commandLineArgs) {
-		String argPrefix = "--" + property + "=";
-		commandLineArgs.removeIf(item -> item.startsWith(argPrefix));
-		commandLineArgs.add(argPrefix + value);
 	}
 
 	private void validateTaskName(String taskName, Launcher launcher) {

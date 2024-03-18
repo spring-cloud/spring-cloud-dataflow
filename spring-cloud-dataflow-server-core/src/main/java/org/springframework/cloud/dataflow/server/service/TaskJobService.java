@@ -184,13 +184,11 @@ public interface TaskJobService {
 	 *
 	 * @param pageable        enumerates the data to be returned.
 	 * @param taskExecutionId the task execution id associated with the execution.
-	 * @param schemaTarget    the schema target of the task execution.
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
 		Pageable pageable,
-		int taskExecutionId,
-		String schemaTarget
+		int taskExecutionId
 	) throws NoSuchJobException;
 }

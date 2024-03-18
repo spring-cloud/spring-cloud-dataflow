@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.aggregate.task;
+package org.springframework.cloud.dataflow.composite.task;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultAggregateTaskExplorer;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
+import org.springframework.cloud.dataflow.composite.task.impl.DefaultCompositeTaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.util.Assert;
 
 /**
@@ -31,23 +28,20 @@ import org.springframework.util.Assert;
  * @author Corneil du Plessis
  */
 @Configuration
-@Import(SchemaServiceConfiguration.class)
-public class AggregateTaskConfiguration {
+public class CompositeTaskConfiguration {
 
 	@Bean
-	public AggregateTaskExplorer aggregateTaskExplorer(
+	public CompositeTaskExplorer aggregateTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
-			SchemaService schemaService,
 			TaskDefinitionReader taskDefinitionReader,
 			TaskDeploymentReader taskDeploymentReader
 	) {
 		Assert.notNull(dataSource, "dataSource required");
 		Assert.notNull(taskExecutionQueryDao, "taskExecutionQueryDao required");
-		Assert.notNull(schemaService, "schemaService required");
 		Assert.notNull(taskDefinitionReader, "taskDefinitionReader required");
 		Assert.notNull(taskDeploymentReader, "taskDeploymentReader required");
-		return new DefaultAggregateTaskExplorer(dataSource,
+		return new DefaultCompositeTaskExplorer(dataSource,
 				taskExecutionQueryDao,
 				taskDefinitionReader,
 				taskDeploymentReader);

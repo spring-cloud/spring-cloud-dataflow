@@ -34,7 +34,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -45,7 +45,6 @@ import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
@@ -94,7 +93,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	/**
 	 * Used to read TaskExecutions.
 	 */
-	private final AggregateTaskExplorer taskExplorer;
+	private final CompositeTaskExplorer taskExplorer;
 
 	private final LauncherRepository launcherRepository;
 
@@ -114,14 +113,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	private final SchemaService schemaService;
-
 	private final int taskDeleteChunkSize;
 
 	private final DataSource dataSource;
 
 	public DefaultTaskDeleteService(
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
@@ -130,7 +127,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -154,7 +150,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.schedulerService = schedulerService;
-		this.schemaService = schemaService;
 		this.taskDeleteChunkSize = taskConfigurationProperties.getExecutionDeleteChunkSize();
 		this.dataSource = dataSource;
 	}

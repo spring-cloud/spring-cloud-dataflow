@@ -22,12 +22,11 @@ import jakarta.servlet.Filter;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -66,9 +65,8 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		FeaturesConfiguration.class,
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
-		SchemaServiceConfiguration.class,
-		AggregateTaskConfiguration.class,
-		AggregateDataFlowTaskConfiguration.class
+		CompositeTaskConfiguration.class,
+		DataFlowTaskConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 @ComponentScan(basePackages = {"org.springframework.cloud.dataflow.schema.service", "org.springframework.cloud.dataflow.aggregate.task"})

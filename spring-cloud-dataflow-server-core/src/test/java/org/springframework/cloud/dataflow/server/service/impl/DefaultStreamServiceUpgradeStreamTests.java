@@ -77,14 +77,10 @@ public class DefaultStreamServiceUpgradeStreamTests {
 									"  spec:\n" +
 									"    applicationProperties:\n" +
 									"      spring.cloud.dataflow.stream.app.type: sink\n" +
-									"    deploymentProperties:\n" +
-									"      spring.cloud.deployer.bootVersion: '2'\n" +
 									"time:\n" +
 									"  spec:\n" +
 									"    applicationProperties:\n" +
-									"      spring.cloud.dataflow.stream.app.type: source\n" +
-									"    deploymentProperties:\n" +
-									"      spring.cloud.deployer.bootVersion: '2'\n", false, null);
+									"      spring.cloud.dataflow.stream.app.type: source\n", false, null);
 			verifyNoMoreInteractions(this.skipperStreamDeployer);
 		}
 	}

@@ -110,11 +110,10 @@ public class DefaultStreamServiceTests {
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryService = mock(AppRegistryService.class);
 		this.auditRecordService = mock(AuditRecordService.class); // FIXME
-		PropertyResolver propertyResolver = mock(PropertyResolver.class);
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(this.appRegistryService,
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
-				new DefaultStreamDefinitionService(), propertyResolver);
+				new DefaultStreamDefinitionService());
 		this.streamValidationService = mock(DefaultStreamValidationService.class);
 		this.defaultStreamService = new DefaultStreamService(streamDefinitionRepository,
 				this.skipperStreamDeployer, this.appDeploymentRequestCreator, this.streamValidationService,
