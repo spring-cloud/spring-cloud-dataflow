@@ -11,17 +11,15 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 
 public class MultiSchemaTaskExecutionDaoFactoryBean extends TaskExecutionDaoFactoryBean {
 	private final DataSource dataSource;
-	private final String tablePrefix;
-	public MultiSchemaTaskExecutionDaoFactoryBean(DataSource dataSource, String tablePrefix) {
-		super(dataSource, tablePrefix);
+	public MultiSchemaTaskExecutionDaoFactoryBean(DataSource dataSource) {
+		super(dataSource);
 		this.dataSource = dataSource;
-		this.tablePrefix = tablePrefix;
 	}
 
 	@Override
 	public TaskExecutionDao getObject() throws Exception {
 		DataFieldMaxValueIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
-		JdbcTaskExecutionDao dao = new JdbcTaskExecutionDao(dataSource, this.tablePrefix);
+		JdbcTaskExecutionDao dao = new JdbcTaskExecutionDao(dataSource);
 		String databaseType;
 		try {
 			databaseType = DatabaseType.fromMetaData(dataSource).name();
@@ -29,7 +27,7 @@ public class MultiSchemaTaskExecutionDaoFactoryBean extends TaskExecutionDaoFact
 		catch (MetaDataAccessException e) {
 			throw new IllegalStateException(e);
 		}
-		dao.setTaskIncrementer(incrementerFactory.getIncrementer(databaseType, this.tablePrefix + "SEQ"));
+		dao.setTaskIncrementer(incrementerFactory.getIncrementer(databaseType,"TASK_SEQ"));
 		return dao;
 	}
 }

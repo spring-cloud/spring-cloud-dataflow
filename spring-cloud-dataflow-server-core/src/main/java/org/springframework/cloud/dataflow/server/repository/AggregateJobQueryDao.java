@@ -49,6 +49,6 @@ public interface AggregateJobQueryDao {
 
 	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
-	JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException;
+	JobInstance getJobInstance(long id) throws NoSuchJobInstanceException;
 
 }

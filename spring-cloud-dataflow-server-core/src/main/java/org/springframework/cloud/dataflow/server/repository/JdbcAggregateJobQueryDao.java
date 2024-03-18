@@ -137,8 +137,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			", (SELECT COUNT(*) FROM AGGREGATE_STEP_EXECUTION S WHERE S.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND S.SCHEMA_TARGET = E.SCHEMA_TARGET) as STEP_COUNT";
 
 	private static final String GET_JOB_INSTANCE_BY_ID = "SELECT I.JOB_INSTANCE_ID, I.VERSION, I.JOB_NAME, I.JOB_KEY" +
-		" FROM AGGREGATE_JOB_INSTANCE I" +
-		" WHERE I.JOB_INSTANCE_ID = ? AND I.SCHEMA_TARGET = ?";
+		" FROM BATCH_JOB_INSTANCE I" +
+		" WHERE I.JOB_INSTANCE_ID = ?";
 
 	private static final String NAME_FILTER = "I.JOB_NAME LIKE ?";
 
@@ -295,8 +295,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 	}
 
 	@Override
-	public JobInstance getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException {
-		List<JobInstance> instances = jdbcTemplate.query(GET_JOB_INSTANCE_BY_ID, new JobInstanceExtractor(), id, schemaTarget);
+	public JobInstance getJobInstance(long id) throws NoSuchJobInstanceException {
+		List<JobInstance> instances = jdbcTemplate.query(GET_JOB_INSTANCE_BY_ID, new JobInstanceExtractor(), id);
 		if (ObjectUtils.isEmpty(instances)) {
 			throw new NoSuchJobInstanceException(String.format("JobInstance with id=%d does not exist", id));
 		} else if (instances.size() > 1) {

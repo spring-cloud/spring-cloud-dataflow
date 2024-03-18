@@ -62,26 +62,6 @@ abstract class AbstractJdbcAggregateJobQueryDaoTests extends AbstractDaoTests {
 		this.databaseType = databaseType;
 	}
 
-	@Test
-	void getJobInstancesForBoot3AndBoot2Instances() throws Exception {
-		assertThatThrownBy( () -> this.jdbcAggregateJobQueryDao.getJobInstance(1, "boot2"))
-			.isInstanceOf(NoSuchJobInstanceException.class)
-			.hasMessageContaining("JobInstance with id=1 does not exist");
-		assertThatThrownBy( () -> this.jdbcAggregateJobQueryDao.getJobInstance(1, "boot3"))
-			.isInstanceOf(NoSuchJobInstanceException.class)
-			.hasMessageContaining("JobInstance with id=1 does not exist");
-		createJobInstance("BOOT2", SchemaVersionTarget.defaultTarget());
-		createJobInstance("BOOT3", SchemaVersionTarget.createDefault(AppBootSchemaVersion.BOOT3));
-		verifyJobInstance(1, "boot2", "BOOT2");
-		verifyJobInstance(1, "boot3", "BOOT3");
-	}
-
-	private void verifyJobInstance(long id, String schemaTarget, String suffix) throws Exception{
-		JobInstance  jobInstance = this.jdbcAggregateJobQueryDao.getJobInstance(id, schemaTarget);
-		assertThat(jobInstance).isNotNull();
-		assertThat(jobInstance.getJobName()).isEqualTo(BASE_JOB_INST_NAME + suffix );
-	}
-
 	private JobInstance createJobInstance(String suffix, SchemaVersionTarget schemaVersionTarget) {
 		this.jdbcSearchableJobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(this.databaseType.name(),
 			schemaVersionTarget.getBatchPrefix()+ "JOB_SEQ"));

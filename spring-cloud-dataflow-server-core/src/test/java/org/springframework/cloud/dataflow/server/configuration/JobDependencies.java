@@ -53,7 +53,6 @@ import org.springframework.cloud.dataflow.configuration.metadata.BootApplication
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistryService;
@@ -109,6 +108,7 @@ import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -423,7 +423,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskRepository taskRepository(DataSource dataSource) {
-		MultiSchemaTaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, "TASK_");
+		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource, "TASK_");
 		return new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 	}
 

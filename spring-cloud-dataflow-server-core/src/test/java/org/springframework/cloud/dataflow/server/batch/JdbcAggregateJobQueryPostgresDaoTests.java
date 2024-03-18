@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -25,8 +24,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 
-//TODO: Boot3x followup
-@Disabled("TODO: Boot3 followup after boot3/boot2 task changes are complete")
 @Testcontainers
 public class JdbcAggregateJobQueryPostgresDaoTests extends AbstractJdbcAggregateJobQueryDaoTests {
 
