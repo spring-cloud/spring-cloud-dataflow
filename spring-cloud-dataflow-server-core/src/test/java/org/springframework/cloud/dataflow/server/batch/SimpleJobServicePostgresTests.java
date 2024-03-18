@@ -25,7 +25,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,16 +32,16 @@ import org.springframework.test.context.DynamicPropertySource;
 @JdbcTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=none",
 	"spring.test.context.cache.maxSize=2",
-	"spring.datasource.hikari.maximum-pool-size=2"
+	"spring.datasource.hikari.maximum-pool-size=4"
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServicePostgresTests.SimpleJobTestPostgresConfiguration.class)
 @Testcontainers
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class SimpleJobServicePostgresTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14");
+	private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14")
+		.withCommand("-c", "max_connections=500");
 
 	@BeforeEach
 	void setup() throws Exception {
