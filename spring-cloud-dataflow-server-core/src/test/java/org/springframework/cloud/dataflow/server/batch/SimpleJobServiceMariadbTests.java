@@ -41,7 +41,8 @@ import org.springframework.test.context.DynamicPropertySource;
 public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
 
 	@Container
-	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.6");
+	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.6")
+		.withCommand("--max-connections=500");
 
 	@BeforeEach
 	void setup() throws Exception {
