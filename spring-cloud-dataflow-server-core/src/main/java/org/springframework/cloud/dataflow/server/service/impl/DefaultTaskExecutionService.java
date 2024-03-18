@@ -37,8 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -135,7 +135,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 
 	private final TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
-	private final AggregateTaskExplorer taskExplorer;
+	private final CompositeTaskExplorer taskExplorer;
 
 	private final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
@@ -198,7 +198,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-		AggregateTaskExplorer taskExplorer,
+		CompositeTaskExplorer taskExplorer,
 		DataflowTaskExecutionDao dataflowTaskExecutionDao,
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -256,7 +256,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskExecutionCreationService taskExecutionRepositoryService,
 		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-		AggregateTaskExplorer taskExplorer,
+		CompositeTaskExplorer taskExplorer,
 		DataflowTaskExecutionDao dataflowTaskExecutionDao,
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,

@@ -34,7 +34,7 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -94,7 +94,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	/**
 	 * Used to read TaskExecutions.
 	 */
-	private final AggregateTaskExplorer taskExplorer;
+	private final CompositeTaskExplorer taskExplorer;
 
 	private final LauncherRepository launcherRepository;
 
@@ -121,7 +121,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	private final DataSource dataSource;
 
 	public DefaultTaskDeleteService(
-			AggregateTaskExplorer taskExplorer,
+			CompositeTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.aggregate.task.impl;
+package org.springframework.cloud.dataflow.composite.task.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.database.Order;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.database.PagingQueryProvider;
 import org.springframework.cloud.task.repository.database.support.SqlPagingQueryProviderFactoryBean;
@@ -55,13 +55,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Provide aggregate data for Boot 3 and Boot &lt;=2 TaskExecutions.
+ * Implementation of the {@link DataflowTaskExecutionQueryDao}.
  *
  * @author Corneil du Plessis
  */
 
-public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecutionQueryDao {
-	private final static Logger logger = LoggerFactory.getLogger(AggregateDataFlowTaskExecutionQueryDao.class);
+public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecutionQueryDao {
+	private final static Logger logger = LoggerFactory.getLogger(DefaultDataFlowTaskExecutionQueryDao.class);
 
 	/**
 	 * SELECT clause for task execution.
@@ -74,7 +74,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	/**
 	 * FROM clause for task execution.
 	 */
-	public static final String FROM_CLAUSE = "AGGREGATE_TASK_EXECUTION";
+	public static final String FROM_CLAUSE = "TASK_EXECUTION";
 
 	private static final String FIND_TASK_ARGUMENTS = "SELECT TASK_EXECUTION_ID, "
 			+ "TASK_PARAM from TASK_EXECUTION_PARAMS where TASK_EXECUTION_ID = :taskExecutionId";
@@ -87,7 +87,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 
 	private final static String GET_CHILD_EXECUTION_BY_ID = GET_EXECUTIONS +
 			" where PARENT_EXECUTION_ID = :taskExecutionId" +
-			" and (SELECT COUNT(*) FROM AGGREGATE_TASK_EXECUTION_PARAMS P " +
+			" and (SELECT COUNT(*) FROM TASK_EXECUTION_PARAMS P " +
 			"           WHERE P.TASK_EXECUTION_ID=TASK_EXECUTION_ID " +
 			"             AND P.SCHEMA_TARGET=SCHEMA_TARGET" +
 			"             AND P.TASK_PARAM = :schemaTarget) > 0";
@@ -122,9 +122,6 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	private static final String TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
 			+ "TASK_EXECUTION where TASK_NAME = :taskName";
 
-	private static final String TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
-			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME < :endTime";
-
 	private static final String COMPLETED_TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
 			+ "TASK_EXECUTION WHERE END_TIME IS NOT NULL";
 
@@ -132,29 +129,27 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			+ "TASK_EXECUTION WHERE END_TIME IS NOT NULL AND END_TIME < :endTime";
 
 	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
-			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL ";
+			+ "TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL ";
 
 	private static final String COMPLETED_TASK_EXECUTION_COUNT_BY_NAME_AND_BEFORE_END_TIME = "SELECT COUNT(*) FROM "
 			+ "TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NOT NULL AND END_TIME < :endTime ";
 
 
 	private static final String RUNNING_TASK_EXECUTION_COUNT_BY_NAME = "SELECT COUNT(*) FROM "
-			+ "AGGREGATE_TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NULL ";
+			+ "TASK_EXECUTION where TASK_NAME = :taskName AND END_TIME IS NULL ";
 
 	private static final String RUNNING_TASK_EXECUTION_COUNT = "SELECT COUNT(*) FROM "
-			+ "AGGREGATE_TASK_EXECUTION where END_TIME IS NULL ";
+			+ "TASK_EXECUTION where END_TIME IS NULL ";
 
 	private static final String LAST_TASK_EXECUTIONS_BY_TASK_NAMES = "select TE2.* from ("
 			+ "select MAX(TE.TASK_EXECUTION_ID) as TASK_EXECUTION_ID, TE.TASK_NAME, TE.START_TIME from ("
 			+ "select TASK_NAME, MAX(START_TIME) as START_TIME"
-			+ "      FROM AGGREGATE_TASK_EXECUTION where TASK_NAME in (:taskNames)"
+			+ "      FROM TASK_EXECUTION where TASK_NAME in (:taskNames)"
 			+ "      GROUP BY TASK_NAME) TE_MAX"
-			+ " inner join AGGREGATE_TASK_EXECUTION TE ON TE.TASK_NAME = TE_MAX.TASK_NAME AND TE.START_TIME = TE_MAX.START_TIME"
+			+ " inner join TASK_EXECUTION TE ON TE.TASK_NAME = TE_MAX.TASK_NAME AND TE.START_TIME = TE_MAX.START_TIME"
 			+ " group by TE.TASK_NAME, TE.START_TIME" + ") TE1"
-			+ " inner join AGGREGATE_TASK_EXECUTION TE2 ON TE1.TASK_EXECUTION_ID = TE2.TASK_EXECUTION_ID AND TE1.SCHEMA_TARGET = TE2.SCHEMA_TARGET"
+			+ " inner join TASK_EXECUTION TE2 ON TE1.TASK_EXECUTION_ID = TE2.TASK_EXECUTION_ID AND TE1.SCHEMA_TARGET = TE2.SCHEMA_TARGET"
 			+ " order by TE2.START_TIME DESC, TE2.TASK_EXECUTION_ID DESC";
-
-	private static final String FIND_TASK_NAMES = "SELECT distinct TASK_NAME from AGGREGATE_TASK_EXECUTION order by TASK_NAME";
 
 	private static final Set<String> validSortColumns = new HashSet<>(10);
 
@@ -179,11 +174,11 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	private final LinkedHashMap<String, Order> orderMap;
 
 	/**
-	 * Initializes the AggregateDataFlowJobExecutionDao.
+	 * Initializes the DefaultDataFlowJobExecutionDao.
 	 *
 	 * @param dataSource used by the dao to execute queries and update the tables.
 	 */
-	public AggregateDataFlowTaskExecutionQueryDao(DataSource dataSource) {
+	public DefaultDataFlowTaskExecutionQueryDao(DataSource dataSource) {
 		Assert.notNull(dataSource, "The dataSource must not be null.");
 		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 		this.dataSource = dataSource;

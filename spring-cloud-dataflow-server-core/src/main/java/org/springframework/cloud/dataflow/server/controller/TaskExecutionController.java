@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -102,7 +102,7 @@ public class TaskExecutionController {
 
 	private final TaskDeleteService taskDeleteService;
 
-	private final AggregateTaskExplorer explorer;
+	private final CompositeTaskExplorer explorer;
 
 	private final TaskJobService taskJobService;
 
@@ -131,7 +131,7 @@ public class TaskExecutionController {
 	 * @param taskDeleteService         the task deletion service
 	 * @param taskJobService            the task job service
 	 */
-	public TaskExecutionController(AggregateTaskExplorer explorer,
+	public TaskExecutionController(CompositeTaskExplorer explorer,
 								   TaskExecutionService taskExecutionService,
 								   TaskDefinitionRepository taskDefinitionRepository,
 								   TaskExecutionInfoService taskExecutionInfoService,

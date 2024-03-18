@@ -23,8 +23,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.composite.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
@@ -59,7 +59,7 @@ import java.sql.SQLException;
  * @author Corneil du Plessis
  */
 @Configuration
-public class AggregateDataFlowTaskConfiguration {
+public class DataFlowTaskConfiguration {
 
 	@Bean
 	public DataflowJobExecutionDao dataflowJobExecutionDao(DataSource dataSource) {
