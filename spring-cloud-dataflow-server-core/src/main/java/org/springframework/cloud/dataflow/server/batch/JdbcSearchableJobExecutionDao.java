@@ -715,12 +715,13 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			}
 			Timestamp startTime = rs.getTimestamp(2);
 			Timestamp endTime = rs.getTimestamp(3);
+			Timestamp lastUpdatedTime = rs.getTimestamp(8);
 			jobExecution.setStartTime((startTime != null) ? startTime.toLocalDateTime() : null);
 			jobExecution.setEndTime((endTime != null) ? endTime.toLocalDateTime() : null);
 			jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 			jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
 			jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());
-			jobExecution.setLastUpdated(rs.getTimestamp(8).toLocalDateTime());
+			jobExecution.setLastUpdated((lastUpdatedTime != null) ? lastUpdatedTime.toLocalDateTime() : null);
 			jobExecution.setVersion(rs.getInt(9));
 			return jobExecution;
 		}
