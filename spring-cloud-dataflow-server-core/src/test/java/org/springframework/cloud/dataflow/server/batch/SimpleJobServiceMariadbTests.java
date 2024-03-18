@@ -25,7 +25,6 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,12 +32,11 @@ import org.springframework.test.context.DynamicPropertySource;
 @JdbcTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=none",
 	"spring.test.context.cache.maxSize=2",
-	"spring.datasource.hikari.maximum-pool-size=2",
+	"spring.datasource.hikari.maximum-pool-size=4",
 	"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestMariaDBConfiguration.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Testcontainers
 public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
 
