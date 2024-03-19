@@ -3,40 +3,27 @@ name: CI PRs
 on:
   pull_request:
 
-env:
-  MAVEN_THREADS: '-T 1'
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    # cache maven repo
-    - uses: actions/cache@v3
+    - uses: jlumbroso/free-disk-space@main
       with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-m2-
-    # jdk8
+        tool-cache: false
+        dotnet: false
+        docker-images: false
+        swap-storage: false
+        large-packages: false
     - uses: actions/setup-java@v3
       with:
         java-version: '8'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - name: Setup Testcontainers Cloud Client
-      uses: atomicjar/testcontainers-cloud-setup-action@v1
-      with:
-        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
-      # build
     - name: Build
       shell: bash
       timeout-minutes: 75
       run: |
-        mvn -B -s .github/settings.xml clean install
+        ./mvnw -B -s .github/settings.xml clean install
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
@@ -52,10 +39,6 @@ jobs:
         name: Unit Tests
         path: '**/surefire-reports/*.xml'
         retention-days: 3
-    # clean m2 cache
-    - name: Clean cache
-      run: |
-        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
   scan:
     runs-on: ubuntu-latest
     steps:
