@@ -54,7 +54,6 @@ import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
@@ -353,8 +352,7 @@ public class TaskExecutionControllerTests {
 					ApplicationType.task,
 					"3.0.0",
 					new URI("file:src/test/resources/apps/foo-task"),
-					null,
-					AppBootSchemaVersion.BOOT3);
+					null);
 		}
 		taskDefinitionRepository.save(new TaskDefinition("timestamp3", "timestamp3"));
 		when(taskLauncher.launch(any())).thenReturn("abc");
@@ -399,8 +397,7 @@ public class TaskExecutionControllerTests {
 					ApplicationType.task,
 					"2.0.1",
 					new URI("file:src/test/resources/apps/foo-task"),
-					null,
-					AppBootSchemaVersion.BOOT2);
+					null);
 		}
 		taskDefinitionRepository.save(new TaskDefinition("timestamp2", "timestamp2"));
 		when(taskLauncher.launch(any())).thenReturn("abc");

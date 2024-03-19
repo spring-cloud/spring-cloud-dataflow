@@ -35,19 +35,15 @@ import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionServiceUtils;
 import org.springframework.cloud.dataflow.core.StreamPropertyKeys;
-import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Create the list of {@link AppDeploymentRequest}s from a {@link StreamDefinition} and
@@ -74,16 +70,12 @@ public class AppDeploymentRequestCreator {
 
 	private final StreamDefinitionService streamDefinitionService;
 
-	private final PropertyResolver propertyResolver;
 
 	public AppDeploymentRequestCreator(
 		AppRegistryService appRegistry,
 		CommonApplicationProperties commonApplicationProperties,
 		ApplicationConfigurationMetadataResolver metadataResolver,
-		StreamDefinitionService streamDefinitionService,
-		PropertyResolver propertyResolver
-	) {
-		Assert.notNull(propertyResolver, "propertyResolver must not be null");
+		StreamDefinitionService streamDefinitionService) {
 		Assert.notNull(appRegistry, "AppRegistryService must not be null");
 		Assert.notNull(commonApplicationProperties, "CommonApplicationProperties must not be null");
 		Assert.notNull(metadataResolver, "MetadataResolver must not be null");
@@ -92,7 +84,6 @@ public class AppDeploymentRequestCreator {
 		this.commonApplicationProperties = commonApplicationProperties;
 		this.visibleProperties = new VisibleProperties(metadataResolver);
 		this.streamDefinitionService = streamDefinitionService;
-		this.propertyResolver = propertyResolver;
 	}
 
 	public List<AppDeploymentRequest> createUpdateRequests(
@@ -128,7 +119,6 @@ public class AppDeploymentRequestCreator {
 				this.visibleProperties.qualifyProperties(appUpdateTimeProperties, metadataResource);
 
 			expandedAppUpdateTimeProperties.put(DataFlowPropertyKeys.STREAM_APP_TYPE, type.toString());
-			addBootVersion(currentApp.getName(), appRegistration.getBootVersion(), deployerDeploymentProperties);
 
 
 			AppDefinition appDefinition = new AppDefinition(currentApp.getName(), expandedAppUpdateTimeProperties);
@@ -138,53 +128,6 @@ public class AppDeploymentRequestCreator {
 			appDeploymentRequests.add(request);
 		}
 		return appDeploymentRequests;
-	}
-
-	private void addBootVersion(
-		String name,
-		AppBootSchemaVersion bootVersion,
-		Map<String, String> deployerDeploymentProperties
-	) {
-		deployerDeploymentProperties.put("spring.cloud.deployer.bootVersion", bootVersion.getBootVersion());
-	}
-
-	private void addDefaultDeployerProperties(
-		String appName,
-		String platformType,
-		String bootVersion,
-		Map<String, String> deploymentProperties
-	) {
-		switch (platformType) {
-			case "local": {
-				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
-				if (StringUtils.hasText(javaHome)) {
-					String property = "spring.cloud.deployer.local.javaHomePath." + bootVersion;
-					deploymentProperties.put(property, javaHome);
-					logger.debug("added:{}={}", property, javaHome);
-				}
-				break;
-			}
-			case "cloudfoundry": {
-				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
-				logger.debug("Resolved defaults buildpack: " + buildpack);
-				if (StringUtils.hasText(buildpack)) {
-					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.buildpack", buildpack);
-					logger.debug("added:spring.cloud.deployer.cloudfoundry.buildpack={}", buildpack);
-				}
-
-				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
-				logger.debug("Resolved defaults buildpacks: " + buildpacks);
-				if (StringUtils.hasText(buildpacks)) {
-					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.buildpacks", buildpacks);
-					logger.debug("added:spring.cloud.deployer.cloudfoundry.buildpacks={}", buildpacks);
-				}
-				logger.debug("Using Boot Version: " + bootVersion);
-				if(AppBootSchemaVersion.BOOT3.getBootVersion().equals(bootVersion)) {
-					deploymentProperties.put("spring.cloud.deployer.cloudfoundry.env.JBP_CONFIG_OPEN_JDK_JRE", "{jre: {version: 17.+}}");
-				}
-				break;
-			}
-		}
 	}
 
 	private String extractAppVersionProperty(StreamAppDefinition appDefinition, Map<String, String> updateProperties) {
@@ -239,8 +182,6 @@ public class AppDeploymentRequestCreator {
 				// TODO ensure new version as a resource exists and load that AppRegistration
 				commandlineArguments.add(version);
 			}
-			addDefaultDeployerProperties(currentApp.getName(), platformType, appRegistration.getBootVersion().getBootVersion(), deployerDeploymentProperties);
-			addBootVersion(currentApp.getName(), appRegistration.getBootVersion(), deployerDeploymentProperties);
 			// Set instance count property
 			if (deployerDeploymentProperties.containsKey(AppDeployer.COUNT_PROPERTY_KEY)) {
 				appDeployTimeProperties.put(StreamPropertyKeys.INSTANCE_COUNT,

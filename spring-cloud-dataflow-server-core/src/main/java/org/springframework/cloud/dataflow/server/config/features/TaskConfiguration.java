@@ -36,8 +36,6 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.config.DataFlowTaskConfiguration;
@@ -105,7 +103,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import({
 		TaskConfiguration.TaskDeleteServiceConfig.class,
-		SchemaServiceConfiguration.class,
 		CompositeTaskConfiguration.class,
 		DataFlowTaskConfiguration.class
 })
@@ -300,7 +297,6 @@ public class TaskConfiguration {
 				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 				TaskConfigurationProperties taskConfigurationProperties,
 				DataSource dataSource,
-				SchemaService schemaService,
 				@Autowired(required = false) SchedulerService schedulerService
 		) {
 			return new DefaultTaskDeleteService(
@@ -313,7 +309,6 @@ public class TaskConfiguration {
 					dataflowJobExecutionDao,
 					dataflowTaskExecutionMetadataDao,
 					schedulerService,
-					schemaService,
 					taskConfigurationProperties,
 					dataSource
 			);

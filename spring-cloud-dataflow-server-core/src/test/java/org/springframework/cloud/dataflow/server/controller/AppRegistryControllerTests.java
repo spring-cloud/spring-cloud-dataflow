@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -141,7 +140,6 @@ public class AppRegistryControllerTests {
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
 		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
-		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
 	}
 
 	@Test
@@ -166,7 +164,6 @@ public class AppRegistryControllerTests {
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
 		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
-		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT3);
 
 	}
 	@Test
@@ -179,7 +176,6 @@ public class AppRegistryControllerTests {
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
 		assertThat(registration.getUri().toString()).isEqualTo("maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE");
-		assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.BOOT2);
 
 	}
 

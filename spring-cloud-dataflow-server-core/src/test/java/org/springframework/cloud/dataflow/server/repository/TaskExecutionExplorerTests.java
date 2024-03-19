@@ -40,7 +40,6 @@ import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.PageRequest;
@@ -139,7 +138,7 @@ public class TaskExecutionExplorerTests {
 
 	@Test
 	public void testExplorerSort() throws Exception {
-		when(appRegistryService.find(eq("baz"), any(ApplicationType.class))).thenReturn(new AppRegistration("baz", ApplicationType.task, "1.0.0", new URI("file://src/test/resources/register-all.txt"),null, AppBootSchemaVersion.BOOT3));
+		when(appRegistryService.find(eq("baz"), any(ApplicationType.class))).thenReturn(new AppRegistration("baz", ApplicationType.task, "1.0.0", new URI("file://src/test/resources/register-all.txt"),null));
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "bar");
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");

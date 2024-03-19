@@ -44,14 +44,12 @@ public class DefaultAppRegistrationAssembler<R extends AppRegistrationResource> 
 						registration.getType().name(),
 						registration.getVersion(),
 						registration.getUri().toString(),
-						registration.getBootVersion(),
 						registration.isDefaultVersion()
 				) : new AppRegistrationResource(
 						registration.getName(),
 						registration.getType().name(),
 						registration.getVersion(),
 						registration.getUri().toString(),
-						registration.getBootVersion(),
 						registration.isDefaultVersion(),
 						registration.getVersions()
 				);

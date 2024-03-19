@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 
 /**
@@ -76,11 +75,10 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * @param type application type
 	 * @param version application version
 	 * @param coordinates Maven coordinates for the application artifact
-	 * @param bootVersion Spring Boot version of the application.
 	 * @param isDefault is this the default app
 	 */
-	public DetailedAppRegistrationResource(String name, String type, String version, String coordinates, AppBootSchemaVersion bootVersion, Boolean isDefault) {
-		super(name, type, version, coordinates, bootVersion, isDefault);
+	public DetailedAppRegistrationResource(String name, String type, String version, String coordinates,  Boolean isDefault) {
+		super(name, type, version, coordinates, isDefault);
 	}
 
 	/**
@@ -91,7 +89,7 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * data
 	 */
 	public DetailedAppRegistrationResource(AppRegistrationResource resource) {
-		super(resource.getName(), resource.getType(), resource.getVersion(), resource.getUri(), resource.getBootVersion(), resource.getDefaultVersion());
+		super(resource.getName(), resource.getType(), resource.getVersion(), resource.getUri(), resource.getDefaultVersion());
 	}
 
 	/**

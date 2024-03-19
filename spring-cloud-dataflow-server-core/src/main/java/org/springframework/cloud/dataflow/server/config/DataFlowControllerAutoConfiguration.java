@@ -498,10 +498,9 @@ public class DataFlowControllerAutoConfiguration {
 		public AppDeploymentRequestCreator streamDeploymentPropertiesUtils(AppRegistryService appRegistry,
 																		   CommonApplicationProperties commonApplicationProperties,
 																		   ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
-																		   StreamDefinitionService streamDefinitionService,
-																		   PropertyResolver propertyResolver) {
+																		   StreamDefinitionService streamDefinitionService) {
 			return new AppDeploymentRequestCreator(appRegistry, commonApplicationProperties,
-					applicationConfigurationMetadataResolver, streamDefinitionService, propertyResolver);
+					applicationConfigurationMetadataResolver, streamDefinitionService);
 		}
 
 		@Bean

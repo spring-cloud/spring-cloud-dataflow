@@ -45,7 +45,6 @@ import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
@@ -114,8 +113,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
-	private final SchemaService schemaService;
-
 	private final int taskDeleteChunkSize;
 
 	private final DataSource dataSource;
@@ -130,7 +127,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -154,7 +150,6 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
 		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.schedulerService = schedulerService;
-		this.schemaService = schemaService;
 		this.taskDeleteChunkSize = taskConfigurationProperties.getExecutionDeleteChunkSize();
 		this.dataSource = dataSource;
 	}

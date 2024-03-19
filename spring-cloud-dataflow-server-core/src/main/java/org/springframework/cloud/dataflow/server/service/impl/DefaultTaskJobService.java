@@ -171,8 +171,7 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
 			Pageable pageable,
-			int taskExecutionId,
-			String schemaTarget
+			int taskExecutionId
 	) {
 		Assert.notNull(pageable, "pageable must not be null");
 		List<TaskJobExecution> taskJobExecutions = getTaskJobExecutionsWithStepCountForList(

@@ -8,10 +8,7 @@ log:
     version: '1.1.1.RELEASE'
     deploymentProperties:
       spring.cloud.deployer.memory: '4096m'
-      spring.cloud.deployer.bootVersion: '2'
 time:
   spec:
     applicationProperties:
       spring.cloud.dataflow.stream.app.type: 'source'
-    deploymentProperties:
-      spring.cloud.deployer.bootVersion: '2'

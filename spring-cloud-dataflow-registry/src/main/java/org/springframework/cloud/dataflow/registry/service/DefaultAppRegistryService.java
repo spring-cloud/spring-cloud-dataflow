@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
@@ -75,8 +74,6 @@ import org.springframework.util.StringUtils;
  */
 @Transactional
 public class DefaultAppRegistryService implements AppRegistryService {
-
-	public static final String METADATA_KEY_SUFFIX = "metadata";
 
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultAppRegistryService.class);
 
@@ -227,8 +224,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	}
 
 	@Override
-	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion) {
-		return this.save(new AppRegistration(name, type, version, uri, metadataUri, bootVersion));
+	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri) {
+		return this.save(new AppRegistration(name, type, version, uri, metadataUri));
 	}
 
 	@Override
@@ -397,21 +394,11 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		}
 		String type = typeName[0].trim();
 		String name = typeName[1].trim();
-		String extra = typeName.length == 3 ? typeName[2] : null;
-		String version = "bootVersion".equals(extra) ? null : getResourceVersion(lineSplit[1]);
+		String version = getResourceVersion(lineSplit[1]);
 		// This is now versioned key
 		String key = type + name + version;
 		if (!registrations.containsKey(key) && registrations.containsKey(type + name + "latest")) {
 			key = type + name + "latest";
-		}
-		if("bootVersion".equals(extra)) {
-			if (previous == null) {
-				throw new IllegalArgumentException("Expected uri for bootVersion:" + lineSplit[0]);
-			}
-			ApplicationType appType = ApplicationType.valueOf(type);
-			Assert.isTrue(appType == previous.getType() && name.equals(previous.getName()), "Expected previous to be same type and name for:" + lineSplit[0]);
-			previous.setBootVersion(AppBootSchemaVersion.fromBootVersion(lineSplit[1]));
-			return previous;
 		}
 		AppRegistration ar = registrations.getOrDefault(key, new AppRegistration());
 		ar.setName(name);
@@ -426,7 +413,6 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				throw new IllegalArgumentException(e);
 			}
 		} else if (typeName.length == 3) {
-			if (extra.equals("metadata")) {
 				// metadata app uri
 				try {
 					ar.setMetadataUri(new URI(lineSplit[1]));
@@ -434,9 +420,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				} catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
-			} else if (!"bootVersion".equals(extra)) {
-				throw new IllegalArgumentException("Invalid property: " + lineSplit[0]);
-			}
+
 		}
 		registrations.put(key, ar);
 		return ar;

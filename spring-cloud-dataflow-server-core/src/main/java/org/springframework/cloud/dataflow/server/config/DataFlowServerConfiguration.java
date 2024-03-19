@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -66,7 +65,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		FeaturesConfiguration.class,
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
-		SchemaServiceConfiguration.class,
 		CompositeTaskConfiguration.class,
 		DataFlowTaskConfiguration.class
 })

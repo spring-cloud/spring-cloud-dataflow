@@ -43,7 +43,6 @@ import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
 import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
@@ -99,9 +98,6 @@ public abstract class DefaultTaskDeleteServiceTests {
 
 	@Autowired
     CompositeTaskExplorer taskExplorer;
-
-	@Autowired
-	SchemaService schemaService;
 
 	@Autowired
 	TaskDeleteService taskDeleteService;

@@ -74,9 +74,6 @@ import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistrySer
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.AppBootVersionConverter;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.TaskValidationController;
 import org.springframework.cloud.dataflow.server.config.DataFlowTaskConfiguration;
@@ -205,7 +202,6 @@ import static org.mockito.Mockito.when;
 @EnableSpringDataWebSupport
 @Import({
 		CompletionConfiguration.class,
-		SchemaServiceConfiguration.class,
 		CompositeTaskConfiguration.class,
 		DataFlowTaskConfiguration.class,
 		ContainerRegistryAutoConfiguration.class,
@@ -291,7 +287,6 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
-		registry.addConverter(new AppBootVersionConverter());
 	}
 
 	@Bean
@@ -419,14 +414,12 @@ public class TestDependencies implements WebMvcConfigurer {
 			AppRegistryService appRegistry,
 			CommonApplicationProperties commonApplicationProperties,
 			ApplicationConfigurationMetadataResolver applicationConfigurationMetadataResolver,
-			StreamDefinitionService streamDefinitionService,
-			PropertyResolver propertyResolver
+			StreamDefinitionService streamDefinitionService
 	) {
 		return new AppDeploymentRequestCreator(appRegistry,
 				commonApplicationProperties,
 				applicationConfigurationMetadataResolver,
-				streamDefinitionService,
-				propertyResolver
+				streamDefinitionService
 		);
 	}
 
@@ -657,7 +650,6 @@ public class TestDependencies implements WebMvcConfigurer {
 			DataflowJobExecutionDao dataflowJobExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -670,7 +662,6 @@ public class TestDependencies implements WebMvcConfigurer {
 				dataflowJobExecutionDao,
 				dataflowTaskExecutionMetadataDao,
 				schedulerService,
-				schemaService,
 				taskConfigurationProperties,
 				dataSource
 		);

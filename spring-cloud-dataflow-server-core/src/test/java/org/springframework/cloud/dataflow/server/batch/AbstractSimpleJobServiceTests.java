@@ -49,8 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.impl.DefaultSchemaService;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
@@ -358,11 +356,6 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		@Bean
 		public PlatformTransactionManager platformTransactionManager() {
 			return new ResourcelessTransactionManager();
-		}
-
-		@Bean
-		public SchemaService schemaService() {
-			return new DefaultSchemaService();
 		}
 
 		@Bean

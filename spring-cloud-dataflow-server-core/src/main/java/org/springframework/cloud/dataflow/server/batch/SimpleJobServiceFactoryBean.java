@@ -39,7 +39,6 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -87,8 +86,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	private PlatformTransactionManager transactionManager;
 
 	private JobService jobService;
-
-	private SchemaService schemaService;
 
 	private Environment environment;
 
@@ -159,13 +156,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		this.jobService = jobService;
 	}
 
-	/**
-	 * Sets the {@link SchemaService} for this factory bean.
-	 * @param schemaService the schemaService for this factory bean.
-	 */
-	public void setSchemaService(SchemaService schemaService) {
-		this.schemaService = schemaService;
-	}
 
 	/**
 	 * A factory for incrementers (used to build primary keys for meta data). Defaults to
