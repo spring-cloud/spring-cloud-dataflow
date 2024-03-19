@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -60,6 +61,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	"logging.level.org.springframework.cloud=info",
 	"logging.level.org.hibernate=debug"
 })
+@Testcontainers
 public abstract class AbstractSkipperSmokeTest {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSkipperSmokeTest.class);
 
