@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -43,6 +44,7 @@ class DatabaseTypeTests {
 
 	@JdbcTest(properties = "spring.jpa.hibernate.ddl-auto=none")
 	@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+	@Testcontainers
 	static abstract class SingleDbDatabaseTypeTests {
 
 		@Test
