@@ -431,9 +431,10 @@ access the REST API. To do so, retrieve an
 OAuth2 Access Token from your OAuth2 provider and pass that access token to
 the REST Api by using the *Authorization* HTTP header, as follows:
 
-```
+[source, shell]
+----
 $ curl -H "Authorization: Bearer <ACCESS_TOKEN>" http://localhost:9393/ -H 'Accept: application/json'
-```
+----
 
 [[configuration-security-customizing-authorization]]
 ==== Customizing Authorization
@@ -658,6 +659,8 @@ spring:
             - POST   /tasks/executions               => hasRole('ROLE_DEPLOY')
             - POST   /tasks/executions/*             => hasRole('ROLE_DEPLOY')
             - DELETE /tasks/executions/*             => hasRole('ROLE_DESTROY')
+
+            - GET    /tasks/thinexecutions           => hasRole('ROLE_VIEW')
 
             # Task Schedules
 

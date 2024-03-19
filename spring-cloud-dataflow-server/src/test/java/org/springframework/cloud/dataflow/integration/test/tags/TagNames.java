@@ -61,6 +61,7 @@ public abstract class TagNames {
 
 
 	public static final String OAUTH = "oauth";
+	public static final String PERFORMANCE = "performance";
 	public static final String UAA = "uaa";
 	public static final String UAA_4_32 = "uaa_4_32";
 

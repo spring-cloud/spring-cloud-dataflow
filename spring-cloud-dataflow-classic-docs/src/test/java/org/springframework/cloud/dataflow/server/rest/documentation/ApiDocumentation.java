@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
 public class ApiDocumentation extends BaseDocumentation {
@@ -117,6 +118,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/launch").description("Provides for launching a Task execution"),
 				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
+				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),

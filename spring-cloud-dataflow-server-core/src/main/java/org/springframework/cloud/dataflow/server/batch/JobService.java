@@ -17,6 +17,8 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -409,4 +411,11 @@ public interface JobService {
 	 */
 	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, int start, int count);
+
+	/**
+	 * Returns a collection job execution ids given a collection of task execution ids that is mapped by id.
+	 * @param taskExecutionId
+	 * @return
+	 */
+	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionId);
 }

@@ -19,10 +19,13 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -376,18 +379,34 @@ public class TaskExecutionController {
 	}
 
 	private Page<TaskJobExecutionRel> getPageableRelationships(Page<AggregateTaskExecution> taskExecutions, Pageable pageable) {
-		List<TaskJobExecutionRel> taskJobExecutionRels = new ArrayList<>();
-		for (AggregateTaskExecution taskExecution : taskExecutions.getContent()) {
-			TaskManifest taskManifest = this.taskExecutionService.findTaskManifestById(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
-			taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
-			List<Long> jobExecutionIds = new ArrayList<>(
-					this.explorer.getJobExecutionIdsByTaskExecutionId(taskExecution.getExecutionId(), taskExecution.getSchemaTarget()));
-			taskJobExecutionRels
-					.add(new TaskJobExecutionRel(sanitizeTaskExecutionArguments(taskExecution),
-							jobExecutionIds,
-							taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds)));
-		}
-		return new PageImpl<>(taskJobExecutionRels, pageable, taskExecutions.getTotalElements());
+		final Map<String, TaskJobExecutionRel> taskJobExecutionRelMap = new HashMap<>();
+		Map<String, List<AggregateTaskExecution>> schemaGroups = taskExecutions.getContent()
+			.stream()
+			.collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
+		schemaGroups.forEach((schemaTarget,aggregateTaskExecutions) -> {
+			Map<Long, AggregateTaskExecution> taskMap = aggregateTaskExecutions.stream().collect(Collectors.toMap(AggregateTaskExecution::getExecutionId, Function.identity()));
+			Set<Long> ids = taskMap.keySet();
+			Map<Long, TaskManifest> manifests = this.taskExecutionService.findTaskManifestByIds(ids, schemaTarget);
+			Map<Long, Set<Long>> jobExecutionIdMap = this.taskJobService.getJobExecutionIdsByTaskExecutionIds(ids, schemaTarget);
+			taskMap.values().forEach(taskExecution -> {
+				long id = taskExecution.getExecutionId();
+				TaskManifest taskManifest = manifests.get(id);
+				if(taskManifest != null) {
+					taskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
+				}
+				Set<Long> jobIds = jobExecutionIdMap.computeIfAbsent(id, aLong -> new HashSet<>());
+				List<Long> jobExecutionIds = new ArrayList<>(jobIds);
+				TaskJobExecutionRel rel = new TaskJobExecutionRel(sanitizeTaskExecutionArguments(taskExecution),
+					jobExecutionIds,
+					taskManifest, getCtrTaskJobExecution(taskExecution, jobExecutionIds));
+				taskJobExecutionRelMap.put(schemaTarget + ":" + id, rel);
+			});
+		});
+		List<TaskJobExecutionRel> taskJobExecutionContent = taskExecutions.stream()
+			.map(aggregateTaskExecution -> taskJobExecutionRelMap.get(aggregateTaskExecution.getSchemaTarget() + ":" + aggregateTaskExecution.getExecutionId()))
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList());
+		return new PageImpl<>(taskJobExecutionContent, pageable, taskExecutions.getTotalElements());
 	}
 
 
@@ -405,7 +424,7 @@ public class TaskExecutionController {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findByTaskName(taskExecution.getTaskName());
 		if (taskDefinition != null) {
 			TaskParser parser = new TaskParser(taskExecution.getTaskName(), taskDefinition.getDslText(), true, false);
-			if (jobExecutionIds.size() > 0 && parser.parse().isComposed()) {
+			if (!jobExecutionIds.isEmpty() && parser.parse().isComposed()) {
 				try {
 					taskJobExecution = this.taskJobService.getJobExecution(jobExecutionIds.toArray(new Long[0])[0], taskExecution.getSchemaTarget());
 				} catch (NoSuchJobExecutionException noSuchJobExecutionException) {

@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,6 +197,13 @@ public class DefaultTaskJobService implements TaskJobService {
 	@Override
 	public JobInstanceExecutions getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException, NoSuchJobException {
 		return aggregateJobQueryDao.getJobInstanceExecutions(id, schemaTarget);
+	}
+
+	@Override
+	public Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds, String schemaTarget) {
+		JobService jobService = this.jobServiceContainer.get(schemaTarget);
+		Assert.notNull(jobService, ()->"Expected JobService for " + schemaTarget);
+		return jobService.getJobExecutionIdsByTaskExecutionIds(taskExecutionIds);
 	}
 
 	@Override
