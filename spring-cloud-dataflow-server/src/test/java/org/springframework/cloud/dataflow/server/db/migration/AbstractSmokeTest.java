@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobParameters;
@@ -73,6 +74,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		properties = "spring.jpa.hibernate.ddl-auto=none")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ExtendWith(OutputCaptureExtension.class)
+@Testcontainers
 public abstract class AbstractSmokeTest {
 
 	@Autowired

@@ -596,15 +596,16 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		return params;
 	}
 	private Map<Long, List<String>> getTaskArgumentsForTasks(Collection<Long> taskExecutionIds, String schemaTarget) {
-		final Map<Long, List<String>> result = new HashMap<>();
-		RowCallbackHandler handler = rs -> result.computeIfAbsent(rs.getLong(1), a -> new ArrayList<>())
-			.add(rs.getString(2));
-		MapSqlParameterSource parameterSource = new MapSqlParameterSource("taskExecutionIds", taskExecutionIds)
-			.addValue("schemaTarget", schemaTarget);
-		this.jdbcTemplate.query(
-			FIND_TASKS_ARGUMENTS,
-			parameterSource,
-			handler);
-		return result;
+		if(taskExecutionIds.isEmpty()) {
+			return Collections.emptyMap();
+		} else {
+			final Map<Long, List<String>> result = new HashMap<>();
+			RowCallbackHandler handler = rs -> result.computeIfAbsent(rs.getLong(1), a -> new ArrayList<>())
+				.add(rs.getString(2));
+			MapSqlParameterSource parameterSource = new MapSqlParameterSource("taskExecutionIds", taskExecutionIds)
+				.addValue("schemaTarget", schemaTarget);
+			this.jdbcTemplate.query(FIND_TASKS_ARGUMENTS, parameterSource, handler);
+			return result;
+		}
 	}
 }

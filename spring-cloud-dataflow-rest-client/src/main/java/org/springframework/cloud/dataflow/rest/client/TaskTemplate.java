@@ -125,7 +125,6 @@ public class TaskTemplate implements TaskOperations {
 		Assert.isTrue(resources.getLink(DEFINITION_RELATION).isPresent(), "Definition relation is required");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION).isPresent(), "Execution relation is required");
-		Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), "Current Executions relation is required");
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.isTrue(resources.getLink(RETRIEVE_LOG).isPresent(), "Log relation is required");
@@ -140,7 +139,11 @@ public class TaskTemplate implements TaskOperations {
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
 				VersionUtils.getThreePartVersion(dataFlowServerVersion),
 				EXECUTIONS_CURRENT_RELATION_VERSION)) {
+			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), "Current Executions relation is required");
 			Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+			this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
+		} else {
+			this.executionsCurrentLink = null;
 		}
 
 		this.restTemplate = restTemplate;
@@ -156,7 +159,6 @@ public class TaskTemplate implements TaskOperations {
 			this.executionLaunchLink = null;
 		}
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
 			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		}
