@@ -27,11 +27,11 @@
 		<spring-statemachine.version>2.5.1</spring-statemachine.version>
 		<spring-cloud-deployer.version>2.9.3-SNAPSHOT</spring-cloud-deployer.version>
 
-		<zeroturnaround.version>1.15</zeroturnaround.version>
-		<spring-restdocs.version>2.0.7.RELEASE</spring-restdocs.version>
-		<java-semver.version>0.9.0</java-semver.version>
+		<zeroturnaround.version>1.17</zeroturnaround.version>
+		<spring-restdocs.version>3.0.1</spring-restdocs.version>
+		<java-semver.version>0.10.2</java-semver.version>
 
-		<equalverifier.version>3.14.1</equalverifier.version>
+		<equalverifier.version>3.15.8</equalverifier.version>
 		<hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
 
 		<jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
@@ -40,16 +40,12 @@
 
 		<jmockit.version>1.24</jmockit.version>
 
-		<commons-compress.version>1.24.0</commons-compress.version>
-		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
-		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
-		<asciidoctorj.version>2.5.7</asciidoctorj.version>
-		<jruby.version>9.2.11.1</jruby.version>
-		<maven-antrun-plugin.version>17</maven-antrun-plugin.version>
+		<commons-compress.version>1.26.1</commons-compress.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
 		<ant-contrib.version>1.0b3</ant-contrib.version>
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
-		<build-helper-maven-plugin>3.0.0</build-helper-maven-plugin>
+		<build-helper-maven-plugin>3.5.0</build-helper-maven-plugin>
 	</properties>
 
 	<modules>
@@ -192,11 +188,6 @@
 				<groupId>org.springframework.restdocs</groupId>
 				<artifactId>spring-restdocs-core</artifactId>
 				<version>${spring-restdocs.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.javax.persistence</groupId>
-				<artifactId>hibernate-jpa-2.1-api</artifactId>
-				<version>${hibernate.jpa.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>nl.jqno.equalsverifier</groupId>

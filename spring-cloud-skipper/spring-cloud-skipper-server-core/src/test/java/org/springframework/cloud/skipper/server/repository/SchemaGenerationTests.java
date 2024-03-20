@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
@@ -36,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
 import org.springframework.cloud.skipper.server.config.SkipperServerConfiguration;
-import org.springframework.data.mapping.model.CamelCaseAbbreviatingFieldNamingStrategy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +85,7 @@ public class SchemaGenerationTests extends AbstractIntegrationTest {
 		final MetadataSources metadata = new MetadataSources(
 				new StandardServiceRegistryBuilder()
 						.applySetting("hibernate.dialect", "org.hibernate.dialect." + dialect + "Dialect")
-						.applySetting("hibernate.physical_naming_strategy", CamelCaseAbbreviatingFieldNamingStrategy.class.getName())
+						.applySetting("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getName())
 						.applySetting("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName())
 						.build());
 
