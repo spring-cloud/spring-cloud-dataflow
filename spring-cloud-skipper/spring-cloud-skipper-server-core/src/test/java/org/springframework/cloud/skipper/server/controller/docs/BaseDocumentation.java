@@ -61,7 +61,7 @@ import org.springframework.restdocs.mockmvc.MockMvcRestDocumentationConfigurer;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
-import org.springframework.restdocs.request.RequestParametersSnippet;
+import org.springframework.restdocs.request.QueryParametersSnippet;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -77,7 +77,8 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+
 
 /**
  * Sets up Spring Rest Docs via {@link #setupMocks()} and also provides common snippets to
@@ -154,7 +155,7 @@ public abstract class BaseDocumentation {
 	/**
 	 * Snippet for common pagination-related request parameters.
 	 */
-	protected final RequestParametersSnippet paginationRequestParameterProperties = requestParameters(
+	protected final QueryParametersSnippet paginationRequestParameterProperties = queryParameters(
 			parameterWithName("page").description("The zero-based page number (optional)"),
 			parameterWithName("size").description("The requested page size (optional)"));
 	protected RestDocumentationResultHandler documentationHandler;
