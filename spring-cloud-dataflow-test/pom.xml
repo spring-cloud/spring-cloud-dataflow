@@ -31,6 +31,16 @@
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+
 		<!-- Testcontainers requires junit4 for some reason, and because our parent provides junit4 at 'test' scope,
 		     it confuses dep. resolution and Testcontainers can not find the junit4 things it needs, this manually
 		     brings in the junit4 at 'compile' scope -->
