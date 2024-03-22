@@ -264,6 +264,39 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listTaskThinExecutions() throws Exception {
+		documentation.dontDocument(() -> this.mockMvc.perform(
+				post("/tasks/executions")
+					.param("name", "taskB")
+					.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+					.param("arguments", "--server.port=8080 --foo=bar")
+			)
+			.andExpect(status().isCreated()));
+
+		this.mockMvc.perform(
+				get("/tasks/thinexecutions")
+					.param("page", "1")
+					.param("size", "2"))
+			.andDo(print())
+			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+				requestParameters(
+					parameterWithName("page")
+						.description("The zero-based page number (optional)"),
+					parameterWithName("size")
+						.description("The requested page size (optional)")
+				),
+				responseFields(
+					subsectionWithPath("_embedded.taskExecutionThinResourceList")
+						.description("Contains a collection of thin Task Executions/"),
+					subsectionWithPath("_links.self").description("Link to the task execution resource"),
+					subsectionWithPath("_links.first").description("Link to the first page of task execution resources").optional(),
+					subsectionWithPath("_links.last").description("Link to the last page of task execution resources").optional(),
+					subsectionWithPath("_links.next").description("Link to the next page of task execution resources").optional(),
+					subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").optional(),
+					subsectionWithPath("page").description("Pagination properties"))));
+	}
+
+	@Test
 	public void listTaskExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/tasks/executions")

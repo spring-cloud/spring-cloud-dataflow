@@ -40,6 +40,8 @@ import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -85,6 +87,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamValidationCont
 import org.springframework.cloud.dataflow.server.controller.TaskCtrController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
@@ -101,8 +104,6 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -296,6 +297,11 @@ public class DataFlowControllerAutoConfiguration {
 					taskDeleteService,
 					taskJobService
 			);
+		}
+
+		@Bean
+		public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer) {
+			return new TaskExecutionThinController(aggregateTaskExplorer);
 		}
 
 		@Bean

@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import javax.naming.OperationNotSupportedException;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.naming.OperationNotSupportedException;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
@@ -31,12 +30,14 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -53,6 +54,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Michael Minella
  * @author Gunnar Hillert
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 public class TaskTemplate implements TaskOperations {
 
@@ -65,6 +67,8 @@ public class TaskTemplate implements TaskOperations {
 	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
+
+	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
 
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
@@ -90,6 +94,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private final Link executionsLink;
 
+	private final Link thinExecutionsLink;
+
 	private final Link executionLink;
 
 	private final Link executionLaunchLink;
@@ -114,6 +120,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.isTrue(resources.getLink("about").isPresent(), "Expected about relation");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
+		Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
 		Assert.isTrue(resources.getLink(DEFINITIONS_RELATION).isPresent(), "Definitions relation is required");
 		Assert.isTrue(resources.getLink(DEFINITION_RELATION).isPresent(), "Definition relation is required");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
@@ -133,7 +140,11 @@ public class TaskTemplate implements TaskOperations {
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
 				VersionUtils.getThreePartVersion(dataFlowServerVersion),
 				EXECUTIONS_CURRENT_RELATION_VERSION)) {
+			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), "Current Executions relation is required");
 			Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
+			this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
+		} else {
+			this.executionsCurrentLink = null;
 		}
 
 		this.restTemplate = restTemplate;
@@ -141,6 +152,7 @@ public class TaskTemplate implements TaskOperations {
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
+		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
 			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
@@ -148,7 +160,6 @@ public class TaskTemplate implements TaskOperations {
 			this.executionLaunchLink = null;
 		}
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
 			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		}
@@ -254,6 +265,11 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionList() {
 		return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionResource.Page.class);
+	}
+
+	@Override
+	public PagedModel<TaskExecutionThinResource> thinExecutionList() {
+		return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
 	}
 
 	@Override

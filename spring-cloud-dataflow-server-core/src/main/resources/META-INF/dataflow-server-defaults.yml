@@ -227,6 +227,8 @@ spring:
             - DELETE /tasks/executions               => hasRole('ROLE_DESTROY')
             - GET    /tasks/info/*                   => hasRole('ROLE_VIEW')
 
+            - GET    /tasks/thinexecutions           => hasRole('ROLE_VIEW')
+
             # Task Schedules
 
             - GET    /tasks/schedules                => hasRole('ROLE_VIEW')
