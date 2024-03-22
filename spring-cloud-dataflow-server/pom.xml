@@ -208,6 +208,7 @@
 				<configuration>
 					<threadCount>1</threadCount>
 					<forkCount>1</forkCount>
+					<reuseForks>false</reuseForks>
 				</configuration>
 				<executions>
 					<execution>
@@ -303,20 +304,11 @@
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>3.0.0</version>
-						<configuration>
-							<threadCount>1</threadCount>
-							<forkCount>1</forkCount>
-							<skipTests>true</skipTests>
-							<failIfNoTests>false</failIfNoTests>
-						</configuration>
-					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<version>3.0.0</version>
 						<configuration>
+							<forkCount>1</forkCount>
+							<reuseForks>false</reuseForks>
 							<includes>
 								<include>**/*IT.java</include>
 							</includes>
