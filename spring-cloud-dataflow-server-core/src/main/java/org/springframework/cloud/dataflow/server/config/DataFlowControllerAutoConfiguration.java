@@ -84,6 +84,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamValidationCont
 import org.springframework.cloud.dataflow.server.controller.TaskCtrController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
@@ -282,6 +283,11 @@ public class DataFlowControllerAutoConfiguration {
 					taskDeleteService,
 					taskJobService
 			);
+		}
+
+		@Bean
+		public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer taskExplorer) {
+			return new TaskExecutionThinController(taskExplorer);
 		}
 
 		@Bean
