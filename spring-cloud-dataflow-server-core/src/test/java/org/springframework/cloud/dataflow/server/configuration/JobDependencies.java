@@ -70,6 +70,7 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProg
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.SchemaController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
@@ -237,6 +238,11 @@ public class JobDependencies {
 				taskDeleteService,
 				taskJobService
 		);
+	}
+
+	@Bean
+	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer) {
+		return new TaskExecutionThinController(aggregateTaskExplorer);
 	}
 
 	@Bean
