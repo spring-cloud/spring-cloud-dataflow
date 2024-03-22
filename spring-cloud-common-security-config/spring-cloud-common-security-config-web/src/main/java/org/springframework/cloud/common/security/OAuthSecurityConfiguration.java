@@ -216,27 +216,44 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		this.authorizationProperties.getAuthenticatedPaths().add("/");
-		this.authorizationProperties.getAuthenticatedPaths()
-				.add(dashboard(authorizationProperties, "/**"));
-		this.authorizationProperties.getAuthenticatedPaths()
-				.add(this.authorizationProperties.getDashboardUrl());
-		this.authorizationProperties.getPermitAllPaths()
-				.add(this.authorizationProperties.getDashboardUrl());
-		this.authorizationProperties.getPermitAllPaths()
-				.add(dashboard(authorizationProperties, "/**"));
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
+		// Anonymous paths for the login page
+		this.authorizationProperties.getAnonymousPaths().add(authorizationProperties.getLoginUrl());
+		this.authorizationProperties.getAnonymousPaths().add("/login");
 
-				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths()
-								.toArray(new String[0]))
-						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths()
-								.toArray(new String[0]))
-						.authenticated();
+		// All paths should be available only for authenticated users
+		this.authorizationProperties.getAuthenticatedPaths().add("/");
+		this.authorizationProperties.getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
+		this.authorizationProperties.getAuthenticatedPaths().add(dashboard(authorizationProperties, "/**"));
+
+		// Permit for all users as the visibility is managed through roles
+		this.authorizationProperties.getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
+		this.authorizationProperties.getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
+
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security;
+
+		if (AuthorizationProperties.FRONTEND_LOGIN_URL.equals(this.authorizationProperties.getLoginUrl())) {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+
+		} else {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+		}
+
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
-
 
 		http.httpBasic().and()
 				.logout()
@@ -248,11 +265,13 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 						new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
 						new RequestHeaderRequestMatcher("X-Requested-With", "XMLHttpRequest"))
 				.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint(this.authorizationProperties.getLoginProcessingUrl()),
+						new LoginUrlAuthenticationEntryPoint(authorizationProperties.getLoginUrl()),
 						textHtmlMatcher)
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, AnyRequestMatcher.INSTANCE);
 
-		http.oauth2Login().userInfoEndpoint()
+		http.oauth2Login()
+				.defaultSuccessUrl(authorizationProperties.getLoginSuccessUrl())
+				.userInfoEndpoint()
 				.userService(this.plainOauth2UserService)
 				.oidcUserService(this.oidcUserService);
 
@@ -401,7 +420,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				OAuth2TokenUtilsService oauth2TokenUtilsService) {
 			AccessTokenClearingLogoutSuccessHandler logoutSuccessHandler =
 					new AccessTokenClearingLogoutSuccessHandler(oauth2TokenUtilsService);
-			logoutSuccessHandler.setDefaultTargetUrl(dashboard(authorizationProperties, "/logout-success-oauth.html"));
+			logoutSuccessHandler.setDefaultTargetUrl(authorizationProperties.getLogoutSuccessUrl());
 			return logoutSuccessHandler;
 		}
 	}
