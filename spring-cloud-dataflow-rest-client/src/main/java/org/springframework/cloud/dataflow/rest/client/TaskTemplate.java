@@ -152,7 +152,7 @@ public class TaskTemplate implements TaskOperations {
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
-		this.thinExecutionsLink = resources.getLink(EXECUTIONS_RELATION).get();
+		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
 		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
 			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
