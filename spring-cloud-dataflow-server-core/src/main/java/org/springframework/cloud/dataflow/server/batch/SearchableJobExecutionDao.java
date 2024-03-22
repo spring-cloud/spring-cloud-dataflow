@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.batch;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -25,7 +27,7 @@ import org.springframework.batch.core.repository.dao.JobExecutionDao;
 
 /**
  * @author Dave Syer
- *
+ * @author Corneil du Plessis
  */
 public interface SearchableJobExecutionDao extends JobExecutionDao {
 
@@ -99,6 +101,11 @@ public interface SearchableJobExecutionDao extends JobExecutionDao {
 	 */
 	List<JobExecutionWithStepCount> getJobExecutionsWithStepCount(int start, int count);
 
+	/**
+	 * @param ids the set of task execution ids.
+	 * @return Map with the TaskExecution id as the key and the set of job execution ids as values.
+	 */
+	Map<Long, Set<Long>> getJobExecutionsByTaskIds(Collection<Long> ids);
 	/**
 	 * Gets count of job executions.
 	 *

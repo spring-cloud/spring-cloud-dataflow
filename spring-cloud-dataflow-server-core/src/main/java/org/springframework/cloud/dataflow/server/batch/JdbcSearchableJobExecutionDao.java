@@ -44,11 +44,13 @@ import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -117,7 +119,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private static final String GET_EXECUTION_BY_ID_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
 
-	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%PREFIX%TASK_BATCH B";
+	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%TASK_PREFIX%TASK_BATCH B";
+
+	private static final String GET_JOB_EXECUTIONS_BY_TASK_IDS = "SELECT JOB_EXECUTION_ID, TASK_EXECUTION_ID from %TASK_PREFIX%TASK_BATCH WHERE TASK_EXECUTION_ID in (?)";
 
 	private PagingQueryProvider allExecutionsPagingQueryProvider;
 
@@ -142,6 +146,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private DataSource dataSource;
 
 	private BatchVersion batchVersion;
+	private String taskTablePrefix;
 
 	public JdbcSearchableJobExecutionDao() {
 		this(BatchVersion.BATCH_4);
@@ -159,6 +164,10 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 */
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public void setTaskTablePrefix(String taskTablePrefix) {
+		this.taskTablePrefix = taskTablePrefix;
 	}
 
 	/**
@@ -190,12 +199,15 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
 				JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
-				FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
+				getTaskQuery(FROM_CLAUSE_TASK_TASK_BATCH), TASK_EXECUTION_ID_FILTER);
 
 		super.afterPropertiesSet();
 
 	}
 
+	protected String getTaskQuery(String base) {
+		return StringUtils.replace(base, "%TASK_PREFIX%", taskTablePrefix);
+	}
 	@Override
 	public List<JobExecution> findJobExecutions(JobInstance job) {
 		Assert.notNull(job, "Job cannot be null.");
@@ -515,6 +527,25 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		catch (IncorrectResultSizeDataAccessException e) {
 			return Collections.emptyList();
 		}
+	}
+
+	@Override
+	public Map<Long, Set<Long>> getJobExecutionsByTaskIds(Collection<Long> ids) {
+		JdbcOperations jdbcTemplate = getJdbcTemplate();
+		String strIds = StringUtils.collectionToCommaDelimitedString(ids);
+
+		String sql = getTaskQuery(GET_JOB_EXECUTIONS_BY_TASK_IDS).replace("?", strIds);
+		return jdbcTemplate.query(sql,
+                rs -> {
+            	    final Map<Long, Set<Long>> results = new HashMap<>();
+                	while (rs.next()) {
+                    	Long taskExecutionId = rs.getLong("TASK_EXECUTION_ID");
+                    	Long jobExecutionId = rs.getLong("JOB_EXECUTION_ID");
+                    	Set<Long> jobs = results.computeIfAbsent(taskExecutionId, aLong -> new HashSet<>());
+                    	jobs.add(jobExecutionId);
+                	}
+                	return results;
+				});
 	}
 
 	@Override

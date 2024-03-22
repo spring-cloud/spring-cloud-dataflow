@@ -62,6 +62,7 @@ public class JobServiceContainer {
 			factoryBean.setJobExplorer(jobExplorerContainer.get(target.getName()));
 			factoryBean.setJobRepository(jobRepositoryContainer.get(target.getName()));
 			factoryBean.setTablePrefix(target.getBatchPrefix());
+			factoryBean.setTaskTablePrefix(target.getTaskPrefix());
 			factoryBean.setAppBootSchemaVersionTarget(target);
 			factoryBean.setSchemaService(schemaService);
 			factoryBean.setSerializer(new AllInOneExecutionContextSerializer());
