@@ -147,6 +147,9 @@
       "href": "http://localhost/tasks/logs/{taskExternalExecutionId}{?platformName}",
       "templated": true
     },
+    "tasks/thinexecutions": {
+      "href":"http://localhost/tasks/thinexecutions"
+    },
     "jobs/executions": {
       "href": "http://localhost/jobs/executions"
     },

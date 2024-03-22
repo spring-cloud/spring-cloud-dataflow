@@ -336,6 +336,16 @@ public class TaskExecutionControllerTests {
 	}
 
 	@Test
+	void getAllThinExecutions() throws Exception {
+			mockMvc.perform(get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
+			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
+			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(4)));
+	}
+
+	@Test
 	void getCurrentExecutions() throws Exception {
 		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
 		mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))

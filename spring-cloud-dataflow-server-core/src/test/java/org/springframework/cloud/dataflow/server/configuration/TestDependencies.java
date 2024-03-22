@@ -52,6 +52,7 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
@@ -197,6 +198,7 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author David Turanski
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @Configuration
 @EnableSpringDataWebSupport
@@ -590,6 +592,10 @@ public class TestDependencies implements WebMvcConfigurer {
 		);
 	}
 
+	@Bean
+	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer) {
+		return new TaskExecutionThinController(dataflowTaskExplorer);
+	}
 	@Bean
 	public TasksInfoController taskExecutionsInfoController(TaskExecutionService taskExecutionService) {
 		return new TasksInfoController(taskExecutionService);
