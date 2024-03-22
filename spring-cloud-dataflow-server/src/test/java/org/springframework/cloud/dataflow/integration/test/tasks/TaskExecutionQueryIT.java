@@ -195,7 +195,7 @@ class TaskExecutionQueryIT {
 			assertThat(totalTime3).isLessThan(totalTime4);
 			assertThat(totalTime4).isLessThan(totalTime2);
 			assertThat(ratioThinExecution).isGreaterThan(ratioExecution);
-
+			assertThat(ratioThinToExecution).isGreaterThan(3.0);
 		}
 	}
 
