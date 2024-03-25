@@ -24,14 +24,6 @@ jobs:
       timeout-minutes: 75
       run: |
         ./mvnw -B -s .github/settings.xml clean install
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: ${{ success() || failure() }}
-      with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        reporter: java-junit
-        list-tests: failed
     - name: Capture Test Results
       if: failure()
       uses: actions/upload-artifact@v3
