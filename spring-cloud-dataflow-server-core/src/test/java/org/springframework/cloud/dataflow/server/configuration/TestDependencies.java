@@ -104,6 +104,7 @@ import org.springframework.cloud.dataflow.server.controller.StreamValidationCont
 import org.springframework.cloud.dataflow.server.controller.TaskCtrController;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
 import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
@@ -547,6 +548,10 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 				taskDeleteService,
 				taskJobService
 		);
+	}
+	@Bean
+	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer explorer) {
+		return new TaskExecutionThinController(explorer);
 	}
 
 	@Bean
