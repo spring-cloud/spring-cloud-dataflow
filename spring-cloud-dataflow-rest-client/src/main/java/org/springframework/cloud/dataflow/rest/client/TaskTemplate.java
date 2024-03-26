@@ -66,6 +66,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
 
+	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
+
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
@@ -120,7 +122,7 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.isTrue(resources.getLink("about").isPresent(), "Expected about relation");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
-		Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
+
 		Assert.isTrue(resources.getLink(DEFINITIONS_RELATION).isPresent(), "Definitions relation is required");
 		Assert.isTrue(resources.getLink(DEFINITION_RELATION).isPresent(), "Definition relation is required");
 		Assert.isTrue(resources.getLink(EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
@@ -129,41 +131,35 @@ public class TaskTemplate implements TaskOperations {
 		Assert.isTrue(resources.getLink(EXECUTION_RELATION_BY_NAME).isPresent(), "Execution by name relation is required");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
 		Assert.isTrue(resources.getLink(RETRIEVE_LOG).isPresent(), "Log relation is required");
+		this.restTemplate = restTemplate;
 		this.dataFlowServerVersion = dataFlowServerVersion;
 
-		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
-				VersionUtils.getThreePartVersion(dataFlowServerVersion),
-				VALIDATION_RELATION_VERSION)) {
-			Assert.notNull(resources.getLink(VALIDATION_REL), "Validiation relation for tasks is required");
+		String version = VersionUtils.getThreePartVersion(dataFlowServerVersion);
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_RELATION_VERSION)) {
+			Assert.isTrue(resources.getLink(VALIDATION_REL).isPresent(), "Validiation relation for tasks is required");
+
+		}
+		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION)) {
+			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), "Executions relation is required");
 		}
 
-		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
-				VersionUtils.getThreePartVersion(dataFlowServerVersion),
-				EXECUTIONS_CURRENT_RELATION_VERSION)) {
+
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, EXECUTIONS_CURRENT_RELATION_VERSION)) {
 			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), "Current Executions relation is required");
-			Assert.notNull(resources.getLink(EXECUTIONS_CURRENT_RELATION), "Executions current relation is required");
-			this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
-		} else {
-			this.executionsCurrentLink = null;
 		}
+		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
+		this.validationLink = resources.getLink(VALIDATION_REL).get();
+		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 
-		this.restTemplate = restTemplate;
 		this.aboutLink = resources.getLink("about").get();
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
-		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
+
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
-		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
-			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
-		} else {
-			this.executionLaunchLink = null;
-		}
+		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
-			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
-		}
-		this.validationLink = resources.getLink(VALIDATION_REL).get();
+		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
 	}
@@ -189,7 +185,7 @@ public class TaskTemplate implements TaskOperations {
 		values.add("definition", definition);
 		values.add("description", description);
 		return restTemplate.postForObject(definitionsLink.expand().getHref(), values,
-				TaskDefinitionResource.class);
+			TaskDefinitionResource.class);
 	}
 	private boolean isNewServer() {
 		if(this.actualDataFlowServerCoreVersion == null) {
@@ -275,7 +271,7 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
 		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(),
-				TaskExecutionResource.Page.class);
+			TaskExecutionResource.Page.class);
 	}
 
 	@Override
@@ -305,10 +301,10 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public Collection<CurrentTaskExecutionsResource> currentTaskExecutions() {
 		ParameterizedTypeReference<Collection<CurrentTaskExecutionsResource>> typeReference =
-				new ParameterizedTypeReference<Collection<CurrentTaskExecutionsResource>>() {
-				};
+			new ParameterizedTypeReference<Collection<CurrentTaskExecutionsResource>>() {
+			};
 		return restTemplate
-				.exchange(executionsCurrentLink.getHref(), HttpMethod.GET, null, typeReference).getBody();
+			.exchange(executionsCurrentLink.getHref(), HttpMethod.GET, null, typeReference).getBody();
 	}
 
 	@Override
@@ -352,7 +348,7 @@ public class TaskTemplate implements TaskOperations {
 		map.put("name", StringUtils.hasText(taskName) ? taskName : "");
 		if (this.executionsInfoLink != null) {
 			return Objects.requireNonNull(
-					restTemplate.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class)
+				restTemplate.getForObject(this.executionsInfoLink.expand(map).getHref(), TaskExecutionsInfoResource.class)
 			).getTotalExecutions();
 		}
 		// for backwards-compatibility return zero count
@@ -362,10 +358,10 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public TaskAppStatusResource validateTaskDefinition(String taskDefinitionName)
-			throws OperationNotSupportedException {
+		throws OperationNotSupportedException {
 		if (validationLink == null) {
 			throw new OperationNotSupportedException("Task Validation not supported on Data Flow Server version "
-					+ dataFlowServerVersion);
+				+ dataFlowServerVersion);
 		}
 		String uriTemplate = this.validationLink.expand(taskDefinitionName).getHref();
 		return restTemplate.getForObject(uriTemplate, TaskAppStatusResource.class);
