@@ -46,8 +46,8 @@ case $DATABASE in
 esac
 case $BROKER in
 "kafka")
-    sh "$K8S/load-image.sh" "confluentinc/cp-kafka" "5" false
-    sh "$K8S/load-image.sh" "confluentinc/cp-zookeeper" "5" false
+    sh "$K8S/load-image.sh" "confluentinc/cp-kafka" "5.5.2" false
+    sh "$K8S/load-image.sh" "confluentinc/cp-zookeeper" "5.5.2" false
     ;;
 "rabbit" | "rabbitmq")
     sh "$K8S/load-image.sh" "rabbitmq" "3.8-management" false
