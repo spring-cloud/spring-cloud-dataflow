@@ -40,7 +40,7 @@ services:
       - zookeeper
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:5
+    image: confluentinc/cp-zookeeper:5.5.2
     container_name: dataflow-kafka-zookeeper
     expose:
       - "2181"
