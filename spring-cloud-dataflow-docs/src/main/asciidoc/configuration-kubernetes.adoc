@@ -124,12 +124,36 @@ These properties are also used when configuring the <<configuration-kubernetes-t
 |The CPU limit, maximum needed value to allocate a pod
 |<none>
 
+|limits.ephemeral-storage
+|The ephemeral-storage limit, maximum needed value to allocate a pod.
+|<none>
+
+|limits.hugepages-2Mi
+|The hugepages-2Mi limit, maximum needed value to allocate a pod.
+|<none>
+
+|limits.hugepages-1Gi
+|The hugepages-1Gi limit, maximum needed value to allocate a pod.
+|<none>
+
 |requests.memory
 |The memory request, guaranteed needed value to allocate a pod.
 |<none>
 
 |requests.cpu
 |The CPU request, guaranteed needed value to allocate a pod.
+|<none>
+
+|requests.ephemeral-storage
+|The ephemeral-storage request, guaranteed needed value to allocate a pod.
+|<none>
+
+|requests.hugepages-2Mi
+|The hugepages-2Mi request, guaranteed needed value to allocate a pod.
+|<none>
+
+|requests.hugepages-1Gi
+|The hugepages-1Gi request, guaranteed needed value to allocate a pod.
 |<none>
 
 |affinity.nodeAffinity
@@ -830,12 +854,21 @@ Using the `boot` Entry Point Style corresponds to using the `exec` style `ENTRYP
 
 When scheduling an application, You can clean up finished Jobs (either Complete or Failed) automatically by specifying `ttlSecondsAfterFinished` value.
 
-The following example shows how you can individually configure application jobs:
+The following example shows how you can configure for scheduled application jobs:
 
 ====
 [source,options=nowrap]
 ----
 deployer.<application>.kubernetes.cron.ttlSecondsAfterFinished=86400
+----
+====
+
+The following example shows how you can individually configure application jobs:
+
+====
+[source,options=nowrap]
+----
+deployer.<application>.kubernetes.ttlSecondsAfterFinished=86400
 ----
 ====
 
