@@ -231,6 +231,11 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 	}
 
 	@Override
+	public Page<AggregateTaskExecution> findAll(Pageable pageable, boolean thinResults) {
+		return taskExecutionQueryDao.findAll(pageable, thinResults);
+	}
+
+	@Override
 	public Long getTaskExecutionIdByJobExecutionId(long jobExecutionId, String schemaTarget) {
 		if (!StringUtils.hasText(schemaTarget)) {
 			schemaTarget = SchemaVersionTarget.defaultTarget().getName();

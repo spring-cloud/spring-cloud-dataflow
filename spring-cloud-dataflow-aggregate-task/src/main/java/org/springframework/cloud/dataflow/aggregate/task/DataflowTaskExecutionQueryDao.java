@@ -164,6 +164,15 @@ public interface DataflowTaskExecutionQueryDao {
 	Page<AggregateTaskExecution> findAll(Pageable pageable);
 
 	/**
+	 * Retrieves all the task executions within the pageable constraints.
+	 * @param pageable the constraints for the search
+	 * @param thinResults Indicated if arguments will be populated
+	 * @return page containing the results from the search
+	 */
+
+	Page<AggregateTaskExecution> findAll(Pageable pageable, boolean thinResults);
+
+	/**
 	 * Returns a {@link List} of the latest {@link TaskExecution} for 1 or more task
 	 * names.
 	 * <p>

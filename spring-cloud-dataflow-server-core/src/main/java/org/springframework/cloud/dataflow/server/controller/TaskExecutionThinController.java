@@ -52,7 +52,7 @@ public class TaskExecutionThinController {
 	@GetMapping(produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionThinResource> listTasks(Pageable pageable, PagedResourcesAssembler<AggregateTaskExecution> pagedAssembler) {
-		return pagedAssembler.toModel(explorer.findAll(pageable), resourceAssembler);
+		return pagedAssembler.toModel(explorer.findAll(pageable, true), resourceAssembler);
 	}
 
 	static class TaskExecutionThinResourceAssembler extends RepresentationModelAssemblerSupport<AggregateTaskExecution, TaskExecutionThinResource> {

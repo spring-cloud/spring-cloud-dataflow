@@ -471,14 +471,14 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		return queryForPageableResults(pageable, SELECT_CLAUSE, FROM_CLAUSE,
 				RUNNING_TASK_WHERE_CLAUSE,
 				new MapSqlParameterSource("taskName", taskName),
-				getRunningTaskExecutionCountByTaskName(taskName));
+				getRunningTaskExecutionCountByTaskName(taskName), false);
 	}
 
 	@Override
 	public Page<AggregateTaskExecution> findTaskExecutionsByName(String taskName, Pageable pageable) {
 		return queryForPageableResults(pageable, SELECT_CLAUSE, FROM_CLAUSE,
 				TASK_NAME_WHERE_CLAUSE, new MapSqlParameterSource("taskName", taskName),
-				getTaskExecutionCountByTaskName(taskName));
+				getTaskExecutionCountByTaskName(taskName), false);
 	}
 
 	@Override
@@ -490,9 +490,14 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 	@Override
 	public Page<AggregateTaskExecution> findAll(Pageable pageable) {
 		return queryForPageableResults(pageable, SELECT_CLAUSE, FROM_CLAUSE, null,
-				new MapSqlParameterSource(), getTaskExecutionCount());
+				new MapSqlParameterSource(), getTaskExecutionCount(), false);
 	}
 
+	@Override
+	public Page<AggregateTaskExecution> findAll(Pageable pageable, boolean thinResults) {
+		return queryForPageableResults(pageable, SELECT_CLAUSE, FROM_CLAUSE, null,
+			new MapSqlParameterSource(), getTaskExecutionCount(), thinResults);
+	}
 
 	private Page<AggregateTaskExecution> queryForPageableResults(
 			Pageable pageable,
@@ -500,7 +505,8 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 			String fromClause,
 			String whereClause,
 			MapSqlParameterSource queryParameters,
-			long totalCount
+			long totalCount,
+			boolean thinResults
 	) {
 		SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
 		factoryBean.setSelectClause(selectClause);
@@ -539,7 +545,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 		}
 		String query = pagingQueryProvider.getPageQuery(pageable);
 		List<AggregateTaskExecution> resultList = this.jdbcTemplate.query(query,
-				queryParameters, new CompositeTaskExecutionRowMapper(false));
+				queryParameters, new CompositeTaskExecutionRowMapper(!thinResults));
 		resultList.stream()
 			.collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget))
 			.forEach(this::populateArguments);
