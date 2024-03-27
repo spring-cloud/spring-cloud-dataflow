@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -466,6 +467,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	public Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
 			int taskExecutionId, int start, int count) {
 		return jobExecutionDao.getJobExecutionsWithStepCountFilteredByTaskExecutionId(taskExecutionId, start, count);
+	}
+
+	@Override
+	public Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds) {
+		return this.jobExecutionDao.getJobExecutionsByTaskIds(taskExecutionIds);
 	}
 
 	private List<JobExecution> getJobExecutions(String jobName, BatchStatus status, int pageOffset, int pageSize) {

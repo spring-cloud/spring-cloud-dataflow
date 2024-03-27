@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.service;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -40,6 +43,7 @@ import org.springframework.data.domain.Pageable;
  *
  * @author Glenn Renfro.
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public interface TaskJobService {
 
@@ -199,4 +203,7 @@ public interface TaskJobService {
 		int taskExecutionId,
 		String schemaTarget
 	) throws NoSuchJobException;
+
+	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds, String schemaTarget);
+
 }
