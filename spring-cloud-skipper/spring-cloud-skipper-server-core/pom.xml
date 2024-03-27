@@ -258,6 +258,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 					<threadCount>1</threadCount>
 					<forkCount>1</forkCount>
 					<failIfNoTests>true</failIfNoTests>
@@ -283,6 +284,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
+							<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 							<threadCount>1</threadCount>
 							<forkCount>1</forkCount>
 							<failIfNoTests>true</failIfNoTests>

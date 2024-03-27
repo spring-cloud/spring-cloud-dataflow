@@ -201,6 +201,7 @@
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${maven-failsafe-plugin.version}</version>
 					<configuration>
+						<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 						<groups>${groups}</groups>
 						<excludedGroups>${excludedGroups}</excludedGroups>
 					</configuration>
@@ -668,6 +669,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<version>${maven-surefire-plugin.version}</version>
 						<configuration>
+							<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 							<threadCount>1</threadCount>
 							<forkCount>1</forkCount>
 							<properties>
