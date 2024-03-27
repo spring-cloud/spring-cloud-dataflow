@@ -125,7 +125,7 @@ public abstract class AbstractSmokeTest {
 		});
 		long expectedNewCount = originalCount + 2;
 		assertThat(taskExplorer.getTaskExecutionCount()).isEqualTo(expectedNewCount);
-		List<AggregateTaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100)).getContent();
+		List<AggregateTaskExecution> taskExecutions = taskExplorer.findAll(Pageable.ofSize(100), true).getContent();
 		assertThat(taskExecutions)
 				.hasSize((int)expectedNewCount)
 				.allSatisfy((taskExecution) -> assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L));

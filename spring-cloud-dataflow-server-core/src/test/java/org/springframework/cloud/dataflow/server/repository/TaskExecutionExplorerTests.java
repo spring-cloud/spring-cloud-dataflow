@@ -126,7 +126,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "foo");
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
-		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
+		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10), true).getContent();
 		assertThat(resultList.size()).isEqualTo(ENTRY_COUNT);
 		Map<String, AggregateTaskExecution> actual = new HashMap<>();
 		for (AggregateTaskExecution taskExecution : resultList) {
@@ -164,7 +164,7 @@ public class TaskExecutionExplorerTests {
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("SCHEMA_TARGET"))).getContent();
+		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("SCHEMA_TARGET")), true).getContent();
 		assertThat(resultList.size()).isEqualTo(4);
 		List<Long> ids = resultList.stream().map(AggregateTaskExecution::getExecutionId).collect(Collectors.toList());
 		assertThat(ids).containsExactly(0L, 2L, 3L, 1L);
