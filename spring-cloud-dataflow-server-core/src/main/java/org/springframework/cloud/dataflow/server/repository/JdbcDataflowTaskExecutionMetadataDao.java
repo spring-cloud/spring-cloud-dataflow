@@ -16,10 +16,10 @@
 package org.springframework.cloud.dataflow.server.repository;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -69,6 +69,8 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		"FROM %PREFIX%EXECUTION_METADATA M INNER JOIN " +
 		"%PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID " +
 		"WHERE E.TASK_EXECUTION_ID = :taskExecutionId";
+	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_IDS = "SELECT M.TASK_EXECUTION_MANIFEST AS TASK_EXECUTION_MANIFEST, M.TASK_EXECUTION_ID AS TASK_EXECUTION_ID " +
+		"FROM %PREFIX%EXECUTION_METADATA M WHERE M.TASK_EXECUTION_ID in (:taskExecutionIds)";
 
 	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS = "DELETE FROM %PREFIX%EXECUTION_METADATA WHERE TASK_EXECUTION_ID IN (:taskExecutionIds)";
 
@@ -179,6 +181,33 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			});
 		} catch (EmptyResultDataAccessException erdae) {
 			return null;
+		}
+	}
+
+	@Override
+	public Map<Long, TaskManifest> findManifestByIds(Set<Long> ids) {
+		final MapSqlParameterSource queryParameters = new MapSqlParameterSource()
+			.addValue("taskExecutionIds", ids);
+
+		try {
+			String sql = SchemaUtilities.getQuery(FIND_MANIFEST_BY_TASK_EXECUTION_IDS, tablePrefix);
+			logger.debug("findManifestByIds:sql={}, parameters={}", sql, queryParameters);
+			final Map<Long, TaskManifest> result = new HashMap<>();
+			this.jdbcTemplate.query(sql, queryParameters, rs -> {
+				try {
+					String executionManifest = rs.getString("TASK_EXECUTION_MANIFEST");
+					if(executionManifest != null && !executionManifest.trim().isEmpty()) {
+						result.put(rs.getLong("TASK_EXECUTION_ID"),
+							objectMapper.readValue(executionManifest, TaskManifest.class));
+					}
+				}
+				catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			return result;
+		} catch (EmptyResultDataAccessException erdae) {
+			return Collections.emptyMap();
 		}
 	}
 

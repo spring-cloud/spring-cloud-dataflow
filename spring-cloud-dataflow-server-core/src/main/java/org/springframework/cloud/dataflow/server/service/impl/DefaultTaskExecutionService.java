@@ -885,8 +885,14 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	public TaskManifest findTaskManifestById(Long id, String schemaTarget) {
 		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
 		Assert.notNull(dataflowTaskExecutionMetadataDao, "Expected dataflowTaskExecutionMetadataDao using " + schemaTarget);
-		AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
-		return taskExecution != null ? dataflowTaskExecutionMetadataDao.findManifestById(taskExecution.getExecutionId()) : null;
+		return dataflowTaskExecutionMetadataDao.findManifestById(id);
+	}
+
+	@Override
+	public Map<Long, TaskManifest> findTaskManifestByIds(Set<Long> ids, String schemaTarget) {
+		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "Expected dataflowTaskExecutionMetadataDao using " + schemaTarget);
+		return dataflowTaskExecutionMetadataDao.findManifestByIds(ids);
 	}
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {

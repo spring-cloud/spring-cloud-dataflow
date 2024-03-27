@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
@@ -24,6 +25,7 @@ import org.springframework.cloud.task.repository.TaskExecution;
  * Data access object used for manipulating task manifests
  *
  * @author Michael Minella
+ * @author Corneil du Plessis
  * @since 2.3
  */
 public interface DataflowTaskExecutionMetadataDao {
@@ -51,6 +53,13 @@ public interface DataflowTaskExecutionMetadataDao {
 	 * @return {@code TaskManifest}
 	 */
 	TaskManifest findManifestById(Long id);
+
+	/**
+	 * Returns a collection of manifests mapped by id for the supplied ids.
+	 * @param ids list of task execution ids.
+	 * @return map of manifests with id as key.
+	 */
+	Map<Long, TaskManifest> findManifestByIds(Set<Long> ids);
 
 	/**
 	 * Deletes the task manifest records associated with the collection of task execution ids provided.

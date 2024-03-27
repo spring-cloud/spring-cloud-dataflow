@@ -73,6 +73,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	private String databaseType;
 
 	private String tablePrefix = AbstractJdbcBatchMetadataDao.DEFAULT_TABLE_PREFIX;
+	private String taskTablePrefix = "TASK_";
 
 	private DataFieldMaxValueIncrementerFactory incrementerFactory;
 
@@ -163,6 +164,10 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 */
 	public void setTablePrefix(String tablePrefix) {
 		this.tablePrefix = tablePrefix;
+	}
+
+	public void setTaskTablePrefix(String taskTablePrefix) {
+		this.taskTablePrefix = taskTablePrefix;
 	}
 
 	/**
@@ -270,6 +275,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		dao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix
 				+ "JOB_EXECUTION_SEQ"));
 		dao.setTablePrefix(tablePrefix);
+		dao.setTaskTablePrefix(taskTablePrefix);
 		dao.setClobTypeToUse(determineClobTypeToUse(this.databaseType));
 		dao.setExitMessageLength(maxVarCharLength);
 		dao.afterPropertiesSet();

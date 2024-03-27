@@ -33,6 +33,7 @@ import org.springframework.cloud.dataflow.core.TaskManifest;
  * @author Gunnar Hillert
  * @author David Turanski
  * @author Daniel Serleg
+ * @author Corneil du Plessis
  */
 public interface TaskExecutionService {
 
@@ -79,6 +80,14 @@ public interface TaskExecutionService {
 	 * @return {@code TaskManifest} or null if not found.
 	 */
 	TaskManifest findTaskManifestById(Long id, String schemaTarget);
+
+	/**
+	 *
+	 * @param ids A set of task execution ids.
+	 * @param schemaTarget Relevant schema target.
+	 * @return collection of manifests mapped by the relevant task execution id.
+	 */
+	Map<Long, TaskManifest> findTaskManifestByIds(Set<Long> ids, String schemaTarget);
 
 	/**
 	 * Returns all the task execution IDs with the option to include only the completed task executions.
