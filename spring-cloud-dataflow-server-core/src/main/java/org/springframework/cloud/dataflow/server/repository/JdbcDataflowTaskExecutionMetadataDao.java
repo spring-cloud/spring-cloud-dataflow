@@ -70,9 +70,7 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 		"%PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID " +
 		"WHERE E.TASK_EXECUTION_ID = :taskExecutionId";
 	private static final String FIND_MANIFEST_BY_TASK_EXECUTION_IDS = "SELECT M.TASK_EXECUTION_MANIFEST AS TASK_EXECUTION_MANIFEST, M.TASK_EXECUTION_ID AS TASK_EXECUTION_ID " +
-		"FROM %PREFIX%EXECUTION_METADATA M INNER JOIN " +
-		"%PREFIX%EXECUTION E ON M.TASK_EXECUTION_ID = E.TASK_EXECUTION_ID " +
-		"WHERE E.TASK_EXECUTION_ID in (:taskExecutionIds)";
+		"FROM %PREFIX%EXECUTION_METADATA M WHERE M.TASK_EXECUTION_ID in (:taskExecutionIds)";
 
 	private static final String DELETE_MANIFEST_BY_TASK_EXECUTION_IDS = "DELETE FROM %PREFIX%EXECUTION_METADATA WHERE TASK_EXECUTION_ID IN (:taskExecutionIds)";
 
@@ -196,17 +194,17 @@ public class JdbcDataflowTaskExecutionMetadataDao implements DataflowTaskExecuti
 			logger.debug("findManifestByIds:sql={}, parameters={}", sql, queryParameters);
 			final Map<Long, TaskManifest> result = new HashMap<>();
 			this.jdbcTemplate.query(sql, queryParameters, rs -> {
-                try {
+				try {
 					String executionManifest = rs.getString("TASK_EXECUTION_MANIFEST");
 					if(executionManifest != null && !executionManifest.trim().isEmpty()) {
 						result.put(rs.getLong("TASK_EXECUTION_ID"),
-								objectMapper.readValue(executionManifest, TaskManifest.class));
+							objectMapper.readValue(executionManifest, TaskManifest.class));
 					}
-                }
-                catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+				}
+				catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			});
 			return result;
 		} catch (EmptyResultDataAccessException erdae) {
 			return Collections.emptyMap();

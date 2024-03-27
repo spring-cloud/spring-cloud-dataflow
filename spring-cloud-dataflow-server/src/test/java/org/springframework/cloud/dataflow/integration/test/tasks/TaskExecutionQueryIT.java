@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.cloud.dataflow.integration.test.tasks;
 
 import java.nio.charset.StandardCharsets;
@@ -99,14 +98,14 @@ class TaskExecutionQueryIT {
 				"TASK_TASK_BATCH"
 			};
 			Map<String, Map<String, Integer>> columnTypes = new HashMap<>();
-			add(columnTypes, "BATCH_JOB_INSTANCE", "VERSION", Types.INTEGER);
-			add(columnTypes, "BATCH_JOB_EXECUTION", "VERSION", Types.INTEGER);
-			add(columnTypes, "BATCH_STEP_EXECUTION", "VERSION", Types.INTEGER);
-			add(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "DATE_VAL", Types.TIMESTAMP);
-			add(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "LONG_VAL", Types.BIGINT);
-			add(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "DOUBLE_VAL", Types.DOUBLE);
-			add(columnTypes, "TASK_EXECUTION", "EXTERNAL_EXECUTION_ID", Types.VARCHAR);
-			add(columnTypes, "TASK_EXECUTION", "EXIT_CODE", Types.INTEGER);
+			addColumnTableType(columnTypes, "BATCH_JOB_INSTANCE", "VERSION", Types.INTEGER);
+			addColumnTableType(columnTypes, "BATCH_JOB_EXECUTION", "VERSION", Types.INTEGER);
+			addColumnTableType(columnTypes, "BATCH_STEP_EXECUTION", "VERSION", Types.INTEGER);
+			addColumnTableType(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "DATE_VAL", Types.TIMESTAMP);
+			addColumnTableType(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "LONG_VAL", Types.BIGINT);
+			addColumnTableType(columnTypes, "BATCH_JOB_EXECUTION_PARAMS", "DOUBLE_VAL", Types.DOUBLE);
+			addColumnTableType(columnTypes, "TASK_EXECUTION", "EXTERNAL_EXECUTION_ID", Types.VARCHAR);
+			addColumnTableType(columnTypes, "TASK_EXECUTION", "EXIT_CODE", Types.INTEGER);
 
 			for (String tableName : tableNames) {
 				long startLoad = System.currentTimeMillis();
@@ -115,20 +114,20 @@ class TaskExecutionQueryIT {
 				CSVLoader.DeriveType deriveType = columnName -> {
 					String col = columnName.toUpperCase();
 					Integer type = tableColumnTypes != null ? tableColumnTypes.get(col) : null;
-                    if(type != null) {
-                        return type;
-                    }
-                    if (col.equals("ID") || col.endsWith("_ID")) {
-                        return Types.BIGINT;
-                    }
-                    if (col.endsWith("_COUNT")) {
-                        return Types.INTEGER;
-                    }
-                    if (col.endsWith("_TIME") || col.endsWith("_UPDATED")) {
-                        return Types.TIMESTAMP;
-                    }
-                    return Types.VARCHAR;
-                };
+					if (type != null) {
+						return type;
+					}
+					if (col.equals("ID") || col.endsWith("_ID")) {
+						return Types.BIGINT;
+					}
+					if (col.endsWith("_COUNT")) {
+						return Types.INTEGER;
+					}
+					if (col.endsWith("_TIME") || col.endsWith("_UPDATED")) {
+						return Types.TIMESTAMP;
+					}
+					return Types.VARCHAR;
+				};
 				ClassPathResource resource = new ClassPathResource("task-executions/" + tableName + ".csv");
 				assertThat(resource.exists()).withFailMessage(() -> "classpath:task-executions/" + tableName + ".csv:NOT FOUND").isTrue();
 				int loaded = CSVLoader.loadCSV(
@@ -144,11 +143,10 @@ class TaskExecutionQueryIT {
 			logger.info("Total load time={}ms", totalTime);
 		}
 
-		private void add(Map<String, Map<String, Integer>> columnTypes, String tableName, String columnName, int type) {
+		private void addColumnTableType(Map<String, Map<String, Integer>> columnTypes, String tableName, String columnName, int type) {
 			Map<String, Integer> tableColumnTypes = columnTypes.computeIfAbsent(tableName, k -> new HashMap<>());
-            tableColumnTypes.put(columnName, type);
+			tableColumnTypes.put(columnName, type);
 		}
-
 
 		@Test
 		void queryWithLargeNumberOfTaskExecutions() throws Exception {
