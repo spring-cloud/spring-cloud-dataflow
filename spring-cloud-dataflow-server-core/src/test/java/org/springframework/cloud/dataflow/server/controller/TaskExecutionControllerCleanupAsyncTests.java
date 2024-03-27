@@ -35,7 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;

@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.server.controller.assembler;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.util.Assert;
@@ -31,14 +31,14 @@ public class DefaultTaskDefinitionAssemblerProvider implements TaskDefinitionAss
 
 	private final TaskExecutionService taskExecutionService;
 
-	private final CompositeTaskExplorer taskExplorer;
+	private final DataflowTaskExplorer taskExplorer;
 
 	private final TaskJobService taskJobService;
 
 	public DefaultTaskDefinitionAssemblerProvider(
 			TaskExecutionService taskExecutionService,
 			TaskJobService taskJobService,
-			CompositeTaskExplorer taskExplorer
+			DataflowTaskExplorer taskExplorer
 	) {
 		Assert.notNull(taskExecutionService, "taskExecutionService required");
 		Assert.notNull(taskJobService, "taskJobService required");

@@ -1,4 +1,4 @@
-package org.springframework.cloud.dataflow.composite.task;
+package org.springframework.cloud.dataflow.server.task;
 
 import java.util.List;
 

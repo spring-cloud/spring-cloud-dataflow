@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.dataflow.composite.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 
 /**

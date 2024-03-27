@@ -32,7 +32,7 @@ import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
 import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
@@ -57,7 +57,7 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 
 	private final TaskJobService taskJobService;
 
-	private final CompositeTaskExplorer taskExplorer;
+	private final DataflowTaskExplorer taskExplorer;
 
 	private final TaskSanitizer taskSanitizer = new TaskSanitizer();
 
@@ -71,7 +71,7 @@ public class DefaultTaskDefinitionAssembler<R extends TaskDefinitionResource> ex
 			boolean enableManifest,
 			Class<R> classType,
 			TaskJobService taskJobService,
-			CompositeTaskExplorer taskExplorer) {
+			DataflowTaskExplorer taskExplorer) {
 		super(TaskDefinitionController.class, classType);
 		this.taskExecutionService = taskExecutionService;
 		this.enableManifest = enableManifest;
