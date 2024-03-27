@@ -129,6 +129,15 @@ public interface AggregateTaskExplorer {
 	Page<AggregateTaskExecution> findAll(Pageable pageable);
 
 	/**
+	 * Retrieves all the task executions within the pageable constraints sorted by start
+	 * date descending, taskExecution id descending.
+	 *
+	 * @param pageable the constraints for the search
+	 * @param thinResults Indicated if arguments will be populated
+	 * @return page containing the results from the search
+	 */
+	Page<AggregateTaskExecution> findAll(Pageable pageable, boolean thinResults);
+	/**
 	 * Returns the id of the TaskExecution that the requested Spring Batch job execution
 	 * was executed within the context of. Returns null if none were found.
 	 *
