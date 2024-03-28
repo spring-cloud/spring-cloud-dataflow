@@ -26,12 +26,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
-import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.composite.task.TaskDeploymentReader;
-import org.springframework.cloud.dataflow.composite.task.impl.DefaultDataFlowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -103,7 +103,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import({
 		TaskConfiguration.TaskDeleteServiceConfig.class,
-		CompositeTaskConfiguration.class,
+		DataflowTaskConfiguration.class,
 		DataFlowTaskConfiguration.class
 })
 public class TaskConfiguration {
@@ -171,7 +171,7 @@ public class TaskConfiguration {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
 			LauncherRepository launcherRepository,
@@ -234,7 +234,7 @@ public class TaskConfiguration {
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionCreationService taskExecutionRepositoryService,
 				TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-				CompositeTaskExplorer taskExplorer,
+				DataflowTaskExplorer taskExplorer,
 				DataflowTaskExecutionDao dataflowTaskExecutionDao,
 				DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 				DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -269,7 +269,7 @@ public class TaskConfiguration {
 		@Bean
 		public TaskJobService taskJobExecutionRepository(
 				JobService service,
-				CompositeTaskExplorer taskExplorer,
+				DataflowTaskExplorer taskExplorer,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionService taskExecutionService,
 				LauncherRepository launcherRepository) {
@@ -287,7 +287,7 @@ public class TaskConfiguration {
 	public static class TaskDeleteServiceConfig {
 		@Bean
 		public TaskDeleteService deleteTaskService(
-				CompositeTaskExplorer taskExplorer,
+				DataflowTaskExplorer taskExplorer,
 				LauncherRepository launcherRepository,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskDeploymentRepository taskDeploymentRepository,

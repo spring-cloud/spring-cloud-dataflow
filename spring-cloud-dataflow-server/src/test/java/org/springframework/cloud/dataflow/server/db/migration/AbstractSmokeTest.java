@@ -36,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
@@ -72,7 +72,7 @@ public abstract class AbstractSmokeTest {
 	private TaskRepository taskRepository;
 
 	@Autowired
-	private CompositeTaskExplorer taskExplorer;
+	private DataflowTaskExplorer taskExplorer;
 
 	@Autowired
 	private StreamDefinitionRepository streamDefinitionRepository;

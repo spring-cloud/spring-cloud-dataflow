@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.core.AllPlatformsTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -80,7 +80,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	/**
 	 * Used to read TaskExecutions.
 	 */
-	private final CompositeTaskExplorer taskExplorer;
+	private final DataflowTaskExplorer taskExplorer;
 
 	private final TaskDefinitionRepository taskDefinitionRepository;
 
@@ -108,7 +108,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	public DefaultTaskExecutionInfoService(
 		DataSourceProperties dataSourceProperties,
 		AppRegistryService appRegistryService,
-		CompositeTaskExplorer taskExplorer,
+		DataflowTaskExplorer taskExplorer,
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskConfigurationProperties taskConfigurationProperties,
 		LauncherRepository launcherRepository,
@@ -140,7 +140,7 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	public DefaultTaskExecutionInfoService(
 		DataSourceProperties dataSourceProperties,
 		AppRegistryService appRegistryService,
-		CompositeTaskExplorer taskExplorer,
+		DataflowTaskExplorer taskExplorer,
 		TaskDefinitionRepository taskDefinitionRepository,
 		TaskConfigurationProperties taskConfigurationProperties,
 		LauncherRepository launcherRepository,

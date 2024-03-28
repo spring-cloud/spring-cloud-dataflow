@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.composite.task;
+package org.springframework.cloud.dataflow.server.task;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.composite.task.impl.DefaultCompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataflowTaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
@@ -28,10 +28,10 @@ import org.springframework.util.Assert;
  * @author Corneil du Plessis
  */
 @Configuration
-public class CompositeTaskConfiguration {
+public class DataflowTaskConfiguration {
 
 	@Bean
-	public CompositeTaskExplorer aggregateTaskExplorer(
+	public DataflowTaskExplorer aggregateTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
 			TaskDefinitionReader taskDefinitionReader,
@@ -41,7 +41,7 @@ public class CompositeTaskConfiguration {
 		Assert.notNull(taskExecutionQueryDao, "taskExecutionQueryDao required");
 		Assert.notNull(taskDefinitionReader, "taskDefinitionReader required");
 		Assert.notNull(taskDeploymentReader, "taskDeploymentReader required");
-		return new DefaultCompositeTaskExplorer(dataSource,
+		return new DefaultDataflowTaskExplorer(dataSource,
 				taskExecutionQueryDao,
 				taskDefinitionReader,
 				taskDeploymentReader);

@@ -45,7 +45,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -147,7 +147,7 @@ public class TaskExecutionControllerTests {
 	private WebApplicationContext wac;
 
 	@Autowired
-	private CompositeTaskExplorer taskExplorer;
+	private DataflowTaskExplorer taskExplorer;
 
 	@Autowired
 	private TaskExecutionService taskExecutionService;

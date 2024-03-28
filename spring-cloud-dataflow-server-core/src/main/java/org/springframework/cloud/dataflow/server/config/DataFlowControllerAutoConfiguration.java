@@ -100,7 +100,7 @@ import org.springframework.cloud.dataflow.server.controller.security.SecurityCon
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.SpringSecurityAuditorAware;
@@ -131,7 +131,6 @@ import org.springframework.cloud.skipper.client.util.HttpClientConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.hateoas.mediatype.MessageResolver;
@@ -269,7 +268,7 @@ public class DataFlowControllerAutoConfiguration {
 
 		@Bean
 		public TaskExecutionController taskExecutionController(
-				CompositeTaskExplorer explorer,
+				DataflowTaskExplorer explorer,
 			   	TaskExecutionService taskExecutionService,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionInfoService taskExecutionInfoService,
@@ -295,14 +294,14 @@ public class DataFlowControllerAutoConfiguration {
 		public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
 				TaskExecutionService taskExecutionService,
 				TaskJobService taskJobService,
-				CompositeTaskExplorer taskExplorer
+				DataflowTaskExplorer taskExplorer
 		) {
 			return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 		}
 
 		@Bean
 		public TaskDefinitionController taskDefinitionController(
-				CompositeTaskExplorer taskExplorer,
+				DataflowTaskExplorer taskExplorer,
 				TaskDefinitionRepository repository,
 				TaskSaveService taskSaveService,
 																 TaskDeleteService taskDeleteService,

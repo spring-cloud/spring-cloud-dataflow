@@ -52,11 +52,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-dataflow-aggregate-task</artifactId>
-			<version>${dataflow.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-common-flyway</artifactId>
 			<version>${dataflow.version}</version>
 		</dependency>
