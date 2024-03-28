@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,25 @@
 
 package org.springframework.cloud.dataflow.server.batch;
 
-
-//TODO: Boot3x followup
-
-import org.springframework.batch.item.database.support.AbstractSqlPagingQueryProvider;
-import org.springframework.cloud.dataflow.server.repository.support.PagingQueryProvider;
+import org.springframework.batch.item.database.PagingQueryProvider;
 
 /**
- * This class provides the implementation for methods removed by Spring Batch but are still
- * needed by SCDF.  This comment will be need to be updated prior to release to
- * discuss that it implements extra features needed beyond the {@code SqlPagingQueryProviderFactoryBean}.
+ * @author Thomas Risberg
+ * @author Michael Minella
+ * @author Corneil du Plessis
  */
-public  class DataflowSqlPagingQueryProvider implements DataflowPagingQueryProvider {
-	public String generateJumpToItemQuery(int start, int count) {
-		throw new UnsupportedOperationException("This method is not yet supported by SCDF.");
-	}
+public interface DataflowSqlPagingQueryProvider extends PagingQueryProvider {
+
+	/**
+	 *
+	 * Generate the query that will provide the jump to item query.  The itemIndex provided could be in the middle of
+	 * the page and together with the page size it will be used to calculate the last index of the preceding page
+	 * to be able to retrieve the sort key for this row.
+	 *
+	 * @param itemIndex the index for the next item to be read
+	 * @param pageSize number of rows to read for each page
+	 * @return the generated query
+	 */
+	String generateJumpToItemQuery(int itemIndex, int pageSize);
+
 }
