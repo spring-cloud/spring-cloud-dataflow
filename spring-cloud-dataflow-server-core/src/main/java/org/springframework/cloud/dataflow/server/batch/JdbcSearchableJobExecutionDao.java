@@ -36,9 +36,10 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
+
 import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.server.batch.DataflowSqlPagingQueryProvider;
+import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -108,41 +109,24 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "TASK_TASK_BATCH B";
 
-	private PagingQueryProvider allExecutionsPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider allExecutionsPagingQueryProvider;
 
-	private DataflowPagingQueryProvider dataflowAllExecutionsPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNamePagingQueryProvider;
 
-	private PagingQueryProvider byJobNamePagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byStatusPagingQueryProvider;
 
-	private DataflowPagingQueryProvider dataflowByJobNamePagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNameAndStatusPagingQueryProvider;
 
-	private PagingQueryProvider byStatusPagingQueryProvider;
 
-	private DataflowPagingQueryProvider dataflowByStatusPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider executionsWithStepCountPagingQueryProvider;
 
-	private DataflowPagingQueryProvider dataflowByJobNameAndStatusPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
 
-	private DataflowPagingQueryProvider dataflowByJobNameWithStepCountPagingQueryProvider;
-
-	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
-
-	private DataflowPagingQueryProvider dataflowExecutionsWithStepCountPagingQueryProvider;
-
-	private PagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
-
-	private DataflowPagingQueryProvider dataflowByDateRangeWithStepCountPagingQueryProvider;
-
-	private PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
-
-	private DataflowPagingQueryProvider dataflowByJobInstanceIdWithStepCountPagingQueryProvider;
-
-	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
-
-	private DataflowPagingQueryProvider dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
 
 	private final ConfigurableConversionService conversionService;
 
@@ -179,42 +163,34 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		});
 
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
-		dataflowAllExecutionsPagingQueryProvider = getDataflowPagingQueryProvider();
+
 
 
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
 
-		dataflowExecutionsWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
+
 
 
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
-		dataflowByJobNamePagingQueryProvider =getDataflowPagingQueryProvider(NAME_FILTER);
+
 
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
-		dataflowByStatusPagingQueryProvider = getDataflowPagingQueryProvider(STATUS_FILTER);
+
 
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
-		dataflowByJobNameAndStatusPagingQueryProvider = getDataflowPagingQueryProvider(NAME_AND_STATUS_FILTER);
+
 
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
 
-		dataflowByJobNameWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
 
 
-		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-				DATE_RANGE_FILTER);
-		dataflowByDateRangeWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-			DATE_RANGE_FILTER);
 
-		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-				JOB_INSTANCE_ID_FILTER);
-		dataflowByJobInstanceIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-			JOB_INSTANCE_ID_FILTER);
+		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, DATE_RANGE_FILTER);
 
-		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
-				FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
-		dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider = getDataflowPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
-			FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
+
+		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, JOB_INSTANCE_ID_FILTER);
+
+		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
 
 		super.afterPropertiesSet();
 
@@ -269,53 +245,37 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} for all job executions
+	 * @return a {@link DataflowSqlPagingQueryProvider} for all job executions
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider() throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider() throws Exception {
 		return getPagingQueryProvider(null);
 	}
 
-	/**
-	 * @return a {@link PagingQueryProvider} for all job executions
-	 * @throws Exception if page provider is not created.
-	 */
-	private DataflowPagingQueryProvider getDataflowPagingQueryProvider() throws Exception {
-		return getDataflowPagingQueryProvider(null);
-	}
 
 	/**
-	 * @return a {@link DataflowPagingQueryProvider} for all job executions with the provided
+	 * @return a {@link DataflowSqlPagingQueryProvider} for all job executions with the provided
 	 * where clause
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
 		return getPagingQueryProvider(null, whereClause);
 	}
 
-	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
-	/**
-	 * @return a {@link DataflowPagingQueryProvider} for all job executions with the provided
-	 * where clause
-	 * @throws Exception if page provider is not created.
-	 */
-	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String whereClause) {
-		return new DataflowSqlPagingQueryProvider();
-	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String fromClause, String whereClause) throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String fromClause, String whereClause) throws Exception {
 		return getPagingQueryProvider(null, fromClause, whereClause);
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause)
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause)
 			throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
@@ -332,15 +292,6 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		factory.setWhereClause(whereClause);
 
 		return factory.getObject();
-	}
-
-	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
-	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
-	 * @throws Exception if page provider is not created.
-	 */
-	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String fields, String fromClause, String whereClause) {
-		return new DataflowSqlPagingQueryProvider();
 	}
 
 	/**
@@ -389,7 +340,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByDateRangeWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					byDateRangeWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					fromDate, toDate);
 			return getJdbcTemplate().query(
 					byDateRangeWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -410,7 +361,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByJobInstanceIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					byJobInstanceIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					jobInstanceId);
 			return getJdbcTemplate().query(
 					byJobInstanceIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -431,7 +382,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataFlowByTaskExecutionIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					byTaskExecutionIdWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					taskExecutionId);
 			return getJdbcTemplate().query(
 					byTaskExecutionIdWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
@@ -461,7 +412,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByJobNameAndStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName,
+					byJobNameAndStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName,
 					status.name());
 			return getJdbcTemplate().query(byJobNameAndStatusPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), jobName, status.name(), startAfterValue);
@@ -482,7 +433,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
+					byJobNamePagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName);
 			return getJdbcTemplate().query(byJobNamePagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), jobName, startAfterValue);
 		}
@@ -499,7 +450,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, status.name());
+					byStatusPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class, status.name());
 			return getJdbcTemplate().query(byStatusPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), status.name(), startAfterValue);
 		}
@@ -519,7 +470,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowByJobNameWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
+					byJobNameWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class,
 					jobName);
 			return getJdbcTemplate().query(byJobNameWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), jobName, startAfterValue);
@@ -540,7 +491,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate()
-				.queryForObject(dataflowAllExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+				.queryForObject(allExecutionsPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(allExecutionsPagingQueryProvider.generateRemainingPagesQuery(count),
 					new SearchableJobExecutionRowMapper(), startAfterValue);
 		}
@@ -557,7 +508,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		}
 		try {
 			Long startAfterValue = getJdbcTemplate().queryForObject(
-					dataflowExecutionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
+					executionsWithStepCountPagingQueryProvider.generateJumpToItemQuery(start, count), Long.class);
 			return getJdbcTemplate().query(
 					executionsWithStepCountPagingQueryProvider.generateRemainingPagesQuery(count),
 					new JobExecutionStepCountRowMapper(), startAfterValue);

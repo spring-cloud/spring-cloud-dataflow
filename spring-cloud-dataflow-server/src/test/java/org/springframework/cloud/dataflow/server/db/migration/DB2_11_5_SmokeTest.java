@@ -25,9 +25,12 @@ import org.springframework.cloud.dataflow.server.db.DB2_11_5_ContainerSupport;
  * @author Corneil du Plessis
  * @author Chris Bono
  */
-//TODO: Boot3x followup Looks like we are trying to access Java 8 code in some of the DB libraries with Java 17 in
-// and is causing the problem below
-// java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module
-@Disabled("TODO: Boot3x followup  followup Looks like we are trying to access Java 8 code in some of the DB libraries with Java 17 in")
+//TODO: DB2 Driver has a bug.
+//java.lang.NullPointerException: Cannot invoke "java.sql.Timestamp.toLocalDateTime()" because "<local4>" is null
+//at com.ibm.db2.jcc.am.ResultSet.getObject(ResultSet.java:2020)
+//at com.ibm.db2.jcc.am.ResultSet.getObject(ResultSet.java:2045)
+//at com.zaxxer.hikari.pool.HikariProxyResultSet.getObject(HikariProxyResultSet.java)
+//at org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao$TaskExecutionRowMapper.mapRow(JdbcTaskExecutionDao.java:621)
+@Disabled("TODO: DB2 Driver and LocalDateTime has a bug when the row has is null in the column")
 public class DB2_11_5_SmokeTest extends AbstractSmokeTest implements DB2_11_5_ContainerSupport {
 }

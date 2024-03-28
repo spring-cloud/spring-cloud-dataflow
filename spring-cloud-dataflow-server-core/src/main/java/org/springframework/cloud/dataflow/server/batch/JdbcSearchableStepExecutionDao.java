@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2013 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,8 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
 import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.support.PatternMatcher;
+import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -137,8 +136,8 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 			whereClause = whereClause + " AND STEP_NAME = ?";
 		}
 
-		PagingQueryProvider queryProvider = getPagingQueryProvider(whereClause);
-		DataflowPagingQueryProvider dataflowQueryProvider = getDataflowPagingQueryProvider(whereClause);
+		DataflowSqlPagingQueryProvider queryProvider = getPagingQueryProvider(whereClause);
+
 
 		List<StepExecution> stepExecutions;
 		if (start <= 0) {
@@ -148,7 +147,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		else {
 			try {
 				Long startAfterValue = getJdbcTemplate().queryForObject(
-						dataflowQueryProvider.generateJumpToItemQuery(start, count), Long.class, jobName, stepName);
+						queryProvider.generateJumpToItemQuery(start, count), Long.class, jobName, stepName);
 				stepExecutions = getJdbcTemplate().query(queryProvider.generateRemainingPagesQuery(count),
 						new StepExecutionRowMapper(), jobName, stepName, startAfterValue);
 			}
@@ -175,11 +174,9 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the
-	 * query
-	 * @throws Exception
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String whereClause) {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String whereClause) {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
 		factory.setFromClause(getQuery("%PREFIX%STEP_EXECUTION S, %PREFIX%JOB_EXECUTION J, %PREFIX%JOB_INSTANCE I"));
@@ -192,22 +189,11 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 					+ " AND S.JOB_EXECUTION_ID = J.JOB_EXECUTION_ID AND J.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID");
 		}
 		try {
-			return (PagingQueryProvider) factory.getObject();
+			return factory.getObject();
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Unexpected exception creating paging query provide", e);
 		}
-	}
-
-	//TODO: Boot3x followup Need to create the {@link DataflowPagingQueryProvider} to call method generateJumpToItemQuery.
-	/**
-	 * @return a {@link DataflowPagingQueryProvider} with a where clause to narrow the
-	 * query
-	 * @throws Exception
-	 */
-	private DataflowPagingQueryProvider getDataflowPagingQueryProvider(String whereClause) {
-		throw new UnsupportedOperationException("Need to create DataflowSqlPagingQueryProvider so that dataflow can call " +
-			"generateJumpToItemQuery");
 	}
 
 	private static class StepExecutionRowMapper implements RowMapper<StepExecution> {

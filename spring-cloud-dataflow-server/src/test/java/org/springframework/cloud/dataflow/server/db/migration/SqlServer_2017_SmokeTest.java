@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,6 @@ import org.junit.jupiter.api.Disabled;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 
 
-//TODO: Boot3x followup Looks like we are trying to access Java 8 code in some of the DB libraries with Java 17 in
-// and is causing the problem below
-// java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module
-@Disabled("TODO: Boot3x followup  followup Looks like we are trying to access Java 8 code in some of the DB libraries with Java 17 in")
 /**
  * Basic database schema and JPA tests for MS SQL Server.
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 the original author or authors.
+ * Copyright 2023-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
 import javax.sql.DataSource;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
@@ -133,7 +131,7 @@ class JobExecutionTestUtils
 	 * Test utility that generates hundreds of job executions which can be useful when debugging paging issues.
 	 * <p>To run, adjust the datasource properties accordingly and then execute the test manually in your editor.
 	 */
-	@Disabled
+	// @Disabled
 	static class JobExecutionTestDataGenerator {
 
 		@Test
