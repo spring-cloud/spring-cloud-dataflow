@@ -19,6 +19,8 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
@@ -120,13 +122,12 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 			this.name = "?";
 		}
 
-		// The others can be localized
-//		timeFormat.setTimeZone(timeZone);
-//		dateFormat.setTimeZone(timeZone);
 		if (jobExecution.getStartTime() != null) {
-			this.startDate = dateFormat.format(jobExecution.getStartTime());
-			this.startTime = timeFormat.format(jobExecution.getStartTime());
-			//TODO: Boot3x followup
+			// We assume the startTime is date time from current timezone.
+			// if the timezone provided is different from the current we have to assume we need a representation in that timezone.
+			this.startDate = dateFormat.format(ZonedDateTime.of(jobExecution.getStartTime(), TimeZone.getDefault().toZoneId()).withZoneSameInstant(timeZone.toZoneId()));
+			this.startTime = timeFormat.format(ZonedDateTime.of(jobExecution.getStartTime(), TimeZone.getDefault().toZoneId()).withZoneSameInstant(timeZone.toZoneId()));
+			// We assume start time and end time are from current timezone.
 			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
 			this.duration = String.valueOf(Duration.between(jobExecution.getStartTime(), endTime));
 		}
