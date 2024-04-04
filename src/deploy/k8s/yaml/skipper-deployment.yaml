@@ -52,6 +52,8 @@ spec:
             cpu: 1500m
             memory: 1536Mi
         env:
+          - name: 'JAVA_TOOL_OPTIONS'
+            value: '-XX:ActiveProcessorCount=-1'
           - name: LANG
             value: en_US.utf8
           - name: LC_ALL
