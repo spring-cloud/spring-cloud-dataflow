@@ -30,7 +30,7 @@ data:
                     imagePullPolicy: IfNotPresent
                     imagePullSecret:
                       -name: registry-key
-                    environmentVariables: 'LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8,SPRING_CLOUD_CONFIG_ENABLED=false,SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
+                    environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1,LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8,SPRING_CLOUD_CONFIG_ENABLED=false,SPRING_RABBITMQ_HOST=${RABBITMQ_SERVICE_HOST},SPRING_RABBITMQ_PORT=${RABBITMQ_SERVICE_PORT}'
                     request:
                       memory: 1024Mi
                       cpu: 1500m

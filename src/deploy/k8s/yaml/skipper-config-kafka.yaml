@@ -30,7 +30,7 @@ data:
                     imagePullPolicy: IfNotPresent
                     imagePullSecret:
                       - name: registry-key
-                    environmentVariables: 'LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8,SPRING_CLOUD_CONFIG_ENABLED=false,SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka-broker:9092,SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
+                    environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1,LANG=en_US.utf8,LC_ALL=en_US.utf8,JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8,SPRING_CLOUD_CONFIG_ENABLED=false,SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka-broker:9092,SPRING_CLOUD_STREAM_KAFKA_BINDER_ZK_NODES=${KAFKA_ZK_SERVICE_HOST}:${KAFKA_ZK_SERVICE_PORT}'
                     request:
                       memory: 1024Mi
                       cpu: 1500m
