@@ -29,7 +29,6 @@ import org.springframework.cloud.task.configuration.EnableTask;
  */
 @EnableTask
 @SpringBootApplication
-@EnableBatchProcessing
 public class SingleStepBatchJobApplication {
 
 	public static void main(String[] args) {
