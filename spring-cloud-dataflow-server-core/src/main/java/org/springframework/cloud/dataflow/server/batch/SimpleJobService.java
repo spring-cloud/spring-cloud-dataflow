@@ -218,25 +218,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 		return new ArrayList<>(jobNames).subList(start, start + count);
 	}
 
-	private Collection<String> getJobNames() {
-		Set<String> jsr352JobNames = new HashSet<String>();
-
-		try {
-			PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
-			Resource[] resources = pathMatchingResourcePatternResolver
-					.getResources("classpath*:/META-INF/batch-jobs/**/*.xml");
-
-			for (Resource resource : resources) {
-				String jobXmlFileName = resource.getFilename();
-				jsr352JobNames.add(jobXmlFileName.substring(0, jobXmlFileName.length() - 4));
-			}
-		} catch (IOException e) {
-			logger.debug("Unable to list JSR-352 batch jobs", e);
-		}
-
-		return jsr352JobNames;
-	}
-
 	@Override
 	public int countJobs() {
 		return jobInstanceDao.getJobNames().size();
@@ -245,16 +226,11 @@ public class SimpleJobService implements JobService, DisposableBean {
 	@Override
 	public int stopAll() {
 		Collection<JobExecution> result = jobExecutionDao.getRunningJobExecutions();
-		Collection<String> jobNames = getJobNames();
-
 		for (JobExecution jobExecution : result) {
 			try {
-				if (jobNames.contains(jobExecution.getJobInstance().getJobName())) {
-					jobOperator.stop(jobExecution.getId());
-
-				} else {
-					throw new JobStopException(jobExecution.getId());
-				}
+				jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
+				jobExecution.setStatus( BatchStatus.STOPPING);
+				jobRepository.update(jobExecution);
 			} catch (Exception e) {
 				throw new IllegalArgumentException("The following JobExecutionId was not found: " + jobExecution.getId(), e);
 			}
@@ -272,15 +248,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 		logger.info("Stopping job execution: " + jobExecution);
 
-		Collection<String> jobNames = getJobNames();
-
-		if (jobNames.contains(jobExecution.getJobInstance().getJobName())) {
-			jobOperator.stop(jobExecutionId);
-			jobExecution = getJobExecution(jobExecutionId);
-		} else {
-			jobExecution.setStatus(BatchStatus.STOPPED);
-			jobRepository.update(jobExecution);
-		}
+		jobExecution.setStatus(BatchStatus.STOPPED);
+		jobRepository.update(jobExecution);
 		return jobExecution;
 
 	}
@@ -297,17 +266,9 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 		logger.info("Aborting job execution: " + jobExecution);
 
-		Collection<String> jobNames = getJobNames();
-
-		JobInstance jobInstance = jobExecution.getJobInstance();
-		if (jobOperator != null && jobNames.contains(jobInstance.getJobName())) {
-			jobOperator.abandon(jobExecutionId);
-			jobExecution = getJobExecution(jobExecutionId);
-		} else {
-			jobExecution.upgradeStatus(BatchStatus.ABANDONED);
-			jobExecution.setEndTime(LocalDateTime.now());
-			jobRepository.update(jobExecution);
-		}
+		jobExecution.upgradeStatus(BatchStatus.ABANDONED);
+		jobExecution.setEndTime(LocalDateTime.now());
+		jobRepository.update(jobExecution);
 
 		return jobExecution;
 
@@ -484,11 +445,9 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if (getJobNames().stream().anyMatch(e -> e.contains(jobName)) ||
-				jobInstanceDao.countJobInstances(jobName) > 0) {
-			return;
+		if (jobInstanceDao.countJobInstances(jobName) <= 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 		}
-		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 	}
 
 	/**
