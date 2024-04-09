@@ -24,10 +24,10 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - name: Setup Testcontainers Cloud Client
-      uses: atomicjar/testcontainers-cloud-setup-action@v1
-      with:
-        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
+#    - name: Setup Testcontainers Cloud Client
+#      uses: atomicjar/testcontainers-cloud-setup-action@v1
+#      with:
+#        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
