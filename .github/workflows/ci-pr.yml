@@ -3,9 +3,6 @@ name: CI PRs
 on:
   pull_request:
 
-env:
-  MAVEN_THREADS: '-T 1'
-
 jobs:
   build:
     runs-on: ubuntu-latest
