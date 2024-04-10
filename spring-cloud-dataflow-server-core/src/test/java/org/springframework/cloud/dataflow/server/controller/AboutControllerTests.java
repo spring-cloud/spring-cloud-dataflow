@@ -146,7 +146,7 @@ public class AboutControllerTests {
 	@SpringBootTest(classes = TestDependencies.class)
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@TestPropertySource(properties = {
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.2-SNAPSHOT",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.3-SNAPSHOT",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=false",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG"
 	})
@@ -169,8 +169,8 @@ public class AboutControllerTests {
 			ResultActions result = mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
 			result.andExpect(jsonPath("$.featureInfo.analyticsEnabled", is(true)))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.2-SNAPSHOT/spring-cloud-dataflow-shell-2.11.2-SNAPSHOT.jar")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.2-SNAPSHOT")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo.spring.io/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.3-SNAPSHOT/spring-cloud-dataflow-shell-2.11.3-SNAPSHOT.jar")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.3-SNAPSHOT")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1").doesNotExist())
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist());
 		}
@@ -363,12 +363,12 @@ public class AboutControllerTests {
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-implementation.version=1.2.3.IMPLEMENTATION.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-core.version=1.2.3.CORE.TEST",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-dashboard.version=1.2.3.UI.TEST",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.1",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.version=2.11.3",
 			"spring.cloud.dataflow.version-info.dependency-fetch.enabled=true",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.3",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.name=Spring Cloud Data Flow Shell Test",
 			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1=ABCDEFG",
-			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1.jar.sha1",
+			"spring.cloud.dataflow.version-info.dependencies.spring-cloud-dataflow-shell.checksum-sha1-url=https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.3.jar.sha1",
 			"spring.cloud.dataflow.metrics.dashboard.url=http://localhost:3001",
 			"spring.cloud.dataflow.metrics.dashboard.type=GRAFANA",
 			"spring.cloud.dataflow.metrics.dashboard.grafana.token=boza",
@@ -402,8 +402,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.1")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.3")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.3")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
@@ -430,8 +430,8 @@ public class AboutControllerTests {
 					.andExpect(jsonPath("$.versionInfo.dashboard.name", is("Spring Cloud Dataflow UI")))
 					.andExpect(jsonPath("$.versionInfo.dashboard.version", is("1.2.3.UI.TEST")))
 					.andExpect(jsonPath("$.versionInfo.shell.name", is("Spring Cloud Data Flow Shell Test")))
-					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.1")))
-					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.1")))
+					.andExpect(jsonPath("$.versionInfo.shell.url", is("https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-dataflow-shell/2.11.3")))
+					.andExpect(jsonPath("$.versionInfo.shell.version", is("2.11.3")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha1", is("ABCDEFG")))
 					.andExpect(jsonPath("$.versionInfo.shell.checksumSha256").doesNotExist())
 					.andExpect(jsonPath("$.securityInfo.authenticationEnabled", is(false)))
