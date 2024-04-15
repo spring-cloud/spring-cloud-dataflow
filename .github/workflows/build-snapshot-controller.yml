@@ -39,7 +39,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-dataflow-ui",
-                "ref": "3.4.x",
+                "ref": "main",
                 "workflow": "build-snapshot-worker.yml"
               }
             },
