@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [main, 2.10.x]
+        branch: [main]
     steps:
     - uses: benc-uk/workflow-dispatch@v1
       with:
