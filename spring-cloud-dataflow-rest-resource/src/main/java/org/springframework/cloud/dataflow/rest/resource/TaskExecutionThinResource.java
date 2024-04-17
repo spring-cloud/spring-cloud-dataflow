@@ -20,6 +20,7 @@ import java.util.Date;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.util.StringUtils;
 
 /**
  * This resource is a match for AggregateTaskExecution and should satisfy UI paging.
@@ -65,6 +66,8 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 
 
 	private String errorMessage;
+
+	private String taskExecutionStatus;
 
 	/**
 	 * @since 2.11.0
@@ -178,6 +181,39 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 	public void setPlatformName(String platformName) {
 		this.platformName = platformName;
 	}
+	public void setTaskExecutionStatus(String taskExecutionStatus) {
+		this.taskExecutionStatus = taskExecutionStatus;
+	}
+
+	/**
+	 * Returns the calculated status of this {@link TaskExecution}.
+	 *
+	 * If {@link #startTime} is
+	 * null, the {@link TaskExecution} is considered to be not running (never executed).
+	 *
+	 * If {@link #endTime} is
+	 * null, the {@link TaskExecution} is considered to be still running:
+	 * {@link TaskExecutionStatus#RUNNING}. If the {@link #endTime} is defined and the
+	 * {@link #exitCode} is non-zero, an status of {@link TaskExecutionStatus#ERROR} is assumed,
+	 * if {@link #exitCode} is zero, {@link TaskExecutionStatus#COMPLETE} is returned.
+	 *
+	 * @return TaskExecutionStatus, never null
+	 */
+	public TaskExecutionStatus getTaskExecutionStatus() {
+		if (StringUtils.hasText(this.taskExecutionStatus)) {
+			return TaskExecutionStatus.valueOf(this.taskExecutionStatus);
+		}
+		if (this.startTime == null) {
+			return TaskExecutionStatus.UNKNOWN;
+		}
+		if (this.endTime == null) {
+			return TaskExecutionStatus.RUNNING;
+		}
+
+		return (this.exitCode == null) ? TaskExecutionStatus.RUNNING :
+				((this.exitCode == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
+	}
+
 	public static class Page extends PagedModel<TaskExecutionThinResource> {
 	}
 }
