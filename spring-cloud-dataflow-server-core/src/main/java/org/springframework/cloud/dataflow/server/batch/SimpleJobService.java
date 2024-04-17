@@ -228,7 +228,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 		Collection<JobExecution> result = jobExecutionDao.getRunningJobExecutions();
 		for (JobExecution jobExecution : result) {
 			try {
-				stopJobExecution(jobExecution);
+				jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
+				jobExecution.setStatus( BatchStatus.STOPPING);
 				jobRepository.update(jobExecution);
 			} catch (Exception e) {
 				throw new IllegalArgumentException("The following JobExecutionId was not found: " + jobExecution.getId(), e);
@@ -236,18 +237,6 @@ public class SimpleJobService implements JobService, DisposableBean {
 		}
 
 		return result.size();
-	}
-
-	/**
-	 * Signal the {@link JobExecution} to stop. Iterates through the associated
-	 * {@link StepExecution}s, calling {@link StepExecution#setTerminateOnly()}.
-	 *
-	 */
-	public void stopJobExecution(JobExecution jobExecution) {
-		for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-			stepExecution.setTerminateOnly();
-		}
-		jobExecution.setStatus( BatchStatus.STOPPING);
 	}
 
 	@Override
@@ -259,8 +248,8 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 		logger.info("Stopping job execution: " + jobExecution);
 
-			jobExecution.setStatus(BatchStatus.STOPPED);
-			jobRepository.update(jobExecution);
+		jobExecution.setStatus(BatchStatus.STOPPED);
+		jobRepository.update(jobExecution);
 		return jobExecution;
 
 	}
@@ -456,10 +445,9 @@ public class SimpleJobService implements JobService, DisposableBean {
 	}
 
 	private void checkJobExists(String jobName) throws NoSuchJobException {
-		if (jobInstanceDao.countJobInstances(jobName) > 0) {
-			return;
+		if (jobInstanceDao.countJobInstances(jobName) <= 0) {
+			throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 		}
-		throw new NoSuchJobException("No Job with that name either current or historic: [" + jobName + "]");
 	}
 
 	/**
