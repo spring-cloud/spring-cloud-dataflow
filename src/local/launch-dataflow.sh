@@ -16,7 +16,7 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
 PROJECT_DIR=$(realpath "$SCDIR/../..")
 if [ "$DATAFLOW_VERSION" = "" ]; then
-    DATAFLOW_VERSION=2.11.2-SNAPSHOT
+    DATAFLOW_VERSION=2.11.3-SNAPSHOT
 fi
 export PLATFORM_TYPE=local
 COMPOSE_PROFILE=
