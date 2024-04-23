@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DeployerConfigurationMetadataResolverTests {
 
 	//todo: Brittle. This breaks if you add a deployer property
-	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 25;
+	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 26;
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withUserConfiguration(Config.class);
@@ -44,7 +44,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES);
+					assertThat(data).hasSize(ALL_LOCAL_DEPLOYER_PROPERTIES);
 				});
 	}
 

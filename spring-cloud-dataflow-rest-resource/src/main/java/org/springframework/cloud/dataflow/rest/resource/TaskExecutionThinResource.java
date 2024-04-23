@@ -18,9 +18,11 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.util.Date;
 
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.StringUtils;
+
 
 /**
  * This resource is a match for AggregateTaskExecution and should satisfy UI paging.
