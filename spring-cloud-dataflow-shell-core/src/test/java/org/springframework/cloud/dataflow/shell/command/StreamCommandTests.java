@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2022 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import java.io.File;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.AfterEach;
@@ -38,6 +39,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,20 +69,48 @@ public class StreamCommandTests extends AbstractShellIntegrationTest {
 
 	@Test
 	public void testStreamLifecycleForTickTock() throws InterruptedException {
-		logger.info("Starting Stream Test for TickTock");
-		Thread.sleep(2000);
 		String streamName = generateUniqueStreamOrTaskName();
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(setupBaseTest());
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
+		stream().create(streamName, "time | log");
+	}
+
+	@Test
+	public void testStreamUpdateForTickTock() throws InterruptedException {
+		String streamName = generateUniqueStreamOrTaskName();
+
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(setupBaseTest());
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
+		stream().create(streamName, "time | log");
+		stream().update(streamName, "version.log=3.2.1","Update request has been sent for the stream");
+	}
+
+	@Test
+	public void testStreamUpdatePropFileForTickTock() throws InterruptedException {
+		String streamName = generateUniqueStreamOrTaskName();
+
+		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(setupBaseTest());
+		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
+		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
+		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
+		stream().create(streamName, "time | log");
+		File resourcesDirectory = new File("src/test/resources");
+		stream().updateFile(streamName, resourcesDirectory.getAbsolutePath() + "/myproperties.properties","Update request has been sent for the stream");
+	}
+
+	private Info setupBaseTest() throws InterruptedException {
+		logger.info("Starting Stream Test for TickTock Update");
+		Thread.sleep(2000);
 		Info info = new Info();
 		Status status = new Status();
 		status.setStatusCode(StatusCode.UNKNOWN);
 		status.setPlatformStatus(null);
 		info.setStatus(status);
-
-		when(skipperClient.status(ArgumentMatchers.anyString())).thenReturn(info);
-		AppDeployer appDeployer = applicationContext.getBean(AppDeployer.class);
-		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
-		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
-		stream().create(streamName, "time | log");
+		return info;
 	}
 
 	@Test
