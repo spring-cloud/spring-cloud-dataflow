@@ -96,10 +96,41 @@
 			<artifactId>spring-cloud-dataflow-test</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter</artifactId>
+				</exclusion>
+			</exclusions>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -182,6 +213,11 @@
 			<version>8.0.33</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -202,22 +238,6 @@
 			</testResource>
 		</testResources>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<threadCount>1</threadCount>
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -245,6 +265,40 @@
 						<phase>package</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
+				<version>4.9.9</version>
+				<executions>
+					<execution>
+						<id>get-the-git-infos</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+						<phase>initialize</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+					<excludeProperties>
+						<excludeProperty>^git.build.user</excludeProperty>
+						<excludeProperty>^git.commit.id.describe</excludeProperty>
+						<excludeProperty>^git.commit.message.*</excludeProperty>
+						<excludeProperty>^git.commit.author.time</excludeProperty>
+						<excludeProperty>^git.commit.committer.time</excludeProperty>
+						<excludeProperty>^git.build.*</excludeProperty>
+						<excludeProperty>^git.closest.*</excludeProperty>
+						<excludeProperty>^git.commit.user.*</excludeProperty>
+						<excludeProperty>^git.dirty.*</excludeProperty>
+						<excludeProperty>^git.local.*</excludeProperty>
+						<excludeProperty>^git.remote.*</excludeProperty>
+						<excludeProperty>^git.tags</excludeProperty>
+						<excludeProperty>^git.total.*</excludeProperty>
+					</excludeProperties>
+					<commitIdGenerationMode>full</commitIdGenerationMode>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -299,19 +353,30 @@
 			<id>failsafe</id>
 			<properties>
 				<groups>mariadb</groups>
+				<failIfNoTests>false</failIfNoTests>
 			</properties>
 			<build>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>3.0.0</version>
+						<version>3.2.5</version>
 						<configuration>
 							<forkCount>1</forkCount>
 							<reuseForks>false</reuseForks>
 							<includes>
 								<include>**/*IT.*</include>
 							</includes>
+							<excludes>
+								<exclude>**/Abstract*.*</exclude>
+							</excludes>
 							<groups>${groups}</groups>
 						</configuration>
 						<executions>

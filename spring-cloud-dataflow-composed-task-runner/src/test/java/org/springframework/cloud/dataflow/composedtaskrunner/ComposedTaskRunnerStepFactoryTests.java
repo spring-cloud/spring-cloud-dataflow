@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import javax.sql.DataSource;
-
 import java.util.Collections;
 
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
@@ -37,8 +36,7 @@ import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,8 +46,7 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})
+@SpringJUnitConfig(classes = {org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})
 public class ComposedTaskRunnerStepFactoryTests {
 
 	@Autowired

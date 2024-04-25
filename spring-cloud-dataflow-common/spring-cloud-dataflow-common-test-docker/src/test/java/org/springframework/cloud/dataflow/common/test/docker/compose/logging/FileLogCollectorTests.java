@@ -15,14 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.logging;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,8 +23,19 @@ import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -101,7 +104,7 @@ public class FileLogCollectorTests {
     @Test
     public void collect_logs_when_one_container_is_running_and_terminates_before_start_collecting_is_run()
             throws Exception {
-        when(compose.services()).thenReturn(Arrays.asList("db"));
+        when(compose.services()).thenReturn(Collections.singletonList("db"));
         when(compose.writeLogs(eq("db"), any(OutputStream.class))).thenAnswer(args -> {
             OutputStream outputStream = (OutputStream) args.getArguments()[1];
             IOUtils.write("log", outputStream);
@@ -116,7 +119,7 @@ public class FileLogCollectorTests {
     @Test
     public void collect_logs_when_one_container_is_running_and_does_not_terminate_until_after_start_collecting_is_run()
             throws Exception {
-        when(compose.services()).thenReturn(Arrays.asList("db"));
+        when(compose.services()).thenReturn(Collections.singletonList("db"));
         CountDownLatch latch = new CountDownLatch(1);
         when(compose.writeLogs(eq("db"), any(OutputStream.class))).thenAnswer(args -> {
             if (!latch.await(1, TimeUnit.SECONDS)) {
@@ -136,7 +139,7 @@ public class FileLogCollectorTests {
     @Test
     public void collect_logs_when_one_container_is_running_and_does_not_terminate()
             throws IOException, InterruptedException {
-        when(compose.services()).thenReturn(Arrays.asList("db"));
+        when(compose.services()).thenReturn(Collections.singletonList("db"));
         CountDownLatch latch = new CountDownLatch(1);
         when(compose.writeLogs(eq("db"), any(OutputStream.class))).thenAnswer(args -> {
             OutputStream outputStream = (OutputStream) args.getArguments()[1];
@@ -190,7 +193,7 @@ public class FileLogCollectorTests {
     @Test
     public void throw_exception_when_trying_to_start_a_started_collector_a_second_time()
             throws IOException, InterruptedException {
-        when(compose.services()).thenReturn(Arrays.asList("db"));
+        when(compose.services()).thenReturn(Collections.singletonList("db"));
         logCollector.startCollecting(compose);
         exception.expect(RuntimeException.class);
         exception.expectMessage("Cannot start collecting the same logs twice");

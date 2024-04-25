@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.skipper.domain.Info;
@@ -46,14 +46,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DirtiesContext
 public class RuntimeAppsDocumentation extends BaseDocumentation {
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
 		registerApp(ApplicationType.sink, "log", "1.2.0.RELEASE");
 		createStream("mystream", "http | log", true);
 	}
 
-	@After
+	@AfterEach
 	public void cleanup() throws Exception {
 		destroyStream("mystream");
 		unregisterApp(ApplicationType.source, "http");

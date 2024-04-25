@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +51,11 @@ import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRe
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
 
-import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests ReleaseService methods.
@@ -77,7 +78,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	@Autowired
 	private RepositoryRepository repositoryRepository;
 
-	@After
+	@AfterEach
 	public void afterTests() {
 		Repository repo = this.repositoryRepository.findByName("test");
 		repo.setLocal(false);
@@ -226,9 +227,11 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	}
 
-	@Test(expected = ReleaseNotFoundException.class)
+	@Test
 	public void testStatusReleaseDoesNotExist() {
-		releaseService.status("notexist");
+		assertThrows(ReleaseNotFoundException.class, () -> {
+			releaseService.status("notexist");
+		});
 	}
 
 	@Test

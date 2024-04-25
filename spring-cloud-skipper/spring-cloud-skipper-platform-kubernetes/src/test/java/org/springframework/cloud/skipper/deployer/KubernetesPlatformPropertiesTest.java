@@ -18,8 +18,7 @@ package org.springframework.cloud.skipper.deployer;
 import java.util.Map;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,7 +30,6 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.skipper.deployer.kubernetes.KubernetesPlatformProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  * @author Chris Bono
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = KubernetesPlatformPropertiesTest.TestConfig.class,
 		properties = { "spring.cloud.kubernetes.client.namespace=default" })
 @ActiveProfiles("platform-properties")

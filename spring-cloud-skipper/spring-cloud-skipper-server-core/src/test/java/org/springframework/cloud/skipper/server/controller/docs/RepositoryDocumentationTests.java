@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * Repository based documentation tests suite.
@@ -24,9 +24,8 @@ import org.junit.runners.Suite;
  * @author Ilayaperumal Gopinathan
  */
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ ApiDocumentation.class, DeployersDocumentation.class,
-		PackageMetadataDocumentation.class, RepositoriesDocumentation.class, ReleasesDocumentation.class })
+@Suite
+@SelectClasses({ ApiDocumentation.class, DeployersDocumentation.class, PackageMetadataDocumentation.class,
+		RepositoriesDocumentation.class, ReleasesDocumentation.class })
 public class RepositoryDocumentationTests {
-
 }

@@ -17,8 +17,9 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.CancelRequest;
 import org.springframework.http.MediaType;
@@ -42,7 +43,7 @@ public class CancelDocumentation extends BaseDocumentation {
 		when(this.skipperStateMachineService.cancelRelease(releaseName)).thenReturn(Boolean.TRUE);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		this.mockMvc.perform(
 				post("/api/release/cancel").accept(MediaType.APPLICATION_JSON).contentType(contentType)

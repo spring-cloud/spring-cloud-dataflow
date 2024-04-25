@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;

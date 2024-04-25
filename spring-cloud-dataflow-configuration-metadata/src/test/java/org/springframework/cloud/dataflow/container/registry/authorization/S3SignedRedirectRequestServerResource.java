@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.dataflow.container.registry.authorization;
 
-import org.junit.rules.ExternalResource;
+
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,7 @@ import org.springframework.util.SocketUtils;
 /**
  * @author Adam J. Weigold
  */
-public class S3SignedRedirectRequestServerResource extends ExternalResource {
+public class S3SignedRedirectRequestServerResource implements BeforeEachCallback, AfterEachCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(S3SignedRedirectRequestServerResource.class);
 
@@ -36,12 +39,9 @@ public class S3SignedRedirectRequestServerResource extends ExternalResource {
 
     private ConfigurableApplicationContext application;
 
-    public S3SignedRedirectRequestServerResource() {
-        super();
-    }
 
-    @Override
-    protected void before() throws Throwable {
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
 
         this.s3SignedRedirectServerPort = SocketUtils.findAvailableTcpPort();
 
@@ -56,9 +56,9 @@ public class S3SignedRedirectRequestServerResource extends ExternalResource {
         logger.info("S3 Signed Redirect Server Server is UP!");
     }
 
-    @Override
-    protected void after() {
-        application.stop();
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		application.stop();
     }
 
     public int getS3SignedRedirectServerPort() {

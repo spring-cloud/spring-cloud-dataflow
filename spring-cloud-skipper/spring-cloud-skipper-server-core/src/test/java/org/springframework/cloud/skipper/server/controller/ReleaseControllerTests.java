@@ -22,7 +22,7 @@ import java.util.Optional;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -347,9 +347,9 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 	private class ErrorDispatcher implements RequestBuilder {
 
-		private MvcResult result;
+		private final MvcResult result;
 
-		private String path;
+		private final String path;
 
 		ErrorDispatcher(MvcResult result, String path) {
 			this.result = result;

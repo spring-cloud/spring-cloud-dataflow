@@ -111,9 +111,8 @@ public abstract class AbstractShellIntegrationTest {
 	public static void startUp() {
 		if (applicationContext == null) {
 			shutdownAfterRun = Boolean.parseBoolean(System.getProperty(SHUTDOWN_AFTER_RUN, "false"));
-			int randomPort = TestSocketUtils.findAvailableTcpPort();
 			String dataFlowUri = String.format("--dataflow.uri=http://localhost:%s", serverPort);
-			String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
+			String dataSourceUrl = "jdbc:h2:mem:dataflow;DATABASE_TO_UPPER=FALSE";
 			SpringApplication application = new SpringApplicationBuilder(TestConfig.class).build();
 			applicationContext = application.run(String.format("--server.port=%s", serverPort), dataFlowUri,
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",

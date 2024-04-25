@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 

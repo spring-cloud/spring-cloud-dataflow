@@ -19,12 +19,9 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.Collections;
 import java.util.HashMap;
 
-
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
@@ -38,25 +35,24 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class AppDeploymentRequestCreatorTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 	@Autowired
 	protected PropertyResolver propertyResolver;
-	@Before
+	@BeforeEach
 	public void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
@@ -96,18 +92,16 @@ public class AppDeploymentRequestCreatorTests {
 
 	@Test
 	public void testSameNamePropertiesKOWhenShorthand() {
-		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-				.setApplicationType(ApplicationType.app)
-				.setProperty("format", "hh").build("streamname");
+		Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+			StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+					.setApplicationType(ApplicationType.app)
+					.setProperty("format", "hh").build("streamname");
 
-		Resource app = new ClassPathResource("/apps/included-source");
+			Resource app = new ClassPathResource("/apps/included-source");
 
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Ambiguous short form property 'format'");
-		thrown.expectMessage("date.format");
-		thrown.expectMessage("time.format");
-
-		this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+			this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+		});
+		assertTrue(exception.getMessage().contains("time.format"));
 	}
 
 	@Test

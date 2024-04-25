@@ -17,7 +17,7 @@ package org.springframework.cloud.dataflow.server.stream;
 
 import java.net.MalformedURLException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
@@ -27,6 +27,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Mark Pollack
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResourceUtilsTests {
 
-	private AppResourceCommon appResourceService = new AppResourceCommon(new MavenProperties(), null);
+	private final AppResourceCommon appResourceService = new AppResourceCommon(new MavenProperties(), null);
 
 	@Test
 	public void testMavenResourceProcessing() {
@@ -64,10 +65,12 @@ public class ResourceUtilsTests {
 		assertThat(appResourceService.getResourceVersion(dockerResource)).isEqualTo("current");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testInvalidDockerResourceProcessing() {
-		DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");
-		appResourceService.getResourceWithoutVersion(dockerResource);
+		assertThrows(IllegalArgumentException.class, () -> {
+			DockerResource dockerResource = new DockerResource("springcloudstream:file-source-kafka-10:1.2.0.RELEASE");
+			appResourceService.getResourceWithoutVersion(dockerResource);
+		});
 	}
 
 	@Test
@@ -85,9 +88,11 @@ public class ResourceUtilsTests {
 		assertThat(appResourceService.getResourceVersion(resource)).isEqualTo("1.2.0.RELEASE");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testFileResourceWithoutVersion() throws MalformedURLException {
-		Resource resource = new UrlResource("https://springcloudstream/filesourcekafkacrap.jar");
-		assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("https://springcloudstream/filesourcekafkacrap.jar");
+		assertThrows(IllegalArgumentException.class, () -> {
+			Resource resource = new UrlResource("https://springcloudstream/filesourcekafkacrap.jar");
+			assertThat(appResourceService.getResourceWithoutVersion(resource)).isEqualTo("https://springcloudstream/filesourcekafkacrap.jar");
+		});
 	}
 }

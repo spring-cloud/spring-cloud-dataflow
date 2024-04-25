@@ -12,6 +12,7 @@
 	<packaging>pom</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
+		<okhttp3.version>5.0.0-alpha.14</okhttp3.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -27,6 +28,23 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.junit.jupiter</groupId>
+					<artifactId>junit-jupiter</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver3-junit5</artifactId>
+			<version>${okhttp3.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

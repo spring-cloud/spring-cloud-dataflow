@@ -18,8 +18,7 @@ package org.springframework.cloud.skipper.server.config;
 
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Janne Valkealahti
  * @author Donovan Muller
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = PlatformPropertiesTests.TestConfig.class,
 		properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles({"platform-properties", "local"})

@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.deployer.metadata;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

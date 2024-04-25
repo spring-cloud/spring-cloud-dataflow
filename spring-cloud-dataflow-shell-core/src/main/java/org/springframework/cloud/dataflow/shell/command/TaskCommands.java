@@ -289,7 +289,7 @@ public class TaskCommands {
 			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		if (force || "y".equalsIgnoreCase(userInput.promptWithOptions("Really destroy all tasks?", "n", "y", "n"))) {
 			taskOperations().destroyAll();
-			return String.format("All tasks destroyed");
+			return "All tasks destroyed";
 		}
 		return "";
 	}
@@ -339,7 +339,7 @@ public class TaskCommands {
 		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
 		modelBuilder.addRow().addValue("Error Message ").addValue(taskExecutionResource.getErrorMessage());
-		modelBuilder.addRow().addValue("Schema Target").addValue(taskExecutionResource.getSchemaTarget());
+		modelBuilder.addRow().addValue("Schema Target ").addValue(taskExecutionResource.getSchemaTarget());
 		modelBuilder.addRow().addValue("External Execution Id ")
 				.addValue(taskExecutionResource.getExternalExecutionId());
 
@@ -387,7 +387,7 @@ public class TaskCommands {
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
 					taskOperations().cleanupAllTaskExecutions(completedOnly, null);
-					return String.format("Request to clean up resources for task executions has been submitted");
+					return "Request to clean up resources for task executions has been submitted";
 				}
 			} else {
 				return String.format("No %stask executions available for deletion.", (completedOnly) ? "completed " : "");
@@ -401,7 +401,7 @@ public class TaskCommands {
 				warn = warn + ". This operation can not be reverted. Are you sure (y/n)? ";
 				if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n"))) {
 					taskOperations().cleanupAllTaskExecutions(completedOnly, taskName);
-					return String.format("Request to clean up resources for task executions has been submitted");
+					return "Request to clean up resources for task executions has been submitted";
 				}
 			} else {
 				return String.format("No %stask executions available for deletion.", (completedOnly) ? "completed " : "");

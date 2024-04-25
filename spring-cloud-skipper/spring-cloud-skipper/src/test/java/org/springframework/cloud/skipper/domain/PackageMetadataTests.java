@@ -16,7 +16,7 @@
 package org.springframework.cloud.skipper.domain;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Mark Pollack

@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 
@@ -39,10 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class TasksInfoDocumentation extends BaseDocumentation {
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("taskA");
@@ -50,7 +50,7 @@ public class TasksInfoDocumentation extends BaseDocumentation {
 
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		destroyTaskDefinition("taskA");
 		destroyTaskDefinition("taskB");

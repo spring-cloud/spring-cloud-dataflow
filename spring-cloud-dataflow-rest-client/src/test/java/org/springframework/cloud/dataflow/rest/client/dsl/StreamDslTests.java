@@ -19,8 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -41,6 +41,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyMap;
 import static org.mockito.Mockito.anyString;
@@ -68,13 +69,13 @@ public class StreamDslTests {
 	@Mock
 	private RuntimeOperations runtimeOperations;
 
-	private StreamApplication timeApplication = new StreamApplication("time");
+	private final StreamApplication timeApplication = new StreamApplication("time");
 
-	private StreamApplication filterApplication = new StreamApplication("filter");
+	private final StreamApplication filterApplication = new StreamApplication("filter");
 
-	private StreamApplication logApplication = new StreamApplication("log");
+	private final StreamApplication logApplication = new StreamApplication("log");
 
-	@Before
+	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		when(client.streamOperations()).thenReturn(this.streamOperations);
@@ -233,11 +234,13 @@ public class StreamDslTests {
 				eq(false));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void testDuplicateNameNoLabel() {
-		Stream.builder(client).name("test").source(timeApplication)
+		assertThatThrownBy(()-> {
+			Stream.builder(client).name("test").source(timeApplication)
 				.processor(filterApplication).processor(filterApplication)
 				.sink(logApplication).create();
+		}).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -277,12 +280,12 @@ public class StreamDslTests {
 
 
 		AppStatusResource appStatusResource = new AppStatusResource("deploymentId", "deployed");
-		appStatusResource.setInstances(CollectionModel.of(Arrays.asList(new AppInstanceStatusResource("instanceId", "deployed",
-				Collections.singletonMap(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, "log")))));
-		streamStatusResource.setApplications(CollectionModel.of(Arrays.asList(appStatusResource)));
+		appStatusResource.setInstances(CollectionModel.of(Collections.singletonList(new AppInstanceStatusResource("instanceId", "deployed",
+			Collections.singletonMap(StreamRuntimePropertyKeys.ATTRIBUTE_SKIPPER_APPLICATION_NAME, "log")))));
+		streamStatusResource.setApplications(CollectionModel.of(Collections.singletonList(appStatusResource)));
 
 		when(runtimeOperations.streamStatus(ticktockDefinition.getName()))
-				.thenReturn(PagedModel.of(Arrays.asList(streamStatusResource), (PagedModel.PageMetadata) null));
+				.thenReturn(PagedModel.of(Collections.singletonList(streamStatusResource), (PagedModel.PageMetadata) null));
 
 		Stream stream = Stream.builder(client).name(ticktockDefinition.getName()).description("demo stream")
 				.definition(ticktockDefinition.getDslText()).create()

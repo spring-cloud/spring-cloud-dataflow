@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.io.DefaultPackageReader;
@@ -61,7 +61,7 @@ public class ManifestUtilsTest {
 
 		String manifest = ManifestUtils.createManifest(pkg, map);
 
-		String dateAsStringWithQuotes = "\"" + date.toString() + "\"";
+		String dateAsStringWithQuotes = "\"" + date + "\"";
 
 		assertThat(manifest).contains("\"version\": \"666\"").describedAs("Handle Integer");
 		assertThat(manifest).contains("\"bool\": \"true\"").describedAs("Handle Boolean");

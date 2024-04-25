@@ -24,15 +24,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
@@ -67,11 +65,8 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StreamDeploymentControllerTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private StreamDeploymentController controller;
 
@@ -87,7 +82,7 @@ public class StreamDeploymentControllerTests {
 	@Mock
 	private Deployer deployer;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
@@ -101,7 +96,7 @@ public class StreamDeploymentControllerTests {
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Map> argumentCaptor2 = ArgumentCaptor.forClass(Map.class);
 		verify(streamService).deployStream(argumentCaptor1.capture(), argumentCaptor2.capture());
-		Assert.assertEquals(argumentCaptor1.getValue(), "test");
+		Assertions.assertEquals(argumentCaptor1.getValue(), "test");
 	}
 
 	@Test
@@ -129,7 +124,7 @@ public class StreamDeploymentControllerTests {
 		this.controller.update("ticktock", updateStreamRequest);
 		ArgumentCaptor<UpdateStreamRequest> argumentCaptor1 = ArgumentCaptor.forClass(UpdateStreamRequest.class);
 		verify(streamService).updateStream(eq("ticktock"), argumentCaptor1.capture());
-		Assert.assertEquals(updateStreamRequest, argumentCaptor1.getValue());
+		Assertions.assertEquals(updateStreamRequest, argumentCaptor1.getValue());
 	}
 
 	@Test
@@ -150,13 +145,13 @@ public class StreamDeploymentControllerTests {
 		ArgumentCaptor<String> argumentCaptor1 = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<Integer> argumentCaptor2 = ArgumentCaptor.forClass(Integer.class);
 		verify(streamService).rollbackStream(argumentCaptor1.capture(), argumentCaptor2.capture());
-		Assert.assertEquals(argumentCaptor1.getValue(), "test1");
-		Assert.assertEquals("Rollback version is incorrect", 2, (int) argumentCaptor2.getValue());
+		Assertions.assertEquals(argumentCaptor1.getValue(), "test1");
+		Assertions.assertEquals(2, (int) argumentCaptor2.getValue(), "Rollback version is incorrect");
 	}
 
 	@Test
 	public void testPlatformsListViaSkipperClient() {
-		when(streamService.platformList()).thenReturn(Arrays.asList(deployer));
+		when(streamService.platformList()).thenReturn(Collections.singletonList(deployer));
 		this.controller.platformList();
 		verify(streamService, times(1)).platformList();
 	}
@@ -191,11 +186,11 @@ public class StreamDeploymentControllerTests {
 		when(this.streamDefinitionService.redactDsl(any())).thenReturn("time | log");
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName(), false);
-		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
-		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
-		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
-		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
-		Assert.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.deployed.name());
+		Assertions.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assertions.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
+		Assertions.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assertions.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
+		Assertions.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.deployed.name());
 	}
 
 	@Test
@@ -219,11 +214,11 @@ public class StreamDeploymentControllerTests {
 		when(this.streamDefinitionService.redactDsl(any())).thenReturn("time | log");
 
 		StreamDeploymentResource streamDeploymentResource = this.controller.info(streamDefinition.getName(), true);
-		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
-		Assert.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
-		Assert.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
-		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
-		Assert.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.undeployed.name());
+		Assertions.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assertions.assertEquals(streamDeploymentResource.getDslText(), streamDefinition.getDslText());
+		Assertions.assertEquals(streamDeploymentResource.getStreamName(), streamDefinition.getName());
+		Assertions.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}", streamDeploymentResource.getDeploymentProperties());
+		Assertions.assertEquals(streamDeploymentResource.getStatus(), DeploymentState.undeployed.name());
 	}
 
 }

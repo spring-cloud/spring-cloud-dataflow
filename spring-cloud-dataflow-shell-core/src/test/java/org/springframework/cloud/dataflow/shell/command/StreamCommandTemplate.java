@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.dataflow.rest.resource.DeploymentStateResource;
@@ -27,7 +28,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Helper methods for stream commands to execute in the shell.
@@ -45,7 +46,7 @@ public class StreamCommandTemplate {
 
 	private final ShellCommandRunner commandRunner;
 
-	private List<String> streams = new ArrayList<String>();
+	private final List<String> streams = new ArrayList<String>();
 
 	/**
 	 * Construct a new StreamCommandTemplate, given a spring shell.
@@ -203,7 +204,7 @@ public class StreamCommandTemplate {
 		Collection<String> statuses = deployed
 				? Arrays.asList(DeploymentStateResource.DEPLOYED.getDescription(),
 				DeploymentStateResource.DEPLOYING.getDescription())
-				: Arrays.asList(DeploymentStateResource.UNDEPLOYED.getDescription());
+				: Collections.singletonList(DeploymentStateResource.UNDEPLOYED.getDescription());
 		for (int row = 0; row < model.getRowCount(); row++) {
 			if (streamName.equals(model.getValue(row, 0))
 					&& definition.replace("\\\\", "\\").equals(model.getValue(row, 2))) {

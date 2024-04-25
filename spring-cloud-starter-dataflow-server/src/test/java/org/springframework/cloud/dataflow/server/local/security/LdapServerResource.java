@@ -19,8 +19,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
-import org.junit.rules.ExternalResource;
-import org.junit.rules.TemporaryFolder;
+import org.assertj.core.util.Files;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.ldap.server.ApacheDSContainer;
@@ -32,7 +34,7 @@ import org.springframework.util.SocketUtils;
  * @author Marius Bogoevici
  * @author Gunnar Hillert
  */
-public class LdapServerResource extends ExternalResource {
+public class LdapServerResource implements AfterEachCallback, BeforeEachCallback {
 
 	private static final String LDAP_PORT_PROPERTY = "ldap.port";
 
@@ -50,7 +52,7 @@ public class LdapServerResource extends ExternalResource {
 
 	private ApacheDSContainer apacheDSContainer;
 
-	private TemporaryFolder temporaryFolder = new TemporaryFolder();
+	private final File temporaryFolder = Files.newTemporaryFolder();
 
 	private File workingDir;
 
@@ -74,11 +76,8 @@ public class LdapServerResource extends ExternalResource {
 	}
 
 	@Override
-	protected void before() throws Throwable {
-
+	public void beforeEach(ExtensionContext context) throws Exception {
 		originalLdapPort = System.getProperty(LDAP_PORT_PROPERTY);
-
-		temporaryFolder.create();
 		apacheDSContainer = new ApacheDSContainer("dc=springframework,dc=org",
 				"classpath:org/springframework/cloud/dataflow/server/local/security/" + this.ldapFileName);
 		int ldapPort = SocketUtils.findAvailableTcpPort();
@@ -86,8 +85,8 @@ public class LdapServerResource extends ExternalResource {
 
 			apacheDSContainer.setLdapOverSslEnabled(true);
 
-			final File temporaryKeyStoreFile = new File(temporaryFolder.getRoot(), "dataflow.keystore");
-			final File temporaryTrustStoreFile = new File(temporaryFolder.getRoot(), "dataflow.truststore");
+			final File temporaryKeyStoreFile = new File(temporaryFolder, "dataflow.keystore");
+			final File temporaryTrustStoreFile = new File(temporaryFolder, "dataflow.truststore");
 
 			FileCopyUtils.copy(keyStoreResource.getInputStream(), new FileOutputStream(temporaryKeyStoreFile));
 			FileCopyUtils.copy(trustStoreResource.getInputStream(), new FileOutputStream(temporaryTrustStoreFile));
@@ -105,14 +104,14 @@ public class LdapServerResource extends ExternalResource {
 
 		apacheDSContainer.setPort(ldapPort);
 		apacheDSContainer.afterPropertiesSet();
-		workingDir = new File(temporaryFolder.getRoot(), UUID.randomUUID().toString());
+		workingDir = new File(temporaryFolder, UUID.randomUUID().toString());
 		apacheDSContainer.setWorkingDirectory(workingDir);
 		apacheDSContainer.start();
 		System.setProperty(LDAP_PORT_PROPERTY, Integer.toString(ldapPort));
 	}
 
 	@Override
-	protected void after() {
+	public void afterEach(ExtensionContext context) throws Exception {
 		apacheDSContainer.stop();
 		try {
 			apacheDSContainer.destroy();

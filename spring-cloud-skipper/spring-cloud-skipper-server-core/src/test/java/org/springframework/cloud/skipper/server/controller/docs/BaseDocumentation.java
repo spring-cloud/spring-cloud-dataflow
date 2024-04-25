@@ -24,8 +24,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -63,7 +62,6 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.RequestParametersSnippet;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -96,7 +94,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.requestP
 		"spring.cloud.skipper.server.enableReleaseStateUpdateService=false",
 		"spring.main.allow-bean-definition-overriding=true"
 }, classes = ServerDependencies.class)
-@RunWith(SpringRunner.class)
 public abstract class BaseDocumentation {
 
 	protected MockMvc mockMvc;
@@ -177,7 +174,7 @@ public abstract class BaseDocumentation {
 				linkWithRel("curies").ignored().optional()).and(descriptors);
 	}
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.prepareDocumentationTests(this.context);
 	}

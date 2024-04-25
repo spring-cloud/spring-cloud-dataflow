@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
@@ -41,7 +41,7 @@ public class TaskTemplateTests {
 
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
@@ -94,12 +94,9 @@ public class TaskTemplateTests {
 		}
 
 		public boolean isLinkRequested(String linkName) {
-			boolean result = false;
+			boolean result = this.linksRequested.containsKey(linkName) &&
+				this.linksRequested.get(linkName) > 1L;
 
-			if (this.linksRequested.containsKey(linkName) &&
-					this.linksRequested.get(linkName) > 1L) {
-				result = true;
-			}
 			return result;
 		}
 

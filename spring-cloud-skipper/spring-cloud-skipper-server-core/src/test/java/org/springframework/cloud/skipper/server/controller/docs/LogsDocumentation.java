@@ -17,9 +17,10 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
@@ -41,7 +42,7 @@ public class LogsDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.releaseService.getLog(release.getName())).thenReturn(new LogInfo(Collections.emptyMap()));
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		this.mockMvc.perform(
 				get("/api/release/logs/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)

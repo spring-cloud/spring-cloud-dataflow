@@ -22,8 +22,7 @@ import java.util.Map;
 
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -42,7 +41,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +51,6 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Mark Pollack
  * @author Chris Bono
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 public class PackageTemplateTests {
 
@@ -69,12 +66,12 @@ public class PackageTemplateTests {
 	@SuppressWarnings("unchecked")
 	public void testMustasche() throws IOException {
 		Yaml yaml = new Yaml(new SafeConstructor());
-		Map model = (Map) yaml.load(valuesResource.getInputStream());
+		Map model = yaml.load(valuesResource.getInputStream());
 		String templateAsString = StreamUtils.copyToString(nestedMapResource.getInputStream(),
 				Charset.defaultCharset());
 		Template mustacheTemplate = Mustache.compiler().compile(templateAsString);
 		String resolvedYml = mustacheTemplate.execute(model);
-		Map map = (Map) yaml.load(resolvedYml);
+		Map map = yaml.load(resolvedYml);
 
 		logger.info("Resolved yml = " + resolvedYml);
 		assertThat(map).containsKeys("apiVersion", "deployment");

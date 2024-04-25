@@ -21,9 +21,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.32</spring-framework.version>
+		<spring-security.version>5.7.12</spring-security.version>
+		<spring-framework.version>5.3.34</spring-framework.version>
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
-		<spring-shell.version>2.1.13</spring-shell.version>
+		<spring-shell.version>2.1.15</spring-shell.version>
 		<commons-io.version>2.7</commons-io.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<testcontainers.version>1.17.6</testcontainers.version>
@@ -38,13 +39,56 @@
 		<java-cfenv.version>2.3.0</java-cfenv.version>
 		<spring-cloud-services-starter-config-client.version>3.5.4</spring-cloud-services-starter-config-client.version>
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
-		<junit.version>4.13.1</junit.version>
-		<junit-jupiter.version>5.9.2</junit-jupiter.version>
+		<junit.version>4.13.2</junit.version>
+		<junit-jupiter.version>5.9.3</junit-jupiter.version>
+		<junit-platform.version>1.9.3</junit-platform.version>
+		<mockito.version>4.11.0</mockito.version>
 		<logback.version>1.2.13</logback.version>
 		<json-path.version>2.9.0</json-path.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-engine</artifactId>
+				<version>${junit-platform.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 			<dependency>
 				<groupId>net.minidev</groupId>
 				<artifactId>json-smart</artifactId>
@@ -89,6 +133,12 @@
 				<version>${kubernetes-fabric8-client.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>${spring-security.version}</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>

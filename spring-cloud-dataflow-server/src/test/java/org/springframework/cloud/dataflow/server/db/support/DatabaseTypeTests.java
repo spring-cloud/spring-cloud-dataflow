@@ -37,6 +37,7 @@ import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupp
 import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +46,8 @@ class DatabaseTypeTests {
 	@JdbcTest(properties = "spring.jpa.hibernate.ddl-auto=none")
 	@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 	@Testcontainers
-	static abstract class SingleDbDatabaseTypeTests {
+	@ContextConfiguration(classes = FakeApp.class)
+	static abstract class AbstractSingleDbDatabaseTypeTests {
 
 		@Test
 		void shouldSupportRowNumberFunction(@Autowired DataSource dataSource) throws MetaDataAccessException {
@@ -56,21 +58,21 @@ class DatabaseTypeTests {
 			return true;
 		}
 
-		@SpringBootConfiguration
-		static class FakeApp {
-		}
+	}
+	@SpringBootConfiguration
+	static class FakeApp {
 	}
 
 	@Nested
-	class MariaDB_10_6_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements MariaDB_10_6_ContainerSupport {
+	class MariaDB_10_6_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements MariaDB_10_6_ContainerSupport {
 	}
 
 	@Nested
-	class MariaDB_11_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements MariaDB_11_ContainerSupport {
+	class MariaDB_11_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements MariaDB_11_ContainerSupport {
 	}
 
 	@Nested
-	class MySql_5_7_tabaseTypeTests extends SingleDbDatabaseTypeTests implements MySQL_5_7_ContainerSupport {
+	class MySql_5_7_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements MySQL_5_7_ContainerSupport {
 		@Override
 		protected boolean supportsRowNumberFunction() {
 			return false;
@@ -78,27 +80,27 @@ class DatabaseTypeTests {
 	}
 
 	@Nested
-	class MySql_8_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements MySQL_8_ContainerSupport {
+	class MySql_8_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements MySQL_8_ContainerSupport {
 	}
 
 	@Nested
-	class DB2DatabaseTypeTests extends SingleDbDatabaseTypeTests implements DB2_11_5_ContainerSupport {
+	class DB2DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements DB2_11_5_ContainerSupport {
 	}
 
 	@Nested
-	class OracleDatabaseTypeTests extends SingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
+	class OracleDatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
 	}
 
 	@Nested
-	class SqlServer_2017_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
+	class SqlServer_2017_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
 	}
 
 	@Nested
-	class SqlServer_2019_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2019_ContainerSupport {
+	class SqlServer_2019_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements SqlServer_2019_ContainerSupport {
 	}
 
 	@Nested
-	class SqlServer_2022_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2022_ContainerSupport {
+	class SqlServer_2022_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements SqlServer_2022_ContainerSupport {
 	}
 
 }

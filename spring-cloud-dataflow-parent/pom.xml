@@ -18,7 +18,7 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.32</spring-framework.version>
+		<spring-framework.version>5.3.34</spring-framework.version>
 		<spring-cloud-dataflow-ui.version>3.4.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
@@ -50,19 +50,72 @@
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
-		<spring-security.version>5.7.11</spring-security.version>
+		<spring-security.version>5.7.12</spring-security.version>
 		<jackson-bom.version>2.13.5</jackson-bom.version>
 		<guava.version>32.1.3-jre</guava.version>
 		<logback.version>1.2.13</logback.version>
 		<json-path.version>2.9.0</json-path.version>
 		<postgresql.version>42.7.2</postgresql.version>
+		<junit-jupiter.version>5.9.3</junit-jupiter.version>
+		<junit-platform.version>1.9.3</junit-platform.version>
+		<mockito.version>4.11.0</mockito.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit-jupiter.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-engine</artifactId>
+				<version>${junit-platform.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-commons</artifactId>
+				<version>${junit-platform.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>${postgresql.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -123,8 +176,9 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-oauth2-client</artifactId>
+				<artifactId>spring-security-bom</artifactId>
 				<version>${spring-security.version}</version>
+				<type>pom</type>
 			</dependency>
 			<!-- Override Logback provided by Spring Boot -->
 			<dependency>
@@ -322,25 +376,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<dependencies>
-		<!-- Allow Surefire to run both Junit 4 and 5 by providing Junit4 libs and engine -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>hamcrest-core</artifactId>
-					<groupId>org.hamcrest</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
 	<distributionManagement>
 		<repository>
 			<id>repo.spring.io</id>
@@ -462,9 +497,32 @@
 					<artifactId>maven-jxr-plugin</artifactId>
 					<version>3.1.1</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.2.3</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<groupId>org.openrewrite.maven</groupId>
+				<artifactId>rewrite-maven-plugin</artifactId>
+				<version>5.28.0</version>
+				<configuration>
+					<activeRecipes>
+						<recipe>org.openrewrite.java.spring.boot2.SpringBoot2JUnit4to5Migration</recipe>
+						<recipe>org.openrewrite.java.testing.hamcrest.MigrateHamcrestToAssertJ</recipe>
+					</activeRecipes>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.openrewrite.recipe</groupId>
+						<artifactId>rewrite-spring</artifactId>
+						<version>5.7.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -477,18 +535,22 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.2.3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0</version>
 				<configuration>
+					<includeJUnit5Engines>junit-jupiter</includeJUnit5Engines>
 					<threadCount>1</threadCount>
 					<forkCount>1</forkCount>
 					<excludes>
-						<exclude>**/Abstract*.java</exclude>
+						<exclude>**/Abstract*.*</exclude>
 					</excludes>
+					<includes>
+						<include>**/*Test.*</include>
+						<include>**/*Tests.*</include>
+					</includes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -516,7 +578,6 @@
 				<version>3.1.0</version>
 			</plugin>
 		</plugins>
-
 	</build>
 	<reporting>
 		<plugins>

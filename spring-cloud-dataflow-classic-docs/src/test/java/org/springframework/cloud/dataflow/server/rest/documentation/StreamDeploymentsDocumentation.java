@@ -17,17 +17,16 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -51,17 +50,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
 						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
@@ -84,7 +77,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 						.param("definition", "time --format='YYYY MM DD' | log")
 						.param("deploy", "false"))
 				.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test

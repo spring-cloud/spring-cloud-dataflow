@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
@@ -39,11 +39,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.SocketUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link LocalTestDataFlowServer}.
@@ -53,12 +53,12 @@ import static org.junit.Assert.fail;
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
  */
-@Ignore
+@Disabled
 public class LocalConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (context != null) {
 			context.close();
@@ -70,7 +70,7 @@ public class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		int randomPort = SocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
-		context = app.run(new String[] { "--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl });
+		context = app.run("--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl);
 		assertNotNull(context.getBean(AppRegistryService.class));
 		assertNotNull(context.getBean(TaskExecutionController.class));
 		// From DataFlowControllerAutoConfiguration
@@ -80,7 +80,7 @@ public class LocalConfigurationTests {
 	@Test
 	public void testLocalAutoConfigApplied() throws Exception {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0" });
+		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0");
 		// LocalDataFlowServerAutoConfiguration also adds docker and maven resource loaders.
 		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
 		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
@@ -92,8 +92,8 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfigWithStreamsDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false" });
+		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0",
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false");
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
 		// The StreamDefinition repository is expected to exist.
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
@@ -108,8 +108,8 @@ public class LocalConfigurationTests {
 	@Test
 	public void testConfigWithTasksDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false" });
+		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0",
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false");
 		assertNotNull(context.getBean(StreamDefinitionRepository.class));
 		// The TaskDefinition repository is expected to exist.
 		assertNotNull(context.getBean(TaskDefinitionRepository.class));
@@ -124,7 +124,7 @@ public class LocalConfigurationTests {
 	@Test
 	public void testNoDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
-		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
+		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false");
 		assertThat(context.containsBean("appRegistry"), is(false));
 	}
 }

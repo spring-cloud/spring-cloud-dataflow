@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -276,7 +276,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		// Note same config values for both time and log
 		ConfigValues configValues = pkg.getConfigValues();
 		Yaml yaml = new Yaml(new SafeConstructor());
-		Map<String, Object> logConfigValueMap = (Map<String, Object>) yaml.load(configValues.getRaw());
+		Map<String, Object> logConfigValueMap = yaml.load(configValues.getRaw());
 		assertThat(logConfigValueMap).containsKeys("version", "spec");
 		if (pkg.getMetadata().getName().equals("log")) {
 			assertThat(logConfigValueMap.get("version")).isEqualTo("1.1.0.RELEASE");

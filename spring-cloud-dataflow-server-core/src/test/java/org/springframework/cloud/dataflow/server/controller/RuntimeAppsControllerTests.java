@@ -18,13 +18,13 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,7 +45,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -65,7 +64,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -85,7 +83,7 @@ public class RuntimeAppsControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -170,7 +168,7 @@ public class RuntimeAppsControllerTests {
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
 
 		when(this.skipperClient.status("ticktock5")).thenReturn(info);
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
@@ -186,7 +184,7 @@ public class RuntimeAppsControllerTests {
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
 
 		List<Release> releases = new ArrayList<>();
 		Release release = new Release();
@@ -201,7 +199,7 @@ public class RuntimeAppsControllerTests {
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())

@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.deployer;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.skipper.SkipperException;

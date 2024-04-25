@@ -34,8 +34,8 @@ import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -78,7 +78,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		cloudFoundryClientProvider = mock(CloudFoundryPlatformClientProvider.class);
 		cloudFoundrySchedulerClientProvider = mock(CloudFoundrySchedulerClientProvider.class);
@@ -237,7 +237,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private Mono<ListOrganizationsResponse> listOrganizationsResponse() {
 		ListOrganizationsResponse response = ListOrganizationsResponse.builder()
-				.addAllResources(Collections.<OrganizationResource>singletonList(
+				.addAllResources(Collections.singletonList(
 						OrganizationResource.builder()
 								.metadata(Metadata.builder().id("123").build()).build())
 				).build();
@@ -246,7 +246,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 
 	private Mono<ListSpacesResponse> listSpacesResponse() {
 		ListSpacesResponse response = ListSpacesResponse.builder()
-				.addAllResources(Collections.<SpaceResource>singletonList(
+				.addAllResources(Collections.singletonList(
 						SpaceResource.builder()
 								.metadata(Metadata.builder().id("123").build()).build())
 				).build();

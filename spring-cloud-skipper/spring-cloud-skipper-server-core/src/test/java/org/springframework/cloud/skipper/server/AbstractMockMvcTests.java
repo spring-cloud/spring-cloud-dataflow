@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,8 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.config.HypermediaMappingInformation;
 import org.springframework.http.MediaType;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -64,7 +63,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * @author Mark Pollack
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { AbstractMockMvcTests.TestConfig.class,
 		AbstractMockMvcTests.HypermediaBareJsonConfiguration.class }, properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
@@ -73,7 +71,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-			MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+			MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 	protected MockMvc mockMvc;
 
@@ -87,7 +85,7 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 		return json;
 	}
 
-	@Before
+	@BeforeEach
 	public void setupMockMvc() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON).contentType(contentType)).build();

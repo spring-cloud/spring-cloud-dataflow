@@ -23,8 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -42,18 +42,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -71,17 +67,17 @@ import static org.mockito.Mockito.when;
  */
 public class DefaultAppRegistryServiceTests {
 
-	private AppRegistrationRepository appRegistrationRepository = mock(AppRegistrationRepository.class);
+	private final AppRegistrationRepository appRegistrationRepository = mock(AppRegistrationRepository.class);
 
-	private ResourceLoader resourceLoader = new DefaultResourceLoader();
+	private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
-	private AppRegistryService appRegistryService = new DefaultAppRegistryService(appRegistrationRepository,
+	private final AppRegistryService appRegistryService = new DefaultAppRegistryService(appRegistrationRepository,
 			new AppResourceCommon(new MavenProperties(), resourceLoader), mock(DefaultAuditRecordService.class));
 
 	@Test
 	public void testNotFound() {
 		AppRegistration registration = appRegistryService.find("foo", ApplicationType.source);
-		assertThat(registration, Matchers.nullValue());
+		assertThat(registration).isNull();
 	}
 
 	@Test
@@ -91,8 +87,8 @@ public class DefaultAppRegistryServiceTests {
 				eq(registration.getName()), eq(registration.getType()))).thenReturn(registration);
 
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
-		assertThat(registration2.getName(), is("foo"));
-		assertThat(registration2.getType(), is(ApplicationType.source));
+		assertThat(registration2.getName()).isEqualTo("foo");
+		assertThat(registration2.getType()).isEqualTo(ApplicationType.source);
 	}
 
 	@Test
@@ -104,7 +100,7 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistryService.getAppMetadataResource(registration2);
 
-		assertThat(appMetadataResource.getFilename(), is("foo-source-metadata"));
+		assertThat(appMetadataResource.getFilename()).isEqualTo("foo-source-metadata");
 	}
 
 	@Test
@@ -117,7 +113,7 @@ public class DefaultAppRegistryServiceTests {
 		AppRegistration registration2 = appRegistryService.find("foo", ApplicationType.source);
 		Resource appMetadataResource = appRegistryService.getAppMetadataResource(registration2);
 
-		assertThat(appMetadataResource.getFilename(), is("foo-source"));
+		assertThat(appMetadataResource.getFilename()).isEqualTo("foo-source");
 	}
 
 	@Test
@@ -129,24 +125,16 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistryService.findAll();
 
-		assertThat(registrations, containsInAnyOrder(
-				allOf(
-						hasProperty("name", is("foo")),
-						hasProperty("uri", is(URI.create("classpath:/foo-source"))),
-						hasProperty("metadataUri", is(URI.create("classpath:/foo-source-metadata"))),
-						hasProperty("type", is(ApplicationType.source))),
-				allOf(
-						hasProperty("name", is("bar")),
-						hasProperty("uri", is(URI.create("classpath:/bar-source"))),
-						hasProperty("metadataUri", is(URI.create("classpath:/bar-source-metadata"))),
-						hasProperty("type", is(ApplicationType.source))),
-				allOf(
-						hasProperty("name", is("foo")),
-						hasProperty("uri", is(URI.create("classpath:/foo-sink"))),
-						hasProperty("metadataUri", nullValue()),
-						hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("classpath:/foo-source"), URI.create("classpath:/foo-source-metadata"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("bar", URI.create("classpath:/bar-source"), URI.create("classpath:/bar-source-metadata"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("classpath:/foo-sink"), null, ApplicationType.sink));
 	}
 
+	static Condition<AppRegistration> appRegistrationWith(String name, URI uri, URI metadata, ApplicationType type) {
+		return metadata != null ?
+			new Condition<>(item -> name.equals(item.getName()) && uri.equals(item.getUri()) && metadata.equals(item.getMetadataUri()) && type.equals(item.getType()), "AppRegistrationWith") :
+			new Condition<>(item -> name.equals(item.getName()) && uri.equals(item.getUri()) && item.getMetadataUri() == null && type.equals(item.getType()), "AppRegistrationWith");
+	}
 	@Test
 	public void testFindAllPageable() {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
@@ -165,7 +153,7 @@ public class DefaultAppRegistryServiceTests {
 
 		PageRequest pageRequest2 = PageRequest.of(1, 2);
 		when(appRegistrationRepository.findAll(eq(pageRequest2)))
-				.thenReturn(new PageImpl(Arrays.asList(fooSource), pageRequest2, 3));
+				.thenReturn(new PageImpl(Collections.singletonList(fooSource), pageRequest2, 3));
 		Page<AppRegistration> registrations2 = appRegistryService.findAll(pageRequest2);
 
 		assertEquals(3, registrations2.getTotalElements());
@@ -230,8 +218,7 @@ public class DefaultAppRegistryServiceTests {
 				eq("foo"), eq(ApplicationType.source), eq("1.0"))).thenReturn(appRegistration());
 		when(appRegistrationRepository.findAppRegistrationByNameAndTypeAndVersion(
 				eq("bar"), eq(ApplicationType.sink), eq("1.0"))).thenReturn(appRegistration());
-		assertThat(appRegistryService.importAll(false,
-				new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass())).size(), equalTo(0));
+		assertThat(appRegistryService.importAll(false, new ClassPathResource("AppRegistryTests-importAllOverwrite.properties", getClass()))).isEmpty();
 	}
 
 	@Test
@@ -242,12 +229,10 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(1)).save(appRegistrationCaptor.capture());
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 		AppRegistration appRegistration = registrations.get(0);
-		assertThat(appRegistration, hasProperty("name", is("cassandra")));
-		assertThat(appRegistration, hasProperty("uri",
-				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"))));
-		assertThat(appRegistration, hasProperty("metadataUri",
-				is(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"))));
-		assertThat(appRegistration, hasProperty("type", is(ApplicationType.sink)));
+		assertThat(appRegistration.getName()).isEqualTo("cassandra");
+		assertThat(appRegistration.getUri()).isEqualTo(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE.jar"));
+		assertThat(appRegistration.getMetadataUri()).isEqualTo(URI.create("http://repo.spring.io/release/org/springframework/cloud/stream/app/cassandra-sink-rabbit/2.1.0.RELEASE/cassandra-sink-rabbit-2.1.0.RELEASE-metadata.jar"));
+		assertThat(appRegistration.getType()).isEqualTo(ApplicationType.sink);
 	}
 
 	@Test
@@ -266,18 +251,8 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("bar")),
-								hasProperty("uri", is(URI.create("http:/bar-source-1.0.0"))),
-								hasProperty("metadataUri", is(URI.create("http:/bar-source-metadata-1.0.0"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("foo")),
-								hasProperty("uri", is(URI.create("http:/foo-sink-1.0.0"))),
-								hasProperty("metadataUri", nullValue()),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("bar", URI.create("http:/bar-source-1.0.0"), URI.create("http:/bar-source-metadata-1.0.0"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("http:/foo-sink-1.0.0"), null, ApplicationType.sink));
 		//
 		// Now import with overwrite = true
 		//
@@ -291,23 +266,9 @@ public class DefaultAppRegistryServiceTests {
 
 		registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("foo")),
-								hasProperty("uri", is(URI.create("http:/foo-source-1.0.0"))),
-								hasProperty("metadataUri", is(URI.create("http:/foo-source-metadata-1.0.0"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("bar")),
-								hasProperty("uri", is(URI.create("http:/bar-source-1.0.0"))),
-								hasProperty("metadataUri", is(URI.create("http:/bar-source-metadata-1.0.0"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("foo")),
-								hasProperty("uri", is(URI.create("http:/foo-sink-1.0.0"))),
-								hasProperty("metadataUri", nullValue()),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("http:/foo-source-1.0.0"), URI.create("http:/foo-source-metadata-1.0.0"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("bar", URI.create("http:/bar-source-1.0.0"), URI.create("http:/bar-source-metadata-1.0.0"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("http:/foo-sink-1.0.0"), null, ApplicationType.sink));
 	}
 
 	@Test
@@ -326,29 +287,10 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(4)).save(appRegistrationCaptor.capture());
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
-
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"), ApplicationType.sink));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.sink));
 	}
 
 	@Test
@@ -369,28 +311,10 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"), ApplicationType.sink));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.sink));
 	}
 
 	@Test
@@ -410,28 +334,10 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"), ApplicationType.sink));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.sink));
 	}
 
 	@Test
@@ -451,28 +357,10 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"), ApplicationType.sink));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.sink));
 	}
 
 	@Test
@@ -491,24 +379,9 @@ public class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(3)).save(appRegistrationCaptor.capture());
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
-
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("time")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"))),
-								hasProperty("metadataUri", nullValue()),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("log")),
-								hasProperty("uri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("time", URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), null, ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("log", URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE"), ApplicationType.sink));
 	}
 
 	@Test
@@ -522,18 +395,8 @@ public class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations,
-				containsInAnyOrder(
-						allOf(
-								hasProperty("name", is("foo")),
-								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-source-kafka:latest"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
-								hasProperty("type", is(ApplicationType.source))),
-						allOf(
-								hasProperty("name", is("foo")),
-								hasProperty("uri", is(URI.create("docker:springcloudstream/foo-sink-kafka:latest"))),
-								hasProperty("metadataUri", is(URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"))),
-								hasProperty("type", is(ApplicationType.sink)))));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("docker:springcloudstream/foo-source-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"), ApplicationType.source));
+		assertThat(registrations).haveAtLeastOne(appRegistrationWith("foo", URI.create("docker:springcloudstream/foo-sink-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT"), ApplicationType.sink));
 	}
 
 	@Test

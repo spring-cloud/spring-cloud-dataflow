@@ -33,8 +33,11 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
@@ -100,6 +103,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -225,7 +229,7 @@ public class StreamControllerTests {
 	}
 
 	@ParameterizedTest
-	@MethodSource("testSaveAndDeployWithDeployPropsProvider")
+	@ArgumentsSource(DeploymentPropsProvider.class)
 	public void testSaveAndDeploy(Map<String, String> deploymentProps, Map<String, String> expectedPropsOnApps) throws Exception {
 		assertThat(repository.count()).isZero();
 		String definition = "time | log";
@@ -270,12 +274,15 @@ public class StreamControllerTests {
 		SpringCloudDeployerApplicationSpec logAppSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertThat(logAppSpec.getDeploymentProperties()).containsAllEntriesOf(expectedPropsOnApps);
 	}
+	static class DeploymentPropsProvider implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
+			return Stream.of(
+					arguments(Collections.singletonMap("deployer.*.count", "2"),
+							Collections.singletonMap("spring.cloud.deployer.count", "2")),
+					arguments(Collections.emptyMap(), Collections.emptyMap()), arguments(null, Collections.emptyMap()));
+		}
 
-	private static Stream<Arguments> testSaveAndDeployWithDeployPropsProvider() {
-		return Stream.of(
-			Arguments.of(Collections.singletonMap("deployer.*.count", "2"), Collections.singletonMap("spring.cloud.deployer.count", "2")),
-			Arguments.of(Collections.emptyMap(), Collections.emptyMap()),
-			Arguments.of(null, Collections.emptyMap()));
 	}
 
 	@Test
@@ -1073,7 +1080,7 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream")));
+		when(skipperClient.search(eq("myStream"), eq(false))).thenReturn(Collections.singletonList(newPackageMetadata("myStream")));
 
 		repository.save(new StreamDefinition("myStream", "time | log"));
 		mockMvc.perform(delete("/streams/deployments/myStream")
@@ -1092,8 +1099,8 @@ public class StreamControllerTests {
 
 	@Test
 	public void testUndeployAllNonDeployedStream() throws Exception {
-		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream1")));
-		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(Arrays.asList(newPackageMetadata("myStream2")));
+		when(skipperClient.search(eq("myStream1"), eq(false))).thenReturn(Collections.singletonList(newPackageMetadata("myStream1")));
+		when(skipperClient.search(eq("myStream2"), eq(false))).thenReturn(Collections.singletonList(newPackageMetadata("myStream2")));
 
 		repository.save(new StreamDefinition("myStream1", "time | log"));
 		repository.save(new StreamDefinition("myStream2", "time | log"));

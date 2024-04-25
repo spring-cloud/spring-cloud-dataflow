@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;
@@ -28,9 +28,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Provides the tests required for exercising a TaskDefinitionRepository impl.
@@ -79,19 +80,23 @@ public abstract class AbstractTaskDefinitionTests {
 		assertEquals(page.getContent().size(), 3);
 	}
 
-	@Test(expected = DuplicateTaskException.class)
+	@Test
 	public void testSaveDuplicate() {
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.save(new TaskDefinition("task1", "myTask"));
+		assertThrows(DuplicateTaskException.class, () -> {
+			repository.save(new TaskDefinition("task1", "myTask"));
+			repository.save(new TaskDefinition("task1", "myTask"));
+		});
 	}
 
-	@Test(expected = DuplicateTaskException.class)
+	@Test
 	public void testSaveAllDuplicate() {
-		List<TaskDefinition> definitions = new ArrayList<>();
-		definitions.add(new TaskDefinition("task1", "myTask"));
+		assertThrows(DuplicateTaskException.class, () -> {
+			List<TaskDefinition> definitions = new ArrayList<>();
+			definitions.add(new TaskDefinition("task1", "myTask"));
 
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.saveAll(definitions);
+			repository.save(new TaskDefinition("task1", "myTask"));
+			repository.saveAll(definitions);
+		});
 	}
 
 	@Test

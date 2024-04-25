@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.hamcrest.MatcherAssert;
 import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,7 +80,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -634,7 +632,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		MatcherAssert.assertThat(request.getDefinition().getProperties(), hasEntry("common.prop2", "wizz"));
+		assertThat(request.getDefinition().getProperties()).containsEntry("common.prop2", "wizz");
 		assertThat(request.getDefinition().getProperties()).containsEntry("spring.cloud.task.name", "myTask2");
 	}
 
@@ -660,7 +658,7 @@ public class TaskControllerTests {
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		assertThat(request.getCommandlineArguments()).hasSize(9);
 		// don't assume order in a list
-		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
+		assertThat(request.getCommandlineArguments()).contains("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'");
 		assertThat(request.getDefinition().getProperties()).containsKey("spring.cloud.task.name");
 	}
 

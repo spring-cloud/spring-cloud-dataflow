@@ -15,14 +15,15 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 
 /**
  * @author Gunnar Hillert
@@ -36,7 +37,7 @@ public class DataflowClientExceptionTests {
 			new DataFlowClientException(null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided vndErrors parameter must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided vndErrors parameter must not be null.");
 			return;
 		}
 
@@ -47,7 +48,7 @@ public class DataflowClientExceptionTests {
 	public void testCreationOfDataflowClientExceptionWithSingleError() {
 		final VndErrors errors = new VndErrors("foo", "bar message", Link.of("somewhere"));
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
-		assertEquals("bar message", dataFlowClientException.getMessage());
+		assertThat(dataFlowClientException.getMessage()).isEqualTo("bar message");
 	}
 
 	@Test
@@ -57,6 +58,6 @@ public class DataflowClientExceptionTests {
 
 		final VndErrors errors = new VndErrors(vndError1, vndError2);
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
-		assertEquals("foo message\nbar message", dataFlowClientException.getMessage());
+		assertThat(dataFlowClientException.getMessage()).isEqualTo("foo message\nbar message");
 	}
 }

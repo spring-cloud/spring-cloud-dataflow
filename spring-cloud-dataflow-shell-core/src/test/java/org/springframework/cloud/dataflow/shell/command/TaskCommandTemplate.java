@@ -19,12 +19,15 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.shell.ShellCommandRunner;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -37,6 +40,7 @@ import static org.junit.Assert.fail;
  * @author Chris Bono
  */
 public class TaskCommandTemplate {
+	private static final Logger logger = LoggerFactory.getLogger(TaskCommandTemplate.class);
 
 	private final static int WAIT_INTERVAL = 500;
 
@@ -44,7 +48,7 @@ public class TaskCommandTemplate {
 
 	private final ShellCommandRunner commandRunner;
 
-	private List<String> tasks = new ArrayList<String>();
+	private final List<String> tasks = new ArrayList<String>();
 
 	private boolean allowErrors;
 
@@ -92,7 +96,7 @@ public class TaskCommandTemplate {
 		Object result = commandRunner.executeCommand("task launch --name " + taskName);
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
 		Table idResultTable = resultAsTable(idResult);
-
+		logger.debug("launch:{} = {}", taskName, render(idResult));
 		long value = (long) idResultTable.getModel().getValue(1, 1);
 		assertThat(result.toString()).contains("with execution id " + value);
 		return value;
@@ -110,6 +114,7 @@ public class TaskCommandTemplate {
 		tasks.add(taskName);
 		Object result = commandRunner.executeCommand(String.format("task launch --name %s --composedTaskRunnerName %s", taskName, ctrAppName));
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
+		logger.debug("launchWithCTR:{}:{} = {}", taskName, ctrAppName, render(idResult));
 		Table idResultTable = resultAsTable(idResult);
 
 		long value = (long) idResultTable.getModel().getValue(1, 1);
@@ -124,10 +129,9 @@ public class TaskCommandTemplate {
 	 */
 	public String getTaskExecutionLog(String taskName) throws Exception{
 		long id = launchTaskExecutionForLog(taskName);
-		// TODO  investigate race condition, getting null results for execution log.
-		Thread.sleep(10000);
-		Object result = commandRunner.executeCommand("task execution log --id " + id);
 
+		Object result = commandRunner.executeCommand("task execution log --id " + id);
+		logger.debug("getTaskExecutionLog:{}={}", taskName, render(result));
 		assertThat(result.toString()).contains("Starting");
 		return result.toString();
 	}
@@ -146,14 +150,17 @@ public class TaskCommandTemplate {
 	 * Launch a task with invalid task execution id
 	 */
 	public void getTaskExecutionLogInvalidId() {
-		commandRunner.executeCommand(String.format("task execution log --id %s", 88));
+		Object result = commandRunner.executeCommand(String.format("task execution log --id %s", 88));
+		logger.debug("getTaskExecutionLogInvalidId:{}", render(result));
 	}
 
 	private long launchTaskExecutionForLog(String taskName) throws Exception{
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
 		Object result = commandRunner.executeCommand(String.format("task launch --name %s", taskName));
+		logger.debug("launchTaskExecutionForLog:{} = {}", taskName, render(result));
 		Object idResult = commandRunner.executeCommand("task execution list --name " + taskName);
+		logger.debug("launchTaskExecutionForLog:list:{} = {}", taskName, render(idResult));
 		Table taskExecutionResult = resultAsTable(idResult);
 
 		long id = (long) taskExecutionResult.getModel().getValue(1, 1);
@@ -164,18 +171,40 @@ public class TaskCommandTemplate {
 
 	private void waitForDBToBePopulated(long id) throws Exception {
 		for (int waitTime = 0; waitTime <= MAX_WAIT_TIME; waitTime += WAIT_INTERVAL) {
+			if (isStartTime(id)) {
+				break;
+			}
 			Thread.sleep(WAIT_INTERVAL);
+		}
+	}
+	private void waitForEnd(long id) throws Exception {
+		for (int waitTime = 0; waitTime <= MAX_WAIT_TIME; waitTime += WAIT_INTERVAL) {
 			if (isEndTime(id)) {
 				break;
 			}
+			Thread.sleep(WAIT_INTERVAL);
 		}
+	}
+	private boolean isStartTime(long id) {
+		Object result = taskExecutionStatus(id);
+		logger.debug("isStartTime:{}:status={}", id, render(result));
+		Table table = resultAsTable(result);
+		return (table.getModel().getValue(8, 1) != null);
+
+	}
+
+	private String render(Object result) {
+		if(result instanceof Table) {
+			return ((Table) result).render(120);
+		}
+		return result.toString();
 	}
 
 	private boolean isEndTime(long id) {
 		Object result = taskExecutionStatus(id);
+		logger.debug("isEndTime:{}:status={}", id,render(result));
 		Table table = resultAsTable(result);
-		return (table.getModel().getValue(6, 1) != null);
-
+		return (table.getModel().getValue(9, 1) != null);
 	}
 	/**
 	 * Stop a task execution.
@@ -247,8 +276,9 @@ public class TaskCommandTemplate {
 		// Shell parser expects quotes to be escaped by \
 		String wholeCommand = String.format("task create --name \"%s\" --definition \"%s\"", taskName,
 				actualDefinition.replaceAll("\"", "\\\\\""));
-		Object result = commandRunner.executeCommand(wholeCommand);
 
+		Object result = commandRunner.executeCommand(wholeCommand);
+		logger.debug("doCreate:{} = {}", wholeCommand, render(result));
 		// add the task name to the tasks list before assertion
 		tasks.add(taskName);
 		String createMsg = "Created";

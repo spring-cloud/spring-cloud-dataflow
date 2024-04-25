@@ -19,9 +19,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,8 +73,7 @@ import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,8 +90,7 @@ import static org.mockito.Mockito.never;
  *
  */
 @SuppressWarnings("unchecked")
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestConfig.class)
+@SpringJUnitConfig(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StateMachineTests {
 
@@ -376,7 +373,7 @@ public class StateMachineTests {
 		Mockito.verify(errorAction, never()).execute(any());
 	}
 
-	@Ignore("Flaky, what it tests not actually used yet")
+	@Disabled("Flaky, what it tests not actually used yet")
 	@Test
 	public void testUpgradeCancelWhileCheckingApps() throws Exception {
 		Manifest manifest = new Manifest();

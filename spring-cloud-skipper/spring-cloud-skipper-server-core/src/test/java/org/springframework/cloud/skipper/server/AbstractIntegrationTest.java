@@ -20,10 +20,9 @@ import java.io.IOException;
 
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
@@ -64,14 +62,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * @author Janne Valkealahti
  * @author Glenn Renfro
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = AbstractIntegrationTest.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeployedTest {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Rule
+	@RegisterExtension
 	public LogTestNameRule logTestName = new LogTestNameRule();
 
 	@Autowired
@@ -91,7 +88,7 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 
 	private File dbScriptFile;
 
-	@Before
+	@BeforeEach
 	public void beforeDumpSchema() {
 		releaseRepository.deleteAll();
 		try {
@@ -104,7 +101,7 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 		dbScriptFile.deleteOnExit();
 	}
 
-	@After
+	@AfterEach
 	public void restoreEmptySchema() {
 		// Add a sleep for now to give the local deployer a chance to install the app. This
 		// should go away once we introduce spring state machine.

@@ -20,13 +20,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -51,10 +52,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class TaskExecutionsDocumentation extends BaseDocumentation {
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("taskA");
@@ -64,7 +65,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		cleanupTaskExecutions("taskA");
 		cleanupTaskExecutions("taskB");
@@ -255,11 +256,11 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						responseFields(
 								subsectionWithPath("_embedded.taskExecutionResourceList")
 										.description("Contains a collection of Task Executions/"),
-								subsectionWithPath("_links.self").description("Link to the task execution resource"),
-								subsectionWithPath("_links.first").description("Link to the first page of task execution resources").optional(),
-								subsectionWithPath("_links.last").description("Link to the last page of task execution resources").optional(),
-								subsectionWithPath("_links.next").description("Link to the next page of task execution resources").optional(),
-								subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").optional(),
+								subsectionWithPath("_links.self").description("Link to the task execution resource").type(JsonFieldType.OBJECT),
+								subsectionWithPath("_links.first").description("Link to the first page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+								subsectionWithPath("_links.last").description("Link to the last page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+								subsectionWithPath("_links.next").description("Link to the next page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+								subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").type(JsonFieldType.OBJECT).optional(),
 								subsectionWithPath("page").description("Pagination properties"))));
 	}
 
@@ -288,11 +289,11 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				responseFields(
 					subsectionWithPath("_embedded.taskExecutionThinResourceList")
 						.description("Contains a collection of thin Task Executions/"),
-					subsectionWithPath("_links.self").description("Link to the task execution resource"),
-					subsectionWithPath("_links.first").description("Link to the first page of task execution resources").optional(),
-					subsectionWithPath("_links.last").description("Link to the last page of task execution resources").optional(),
-					subsectionWithPath("_links.next").description("Link to the next page of task execution resources").optional(),
-					subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").optional(),
+					subsectionWithPath("_links.self").description("Link to the task execution resource").type(JsonFieldType.OBJECT),
+					subsectionWithPath("_links.first").description("Link to the first page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+					subsectionWithPath("_links.last").description("Link to the last page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+					subsectionWithPath("_links.next").description("Link to the next page of task execution resources").type(JsonFieldType.OBJECT).optional(),
+					subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").type(JsonFieldType.OBJECT).optional(),
 					subsectionWithPath("page").description("Pagination properties"))));
 	}
 

@@ -25,9 +25,9 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -51,6 +51,8 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +68,7 @@ public class DataflowTemplateTests {
 
 	private ObjectMapper mapper;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jdk8Module());
@@ -76,7 +78,7 @@ public class DataflowTemplateTests {
 		System.setProperty("sun.net.client.defaultConnectTimeout", String.valueOf(100));
 	}
 
-	@After
+	@AfterEach
 	public void shutdown() {
 		System.clearProperty("sun.net.client.defaultConnectTimeout");
 	}
@@ -95,9 +97,11 @@ public class DataflowTemplateTests {
 		fail("Expected an IllegalArgumentException to be thrown.");
 	}
 
-	@Test(expected = ResourceAccessException.class)
+	@Test
 	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-		new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
+		assertThrows(ResourceAccessException.class, ()-> {
+			new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
+		});
 	}
 
 	@Test
@@ -115,7 +119,6 @@ public class DataflowTemplateTests {
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("The objectMapper must not be null.", e.getMessage());
-			return;
 		}
 	}
 
@@ -177,7 +180,7 @@ public class DataflowTemplateTests {
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 
 		assertNotNull(restTemplate);
-		assertTrue(providedRestTemplate == restTemplate);
+		assertSame(providedRestTemplate, restTemplate);
 		assertTrue(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler);
 
 		assertCorrectMixins(restTemplate);

@@ -16,17 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
+import javax.sql.DataSource;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -59,7 +61,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.support.MetaDataAccessException;
-import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,16 +87,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
  */
+@ExtendWith(RestDocumentationExtension.class)
 public abstract class BaseDocumentation {
 
 	private static String skipperServerPort;
 
-	@ClassRule
+	@RegisterExtension
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
 			"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
 
-	@Before
-	public void setupMocks() throws Exception {
+	@BeforeEach
+	public void setupMocks(RestDocumentationContextProvider restDocumentationContextProvider) throws Exception {
 		reset(springDataflowServer.getSkipperClient());
 
 		AboutResource about = new AboutResource();
@@ -110,17 +114,15 @@ public abstract class BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().status(ArgumentMatchers.anyString())).thenReturn(info);
 
 		Deployer deployer = new Deployer("default", "local", mock(AppDeployer.class), mock(ActuatorOperations.class));
-		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(Arrays.asList(deployer));
+		when(springDataflowServer.getSkipperClient().listDeployers()).thenReturn(Collections.singletonList(deployer));
 
 		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new ArrayList<>());
 
-		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext());
+		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext(),
+				restDocumentationContextProvider);
 	}
 
 	public static final String TARGET_DIRECTORY = "target/generated-snippets";
-
-	@Rule
-	public JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation(TARGET_DIRECTORY);
 
 	protected MockMvc mockMvc;
 
@@ -132,19 +134,21 @@ public abstract class BaseDocumentation {
 
 	protected ApplicationContext context;
 
-	protected void prepareDocumentationTests(WebApplicationContext context) throws Exception {
+	protected void prepareDocumentationTests(WebApplicationContext context,
+			RestDocumentationContextProvider restDocumentationContextProvider) throws Exception {
 		this.context = context;
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.documentation = new ToggleableResultHandler(documentationHandler);
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
-				.apply(documentationConfiguration(this.restDocumentation).uris().withPort(9393))
+			.apply(documentationConfiguration(restDocumentationContextProvider).uris().withPort(9393))
 				.alwaysDo((ToggleableResultHandler) this.documentation).build();
 
 		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
-		TaskSchedulerController controller = this.springDataflowServer.getWebApplicationContext().getBean(TaskSchedulerController.class);
+		TaskSchedulerController controller = springDataflowServer.getWebApplicationContext()
+			.getBean(TaskSchedulerController.class);
 		ReflectionTestUtils.setField(controller, "schedulerService", schedulerService());
-		TaskPlatform taskPlatform = this.springDataflowServer.getWebApplicationContext().getBean(TaskPlatform.class);
+		TaskPlatform taskPlatform = springDataflowServer.getWebApplicationContext().getBean(TaskPlatform.class);
 		Launcher launcher = taskPlatform.getLaunchers().stream().filter(launcherToFilter -> launcherToFilter.getName().equals("default")).findFirst().get();
 		ReflectionTestUtils.setField(launcher, "scheduler", localTestScheduler());
 	}

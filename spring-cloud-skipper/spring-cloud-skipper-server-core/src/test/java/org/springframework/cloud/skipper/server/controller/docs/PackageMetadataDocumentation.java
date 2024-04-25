@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -97,7 +97,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
 								fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
 								.and(super.defaultLinkProperties),
-						super.linksForSkipper()));
+						linksForSkipper()));
 	}
 
 	@Test

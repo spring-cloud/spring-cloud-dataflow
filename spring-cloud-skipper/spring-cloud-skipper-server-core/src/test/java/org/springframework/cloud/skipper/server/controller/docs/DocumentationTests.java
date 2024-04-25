@@ -15,16 +15,17 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * Documentation tests suite.
  *
  * @author Ilayaperumal Gopinathan
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({ AboutDocumentation.class, InstallDocumentation.class, ListDocumentation.class,
+
+@Suite
+@SelectClasses({ AboutDocumentation.class, InstallDocumentation.class, ListDocumentation.class,
 		CancelDocumentation.class, DeleteDocumentation.class, HistoryDocumentation.class, ManifestDocumentation.class,
 		RollbackDocumentation.class, StatusDocumentation.class, UpgradeDocumentation.class, UploadDocumentation.class })
 public class DocumentationTests {
