@@ -59,7 +59,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/apps").requestAttr(
 								RequestDispatcher.ERROR_MESSAGE,
 								"The app 'http://localhost:8080/apps/123' does " + "not exist"))
-				.andDo(print())
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))
@@ -76,7 +75,6 @@ public class ApiDocumentation extends BaseDocumentation {
 	@Test
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(links(
 				linkWithRel("about").description(
