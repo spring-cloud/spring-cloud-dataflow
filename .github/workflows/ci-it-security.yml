@@ -42,14 +42,6 @@ jobs:
         path: '**/failsafe-reports/*IT.xml'
         reporter: java-junit
         list-tests: failed
-    - name: 'Action: Upload Unit Test Results'
-      if: ${{ always() }}
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.group }}-test-results-surefire
-        path: './**/target/surefire-reports/**/*.*'
-        retention-days: 7
-        if-no-files-found: ignore
     - name: 'Action: Upload Integration Test Results'
       if: ${{ always() }}
       uses: actions/upload-artifact@v3

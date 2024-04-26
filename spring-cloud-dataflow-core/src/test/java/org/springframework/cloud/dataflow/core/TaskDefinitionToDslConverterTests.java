@@ -17,11 +17,13 @@
 package org.springframework.cloud.dataflow.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Christian Tzolov
@@ -38,8 +40,8 @@ public class TaskDefinitionToDslConverterTests {
 	@Test
 	public void testExclusionOfDataFlowAddedProperties() {
 
-		List<String> dataFlowAddedProperties = Arrays.asList(
-				TaskDefinition.SPRING_CLOUD_TASK_NAME);
+		List<String> dataFlowAddedProperties = Collections.singletonList(
+			TaskDefinition.SPRING_CLOUD_TASK_NAME);
 
 		for (String key : dataFlowAddedProperties) {
 			String dslText = "foo --" + key + "=boza";
@@ -86,10 +88,12 @@ public class TaskDefinitionToDslConverterTests {
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void compositeTaskDsl() {
-		TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
-		new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
+			new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+		});
 	}
 
 }
