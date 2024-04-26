@@ -83,7 +83,6 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 						.param("name", JOB_NAME)
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				requestParameters(
 						parameterWithName("page")
@@ -103,7 +102,6 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/instances/{id}", "1").queryParam("schemaTarget", "boot2"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					pathParameters(

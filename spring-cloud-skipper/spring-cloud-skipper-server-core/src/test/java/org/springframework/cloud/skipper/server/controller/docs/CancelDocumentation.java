@@ -48,7 +48,6 @@ public class CancelDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				post("/api/release/cancel").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 						.content(convertObjectToJson(new CancelRequest(releaseName))))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(fieldWithPath("accepted").description("If cancel request was accepted"))

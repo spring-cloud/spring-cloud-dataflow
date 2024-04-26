@@ -68,7 +68,6 @@ public class UpgradeDocumentation extends BaseDocumentation {
 		MvcResult result = this.mockMvc
 				.perform(post("/api/release/upgrade").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 						.content(convertObjectToJson(upgradeRequest)))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(

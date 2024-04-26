@@ -38,7 +38,6 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 				get("/api/repositories")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,
@@ -64,7 +63,6 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 				get("/api/repositories/search/findByName?name={name}", "local"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

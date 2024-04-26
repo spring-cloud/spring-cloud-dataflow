@@ -49,7 +49,6 @@ public class DeleteDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				delete("/api/release/{releaseName}/package", release.getName())
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
@@ -117,7 +116,6 @@ public class DeleteDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				delete("/api/release/{releaseName}", "test")
 						.accept(MediaType.APPLICATION_JSON).contentType(contentType))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

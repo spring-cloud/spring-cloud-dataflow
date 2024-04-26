@@ -118,7 +118,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));
@@ -135,7 +134,7 @@ public class JobExecutionThinControllerTests {
 				.param("toDate",
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(toDate))
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)));
@@ -145,7 +144,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByJobInstanceId() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("jobInstanceId", "1")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].instanceId", is(1)))
@@ -156,7 +154,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByTaskExecutionId() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("taskExecutionId", "4")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].taskExecutionId", is(4)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));

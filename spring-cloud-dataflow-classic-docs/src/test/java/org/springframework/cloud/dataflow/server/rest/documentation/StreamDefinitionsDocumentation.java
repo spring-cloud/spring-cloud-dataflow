@@ -98,7 +98,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 				.param("sort", "name,ASC")
 				.param("search", "")
 				.param("size", "10"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -118,7 +117,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 				get("/streams/definitions/{name}", "timelog"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -141,7 +139,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 		createStream("mysamplestream", "time | log", false);
 		this.mockMvc.perform(
 				get("/streams/definitions/{name}/applications", "mysamplestream"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -172,7 +169,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
                     .param("search", "")
                     .param("size", "10")
 					.param("nested", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
                 requestParameters(
@@ -197,7 +193,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 			delete("/streams/definitions/{name}", "timelog"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(parameterWithName("name")
@@ -209,7 +204,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	public void streamDefinitionDeleteAll() throws Exception {
 		this.mockMvc.perform(
 			delete("/streams/definitions"))
-			.andDo(print())
 			.andExpect(status().isOk());
 	}
 

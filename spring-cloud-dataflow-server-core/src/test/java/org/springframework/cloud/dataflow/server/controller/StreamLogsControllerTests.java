@@ -82,12 +82,10 @@ public class StreamLogsControllerTests {
 		when(this.skipperClient.getLog("ticktock4")).thenReturn(new LogInfo(Collections.emptyMap()));
 		mockMvc.perform(
 				get("/streams/logs/ticktock4").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 		when(this.skipperClient.getLog("ticktock4", "myapp")).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		mockMvc.perform(
 				get("/streams/logs/ticktock4/myapp").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 }

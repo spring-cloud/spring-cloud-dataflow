@@ -73,7 +73,6 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/tasks/logs/"+taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName)
 						.getTaskDeploymentId()).param("platformName", "default"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(

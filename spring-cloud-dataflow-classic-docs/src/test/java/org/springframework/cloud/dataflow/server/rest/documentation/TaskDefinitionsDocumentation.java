@@ -100,7 +100,6 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.param("search", "")
 				.param("manifest", "true")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -128,7 +127,6 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
 			.param("manifest", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
@@ -162,7 +160,6 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
 			.param("cleanup", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(

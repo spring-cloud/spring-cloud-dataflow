@@ -41,8 +41,7 @@ public class HistoryDocumentation extends BaseDocumentation {
 		this.releaseRepository.save(createTestRelease());
 
 		this.mockMvc.perform(
-				get("/api/releases/search/findByNameIgnoreCaseContainingOrderByNameAscVersionDesc?name={name}", "test")).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/releases/search/findByNameIgnoreCaseContainingOrderByNameAscVersionDesc?name={name}", "test")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_links").ignored(),

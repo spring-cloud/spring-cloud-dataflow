@@ -62,7 +62,6 @@ public class RootControllerTests {
 	@Test
 	public void testRootControllerResponse() throws Exception {
 		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andReturn()
 			.getResponse()

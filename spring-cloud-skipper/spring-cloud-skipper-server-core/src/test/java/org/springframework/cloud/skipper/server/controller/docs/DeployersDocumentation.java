@@ -38,7 +38,6 @@ public class DeployersDocumentation extends BaseDocumentation {
 				get("/api/deployers")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,

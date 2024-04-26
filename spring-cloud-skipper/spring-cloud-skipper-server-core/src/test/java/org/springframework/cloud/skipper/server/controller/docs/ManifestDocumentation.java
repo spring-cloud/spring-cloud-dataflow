@@ -46,7 +46,6 @@ public class ManifestDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/manifest/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)
 						.contentType(contentType))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseBody()));
@@ -61,7 +60,6 @@ public class ManifestDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/manifest/{releaseName}/{releaseVersion}",
 						release.getName(), release.getVersion()))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseBody()));

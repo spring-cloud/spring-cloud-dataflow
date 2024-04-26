@@ -43,7 +43,6 @@ public class TaskPlatformDocumentation extends BaseDocumentation {
 				get("/tasks/platforms")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(

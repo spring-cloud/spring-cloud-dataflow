@@ -29,8 +29,7 @@ public class RootControllerTests extends AbstractControllerTests {
 
 	@Test
 	public void indexUrlShouldRedirect() throws Exception {
-		mockMvc.perform(get("/")).andDo(print())
-				.andExpect(status().is3xxRedirection())
+		mockMvc.perform(get("/")).andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/api"));
 	}
 }

@@ -160,7 +160,6 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
@@ -193,25 +192,21 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams?page=0&size=2")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(2)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=2")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(1)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1000&size=30")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 	}
@@ -221,7 +216,6 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
@@ -253,7 +247,6 @@ public class RuntimeStreamsControllerTests {
 				get("/runtime/streams")
 						.param("names", "ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))

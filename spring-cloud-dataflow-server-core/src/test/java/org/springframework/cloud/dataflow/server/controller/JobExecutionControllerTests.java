@@ -116,14 +116,12 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testStopNonExistingJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
-				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
@@ -131,21 +129,18 @@ public class JobExecutionControllerTests {
 	public void testRestartNonExistingJobExecution() throws Exception {
 		mockMvc.perform(
 						put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
-				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testRestartCompletedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/5").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
-				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test
 	public void testStopStartedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 
@@ -154,7 +149,6 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON)
 						.param("stop", "true")
 						.queryParam("schemaTarget", "foo"))
-				.andDo(print())
 				.andExpect(status().is4xxClientError());
 	}
 
@@ -162,7 +156,6 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testStopStartedJobExecutionTwice() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
-				.andDo(print())
 				.andExpect(status().isOk());
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STARTED, taskDefinitionReader);
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
@@ -173,14 +166,12 @@ public class JobExecutionControllerTests {
 		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void testStopStoppedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
-				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STOPPED, taskDefinitionReader);
 		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
@@ -195,7 +186,6 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecution() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.executionId", is(1)))
 				.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1)));
@@ -204,7 +194,6 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionWithJobProperties() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
@@ -218,7 +207,6 @@ public class JobExecutionControllerTests {
 		createDirtyJob();
 		// expecting to ignore dirty job
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)));
 	}
@@ -226,7 +214,6 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetAllExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)))
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInRelativeOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
@@ -242,7 +229,6 @@ public class JobExecutionControllerTests {
 	public void testGetExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(
 						jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName", is(JobExecutionUtils.JOB_NAME_ORIG)))
@@ -260,7 +246,6 @@ public class JobExecutionControllerTests {
 	public void testGetExecutionsByNameMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FOOBAR)))
@@ -275,7 +260,6 @@ public class JobExecutionControllerTests {
 						.param("name", "")
 						.param("status", "FAILED")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_FAILED2)))
@@ -289,7 +273,6 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(get("/jobs/executions/")
 						.param("status", "UNKNOWN")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(5)));
 	}
@@ -300,7 +283,6 @@ public class JobExecutionControllerTests {
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
 						.param("status", "COMPLETED")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_COMPLETED)))
@@ -310,7 +292,6 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
@@ -318,7 +299,6 @@ public class JobExecutionControllerTests {
 	public void testWildcardMatchMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions/")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_STOPPED)))
@@ -331,7 +311,6 @@ public class JobExecutionControllerTests {
 	public void testWildcardMatchSingleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions/")
 						.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)))
 				.andExpect(
@@ -353,7 +332,6 @@ public class JobExecutionControllerTests {
 	private void verify5XXErrorIsThrownForPageOffsetError(MockHttpServletRequestBuilder builder) throws Exception {
 		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE))
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is4xxClientError())
 				.andReturn().getResponse().getContentAsString()
 				.contains("OffsetOutOfBoundsException");
@@ -363,7 +341,6 @@ public class JobExecutionControllerTests {
 		mockMvc.perform(builder.param("page", String.valueOf(Integer.MAX_VALUE - 1))
 				.param("size", "1")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 }

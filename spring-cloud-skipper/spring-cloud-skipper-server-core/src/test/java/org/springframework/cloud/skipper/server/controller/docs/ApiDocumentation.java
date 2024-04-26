@@ -57,7 +57,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/path/not/there")
 						.requestAttr(RequestDispatcher.ERROR_MESSAGE,
 								"The path, 'http://localhost:8080/path/not/there', does not exist."))
-				.andDo(print())
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))

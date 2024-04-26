@@ -71,8 +71,7 @@ public class UploadDocumentation extends BaseDocumentation {
 		when(this.packageService.upload(any(UploadRequest.class))).thenReturn(pkg.getMetadata());
 
 		mockMvc.perform(post("/api/package/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				.content(convertObjectToJson(uploadProperties))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(uploadProperties))).andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
 								responseFields(

@@ -61,7 +61,7 @@ public class SchemaControllerTests {
 	@Test
 	public void testVersions() throws Exception {
 		// when
-		ResultActions result = mockMvc.perform(get("/schema/versions").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+		ResultActions result = mockMvc.perform(get("/schema/versions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 		// then
 		result.andExpect(jsonPath("$.defaultSchemaVersion", is("2")));
 		result.andExpect(jsonPath("$.versions", is(Arrays.asList("2", "3"))));
@@ -70,7 +70,7 @@ public class SchemaControllerTests {
 	@Test
 	public void testTargets() throws Exception {
 		// when
-		ResultActions result = mockMvc.perform(get("/schema/targets").accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+		ResultActions result = mockMvc.perform(get("/schema/targets").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 		// then
 		result.andExpect(jsonPath("$.defaultSchemaTarget", is("boot2")));
 		result.andExpect(jsonPath("$._links.self.href", is("http://localhost/schema/targets")));

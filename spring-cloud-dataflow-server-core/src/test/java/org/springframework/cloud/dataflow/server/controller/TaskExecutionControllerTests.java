@@ -316,7 +316,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
@@ -324,7 +323,6 @@ public class TaskExecutionControllerTests {
 	void getExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/1").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(content().json("{taskName: \"" + TASK_NAME_ORIG + "\"}"))
 				.andExpect(jsonPath("$.parentExecutionId", is(nullValue())))
@@ -335,7 +333,6 @@ public class TaskExecutionControllerTests {
 	void getChildTaskExecution() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "",
 				mockMvc.perform(get("/tasks/executions/2").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$.parentExecutionId", is(1)))
 				.andExpect(jsonPath("jobExecutionIds", hasSize(0)));
@@ -344,7 +341,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void getExecutionForJob() throws Exception {
 		mockMvc.perform(get("/tasks/executions/4").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"" + TASK_NAME_FOOBAR + "\"}"))
 				.andExpect(jsonPath("jobExecutionIds[0]", is(1)))
@@ -355,7 +351,6 @@ public class TaskExecutionControllerTests {
 	void getAllExecutions() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
@@ -365,7 +360,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void getAllThinExecutions() throws Exception {
 			mockMvc.perform(get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
@@ -376,7 +370,6 @@ public class TaskExecutionControllerTests {
 	void getCurrentExecutions() throws Exception {
 		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
 		mockMvc.perform(get("/tasks/executions/current").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].runningExecutionCount", is(4)));
 
@@ -400,8 +393,7 @@ public class TaskExecutionControllerTests {
 								.queryParam("name", "timestamp3")
 								.queryParam("properties", "app.timestamp3.foo3=bar3,app.timestamp3.bar3=3foo")
 								.accept(MediaType.APPLICATION_JSON)
-				).andDo(print())
-				.andExpect(status().isCreated());
+				).andExpect(status().isCreated());
 
 		String response = resultActions.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -415,7 +407,6 @@ public class TaskExecutionControllerTests {
 								.accept(MediaType.APPLICATION_JSON)
 								.queryParam("schemaTarget", resource.getSchemaTarget())
 				)
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp3\"}"));
 		response = resultActions.andReturn().getResponse().getContentAsString();
@@ -449,8 +440,7 @@ public class TaskExecutionControllerTests {
 						post("/tasks/executions")
 								.queryParam("name", "timestamp3")
 								.accept(MediaType.APPLICATION_JSON)
-				).andDo(print())
-				.andExpect(status().isBadRequest());
+				).andExpect(status().isBadRequest());
 
 		String response = resultActions.andReturn().getResponse().getContentAsString();
 		assertThat(response).contains("cannot be launched for");
@@ -474,8 +464,7 @@ public class TaskExecutionControllerTests {
 								.queryParam("name", "timestamp2")
 								.queryParam("properties", "app.timestamp2.foo3=bar3,app.timestamp2.bar3=3foo")
 								.accept(MediaType.APPLICATION_JSON)
-				).andDo(print())
-				.andExpect(status().isCreated());
+				).andExpect(status().isCreated());
 
 		String response = resultActions.andReturn().getResponse().getContentAsString();
 		ObjectMapper mapper = new ObjectMapper();
@@ -489,7 +478,6 @@ public class TaskExecutionControllerTests {
 								.accept(MediaType.APPLICATION_JSON)
 								.queryParam("schemaTarget", resource.getSchemaTarget())
 				)
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(content().json("{taskName: \"timestamp2\"}"));
 		response = resultActions.andReturn().getResponse().getContentAsString();
@@ -511,7 +499,6 @@ public class TaskExecutionControllerTests {
 	void getExecutionsByName() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").param("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[0].taskName", is(TASK_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[1].taskName", is(TASK_NAME_ORIG)))
@@ -523,7 +510,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void getExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is4xxClientError()).andReturn().getResponse().getContentAsString()
 				.contains("NoSuchTaskException");
 	}
@@ -531,7 +517,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void cleanup() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1"))
-				.andDo(print())
 				.andExpect(status().is(200));
 		verify(taskLauncher).cleanup("foobar");
 	}
@@ -539,7 +524,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void cleanupAll() throws Exception {
 		mockMvc.perform(delete("/tasks/executions"))
-				.andDo(print())
 				.andExpect(status().is(200));
 		verify(taskLauncher,  times(2)).cleanup("foobar");
 	}
@@ -547,7 +531,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void cleanupWithActionParam() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "CLEANUP"))
-				.andDo(print())
 				.andExpect(status().is(200));
 		verify(taskLauncher).cleanup("foobar");
 	}
@@ -555,7 +538,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void cleanupWithInvalidAction() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "does_not_exist").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is(400))
 				.andExpect(jsonPath("_embedded.errors[0].message",
 						is("The parameter 'action' must contain one of the following values: 'CLEANUP, REMOVE_DATA'.")));
@@ -564,7 +546,6 @@ public class TaskExecutionControllerTests {
 	@Test
 	void cleanupByIdNotFound() throws Exception {
 		mockMvc.perform(delete("/tasks/executions/10"))
-				.andDo(print())
 				.andExpect(status().is(404))
 				.andReturn()
 				.getResponse()
@@ -575,16 +556,13 @@ public class TaskExecutionControllerTests {
 	void deleteSingleTaskExecutionById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4)));
 		mockMvc.perform(delete("/tasks/executions/1").param("action", "REMOVE_DATA"))
-				.andDo(print())
 				.andExpect(status().isOk());
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(2)));
@@ -599,16 +577,13 @@ public class TaskExecutionControllerTests {
 	void deleteThreeTaskExecutionsById() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4)));
 		mockMvc.perform(delete("/tasks/executions/1,3").param("action", "REMOVE_DATA"))
-				.andDo(print())
 				.andExpect(status().isOk());
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(1)));
@@ -618,15 +593,12 @@ public class TaskExecutionControllerTests {
 	void deleteAllTaskExecutions() throws Exception {
 		verifyTaskArgs(SAMPLE_CLEANSED_ARGUMENT_LIST, "$._embedded.taskExecutionResourceList[0].",
 				mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-						.andDo(print())
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4)));
 		mockMvc.perform(delete("/tasks/executions").param("action", "CLEANUP,REMOVE_DATA"))
-				.andDo(print())
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/executions/").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.page.totalElements", is(0)));
 	}
@@ -642,25 +614,19 @@ public class TaskExecutionControllerTests {
 	@Test
 	void sorting() throws Exception {
 		mockMvc.perform(get("/tasks/executions").param("sort", "TASK_EXECUTION_ID").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/executions").param("sort", "task_execution_id").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 
 		mockMvc.perform(get("/tasks/executions").param("sort", "SCHEMA_TARGET").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk());
 		mockMvc.perform(get("/tasks/executions").param("sort", "schema_target").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk());
 
 		mockMvc.perform(get("/tasks/executions").param("sort", "WRONG_FIELD").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is5xxServerError())
 				.andExpect(content().string(containsString("Sorting column WRONG_FIELD not allowed")));
 		mockMvc.perform(get("/tasks/executions").param("sort", "wrong_field").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is5xxServerError())
 				.andExpect(content().string(containsString("Sorting column wrong_field not allowed")));
 	}

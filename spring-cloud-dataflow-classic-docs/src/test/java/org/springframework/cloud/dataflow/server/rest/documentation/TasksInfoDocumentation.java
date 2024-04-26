@@ -61,7 +61,6 @@ public class TasksInfoDocumentation extends BaseDocumentation {
 	public void getTaskExecutionsInfo() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/info/executions?completed=false"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

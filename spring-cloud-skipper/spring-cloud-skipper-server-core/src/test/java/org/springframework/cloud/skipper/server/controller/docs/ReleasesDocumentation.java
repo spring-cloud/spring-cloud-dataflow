@@ -42,7 +42,6 @@ public class ReleasesDocumentation extends BaseDocumentation {
 				get("/api/releases")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,

@@ -70,7 +70,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 				.param("fromDate", "2000-01-01T00:00:00")
 				.param("toDate", "2099-01-01T00:00:00")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -94,7 +93,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditRecord() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/{id}", "5"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
@@ -118,7 +116,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditActionTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-action-types"))
-			.andDo(print())
 			.andExpect(status().isOk()
 		);
 	}
@@ -127,7 +124,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditOperationTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-operation-types"))
-			.andDo(print())
 			.andExpect(status().isOk()
 		);
 	}

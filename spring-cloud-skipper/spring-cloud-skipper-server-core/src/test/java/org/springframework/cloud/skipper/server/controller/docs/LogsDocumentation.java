@@ -47,7 +47,6 @@ public class LogsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/logs/{releaseName}", release.getName()).accept(MediaType.APPLICATION_JSON)
 						.contentType(contentType))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseBody()));
@@ -61,7 +60,6 @@ public class LogsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/logs/{releaseName}/{appName}",
 						release.getName(), "myapp"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseBody()));

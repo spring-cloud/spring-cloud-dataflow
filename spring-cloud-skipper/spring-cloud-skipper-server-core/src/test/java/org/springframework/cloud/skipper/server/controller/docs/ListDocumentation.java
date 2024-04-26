@@ -45,8 +45,7 @@ public class ListDocumentation extends BaseDocumentation {
 		releaseList.add(createTestRelease());
 		when(this.releaseService.list()).thenReturn(releaseList);
 		this.mockMvc.perform(
-				get("/api/release/list")).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/release/list")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_embedded.releases[]._links").ignored(),
@@ -114,8 +113,7 @@ public class ListDocumentation extends BaseDocumentation {
 		releaseList.add(release);
 		when(this.releaseService.list(release.getName())).thenReturn(releaseList);
 		this.mockMvc.perform(
-				get("/api/release/list/{releaseName}", release.getName())).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/release/list/{releaseName}", release.getName())).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_embedded.releases[]._links").ignored(),

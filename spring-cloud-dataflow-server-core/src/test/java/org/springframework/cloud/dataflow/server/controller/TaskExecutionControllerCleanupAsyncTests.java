@@ -126,7 +126,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 		String taskExecutionId = "asyncCleanupAllTaskExecId";
 		setupTaskExecutions("asyncCleanupAllTaskName", taskExecutionId);
 		mockMvc.perform(delete("/tasks/executions"))
-				.andDo(print())
 				.andExpect(status().is(200));
 		verify(taskLauncher, times(0)).cleanup(taskExecutionId);
 		Awaitility.await()

@@ -61,8 +61,7 @@ public class InstallDocumentation extends BaseDocumentation {
 		when(this.skipperStateMachineService.installRelease(any(InstallRequest.class)))
 				.thenReturn(createTestRelease(releaseName, StatusCode.DEPLOYED));
 		mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				.content(convertObjectToJson(installRequest))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(installRequest))).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("links").ignored(),
@@ -143,8 +142,7 @@ public class InstallDocumentation extends BaseDocumentation {
 
 		mockMvc.perform(post("/api/package/install/{packageMetaDataId}", 1).accept(MediaType.APPLICATION_JSON)
 				.contentType(contentType)
-				.content(convertObjectToJson(installProperties2))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(installProperties2))).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("links").ignored(),

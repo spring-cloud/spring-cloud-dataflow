@@ -49,8 +49,7 @@ public class RollbackDocumentation extends BaseDocumentation {
 		when(this.skipperStateMachineService.rollbackRelease(any(RollbackRequest.class))).thenReturn(release);
 		MvcResult result = this.mockMvc.perform(
 				post("/api/release/rollback/{releaseName}/{releaseVersion}",
-						release.getName(), release.getVersion())).andDo(print())
-				.andExpect(status().isCreated())
+						release.getName(), release.getVersion())).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_links").ignored(),
@@ -120,7 +119,6 @@ public class RollbackDocumentation extends BaseDocumentation {
 		MvcResult result = this.mockMvc.perform(
 				post("/api/release/rollback").accept(MediaType.APPLICATION_JSON).contentType(contentType)
 						.content(convertObjectToJson(rollbackRequest)))
-				.andDo(print())
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(

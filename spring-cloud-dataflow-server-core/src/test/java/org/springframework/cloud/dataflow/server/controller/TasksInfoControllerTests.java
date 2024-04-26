@@ -186,12 +186,10 @@ public class TasksInfoControllerTests {
     @Test
     public void testGetAllTaskExecutions() throws Exception {
         mockMvc.perform(get("/tasks/info/executions").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-                .andExpect(status().isOk())
+				.andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalExecutions", is(4)));
         mockMvc.perform(get("/tasks/info/executions?completed=true").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
-                .andExpect(status().isOk())
+				.andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalExecutions", is(0)));
     }
 }

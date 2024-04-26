@@ -81,7 +81,6 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void deleteSchedule() throws Exception {
 		this.mockMvc.perform(
 				delete("/tasks/schedules/{scheduleName}", "mytestschedule"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("scheduleName")
@@ -94,7 +93,6 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("task-definition-name")
@@ -117,7 +115,6 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(

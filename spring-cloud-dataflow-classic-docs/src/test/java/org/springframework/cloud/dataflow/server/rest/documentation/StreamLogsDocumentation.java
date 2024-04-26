@@ -49,7 +49,6 @@ public class StreamLogsDocumentation extends BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().getLog("ticktock")).thenReturn(logInfo);
 		this.mockMvc.perform(
 			get("/streams/logs/ticktock"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document());
 	}
@@ -63,7 +62,6 @@ public class StreamLogsDocumentation extends BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().getLog("ticktock", "ticktock-log-v1")).thenReturn(logInfo);
 		this.mockMvc.perform(
 				get("/streams/logs/ticktock/ticktock-log-v1"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document());
 	}

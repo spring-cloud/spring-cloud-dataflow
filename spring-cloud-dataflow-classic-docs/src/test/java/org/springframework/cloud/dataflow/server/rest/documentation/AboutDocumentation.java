@@ -41,7 +41,6 @@ public class AboutDocumentation extends BaseDocumentation {
 			get("/about")
 				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andDo(print())
 				.andDo(this.documentationHandler.document(responseFields(
 						fieldWithPath("_links.self.href").description("Link to the runtime environment resource"),
 

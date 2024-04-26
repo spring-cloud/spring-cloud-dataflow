@@ -82,8 +82,7 @@ public class TaskPlatformControllerTests {
 	@Test
 	public void testGetPlatformList() throws Exception {
 		String responseString = mockMvc
-				.perform(get("/tasks/platforms").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+				.perform(get("/tasks/platforms").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
 		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
 		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
@@ -92,16 +91,14 @@ public class TaskPlatformControllerTests {
 	@Test
 	public void testGetPlatformSchedulerList() throws Exception {
 		String responseString = mockMvc
-				.perform(get("/tasks/platforms?schedulesEnabled=true").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+				.perform(get("/tasks/platforms?schedulesEnabled=true").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
 	}
 
 	@Test
 	public void testGetPlatformSchedulerListFalse() throws Exception {
 		String responseString = mockMvc
-				.perform(get("/tasks/platforms?schedulesEnabled=false").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+				.perform(get("/tasks/platforms?schedulesEnabled=false").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
 		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
 		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));

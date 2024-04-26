@@ -166,7 +166,6 @@ public class JobStepExecutionControllerTests {
 
 	private void validateStepDetail(int jobId, int stepId, String contextValue) throws Exception{
 		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.jobExecutionId", is(jobId)))
 				.andExpect(jsonPath("$.stepExecution.stepName", is(contextValue)));
@@ -174,8 +173,7 @@ public class JobStepExecutionControllerTests {
 
 	@Test
 	public void testGetMultipleStepExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk())
+		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[*]", hasSize(3)))
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[0].stepExecution.id", is(4)))
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[1].stepExecution.id", is(5)))
@@ -185,7 +183,6 @@ public class JobStepExecutionControllerTests {
 	@Test
 	public void testSingleGetStepExecutionProgress() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk()).andExpect(content().json("{finished: " + false + "}"))
 				.andExpect(content().json("{percentageComplete: " + 0.5 + "}"))
 				.andExpect(jsonPath("$.stepExecutionHistory.count", is(0)))
