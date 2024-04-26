@@ -9,9 +9,9 @@
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-dataflow-build</artifactId>
+		<artifactId>spring-cloud-dataflow-parent</artifactId>
 		<version>2.11.3-SNAPSHOT</version>
-		<relativePath>../spring-cloud-dataflow-build</relativePath>
+		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 
 	<modules>
