@@ -274,8 +274,11 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public PagedModel<TaskExecutionThinResource> thinExecutionList() {
-		Assert.notNull(thinExecutionsLink, "Expected link:" + THIN_EXECUTIONS_RELATION);
-		return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		if(thinExecutionsLink != null) {
+			return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		} else {
+			return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		}
 	}
 
 	@Override
