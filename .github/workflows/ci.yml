@@ -22,7 +22,7 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v4
-    - uses: jlumbroso/free-disk-space@main
+    - uses: insightsengineering/disk-space-reclaimer@v1
       with:
         tool-cache: false
     # cache maven repo
