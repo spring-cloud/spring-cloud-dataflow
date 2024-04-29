@@ -159,9 +159,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						queryParameters(
-							parameterWithName("name").description("The name of the Package")
-						),
+						queryParameters(parameterWithName("name").description("The name of the Package")),
 						responseFields(
 								fieldWithPath("_embedded.packageMetadata[].apiVersion")
 										.description("The Package Index spec version this file is based on"),
@@ -206,9 +204,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						queryParameters(
-							parameterWithName("name").description("The name of the Package")
-						),
+						queryParameters(parameterWithName("name").description("The name of the Package")),
 						responseFields(
 								fieldWithPath("_embedded.packageMetadata[].apiVersion")
 										.description("The Package Index spec version this file is based on"),
