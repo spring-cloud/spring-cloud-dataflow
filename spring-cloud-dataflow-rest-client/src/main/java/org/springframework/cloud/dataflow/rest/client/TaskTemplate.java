@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
@@ -68,6 +69,8 @@ public class TaskTemplate implements TaskOperations {
 	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
 
 	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
+
+	private static final String VALIDATION_TASK_LAUNCH_VERSION = "2.11.0";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
@@ -131,8 +134,7 @@ public class TaskTemplate implements TaskOperations {
 				EXECUTION_RELATION_BY_NAME,
 				EXECUTIONS_INFO_RELATION,
 				PLATFORM_LIST_RELATION,
-				RETRIEVE_LOG,
-				VALIDATION_REL
+				RETRIEVE_LOG
 			).forEach(relation -> {
 				Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
 			});
@@ -143,8 +145,11 @@ public class TaskTemplate implements TaskOperations {
 		String version = VersionUtils.getThreePartVersion(dataFlowServerVersion);
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_RELATION_VERSION)) {
 			Assert.isTrue(resources.getLink(VALIDATION_REL).isPresent(), ()->VALIDATION_REL + " relation is required");
-
+			this.validationLink = resources.getLink(VALIDATION_REL).get();
+		} else {
+			this.validationLink = null;
 		}
+
 		// TODO early 2.11.3-SNAPSHOT version didn't have this. Remove && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent() when releasing 2.11.3
 		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION) && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent()) {
 			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), () -> THIN_EXECUTIONS_RELATION + " relation is required");
@@ -153,6 +158,12 @@ public class TaskTemplate implements TaskOperations {
 			this.thinExecutionsLink = null;
 		}
 
+		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_TASK_LAUNCH_VERSION)) {
+			Assert.isTrue(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent(), () -> EXECUTION_LAUNCH_RELATION + " relation is required");
+			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
+		} else {
+			this.executionLaunchLink = null;
+		}
 
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, EXECUTIONS_CURRENT_RELATION_VERSION)) {
 			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), ()-> EXECUTIONS_CURRENT_RELATION + " relation is required");
@@ -161,12 +172,11 @@ public class TaskTemplate implements TaskOperations {
 			this.executionsCurrentLink = null;
 		}
 		this.aboutLink = resources.getLink("about").get();
-		this.validationLink = resources.getLink(VALIDATION_REL).get();
+
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
-		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
@@ -274,8 +284,11 @@ public class TaskTemplate implements TaskOperations {
 
 	@Override
 	public PagedModel<TaskExecutionThinResource> thinExecutionList() {
-		Assert.notNull(thinExecutionsLink, "Expected link:" + THIN_EXECUTIONS_RELATION);
-		return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		if(thinExecutionsLink != null) {
+			return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		} else {
+			return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		}
 	}
 
 	@Override
