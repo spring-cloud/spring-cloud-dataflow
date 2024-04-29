@@ -30,12 +30,12 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - name: Login dockerhub
-      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+#    - name: Login dockerhub
+#      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
+#      uses: docker/login-action@v3
+#      with:
+#        username: ${{ secrets.DOCKERHUB_USERNAME }}
+#        password: ${{ secrets.DOCKERHUB_TOKEN }}
     # build
     - name: Build
       run: |
