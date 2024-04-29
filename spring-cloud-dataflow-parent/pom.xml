@@ -18,7 +18,8 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.32</spring-framework.version>
+		<spring-framework.version>5.3.34</spring-framework.version>
+		<spring-security.version>5.7.12</spring-security.version>
 		<spring-cloud-dataflow-ui.version>3.4.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
@@ -50,7 +51,6 @@
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
 		<springdoc-openapi-ui.version>1.6.6</springdoc-openapi-ui.version>
 		<!-- update to ensure it is same as spring-boot-dependencies property, which doesn't seem to be imported -->
-		<spring-security.version>5.7.11</spring-security.version>
 		<jackson-bom.version>2.13.5</jackson-bom.version>
 		<guava.version>32.1.3-jre</guava.version>
 		<logback.version>1.2.13</logback.version>
@@ -121,11 +121,6 @@
 				<artifactId>jettison</artifactId>
 				<version>${jettison.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-oauth2-client</artifactId>
-				<version>${spring-security.version}</version>
-			</dependency>
 			<!-- Override Logback provided by Spring Boot -->
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -146,6 +141,20 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
 				<version>${spring-framework.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>${spring-security.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-task-dependencies</artifactId>
+				<version>${spring-cloud-task.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -184,13 +193,6 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
 				<version>${dataflow.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-task-dependencies</artifactId>
-				<version>${spring-cloud-task.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
