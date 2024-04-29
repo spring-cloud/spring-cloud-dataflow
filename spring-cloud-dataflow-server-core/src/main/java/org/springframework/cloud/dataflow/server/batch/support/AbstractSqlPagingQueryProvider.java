@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.item.database.JdbcParameterUtils;
@@ -73,7 +74,7 @@ public abstract class AbstractSqlPagingQueryProvider implements DataflowSqlPagin
 	 * The setter for the group by clause
 	 * @param groupClause SQL GROUP BY clause part of the SQL query string
 	 */
-	public void setGroupClause(String groupClause) {
+	protected void setGroupClause(String groupClause) {
 		if (StringUtils.hasText(groupClause)) {
 			this.groupClause = removeKeyWord("group by", groupClause);
 		}
@@ -86,14 +87,14 @@ public abstract class AbstractSqlPagingQueryProvider implements DataflowSqlPagin
 	 * The getter for the group by clause
 	 * @return SQL GROUP BY clause part of the SQL query string
 	 */
-	public String getGroupClause() {
+	protected String getGroupClause() {
 		return this.groupClause;
 	}
 
 	/**
 	 * @param selectClause SELECT clause part of SQL query string
 	 */
-	public void setSelectClause(String selectClause) {
+	protected void setSelectClause(String selectClause) {
 		this.selectClause = removeKeyWord("select", selectClause);
 	}
 
@@ -107,7 +108,7 @@ public abstract class AbstractSqlPagingQueryProvider implements DataflowSqlPagin
 	/**
 	 * @param fromClause FROM clause part of SQL query string
 	 */
-	public void setFromClause(String fromClause) {
+	protected void setFromClause(String fromClause) {
 		this.fromClause = removeKeyWord("from", fromClause);
 	}
 
@@ -140,7 +141,7 @@ public abstract class AbstractSqlPagingQueryProvider implements DataflowSqlPagin
 	/**
 	 * @param sortKeys key to use to sort and limit page content
 	 */
-	public void setSortKeys(Map<String, Order> sortKeys) {
+	protected void setSortKeys(Map<String, Order> sortKeys) {
 		this.sortKeys = sortKeys;
 	}
 

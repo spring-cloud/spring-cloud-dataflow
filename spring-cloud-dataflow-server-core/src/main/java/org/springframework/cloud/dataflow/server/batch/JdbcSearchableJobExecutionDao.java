@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.BatchStatus;
@@ -36,9 +37,7 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
-
 import org.springframework.batch.item.database.Order;
-import org.springframework.cloud.dataflow.server.batch.DataflowSqlPagingQueryProvider;
 import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
@@ -149,9 +148,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		Assert.state(dataSource != null, "DataSource must be provided");
-
 		if (getJdbcTemplate() == null) {
 			setJdbcTemplate(new JdbcTemplate(dataSource));
 		}
@@ -161,39 +158,16 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 				return 0;
 			}
 		});
-
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
-
-
-
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
-
-
-
-
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
-
-
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
-
-
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
-
-
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
-
-
-
-
 		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, DATE_RANGE_FILTER);
-
-
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, JOB_INSTANCE_ID_FILTER);
-
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, FROM_CLAUSE_TASK_TASK_BATCH, TASK_EXECUTION_ID_FILTER);
-
 		super.afterPropertiesSet();
-
 	}
 
 	@Override
