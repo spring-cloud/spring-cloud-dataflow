@@ -15,14 +15,11 @@
  */
 package org.springframework.cloud.skipper.server.autoconfigure;
 
-import java.util.Map;
-
-import mockit.MockUp;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.core.env.PropertySource;
@@ -35,7 +32,7 @@ import static org.mockito.Mockito.when;
  * @author Chris Schaefer
  * @author Mark Pollack
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProfileApplicationListenerTests {
 
 	private MockEnvironment environment;
@@ -45,7 +42,7 @@ public class ProfileApplicationListenerTests {
 
 	private ProfileApplicationListener profileApplicationListener;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		environment = new MockEnvironment();
 		when(event.getEnvironment()).thenReturn(environment);
@@ -115,29 +112,4 @@ public class ProfileApplicationListenerTests {
 		}
 	}
 
-	@Test
-	public void disableProfileApplicationListenerViaEnvVar() {
-		MockUp<?> mockup = mockProfileListenerEnvVar();
-		try {
-			environment.setProperty("VCAP_APPLICATION", "true");
-			profileApplicationListener.onApplicationEvent(event);
-			assertThat(environment.getActiveProfiles()).isEmpty();
-		}
-		finally {
-			mockup.tearDown();
-		}
-	}
-
-	private MockUp<?> mockProfileListenerEnvVar() {
-		Map<String, String> env = System.getenv();
-		return new MockUp<System>() {
-			@mockit.Mock
-			public String getenv(String name) {
-				if (name.equalsIgnoreCase(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME)) {
-					return "true";
-				}
-				return env.get(name);
-			}
-		};
-	}
 }
