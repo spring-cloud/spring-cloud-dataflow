@@ -37,7 +37,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Java6Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 /**
  * @author Ilayaperumal Gopinathan

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.composite.task.impl;
+package org.springframework.cloud.dataflow.server.task.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.database.Order;
-import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.database.PagingQueryProvider;
 import org.springframework.cloud.task.repository.database.support.SqlPagingQueryProviderFactoryBean;

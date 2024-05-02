@@ -47,6 +47,7 @@ public class ComposedTaskPropertiesTests {
 		properties.setComposedTaskArguments("bbb");
 		properties.setIntervalTimeBetweenChecks(12345);
 		properties.setMaxWaitTime(6789);
+		properties.setMaxStartWaitTime(101112);
 		properties.setDataflowServerUri(new URI("http://test"));
 		properties.setGraph("ddd");
 		properties.setDataflowServerUsername("foo");
@@ -57,6 +58,7 @@ public class ComposedTaskPropertiesTests {
 		assertThat(properties.getComposedTaskArguments()).isEqualTo("bbb");
 		assertThat(properties.getIntervalTimeBetweenChecks()).isEqualTo(12345);
 		assertThat(properties.getMaxWaitTime()).isEqualTo(6789);
+		assertThat(properties.getMaxStartWaitTime()).isEqualTo(101112);
 		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://test");
 		assertThat(properties.getGraph()).isEqualTo("ddd");
 		assertThat(properties.getDataflowServerUsername()).isEqualTo("foo");

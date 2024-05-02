@@ -22,7 +22,7 @@ import jakarta.servlet.Filter;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
@@ -65,7 +65,7 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		FeaturesConfiguration.class,
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
-		CompositeTaskConfiguration.class,
+		DataflowTaskConfiguration.class,
 		DataFlowTaskConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })

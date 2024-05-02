@@ -39,8 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
-import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
@@ -97,7 +97,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	TaskDefinitionRepository taskDefinitionRepository;
 
 	@Autowired
-    CompositeTaskExplorer taskExplorer;
+	DataflowTaskExplorer taskExplorer;
 
 	@Autowired
 	TaskDeleteService taskDeleteService;

@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
 import org.springframework.hateoas.PagedModel;
 
 /**
@@ -37,6 +38,7 @@ import org.springframework.hateoas.PagedModel;
  * @author Michael Minella
  * @author Gunnar Hillert
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 public interface TaskOperations {
 
@@ -105,6 +107,11 @@ public interface TaskOperations {
 	 * @return the list task executions known to the system.
 	 */
 	PagedModel<TaskExecutionResource> executionList();
+
+	/**
+	 * @return the list of thin task executions known to the system.
+	 */
+	PagedModel<TaskExecutionThinResource> thinExecutionList();
 
 	/**
 	 * List task executions known to the system filtered by task name.

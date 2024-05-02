@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.boot.autoconfigure.batch.BasicBatchConfigurer;
+
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;

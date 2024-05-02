@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,30 @@ public class StreamCommandTemplate {
 		assertThat(result).isEqualTo(deployMsg);
 
 		verifyExists(streamname, actualDefinition, deploy);
+	}
+
+	/**
+	 * Update the given stream
+	 *
+	 * @param streamname name of the stream
+	 * @param propertyValue the value to update stream
+	 *
+	 */
+	public void update(String streamname, String propertyValue, String expectedResult) {
+		Object result = commandRunner.executeCommand("stream update --name " + streamname + " --properties " + propertyValue);
+		assertThat((String)result).contains(expectedResult);
+	}
+
+	/**
+	 * Update the given stream
+	 *
+	 * @param streamname name of the stream
+	 * @param propertyFile the file that contains the properties
+	 *
+	 */
+	public void updateFile(String streamname, String propertyFile, String expectedResult) {
+		Object result = commandRunner.executeCommand("stream update --name " + streamname + " --propertiesFile " + propertyFile);
+		assertThat((String)result).contains(expectedResult);
 	}
 
 	/**

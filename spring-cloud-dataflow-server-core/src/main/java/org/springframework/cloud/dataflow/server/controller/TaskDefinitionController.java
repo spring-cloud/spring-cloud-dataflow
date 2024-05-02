@@ -34,7 +34,7 @@ import org.springframework.cloud.dataflow.server.controller.support.TaskExecutio
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
@@ -78,7 +78,7 @@ public class TaskDefinitionController {
 
 	private final TaskDeleteService taskDeleteService;
 
-	private final CompositeTaskExplorer explorer;
+	private final DataflowTaskExplorer explorer;
 
 	private final TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider;
 
@@ -95,9 +95,9 @@ public class TaskDefinitionController {
 	 * @param taskDeleteService               handles Task deletion related operations.
 	 * @param taskDefinitionAssemblerProvider the task definition assembler provider to use.
 	 */
-	public TaskDefinitionController(CompositeTaskExplorer taskExplorer, TaskDefinitionRepository repository,
-                                    TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
-                                    TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
+	public TaskDefinitionController(DataflowTaskExplorer taskExplorer, TaskDefinitionRepository repository,
+									TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+									TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(repository, "repository must not be null");
 		Assert.notNull(taskSaveService, "taskSaveService must not be null");

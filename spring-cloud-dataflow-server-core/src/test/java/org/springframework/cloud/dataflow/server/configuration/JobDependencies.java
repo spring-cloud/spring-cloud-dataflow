@@ -41,10 +41,11 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
-import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.composite.task.impl.DefaultDataFlowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -134,7 +135,7 @@ import static org.mockito.Mockito.mock;
 @Configuration
 @EnableSpringDataWebSupport
 @Import({
-		CompositeTaskConfiguration.class,
+		DataflowTaskConfiguration.class,
 		DataFlowTaskConfiguration.class
 })
 @ImportAutoConfiguration({
@@ -247,7 +248,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskExecutionController taskExecutionController(
-			CompositeTaskExplorer explorer,
+			DataflowTaskExplorer explorer,
 			TaskExecutionService taskExecutionService,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
@@ -262,6 +263,11 @@ public class JobDependencies {
 				taskDeleteService,
 				taskJobService
 		);
+	}
+
+	@Bean
+	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer) {
+		return new TaskExecutionThinController(dataflowTaskExplorer);
 	}
 
 	@Bean
@@ -288,7 +294,7 @@ public class JobDependencies {
 	@Bean
 	public TaskJobService taskJobExecutionRepository(
 			JobService jobService,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
 			LauncherRepository launcherRepository
@@ -303,7 +309,7 @@ public class JobDependencies {
 
 	@Bean
 	public TaskDeleteService deleteTaskService(
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
@@ -362,7 +368,7 @@ public class JobDependencies {
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -394,7 +400,7 @@ public class JobDependencies {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
 			LauncherRepository launcherRepository,

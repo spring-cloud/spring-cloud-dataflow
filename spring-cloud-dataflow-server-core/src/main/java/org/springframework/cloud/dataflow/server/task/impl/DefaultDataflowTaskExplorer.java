@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.composite.task.impl;
+package org.springframework.cloud.dataflow.server.task.impl;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -25,10 +25,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
-import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.composite.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.composite.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -41,12 +41,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.util.Assert;
 
 /**
- * Implements CompositeTaskExplorer. This class will be responsible for retrieving task execution data for all schema targets.
+ * Implements DataflowTaskExplorer. This class will be responsible for retrieving task execution data for all schema targets.
  *
  * @author Corneil du Plessis
  */
-public class DefaultCompositeTaskExplorer implements CompositeTaskExplorer {
-	private final static Logger logger = LoggerFactory.getLogger(DefaultCompositeTaskExplorer.class);
+public class DefaultDataflowTaskExplorer implements DataflowTaskExplorer {
+	private final static Logger logger = LoggerFactory.getLogger(DefaultDataflowTaskExplorer.class);
 
 	private final TaskExplorer taskExplorer;
 
@@ -56,7 +56,7 @@ public class DefaultCompositeTaskExplorer implements CompositeTaskExplorer {
 
 	private final TaskDeploymentReader taskDeploymentReader;
 
-	public DefaultCompositeTaskExplorer(
+	public DefaultDataflowTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
 			TaskDefinitionReader taskDefinitionReader,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 the original author or authors.
+ * Copyright 2018-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ public class StreamCommands {
 	@ShellMethodAvailability("availableWithModifyRole")
 	public String updateStream(
 			@ShellOption(value = { "", "--name" }, help = "the name of the stream", valueProvider = StreamNameValueProvider.class) String name,
-			@ShellOption(help = "Flattened YAML style properties to update the stream") String properties,
+			@ShellOption(value = "--properties", help = "Flattened YAML style properties to update the stream", defaultValue = ShellOption.NULL) String properties,
 			@ShellOption(value = "--propertiesFile", help = "the properties for the stream update (as a File)", defaultValue = ShellOption.NULL) File propertiesFile,
 			@ShellOption(value = "--packageVersion", help = "the package version of the package to update when using Skipper", defaultValue = ShellOption.NULL) String packageVersion,
 			@ShellOption(value = "--repoName", help = "the name of the local repository to upload the package when using Skipper", defaultValue = ShellOption.NULL) String repoName,

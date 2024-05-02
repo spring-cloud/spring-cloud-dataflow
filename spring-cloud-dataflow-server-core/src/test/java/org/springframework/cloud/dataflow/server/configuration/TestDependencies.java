@@ -52,10 +52,11 @@ import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfigu
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskConfiguration;
-import org.springframework.cloud.dataflow.composite.task.CompositeTaskExplorer;
-import org.springframework.cloud.dataflow.composite.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.composite.task.impl.DefaultDataFlowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -197,12 +198,13 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author David Turanski
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @Configuration
 @EnableSpringDataWebSupport
 @Import({
 		CompletionConfiguration.class,
-		CompositeTaskConfiguration.class,
+		DataflowTaskConfiguration.class,
 		DataFlowTaskConfiguration.class,
 		ContainerRegistryAutoConfiguration.class,
 		TaskConfiguration.TaskJobServiceConfig.class
@@ -547,13 +549,13 @@ public class TestDependencies implements WebMvcConfigurer {
 	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
 			TaskExecutionService taskExecutionService,
 			TaskJobService taskJobService,
-			CompositeTaskExplorer taskExplorer) {
+			DataflowTaskExplorer taskExplorer) {
 		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
 	}
 
 	@Bean
 	public TaskDefinitionController taskDefinitionController(
-		CompositeTaskExplorer explorer, TaskDefinitionRepository repository,
+		DataflowTaskExplorer explorer, TaskDefinitionRepository repository,
 		TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
 		TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider
 	) {
@@ -567,7 +569,7 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Bean
 	public TaskExecutionController taskExecutionController(
-			CompositeTaskExplorer explorer,
+			DataflowTaskExplorer explorer,
 			ApplicationConfigurationMetadataResolver metadataResolver,
 			AppRegistryService appRegistry,
 			LauncherRepository launcherRepository,
@@ -590,6 +592,10 @@ public class TestDependencies implements WebMvcConfigurer {
 		);
 	}
 
+	@Bean
+	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer) {
+		return new TaskExecutionThinController(dataflowTaskExplorer);
+	}
 	@Bean
 	public TasksInfoController taskExecutionsInfoController(TaskExecutionService taskExecutionService) {
 		return new TasksInfoController(taskExecutionService);
@@ -641,7 +647,7 @@ public class TestDependencies implements WebMvcConfigurer {
 
 	@Bean
 	public TaskDeleteService deleteTaskService(
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
@@ -701,7 +707,7 @@ public class TestDependencies implements WebMvcConfigurer {
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			DataflowTaskExecutionDao dataflowTaskExecutionDao,
 			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
@@ -734,7 +740,7 @@ public class TestDependencies implements WebMvcConfigurer {
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,
-			CompositeTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
 			LauncherRepository launcherRepository,

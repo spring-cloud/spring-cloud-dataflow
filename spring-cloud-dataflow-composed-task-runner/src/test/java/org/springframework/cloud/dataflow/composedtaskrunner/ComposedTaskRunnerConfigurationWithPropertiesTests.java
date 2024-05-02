@@ -61,7 +61,7 @@ import static org.mockito.Mockito.verify;
 		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
 		"transaction-isolation-level=ISOLATION_READ_COMMITTED","spring.cloud.task.closecontext-enabled=true",
-		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
+		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest","max-start-wait-time=1011"})
 @EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
 public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
@@ -102,6 +102,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		props.put("memory", "2048m");
 		assertThat(composedTaskProperties.getComposedTaskProperties()).isEqualTo(COMPOSED_TASK_PROPS);
 		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
+		assertThat(composedTaskProperties.getMaxStartWaitTime()).isEqualTo(1011);
 		assertThat(composedTaskProperties.getIntervalTimeBetweenChecks()).isEqualTo(1100);
 		assertThat(composedTaskProperties.getDataflowServerUri().toASCIIString()).isEqualTo("https://bar");
 		assertThat(composedTaskProperties.getTransactionIsolationLevel()).isEqualTo("ISOLATION_READ_COMMITTED");

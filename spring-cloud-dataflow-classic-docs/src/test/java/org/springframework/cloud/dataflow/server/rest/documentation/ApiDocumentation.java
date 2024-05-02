@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
 public class ApiDocumentation extends BaseDocumentation {
@@ -58,7 +59,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/apps").requestAttr(
 								RequestDispatcher.ERROR_MESSAGE,
 								"The app 'http://localhost:8080/apps/123' does " + "not exist"))
-				.andDo(print())
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))
@@ -75,7 +75,6 @@ public class ApiDocumentation extends BaseDocumentation {
 	@Test
 	public void index() throws Exception {
 		this.mockMvc.perform(get("/"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(links(
 				linkWithRel("about").description(
@@ -117,6 +116,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/launch").description("Provides for launching a Task execution"),
 				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
+				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),

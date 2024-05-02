@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
     # cache maven repo
     - uses: actions/cache@v3
       with:
@@ -28,6 +31,7 @@ jobs:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
 #    - name: Login dockerhub
+#      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
 #      uses: docker/login-action@v3
 #      with:
 #        username: ${{ secrets.DOCKERHUB_USERNAME }}
