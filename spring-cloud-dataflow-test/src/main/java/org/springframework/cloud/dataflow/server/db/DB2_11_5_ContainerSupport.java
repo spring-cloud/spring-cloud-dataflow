@@ -37,7 +37,7 @@ public interface DB2_11_5_ContainerSupport extends Db2Arm64ContainerSupport {
 	@BeforeAll
 	static void startContainer() {
 		Db2Container container = Db2Arm64ContainerSupport.startContainer(() ->
-				new Db2Container("ibmcom/db2:11.5.8.0").acceptLicense());
+				new Db2Container("icr.io/db2_community/db2:11.5.8.0").acceptLicense());
 		containerReference.set(container);
 	}
 
