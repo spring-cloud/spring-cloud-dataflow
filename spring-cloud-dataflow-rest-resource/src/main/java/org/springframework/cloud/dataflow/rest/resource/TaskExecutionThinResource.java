@@ -71,6 +71,8 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 
 	private String taskExecutionStatus;
 
+	private String composedTaskJobExecutionStatus;
+
 	/**
 	 * @since 2.11.0
 	 */
@@ -94,6 +96,7 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.exitCode = aggregateTaskExecution.getExitCode();
 		this.exitMessage = aggregateTaskExecution.getExitMessage();
 		this.errorMessage = aggregateTaskExecution.getErrorMessage();
+		this.composedTaskJobExecutionStatus = aggregateTaskExecution.getCtrTaskStatus();
 	}
 
 	public long getExecutionId() {
@@ -187,6 +190,14 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.taskExecutionStatus = taskExecutionStatus;
 	}
 
+	public String getComposedTaskJobExecutionStatus() {
+		return composedTaskJobExecutionStatus;
+	}
+
+	public void setComposedTaskJobExecutionStatus(String composedTaskJobExecutionStatus) {
+		this.composedTaskJobExecutionStatus = composedTaskJobExecutionStatus;
+	}
+
 	/**
 	 * Returns the calculated status of this {@link TaskExecution}.
 	 *
@@ -211,7 +222,12 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		if (this.endTime == null) {
 			return TaskExecutionStatus.RUNNING;
 		}
-
+		if (this.composedTaskJobExecutionStatus != null) {
+			return (this.composedTaskJobExecutionStatus.equals("ABANDONED") ||
+				this.composedTaskJobExecutionStatus.equals("FAILED") ||
+				this.composedTaskJobExecutionStatus.equals("STOPPED")) ?
+				TaskExecutionStatus.ERROR : TaskExecutionStatus.COMPLETE;
+		}
 		return (this.exitCode == null) ? TaskExecutionStatus.RUNNING :
 				((this.exitCode == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
 	}

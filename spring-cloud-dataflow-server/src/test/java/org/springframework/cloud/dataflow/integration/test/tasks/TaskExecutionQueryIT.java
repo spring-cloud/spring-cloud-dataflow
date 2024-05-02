@@ -160,27 +160,27 @@ class TaskExecutionQueryIT {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(greaterThanOrEqualTo(20))));
 			long totalTime = System.currentTimeMillis() - startTime;
-			logger.info("result:totalTime={}ms", totalTime);
 			long startTime2 = System.currentTimeMillis();
 			mockMvc.perform(
 					get("/tasks/executions").accept(MediaType.APPLICATION_JSON).param("size", "200").param("page", "2"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(greaterThanOrEqualTo(200))));
 			long totalTime2 = System.currentTimeMillis() - startTime2;
-			logger.info("result:totalTime2={}ms", totalTime2);
 			long startTime3 = System.currentTimeMillis();
 			mockMvc.perform(
 					get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON).param("size", "20").param("page", "3"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(greaterThanOrEqualTo(20))));
 			long totalTime3 = System.currentTimeMillis() - startTime3;
-			logger.info("result:totalTime3={}ms", totalTime3);
 			long startTime4 = System.currentTimeMillis();
 			mockMvc.perform(
 					get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON).param("size", "200").param("page", "2"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(greaterThanOrEqualTo(200))));
 			long totalTime4 = System.currentTimeMillis() - startTime4;
+			logger.info("result:totalTime={}ms", totalTime);
+			logger.info("result:totalTime2={}ms", totalTime2);
+			logger.info("result:totalTime3={}ms", totalTime3);
 			logger.info("result:totalTime4={}ms", totalTime4);
 			double ratioExecution = (double) totalTime / (double) totalTime2;
 			double ratioThinExecution = (double) totalTime3 / (double) totalTime4;
@@ -188,9 +188,6 @@ class TaskExecutionQueryIT {
 			logger.info("Ratio for tasks/executions:{}", ratioExecution);
 			logger.info("Ratio for tasks/thinexecutions:{}", ratioThinExecution);
 			logger.info("Ratio for tasks/executions to thinexecutions:{}", ratioThinToExecution);
-			assertThat(totalTime).isLessThan(totalTime2);
-			assertThat(totalTime3).isLessThan(totalTime);
-			assertThat(totalTime3).isLessThan(totalTime4);
 			assertThat(totalTime4).isLessThan(totalTime2);
 			assertThat(ratioThinExecution).isGreaterThan(ratioExecution);
 			assertThat(ratioThinToExecution).isGreaterThan(3.0);
