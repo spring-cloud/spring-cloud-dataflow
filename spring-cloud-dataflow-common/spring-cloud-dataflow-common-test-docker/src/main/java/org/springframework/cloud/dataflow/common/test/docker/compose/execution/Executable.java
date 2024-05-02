@@ -21,6 +21,6 @@ public interface Executable {
 
     String commandName();
 
-    Process execute(String... commands) throws IOException;
+    Process execute(boolean composeCommand, String... commands) throws IOException;
 
 }

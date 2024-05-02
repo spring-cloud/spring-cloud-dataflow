@@ -50,8 +50,8 @@ public class Command {
 		this.logConsumer = logConsumer;
 	}
 
-	public String execute(ErrorHandler errorHandler, String... commands) throws IOException, InterruptedException {
-		ProcessResult result = run(commands);
+	public String execute(ErrorHandler errorHandler, boolean composeCommand, String... commands) throws IOException, InterruptedException {
+		ProcessResult result = run(composeCommand, commands);
 
 		if (result.exitCode() != 0) {
 			errorHandler.handle(result.exitCode(), result.output(), executable.commandName(), commands);
@@ -73,8 +73,8 @@ public class Command {
 				+ exitCode;
 	}
 
-	private ProcessResult run(String... commands) throws IOException, InterruptedException {
-		Process process = executable.execute(commands);
+	private ProcessResult run(boolean composeCommand, String... commands) throws IOException, InterruptedException {
+		Process process = executable.execute(composeCommand, commands);
 
 		ExecutorService exec = newSingleThreadExecutor();
 		Future<String> outputProcessing = exec

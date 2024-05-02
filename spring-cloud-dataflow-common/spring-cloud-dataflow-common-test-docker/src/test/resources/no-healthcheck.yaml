@@ -1,5 +1,3 @@
-version: "2"
-
 services:
   noHealthcheck:
     image: gliderlabs/alpine:3.4

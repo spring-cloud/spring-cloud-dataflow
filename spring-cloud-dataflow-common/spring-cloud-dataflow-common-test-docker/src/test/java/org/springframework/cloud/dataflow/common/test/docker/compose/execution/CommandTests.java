@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.commons.io.IOUtils.toInputStream;
+import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
@@ -46,8 +46,7 @@ class CommandTests {
     @BeforeEach
     void prepareForTest() throws IOException {
         when(dockerComposeExecutable.commandName()).thenReturn("docker-compose");
-        when(dockerComposeExecutable.execute(any())).thenReturn(executedProcess);
-        when(dockerComposeExecutable.execute(any(String[].class))).thenReturn(executedProcess);
+        when(dockerComposeExecutable.execute(any(), any(String[].class))).thenReturn(executedProcess);
         dockerComposeCommand = new Command(dockerComposeExecutable, logConsumer);
         givenTheUnderlyingProcessHasOutput("");
         givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(0);
@@ -57,13 +56,13 @@ class CommandTests {
     void invokeErrorHandlerWhenExitCodeOfTheExecutedProcessIsNonZero() throws Exception {
         int expectedExitCode = 1;
         givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(expectedExitCode);
-        dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         verify(errorHandler).handle(expectedExitCode, "", "docker-compose", "rm", "-f");
     }
 
     @Test
     void notInvokeErrorHandlerWhenExitCodeOfTheExecutedProcessIsZero() throws Exception {
-        dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         verifyNoMoreInteractions(errorHandler);
     }
 
@@ -72,7 +71,7 @@ class CommandTests {
         String expectedOutput = "test output";
         givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(1);
         givenTheUnderlyingProcessHasOutput(expectedOutput);
-        String commandOutput = dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        String commandOutput = dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         assertThat(commandOutput, is(expectedOutput));
     }
 
@@ -80,14 +79,14 @@ class CommandTests {
     void returnOutputWhenExitCodeOfTheExecutedProcessIsZero() throws Exception {
         String expectedOutput = "test output";
         givenTheUnderlyingProcessHasOutput(expectedOutput);
-        String commandOutput = dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        String commandOutput = dockerComposeCommand.execute(errorHandler, true,"rm", "-f");
         assertThat(commandOutput, is(expectedOutput));
     }
 
     @Test
     void giveTheOutputToTheSpecifiedConsumerAsItIsAvailable() throws Exception {
         givenTheUnderlyingProcessHasOutput("line 1\nline 2");
-        dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         assertThat(consumedLogLines, contains("line 1", "line 2"));
     }
 
@@ -95,13 +94,13 @@ class CommandTests {
     @Test
     void notCreateLongLivedThreadsAfterExecution() throws Exception {
         int preThreadCount = Thread.getAllStackTraces().entrySet().size();
-        dockerComposeCommand.execute(errorHandler, "rm", "-f");
+        dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         int postThreadCount = Thread.getAllStackTraces().entrySet().size();
         assertThat("command thread pool has exited", preThreadCount == postThreadCount);
     }
 
     private void givenTheUnderlyingProcessHasOutput(String output) {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(output));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(output));
     }
 
     private void givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(int exitCode) {

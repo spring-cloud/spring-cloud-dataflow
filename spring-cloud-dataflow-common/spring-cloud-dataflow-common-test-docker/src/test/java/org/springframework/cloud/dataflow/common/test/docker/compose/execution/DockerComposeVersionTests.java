@@ -47,4 +47,9 @@ public class DockerComposeVersionTests {
                 DockerComposeVersion.parseFromDockerComposeVersion("docker-compose version 1.7.0rc1, build 1ad8866"),
                 is(Version.valueOf("1.7.0")));
     }
+	public void check_for_docker_version() {
+		assertThat(
+			DockerComposeVersion.parseFromDockerComposeVersion("Docker version 26.1.1, build 1ad8866"),
+			is(Version.valueOf("26.1.1")));
+	}
 }

@@ -21,7 +21,7 @@ import com.github.zafarkhaja.semver.Version;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.commons.io.IOUtils.toInputStream;
+import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,43 +39,43 @@ class DockerTests {
     void prepareForTest() throws IOException {
         when(executor.commandName()).thenReturn("docker-compose");
         when(executor.execute(any())).thenReturn(executedProcess);
-        when(executor.execute(any(String[].class))).thenReturn(executedProcess);
+        when(executor.execute(any(), any(String[].class))).thenReturn(executedProcess);
         when(executedProcess.exitValue()).thenReturn(0);
     }
     
     @Test
     void callDockerRmWithForceFlagOnRm() throws Exception {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(""));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(""));
         docker.rm("testContainer");
-        verify(executor).execute("rm", "-f", "testContainer");
+        verify(executor).execute(false,"rm", "-f", "testContainer");
     }
 
     @Test
     void callDockerNetworkLs() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(lsOutput));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
         assertThat(docker.listNetworks(), is(lsOutput));
-        verify(executor).execute("network", "ls");
+        verify(executor).execute(false, "network", "ls");
     }
 
     @Test
     void callDockerNetworkPrune() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(lsOutput));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
         assertThat(docker.pruneNetworks(), is(lsOutput));
-        verify(executor).execute("network", "prune", "--force");
+        verify(executor).execute(false,"network", "prune", "--force");
     }
 
     @Test
     void understandOldVersionFormat() throws Exception {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("Docker version 1.7.2"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 1.7.2"));
         Version version = docker.configuredVersion();
         assertThat(version, is(Version.valueOf("1.7.2")));
     }
 
     @Test
     void understandNewVersionFormat() throws Exception {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("Docker version 17.03.1-ce"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 17.03.1-ce"));
         Version version = docker.configuredVersion();
         assertThat(version, is(Version.valueOf("17.3.1")));
     }
