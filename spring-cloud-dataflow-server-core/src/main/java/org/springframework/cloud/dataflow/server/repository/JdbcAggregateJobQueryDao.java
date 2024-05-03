@@ -178,7 +178,14 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		" from AGGREGATE_TASK_EXECUTION T" +
 		" JOIN AGGREGATE_TASK_BATCH TB ON TB.TASK_EXECUTION_ID=T.TASK_EXECUTION_ID AND TB.SCHEMA_TARGET=T.SCHEMA_TARGET" +
 		" JOIN AGGREGATE_JOB_EXECUTION J ON J.JOB_EXECUTION_ID=TB.JOB_EXECUTION_ID AND J.SCHEMA_TARGET=TB.SCHEMA_TARGET" +
-		" WHERE T.TASK_EXECUTION_ID in (:taskExecutionIds) AND T.SCHEMA_TARGET = ? AND (select count(*) from AGGREGATE_TASK_EXECUTION WHERE PARENT_EXECUTION_ID = T.TASK_EXECUTION_ID) > 0";
+		" WHERE T.TASK_EXECUTION_ID in (:taskExecutionIds) " +
+		"  AND T.SCHEMA_TARGET = ':schemaTarget'" +
+		"  AND (select count(*) from AGGREGATE_TASK_EXECUTION CT" +
+		"        where (select count(*) from AGGREGATE_TASK_EXECUTION_PARAMS where" +
+		"                    CT.TASK_EXECUTION_ID = TASK_EXECUTION_ID and" +
+		"                    CT.SCHEMA_TARGET = SCHEMA_TARGET and" +
+		"                    TASK_PARAM = '--spring.cloud.task.parent-schema-target=boot2') > 0" +
+		"    AND CT.PARENT_EXECUTION_ID = T.TASK_EXECUTION_ID) > 0";
 
 	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
 			" where I.JOB_NAME = ? AND I.JOB_INSTANCE_ID = ?";
@@ -290,7 +297,8 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				.stream()
 				.map(Object::toString)
 				.collect(Collectors.joining(","));
-			jdbcTemplate.query(FIND_CTR_STATUS.replace(":taskExecutionIds", ids), ps -> ps.setString(1, target), rs -> {
+			String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids).replace(":schemaTarget", target);
+			jdbcTemplate.query(sql, rs -> {
 				Long id = rs.getLong("TASK_EXECUTION_ID");
 				String ctrStatus = rs.getString("CTR_STATUS");
 				LOG.debug("populateCtrStatus:{}={}", id, ctrStatus);
