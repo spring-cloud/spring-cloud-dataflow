@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -53,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskExecutionsDocumentation extends BaseDocumentation {
-
 	@Before
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
@@ -77,9 +77,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void launchTaskBoot3() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions/launch")
-								.param("name", "taskA")
-								.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-								.param("arguments", "--server.port=8080 --foo=bar")
+								.queryParam("name", "taskA")
+								.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+								.queryParam("arguments", "--server.port=8080 --foo=bar")
 				)
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
@@ -91,7 +91,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 												.description("Command line arguments to pass to the task. (optional)")),
 								responseFields(
 										fieldWithPath("executionId").description("The id of the task execution"),
-										fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 										subsectionWithPath("_links.self").description("Link to the task execution resource"),
 										subsectionWithPath("_links.tasks/logs").type(fieldWithPath("_links.tasks/logs").ignored().optional()).description("Link to the task execution logs").optional()
 								)
@@ -103,9 +102,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void launchTask() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions")
-								.param("name", "taskA")
-								.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-								.param("arguments", "--server.port=8080 --foo=bar")
+								.queryParam("name", "taskA")
+								.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+								.queryParam("arguments", "--server.port=8080 --foo=bar")
 				)
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
@@ -139,15 +138,12 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void getTaskDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-						get("/tasks/executions/{id}", "1").queryParam("schemaTarget", "boot2")
+						get("/tasks/executions/{id}", "1")
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing task execution (required)")
-						),
-						queryParameters(
-								parameterWithName("schemaTarget").description("The schemaTarget provided in Task execution detail")
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The id of the task execution"),
@@ -163,7 +159,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),
-								fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
 								subsectionWithPath("appProperties").description("The application properties of the task execution"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task execution"),
@@ -180,8 +175,8 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 		documentation.dontDocument(() -> {
 			MvcResult mvcResult = this.mockMvc.perform(
 							get("/tasks/executions")
-									.param("page", "0")
-									.param("size", "20"))
+									.queryParam("page", "0")
+									.queryParam("size", "20"))
 					.andExpect(status().isOk()).andReturn();
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode node = mapper.readTree(mvcResult.getResponse().getContentAsString());
@@ -216,7 +211,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("taskExecutionStatus").description("The status of the task execution"),
 								fieldWithPath("parentExecutionId").description("The id of parent task execution, " +
 										"null if task execution does not have parent"),
-								fieldWithPath("schemaTarget").description("The schema target of the task state data"),
 								fieldWithPath("resourceUrl").description("The resource URL that defines the task that was executed"),
 								subsectionWithPath("appProperties").description("The application properties of the task execution"),
 								subsectionWithPath("deploymentProperties").description("The deployment properties of the task execution"),
@@ -230,16 +224,16 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void listTaskExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						post("/tasks/executions")
-								.param("name", "taskB")
-								.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-								.param("arguments", "--server.port=8080 --foo=bar")
+								.queryParam("name", "taskB")
+								.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+								.queryParam("arguments", "--server.port=8080 --foo=bar")
 				)
 				.andExpect(status().isCreated()));
 
 		this.mockMvc.perform(
 						get("/tasks/executions")
-								.param("page", "1")
-								.param("size", "2"))
+								.queryParam("page", "1")
+								.queryParam("size", "2"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page")
@@ -262,16 +256,16 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void listTaskThinExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 				post("/tasks/executions")
-					.param("name", "taskB")
-					.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-					.param("arguments", "--server.port=8080 --foo=bar")
+					.queryParam("name", "taskB")
+					.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+					.queryParam("arguments", "--server.port=8080 --foo=bar")
 			)
 			.andExpect(status().isCreated()));
 
 		this.mockMvc.perform(
 				get("/tasks/thinexecutions")
-					.param("page", "1")
-					.param("size", "2"))
+					.queryParam("page", "1")
+					.queryParam("size", "2"))
 			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				queryParameters(
 					parameterWithName("page")
@@ -294,9 +288,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void listTaskExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/tasks/executions")
-								.param("name", "taskB")
-								.param("page", "0")
-								.param("size", "10")
+								.queryParam("name", "taskB")
+								.queryParam("page", "0")
+								.queryParam("size", "10")
 				)
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -317,22 +311,19 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	public void stopTask() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions")
-								.param("name", "taskA")
-								.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-								.param("arguments", "--server.port=8080 --foo=bar")
+								.queryParam("name", "taskA")
+								.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+								.queryParam("arguments", "--server.port=8080 --foo=bar")
 				)
 				.andExpect(status().isCreated());
 		this.mockMvc.perform(
 						post("/tasks/executions/{id}", 1)
-								.queryParam("schemaTarget", "boot2")
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 								pathParameters(
 										parameterWithName("id").description("The ids of an existing task execution (required)")
-								),
-								queryParameters(
-										parameterWithName("schemaTarget").description("The schemaTarget provided in Task execution detail. (optional)"))
+								)
 						)
 				);
 	}
@@ -342,9 +333,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						post("/tasks/executions")
-								.param("name", "taskB")
-								.param("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
-								.param("arguments", "--server.port=8080 --foo=bar"))
+								.queryParam("name", "taskB")
+								.queryParam("properties", "app.my-task.foo=bar,deployer.my-task.something-else=3")
+								.queryParam("arguments", "--server.port=8080 --foo=bar"))
 				.andExpect(status().isCreated()));
 
 		this.mockMvc.perform(
@@ -360,12 +351,11 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
 		this.mockMvc.perform(
-						delete("/tasks/executions/{ids}?schemaTarget=boot2&action=CLEANUP,REMOVE_DATA", "1,2"))
+						delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously."),
-								parameterWithName("schemaTarget").description("Schema target for task. (optional)")
+								parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously.")
 						),
 						pathParameters(parameterWithName("ids")
 								.description("Providing 2 comma separated task execution id values.")
@@ -375,32 +365,36 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	private void createTaskDefinition(String taskName) throws Exception {
-		documentation.dontDocument(() -> this.mockMvc.perform(
-						post("/tasks/definitions")
-								.param("name", taskName)
-								.param("definition", "timestamp --format='yyyy MM dd'"))
-				.andExpect(status().isOk()));
+		documentation.dontDocument(() ->
+			this.mockMvc.perform(
+				post("/tasks/definitions")
+						.queryParam("name", taskName)
+						.queryParam("definition", "timestamp --format='yyyy MM dd'")
+				)
+		);
 	}
 	private void cleanupTaskExecutions(String taskName) throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
-						delete("/tasks/executions")
-								.queryParam("name", taskName)
-				)
-				.andExpect(status().isOk()));
+				delete("/tasks/executions")
+						.queryParam("name", taskName)
+			)
+		);
 	}
 	private void destroyTaskDefinition(String taskName) throws Exception {
-		documentation.dontDocument(() -> this.mockMvc.perform(
-						delete("/tasks/definitions/{name}", taskName))
-				.andExpect(status().isOk()));
+		documentation.dontDocument(() ->
+			this.mockMvc.perform(
+						delete("/tasks/definitions/{name}", taskName)
+			)
+		);
 	}
 
 	private void executeTask(String taskName) throws Exception {
 		documentation.dontDocument(() ->
 				this.mockMvc.perform(
 						post("/tasks/executions")
-								.param("name", taskName)
-								.param("arguments", "--server.port=8080 --foo=bar")
-				).andExpect(status().isCreated())
+								.queryParam("name", taskName)
+								.queryParam("arguments", "--server.port=8080 --foo=bar")
+				)
 		);
 	}
 }

@@ -72,9 +72,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void registeringAnApplicationVersion() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.1.0.RELEASE")
-								.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
-								.queryParam("bootVersion", "2"))
-				.andExpect(status().isCreated())
+								.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+			).andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
 								pathParameters(
@@ -88,9 +87,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("metadata-uri").optional()
 												.description("URI where the application metadata jar can be found"),
 										parameterWithName("force").optional()
-												.description("Must be true if a registration with the same name and type already exists, otherwise an error will occur"),
-										parameterWithName("bootVersion").optional()
-												.description("Spring Boot version. Value of 2 or 3. Must be supplied of greater than 2.")
+												.description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
 								)
 						)
 				);
@@ -179,7 +176,6 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										fieldWithPath("version").description("The version of the application"),
 										fieldWithPath("versions").description("All the registered versions of the application"),
 										fieldWithPath("defaultVersion").description("If true, the application is the default version"),
-										fieldWithPath("bootVersion").description("The version of Spring Boot the application targets (2, 3)"),
 										subsectionWithPath("options").description("The options of the application (Array)"),
 										fieldWithPath("shortDescription").description("The description of the application"),
 										fieldWithPath("inboundPortNames").description("Inbound port names of the application"),
@@ -195,8 +191,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}", ApplicationType.source, "http")
-								.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
-								.queryParam("bootVersion", "2")
+								.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
 				)
 				.andExpect(status().isCreated())
 				.andDo(
@@ -208,7 +203,6 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 								queryParameters(
 										parameterWithName("uri").description("URI where the application bits reside"),
 										parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
-										parameterWithName("bootVersion").optional().description("The Spring Boot version of the application.Default is 2"),
 										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
 								)
 						)

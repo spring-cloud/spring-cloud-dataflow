@@ -481,10 +481,11 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 				parentExecutionId = null;
 			}
 			Timestamp endTimestamp = rs.getTimestamp("END_TIME");
+			Timestamp startTime = rs.getTimestamp("START_TIME");
 			return new TaskExecution(id,
 					getNullableExitCode(rs),
 					rs.getString("TASK_NAME"),
-					rs.getTimestamp("START_TIME").toLocalDateTime(),
+					startTime != null ? startTime.toLocalDateTime() : null,
 					(endTimestamp != null) ? endTimestamp.toLocalDateTime() : null,
 					rs.getString("EXIT_MESSAGE"),
 					getTaskArguments(id),
