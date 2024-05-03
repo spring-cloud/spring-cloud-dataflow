@@ -27,9 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.Executors.newSingleThreadExecutor;
@@ -75,7 +73,7 @@ public class Command {
 
 	private ProcessResult run(boolean composeCommand, String... commands) throws IOException, InterruptedException {
 		Process process = executable.execute(composeCommand, commands);
-
+		Assert.notNull(process, () -> "expected process from " + composeCommand + ":" + Arrays.asList(commands));
 		ExecutorService exec = newSingleThreadExecutor();
 		Future<String> outputProcessing = exec
 				.submit(() -> processOutputFrom(process));

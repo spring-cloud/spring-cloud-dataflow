@@ -29,6 +29,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -46,7 +47,7 @@ class CommandTests {
     @BeforeEach
     void prepareForTest() throws IOException {
         when(dockerComposeExecutable.commandName()).thenReturn("docker-compose");
-        when(dockerComposeExecutable.execute(any(), any(String[].class))).thenReturn(executedProcess);
+        when(dockerComposeExecutable.execute(anyBoolean(), any(String[].class))).thenReturn(executedProcess);
         dockerComposeCommand = new Command(dockerComposeExecutable, logConsumer);
         givenTheUnderlyingProcessHasOutput("");
         givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(0);

@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,8 +39,8 @@ class DockerTests {
     @BeforeEach
     void prepareForTest() throws IOException {
         when(executor.commandName()).thenReturn("docker-compose");
-        when(executor.execute(any())).thenReturn(executedProcess);
-        when(executor.execute(any(), any(String[].class))).thenReturn(executedProcess);
+        when(executor.execute(anyBoolean())).thenReturn(executedProcess);
+        when(executor.execute(anyBoolean(), any(String[].class))).thenReturn(executedProcess);
         when(executedProcess.exitValue()).thenReturn(0);
     }
     
