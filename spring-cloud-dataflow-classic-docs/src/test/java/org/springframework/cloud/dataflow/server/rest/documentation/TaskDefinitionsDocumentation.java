@@ -60,9 +60,9 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	public void createDefinition() throws Exception {
 		this.mockMvc.perform(
 			post("/tasks/definitions")
-				.param("name", "my-task")
-				.param("definition", "timestamp --format='YYYY MM DD'")
-				.param("description", "Demo task definition for testing"))
+				.queryParam("name", "my-task")
+				.queryParam("definition", "timestamp --format='YYYY MM DD'")
+				.queryParam("description", "Demo task definition for testing"))
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
@@ -88,11 +88,11 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	public void listAllTaskDefinitions() throws Exception {
 		this.mockMvc.perform(
 			get("/tasks/definitions")
-				.param("page", "0")
-				.param("size", "10")
-				.param("sort", "taskName,ASC")
-				.param("search", "")
-				.param("manifest", "true")
+				.queryParam("page", "0")
+				.queryParam("size", "10")
+				.queryParam("sort", "taskName,ASC")
+				.queryParam("search", "")
+				.queryParam("manifest", "true")
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -115,7 +115,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	public void displayDetail() throws Exception {
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
-			.param("manifest", "true"))
+			.queryParam("manifest", "true"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
@@ -143,7 +143,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	public void taskDefinitionDelete() throws Exception {
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
-			.param("cleanup", "true"))
+			.queryParam("cleanup", "true"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(

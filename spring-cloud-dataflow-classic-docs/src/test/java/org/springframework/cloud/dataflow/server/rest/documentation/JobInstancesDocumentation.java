@@ -105,15 +105,12 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	@Test
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
-				get("/jobs/instances/{id}", "1").queryParam("schemaTarget", "boot2"))
+				get("/jobs/instances/{id}", "1"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					pathParameters(
 						parameterWithName("id").description("The id of an existing job instance (required)")
-					),
-					queryParameters(
-							parameterWithName("schemaTarget").description("Schema target").optional()
 					),
 					responseFields(
 						fieldWithPath("jobName").description("The name of the job instance"),

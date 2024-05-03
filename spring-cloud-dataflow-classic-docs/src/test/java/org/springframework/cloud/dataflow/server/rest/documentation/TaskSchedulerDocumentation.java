@@ -60,11 +60,11 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
-						.param("scheduleName", "myschedule")
-						.param("taskDefinitionName", "mytaskname")
-						.param("platform", "default")
-						.param("properties", "scheduler.cron.expression=00 22 17 ? *")
-						.param("arguments", "--foo=bar"))
+						.queryParam("scheduleName", "myschedule")
+						.queryParam("taskDefinitionName", "mytaskname")
+						.queryParam("platform", "default")
+						.queryParam("properties", "scheduler.cron.expression=00 22 17 ? *")
+						.queryParam("arguments", "--foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
@@ -92,8 +92,8 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void listFilteredSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
-						.param("page", "0")
-						.param("size", "10"))
+						.queryParam("page", "0")
+						.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
@@ -115,8 +115,8 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	public void listAllSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules")
-						.param("page", "0")
-						.param("size", "10"))
+						.queryParam("page", "0")
+						.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
@@ -135,8 +135,8 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	private void createTaskDefinition(String taskName) throws Exception{
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/definitions")
-						.param("name", taskName)
-						.param("definition", "timestamp --format='yyyy MM dd'"))
+						.queryParam("name", taskName)
+						.queryParam("definition", "timestamp --format='yyyy MM dd'"))
 				.andExpect(status().isOk()));
 	}
 

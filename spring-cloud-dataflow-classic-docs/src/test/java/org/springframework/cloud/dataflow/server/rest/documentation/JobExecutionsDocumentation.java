@@ -43,6 +43,7 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -105,8 +106,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 			documentation.dontDocument(() -> this.mockMvc.perform(
 							post("/tasks/definitions")
-									.param("name", "DOCJOB1")
-									.param("definition", "timestamp --format='YYYY MM DD'"))
+									.queryParam("name", "DOCJOB1")
+									.queryParam("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
 
 			initialized = true;
@@ -117,8 +118,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -138,8 +139,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listThinJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -159,9 +160,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listThinJobExecutionsByJobInstanceId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("jobInstanceId", "1"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("jobInstanceId", "1"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -183,9 +184,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listThinJobExecutionsByTaskExecutionId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("taskExecutionId", "1"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("taskExecutionId", "1"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -207,10 +208,10 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listThinJobExecutionsByDate() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("fromDate", "2000-09-24T17:00:45,000")
-								.param("toDate", "2050-09-24T18:00:45,000"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("fromDate", "2000-09-24T17:00:45,000")
+								.queryParam("toDate", "2050-09-24T18:00:45,000"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -234,9 +235,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
-								.param("name", JOB_NAME)
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("name", JOB_NAME)
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -258,9 +259,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void listThinJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("name", JOB_NAME)
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("name", JOB_NAME)
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
 				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
@@ -282,16 +283,12 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}", "2")
-								.queryParam("schemaTarget", "boot2")
 				)
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing job execution (required)")
-						),
-						queryParameters(
-								parameterWithName("schemaTarget").description("Schema Target to the Job.").optional()
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The execution ID of the job execution"),
@@ -309,12 +306,11 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("stoppable").description("The status stoppable of the job execution"),
 								fieldWithPath("defined").description("The status defined of the job execution"),
 								fieldWithPath("timeZone").description("The time zone of the job execution"),
-								fieldWithPath("schemaTarget").description("The schema target of the job execution"),
 								subsectionWithPath("jobExecution").description("The details of the job execution"),
 								subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
 								subsectionWithPath("_links.self").description("Link to the stream definition resource"),
-								subsectionWithPath("_links.stop").description("Link to stopping the job"),
-								subsectionWithPath("_links.restart").description("Link to restarting the job")
+								subsectionWithPath("_links.stop").type(JsonFieldType.OBJECT).description("Link to stopping the job").optional(),
+								subsectionWithPath("_links.restart").type(JsonFieldType.OBJECT).description("Link to restarting the job").optional()
 						)
 				));
 	}
@@ -322,8 +318,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void jobStop() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "1")
-						.param("stop", "true")
-						.queryParam("schemaTarget", "boot2")
+						.queryParam("stop", "true")
 				)
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -331,7 +326,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						pathParameters(parameterWithName("id")
 								.description("The id of an existing job execution (required)"))
 						, queryParameters(
-								parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
 								parameterWithName("stop")
 										.description("Sends signal to stop the job if set to true"))));
 	}
@@ -339,8 +333,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	@Test
 	public void jobRestart() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "2")
-						.param("restart", "true")
-						.queryParam("schemaTarget", "boot2")
+						.queryParam("restart", "true")
 				)
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -348,7 +341,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								pathParameters(parameterWithName("id")
 										.description("The id of an existing job execution (required)"))
 								, queryParameters(
-										parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
 										parameterWithName("restart")
 												.description("Sends signal to restart the job if set to true")
 								)
@@ -379,5 +371,4 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 		taskManifest.setPlatformName("default");
 		dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 	}
-
 }

@@ -55,14 +55,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			return;
 		}
 
-
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
-					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
 			.andExpect(status().isCreated());
 		this.mockMvc.perform(
 			post("/apps/{type}/log", "sink")
-					.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"))
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"))
 			.andExpect(status().isCreated());
 		setUpIsDone = true;
 	}
@@ -71,10 +70,10 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	public void createDefinition() throws Exception {
 		this.mockMvc.perform(
 			post("/streams/definitions")
-					.param("name", "timelog")
-					.param("definition", "time --format='YYYY MM DD' | log")
-					.param("description", "Demo stream for testing")
-					.param("deploy", "false"))
+					.queryParam("name", "timelog")
+					.queryParam("definition", "time --format='YYYY MM DD' | log")
+					.queryParam("description", "Demo stream for testing")
+					.queryParam("deploy", "false"))
 			.andExpect(status().isCreated())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
@@ -100,10 +99,10 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	public void listAllStreamDefinitions() throws Exception {
 		this.mockMvc.perform(
 			get("/streams/definitions")
-				.param("page", "0")
-				.param("sort", "name,ASC")
-				.param("search", "")
-				.param("size", "10"))
+				.queryParam("page", "0")
+				.queryParam("sort", "name,ASC")
+				.queryParam("search", "")
+				.queryParam("size", "10"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
@@ -161,7 +160,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 								fieldWithPath("[].uri").description("The uri of the application"),
 								fieldWithPath("[].version").description("The version of the application"),
 								fieldWithPath("[].defaultVersion").description("If true, the application is the default version"),
-								fieldWithPath("[].bootVersion").description("The version of Spring Boot the application targets (2, 3)"),
 								fieldWithPath("[].versions").description("All the registered versions of the application"),
 								fieldWithPath("[]._links.self.href").description("Link to the application resource")
 						)));
@@ -171,11 +169,11 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	public void listRelatedStreamDefinitions() throws Exception {
 		this.mockMvc.perform(
 			get("/streams/definitions/{name}/related", "timelog")
-                    .param("page", "0")
-                    .param("sort", "name,ASC")
-                    .param("search", "")
-                    .param("size", "10")
-					.param("nested", "true"))
+                    .queryParam("page", "0")
+                    .queryParam("sort", "name,ASC")
+                    .queryParam("search", "")
+                    .queryParam("size", "10")
+					.queryParam("nested", "true"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
