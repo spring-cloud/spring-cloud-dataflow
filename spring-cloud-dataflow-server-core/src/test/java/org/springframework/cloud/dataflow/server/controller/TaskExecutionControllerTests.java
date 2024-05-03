@@ -359,6 +359,7 @@ public class TaskExecutionControllerTests {
 						.andExpect(status().isOk()))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
+				.andExpect(jsonPath("$._embedded.taskExecutionResourceList[*].taskExecutionStatus", containsInAnyOrder("RUNNING", "RUNNING","RUNNING","RUNNING")))
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(4)));
 	}
 
@@ -369,6 +370,7 @@ public class TaskExecutionControllerTests {
 				.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].executionId", containsInAnyOrder(4, 3, 2, 1)))
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].parentExecutionId", containsInAnyOrder(null, null, null, 1)))
+			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].taskExecutionStatus", containsInAnyOrder("RUNNING", "RUNNING","RUNNING","RUNNING")))
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(4)));
 	}
 

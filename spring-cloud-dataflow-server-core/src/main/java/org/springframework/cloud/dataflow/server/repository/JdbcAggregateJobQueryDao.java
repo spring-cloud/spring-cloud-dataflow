@@ -300,7 +300,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				execution.setCtrTaskStatus(ctrStatus);
 			});
 		}
-		LOG.info("updated {} ctr statuses", updated.get());
+		LOG.debug("updated {} ctr statuses", updated.get());
 	}
 
 	@Override
