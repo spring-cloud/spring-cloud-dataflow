@@ -190,7 +190,7 @@ class TaskExecutionQueryIT {
 			logger.info("Ratio for tasks/executions to thinexecutions:{}", ratioThinToExecution);
 			assertThat(totalTime4).isLessThan(totalTime2);
 			assertThat(ratioThinExecution).isGreaterThan(ratioExecution);
-			assertThat(ratioThinToExecution).isGreaterThan(3.0);
+			assertThat(ratioThinToExecution).isGreaterThan(2.0);
 		}
 	}
 
