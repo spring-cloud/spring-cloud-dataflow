@@ -156,6 +156,7 @@ public class DefaultAggregateExecutionSupport implements AggregateExecutionSuppo
 					execution.getExternalExecutionId(),
 					execution.getParentExecutionId(),
 					platformName,
+					null,
 					schemaTarget);
 		}
 		return null;

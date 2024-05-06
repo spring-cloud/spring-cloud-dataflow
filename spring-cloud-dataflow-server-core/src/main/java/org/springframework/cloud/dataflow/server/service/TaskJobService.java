@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -205,5 +207,7 @@ public interface TaskJobService {
 	) throws NoSuchJobException;
 
 	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds, String schemaTarget);
+
+	void populateComposeTaskRunnerStatus(Collection<AggregateTaskExecution> taskExecutions);
 
 }

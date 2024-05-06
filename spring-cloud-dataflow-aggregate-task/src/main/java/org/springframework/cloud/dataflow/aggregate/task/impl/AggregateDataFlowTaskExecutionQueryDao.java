@@ -581,6 +581,7 @@ public class AggregateDataFlowTaskExecutionQueryDao implements DataflowTaskExecu
 					rs.getString("EXTERNAL_EXECUTION_ID"),
 					parentExecutionId,
 					null,
+					null,
 					schemaTarget
 			);
 		}

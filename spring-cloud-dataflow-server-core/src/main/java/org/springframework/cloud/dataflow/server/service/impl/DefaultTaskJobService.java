@@ -313,6 +313,10 @@ public class DefaultTaskJobService implements TaskJobService {
 		logger.info("stopped:{}:{}:status={}", jobExecutionId, schemaTarget, status);
 	}
 
+	@Override
+	public void populateComposeTaskRunnerStatus(Collection<AggregateTaskExecution> taskExecutions) {
+		aggregateJobQueryDao.populateCtrStatus(taskExecutions);
+	}
 
 	private TaskJobExecution getTaskJobExecution(JobExecution jobExecution, String schemaTarget) {
 		return new TaskJobExecution(

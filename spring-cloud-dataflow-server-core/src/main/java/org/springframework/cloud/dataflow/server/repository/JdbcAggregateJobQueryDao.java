@@ -22,13 +22,15 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -58,6 +60,7 @@ import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
@@ -171,6 +174,19 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 			" LEFT OUTER JOIN AGGREGATE_TASK_BATCH TT ON E.JOB_EXECUTION_ID = TT.JOB_EXECUTION_ID AND E.SCHEMA_TARGET = TT.SCHEMA_TARGET" +
 			" LEFT OUTER JOIN AGGREGATE_TASK_EXECUTION T ON TT.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID AND TT.SCHEMA_TARGET = T.SCHEMA_TARGET";
 
+	private static final String FIND_CTR_STATUS = "SELECT T.TASK_EXECUTION_ID as TASK_EXECUTION_ID, J.EXIT_MESSAGE as CTR_STATUS" +
+		" from AGGREGATE_TASK_EXECUTION T" +
+		" JOIN AGGREGATE_TASK_BATCH TB ON TB.TASK_EXECUTION_ID=T.TASK_EXECUTION_ID AND TB.SCHEMA_TARGET=T.SCHEMA_TARGET" +
+		" JOIN AGGREGATE_JOB_EXECUTION J ON J.JOB_EXECUTION_ID=TB.JOB_EXECUTION_ID AND J.SCHEMA_TARGET=TB.SCHEMA_TARGET" +
+		" WHERE T.TASK_EXECUTION_ID in (:taskExecutionIds) " +
+		"  AND T.SCHEMA_TARGET = ':schemaTarget'" +
+		"  AND (select count(*) from AGGREGATE_TASK_EXECUTION CT" +
+		"        where (select count(*) from AGGREGATE_TASK_EXECUTION_PARAMS where" +
+		"                    CT.TASK_EXECUTION_ID = TASK_EXECUTION_ID and" +
+		"                    CT.SCHEMA_TARGET = SCHEMA_TARGET and" +
+		"                    TASK_PARAM = '--spring.cloud.task.parent-schema-target=boot2') > 0" +
+		"    AND CT.PARENT_EXECUTION_ID = T.TASK_EXECUTION_ID) > 0";
+
 	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
 			" where I.JOB_NAME = ? AND I.JOB_INSTANCE_ID = ?";
 
@@ -267,6 +283,32 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		List<JobInstanceExecutions> taskJobInstancesForJobName = getTaskJobInstancesForJobName(jobName, pageable);
 		return new PageImpl<>(taskJobInstancesForJobName, pageable, total);
 
+	}
+
+	@Override
+	public void populateCtrStatus(Collection<AggregateTaskExecution> aggregateTaskExecutions) {
+		Map<String, List<AggregateTaskExecution>> targets = aggregateTaskExecutions.stream().collect(Collectors.groupingBy(aggregateTaskExecution -> aggregateTaskExecution.getSchemaTarget()));
+		final AtomicInteger updated = new AtomicInteger(0);
+		for(Map.Entry<String, List<AggregateTaskExecution>> entry : targets.entrySet()) {
+			String target = entry.getKey();
+			Map<Long, AggregateTaskExecution> aggregateTaskExecutionMap = entry.getValue().stream()
+				.collect(Collectors.toMap(AggregateTaskExecution::getExecutionId, Function.identity()));
+			String ids = aggregateTaskExecutionMap.keySet()
+				.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining(","));
+			String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids).replace(":schemaTarget", target);
+			jdbcTemplate.query(sql, rs -> {
+				Long id = rs.getLong("TASK_EXECUTION_ID");
+				String ctrStatus = rs.getString("CTR_STATUS");
+				LOG.debug("populateCtrStatus:{}={}", id, ctrStatus);
+				AggregateTaskExecution execution = aggregateTaskExecutionMap.get(id);
+				Assert.notNull(execution, "Expected AggregateTaskExecution for " + id + " from " + ids);
+				updated.incrementAndGet();
+				execution.setCtrTaskStatus(ctrStatus);
+			});
+		}
+		LOG.debug("updated {} ctr statuses", updated.get());
 	}
 
 	@Override
