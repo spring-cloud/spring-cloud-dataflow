@@ -18,9 +18,11 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,13 +32,13 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.connection.
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Ports;
 
-import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -57,9 +59,8 @@ class DockerComposeTests {
     void prepareForTest() throws IOException {
         when(dockerMachine.getIp()).thenReturn("0.0.0.0");
         when(executor.commandName()).thenReturn("docker-compose");
-        when(executor.execute(any())).thenReturn(executedProcess);
-        when(executor.execute(any(String[].class))).thenReturn(executedProcess);
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("0.0.0.0:7000->7000/tcp"));
+		when(executor.execute(anyBoolean(), any(String[].class))).thenReturn(executedProcess);
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("0.0.0.0:7000->7000/tcp"));
         when(executedProcess.exitValue()).thenReturn(0);
         when(container.getContainerName()).thenReturn("my-container");
     }
@@ -67,44 +68,44 @@ class DockerComposeTests {
     @Test
     void callDockerComposeUpWithDaemonFlagOnUp() throws Exception {
         compose.up();
-        verify(executor).execute("up", "-d");
+        verify(executor).execute(true, "up", "-d");
     }
 
     @Test
     void callDockerComposeRmWithForceAndVolumeFlagsOnRm() throws Exception {
         compose.rm();
-        verify(executor).execute("rm", "--force", "-v");
+        verify(executor).execute(true,"rm", "--force", "-v");
     }
 
     @Test
     void callDockerComposeStopOnStop() throws Exception {
         compose.stop(container);
-        verify(executor).execute("stop", "my-container");
+        verify(executor).execute(true, "stop", "my-container");
     }
 
     @Test
     void callDockerComposeStartOnStart() throws Exception {
         compose.start(container);
-        verify(executor).execute("start", "my-container");
+        verify(executor).execute(true, "start", "my-container");
     }
 
     @Test
     void parseAndReturnsContainerNamesOnPs() throws Exception {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("ps\n----\ndir_db_1"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("ps\n----\ndir_db_1"));
         List<ContainerName> containerNames = compose.ps();
-        verify(executor).execute("ps");
+        verify(executor).execute(true,"ps");
         assertThat(containerNames, contains(ContainerName.builder().semanticName("db").rawName("dir_db_1").build()));
     }
 
     @Test
     void callDockerComposeWithNoColourFlagOnLogs() throws IOException {
         when(executedProcess.getInputStream()).thenReturn(
-                toInputStream("id"),
-                toInputStream("docker-compose version 1.5.6, build 1ad8866"),
-                toInputStream("logs"));
+                IOUtils.toInputStream("id"),
+                IOUtils.toInputStream("docker-compose version 1.5.6, build 1ad8866"),
+                IOUtils.toInputStream("logs"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         compose.writeLogs("db", output);
-        verify(executor).execute("logs", "--no-color", "db");
+        verify(executor).execute(true,"logs", "--no-color", "db");
         assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
     }
 
@@ -113,31 +114,31 @@ class DockerComposeTests {
         reset(executor);
         Process mockIdProcess = mock(Process.class);
         when(mockIdProcess.exitValue()).thenReturn(0);
-        InputStream emptyStream = toInputStream("");
-        when(mockIdProcess.getInputStream()).thenReturn(emptyStream, emptyStream, emptyStream, toInputStream("id"));
-        Process mockVersionProcess = mock(Process.class);
-        when(mockVersionProcess.exitValue()).thenReturn(0);
-        when(mockVersionProcess.getInputStream()).thenReturn(toInputStream("docker-compose version 1.5.6, build 1ad8866"));
-        when(executor.execute("ps", "-q", "db")).thenReturn(mockIdProcess);
-        when(executor.execute("-v")).thenReturn(mockVersionProcess);
-        when(executor.execute("logs", "--no-color", "db")).thenReturn(executedProcess);
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("logs"));
+        InputStream emptyStream = IOUtils.toInputStream("");
+        when(mockIdProcess.getInputStream()).thenReturn(emptyStream, emptyStream, emptyStream, IOUtils.toInputStream("id"));
+		when(executor.execute(true, "ps", "-q", "db")).thenReturn(mockIdProcess);
+		Process mockVersionProcess = mock(Process.class);
+		when(mockVersionProcess.exitValue()).thenReturn(0);
+		when(mockVersionProcess.getInputStream()).thenReturn(IOUtils.toInputStream("docker-compose version 1.5.6, build 1ad8866"));
+		when(executor.execute(false, "-v")).thenReturn(mockVersionProcess);
+		when(executor.execute(true, "logs", "--no-color", "db")).thenReturn(executedProcess);
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("logs"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         compose.writeLogs("db", output);
-        verify(executor, times(4)).execute("ps", "-q", "db");
-        verify(executor).execute("logs", "--no-color", "db");
+        verify(executor, times(4)).execute(true,"ps", "-q", "db");
+        verify(executor).execute(true,"logs", "--no-color", "db");
         assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
     }
 
     @Test
     void callDockerComposeWithTheFollowFlagWhenVersionIsAtLeast_1_7_0_OnLogs() throws IOException {
         when(executedProcess.getInputStream()).thenReturn(
-                toInputStream("id"),
-                toInputStream("docker-compose version 1.7.0, build 1ad8866"),
-                toInputStream("logs"));
+                IOUtils.toInputStream("id"),
+                IOUtils.toInputStream("docker-compose version 1.7.0, build 1ad8866"),
+                IOUtils.toInputStream("logs"));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         compose.writeLogs("db", output);
-        verify(executor).execute("logs", "--no-color", "--follow", "db");
+        verify(executor).execute(true,"logs", "--no-color", "--follow", "db");
         assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
     }
 
@@ -152,14 +153,14 @@ class DockerComposeTests {
     @Test
     void notThrowExceptionWhenDownFailsBecauseTheCommandDoesNotExist() throws Exception {
         when(executedProcess.exitValue()).thenReturn(1);
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("No such command: down"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("No such command: down"));
         compose.down();
     }
 
     @Test
     void throwExceptionWhenDownFailsForAReasonOtherThanTheCommandNotBeingPresent() {
         when(executedProcess.exitValue()).thenReturn(1);
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(""));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(""));
         assertThatExceptionOfType(DockerExecutionException.class)
                 .isThrownBy(() -> compose.down())
                 .withMessageStartingWith("'docker-compose down --volumes' returned exit code 1");
@@ -168,19 +169,19 @@ class DockerComposeTests {
     @Test
     void useTheRemoveVolumesFlagWhenDownExists() throws Exception {
         compose.down();
-        verify(executor).execute("down", "--volumes");
+		verify(executor).execute(true, "down", "--volumes");
     }
 
     @Test
     void parseThePsOutputOnPorts() throws Exception {
         Ports ports = compose.ports("db");
-        verify(executor).execute("ps", "db");
+        verify(executor).execute(true,"ps", "db");
         assertThat(ports, is(new Ports(new DockerPort("0.0.0.0", 7000, 7000))));
     }
 
     @Test
     void throwIllegalStateExceptionWhereThereIsNoContainerFoundForPorts() {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(""));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(""));
         assertThatIllegalStateException()
                 .isThrownBy(() -> compose.ports("db"))
                 .withMessage("No container with name 'db' found");
@@ -188,7 +189,7 @@ class DockerComposeTests {
 
     @Test
     void failOnDockerComposeExecCommandIfVersionIsNotAtLeast_1_7_0() {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("docker-compose version 1.5.6, build 1ad8866"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("docker-compose version 1.5.6, build 1ad8866"));
         assertThatIllegalStateException()
                 .isThrownBy(() -> compose.exec(options("-d"), "container_1", arguments("ls")))
                 .withMessage("You need at least docker-compose 1.7 to run docker-compose exec");
@@ -196,26 +197,37 @@ class DockerComposeTests {
     
     @Test
     void passConcatenatedArgumentsToExecutorOnDockerComposeExec() throws Exception {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("docker-compose version 1.7.0rc1, build 1ad8866"));
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("docker-compose version 1.7.0rc1, build 1ad8866"));
         compose.exec(options("-d"), "container_1", arguments("ls"));
-        verify(executor, times(1)).execute("exec", "-T", "-d", "container_1", "ls");
+        verify(executor, times(1)).execute(true,"exec", "-T", "-d", "container_1", "ls");
     }
 
     @Test
     void passConcatenatedArgumentsToExecutorOnDockerComposeRun() throws Exception {
         compose.run(DockerComposeRunOption.options("-d"), "container_1", DockerComposeRunArgument.arguments("ls"));
-        verify(executor, times(1)).execute("run", "-d", "container_1", "ls");
+        verify(executor, times(1)).execute(true,"run", "-d", "container_1", "ls");
     }
 
     @Test
     void returnTheOutputFromTheExecutedProcessOnDockerComposeExec() throws Exception {
-        String lsString = String.format("-rw-r--r--  1 user  1318458867  11326 Mar  9 17:47 LICENSE%n"
-                                        + "-rw-r--r--  1 user  1318458867  12570 May 12 14:51 README.md");
+        String lsString = "-rw-r--r--  1 user  1318458867  11326 Mar  9 17:47 LICENSE\n"
+						+ "-rw-r--r--  1 user  1318458867  12570 May 12 14:51 README.md";
         String versionString = "docker-compose version 1.7.0rc1, build 1ad8866";
-        DockerComposeExecutable processExecutor = mock(DockerComposeExecutable.class);
-        addProcessToExecutor(processExecutor, processWithOutput(versionString), "-v");
-        addProcessToExecutor(processExecutor, processWithOutput(lsString), "exec", "-T", "container_1", "ls", "-l");
+
+		Process mockVersionProcess = mock(Process.class);
+		when(mockVersionProcess.exitValue()).thenReturn(0);
+		when(mockVersionProcess.getInputStream()).thenReturn(IOUtils.toInputStream(versionString));
+
+		Process mockLs = mock(Process.class);
+		when(mockLs.exitValue()).thenReturn(0);
+		when(mockLs.getInputStream()).thenReturn(IOUtils.toInputStream(lsString, StandardCharsets.UTF_8));
+
+		DockerComposeExecutable processExecutor = mock(DockerComposeExecutable.class);
+        when(processExecutor.execute(true, "exec", "-T", "container_1", "ls", "-l")).thenReturn(mockLs);
+		when(processExecutor.execute(false, "-v")).thenReturn(mockVersionProcess);
+
         DockerCompose processCompose = new DefaultDockerCompose(processExecutor, dockerMachine);
+
         assertThat(processCompose.exec(options(), "container_1", arguments("ls", "-l")), is(lsString));
     }
 
@@ -230,12 +242,12 @@ class DockerComposeTests {
     }
 
     private static void addProcessToExecutor(DockerComposeExecutable dockerComposeExecutable, Process process, String... commands) throws Exception {
-        when(dockerComposeExecutable.execute(commands)).thenReturn(process);
+        when(dockerComposeExecutable.execute(true,commands)).thenReturn(process);
     }
 
     private static Process processWithOutput(String output) {
         Process mockedProcess = mock(Process.class);
-        when(mockedProcess.getInputStream()).thenReturn(toInputStream(output));
+        when(mockedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(output));
         when(mockedProcess.exitValue()).thenReturn(0);
         return mockedProcess;
     }

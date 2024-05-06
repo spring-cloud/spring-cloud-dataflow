@@ -1,5 +1,3 @@
-version: "2.1"
-
 services:
   withHealthcheck:
     image: gliderlabs/alpine:3.4

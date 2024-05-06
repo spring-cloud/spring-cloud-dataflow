@@ -71,52 +71,52 @@ public class DefaultDockerCompose implements DockerCompose {
 
 	@Override
 	public void pull() throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "pull");
+		command.execute(Command.throwingOnError(), true, "pull");
 	}
 
 	@Override
 	public void build() throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "build");
+		command.execute(Command.throwingOnError(), true, "build");
 	}
 
 	@Override
 	public void up() throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "up", "-d");
+		command.execute(Command.throwingOnError(), true, "up", "-d");
 	}
 
 	@Override
 	public void down() throws IOException, InterruptedException {
-		command.execute(swallowingDownCommandDoesNotExist(), "down", "--volumes");
+		command.execute(swallowingDownCommandDoesNotExist(), true, "down", "--volumes");
 	}
 
 	@Override
 	public void kill() throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "kill");
+		command.execute(Command.throwingOnError(), true, "kill");
 	}
 
 	@Override
 	public void rm() throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "rm", "--force", "-v");
+		command.execute(Command.throwingOnError(), true, "rm", "--force", "-v");
 	}
 
 	@Override
 	public void up(Container container) throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "up", "-d",  container.getContainerName());
+		command.execute(Command.throwingOnError(), true, "up", "-d", container.getContainerName());
 	}
 
 	@Override
 	public void start(Container container) throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "start", container.getContainerName());
+		command.execute(Command.throwingOnError(), true, "start", container.getContainerName());
 	}
 
 	@Override
 	public void stop(Container container) throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "stop", container.getContainerName());
+		command.execute(Command.throwingOnError(), true, "stop", container.getContainerName());
 	}
 
 	@Override
 	public void kill(Container container) throws IOException, InterruptedException {
-		command.execute(Command.throwingOnError(), "kill", container.getContainerName());
+		command.execute(Command.throwingOnError(), true, "kill", container.getContainerName());
 	}
 
 	@Override
@@ -124,22 +124,25 @@ public class DefaultDockerCompose implements DockerCompose {
 			DockerComposeExecArgument dockerComposeExecArgument) throws IOException, InterruptedException {
 		verifyDockerComposeVersionAtLeast(VERSION_1_7_0, "You need at least docker-compose 1.7 to run docker-compose exec");
 		String[] fullArgs = constructFullDockerComposeExecArguments(dockerComposeExecOption, containerName, dockerComposeExecArgument);
-		return command.execute(Command.throwingOnError(), fullArgs);
+		if (log.isDebugEnabled()) {
+			log.debug("exec:{}", StringUtils.collectionToDelimitedString(Arrays.asList(fullArgs), " "));
+		}
+		return command.execute(Command.throwingOnError(), true, fullArgs);
 	}
 
 	@Override
 	public String run(DockerComposeRunOption dockerComposeRunOption, String containerName,
 			DockerComposeRunArgument dockerComposeRunArgument) throws IOException, InterruptedException {
 		String[] fullArgs = constructFullDockerComposeRunArguments(dockerComposeRunOption, containerName, dockerComposeRunArgument);
-		return command.execute(Command.throwingOnError(), fullArgs);
+		return command.execute(Command.throwingOnError(), true, fullArgs);
 	}
 
 	private void verifyDockerComposeVersionAtLeast(Version targetVersion, String message) throws IOException, InterruptedException {
-		validState(version().greaterThanOrEqualTo(targetVersion), message);
+		validState(version().isHigherThanOrEquivalentTo(targetVersion), message);
 	}
 
 	private Version version() throws IOException, InterruptedException {
-		String versionOutput = command.execute(Command.throwingOnError(), "-v");
+		String versionOutput = command.execute(Command.throwingOnError(), false, "-v");
 		return DockerComposeVersion.parseFromDockerComposeVersion(versionOutput);
 	}
 
@@ -169,7 +172,7 @@ public class DefaultDockerCompose implements DockerCompose {
 
 	@Override
 	public List<ContainerName> ps() throws IOException, InterruptedException {
-		String psOutput = command.execute(Command.throwingOnError(), "ps");
+		String psOutput = command.execute(Command.throwingOnError(), true, "ps");
 		return ContainerNames.parseFromDockerComposePs(psOutput);
 	}
 
@@ -180,12 +183,12 @@ public class DefaultDockerCompose implements DockerCompose {
 
 	@Override
 	public String config() throws IOException, InterruptedException {
-		return command.execute(Command.throwingOnError(), "config");
+		return command.execute(Command.throwingOnError(), true, "config");
 	}
 
 	@Override
 	public List<String> services() throws IOException, InterruptedException {
-		String servicesOutput = command.execute(Command.throwingOnError(), "config", "--services");
+		String servicesOutput = command.execute(Command.throwingOnError(), true, "config", "--services");
 		return Arrays.asList(servicesOutput.split("(\r|\n)+"));
 	}
 
@@ -214,7 +217,7 @@ public class DefaultDockerCompose implements DockerCompose {
 	}
 
 	private Optional<String> id(String containerName) throws IOException, InterruptedException {
-		String id = command.execute(Command.throwingOnError(), "ps", "-q", containerName);
+		String id = command.execute(Command.throwingOnError(), true, "ps", "-q", containerName);
 		if (id.isEmpty()) {
 			return Optional.empty();
 		}
@@ -223,10 +226,10 @@ public class DefaultDockerCompose implements DockerCompose {
 
 	private Process followLogs(String container) throws IOException, InterruptedException {
 		if (version().greaterThanOrEqualTo(VERSION_1_7_0)) {
-			return rawExecutable.execute("logs", "--no-color", "--follow", container);
+			return rawExecutable.execute(true, "logs", "--no-color", "--follow", container);
 		}
 
-		return rawExecutable.execute("logs", "--no-color", container);
+		return rawExecutable.execute(true, "logs", "--no-color", container);
 	}
 
 	@Override
@@ -251,7 +254,7 @@ public class DefaultDockerCompose implements DockerCompose {
 	}
 
 	private String psOutput(String service) throws IOException, InterruptedException {
-		String psOutput = command.execute(Command.throwingOnError(), "ps", service);
+		String psOutput = command.execute(Command.throwingOnError(), true, "ps", service);
 		validState(StringUtils.hasText(psOutput), "No container with name '" + service + "' found");
 		return psOutput;
 	}

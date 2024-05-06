@@ -34,16 +34,17 @@ public class DockerComposeExecutable implements Executable {
 	private static final DockerCommandLocations DOCKER_COMPOSE_LOCATIONS = new DockerCommandLocations(
 			System.getenv("DOCKER_COMPOSE_LOCATION"),
 			"/usr/local/bin/docker-compose",
-			"/usr/bin/docker-compose"
+			"/usr/bin/docker-compose",
+			"/usr/local/bin/docker",
+			"/usr/bin/docker"
 	);
 
 	private static String defaultDockerComposePath() {
 		String pathToUse = DOCKER_COMPOSE_LOCATIONS.preferredLocation()
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find docker-compose, looked in: " + DOCKER_COMPOSE_LOCATIONS));
+					"Could not find docker-compose or docker, looked in: " + DOCKER_COMPOSE_LOCATIONS));
 
 		log.debug("Using docker-compose found at " + pathToUse);
-
 		return pathToUse;
 	}
 
@@ -52,11 +53,11 @@ public class DockerComposeExecutable implements Executable {
 
 			@Override
 			public String commandName() {
-				return "docker-compose";
+				return defaultDockerComposePath();
 			}
 
 			@Override
-			public Process execute(String... commands) throws IOException {
+			public Process execute(boolean composeCommand, String... commands) throws IOException {
 				List<String> args = new ArrayList<>();
 				args.add(defaultDockerComposePath());
 				args.addAll(Arrays.asList(commands));
@@ -65,7 +66,7 @@ public class DockerComposeExecutable implements Executable {
 			}
 		}, log::debug);
 
-		String versionOutput = dockerCompose.execute(Command.throwingOnError(), "-v");
+		String versionOutput = dockerCompose.execute(Command.throwingOnError(), false, "-v");
 		return DockerComposeVersion.parseFromDockerComposeVersion(versionOutput);
 	}
 
@@ -98,7 +99,7 @@ public class DockerComposeExecutable implements Executable {
 
 	@Override
 	public final String commandName() {
-		return "docker-compose";
+		return defaultDockerComposePath().endsWith("/docker") ? "docker" : "docker-compose";
 	}
 
 	protected String dockerComposePath() {
@@ -106,11 +107,14 @@ public class DockerComposeExecutable implements Executable {
 	}
 
 	@Override
-	public Process execute(String... commands) throws IOException {
+	public Process execute(boolean composeCommand, String... commands) throws IOException {
 		DockerForMacHostsIssue.issueWarning();
 
 		List<String> args = new ArrayList<>();
 		args.add(dockerComposePath());
+		if (composeCommand && commandName().equalsIgnoreCase("docker")) {
+			args.add("compose");
+		}
 		// if a single option is provided that starts with - skips the file commands.
 		if (commands.length > 1 || commands[0].charAt(0) != '-') {
 			args.addAll(projectName().constructComposeFileCommand());

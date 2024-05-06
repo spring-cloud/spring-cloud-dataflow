@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.db.support;
 
 import javax.sql.DataSource;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -40,9 +39,6 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-//TODO: Boot3x followup Looks like we are trying to access Java 8 code in some of the DB libraries with Java 17 in
-// some of the tests and is causing the problem below
-// java.lang.reflect.InaccessibleObjectException: Unable to make field private final java.util.Map java.util.Collections$UnmodifiableMap.m accessible: module java.base does not "opens java.util" to unnamed module
 class DatabaseTypeTests {
 
 	@JdbcTest(properties = "spring.jpa.hibernate.ddl-auto=none")
@@ -83,28 +79,23 @@ class DatabaseTypeTests {
 	class MySql_8_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements MySQL_8_ContainerSupport {
 	}
 
-	@Disabled
 	@Nested
 	class DB2DatabaseTypeTests extends SingleDbDatabaseTypeTests implements DB2_11_5_ContainerSupport {
 	}
 
-	@Disabled
 	@Nested
 	class OracleDatabaseTypeTests extends SingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
 	}
 
-	@Disabled
 	@Nested
 	class SqlServer_2017_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
 	}
-	@Disabled
+
 	@Nested
 	class SqlServer_2019_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2019_ContainerSupport {
 	}
 
-	@Disabled
 	@Nested
 	class SqlServer_2022_DatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2022_ContainerSupport {
 	}
-
 }

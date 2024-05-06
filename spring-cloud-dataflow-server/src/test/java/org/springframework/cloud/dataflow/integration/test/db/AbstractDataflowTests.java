@@ -87,8 +87,8 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.ORACLE_12_2_0_1_se2,
 			"dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/oracle/database-prebuilt:12.2.0.1-se2",
 			TagNames.ORACLE),
-		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
-		ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
+		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "icr.io/db2_community/db2:11.5.0.0a", TagNames.DB2),
+		ClusterContainer.from(TagNames.DB2_11_5_8_0, "icr.io/db2_community/db2:11.5.8.0", TagNames.DB2)
 	);
 
 	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
