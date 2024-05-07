@@ -18,6 +18,10 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-core-dsl</artifactId>
 			<version>${project.version}</version>
@@ -45,10 +49,6 @@
 		     it confuses dep. resolution and Testcontainers can not find the junit4 things it needs, this manually
 		     brings in the junit4 at 'compile' scope -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
@@ -71,10 +71,6 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>db2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
 		</dependency>
 	</dependencies>
 

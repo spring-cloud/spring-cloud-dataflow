@@ -19,14 +19,15 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -82,7 +83,7 @@ public class ConfigCommandTests {
 	private ObjectMapper mapper;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		if (this.mapper == null) {
 			this.mapper = new ObjectMapper();
@@ -133,7 +134,7 @@ public class ConfigCommandTests {
 			TablesInfo tablesInfo = configCommands.info();
 			final Table infoResult = tablesInfo.getTables().get(0);
 			String expectedOutput = FileCopyUtils.copyToString(new InputStreamReader(
-					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), "UTF-8"));
+					getClass().getResourceAsStream(ConfigCommandTests.class.getSimpleName() + "-testInfo.txt"), StandardCharsets.UTF_8));
 			assertThat(infoResult.render(80)
 					.replace("\r\n", "\n")).isEqualTo(expectedOutput.replace("\r\n", "\n"));
 		}

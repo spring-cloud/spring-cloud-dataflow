@@ -16,20 +16,50 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import org.hamcrest.FeatureMatcher;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.assertj.core.api.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Contains helper Hamcrest matchers for testing completion proposal related code.
  *
  * @author Eric Bottard
+ * @author Corneil du Plessis
  */
 class Proposals {
-	static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
-		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
-			@Override
-			protected String featureValueOf(CompletionProposal actual) {
-				return actual.getText();
-			}
-		};
+	private static final Logger log = LoggerFactory.getLogger(Proposals.class);
+
+	static Condition<CompletionProposal> proposalThatIs(String text) {
+		return new Condition<>(item -> text.equals(item.getText()), "proposalThatIs");
+	}
+	static Condition<CompletionProposal> proposalThatStartsWith(String text) {
+		return new Condition<>(item -> item.getText().startsWith(text), "proposalThatStartsWith");
+	}
+	public static Condition<? super List<? extends CompletionProposal>> proposalThatHas(boolean all, String ...text) {
+		Set<String> texts = new HashSet<>(Arrays.asList(text));
+		if(all) {
+			return new Condition<>(items -> {
+				Set<String> itemStrings = items.stream().map(completionProposal -> completionProposal.getText()).collect(Collectors.toSet());
+				return texts.stream().allMatch(txt -> itemStrings.contains(txt));
+				},"proposalThatHasAll");
+		} else {
+			return new Condition<>(items ->  {
+				Set<String> itemStrings = items.stream().map(completionProposal -> completionProposal.getText()).collect(Collectors.toSet());
+				return texts.stream().anyMatch(txt -> itemStrings.contains(txt));
+				}, "proposalThatHasAny");
+		}
+	}
+	public static Condition<? super List<? extends CompletionProposal>> proposalThatHasAll(String ...text) {
+		return proposalThatHas(true, text);
+	}
+	public static Condition<? super List<? extends CompletionProposal>> proposalThatHasAny(String ...text) {
+		return proposalThatHas(false, text);
 	}
 }

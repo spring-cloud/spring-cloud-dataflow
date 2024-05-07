@@ -18,13 +18,13 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,7 +45,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -65,7 +64,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -85,7 +83,7 @@ public class RuntimeAppsControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -159,7 +157,6 @@ public class RuntimeAppsControllerTests {
 	@Test
 	public void testFindNonExistentApp() throws Exception {
 		mockMvc.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is4xxClientError())
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 	}
@@ -170,13 +167,12 @@ public class RuntimeAppsControllerTests {
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
 
 		when(this.skipperClient.status("ticktock5")).thenReturn(info);
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
 
-		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isNotFound())
+		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1.").accept(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound())
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 	}
 
@@ -186,7 +182,7 @@ public class RuntimeAppsControllerTests {
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.unknown).build()));
 
 		List<Release> releases = new ArrayList<>();
 		Release release = new Release();
@@ -196,15 +192,13 @@ public class RuntimeAppsControllerTests {
 		streamDefinitionRepository.save(new StreamDefinition("ticktock5", "time2|log2"));
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is4xxClientError())
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppException")));
 
 		info.getStatus().setPlatformStatusAsAppStatusList(
-				Arrays.asList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
+			Collections.singletonList(AppStatus.of("ticktock5.log2-v1").generalState(DeploymentState.deployed).build()));
 
 		mockMvc.perform(get("/runtime/apps/ticktock5.log2-v1/instances/log2-0").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().is4xxClientError())
 				.andExpect(jsonPath("_embedded.errors[0].logref", is("NoSuchAppInstanceException")));
 	}
@@ -213,7 +207,6 @@ public class RuntimeAppsControllerTests {
 	public void testFindNonExistentAppInstance2() throws Exception {
 		mockMvc.perform(
 				get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.instanceId", is("ticktock4.log-v1-0")))
 				.andExpect(jsonPath("$.state", is("deployed")))
@@ -225,7 +218,6 @@ public class RuntimeAppsControllerTests {
 	@Test
 	public void testListRuntimeApps() throws Exception {
 		mockMvc.perform(get("/runtime/apps").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$._embedded.appStatusResourceList[0].deploymentId", is("ticktock3.log-v1")))
@@ -242,7 +234,6 @@ public class RuntimeAppsControllerTests {
 	public void testListRuntimeAppsPageSizes() throws Exception {
 
 		mockMvc.perform(get("/runtime/apps?page=0&size=1").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(2)))
@@ -250,7 +241,6 @@ public class RuntimeAppsControllerTests {
 				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock3.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=0&size=2").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(4)))
@@ -260,7 +250,6 @@ public class RuntimeAppsControllerTests {
 				.andExpect(jsonPath("$._embedded.appStatusResourceList[3].deploymentId", is("ticktock4.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=1&size=1").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$._embedded.appStatusResourceList.*", hasSize(2)))
@@ -268,7 +257,6 @@ public class RuntimeAppsControllerTests {
 				.andExpect(jsonPath("$._embedded.appStatusResourceList[1].deploymentId", is("ticktock4.time-v1")));
 
 		mockMvc.perform(get("/runtime/apps?page=1&size=3").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$._embedded.appStatusResourceList.*").doesNotExist());

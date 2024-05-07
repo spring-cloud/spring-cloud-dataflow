@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -48,6 +48,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Ilayaperumal Gopinathan
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class RuntimeCommandsTests {
 
@@ -65,7 +66,7 @@ public class RuntimeCommandsTests {
 
 	private AppStatusResource appStatusResource3;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.openMocks(this);
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);

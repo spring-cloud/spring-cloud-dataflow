@@ -30,8 +30,7 @@ import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +44,6 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -71,7 +66,6 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.scheduler-url=https://localhost"
 		})
-@RunWith(SpringRunner.class)
 public class MultiplePlatformTypeTests {
 
 	@Autowired
@@ -119,11 +113,11 @@ public class MultiplePlatformTypeTests {
 
 	@Configuration
 	static class TestConfig {
-		private CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class);
+		private final CloudFoundryClient cloudFoundryClient = mock(CloudFoundryClient.class);
 
-		private LogCacheClient logCacheClient = mock(LogCacheClient.class);
+		private final LogCacheClient logCacheClient = mock(LogCacheClient.class);
 
-		private TokenProvider tokenProvider = mock(TokenProvider.class);
+		private final TokenProvider tokenProvider = mock(TokenProvider.class);
 
 		@Bean
 		@Primary
@@ -143,7 +137,7 @@ public class MultiplePlatformTypeTests {
 
 		private Mono<ListOrganizationsResponse> listOrganizationsResponse() {
 			ListOrganizationsResponse response = ListOrganizationsResponse.builder()
-					.addAllResources(Collections.<OrganizationResource>singletonList(
+					.addAllResources(Collections.singletonList(
 							OrganizationResource.builder()
 									.metadata(Metadata.builder().id("123").build()).build())
 					).build();
@@ -152,7 +146,7 @@ public class MultiplePlatformTypeTests {
 
 		private Mono<ListSpacesResponse> listSpacesResponse() {
 			ListSpacesResponse response = ListSpacesResponse.builder()
-					.addAllResources(Collections.<SpaceResource>singletonList(
+					.addAllResources(Collections.singletonList(
 							SpaceResource.builder()
 									.metadata(Metadata.builder().id("123").build()).build())
 					).build();

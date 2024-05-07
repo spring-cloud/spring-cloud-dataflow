@@ -18,11 +18,11 @@ package org.springframework.cloud.skipper.server.autoconfigure;
 import java.util.Map;
 
 import mockit.MockUp;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.core.env.PropertySource;
@@ -34,8 +34,9 @@ import static org.mockito.Mockito.when;
 /**
  * @author Chris Schaefer
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProfileApplicationListenerTests {
 
 	private MockEnvironment environment;
@@ -45,7 +46,7 @@ public class ProfileApplicationListenerTests {
 
 	private ProfileApplicationListener profileApplicationListener;
 
-	@Before
+	@BeforeEach
 	public void before() {
 		environment = new MockEnvironment();
 		when(event.getEnvironment()).thenReturn(environment);

@@ -17,8 +17,9 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Release;
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class DeleteDocumentation extends BaseDocumentation {
 
@@ -48,7 +50,6 @@ public class DeleteDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				delete("/api/release/{releaseName}/package", release.getName())
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
@@ -111,12 +112,11 @@ public class DeleteDocumentation extends BaseDocumentation {
 		Release release = createTestRelease("test", StatusCode.DELETED);
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		this.mockMvc.perform(
 				delete("/api/release/{releaseName}", "test")
 						.accept(MediaType.APPLICATION_JSON).contentType(contentType))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

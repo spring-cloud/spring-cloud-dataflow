@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -32,7 +31,6 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.StreamUtils;
@@ -46,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TestDependencies.class })
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class RootControllerTests {
@@ -56,7 +53,7 @@ public class RootControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -65,7 +62,6 @@ public class RootControllerTests {
 	@Test
 	public void testRootControllerResponse() throws Exception {
 		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andReturn()
 			.getResponse()

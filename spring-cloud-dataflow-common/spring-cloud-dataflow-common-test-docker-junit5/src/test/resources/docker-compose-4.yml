@@ -1,4 +1,3 @@
-version: '3'
 services:
   testservice4:
     image: 'springcloud/openjdk:latest'

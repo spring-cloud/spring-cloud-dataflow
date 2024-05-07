@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.http.MediaType;
@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
 public class AppRegistryDocumentation extends BaseDocumentation {

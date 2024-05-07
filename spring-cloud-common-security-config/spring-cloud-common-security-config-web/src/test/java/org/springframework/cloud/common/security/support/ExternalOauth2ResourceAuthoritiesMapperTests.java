@@ -21,10 +21,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import mockwebserver3.MockResponse;
+import mockwebserver3.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -36,21 +36,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mike Heath
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class ExternalOauth2ResourceAuthoritiesMapperTests {
 
-	public static MockWebServer mockBackEnd;
+	public MockWebServer mockBackEnd;
 
-	@BeforeAll
-	public static void setUp() throws IOException {
+
+	@BeforeEach
+	public void setUp() throws IOException {
 		mockBackEnd = new MockWebServer();
 		mockBackEnd.start();
 	}
-
-	@AfterAll
-	public static void tearDown() throws IOException {
+	@AfterEach
+	public void tearDown() throws IOException {
 		mockBackEnd.shutdown();
 	}
+
 
 	@Test
 	public void testExtractAuthorities() throws Exception {
@@ -63,9 +65,9 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 
 	private void assertAuthorities2(URI uri, String... roles) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		mockBackEnd.enqueue(new MockResponse()
-				.setBody(objectMapper.writeValueAsString(roles))
-				.addHeader("Content-Type", "application/json"));
+		mockBackEnd.enqueue(new MockResponse().newBuilder()
+				.body(objectMapper.writeValueAsString(roles))
+				.addHeader("Content-Type", "application/json").build());
 
 		final ExternalOauth2ResourceAuthoritiesMapper authoritiesExtractor =
 				new ExternalOauth2ResourceAuthoritiesMapper(uri);
@@ -73,6 +75,6 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 		for (String role : roles) {
 			assertThat(grantedAuthorities).containsAnyOf(new SimpleGrantedAuthority(SecurityConfigUtils.ROLE_PREFIX + role));
 		}
-		assertThat(mockBackEnd.takeRequest().getHeader("Authorization")).isEqualTo("Bearer 1234567");
+		assertThat(mockBackEnd.takeRequest().getHeaders().get("Authorization")).isEqualTo("Bearer 1234567");
 	}
 }

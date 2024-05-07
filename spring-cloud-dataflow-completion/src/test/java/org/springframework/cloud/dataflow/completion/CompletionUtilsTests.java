@@ -16,19 +16,20 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
 
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for CompletionUtils.
  *
  * @author Eric Bottard
+ * @author Corneil du Plessis
  */
 public class CompletionUtilsTests {
 
@@ -37,16 +38,16 @@ public class CompletionUtilsTests {
 	@Test
 	public void testLabelQualification() {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter2: filter"));
+		assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
+				this.streamDefinitionService.getAppDefinitions(streamDefinition))).isEqualTo("filter2: filter");
 
 		streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("transform",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("transform"));
+		assertThat(CompletionUtils.maybeQualifyWithLabel("transform",
+				this.streamDefinitionService.getAppDefinitions(streamDefinition))).isEqualTo("transform");
 
 		streamDefinition = new StreamDefinition("foo", "http | filter | filter2: filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter3: filter"));
+		assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
+				this.streamDefinitionService.getAppDefinitions(streamDefinition))).isEqualTo("filter3: filter");
 	}
 
 }

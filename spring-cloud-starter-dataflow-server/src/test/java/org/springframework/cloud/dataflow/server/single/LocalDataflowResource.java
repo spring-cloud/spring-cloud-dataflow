@@ -21,7 +21,9 @@ import java.util.List;
 
 import javax.servlet.Filter;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,15 +62,15 @@ import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Marius Bogoevici
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class LocalDataflowResource extends ExternalResource {
+public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallback {
 
 	private static final String DATAFLOW_PORT_PROPERTY = "dataflow.port";
 
@@ -94,7 +96,7 @@ public class LocalDataflowResource extends ExternalResource {
 
 	private String skipperServerPort;
 
-	private String configurationLocation;
+	private final String configurationLocation;
 
 	private WebApplicationContext configurableApplicationContext;
 
@@ -142,7 +144,7 @@ public class LocalDataflowResource extends ExternalResource {
 	}
 
 	@Override
-	protected void before() {
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
 
 		this.dataflowServerPort = SocketUtils.findAvailableTcpPort();
@@ -195,7 +197,7 @@ public class LocalDataflowResource extends ExternalResource {
 	}
 
 	@Override
-	protected void after() {
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
 		SpringApplication.exit(configurableApplicationContext);
 		resetConfigLocation();
 		if (originalDataflowServerPort != null) {

@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -34,7 +33,6 @@ import org.springframework.cloud.dataflow.server.service.StreamService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,8 +42,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Mark Pollack
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -60,9 +58,9 @@ public class DefaultStreamServiceUpgradeStreamTests {
 	@MockBean
 	private SkipperStreamDeployer skipperStreamDeployer;
 
-	private StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
+	private final StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
-	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
+	private final StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 
 	@Test
 	public void verifyUpgradeStream() {

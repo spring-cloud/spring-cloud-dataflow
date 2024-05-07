@@ -43,7 +43,7 @@
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.12.676</aws-java-sdk-ecr.version>
-		<testcontainers.version>1.17.6</testcontainers.version>
+		<testcontainers.version>1.19.7</testcontainers.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>3.2.1</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
@@ -56,66 +56,14 @@
 		<logback.version>1.2.13</logback.version>
 		<json-path.version>2.9.0</json-path.version>
 		<postgresql.version>42.7.2</postgresql.version>
-		<junit-jupiter.version>5.9.3</junit-jupiter.version>
-		<junit-platform.version>1.9.3</junit-platform.version>
 		<mockito.version>4.11.0</mockito.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.junit</groupId>
-				<artifactId>junit-bom</artifactId>
-				<version>${junit-jupiter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
-				<version>${junit-jupiter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter</artifactId>
-				<version>${junit-jupiter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit-jupiter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit-jupiter.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-engine</artifactId>
-				<version>${junit-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-commons</artifactId>
-				<version>${junit-platform.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>${postgresql.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-junit-jupiter</artifactId>
-				<version>${mockito.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.junit.jupiter</groupId>
-						<artifactId>junit-jupiter-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.junit.jupiter</groupId>
-						<artifactId>junit-jupiter</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -527,6 +475,7 @@
 					<includeJUnit5Engines>junit-jupiter</includeJUnit5Engines>
 					<threadCount>1</threadCount>
 					<forkCount>1</forkCount>
+					<failIfNoTests>true</failIfNoTests>
 					<excludes>
 						<exclude>**/Abstract*.*</exclude>
 					</excludes>

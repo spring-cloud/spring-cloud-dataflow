@@ -22,7 +22,7 @@ import java.util.Optional;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,6 +64,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 @ActiveProfiles({"repo-test", "local"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -108,8 +109,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
-		mockMvc.perform(delete("/api/release/" + releaseName)).andDo(print())
-				.andExpect(status().isOk()).andReturn();
+		mockMvc.perform(delete("/api/release/" + releaseName)).andExpect(status().isOk()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName, 1);
 		assertThat(deletedRelease.getInfo().getStatus().getStatusCode()).isEqualTo(StatusCode.DELETED);
 	}
@@ -119,8 +119,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		// Deploy
 		String releaseName = "testLogs";
 		install("log", "1.0.0", releaseName);
-		MvcResult result = mockMvc.perform(get("/api/release/logs/" + releaseName)).andDo(print())
-				.andExpect(status().isOk()).andReturn();
+		MvcResult result = mockMvc.perform(get("/api/release/logs/" + releaseName)).andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 	}
 
@@ -144,7 +143,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Undeploy
 		MvcResult result = mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
-				.andDo(print()).andExpect(status().isConflict()).andReturn();
+				.andExpect(status().isConflict()).andReturn();
 
 		assertThat(result.getResolvedException().getMessage())
 				.contains("Can not delete Package Metadata [log:1.0.0] in Repository [test]. Not all releases of " +
@@ -154,12 +153,12 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Delete the 'release2' only not the package.
 		mockMvc.perform(delete("/api/release/" + releaseNameTwo))
-				.andDo(print()).andExpect(status().isOk()).andReturn();
+				.andExpect(status().isOk()).andReturn();
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
 
 		// Second attempt to delete 'release1' along with its package 'log'.
 		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
-				.andDo(print()).andExpect(status().isOk()).andReturn();
+				.andExpect(status().isOk()).andReturn();
 		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(0);
 
 	}
@@ -173,8 +172,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Check manifest
-		MvcResult result = mockMvc.perform(get("/api/release/manifest/" + releaseName)).andDo(print())
-				.andExpect(status().isOk()).andReturn();
+		MvcResult result = mockMvc.perform(get("/api/release/manifest/" + releaseName)).andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
 		// Upgrade
@@ -183,8 +181,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Check manifest
-		result = mockMvc.perform(get("/api/release/manifest/" + releaseName + "/2")).andDo(print())
-				.andExpect(status().isOk()).andReturn();
+		result = mockMvc.perform(get("/api/release/manifest/" + releaseName + "/2")).andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 
 		// Rollback to release version 1, creating a third release version equivalent to
@@ -201,7 +198,6 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Undeploy
 		mockMvc.perform(delete("/api/release/" + releaseName))
-				.andDo(print())
 				.andExpect(status().isOk()).andReturn();
 		Release deletedRelease = this.releaseRepository.findByNameAndVersion(releaseName,
 				Integer.valueOf(releaseVersion));
@@ -244,8 +240,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		// In a real container the response is carried over into the error dispatcher, but
 		// in the mock a new one is created so we have to assert the status at this
 		// intermediate point
-		MvcResult result = mockMvc.perform(get("/api/release/status/myLog")).andDo(print())
-				.andExpect(status().is4xxClientError()).andReturn();
+		MvcResult result = mockMvc.perform(get("/api/release/status/myLog")).andExpect(status().is4xxClientError()).andReturn();
 		MvcResult response = this.mockMvc.perform(new ErrorDispatcher(result, "/error"))
 				.andReturn();
 		assertThat(response.getResponse().getContentAsString()).contains("ReleaseNotFoundException");
@@ -272,8 +267,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
 		MvcResult result = mockMvc.perform(post("/api/release/upgrade")
-				.content(convertObjectToJson(upgradeRequest))).andDo(print())
-				.andExpect(status().is4xxClientError()).andReturn();
+				.content(convertObjectToJson(upgradeRequest))).andExpect(status().is4xxClientError()).andReturn();
 		assertThat(result.getResolvedException().getMessage()).isEqualTo("Package to upgrade has no difference than existing deployed/deleted package. Not upgrading.");
 	}
 
@@ -347,9 +341,9 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 	private class ErrorDispatcher implements RequestBuilder {
 
-		private MvcResult result;
+		private final MvcResult result;
 
-		private String path;
+		private final String path;
 
 		ErrorDispatcher(MvcResult result, String path) {
 			this.result = result;

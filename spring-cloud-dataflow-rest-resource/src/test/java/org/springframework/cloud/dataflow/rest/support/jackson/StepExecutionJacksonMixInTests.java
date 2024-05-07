@@ -16,23 +16,29 @@
 
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class StepExecutionJacksonMixInTests {
 
@@ -42,15 +48,20 @@ public class StepExecutionJacksonMixInTests {
 	 *
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
-	@Test(expected = JsonMappingException.class)
+	@Test
 	public void testSerializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
-
-		final ObjectMapper objectMapper = new ObjectMapper();
-
-		final StepExecution stepExecution = getStepExecution();
-		final String result = objectMapper.writeValueAsString(stepExecution);
-
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}"));
+		assertThatExceptionOfType(JsonMappingException.class).isThrownBy(() -> {
+			final ObjectMapper objectMapper = new ObjectMapper();
+			final StepExecution stepExecution = getStepExecution();
+			final String result = objectMapper.writeValueAsString(stepExecution);
+			DocumentContext parsed = JsonPath.parse(result);
+			Object dirty = parsed.read("$['executionContext']['dirty']");
+			assertThat(dirty).isExactlyInstanceOf(Boolean.class);
+			assertThat((Boolean) dirty).isTrue();
+			Object empty = parsed.read("$['executionContext']['empty']");
+			assertThat(empty).isExactlyInstanceOf(Boolean.class);
+			assertThat((Boolean) empty).isFalse();
+		});
 	}
 
 	/**
@@ -70,15 +81,24 @@ public class StepExecutionJacksonMixInTests {
 		final StepExecution stepExecution = getStepExecution();
 		final String result = objectMapper.writeValueAsString(stepExecution);
 
-		assertThat(result, not(containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}")));
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{"));
-
-		assertThat(result, containsString("{\"counter\":1234}"));
-		assertThat(result, containsString("{\"myDouble\":1.123456}"));
-		assertThat(result, containsString("{\"Josh\":4444444444}"));
-		assertThat(result, containsString("{\"awesomeString\":\"Yep\"}"));
-		assertThat(result, containsString("{\"hello\":\"world\""));
-		assertThat(result, containsString("{\"counter2\":9999}"));
+		DocumentContext parsed = JsonPath.parse(result);
+		Object dirty = parsed.read("$['executionContext']['dirty']");
+		assertThat(dirty).isExactlyInstanceOf(Boolean.class);
+		assertThat((Boolean) dirty).isTrue();
+		Object empty = parsed.read("$['executionContext']['empty']");
+		assertThat(empty).isExactlyInstanceOf(Boolean.class);
+		assertThat((Boolean) empty).isFalse();
+		Object values = parsed.read("$['executionContext']['values']", List.class);
+		assertThat(values).isInstanceOf(List.class);
+		Map<String, Object> valueMap = ((List<Map<String, Object>>) values).stream()
+			.flatMap(map -> map.entrySet().stream())
+			.collect(Collectors.toMap(o -> o.getKey(), o -> o.getValue()));
+		assertThat(valueMap).containsEntry("counter", 1234);
+		assertThat(valueMap).containsEntry("myDouble", 1.123456);
+		assertThat(valueMap).containsEntry("Josh", 4444444444L);
+		assertThat(valueMap).containsEntry("awesomeString", "Yep");
+		assertThat(valueMap).containsEntry("hello", "world");
+		assertThat(valueMap).containsEntry("counter2", 9999);
 	}
 
 	private StepExecution getStepExecution() {

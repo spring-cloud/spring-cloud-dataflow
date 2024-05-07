@@ -22,9 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -51,7 +50,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -59,7 +57,8 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -73,8 +72,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Glenn Renfro
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -101,15 +100,17 @@ public class TaskSchedulerControllerTests {
 
 	private MockMvc mockMvc;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testTaskSchedulerControllerConstructorMissingService() {
-		new TaskSchedulerController(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new TaskSchedulerController(null);
+		});
 	}
 
 	@Test
@@ -120,8 +121,7 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("schedule1");
 		createSampleSchedule("schedule2");
-		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/schedules").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule1", "schedule2")))
 				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(2)));
 	}
@@ -136,15 +136,15 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("schedule1");
 		createSampleSchedule("schedule2");
 		mockMvc.perform(get("/tasks/schedules/schedule1").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isOk())
+				.andExpect(status().isOk())
 				.andExpect(content().json("{scheduleName: \"schedule1\"}"))
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/schedule2").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isOk())
+				.andExpect(status().isOk())
 				.andExpect(content().json("{scheduleName: \"schedule2\"}"))
 				.andExpect(content().json("{taskDefinitionName: \"testDefinition\"}"));
 		mockMvc.perform(get("/tasks/schedules/scheduleNotExisting").accept(MediaType.APPLICATION_JSON))
-				.andDo(print()).andExpect(status().isNotFound())
+				.andExpect(status().isNotFound())
 				.andExpect(jsonPath("_embedded.errors.[0].message", is("Schedule [scheduleNotExisting] doesn't exist")))
 				.andExpect(jsonPath("_embedded.errors.[0].logref", is("NoSuchScheduleException")));
 	}
@@ -159,8 +159,7 @@ public class TaskSchedulerControllerTests {
 
 		createSampleSchedule("foo", "schedule1");
 		createSampleSchedule("bar", "schedule2");
-		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk())
+		mockMvc.perform(get("/tasks/schedules/instances/bar").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList[*].scheduleName", containsInAnyOrder("schedule2")))
 				.andExpect(jsonPath("$._embedded.scheduleInfoResourceList", hasSize(1)));
 	}
@@ -192,7 +191,7 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules/").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", scheduleName).param("properties", "scheduler.cron.expression=* * * * *")
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals(createdScheduleName, scheduleInfo.getScheduleName());
@@ -263,7 +262,7 @@ public class TaskSchedulerControllerTests {
 				.param("properties",
 						"scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
 				.param("arguments", arguments)
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated());
 		assertEquals(1, simpleTestScheduler.list().size());
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
 		assertEquals("mySchedule", scheduleInfo.getScheduleName());
@@ -304,8 +303,7 @@ public class TaskSchedulerControllerTests {
 		createSampleSchedule("mySchedule");
 		createSampleSchedule("mySchedule2");
 		assertEquals(2, simpleTestScheduler.list().size());
-		mockMvc.perform(delete("/tasks/schedules/instances/testDefinition").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+		mockMvc.perform(delete("/tasks/schedules/instances/testDefinition").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 		assertEquals(0, simpleTestScheduler.list().size());
 	}
 
@@ -318,8 +316,7 @@ public class TaskSchedulerControllerTests {
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		createSampleSchedule("mySchedule");
 		assertEquals(1, simpleTestScheduler.list().size());
-		mockMvc.perform(delete("/tasks/schedules/" + "mySchedule").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk());
+		mockMvc.perform(delete("/tasks/schedules/" + "mySchedule").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 		assertEquals(0, simpleTestScheduler.list().size());
 
 		AuditActionType[] auditActionTypesCreate = { AuditActionType.CREATE };

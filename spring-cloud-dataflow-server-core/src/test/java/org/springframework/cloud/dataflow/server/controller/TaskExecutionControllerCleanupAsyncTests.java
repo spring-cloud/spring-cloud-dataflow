@@ -71,6 +71,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Unit tests for the {@link TaskExecutionController#cleanupAll async cleanup} API.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SpringBootTest(
 		properties = "spring.cloud.dataflow.async.enabled=true",
@@ -126,7 +127,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 		String taskExecutionId = "asyncCleanupAllTaskExecId";
 		setupTaskExecutions("asyncCleanupAllTaskName", taskExecutionId);
 		mockMvc.perform(delete("/tasks/executions"))
-				.andDo(print())
 				.andExpect(status().is(200));
 		verify(taskLauncher, times(0)).cleanup(taskExecutionId);
 		Awaitility.await()

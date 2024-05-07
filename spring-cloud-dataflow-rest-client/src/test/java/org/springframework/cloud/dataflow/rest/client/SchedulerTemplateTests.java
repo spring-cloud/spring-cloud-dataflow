@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class SchedulerTemplateTests {
 	private static final String SCHEDULES_RELATION = org.springframework.cloud.dataflow.rest.client.SchedulerTemplate.SCHEDULES_RELATION;
@@ -49,7 +50,7 @@ public class SchedulerTemplateTests {
 	private RestTemplate restTemplate;
 	private SchedulerTemplate template;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		rootResource = mock(RootResource.class);
 		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(Optional.of(Link.of(SCHEDULES_RELATION)));

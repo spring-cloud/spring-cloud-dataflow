@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
@@ -30,12 +30,12 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class JobExecutionDeserializationTests {
 
@@ -53,10 +53,10 @@ public class JobExecutionDeserializationTests {
 				new TypeReference<PagedModel<EntityModel<JobExecutionResource>>>() {
 				});
 		final JobExecutionResource jobExecutionResource = paged.getContent().iterator().next().getContent();
-		assertEquals("Expect 1 JobExecutionInfoResource", 6, paged.getContent().size());
-		assertEquals(Long.valueOf(6), jobExecutionResource.getJobId());
-		assertEquals("job200616815", jobExecutionResource.getName());
-		assertEquals("COMPLETED", jobExecutionResource.getJobExecution().getStatus().name());
+		assertThat(paged.getContent().size()).as("Expect 1 JobExecutionInfoResource").isEqualTo(6);
+		assertThat(jobExecutionResource.getJobId()).isEqualTo(Long.valueOf(6));
+		assertThat(jobExecutionResource.getName()).isEqualTo("job200616815");
+		assertThat(jobExecutionResource.getJobExecution().getStatus().name()).isEqualTo("COMPLETED");
 	}
 
 	@Test
@@ -71,19 +71,19 @@ public class JobExecutionDeserializationTests {
 
 		final JobExecutionResource jobExecutionInfoResource = objectMapper.readValue(json, JobExecutionResource.class);
 
-		assertNotNull(jobExecutionInfoResource);
-		assertEquals(Long.valueOf(1), jobExecutionInfoResource.getJobId());
-		assertEquals("ff.job", jobExecutionInfoResource.getName());
-		assertEquals("COMPLETED", jobExecutionInfoResource.getJobExecution().getStatus().name());
-		assertEquals(1, jobExecutionInfoResource.getJobExecution().getStepExecutions().size());
+		assertThat(jobExecutionInfoResource).isNotNull();
+		assertThat(jobExecutionInfoResource.getJobId()).isEqualTo(Long.valueOf(1));
+		assertThat(jobExecutionInfoResource.getName()).isEqualTo("ff.job");
+		assertThat(jobExecutionInfoResource.getJobExecution().getStatus().name()).isEqualTo("COMPLETED");
+		assertThat(jobExecutionInfoResource.getJobExecution().getStepExecutions().size()).isEqualTo(1);
 
 		final StepExecution stepExecution = jobExecutionInfoResource.getJobExecution().getStepExecutions().iterator().next();
-		assertNotNull(stepExecution);
+		assertThat(stepExecution).isNotNull();
 
 		final ExecutionContext stepExecutionExecutionContext = stepExecution.getExecutionContext();
 
-		assertNotNull(stepExecutionExecutionContext);
-		assertEquals(2, stepExecutionExecutionContext.size());
+		assertThat(stepExecutionExecutionContext).isNotNull();
+		assertThat(stepExecutionExecutionContext.size()).isEqualTo(2);
 	}
 
 }

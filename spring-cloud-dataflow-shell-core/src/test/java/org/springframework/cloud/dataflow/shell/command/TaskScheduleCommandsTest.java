@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Daniel Serleg
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 

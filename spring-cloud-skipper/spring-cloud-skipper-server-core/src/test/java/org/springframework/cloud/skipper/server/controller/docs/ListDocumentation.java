@@ -19,7 +19,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class ListDocumentation extends BaseDocumentation {
 
@@ -45,8 +46,7 @@ public class ListDocumentation extends BaseDocumentation {
 		releaseList.add(createTestRelease());
 		when(this.releaseService.list()).thenReturn(releaseList);
 		this.mockMvc.perform(
-				get("/api/release/list")).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/release/list")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_embedded.releases[]._links").ignored(),
@@ -114,8 +114,7 @@ public class ListDocumentation extends BaseDocumentation {
 		releaseList.add(release);
 		when(this.releaseService.list(release.getName())).thenReturn(releaseList);
 		this.mockMvc.perform(
-				get("/api/release/list/{releaseName}", release.getName())).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/release/list/{releaseName}", release.getName())).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_embedded.releases[]._links").ignored(),

@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.ActiveProfiles;
 
@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @ActiveProfiles({"repository", "local"})
 public class DeployersDocumentation extends BaseDocumentation {
@@ -38,7 +39,6 @@ public class DeployersDocumentation extends BaseDocumentation {
 				get("/api/deployers")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,
@@ -78,6 +78,6 @@ public class DeployersDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.deployers[].options[].deprecated").description(""),
 								fieldWithPath("_embedded.deployers[]._links.deployer.href").ignored())
 								.and(super.defaultLinkProperties),
-						super.linksForSkipper()));
+						linksForSkipper()));
 	}
 }

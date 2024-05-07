@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.StatusCode;
@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class StatusDocumentation extends BaseDocumentation {
 
@@ -41,8 +42,7 @@ public class StatusDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.releaseService.status(release.getName())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
-				get("/api/release/status/{releaseName}", release.getName())).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/release/status/{releaseName}", release.getName())).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_links").ignored(),
@@ -65,7 +65,6 @@ public class StatusDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/status/{releaseName}/{releaseVersion}",
 						release.getName(), release.getVersion()))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

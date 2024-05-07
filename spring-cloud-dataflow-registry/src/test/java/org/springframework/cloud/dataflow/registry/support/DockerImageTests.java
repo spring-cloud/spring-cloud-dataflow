@@ -17,118 +17,77 @@ package org.springframework.cloud.dataflow.registry.support;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 /**
  * Test for DockerImage parsing methods Code from https://github.com/vmware/admiral
  */
-@RunWith(Parameterized.class)
+
 public class DockerImageTests {
-	private final String description;
 
-	private final String fullImageName;
 
-	private final String expectedHost;
+	static class DockerImageNames implements ArgumentsProvider {
+		@Override
+		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
+			List<Arguments> data = new ArrayList<>();
+			data.add(arguments("all sections", "myhost:300/namespace/repo:tag", "myhost:300", "namespace", "repo",
+					"namespace/repo", "tag"));
+			data.add(arguments("repo and tag", "repo:tag", null, null, "repo", "library/repo", "tag"));
+			data.add(arguments("implicit registry, repo and tag", "library/repo:tag", null, "library", "repo",
+					"library/repo", "tag"));
+			data.add(arguments("repo without tag", "repo", null, null, "repo", "library/repo", "latest"));
+			data.add(arguments("namespace and repo", "namespace/repo", null, "namespace", "repo", "namespace/repo",
+					"latest"));
+			data.add(arguments("host with dot and repo", "host.name/repo", "host.name", null, "repo", "repo",
+					"latest"));
+			data.add(arguments("host with colon and repo", "host:3000/repo", "host:3000", null, "repo", "repo",
+					"latest"));
+			data.add(arguments("host with colon, repo and tag", "host:3000/repo:tag", "host:3000", null, "repo",
+					"repo", "tag"));
+			data.add(arguments("official repo with default namespace", "registry.hub.docker.com/library/repo:tag",
+					"registry.hub.docker.com", "library", "repo", "library/repo", "tag"));
+			data.add(arguments("official repo with custom namespace", "registry.hub.docker.com/user/repo:tag",
+					"registry.hub.docker.com", "user", "repo", "user/repo", "tag"));
+			data.add(arguments("official repo with default namespace", "docker.io/library/repo:tag", "docker.io",
+					"library", "repo", "library/repo", "tag"));
+			data.add(arguments("official repo with custom namespace", "docker.io/user/repo:tag", "docker.io", "user",
+					"repo", "user/repo", "tag"));
+			data.add(arguments("host and three path components of repo", "host/namespace/category/repo", "host",
+					"namespace/category", "repo", "namespace/category/repo", "latest"));
+			data.add(arguments("host, port, three path components of repo and tag",
+					"host:5000/namespace/category/repo:tag", "host:5000", "namespace/category", "repo",
+					"namespace/category/repo", "tag"));
 
-	private final String expectedNamespace;
-
-	private final String expectedRepo;
-
-	private final String expectedNamespaceAndRepo;
-
-	private final String expectedTag;
-
-	/**
-	 * @param expectedHost
-	 * @param expectedNamespace
-	 * @param expectedRepo
-	 */
-	public DockerImageTests(String description, String fullImageName, String expectedHost,
-			String expectedNamespace,
-			String expectedRepo,
-			String expectedNamespaceAndRepo,
-			String expectedTag) {
-
-		this.description = description;
-		this.fullImageName = fullImageName;
-		this.expectedHost = expectedHost;
-		this.expectedNamespace = expectedNamespace;
-		this.expectedRepo = expectedRepo;
-		this.expectedNamespaceAndRepo = expectedNamespaceAndRepo;
-		this.expectedTag = expectedTag;
+			return data.stream();
+		}
 	}
 
-	@Parameterized.Parameters
-	public static List<String[]> data() {
-		List<String[]> data = new ArrayList<>();
-		data.add(new String[] { "all sections", "myhost:300/namespace/repo:tag", "myhost:300",
-				"namespace", "repo", "namespace/repo", "tag" });
 
-		data.add(new String[] { "repo and tag", "repo:tag", null, null, "repo", "library/repo",
-				"tag" });
-
-		data.add(new String[] { "implicit registry, repo and tag", "library/repo:tag", null,
-				"library", "repo", "library/repo", "tag" });
-
-		data.add(new String[] { "repo without tag", "repo", null, null, "repo", "library/repo",
-				"latest" });
-
-		data.add(new String[] { "namespace and repo", "namespace/repo", null, "namespace", "repo",
-				"namespace/repo", "latest" });
-
-		data.add(new String[] { "host with dot and repo", "host.name/repo", "host.name", null,
-				"repo", "repo", "latest" });
-
-		data.add(new String[] { "host with colon and repo", "host:3000/repo", "host:3000", null,
-				"repo", "repo", "latest" });
-
-		data.add(new String[] { "host with colon, repo and tag", "host:3000/repo:tag", "host:3000",
-				null, "repo", "repo", "tag" });
-
-		data.add(new String[] { "official repo with default namespace",
-				"registry.hub.docker.com/library/repo:tag", "registry.hub.docker.com", "library",
-				"repo", "library/repo", "tag" });
-
-		data.add(new String[] { "official repo with custom namespace",
-				"registry.hub.docker.com/user/repo:tag", "registry.hub.docker.com", "user", "repo",
-				"user/repo", "tag" });
-
-		data.add(new String[] { "official repo with default namespace",
-				"docker.io/library/repo:tag", "docker.io", "library", "repo", "library/repo",
-				"tag" });
-
-		data.add(new String[] { "official repo with custom namespace",
-				"docker.io/user/repo:tag", "docker.io", "user", "repo", "user/repo", "tag" });
-
-		data.add(new String[] { "host and three path components of repo",
-				"host/namespace/category/repo", "host", "namespace/category", "repo",
-				"namespace/category/repo", "latest" });
-
-		data.add(new String[] { "host, port, three path components of repo and tag",
-				"host:5000/namespace/category/repo:tag", "host:5000", "namespace/category", "repo",
-				"namespace/category/repo", "tag" });
-
-		return data;
-	}
-
-	@Test
-	public void testDockerImageParsing() {
-
+	@ParameterizedTest
+	@ArgumentsSource(DockerImageNames.class)
+	public void testDockerImageParsing(String description, String fullImageName, String expectedHost, String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
 		DockerImage dockerImage = DockerImage.fromImageName(fullImageName);
-		assertEquals(description + ": host", expectedHost, dockerImage.getHost());
-		assertEquals(description + ": namespace", expectedNamespace, dockerImage.getNamespace());
-		assertEquals(description + ": repository", expectedRepo, dockerImage.getRepository());
-		assertEquals(description + ": namespace and repo", expectedNamespaceAndRepo,
-				dockerImage.getNamespaceAndRepo());
-		assertEquals(description + ": tag", expectedTag, dockerImage.getTag());
+		assertEquals( expectedHost, dockerImage.getHost(), description + ": host");
+		assertEquals(expectedNamespace, dockerImage.getNamespace(), description + ": namespace");
+		assertEquals(expectedRepo, dockerImage.getRepository(), description + ": repository");
+		assertEquals(expectedNamespaceAndRepo, dockerImage.getNamespaceAndRepo(), description + ": namespace and repo");
+		assertEquals(expectedTag, dockerImage.getTag(), description + ": tag");
 	}
 }

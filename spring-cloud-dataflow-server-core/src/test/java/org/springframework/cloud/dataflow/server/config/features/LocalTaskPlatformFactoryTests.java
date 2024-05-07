@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author David Turanski
+ * @author Corneil du Plessis
  **/
 public class LocalTaskPlatformFactoryTests {
 

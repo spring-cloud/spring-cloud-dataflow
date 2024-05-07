@@ -21,8 +21,7 @@ import java.net.URI;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,17 +42,15 @@ import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @EnableConfigurationProperties({ CommonApplicationProperties.class, TaskConfigurationProperties.class,
@@ -97,7 +94,7 @@ public class DefaultAppValidationServiceTests {
 	@Test
 	@DirtiesContext
 	public void validateDockerTest() {
-		org.junit.Assume.assumeTrue(dockerCheck());
+		org.junit.jupiter.api.Assumptions.assumeTrue(dockerCheck());
 		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:latest");
 		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
 	}
@@ -105,7 +102,7 @@ public class DefaultAppValidationServiceTests {
 	@Test
 	@DirtiesContext
 	public void validateDockerMultiPageTest() {
-		org.junit.Assume.assumeTrue(dockerCheck());
+		org.junit.jupiter.api.Assumptions.assumeTrue(dockerCheck());
 		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:1.3.1.RELEASE");
 		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
 	}

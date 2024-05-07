@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -36,7 +35,6 @@ import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -48,8 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -69,7 +67,7 @@ public class StreamLogsControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -85,12 +83,10 @@ public class StreamLogsControllerTests {
 		when(this.skipperClient.getLog("ticktock4")).thenReturn(new LogInfo(Collections.emptyMap()));
 		mockMvc.perform(
 				get("/streams/logs/ticktock4").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 		when(this.skipperClient.getLog("ticktock4", "myapp")).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		mockMvc.perform(
 				get("/streams/logs/ticktock4/myapp").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk());
 	}
 }

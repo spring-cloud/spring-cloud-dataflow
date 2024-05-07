@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -34,19 +34,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the /streams/validation endpoint.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class StreamValidationDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
 						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
@@ -57,7 +52,6 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE")
 						.param("force", "true"))
 				.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test

@@ -24,9 +24,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -48,7 +47,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -69,8 +67,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Christian Tzolov
  * @author Daniel Serleg
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -90,7 +88,7 @@ public class RuntimeStreamsControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -163,7 +161,6 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
@@ -196,25 +193,21 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams?page=0&size=2")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(2)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=2")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*", hasSize(1)));
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1&size=3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 		this.mockMvc.perform(
 				get("/runtime/streams?page=1000&size=30")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.streamStatusResourceList.*").doesNotExist());
 	}
@@ -224,7 +217,6 @@ public class RuntimeStreamsControllerTests {
 		this.mockMvc.perform(
 				get("/runtime/streams")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))
@@ -256,7 +248,6 @@ public class RuntimeStreamsControllerTests {
 				get("/runtime/streams")
 						.param("names", "ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 
 				.andExpect(jsonPath("$.**", hasSize(3)))

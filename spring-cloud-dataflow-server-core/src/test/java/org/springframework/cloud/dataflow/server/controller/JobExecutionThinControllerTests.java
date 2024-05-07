@@ -20,9 +20,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -41,7 +40,6 @@ import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContaine
 import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -49,6 +47,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -58,7 +57,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author  Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
@@ -88,7 +86,7 @@ public class JobExecutionThinControllerTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepositoryContainer,
@@ -101,9 +99,11 @@ public class JobExecutionThinControllerTests {
 		);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testJobExecutionThinControllerConstructorMissingRepository() {
-		new JobExecutionThinController(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new JobExecutionThinController(null);
+		});
 	}
 
 	@Test
@@ -118,7 +118,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));
@@ -135,7 +134,7 @@ public class JobExecutionThinControllerTests {
 				.param("toDate",
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(toDate))
-				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)));
@@ -145,7 +144,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByJobInstanceId() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("jobInstanceId", "1")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].instanceId", is(1)))
@@ -156,7 +154,6 @@ public class JobExecutionThinControllerTests {
 	public void testGetExecutionsByTaskExecutionId() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions/").param("taskExecutionId", "4")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].taskExecutionId", is(4)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(1)));

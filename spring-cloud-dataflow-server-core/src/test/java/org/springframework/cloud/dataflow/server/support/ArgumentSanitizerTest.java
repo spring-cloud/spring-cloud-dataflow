@@ -25,9 +25,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
@@ -49,7 +49,7 @@ public class ArgumentSanitizerTest {
 	private static final String[] keys = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services", "url" };
 
-	@Before
+	@BeforeEach
 	public void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
@@ -57,8 +57,8 @@ public class ArgumentSanitizerTest {
 	@Test
 	public void testSanitizeProperties() {
 		for (String key : keys) {
-			Assert.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			Assert.assertEquals("******", sanitizer.sanitize(key, "bar"));
+			Assertions.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
+			Assertions.assertEquals("******", sanitizer.sanitize(key, "bar"));
 		}
 	}
 
@@ -81,19 +81,19 @@ public class ArgumentSanitizerTest {
 		JobParameters sanitizedJobParameters = this.sanitizer.sanitizeJobParameters(jobParameters);
 		for(Map.Entry<String, JobParameter> entry : sanitizedJobParameters.getParameters().entrySet()) {
 			if (entry.getKey().equals("username") || entry.getKey().equals("password")) {
-				Assert.assertEquals("******", entry.getValue().getValue());
+				Assertions.assertEquals("******", entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("name")) {
-				Assert.assertEquals("baz", entry.getValue().getValue());
+				Assertions.assertEquals("baz", entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("C")) {
-				Assert.assertEquals(1L, entry.getValue().getValue());
+				Assertions.assertEquals(1L, entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("D")) {
-				Assert.assertEquals(1D, entry.getValue().getValue());
+				Assertions.assertEquals(1D, entry.getValue().getValue());
 			}
 			else if (entry.getKey().equals("E")) {
-				Assert.assertEquals(testDate, entry.getValue().getValue());
+				Assertions.assertEquals(testDate, entry.getValue().getValue());
 			}
 		}
 	}
@@ -101,21 +101,21 @@ public class ArgumentSanitizerTest {
 	@Test
 	public void testSanitizeTaskDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar --another-secret=kenny");
-		Assert.assertEquals("task1 --some.password='******' --another-secret='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
+		Assertions.assertEquals("task1 --some.password='******' --another-secret='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 
 	@Test
 	public void testSanitizeComposedTaskDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar && task2 --some.password=woof");
-		Assert.assertEquals("task1 --some.password='******' && task2 --some.password='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
+		Assertions.assertEquals("task1 --some.password='******' && task2 --some.password='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
 	}
 
 	@Test
 	public void testSanitizeComposedTaskSplitDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition(
 				"mytask", "<task1 --some.password=foobar || task2 --some.password=woof> && task3  --some.password=foobar");
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				"<task1 --some.password='******' || task2 --some.password='******'> && task3 --some.password='******'",
 				this.sanitizer.sanitizeTaskDsl(taskDefinition));
 	}
@@ -130,11 +130,11 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assert.assertEquals(keys.length, sanitizedArguments.size());
+		Assertions.assertEquals(keys.length, sanitizedArguments.size());
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			Assert.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			Assertions.assertEquals("--" + keys[order] + "=******", sanitizedString);
 			order++;
 		}
 	}
@@ -147,16 +147,16 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assert.assertEquals(1, sanitizedArguments.size());
-		Assert.assertEquals(sanitizedArguments.get(0), "");
+		Assertions.assertEquals(1, sanitizedArguments.size());
+		Assertions.assertEquals(sanitizedArguments.get(0), "");
 	}
 
 
 	@Test
 	public void testMultipartProperty() {
-		Assert.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		Assert.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		Assert.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+		Assertions.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
+		Assertions.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
+		Assertions.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
 	}
 	private String loadStringFromResource(String uri) throws IOException {
 		Resource resource = new DefaultResourceLoader().getResource(uri);
@@ -170,8 +170,8 @@ public class ArgumentSanitizerTest {
 		String output = sanitizer.sanitizeJsonOrYamlString(input);
 		System.out.println("Read:" + input);
 		System.out.println("Sanitized:" + output);
-		Assert.assertTrue(output.contains("*****"));
-		Assert.assertFalse(output.contains("54321"));
+		Assertions.assertTrue(output.contains("*****"));
+		Assertions.assertFalse(output.contains("54321"));
 
 	}
 
@@ -181,8 +181,8 @@ public class ArgumentSanitizerTest {
 		String output = sanitizer.sanitizeJsonOrYamlString(input);
 		System.out.println("Read:" + input);
 		System.out.println("Sanitized:" + output);
-		Assert.assertTrue(output.contains("*****"));
-		Assert.assertFalse(output.contains("54321"));
+		Assertions.assertTrue(output.contains("*****"));
+		Assertions.assertFalse(output.contains("54321"));
 	}
 
 }

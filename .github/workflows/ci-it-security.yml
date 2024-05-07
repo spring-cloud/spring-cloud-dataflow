@@ -27,19 +27,20 @@ jobs:
 
     - name: Run Security IT
       run: |
+        mvn clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am
         mvn \
           -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=oauth \
           -Pfailsafe \
           --batch-mode \
-          integration-test
+          test
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
       with:
         name: Integration Tests
-        path: '**/failsafe-reports/*IT.xml'
+        path: '**/surefire-reports/*IT.xml'
         reporter: java-junit
         list-tests: failed
     - name: 'Action: Upload Integration Test Results'

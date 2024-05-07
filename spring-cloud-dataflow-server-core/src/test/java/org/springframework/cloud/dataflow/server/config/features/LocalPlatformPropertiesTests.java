@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,14 +25,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = LocalPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("local-platform-properties")
 public class LocalPlatformPropertiesTests {

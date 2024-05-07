@@ -21,10 +21,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,6 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -58,7 +56,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,8 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -109,7 +107,7 @@ public class AuditRecordControllerTests {
 
 	private ZonedDateTime endDate;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -146,7 +144,7 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		appRegistrationRepository.deleteAll();
 		streamDefinitionRepository.deleteAll();
@@ -173,7 +171,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 	}
@@ -185,7 +182,6 @@ public class AuditRecordControllerTests {
 				.param("sort", "correlationId,asc")
 				.param("sort", "id,asc")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)))
 
@@ -199,7 +195,6 @@ public class AuditRecordControllerTests {
 				.param("sort", "correlationId,desc")
 				.param("sort", "id,desc")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)))
 
@@ -210,7 +205,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)));
 	}
@@ -218,7 +212,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
@@ -226,7 +219,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTask() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded").doesNotExist());
 	}
@@ -234,7 +226,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecordsWithOperationTaskAndStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK,STREAM").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
@@ -242,7 +233,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAllAuditRecordsWithActionDeleteAndUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)));
 	}
@@ -250,7 +240,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAppRelatedAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)));
 	}
@@ -258,7 +247,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAuditRecordsWithActionCreate() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=CREATE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(7)));
 	}
@@ -266,7 +254,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAuditActionTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-action-types").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.*", hasSize(7)))
 				.andExpect(jsonPath("$[0].id", is(100)))
@@ -308,7 +295,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAuditOperationTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.*", hasSize(5)))
 
@@ -337,7 +323,6 @@ public class AuditRecordControllerTests {
 	public void testRetrieveRegisteredAppsAuditData() throws Exception {
 		mockMvc.perform(
 				get("/audit-records?operations=APP_REGISTRATION&actions=CREATE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)))
 
@@ -348,7 +333,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveDeletedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 
@@ -356,7 +340,6 @@ public class AuditRecordControllerTests {
 
 		mockMvc.perform(
 				get("/audit-records?operations=APP_REGISTRATION&actions=DELETE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)))
 
@@ -370,7 +353,6 @@ public class AuditRecordControllerTests {
 		String toDate = time.toString();
 
 		mockMvc.perform(get("/audit-records?toDate=" + toDate).accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(6)))
 
@@ -389,7 +371,6 @@ public class AuditRecordControllerTests {
 		String fromDate = betweenTime.toString();
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate).accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(greaterThanOrEqualTo(2))))
 
@@ -412,7 +393,6 @@ public class AuditRecordControllerTests {
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate)
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(greaterThanOrEqualTo(1))))
 
@@ -430,14 +410,12 @@ public class AuditRecordControllerTests {
 				.param("fromDate", fromDate)
 				.param("toDate", toDate)
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	public void testRetrieveAuditRecordsBetweenTwoNullDates() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(greaterThanOrEqualTo(9))))
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList[4].auditRecordId", is(9)))
@@ -448,7 +426,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveAuditRecordById() throws Exception {
 		mockMvc.perform(get("/audit-records/13").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.auditRecordId", is(13)))
 				.andExpect(jsonPath("$.correlationId", is("myStream")))
@@ -458,7 +435,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveUpdatedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(4)));
 
@@ -467,7 +443,6 @@ public class AuditRecordControllerTests {
 
 		mockMvc.perform(
 				get("/audit-records?operations=APP_REGISTRATION&actions=UPDATE").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)))
 
@@ -478,7 +453,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveStreamAndTaskRecords() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
@@ -486,7 +460,6 @@ public class AuditRecordControllerTests {
     @Test
 	public void testRetrievePagedAuditDataNegative() throws Exception {
 		mockMvc.perform(get("/audit-records?page=-5&size=2").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)));
 	}
@@ -494,7 +467,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrievePagedAuditDataInRange() throws Exception {
 		mockMvc.perform(get("/audit-records?page=0&size=5").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
@@ -503,7 +475,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrievePagedAuditDataFromPage3() throws Exception {
 		mockMvc.perform(get("/audit-records?page=2&size=4").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(1)));
 	}
@@ -511,7 +482,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrieveDeletedAndUndeployedStreamsAndTasks() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK&actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(2)))
 
@@ -537,7 +507,6 @@ public class AuditRecordControllerTests {
 
 		mockMvc.perform(get("/audit-records?fromDate=" + fromDate + "&toDate=" + toDate+"&actions=CREATE&operations=STREAM")
 				.accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(greaterThanOrEqualTo(2))))
 
@@ -555,7 +524,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrievePagedAuditDataOverlappingRightBound() throws Exception {
 		mockMvc.perform(get("/audit-records?page=0&size=20").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(9)));
 	}
@@ -563,7 +531,6 @@ public class AuditRecordControllerTests {
 	@Test
 	public void testRetrievePagedAuditDataOutOfRange() throws Exception {
 		mockMvc.perform(get("/audit-records?page=55&size=2").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*").doesNotExist());
 	}

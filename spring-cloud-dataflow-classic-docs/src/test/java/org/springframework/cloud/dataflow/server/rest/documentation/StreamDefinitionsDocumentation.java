@@ -17,11 +17,12 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 
@@ -42,20 +43,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
-
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
 					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
@@ -64,7 +59,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 			post("/apps/{type}/log", "sink")
 					.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"))
 			.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test
@@ -98,13 +92,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void listAllStreamDefinitions() throws Exception {
+		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 			get("/streams/definitions")
 				.param("page", "0")
 				.param("sort", "name,ASC")
 				.param("search", "")
 				.param("size", "10"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -121,9 +115,9 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getStreamDefinition() throws Exception {
+		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 				get("/streams/definitions/{name}", "timelog"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -146,7 +140,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 		createStream("mysamplestream", "time | log", false);
 		this.mockMvc.perform(
 				get("/streams/definitions/{name}/applications", "mysamplestream"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -169,6 +162,7 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void listRelatedStreamDefinitions() throws Exception {
+		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 			get("/streams/definitions/{name}/related", "timelog")
                     .param("page", "0")
@@ -176,7 +170,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
                     .param("search", "")
                     .param("size", "10")
 					.param("nested", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
                 requestParameters(
@@ -198,9 +191,9 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void streamDefinitionDelete1() throws Exception {
+		createStream("timelog", "time --format='YYYY MM DD' | log", false);
 		this.mockMvc.perform(
 			delete("/streams/definitions/{name}", "timelog"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(parameterWithName("name")
@@ -212,7 +205,6 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 	public void streamDefinitionDeleteAll() throws Exception {
 		this.mockMvc.perform(
 			delete("/streams/definitions"))
-			.andDo(print())
 			.andExpect(status().isOk());
 	}
 

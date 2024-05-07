@@ -22,14 +22,14 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -73,11 +73,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -90,8 +89,8 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @TestPropertySource(properties = { "spring.main.banner-mode=off"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -113,17 +112,17 @@ public class DefaultStreamServiceIntegrationTests {
 	@MockBean
 	private SkipperClient skipperClient;
 
-	@Before
+	@BeforeEach
 	public void before() throws URISyntaxException {
 		createTickTock();
 		this.skipperClient = MockUtils.configureMock(this.skipperClient);
 	}
 
-	@After
+	@AfterEach
 	public void destroyStream() {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setName("ticktock");
-		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Arrays.asList(packageMetadata));
+		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Collections.singletonList(packageMetadata));
 		streamService.undeployStream("ticktock");
 		streamDefinitionRepository.deleteAll();
 	}

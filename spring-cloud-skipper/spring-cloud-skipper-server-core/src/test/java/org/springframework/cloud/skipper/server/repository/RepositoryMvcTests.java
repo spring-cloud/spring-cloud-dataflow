@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.server.AbstractMockMvcTests;
 
@@ -26,12 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 public class RepositoryMvcTests extends AbstractMockMvcTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/api")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/api")).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.repositories").exists());
 	}
 }

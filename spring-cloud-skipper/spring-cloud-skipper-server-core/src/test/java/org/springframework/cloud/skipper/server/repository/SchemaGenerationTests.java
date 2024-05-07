@@ -29,7 +29,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repo-test")
 @Transactional
