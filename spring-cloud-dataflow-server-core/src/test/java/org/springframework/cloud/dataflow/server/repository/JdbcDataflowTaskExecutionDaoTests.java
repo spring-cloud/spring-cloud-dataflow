@@ -28,10 +28,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
+import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.task.repository.TaskRepository;
@@ -108,7 +108,8 @@ public class JdbcDataflowTaskExecutionDaoTests {
 		for (int i = 0; i < numExecutions; i++) {
 			long executionId = randomGenerator.nextLong();
 			taskExecutions.add(new AggregateTaskExecution(executionId, null, taskName, startTime,
-					null, null, new ArrayList<>(), null, externalExecutionId, schemaVersionTarget.getName(), null));
+					null, null, new ArrayList<>(), null, externalExecutionId, null,
+				schemaVersionTarget.getName(), null));
 		}
 		return taskExecutions;
 	}

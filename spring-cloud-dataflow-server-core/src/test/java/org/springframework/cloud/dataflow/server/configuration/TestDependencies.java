@@ -550,8 +550,8 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		);
 	}
 	@Bean
-	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer explorer) {
-		return new TaskExecutionThinController(explorer);
+	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer explorer, TaskJobService taskJobService) {
+		return new TaskExecutionThinController(explorer, taskJobService);
 	}
 
 	@Bean

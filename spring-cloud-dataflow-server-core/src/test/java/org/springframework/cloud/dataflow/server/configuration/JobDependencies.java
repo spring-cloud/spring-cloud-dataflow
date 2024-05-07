@@ -241,8 +241,8 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer) {
-		return new TaskExecutionThinController(aggregateTaskExplorer);
+	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer, TaskJobService taskJobService) {
+		return new TaskExecutionThinController(aggregateTaskExplorer, taskJobService);
 	}
 
 	@Bean
