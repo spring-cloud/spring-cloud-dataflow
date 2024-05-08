@@ -15,25 +15,27 @@
  */
 package org.springframework.cloud.skipper.server;
 
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
-public class LogTestNameRule extends TestWatcher {
+public class LogTestNameRule implements AfterEachCallback, BeforeEachCallback {
 
 	private final static Logger log = LoggerFactory.getLogger("junit.logTestName");
 
 	@Override
-	protected void starting(Description description) {
-		log.info("Starting Test {}", description.getMethodName());
+	public void beforeEach(ExtensionContext context) throws Exception {
+		log.info("Starting Test {}", context.getRequiredTestMethod());
 	}
 
 	@Override
-	protected void finished(Description description) {
-		log.info("Finished Test {}", description.getMethodName());
+	public void afterEach(ExtensionContext context) throws Exception {
+		log.info("Finished Test {}", context.getRequiredTestMethod());
 	}
 }

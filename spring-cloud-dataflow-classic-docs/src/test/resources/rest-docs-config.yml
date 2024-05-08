@@ -23,3 +23,10 @@ spring:
       org.springframework.cloud.dataflow.shell.autoconfigure.BaseShellAutoConfiguration,
       org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundryTaskPlatformAutoConfiguration,
       org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration
+management:
+  info:
+    build:
+      enabled: true
+    git:
+      enabled: true
+      mode: full

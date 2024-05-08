@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
 public class PackageMetadataDocumentation extends BaseDocumentation {
@@ -55,7 +56,6 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				get("/api/packageMetadata")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,
@@ -97,7 +97,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 								fieldWithPath("_embedded.packageMetadata[]._links.packageMetadata.templated").ignored(),
 								fieldWithPath("_embedded.packageMetadata[]._links.install.href").ignored())
 								.and(super.defaultLinkProperties),
-						super.linksForSkipper()));
+						linksForSkipper()));
 	}
 
 	@Test
@@ -111,7 +111,6 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata/{packageMetadataId}", saved.getId()))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -156,7 +155,6 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata/search/findByName?name=log"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(parameterWithName("name").description("The name of the Package")),
@@ -201,7 +199,6 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata/search/findByNameContainingIgnoreCase?name=LO"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(parameterWithName("name").description("The name of the Package")),
@@ -254,7 +251,6 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
 				get("/api/packageMetadata?projection=summary"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationProperties.and(

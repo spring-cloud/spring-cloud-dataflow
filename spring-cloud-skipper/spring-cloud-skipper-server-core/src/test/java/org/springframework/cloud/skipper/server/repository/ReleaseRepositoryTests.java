@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.repository;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -42,14 +42,15 @@ import static org.assertj.core.api.Java6Assertions.fail;
 /**
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repo-test")
 @Transactional
 public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
-	private static Long REMOTE_REPO = 1L;
+	private static final Long REMOTE_REPO = 1L;
 
-	private static Long LOCAL_REPO = 2L;
+	private static final Long LOCAL_REPO = 2L;
 
 	@Autowired
 	private ReleaseRepository releaseRepository;

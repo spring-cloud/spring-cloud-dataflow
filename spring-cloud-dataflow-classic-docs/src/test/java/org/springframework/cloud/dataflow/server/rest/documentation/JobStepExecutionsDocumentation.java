@@ -19,9 +19,8 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -41,7 +40,6 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -60,40 +58,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
 public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
-	private static boolean initialized;
-
 	private JobRepositoryContainer jobRepositoryContainer;
-
 	private TaskExecutionDaoContainer daoContainer;
-
 	private TaskBatchDaoContainer taskBatchDaoContainer;
-
 	private AggregateExecutionSupport aggregateExecutionSupport;
-
 	private TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (!initialized) {
-			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
-			initialize();
-			createJobExecution(JOB_NAME, BatchStatus.STARTED);
+		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+		initialize();
+		createJobExecution(JOB_NAME, BatchStatus.STARTED);
 
-			documentation.dontDocument(() -> this.mockMvc.perform(
-							post("/tasks/definitions")
-									.param("name", "DOCJOB1")
-									.param("definition", "timestamp --format='YYYY MM DD'"))
-					.andExpect(status().isOk()));
-
-			initialized = true;
-		}
+		documentation.dontDocument(() -> this.mockMvc.perform(
+						post("/tasks/definitions")
+								.param("name", "DOCJOB1")
+								.param("definition", "timestamp --format='YYYY MM DD'"))
+				.andExpect(status().isOk()));
 	}
 
 

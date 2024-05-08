@@ -19,9 +19,10 @@ package org.springframework.cloud.dataflow.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Christian Tzolov
@@ -34,7 +35,7 @@ public class ArgumentSanitizerTest {
 	private static final String[] keys = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services", "url" };
 
-	@Before
+	@BeforeEach
 	public void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
@@ -42,8 +43,8 @@ public class ArgumentSanitizerTest {
 	@Test
 	public void testSanitizeProperties() {
 		for (String key : keys) {
-			Assert.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			Assert.assertEquals("******", sanitizer.sanitize(key, "bar"));
+			assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
+			assertEquals("******", sanitizer.sanitize(key, "bar"));
 		}
 	}
 
@@ -57,11 +58,11 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assert.assertEquals(keys.length, sanitizedArguments.size());
+		assertEquals(keys.length, sanitizedArguments.size());
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			Assert.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			assertEquals("--" + keys[order] + "=******", sanitizedString);
 			order++;
 		}
 	}
@@ -69,26 +70,26 @@ public class ArgumentSanitizerTest {
 
 	@Test
 	public void testMultipartProperty() {
-		Assert.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		Assert.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		Assert.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+		assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
+		assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
+		assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
 	}
 
 //	@Test
 //	public void testHierarchicalPropertyNames() {
-//		Assert.assertEquals("time --password='******' | log",
+//		assertEquals("time --password='******' | log",
 //				sanitizer.(new StreamDefinition("stream", "time --password=bar | log")));
 //	}
 //
 //	@Test
 //	public void testStreamPropertyOrder() {
-//		Assert.assertEquals("time --some.password='******' --another-secret='******' | log",
+//		assertEquals("time --some.password='******' --another-secret='******' | log",
 //				sanitizer.sanitizeStream(new StreamDefinition("stream", "time --some.password=foobar --another-secret=kenny | log")));
 //	}
 //
 //	@Test
 //	public void testStreamMatcherWithHyphenDotChar() {
-//		Assert.assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
+//		assertEquals("twitterstream --twitter.credentials.access-token-secret='******' "
 //						+ "--twitter.credentials.access-token='******' --twitter.credentials.consumer-secret='******' "
 //						+ "--twitter.credentials.consumer-key='******' | "
 //						+ "filter --expression=#jsonPath(payload,'$.lang')=='en' | "
@@ -105,6 +106,6 @@ public class ArgumentSanitizerTest {
 //	@Test
 //	public void testStreamSanitizeOriginalDsl() {
 //		StreamDefinition streamDefinition = new StreamDefinition("test", "time --password='******' | log --password='******'", "time --password='******' | log");
-//		Assert.assertEquals("time --password='******' | log", sanitizer.sanitizeOriginalStreamDsl(streamDefinition));
+//		assertEquals("time --password='******' | log", sanitizer.sanitizeOriginalStreamDsl(streamDefinition));
 //	}
 }

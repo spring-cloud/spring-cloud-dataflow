@@ -20,11 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
+
 
 /**
  * @author Thomas Risberg
@@ -61,7 +61,8 @@ public class TaskDefinitionTests {
 
 	@Test
 	public void testBuilder() {
-		TaskDefinition definition = new TaskDefinition.TaskDefinitionBuilder()
+		new TaskDefinition.TaskDefinitionBuilder();
+		TaskDefinition definition = TaskDefinition.TaskDefinitionBuilder
 				.from(new TaskDefinition("test", "timestamp"))
 				.build();
 		assertEquals("test", definition.getName());
@@ -75,8 +76,8 @@ public class TaskDefinitionTests {
 		TaskDefinition definitionOne = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionTwo = new TaskDefinition("test", "timestamp");
 
-		assertTrue("TaskDefinitions were expected to be equal.", definitionOne.equals(definitionTwo));
-		assertTrue("TaskDefinitions were expected to be equal.", definitionOne.equals(definitionOne));
+		assertEquals(definitionOne, definitionTwo, "TaskDefinitions were expected to be equal.");
+		assertEquals(definitionOne, definitionOne, "TaskDefinitions were expected to be equal.");
 
 	}
 
@@ -85,9 +86,9 @@ public class TaskDefinitionTests {
 		TaskDefinition definitionOne = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionFoo = new TaskDefinition("test", "foo");
 
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals(definitionFoo));
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals(null));
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals("HI"));
+		assertNotEquals(definitionOne, definitionFoo, "TaskDefinitions were not expected to be equal.");
+		assertNotEquals(null, definitionOne, "TaskDefinitions were not expected to be equal.");
+		assertNotEquals("HI", definitionOne, "TaskDefinitions were not expected to be equal.");
 	}
 	@Test
 	public void testHashCode() {
@@ -95,8 +96,8 @@ public class TaskDefinitionTests {
 		TaskDefinition definitionTwo = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionFoo = new TaskDefinition("test", "foo");
 
-		assertTrue("TaskDefinitions' hashcodes were expected to be equal.", definitionOne.hashCode() == definitionTwo.hashCode());
-		assertFalse("TaskDefinitions' hashcodes were not expected to be equal.", definitionOne.hashCode() == definitionFoo.hashCode());
+		assertEquals(definitionOne.hashCode(), definitionTwo.hashCode(), "TaskDefinitions' hashcodes were expected to be equal.");
+		assertNotEquals(definitionOne.hashCode(), definitionFoo.hashCode(), "TaskDefinitions' hashcodes were not expected to be equal.");
 	}
 
 	@Test
@@ -114,7 +115,8 @@ public class TaskDefinitionTests {
 	public void testBuilderSetProperties() {
 		Map<String,String> properties = new HashMap<>();
 		properties.put("foo", "bar");
-		TaskDefinition definition = new TaskDefinition.TaskDefinitionBuilder()
+		new TaskDefinition.TaskDefinitionBuilder();
+		TaskDefinition definition = TaskDefinition.TaskDefinitionBuilder
 				.from(new TaskDefinition("test", "timestamp"))
 				.setProperties(properties)
 				.build();

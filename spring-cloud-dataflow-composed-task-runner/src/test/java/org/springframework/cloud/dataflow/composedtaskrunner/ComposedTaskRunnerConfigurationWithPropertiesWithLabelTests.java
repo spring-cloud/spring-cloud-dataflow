@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +38,8 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskRunnerTaskletTestUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,10 +47,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Glenn Renfro
  */
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
-	DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
-	ComposedTaskRunnerConfiguration.class})
+@SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
+		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
+		ComposedTaskRunnerConfiguration.class})
 @TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l11","max-wait-time=1010",
 	"composed-task-app-properties.app.l1.AAA.format=yyyy",
 	"composed-task-app-properties.app.l11.AAA.format=yyyy",

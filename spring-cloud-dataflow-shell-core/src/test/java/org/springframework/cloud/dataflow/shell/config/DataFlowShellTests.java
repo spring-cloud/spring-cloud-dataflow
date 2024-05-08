@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.dataflow.shell.config;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
@@ -28,6 +28,7 @@ import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class DataFlowShellTests {
 
@@ -36,7 +37,7 @@ public class DataFlowShellTests {
 		final DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(null);
 
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -45,7 +46,7 @@ public class DataFlowShellTests {
 		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -54,7 +55,7 @@ public class DataFlowShellTests {
 		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
+		Assertions.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
 
 	}
 
@@ -64,7 +65,7 @@ public class DataFlowShellTests {
 		target.setAuthenticationEnabled(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 
 	}
 
@@ -76,7 +77,7 @@ public class DataFlowShellTests {
 		target.setAuthenticated(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -86,7 +87,7 @@ public class DataFlowShellTests {
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -98,7 +99,7 @@ public class DataFlowShellTests {
 		target.setAuthenticated(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
 	}
 
 	@Test
@@ -110,7 +111,7 @@ public class DataFlowShellTests {
 		target.setAuthenticated(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assert.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
+		Assertions.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
 	}
 
 	private DataFlowShell prepareDataFlowShellWithStreamOperations(Target target) {

@@ -19,10 +19,10 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,26 +56,21 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-@Performance
-class TaskExecutionQueryIT {
 
+public class TaskExecutionQueryContainer {
+
+	static final Logger logger = LoggerFactory.getLogger(TaskExecutionQueryContainer.class);
 	@SpringBootTest(classes = DataFlowServerApplication.class, properties = {
-		"spring.jpa.hibernate.ddl-auto=none",
-		"spring.datasource.hikari.maximum-pool-size=5"
+			"spring.jpa.hibernate.ddl-auto=none", "spring.datasource.hikari.maximum-pool-size=5"
 	})
 	@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 	@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-	static abstract class LargeTaskExecutionDatabaseTests {
-
-		static final Logger logger = LoggerFactory.getLogger(TaskExecutionQueryIT.class);
-
+	@Performance
+	static abstract class AbstractLargeTaskExecutionDatabaseIT {
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(), MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
-
 		MockMvc mockMvc;
-
 		@Autowired
 		WebApplicationContext wac;
-
 		@Autowired
 		DataSource dataSource;
 
@@ -194,43 +189,45 @@ class TaskExecutionQueryIT {
 		}
 	}
 
-	@Nested
-	class MariaDB_10_6_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements MariaDB_10_6_ContainerSupport {
+	static class MariaDB_10_6_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements MariaDB_10_6_ContainerSupport {
+
 	}
 
-	@Nested
-	class MariaDB_11_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements MariaDB_11_ContainerSupport {
+	static class MariaDB_11_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements MariaDB_11_ContainerSupport {
 	}
 
-	@Nested
-	class MySql_5_7_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements MySQL_5_7_ContainerSupport {
+	static class MySql_5_7_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements MySQL_5_7_ContainerSupport {
 	}
 
-	@Nested
-	class MySql_8_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements MySQL_8_ContainerSupport {
+	static class MySql_8_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements MySQL_8_ContainerSupport {
 	}
 
-	@Nested
-	class DB2_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements DB2_11_5_ContainerSupport {
+	static class DB2_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements DB2_11_5_ContainerSupport {
 	}
 
-	@Nested
-	class SqlServer_2017_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements SqlServer_2017_ContainerSupport {
+	static class SqlServer_2017_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements SqlServer_2017_ContainerSupport {
 	}
 
-	@Nested
-	class SqlServer_2019_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements SqlServer_2019_ContainerSupport {
+	static class SqlServer_2019_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements SqlServer_2019_ContainerSupport {
 	}
 
-	@Nested
-	class SqlServer_2022_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements SqlServer_2022_ContainerSupport {
+	static class SqlServer_2022_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements SqlServer_2022_ContainerSupport {
 	}
 
-	@Nested
-	class PostgreSQL_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements PostgreSQL_14_ContainerSupport {
+	static class PostgreSQL_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements PostgreSQL_14_ContainerSupport {
 	}
 
-	@Nested
-	class Oracle_TaskExecutionQueryTests extends LargeTaskExecutionDatabaseTests implements Oracle_XE_18_ContainerSupport {
+	static class Oracle_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
+			implements Oracle_XE_18_ContainerSupport {
 	}
+
 }

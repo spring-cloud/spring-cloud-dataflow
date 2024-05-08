@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -62,7 +61,6 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -70,8 +68,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Glenn Renfro
  * @author Corneil du Plessis
+ * @author Corneil du Plessis
  */
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)

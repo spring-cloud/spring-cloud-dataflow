@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link DeploymentPropertiesUtils}.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 public class DeploymentPropertiesUtilsTests {
 

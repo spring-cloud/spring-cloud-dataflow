@@ -85,8 +85,8 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.MSSQL_2019_CU16_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2019-CU16-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.MSSQL_2022_CTP2_0_ubuntu_20_04, "mcr.microsoft.com/mssql/server:2022-CTP2.0-ubuntu-20.04", TagNames.MSSQL),
 		ClusterContainer.from(TagNames.ORACLE_XE_18, "gvenzl/oracle-xe:18-slim-faststart", TagNames.ORACLE),
-		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "ibmcom/db2:11.5.0.0a", TagNames.DB2),
-		ClusterContainer.from(TagNames.DB2_11_5_8_0, "ibmcom/db2:11.5.8.0", TagNames.DB2)
+		ClusterContainer.from(TagNames.DB2_11_5_0_0a, "icr.io/db2_community/db2:11.5.0.0a", TagNames.DB2),
+		ClusterContainer.from(TagNames.DB2_11_5_8_0, "icr.io/db2_community/db2:11.5.8.0", TagNames.DB2)
 	);
 
 	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(

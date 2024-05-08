@@ -21,9 +21,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -47,7 +46,6 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -70,14 +68,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
 public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
-
-	private static boolean initialized;
 
 	private JobRepositoryContainer jobRepositoryContainer;
 
@@ -94,9 +89,8 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	private TaskDefinitionReader taskDefinitionReader;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (!initialized) {
 			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 			initialize();
 			createJobExecution(JOB_NAME, BatchStatus.STARTED);
@@ -115,9 +109,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 									.param("name", "DOCJOB1")
 									.param("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
-
-			initialized = true;
-		}
 	}
 
 	@Test
@@ -126,7 +117,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions")
 								.param("page", "0")
 								.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -147,7 +137,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/thinexecutions")
 								.param("page", "0")
 								.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -169,7 +158,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								.param("page", "0")
 								.param("size", "10")
 								.param("jobInstanceId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -193,7 +181,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								.param("page", "0")
 								.param("size", "10")
 								.param("taskExecutionId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -218,7 +205,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								.param("size", "10")
 								.param("fromDate", "2000-09-24T17:00:45,000")
 								.param("toDate", "2050-09-24T18:00:45,000"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -244,7 +230,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								.param("name", JOB_NAME)
 								.param("page", "0")
 								.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -268,7 +253,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								.param("name", JOB_NAME)
 								.param("page", "0")
 								.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						requestParameters(
 								parameterWithName("page")
@@ -291,7 +275,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions/{id}", "2")
 								.queryParam("schemaTarget", "boot2")
 				)
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
@@ -332,7 +315,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						.param("stop", "true")
 						.queryParam("schemaTarget", "boot2")
 				)
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("id")
@@ -349,7 +331,6 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 						.param("restart", "true")
 						.queryParam("schemaTarget", "boot2")
 				)
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 								pathParameters(parameterWithName("id")

@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -36,19 +36,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the {@code /audit-records} endpoint.
  *
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class AuditRecordsDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
 					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
@@ -63,7 +58,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 						.param("definition", "time --format='YYYY MM DD' | log")
 						.param("deploy", "false"))
 				.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test
@@ -77,7 +71,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 				.param("fromDate", "2000-01-01T00:00:00")
 				.param("toDate", "2099-01-01T00:00:00")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -101,7 +94,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditRecord() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/{id}", "5"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
@@ -125,7 +117,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditActionTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-action-types"))
-			.andDo(print())
 			.andExpect(status().isOk()
 		);
 	}
@@ -134,7 +125,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	public void getAuditOperationTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-operation-types"))
-			.andDo(print())
 			.andExpect(status().isOk()
 		);
 	}

@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @ActiveProfiles({"repo-test", "local"})
 @TestPropertySource(properties = {

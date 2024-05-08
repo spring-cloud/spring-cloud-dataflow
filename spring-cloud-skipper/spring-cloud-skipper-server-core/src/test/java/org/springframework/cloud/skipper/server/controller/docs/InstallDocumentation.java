@@ -19,7 +19,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.InstallProperties;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class InstallDocumentation extends BaseDocumentation {
 
@@ -56,13 +57,12 @@ public class InstallDocumentation extends BaseDocumentation {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		when(this.skipperStateMachineService.installRelease(any(InstallRequest.class)))
 				.thenReturn(createTestRelease(releaseName, StatusCode.DEPLOYED));
 		mockMvc.perform(post("/api/package/install").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				.content(convertObjectToJson(installRequest))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(installRequest))).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("links").ignored(),
@@ -143,8 +143,7 @@ public class InstallDocumentation extends BaseDocumentation {
 
 		mockMvc.perform(post("/api/package/install/{packageMetaDataId}", 1).accept(MediaType.APPLICATION_JSON)
 				.contentType(contentType)
-				.content(convertObjectToJson(installProperties2))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(installProperties2))).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("links").ignored(),

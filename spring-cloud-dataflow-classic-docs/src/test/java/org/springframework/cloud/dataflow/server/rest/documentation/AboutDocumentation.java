@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -24,19 +24,24 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
 public class AboutDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getMetaInformation() throws Exception {
-		this.mockMvc.perform(get("/about").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		this.mockMvc.perform(
+			get("/about")
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseFields(
 						fieldWithPath("_links.self.href").description("Link to the runtime environment resource"),
 
@@ -168,8 +173,12 @@ public class AboutDocumentation extends BaseDocumentation {
 								"Provides the git branch for the Dataflow server"),
 						fieldWithPath("gitAndBuildInfo.git.commit").type(JsonFieldType.OBJECT).description(
 								"Provides the git commit info for the Dataflow server"),
-						fieldWithPath("gitAndBuildInfo.git.commit.id").type(JsonFieldType.STRING).description(
+						fieldWithPath("gitAndBuildInfo.git.commit.id").type(JsonFieldType.OBJECT).description(
 								"Provides the git commit id for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.commit.id.abbrev").type(JsonFieldType.STRING).description(
+							"Provides the short git commit id for the Dataflow server"),
+						fieldWithPath("gitAndBuildInfo.git.commit.id.full").type(JsonFieldType.STRING).description(
+							"Provides the full git commit id for the Dataflow server"),
 						fieldWithPath("gitAndBuildInfo.git.commit.time").type(JsonFieldType.STRING).description(
 								"Provides the git commit time for the Dataflow server"),
 						fieldWithPath("gitAndBuildInfo.build").type(JsonFieldType.OBJECT).description(

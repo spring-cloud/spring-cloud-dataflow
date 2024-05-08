@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.ActiveProfiles;
 
@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @ActiveProfiles({ "repository" })
 public class RepositoriesDocumentation extends BaseDocumentation {
@@ -38,7 +39,6 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 				get("/api/repositories")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						super.paginationRequestParameterProperties,
@@ -64,7 +64,6 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 				get("/api/repositories/search/findByName?name={name}", "local"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

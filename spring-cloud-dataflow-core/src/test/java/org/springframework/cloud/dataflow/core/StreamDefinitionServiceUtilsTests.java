@@ -20,10 +20,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Ignore;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Christian Tzolov
@@ -38,7 +39,7 @@ public class StreamDefinitionServiceUtilsTests {
 		reverseDslTest("time | log", 2);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void quotesInParams() {
 		reverseDslTest("foo --bar='payload.matches(''hello'')' | file", 2);
@@ -59,13 +60,13 @@ public class StreamDefinitionServiceUtilsTests {
 		reverseDslTest("time | filter | log", 3);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testXD2416_1() {
 		reverseDslTest("http | transform --expression='payload.replace(\"abc\", \"\")' | log", 3);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void testXD2416_2() {
 		reverseDslTest("http | transform --expression='payload.replace(\"abc\", '''')' | log", 3);

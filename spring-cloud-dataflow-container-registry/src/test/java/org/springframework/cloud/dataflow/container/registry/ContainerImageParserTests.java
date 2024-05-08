@@ -20,14 +20,14 @@ package org.springframework.cloud.dataflow.container.registry;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * @author Christian Tzolov
  */
 public class ContainerImageParserTests {
 
-	private ContainerImageParser containerImageNameParser =
+	private final ContainerImageParser containerImageNameParser =
 			new ContainerImageParser("test-domain.io", "tag654", "official-repo-name");
 
 
@@ -105,13 +105,13 @@ public class ContainerImageParserTests {
 
 	@Test
 	public void testInvalidRegistryHostName() {
-		assertThrows(IllegalArgumentException.class, () ->
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
 				containerImageNameParser.parse("6666#.6:80/scdf/spring-image:123"));
 	}
 
 	@Test
 	public void testInvalidRegistryPart() {
-		assertThrows(IllegalArgumentException.class, () ->
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
 				containerImageNameParser.parse("localhost:80bla/scdf/spring-image:123"));
 	}
 }

@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Gunnar Hillert
@@ -43,19 +43,19 @@ public class OnOAuth2ClientCredentialsEnabledTests {
 	@Test
 	public void noPropertySet() throws Exception {
 		this.context = load(Config.class);
-		org.hamcrest.MatcherAssert.assertThat(context.containsBean("myBean"), equalTo(false));
+		assertThat(context.containsBean("myBean")).isEqualTo(false);
 	}
 
 	@Test
 	public void propertyClientId() throws Exception {
 		this.context = load(Config.class, "oauth2-client-credentials-client-id:12345");
-		org.hamcrest.MatcherAssert.assertThat(context.containsBean("myBean"), equalTo(true));
+		assertThat(context.containsBean("myBean")).isEqualTo(true);
 	}
 
 	@Test
 	public void clientIdOnlyWithNoValue() throws Exception {
 		this.context = load(Config.class, "oauth2-client-credentials-client-id:");
-		org.hamcrest.MatcherAssert.assertThat(context.containsBean("myBean"), equalTo(false));
+		assertThat(context.containsBean("myBean")).isEqualTo(false);
 	}
 
 	private AnnotationConfigApplicationContext load(Class<?> config, String... env) {

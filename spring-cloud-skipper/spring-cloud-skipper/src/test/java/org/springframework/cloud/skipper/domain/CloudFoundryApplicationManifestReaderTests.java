@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec.HealthCheckType;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CloudFoundryApplicationManifestReaderTests {
 
-	private CloudFoundryApplicationManifestReader applicationManifestReader = new CloudFoundryApplicationManifestReader();
+	private final CloudFoundryApplicationManifestReader applicationManifestReader = new CloudFoundryApplicationManifestReader();
 
 	@Test
 	public void readTests() throws IOException {

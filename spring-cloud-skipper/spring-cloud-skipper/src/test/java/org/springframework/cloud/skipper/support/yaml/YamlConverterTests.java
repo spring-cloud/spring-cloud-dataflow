@@ -21,11 +21,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.support.yaml.YamlConversionStatus.ConversionMessage;
 import org.springframework.cloud.skipper.support.yaml.YamlConverter.Builder;
@@ -222,7 +223,7 @@ public class YamlConverterTests {
 	public void forceFlatten() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
-				Arrays.asList("some.property"),
+			Collections.singletonList("some.property"),
 				"some.property.sub1.sub2=sub-value",
 				// ==>
 				"some:\n" +
@@ -238,7 +239,7 @@ public class YamlConverterTests {
 	public void forceFlattenMulti() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
-				Arrays.asList("some.property"),
+			Collections.singletonList("some.property"),
 				"some.property.sub1.sub2=sub-value1\n" +
 				"some.property.sub3.sub4=sub-value2",
 				// ==>
@@ -256,7 +257,7 @@ public class YamlConverterTests {
 	public void forceFlattenMultiUseRegex() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
-				Arrays.asList("[a-z]*2\\.property"),
+			Collections.singletonList("[a-z]*2\\.property"),
 				"some1.property.sub1.sub2=sub-value1\n" +
 				"some1.property.sub3.sub4=sub-value2\n" +
 				"some2.property.sub5.sub6=sub-value1\n" +

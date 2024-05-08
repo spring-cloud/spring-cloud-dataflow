@@ -20,20 +20,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
  * Test the {@link TaskTemplate} implementation of {@link TaskOperations}.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class TaskTemplateTests {
 
@@ -41,7 +42,7 @@ public class TaskTemplateTests {
 
 	private RestTemplate restTemplate;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
@@ -67,13 +68,13 @@ public class TaskTemplateTests {
 	private void validateExecutionLinkPresent(String dataFlowVersion) {
 		TestResource testResource = new TestResource();
 		new TaskTemplate(this.restTemplate, testResource, dataFlowVersion);
-		Assert.assertTrue(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
+		assertThat(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK)).isTrue();
 	}
 
 	private void validateExecutionLinkNotPresent(String version) {
 		TestResource testResource = new TestResource();
 		new TaskTemplate(this.restTemplate, testResource, version);
-		Assert.assertFalse(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK));
+		assertThat(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK)).isFalse();
 	}
 
 	public static class TestResource extends RepresentationModel<TestResource> {
@@ -94,12 +95,9 @@ public class TaskTemplateTests {
 		}
 
 		public boolean isLinkRequested(String linkName) {
-			boolean result = false;
+			boolean result = this.linksRequested.containsKey(linkName) &&
+				this.linksRequested.get(linkName) > 1L;
 
-			if (this.linksRequested.containsKey(linkName) &&
-					this.linksRequested.get(linkName) > 1L) {
-				result = true;
-			}
 			return result;
 		}
 

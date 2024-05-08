@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PackageMetadataMvcTests extends AbstractMockMvcTests {
@@ -41,7 +42,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/api")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/api")).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.packageMetadata").exists());
 	}
 
@@ -52,7 +53,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 		assertThat(packageMetadata.getId()).isNotNull();
 		packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package2", "2.0.0");
 		assertThat(packageMetadata.getId()).isNotNull();
-		mockMvc.perform(get("/api/packageMetadata?projection=summary")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/api/packageMetadata?projection=summary")).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].iconUrl")
 						.value("http://www.gilligansisle.com/images/a2.gif"))
@@ -66,7 +67,7 @@ public class PackageMetadataMvcTests extends AbstractMockMvcTests {
 						.value("http://localhost/api/package/install/2"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[1].maintainer").doesNotExist());
 
-		mockMvc.perform(get("/api/packageMetadata")).andDo(print()).andExpect(status().isOk())
+		mockMvc.perform(get("/api/packageMetadata")).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].version").value("1.0.0"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0].description").value("A very cool project"))
 				.andExpect(jsonPath("$._embedded.packageMetadata[0]._links.install.href")

@@ -51,12 +51,12 @@
 		<checkstyle.version>${maven-checkstyle-plugin.version}</checkstyle.version>
 		<puppycrawl-tools-checkstyle.version>8.29</puppycrawl-tools-checkstyle.version>
 		<spring-javaformat.version>0.0.9</spring-javaformat.version>
-		<maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
+		<maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
 		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-		<maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+		<maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<git-commit-id-plugin.version>4.9.9</git-commit-id-plugin.version>
@@ -108,22 +108,6 @@
 	</dependencyManagement>
 	<dependencies>
 		<!-- Boot removed junit4/vintage deps, we're not yet ready, so give it all -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>hamcrest-core</artifactId>
-					<groupId>org.hamcrest</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 	</dependencies>
 	<organization>
 		<name>Pivotal Software, Inc.</name>
@@ -207,6 +191,9 @@
 					<configuration>
 						<groups>${groups}</groups>
 						<excludedGroups>${excludedGroups}</excludedGroups>
+						<excludes>
+							<exclude>**/Abstract*.*</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
@@ -238,8 +225,9 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${maven-surefire-plugin.version}</version>
+					<version>3.2.5</version>
 					<configuration>
+						<failIfNoTests>true</failIfNoTests>
 						<threadCount>1</threadCount>
 						<forkCount>1</forkCount>
 						<includes>
@@ -668,8 +656,8 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<version>${maven-surefire-plugin.version}</version>
 						<configuration>
+							<failIfNoTests>true</failIfNoTests>
 							<threadCount>1</threadCount>
 							<forkCount>1</forkCount>
 							<properties>
@@ -728,6 +716,11 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<version>${maven-failsafe-plugin.version}</version>
+						<configuration>
+							<excludes>
+								<exclude>**/Abstract*.*</exclude>
+							</excludes>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

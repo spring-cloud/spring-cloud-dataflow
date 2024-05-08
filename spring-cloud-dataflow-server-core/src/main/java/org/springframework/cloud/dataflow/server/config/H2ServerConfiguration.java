@@ -37,11 +37,12 @@ import org.springframework.context.annotation.Configuration;
  * Autostart an embedded H2 database server.
  *
  * @author Michael Wirth
+ * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(Server.class)
 @ConditionalOnProperty(name = "spring.dataflow.embedded.database.enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnExpression("'${spring.datasource.url:#{null}}'.startsWith('jdbc:h2:tcp://localhost:')")
+@ConditionalOnExpression("'${spring.datasource.url:#{null}}'.startsWith('jdbc:h2:tcp://localhost')")
 public class H2ServerConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(H2ServerConfiguration.class);

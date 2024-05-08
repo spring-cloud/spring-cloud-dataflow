@@ -16,11 +16,12 @@
 package org.springframework.cloud.skipper.client;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -36,6 +37,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -49,6 +51,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Janne Valkealahti
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class DefaultSkipperClientTests {
 
@@ -93,30 +96,34 @@ public class DefaultSkipperClientTests {
 		assertThat(status).isInstanceOf(Info.class);
 	}
 
-	@Test(expected = ReleaseNotFoundException.class)
+	@Test
 	public void testStatusReleaseNameNotFound() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
-		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+		assertThrows(ReleaseNotFoundException.class, () -> {
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
+			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
-		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/release/status/mylog"))
-				.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR1).contentType(MediaType.APPLICATION_JSON));
+			MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+			mockServer.expect(requestTo("/release/status/mylog"))
+					.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR1).contentType(MediaType.APPLICATION_JSON));
 
-		skipperClient.status("mylog");
+			skipperClient.status("mylog");
+		});
 	}
 
-	@Test(expected = SkipperException.class)
+	@Test
 	public void testSkipperException() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
-		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+		assertThrows(SkipperException.class, () -> {
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
+			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
-		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/release/status/mylog"))
-				.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR2).contentType(MediaType.APPLICATION_JSON));
+			MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+			mockServer.expect(requestTo("/release/status/mylog"))
+					.andRespond(withStatus(HttpStatus.NOT_FOUND).body(ERROR2).contentType(MediaType.APPLICATION_JSON));
 
-		skipperClient.status("mylog");
+			skipperClient.status("mylog");
+		});
 	}
 
 	@Test
@@ -135,7 +142,7 @@ public class DefaultSkipperClientTests {
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
 		mockServer.expect(requestTo("/release/release1" + (deletePackage ? "/package" : "")))
@@ -144,16 +151,18 @@ public class DefaultSkipperClientTests {
 		skipperClient.delete("release1", deletePackage);
 	}
 
-	@Test(expected = PackageDeleteException.class)
+	@Test
 	public void testDeletePackageHasDeployedRelease() {
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
-		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
+		assertThrows(PackageDeleteException.class, () -> {
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
+			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
-		MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
-		mockServer.expect(requestTo("/release/release1/package"))
-				.andRespond(withStatus(HttpStatus.CONFLICT).body(ERROR3).contentType(MediaType.APPLICATION_JSON));
-		skipperClient.delete("release1", true);
+			MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+			mockServer.expect(requestTo("/release/release1/package"))
+					.andRespond(withStatus(HttpStatus.CONFLICT).body(ERROR3).contentType(MediaType.APPLICATION_JSON));
+			skipperClient.delete("release1", true);
+		});
 	}
 
 	@Test

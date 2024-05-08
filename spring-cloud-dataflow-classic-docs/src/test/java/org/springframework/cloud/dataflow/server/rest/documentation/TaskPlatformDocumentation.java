@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -32,9 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Documentation for the /tasks/platforms endpoint.
  *
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class TaskPlatformDocumentation extends BaseDocumentation {
 
 	@Test
@@ -43,7 +44,6 @@ public class TaskPlatformDocumentation extends BaseDocumentation {
 				get("/tasks/platforms")
 						.param("page", "0")
 						.param("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						requestParameters(

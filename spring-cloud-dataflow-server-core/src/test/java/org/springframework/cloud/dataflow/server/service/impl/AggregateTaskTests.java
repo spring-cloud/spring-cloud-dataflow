@@ -15,14 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.persistence.EntityManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -55,12 +55,10 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(
 		classes = {AggregateTaskTests.TestConfiguration.class},
 		properties = {"spring.main.allow-bean-definition-overriding=true"}

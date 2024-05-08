@@ -19,14 +19,10 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
-
 import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -64,10 +60,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -78,15 +73,11 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
 		"spring.main.allow-bean-definition-overriding=true"})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public class DefaultTaskExecutionServiceTransactionTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private final static String BASE_TASK_NAME = "myTask";
 
@@ -151,7 +142,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	@Autowired
 	ApplicationContext applicationContext;
 
-	@Before
+	@BeforeEach
 	public void setupMocks() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new TaskLauncherStub(dataSource)));

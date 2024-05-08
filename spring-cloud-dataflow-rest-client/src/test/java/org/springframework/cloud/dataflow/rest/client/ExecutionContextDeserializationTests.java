@@ -21,20 +21,18 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.util.StreamUtils;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class ExecutionContextDeserializationTests {
 
@@ -51,11 +49,11 @@ public class ExecutionContextDeserializationTests {
 		ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertEquals(2, executionContext.entrySet().size());
-		assertEquals("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1", executionContext.get("batch.taskletType"));
-		assertEquals("org.springframework.batch.core.step.tasklet.TaskletStep", executionContext.get("batch.stepType"));
-		assertFalse(executionContext.isDirty());
-		assertFalse(executionContext.isEmpty());
+		assertThat(executionContext.entrySet().size()).isEqualTo(2);
+		assertThat(executionContext.get("batch.taskletType")).isEqualTo("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1");
+		assertThat(executionContext.get("batch.stepType")).isEqualTo("org.springframework.batch.core.step.tasklet.TaskletStep");
+		assertThat(executionContext.isDirty()).isFalse();
+		assertThat(executionContext.isEmpty()).isFalse();
 	}
 
 	/**
@@ -78,11 +76,11 @@ public class ExecutionContextDeserializationTests {
 		ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertEquals(2, executionContext.entrySet().size());
-		assertEquals("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1", executionContext.get("batch.taskletType"));
-		assertEquals("org.springframework.batch.core.step.tasklet.TaskletStep", executionContext.get("batch.stepType"));
-		assertTrue(executionContext.isDirty());
-		assertFalse(executionContext.isEmpty());
+		assertThat(executionContext.entrySet().size()).isEqualTo(2);
+		assertThat(executionContext.get("batch.taskletType")).isEqualTo("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1");
+		assertThat(executionContext.get("batch.stepType")).isEqualTo("org.springframework.batch.core.step.tasklet.TaskletStep");
+		assertThat(executionContext.isDirty()).isTrue();
+		assertThat(executionContext.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -98,16 +96,16 @@ public class ExecutionContextDeserializationTests {
 		final ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertEquals(6, executionContext.entrySet().size());
-		assertEquals(1234, executionContext.getInt("barNumber"));
-		assertEquals("1234", executionContext.getString("barNumberAsString"));
+		assertThat(executionContext.entrySet().size()).isEqualTo(6);
+		assertThat(executionContext.getInt("barNumber")).isEqualTo(1234);
+		assertThat(executionContext.getString("barNumberAsString")).isEqualTo("1234");
 
 		try {
 			executionContext.getLong("barNumber");
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Long], it is [(class java.lang.Integer)"));
+			assertThat(ce.getMessage()).contains("key=[barNumber] is not of type: [class java.lang.Long], it is [(class java.lang.Integer)");
 		}
 
 		try {
@@ -115,24 +113,24 @@ public class ExecutionContextDeserializationTests {
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[barNumber] is not of type: [class java.lang.Double], it is [(class java.lang.Integer)"));
+			assertThat(ce.getMessage()).contains("key=[barNumber] is not of type: [class java.lang.Double], it is [(class java.lang.Integer)");
 		}
 
-		assertEquals(22222222222L, executionContext.getLong("longNumber"));
+		assertThat(executionContext.getLong("longNumber")).isEqualTo(22222222222L);
 
 		try {
 			executionContext.getInt("longNumber");
 			fail("Expected a ClassCastException to be thrown.");
 		}
 		catch (ClassCastException ce) {
-			assertThat(ce.getMessage(), containsString("key=[longNumber] is not of type: [class java.lang.Integer], it is [(class java.lang.Long)"));
+			assertThat(ce.getMessage()).contains("key=[longNumber] is not of type: [class java.lang.Integer], it is [(class java.lang.Long)");
 		}
 
-		assertEquals("true", executionContext.get("fooBoolean"));
-		assertEquals(3.5, executionContext.getDouble("floatNumber"), 0.1);
-		assertEquals("[1,2,3]", executionContext.getString("floatNumberArray"));
+		assertThat(executionContext.get("fooBoolean")).isEqualTo("true");
+		assertThat(executionContext.getDouble("floatNumber")).isCloseTo(3.5, within(0.1));
+		assertThat(executionContext.getString("floatNumberArray")).isEqualTo("[1,2,3]");
 
-		assertFalse(executionContext.isDirty());
-		assertFalse(executionContext.isEmpty());
+		assertThat(executionContext.isDirty()).isFalse();
+		assertThat(executionContext.isEmpty()).isFalse();
 	}
 }

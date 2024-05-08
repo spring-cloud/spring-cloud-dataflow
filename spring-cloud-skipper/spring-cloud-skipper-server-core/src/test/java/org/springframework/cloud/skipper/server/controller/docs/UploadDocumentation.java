@@ -17,8 +17,9 @@
 package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Package;
 import org.springframework.cloud.skipper.domain.UploadRequest;
@@ -43,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class UploadDocumentation extends BaseDocumentation {
 
@@ -65,13 +67,12 @@ public class UploadDocumentation extends BaseDocumentation {
 		uploadProperties.setPackageFileAsBytes(originalPackageBytes);
 
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-				MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
+				MediaType.APPLICATION_JSON.getSubtype(), StandardCharsets.UTF_8);
 
 		when(this.packageService.upload(any(UploadRequest.class))).thenReturn(pkg.getMetadata());
 
 		mockMvc.perform(post("/api/package/upload").accept(MediaType.APPLICATION_JSON).contentType(contentType)
-				.content(convertObjectToJson(uploadProperties))).andDo(print())
-				.andExpect(status().isCreated())
+				.content(convertObjectToJson(uploadProperties))).andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
 								responseFields(

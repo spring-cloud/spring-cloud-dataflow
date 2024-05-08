@@ -35,20 +35,21 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: 'Action: Run Db IT'
       run: |
+        mvn clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  
         mvn \
           -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=${{ matrix.group }} \
           -Pfailsafe \
           --batch-mode \
-          integration-test
+          test
     - name: Integration Test Report for ${{ matrix.group }}
       id: test_report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
       with:
         name: Integration Tests - ${{ matrix.group }}
-        path: '**/failsafe-reports/*IT.xml'
+        path: '**/surefire-reports/*.xml'
         reporter: java-junit
         list-tests: failed
     - name: Publish Test Url for ${{ matrix.group }}

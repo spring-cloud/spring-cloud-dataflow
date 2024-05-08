@@ -16,21 +16,22 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.data.domain.PageRequest;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class SearchPageableTests {
 
@@ -81,7 +82,7 @@ public class SearchPageableTests {
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
 		try {
-			searchPageable.addColumns(new String[] {});
+			searchPageable.addColumns();
 		}
 		catch (IllegalArgumentException e) {
 			assertEquals("You must specify at least 1 column.", e.getMessage());

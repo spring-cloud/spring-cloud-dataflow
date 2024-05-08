@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractControllerTests extends AbstractMockMvcTests {
@@ -62,12 +63,12 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	@Autowired
 	protected SkipperServerProperties skipperServerProperties;
 
-	@Before
+	@BeforeEach
 	public void cleanupReleaseRepository() {
 		this.releaseRepository.deleteAll();
 	}
 
-	@After
+	@AfterEach
 	public void cleanupReleases() throws Exception {
 		// Add a sleep for now to give the local deployer a chance to install the app.
 		// This
@@ -78,7 +79,6 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 			if (release.getInfo().getStatus().getStatusCode() != StatusCode.DELETED) {
 				try {
 					mockMvc.perform(delete("/api/release/" + release.getName()))
-							.andDo(print())
 							.andExpect(status().isOk()).andReturn();
 				}
 				catch (Throwable e) {
@@ -96,8 +96,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 				packageVersion);
 		assertThat(packageMetadata).isNotNull();
 		MvcResult result = mockMvc.perform(post("/api/package/install/" + packageMetadata.getId())
-				.content(convertObjectToJson(installProperties))).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
+				.content(convertObjectToJson(installProperties))).andExpect(status().isCreated()).andReturn();
 
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
 		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
@@ -108,8 +107,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 
 	protected Release installPackage(InstallRequest installRequest) throws Exception {
 		MvcResult result = mockMvc.perform(post("/api/package/install")
-				.content(convertObjectToJson(installRequest))).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
+				.content(convertObjectToJson(installRequest))).andExpect(status().isCreated()).andReturn();
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
 		assertReleaseIsDeployedSuccessfully(release.getName(), release.getVersion());
 		String releaseName = installRequest.getInstallProperties().getReleaseName();
@@ -139,8 +137,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 				packageVersion);
 		assertThat(updatePackageMetadata).isNotNull();
 		MvcResult result = mockMvc.perform(post("/api/release/upgrade")
-				.content(convertObjectToJson(upgradeRequest))).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
+				.content(convertObjectToJson(upgradeRequest))).andExpect(status().isCreated()).andReturn();
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
 		if (wait) {
 			assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
@@ -153,8 +150,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected Release rollback(String releaseName, int releaseVersion) throws Exception {
-		MvcResult result = mockMvc.perform(post("/api/release/rollback/" + releaseName + "/" + releaseVersion)).andDo(print())
-				.andExpect(status().isCreated()).andReturn();
+		MvcResult result = mockMvc.perform(post("/api/release/rollback/" + releaseName + "/" + releaseVersion)).andExpect(status().isCreated()).andReturn();
 		Release release = convertContentToRelease(result.getResponse().getContentAsString());
 		assertReleaseIsDeployedSuccessfully(releaseName, release.getVersion());
 		Release updatedRelease = this.releaseRepository.findByNameAndVersion(releaseName, release.getVersion());
@@ -162,8 +158,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	}
 
 	protected void cancel(String releaseName, int expectStatus, boolean accepted) throws Exception {
-		MvcResult result = mockMvc.perform(post("/api/release/cancel").content(convertObjectToJson(new CancelRequest(releaseName)))).andDo(print())
-				.andExpect(status().is(expectStatus)).andReturn();
+		MvcResult result = mockMvc.perform(post("/api/release/cancel").content(convertObjectToJson(new CancelRequest(releaseName)))).andExpect(status().is(expectStatus)).andReturn();
 		CancelResponse response = convertContentToCancelResponse(result.getResponse().getContentAsString());
 		assertThat(response.getAccepted()).isEqualTo(accepted);
 	}

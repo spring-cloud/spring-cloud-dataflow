@@ -18,9 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -37,7 +36,6 @@ import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -49,8 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -71,7 +69,7 @@ public class TaskLogsControllerTests {
 	@Autowired
 	private TaskPlatform taskPlatform;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);

@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 
@@ -41,17 +41,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * @author Eric Bottard
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
@@ -86,6 +87,12 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void listAllTaskDefinitions() throws Exception {
+		documentation.dontDocument(()->this.mockMvc.perform(
+				post("/tasks/definitions")
+					.param("name", "my-task")
+					.param("definition", "timestamp --format='YYYY MM DD'")
+					.param("description", "Demo task definition for testing"))
+			.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions")
 				.param("page", "0")
@@ -94,7 +101,6 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.param("search", "")
 				.param("manifest", "true")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				requestParameters(
@@ -113,10 +119,15 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void displayDetail() throws Exception {
+		documentation.dontDocument(()->this.mockMvc.perform(
+				post("/tasks/definitions")
+					.param("name", "my-task")
+					.param("definition", "timestamp --format='YYYY MM DD'")
+					.param("description", "Demo task definition for testing"))
+			.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
 			.param("manifest", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
@@ -141,10 +152,15 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void taskDefinitionDelete() throws Exception {
+		documentation.dontDocument(()->this.mockMvc.perform(
+				post("/tasks/definitions")
+					.param("name", "my-task")
+					.param("definition", "timestamp --format='YYYY MM DD'")
+					.param("description", "Demo task definition for testing"))
+			.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
 			.param("cleanup", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(

@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.util.StreamUtils;
@@ -31,10 +31,11 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class SpringCloudDeployerApplicationManifestReaderTests {
 
-	private SpringCloudDeployerApplicationManifestReader applicationManifestReader = new SpringCloudDeployerApplicationManifestReader();
+	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader = new SpringCloudDeployerApplicationManifestReader();
 
 	@Test
 	public void readTests() throws IOException {
@@ -46,9 +47,9 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 
 		assertThat(applicationSpecList).hasSize(2);
 		assertThat(applicationSpecList.get(0) instanceof SpringCloudDeployerApplicationManifest).isTrue();
-		assertTimeOrLogApp(((SpringCloudDeployerApplicationManifest) applicationSpecList.get(0)));
+		assertTimeOrLogApp(applicationSpecList.get(0));
 		assertThat(applicationSpecList.get(1) instanceof SpringCloudDeployerApplicationManifest).isTrue();
-		assertTimeOrLogApp(((SpringCloudDeployerApplicationManifest) applicationSpecList.get(1)));
+		assertTimeOrLogApp(applicationSpecList.get(1));
 	}
 
 	@Test

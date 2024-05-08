@@ -25,15 +25,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests for {@link DeploymentPropertiesUtils}.
  *
@@ -41,6 +40,7 @@ import static org.junit.Assert.fail;
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class DeploymentPropertiesUtilsTests {
 

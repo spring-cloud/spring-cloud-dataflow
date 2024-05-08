@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
 public class HistoryDocumentation extends BaseDocumentation {
@@ -41,8 +42,7 @@ public class HistoryDocumentation extends BaseDocumentation {
 		this.releaseRepository.save(createTestRelease());
 
 		this.mockMvc.perform(
-				get("/api/releases/search/findByNameIgnoreCaseContainingOrderByNameAscVersionDesc?name={name}", "test")).andDo(print())
-				.andExpect(status().isOk())
+				get("/api/releases/search/findByNameIgnoreCaseContainingOrderByNameAscVersionDesc?name={name}", "test")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(
 								subsectionWithPath("_links").ignored(),

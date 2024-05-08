@@ -40,7 +40,7 @@
 
 		<jmockit.version>1.24</jmockit.version>
 
-		<testcontainers.version>1.17.6</testcontainers.version>
+		<testcontainers.version>1.19.7</testcontainers.version>
 		<commons-compress.version>1.26.0</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
@@ -271,11 +271,6 @@
 						</execution>
 					</executions>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0</version>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -305,10 +300,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

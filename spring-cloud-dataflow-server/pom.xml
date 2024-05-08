@@ -204,22 +204,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<threadCount>1</threadCount>
-					<forkCount>1</forkCount>
-					<reuseForks>false</reuseForks>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>${maven-javadoc-plugin.version}</version>
 				<executions>
@@ -245,6 +229,40 @@
 						<phase>package</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
+				<version>4.9.9</version>
+				<executions>
+					<execution>
+						<id>get-the-git-infos</id>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+						<phase>initialize</phase>
+					</execution>
+				</executions>
+				<configuration>
+					<generateGitPropertiesFile>true</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+					<excludeProperties>
+						<excludeProperty>^git.build.user</excludeProperty>
+						<excludeProperty>^git.commit.id.describe</excludeProperty>
+						<excludeProperty>^git.commit.message.*</excludeProperty>
+						<excludeProperty>^git.commit.author.time</excludeProperty>
+						<excludeProperty>^git.commit.committer.time</excludeProperty>
+						<excludeProperty>^git.build.*</excludeProperty>
+						<excludeProperty>^git.closest.*</excludeProperty>
+						<excludeProperty>^git.commit.user.*</excludeProperty>
+						<excludeProperty>^git.dirty.*</excludeProperty>
+						<excludeProperty>^git.local.*</excludeProperty>
+						<excludeProperty>^git.remote.*</excludeProperty>
+						<excludeProperty>^git.tags</excludeProperty>
+						<excludeProperty>^git.total.*</excludeProperty>
+					</excludeProperties>
+					<commitIdGenerationMode>full</commitIdGenerationMode>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -285,7 +303,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -304,24 +321,17 @@
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>3.0.0</version>
+						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<forkCount>1</forkCount>
+							<failIfNoTests>true</failIfNoTests>
 							<reuseForks>false</reuseForks>
 							<includes>
 								<include>**/*IT.*</include>
+								<include>**/*$*IT.*</include>
 							</includes>
 							<groups>${groups}</groups>
 						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>integration-test</goal>
-									<goal>verify</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>

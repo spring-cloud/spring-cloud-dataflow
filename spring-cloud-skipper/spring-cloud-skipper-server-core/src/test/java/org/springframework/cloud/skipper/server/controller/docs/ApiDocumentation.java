@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import javax.servlet.RequestDispatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.ActiveProfiles;
 
@@ -38,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
 public class ApiDocumentation extends BaseDocumentation {
@@ -57,7 +58,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/path/not/there")
 						.requestAttr(RequestDispatcher.ERROR_MESSAGE,
 								"The path, 'http://localhost:8080/path/not/there', does not exist."))
-				.andDo(print())
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("error", is("Bad Request")))
 				.andExpect(jsonPath("timestamp", is(notNullValue()))).andExpect(jsonPath("status", is(400)))
 				.andExpect(jsonPath("path", is(notNullValue())))

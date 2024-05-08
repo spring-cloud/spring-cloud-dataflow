@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.server.service;
 
 import java.nio.charset.Charset;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.server.TestResourceUtils;
 import org.springframework.cloud.skipper.server.util.ArgumentSanitizer;

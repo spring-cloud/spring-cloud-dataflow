@@ -19,9 +19,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -42,7 +43,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,19 +50,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
  * @author David Turanski
+ * @author Corneil du Plessis
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+
+@Suite
+@SelectClasses({
 		SkipperServerPlatformConfigurationTests.AllPlatformsConfigurationTest.class,
 		SkipperServerPlatformConfigurationTests.ExternalPlatformsOnlyConfigurationTest.class,
 		SkipperServerPlatformConfigurationTests.SinglePlatformConfigurationTest.class
 })
 public class SkipperServerPlatformConfigurationTests {
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 	@ActiveProfiles({"platform-configuration", "local"})
-	public static class AllPlatformsConfigurationTest {
+	@Nested
+	public class AllPlatformsConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;
@@ -73,10 +75,10 @@ public class SkipperServerPlatformConfigurationTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
+	@Nested
 	@SpringBootTest(classes = TestConfig.class,
-			properties = {"spring.main.allow-bean-definition-overriding=true" })
-	public static class SinglePlatformConfigurationTest {
+			properties = {"spring.main.allow-bean-definition-overriding=true"})
+	public class SinglePlatformConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;
@@ -87,11 +89,11 @@ public class SkipperServerPlatformConfigurationTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class,
-			properties = {"spring.main.allow-bean-definition-overriding=true" })
+			properties = {"spring.main.allow-bean-definition-overriding=true"})
 	@ActiveProfiles("platform-configuration")
-	public static class ExternalPlatformsOnlyConfigurationTest {
+	@Nested
+	public class ExternalPlatformsOnlyConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;

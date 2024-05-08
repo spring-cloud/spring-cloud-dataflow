@@ -19,10 +19,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -55,7 +53,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -63,6 +60,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -73,7 +71,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = { JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
 @EnableConfigurationProperties({ CommonApplicationProperties.class })
@@ -125,7 +122,7 @@ public class JobStepExecutionControllerTests {
 	@Autowired
 	TaskJobService taskJobService;
 
-	@Before
+	@BeforeEach
 	public void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
@@ -144,9 +141,11 @@ public class JobStepExecutionControllerTests {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testJobStepExecutionControllerConstructorMissingRepository() {
-		new JobStepExecutionController(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			new JobStepExecutionController(null);
+		});
 	}
 
 	@Test
@@ -167,7 +166,6 @@ public class JobStepExecutionControllerTests {
 
 	private void validateStepDetail(int jobId, int stepId, String contextValue) throws Exception{
 		mockMvc.perform(get(String.format("/jobs/executions/%d/steps/%d", jobId, stepId)).accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.jobExecutionId", is(jobId)))
 				.andExpect(jsonPath("$.stepExecution.stepName", is(contextValue)));
@@ -175,8 +173,7 @@ public class JobStepExecutionControllerTests {
 
 	@Test
 	public void testGetMultipleStepExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andDo(print())
-				.andExpect(status().isOk())
+		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[*]", hasSize(3)))
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[0].stepExecution.id", is(4)))
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[1].stepExecution.id", is(5)))
@@ -186,7 +183,6 @@ public class JobStepExecutionControllerTests {
 	@Test
 	public void testSingleGetStepExecutionProgress() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
-				.andDo(print())
 				.andExpect(status().isOk()).andExpect(content().json("{finished: " + false + "}"))
 				.andExpect(content().json("{percentageComplete: " + 0.5 + "}"))
 				.andExpect(jsonPath("$.stepExecutionHistory.count", is(0)))

@@ -47,6 +47,7 @@ import org.springframework.shell.table.TableModelBuilder;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @ShellComponent
 public class JobCommands {
@@ -148,7 +149,7 @@ public class JobCommands {
 				.addValue(jobExecutionResource.getJobExecution().getExitStatus().getExitDescription());
 		modelBuilder.addRow().addValue("Definition Status ")
 				.addValue(jobExecutionResource.isDefined() ? "Created" : "Destroyed");
-		modelBuilder.addRow().addValue("Schema Target").addValue(jobExecutionResource.getSchemaTarget());
+		modelBuilder.addRow().addValue("Schema Target ").addValue(jobExecutionResource.getSchemaTarget());
 		modelBuilder.addRow().addValue("Job Parameters ").addValue("");
 		for (Map.Entry<String, JobParameter> jobParameterEntry : jobExecutionResource.getJobExecution()
 				.getJobParameters().getParameters().entrySet()) {
@@ -178,7 +179,7 @@ public class JobCommands {
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 		modelBuilder.addRow().addValue("Name ").addValue("Execution ID ").addValue("Step Execution Count ")
-				.addValue("Status ").addValue("Schema Target").addValue("Job Parameters ");
+				.addValue("Status ").addValue("Schema Target ").addValue("Job Parameters ");
 		for (JobExecutionResource job : jobInstanceResource.getJobExecutions()) {
 			modelBuilder.addRow()
 					.addValue(jobInstanceResource.getJobName())

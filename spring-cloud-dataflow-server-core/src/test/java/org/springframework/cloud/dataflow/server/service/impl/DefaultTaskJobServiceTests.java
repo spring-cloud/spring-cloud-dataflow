@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.sql.Types;
@@ -26,10 +25,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.sql.DataSource;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.batch.core.BatchStatus;
@@ -70,10 +69,9 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -81,7 +79,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
 		TaskServiceDependencies.class,
 		JobDependencies.class,
@@ -147,7 +144,7 @@ public class DefaultTaskJobServiceTests {
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Map<String, JobParameter> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("identifying.param", new JobParameter("testparam"));

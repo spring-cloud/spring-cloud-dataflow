@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.service;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.server.AbstractIntegrationTest;
@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repo-test")
 public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {

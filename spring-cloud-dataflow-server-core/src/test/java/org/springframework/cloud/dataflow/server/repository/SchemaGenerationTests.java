@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.hibernate.HibernateException;
@@ -29,8 +28,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +41,11 @@ import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
 		EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class
 })

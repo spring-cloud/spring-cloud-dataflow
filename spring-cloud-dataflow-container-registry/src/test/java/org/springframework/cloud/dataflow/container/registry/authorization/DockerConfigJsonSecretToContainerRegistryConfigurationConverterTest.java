@@ -21,8 +21,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -37,9 +37,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -60,7 +58,7 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 
 	private DockerConfigJsonSecretToRegistryConfigurationConverter converter;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		MockitoAnnotations.initMocks(this);
 		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
@@ -77,15 +75,15 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 		String b = "{\"auths\":{\"demo.repository.io\":{}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result.size(), is(1));
-		assertThat(result.containsKey("demo.repository.io")).isTrue();
+		assertThat(result).hasSize(1);
+		assertThat(result).containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
-		assertThat(registryConfiguration.getRegistryHost(), is("demo.repository.io"));
-		assertThat(registryConfiguration.getUser(), nullValue());
-		assertThat(registryConfiguration.getSecret(), nullValue());
-		assertThat(registryConfiguration.getAuthorizationType(), is(ContainerRegistryConfiguration.AuthorizationType.anonymous));
+		assertThat(registryConfiguration.getRegistryHost()).isEqualTo("demo.repository.io");
+		assertThat(registryConfiguration.getUser()).isNull();
+		assertThat(registryConfiguration.getSecret()).isNull();
+		assertThat(registryConfiguration.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.anonymous);
 	}
 
 	@Test
@@ -98,15 +96,15 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result.size(), is(1));
-		assertThat(result.containsKey("demo.repository.io")).isTrue();
+		assertThat(result).hasSize(1);
+		assertThat(result).containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
-		assertThat(registryConfiguration.getRegistryHost(), is("demo.repository.io"));
-		assertThat(registryConfiguration.getUser(), is("testuser"));
-		assertThat(registryConfiguration.getSecret(), is("testpassword"));
-		assertThat(registryConfiguration.getAuthorizationType(), is(ContainerRegistryConfiguration.AuthorizationType.basicauth));
+		assertThat(registryConfiguration.getRegistryHost()).isEqualTo("demo.repository.io");
+		assertThat(registryConfiguration.getUser()).isEqualTo("testuser");
+		assertThat(registryConfiguration.getSecret()).isEqualTo("testpassword");
+		assertThat(registryConfiguration.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.basicauth);
 	}
 
 	@Test
@@ -144,17 +142,16 @@ public class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result.size(), is(1));
+		assertThat(result).hasSize(1);
 		assertThat(result.containsKey("demo.repository.io")).isTrue();
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
-		assertThat(registryConfiguration.getRegistryHost(), is("demo.repository.io"));
-		assertThat(registryConfiguration.getUser(), is("testuser"));
-		assertThat(registryConfiguration.getSecret(), is("testpassword"));
-		assertThat(registryConfiguration.getAuthorizationType(), is(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2));
-		assertThat(registryConfiguration.getExtra().get("registryAuthUri"),
-				is("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull"));
+		assertThat(registryConfiguration.getRegistryHost()).isEqualTo("demo.repository.io");
+		assertThat(registryConfiguration.getUser()).isEqualTo("testuser");
+		assertThat(registryConfiguration.getSecret()).isEqualTo("testpassword");
+		assertThat(registryConfiguration.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
+		assertThat(registryConfiguration.getExtra().get("registryAuthUri")).isEqualTo("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
 
 	}
 
