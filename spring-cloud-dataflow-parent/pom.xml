@@ -35,7 +35,7 @@
 		<!-- Specific version overrides to deal w/ CVEs -->
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
-		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
+		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.26.0</commons-compress.version>
 
