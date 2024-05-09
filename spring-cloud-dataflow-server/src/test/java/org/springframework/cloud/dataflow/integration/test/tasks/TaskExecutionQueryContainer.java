@@ -23,7 +23,9 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,7 +207,8 @@ public class TaskExecutionQueryContainer {
 	static class MySql_8_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
 			implements MySQL_8_ContainerSupport {
 	}
-
+	@EnabledIfEnvironmentVariable(named = "ENABLE_DB2", matches = "true", disabledReason = "Container is too big")
+	@Tag("DB2")
 	static class DB2_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
 			implements DB2_11_5_ContainerSupport {
 	}
