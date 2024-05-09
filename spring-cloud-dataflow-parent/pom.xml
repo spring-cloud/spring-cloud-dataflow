@@ -167,8 +167,8 @@
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>${spring-kafka.version}</version>
-		    </dependency>
-		    <dependency>
+			</dependency>
+			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-bom</artifactId>
 				<version>${netty.version}</version>
