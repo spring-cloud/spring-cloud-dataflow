@@ -66,7 +66,8 @@ jobs:
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         dispatch-handler-extract-context-properties: true
-
+    - name: 'Install: xmllint'
+      uses: ./.github/actions/install-xmlutils
     # build and publish to configured target
     - name: Build and Publish
       shell: bash
