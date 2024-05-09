@@ -29,6 +29,9 @@
 		<commons-text.version>1.10.0</commons-text.version>
 		<testcontainers.version>1.19.7</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
+		<netty.version>4.1.109.Final</netty.version>
+		<reactor-bom.version>2020.0.43</reactor-bom.version>
+		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>

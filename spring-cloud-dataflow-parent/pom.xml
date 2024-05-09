@@ -33,12 +33,14 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
+		<netty.version>4.1.109.Final</netty.version>
+		<reactor-bom.version>2020.0.43</reactor-bom.version>
+		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.26.0</commons-compress.version>
-
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -137,6 +139,27 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-access</artifactId>
 				<version>${logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-bom</artifactId>
+				<version>${netty.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>${reactor-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.rsocket</groupId>
+				<artifactId>rsocket-bom</artifactId>
+				<version>${rsocket.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
