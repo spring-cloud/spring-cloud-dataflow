@@ -144,22 +144,22 @@
 			</dependency>
 			<!-- There is no embedded tomcat BOM unfortunately -->
 			<dependency>
-				<groupId>org.apache.tomcat</groupId>
+				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-core</artifactId>
 				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tomcat</groupId>
+				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-el</artifactId>
 				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tomcat</groupId>
+				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-jasper</artifactId>
 				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.tomcat</groupId>
+				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-websocket</artifactId>
 				<version>${tomcat.version}</version>
 			</dependency>
@@ -167,8 +167,8 @@
 				<groupId>org.springframework.kafka</groupId>
 				<artifactId>spring-kafka</artifactId>
 				<version>${spring-kafka.version}</version>
-    </dependency>
-    <dependency>
+		    </dependency>
+		    <dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-bom</artifactId>
 				<version>${netty.version}</version>
