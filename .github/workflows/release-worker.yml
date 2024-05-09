@@ -57,7 +57,8 @@ jobs:
           ensure-env: |
             BUILD_ZOO_HANDLER_spring_cloud_deployer_version
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
-
+      - name: 'Install: xmllint'
+        uses: ./.github/actions/install-xmlutils
       # build and publish to configured target
       - name: Build and Publish
         run: |
