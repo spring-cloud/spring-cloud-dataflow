@@ -33,12 +33,12 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
+		<tomcat.version>9.0.88</tomcat.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.26.0</commons-compress.version>
-
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -137,6 +137,27 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-access</artifactId>
 				<version>${logback.version}</version>
+			</dependency>
+			<!-- There is no embedded tomcat BOM unfortunately -->
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-jasper</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-websocket</artifactId>
+				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
