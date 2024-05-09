@@ -30,6 +30,7 @@
 		<testcontainers.version>1.19.7</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
 		<tomcat.version>9.0.88</tomcat.version>
+		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<netty.version>4.1.109.Final</netty.version>
 		<reactor-bom.version>2020.0.43</reactor-bom.version>
@@ -189,6 +190,22 @@
 				<groupId>io.pivotal.spring.cloud</groupId>
 				<artifactId>spring-cloud-services-starter-config-client</artifactId>
 				<version>${spring-cloud-services-starter-config-client.version}</version>
+			</dependency>
+			<!-- Provide Bouncycastle dep. mgmt. -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
