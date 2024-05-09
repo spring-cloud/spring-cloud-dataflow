@@ -34,6 +34,7 @@
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
 		<tomcat.version>9.0.88</tomcat.version>
+		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<netty.version>4.1.109.Final</netty.version>
 		<reactor-bom.version>2020.0.43</reactor-bom.version>
@@ -142,7 +143,7 @@
 				<artifactId>logback-access</artifactId>
 				<version>${logback.version}</version>
 			</dependency>
-			<!-- There is no embedded tomcat BOM unfortunately -->
+			<!-- Override embedded Tomcat provided by Spring Boot (no BOM unfortunately) -->
 			<dependency>
 				<groupId>org.apache.tomcat.embed</groupId>
 				<artifactId>tomcat-embed-core</artifactId>
@@ -168,6 +169,7 @@
 				<artifactId>spring-kafka</artifactId>
 				<version>${spring-kafka.version}</version>
 			</dependency>
+			<!-- Override Netty provided by Spring Boot -->
 			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-bom</artifactId>
@@ -175,6 +177,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- Override Reactor provided by Spring Boot -->
 			<dependency>
 				<groupId>io.projectreactor</groupId>
 				<artifactId>reactor-bom</artifactId>
@@ -182,6 +185,7 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- Override RSocket provided by Spring Boot -->
 			<dependency>
 				<groupId>io.rsocket</groupId>
 				<artifactId>rsocket-bom</artifactId>
@@ -189,6 +193,23 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- Provide Bouncycastle dep. mgmt. -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcutil-jdk18on</artifactId>
+				<version>${bouncycastle.version}</version>
+			</dependency>
+			<!-- Override dependencies should go above this comment -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
