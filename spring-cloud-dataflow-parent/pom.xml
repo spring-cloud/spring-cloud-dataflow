@@ -33,6 +33,7 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
+		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37</nimbus-jose-jwt.version>
@@ -137,6 +138,11 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-access</artifactId>
 				<version>${logback.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.kafka</groupId>
+				<artifactId>spring-kafka</artifactId>
+				<version>${spring-kafka.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
