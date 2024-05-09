@@ -75,6 +75,16 @@ jobs:
         jfrog rt mvn install -Pfull,asciidoctordocs,restdocs -B
         jfrog rt mvn install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
+        export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
+        PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-snapshot-local)
+        if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
+          echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
+        else
+          echo "::info ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
+          jfrog rt sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
+          echo "::info ::Skipper Docs Set Properties buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
+        fi
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
