@@ -19,7 +19,9 @@ package org.springframework.cloud.dataflow.server.db.support;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +86,8 @@ class DatabaseTypeTests {
 	}
 
 	@Nested
+	@EnabledIfEnvironmentVariable(named = "ENABLE_DB2", matches = "true", disabledReason = "Container is too big")
+	@Tag("DB2")
 	class DB2DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements DB2_11_5_ContainerSupport {
 	}
 
