@@ -37,7 +37,8 @@
 		<revision>${project.version}</revision>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
 		<jruby-complete.version>9.2.7.0</jruby-complete.version>
-
+		<!-- override for CVE since it is a parent -->
+		<tomcat.version>9.0.88</tomcat.version>
 		<!-- Sonar -->
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -100,7 +101,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-build-dependencies</artifactId>
-				<version>2.11.3-SNAPSHOT</version>
+				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
