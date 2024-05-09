@@ -29,7 +29,7 @@
 		<commons-text.version>1.10.0</commons-text.version>
 		<testcontainers.version>1.19.7</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
-
+		<tomcat.version>9.0.88</tomcat.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<netty.version>4.1.109.Final</netty.version>
 		<reactor-bom.version>2020.0.43</reactor-bom.version>

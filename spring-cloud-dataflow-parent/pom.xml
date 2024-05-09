@@ -33,6 +33,7 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
+		<tomcat.version>9.0.88</tomcat.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
 		<netty.version>4.1.109.Final</netty.version>
 		<reactor-bom.version>2020.0.43</reactor-bom.version>
@@ -140,6 +141,27 @@
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-access</artifactId>
 				<version>${logback.version}</version>
+			</dependency>
+			<!-- There is no embedded tomcat BOM unfortunately -->
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-jasper</artifactId>
+				<version>${tomcat.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-embed-websocket</artifactId>
+				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.kafka</groupId>
