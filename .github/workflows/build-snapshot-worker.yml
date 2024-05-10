@@ -57,7 +57,7 @@ jobs:
       with:
         dispatch-handler-extract-context-properties: true
     - name: 'Install: xmllint'
-      uses: '.github/actions/install-xmlutils'
+      uses: ./.github/actions/install-xmlutils
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
