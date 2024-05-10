@@ -100,6 +100,7 @@ jobs:
         jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles -B install -DskipTests 
         jfrog rt build-publish
         PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
+        set +e
         SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-milestone-local)
         if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
           echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
