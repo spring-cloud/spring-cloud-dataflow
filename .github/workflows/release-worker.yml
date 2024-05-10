@@ -108,8 +108,9 @@ jobs:
           jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles -B install -DskipTests
           echo "::notice ::build-publish"
           jfrog rt build-publish
-          PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
           set +e
+          PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "::info ::Project version=$PROJECT_VERSION"
           SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-staging-local)
           if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
             echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
