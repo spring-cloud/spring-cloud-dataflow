@@ -25,30 +25,22 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-#    - name: Setup Testcontainers Cloud Client
-#      uses: atomicjar/testcontainers-cloud-setup-action@v1
-#      with:
-#        token: ${{ secrets.TC_CLOUD_TOKEN_SCDF }}
     - uses: jfrog/setup-jfrog-cli@v1
       with:
         version: 1.46.4
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-
-    # cache maven .m2
     - uses: actions/cache@v3
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
-
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    # target deploy repos
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
@@ -60,15 +52,12 @@ jobs:
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-
-    # zoo extract and ensure
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         dispatch-handler-extract-context-properties: true
     - name: 'Install: xmllint'
-      uses: ./.github/actions/install-xmlutils
-    # build and publish to configured target
+      uses: '.github/actions/install-xmlutils'
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
@@ -102,7 +91,6 @@ jobs:
         path: '**/surefire-reports/*.xml'
         reporter: java-junit
         list-tests: failed
-      # clean m2 cache
     - name: Clean cache
       run: |
         find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
@@ -136,7 +124,7 @@ jobs:
           echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname }}" >> $GITHUB_ENV 
           echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}" >> $GITHUB_ENV
           echo "BUILD_ZOO_HANDLER_spring_cloud_skipper_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}" >> $GITHUB_ENV
-      # zoo success
+#       zoo success
       - name: Notify Build Success Zoo Handler Controller
         uses: jvalkeal/build-zoo-handler@v0.0.4
         with:
@@ -145,7 +133,7 @@ jobs:
             {
               "event": "build-succeed"
             }
-      # zoo failure
+#       zoo failure
       - name: Notify Build Failure Zoo Handler Controller
         if: ${{ failure() }}
         uses: jvalkeal/build-zoo-handler@v0.0.4

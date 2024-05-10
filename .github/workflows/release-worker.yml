@@ -36,7 +36,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-m2-
 
-      # target deploy repos
+#       target deploy repos
       - name: Configure JFrog Cli
         run: |
           jfrog rt mvnc \
@@ -49,7 +49,7 @@ jobs:
           echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-release >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
-      # zoo extract and ensure
+#       zoo extract and ensure
       - name: Extract Zoo Context Properties
         uses: jvalkeal/build-zoo-handler@v0.0.4
         with:
@@ -59,7 +59,7 @@ jobs:
             BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
       - name: 'Install: xmllint'
         uses: ./.github/actions/install-xmlutils
-      # build and publish to configured target
+#       build and publish to configured target
       - name: Build and Publish
         run: |
           jfrog rt mvn build-helper:parse-version versions:set \
@@ -129,14 +129,14 @@ jobs:
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release" 
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER" 
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version"
-      # zoo tag
+#       zoo tag
       - name: Tag Release
         uses: jvalkeal/build-zoo-handler@v0.0.4
         with:
           tag-release-branch: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
           tag-release-tag: ${{ env.BUILD_ZOO_HANDLER_spring_cloud_dataflow_version }}
           tag-release-tag-prefix: v
-        # clean m2 cache
+#         clean m2 cache
       - name: Clean cache
         run: |
           find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
@@ -172,7 +172,7 @@ jobs:
           echo "BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber }}" >> $GITHUB_ENV
           echo "BUILD_ZOO_HANDLER_spring_cloud_skipper_version=${{ needs.build.outputs.BUILD_ZOO_HANDLER_spring_cloud_skipper_version }}" >> $GITHUB_ENV
 
-      # zoo success
+#       zoo success
       - name: Notify Build Success Zoo Handler Controller
         if: ${{ success() }}
         uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -183,7 +183,7 @@ jobs:
               "event": "build-succeed"
             }
 
-      # zoo failure
+#       zoo failure
       - name: Notify Build Failure Zoo Handler Controller
         if: ${{ failure() }}
         uses: jvalkeal/build-zoo-handler@v0.0.4
