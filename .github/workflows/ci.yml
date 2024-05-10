@@ -73,8 +73,8 @@ jobs:
         jfrog rt mvn install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
-#        set +e
         PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
 #        SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-snapshot-local)
 #        if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then

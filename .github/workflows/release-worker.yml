@@ -108,17 +108,7 @@ jobs:
           jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,asciidoctordocs,restdocs -B install -DskipTests
           echo "::notice ::build-publish"
           jfrog rt build-publish
-#          set +e
           PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
-#          echo "::info ::Project version=$PROJECT_VERSION"
-#          SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-staging-local)
-#          if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
-#            echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
-#          else
-#            echo "::info ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
-#            jfrog rt sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
-#            echo "::info ::Skipper Docs Set Properties buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
-#          fi
           spring_cloud_dataflow_version=$PROJECT_VERSION
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV
@@ -129,6 +119,17 @@ jobs:
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release" 
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER" 
           echo "::info ::BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$spring_cloud_dataflow_version"
+
+      #          set +e
+      #          echo "::info ::Project version=$PROJECT_VERSION"
+      #          SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-staging-local)
+      #          if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
+      #            echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
+      #          else
+      #            echo "::info ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
+      #            jfrog rt sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
+      #            echo "::info ::Skipper Docs Set Properties buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
+      #          fi
 #       zoo tag
       - name: Tag Release
         uses: jvalkeal/build-zoo-handler@v0.0.4

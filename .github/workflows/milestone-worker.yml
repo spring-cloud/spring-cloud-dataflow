@@ -98,8 +98,12 @@ jobs:
         ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,asciidoctordocs,restdocs -B install -DskipTests 
         jfrog rt build-publish
-#        set +e
         PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+
+#        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
 #        SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-milestone-local)
 #        if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
@@ -109,9 +113,7 @@ jobs:
 #          jfrog rt sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
 #          echo "::info ::Skipper Docs Set Properties buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
 #        fi
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+
 #     zoo tag
     - name: Tag Release
       uses: jvalkeal/build-zoo-handler@v0.0.4
