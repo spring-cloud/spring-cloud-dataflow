@@ -79,6 +79,7 @@ jobs:
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
         PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        set +e
         SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-snapshot-local)
         if [[ "$SKIPPER_DOCS_PATTERN" == *"does not exist"* ]]; then
           echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
