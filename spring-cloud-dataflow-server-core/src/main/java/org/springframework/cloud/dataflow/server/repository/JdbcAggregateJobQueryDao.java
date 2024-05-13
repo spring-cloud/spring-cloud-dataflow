@@ -298,7 +298,6 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				.map(Object::toString)
 				.collect(Collectors.joining(","));
 			String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids).replace(":schemaTarget", target);
-			LOG.debug("populateCtrStatus:{}", sql);
 			jdbcTemplate.query(sql, rs -> {
 				Long id = rs.getLong("TASK_EXECUTION_ID");
 				String ctrStatus = rs.getString("CTR_STATUS");
