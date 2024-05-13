@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -46,7 +46,7 @@ if [ "$1" != "" ]; then
     STREAM_APPS_VERSION=$1
 fi
 
-if [ "$BROKER" == "kafka" ]; then
+if [ "$BROKER" = "kafka" ]; then
     BROKER_NAME=kafka
 else
     # unfortunately different in docker image names and registration link.

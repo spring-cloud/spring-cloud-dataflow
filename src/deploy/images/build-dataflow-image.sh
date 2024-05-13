@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -16,5 +16,4 @@ ROOTDIR=$(realpath "$SCDIR/../../..")
 pushd "$ROOTDIR" > /dev/null
     $ROOTDIR/mvnw -o -am -pl :spring-cloud-dataflow-server install -DskipTests -T 0.5C
     $ROOTDIR/mvnw -o -pl :spring-cloud-dataflow-server spring-boot:build-image -DskipTests
-popd
 popd

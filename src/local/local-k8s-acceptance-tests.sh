@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -49,7 +49,7 @@ if [ "$1" != "" ]; then
     export EXTRA="-P test-info -Dtest=org.springframework.cloud.dataflow.acceptance.test.DataFlowAT#aboutTestInfo"
     ;;
     *)
-      if [[ "$1" == *"group"* ]]; then
+      if [[ "$1" = *"group"* ]]; then
         export EXTRA="-Dmaven-failsafe-plugin.groups=$*"
       else
         export EXTRA="-Dtest=$*"

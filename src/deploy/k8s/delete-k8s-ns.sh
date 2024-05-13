@@ -31,7 +31,7 @@ if [ "$VERBOSE" != "" ]; then
 fi
 if [ "$FOUND" != "" ] && [ "$FOUND" != "null" ]; then
     echo "Deleting all resources in Namespace: $NS"
-    if [ "$CARVEL" == "true" ]; then
+    if [ "$CARVEL" = "true" ]; then
         kubectl delete apps --all --wait=false --namespace="$NS"
         kubectl delete packageinstalls --all --wait=false --namespace="$NS"
         kubectl delete packagerepositories --all --wait=false --namespace="$NS"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then

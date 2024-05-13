@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -24,8 +24,8 @@ case $BROKER in
 *)
   echo "BROKER=$BROKER not supported"
 esac
-if [ "$STREAM_APPS_VERSION" == "" ]; then
-    if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
+if [ "$STREAM_APPS_VERSION" = "" ]; then
+    if [[ "$DATAFLOW_VERSION" = *"SNAPSHOT"* ]]; then
         STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
     else
         STREAM_APPS_VERSION="4.0.0"

@@ -23,11 +23,11 @@ if [ "$NS" = "" ]; then
     exit 1
 fi
 
-if [ "$SCDF_TYPE" == "" ]; then
+if [ "$SCDF_TYPE" = "" ]; then
     echo "Environmental variable SCDF_TYPE must defined."
     exit 1
 fi
-if [ "$PACKAGE_VERSION" == "" ]; then
+if [ "$PACKAGE_VERSION" = "" ]; then
     echo "Environmental variable PACKAGE_VERSION must defined."
     exit 1
 fi

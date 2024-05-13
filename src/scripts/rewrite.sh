@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 rm -f rewrite.log
 CMD=$1
 shift

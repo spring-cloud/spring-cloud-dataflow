@@ -17,7 +17,7 @@ pushd "$ROOTDIR" > /dev/null
 if [ "$PACKAGE_VERSION" = "" ]; then
     $MVNW help:evaluate -Dexpression=project.version -q -DforceStdout > /dev/null
     PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
-    if [[ "$PACKAGE_VERSION" == *"Downloading"* ]]; then
+    if [[ "$PACKAGE_VERSION" = *"Downloading"* ]]; then
         PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
     fi
 fi

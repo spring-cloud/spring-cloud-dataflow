@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -21,7 +21,7 @@ kubectl apply -f "$SCDIR/yaml/metallb.yaml"
 
 kubectl rollout status ds speaker --namespace=metallb-system
 kubectl rollout status deploy controller --namespace=metallb-system
-if [ "$K8S_DRIVER" == "kind" ]; then
+if [ "$K8S_DRIVER" = "kind" ]; then
     docker network inspect -f '{{.IPAM.Config}}' kind
 fi
 echo "Modify $SCDIR/yaml/metallb-configmap.yaml to use the address range."

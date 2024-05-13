@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 VERSION=$1
 if [ "$1" = "" ]; then
     echo "Version is required"

@@ -12,7 +12,7 @@ else
 fi
 SCDIR="$(dirname "$SCDIR")"
 
-if [ "$1" == "" ]; then
+if [ "$1" = "" ]; then
     echo "Usage is: "${BASH_SOURCE[0]}" <database> <broker> [compose-command] [options] [flags] [--no-wait]"
     echo "Where:"
     echo "    database: is one of mariadb, mysql, mssql or postgres"
@@ -68,7 +68,7 @@ while [ "$1" != "" ]; do
                 ARGS="-f $SCDIR/docker-compose-$1.yml"
             fi
         else
-            if [ "$DC_OPTS" == "" ]; then
+            if [ "$DC_OPTS" = "" ]; then
                 DC_OPTS="$1"
             else
                 DC_OPTS="$DC_OPTS $1"
@@ -78,11 +78,11 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-if [ "$BROKER" == "" ]; then
+if [ "$BROKER" = "" ]; then
     echo "Provide a broker name like kafka or rabbitmq"
     exit 1
 fi
-if [ "$DATABASE" == "" ]; then
+if [ "$DATABASE" = "" ]; then
     echo "Provide a database name like mysql, mariadb or postgres"
     exit 1
 fi
@@ -104,7 +104,7 @@ else
     ARGS="$BASIC_ARGS"
 fi
 echo "Invoking:$DC $ARGS $DC_CMD $DC_OPTS"
-if [ "$WAIT" == "true" ]; then
+if [ "$WAIT" = "true" ]; then
     echo "Press any key to continue..."
     read -s -n 1
 fi

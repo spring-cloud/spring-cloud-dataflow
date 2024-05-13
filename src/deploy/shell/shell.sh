@@ -20,11 +20,11 @@ fi
 SHELL_JAR="$SCDIR/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
 if [ ! -f "$SHELL_JAR" ]; then
     echo "Downloading $SHELL_JAR"
-    if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
+    if [[ "$DATAFLOW_VERSION" = *"SNAPSHOT"* ]]; then
         URL="https://repo.spring.io/artifactory/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/$DATAFLOW_VERSION/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
         echo "Please visit $URL to download the latest jar file and save as $SHELL_JAR"
         exit 1
-    elif [[ "$DATAFLOW_VERSION" == *"-M"* ]] || [[ "$DATAFLOW_VERSION" == *"-RC"* ]]; then
+    elif [[ "$DATAFLOW_VERSION" = *"-M"* ]] || [[ "$DATAFLOW_VERSION" = *"-RC"* ]]; then
         URL="https://repo.spring.io/artifactory/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/$DATAFLOW_VERSION/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
         echo "Downloading $URL"
         set -e

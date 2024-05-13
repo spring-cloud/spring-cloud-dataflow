@@ -73,7 +73,7 @@ if [ "$SKIPPER_CLI" = "true" ]; then
         --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect &
     echo "$!" > skipper.pid
 fi
-if [ "$COMPOSE_PROFILE" == "skipper" ] || [ "$SKIPPER_CLI" == "true" ]; then
+if [ "$COMPOSE_PROFILE" = "skipper" ] || [ "$SKIPPER_CLI" = "true" ]; then
     echo "Waiting for Skipper"
     wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q http://localhost:7577
     echo "Skipper running"
@@ -89,7 +89,7 @@ if [ "$NO_TASKS" = "true" ]; then
 else
     DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.tasks-enabled=true"
 fi
-if [ "$USE_PRO" == "true" ]; then
+if [ "$USE_PRO" = "true" ]; then
     if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
         DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
     fi
@@ -101,7 +101,7 @@ fi
 if [[ "$DATAFLOW_ARGS" != *"--spring.datasource."* ]]; then
     DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.datasource.url=jdbc:mariadb://localhost:3306/dataflow --spring.datasource.username=spring --spring.datasource.password=spring --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect"
 fi
-if [ "$START_DATAFLOW" == "true" ]; then
+if [ "$START_DATAFLOW" = "true" ]; then
     echo "launching $SCDF_JAR with $DATAFLOW_ARGS"
     read -p "Press any key to launch Spring Cloud Data Flow..."
     java -jar "$SCDF_JAR" $DATAFLOW_ARGS &

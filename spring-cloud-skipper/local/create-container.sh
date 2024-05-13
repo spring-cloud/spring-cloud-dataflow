@@ -25,13 +25,13 @@ else
     v=11
 fi
 PROCESSOR=$(uname -p)
-if [ "$ARCH" == "" ]; then
+if [ "$ARCH" = "" ]; then
     case $PROCESSOR in
     "x86_64")
         ARCH=amd64
         ;;
     *)
-        if [[ "$PROCESSOR" == *"arm"* ]]; then
+        if [[ "$PROCESSOR" = *"arm"* ]]; then
             ARCH=arm64v8
         fi
         ;;

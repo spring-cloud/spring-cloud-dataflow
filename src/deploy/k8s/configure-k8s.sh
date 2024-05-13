@@ -29,7 +29,7 @@ fi
 if [ "$1" != "" ]; then
     export K8S_VERSION="$1"
 else
-    if [ "$K8S_VERSION" == "" ]; then
+    if [ "$K8S_VERSION" = "" ]; then
         export K8S_VERSION="1.28"
     fi
 fi

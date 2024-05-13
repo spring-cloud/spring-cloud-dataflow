@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -146,7 +146,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
     if [ "$USE_PRO" = "true" ]; then
         sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
-#        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
+#        if [[ "$DATAFLOW_PRO_VERSION" = *"1.6"* ]]; then
 #            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
 #
 #        else

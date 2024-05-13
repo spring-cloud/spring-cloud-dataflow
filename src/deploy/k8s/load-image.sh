@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 function print_args() {
     echo "Arguments: <docker-image:tag> [<dont-pull>]"
     echo "Not there is not space between name and tag. It is like on any docker registry"
@@ -9,7 +9,7 @@ function print_args() {
 if [ "$K8S_DRIVER" = "" ]; then
   K8S_DRIVER=kind
 fi
-if [ "$1" == "" ]; then
+if [ "$1" = "" ]; then
   print_args
   exit 1
 fi
@@ -30,7 +30,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
       echo "Not pulling:$IMAGE"
     fi
   elif [ "$DONT_PULL" = "" ]; then
-    if ((COUNT == 0)) || [[ "$IMAGE" == *"-SNAPSHOT" ]] || [[ "$IMAGE" == *":latest" ]]; then
+    if ((COUNT == 0)) || [[ "$IMAGE" = *"-SNAPSHOT" ]] || [[ "$IMAGE" = *":latest" ]]; then
       echo "Pulling:$IMAGE"
       docker pull "$IMAGE"
     else
@@ -85,14 +85,14 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ] ; then
       done
     done
     PULL=false
-    if [ "$DONT_PULL" == "false" ]; then
+    if [ "$DONT_PULL" = "false" ]; then
         PULL=true
         echo "Loading:$IMAGE"
     else
         echo "Loading:$IMAGE:$DOCKER_IDS"
     fi
     OPTIONS="--overwrite true --daemon true --pull $PULL"
-    if [ "$PULL" == "false" ]; then
+    if [ "$PULL" = "false" ]; then
         OPTIONS="$OPTIONS --remote false"
     fi
     minikube image load "$IMAGE" $OPTIONS

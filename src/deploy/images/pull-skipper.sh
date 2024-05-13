@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ "$SKIPPER_VERSION" = "" ]; then
   SKIPPER_VERSION=2.11.3-SNAPSHOT
 fi

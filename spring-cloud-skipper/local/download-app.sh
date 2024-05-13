@@ -43,7 +43,7 @@ function download_deps() {
     VERSION=$(echo "$DEP" | awk -F":" '{split($0,a); print a[3]}')
     echo "Dependency: groupId: $GROUP_ID, artifactId: $ARTIFACT_ID, version: $VERSION"
     TS=
-    if [ "$INC_VER" == "true" ]; then
+    if [ "$INC_VER" = "true" ]; then
         DEP_PATH="${DEP//\:/\/}"
         META_DATA="$URL/${GROUP_ID//\./\/}/$ARTIFACT_ID/$VERSION/maven-metadata.xml"
         echo "Reading $META_DATA"
@@ -83,7 +83,7 @@ function download_deps() {
     TARGET_FILE="${TARGET}/${ARTIFACT_ID}-${VERSION}.${EXT}"
     if [ "$TS" != "" ] && [ "$DS" != "" ] && [ -f "$TARGET_FILE" ]; then
         FD=$(date -r "$TARGET_FILE" +"%Y-%m-%d %H:%M:%S")
-        if [ "$FD" == "$DS" ]; then
+        if [ "$FD" = "$DS" ]; then
 
             echo "$(realpath --relative-to $PWD $TARGET_FILE) has same timestamp ($FD) as $SOURCE."
             echo "Skipping download"

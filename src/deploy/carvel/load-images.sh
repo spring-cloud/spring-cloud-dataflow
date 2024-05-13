@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ -n "$BASH_SOURCE" ]; then
   SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
 elif [ -n "$ZSH_VERSION" ]; then
@@ -13,7 +13,7 @@ fi
 SCDIR="$(dirname "$SCDIR")"
 
 PROMETHEUS=$(yq ".scdf.feature.monitoring.prometheusRsocketProxy.enabled" ./scdf-values.yml)
-if [ "$PROMETHEUS" == "null" ]; then
+if [ "$PROMETHEUS" = "null" ]; then
     PROMETHEUS=false
 fi
 SCDF_TYPE=oss

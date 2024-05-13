@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 function add_role() {
     ROLE=$1
     ROLE_NAME=$(echo "rolebinding-$NS-default-$ROLE" | sed 's/:/-/g')

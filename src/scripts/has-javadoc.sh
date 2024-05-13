@@ -44,7 +44,7 @@ for file in $FILES; do
         pushd "$DIR" > /dev/null || exit 1
             PACKAGING=$($MVNV help:evaluate -Dexpression=project.packaging -q -DforceStdout)
         popd > /dev/null || exit 1
-        if [ "$PACKAGING" == "jar" ]; then
+        if [ "$PACKAGING" = "jar" ]; then
             FILE=$(find $DIR/target -name "*-${VERSION}.jar" 2> /dev/null)
             if [ "$FILE" = "" ]; then
                 COUNT_MISSING_JAR=$((1 + COUNT_MISSING_JAR))

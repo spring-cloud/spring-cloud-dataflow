@@ -15,7 +15,7 @@ SCDIR="$(dirname "$SCDIR")"
 
 function check_env() {
     eval ev='$'$1
-    if [ "$ev" == "" ]; then
+    if [ "$ev" = "" ]; then
         echo "env var $1 not defined"
         exit 1
     fi

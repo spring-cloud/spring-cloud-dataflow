@@ -64,7 +64,7 @@ echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
 SERVER_TAG=$(yq '.scdf.server.image.tag' ./scdf-values.yml)
 if [ "$DATAFLOW_VERSION" != "" ]; then
     if [ "$SCDF_TYPE" = "oss" ]; then
-        if [ "$SERVER_TAG" = "null" ] || [ "$SERVER_TAG" == "" ]; then
+        if [ "$SERVER_TAG" = "null" ] || [ "$SERVER_TAG" = "" ]; then
             yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
             echo "Overriding Data Flow version=$DATAFLOW_VERSION"
         else
@@ -72,7 +72,7 @@ if [ "$DATAFLOW_VERSION" != "" ]; then
         fi
     fi
     CTR_TAG=$(yq '.scdf.ctr.image.tag' ./scdf-values.yml)
-    if [ "$CTR_TAG" = "null" ] || [ "$CTR_TAG" == "" ]; then
+    if [ "$CTR_TAG" = "null" ] || [ "$CTR_TAG" = "" ]; then
         yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
         echo "Overriding Composed Task Runner version=$DATAFLOW_VERSION"
     else
@@ -98,7 +98,7 @@ else
 fi
 SKIPPER_TAG=$(yq '.scdf.skipper.image.tag' ./scdf-values.yml)
 if [ "$SKIPPER_VERSION" != "" ]; then
-    if [ "$SKIPPER_TAG" == "null" ] || [ "$SKIPPER_TAG" == "" ]; then
+    if [ "$SKIPPER_TAG" = "null" ] || [ "$SKIPPER_TAG" = "" ]; then
         yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
         echo "Overriding Skipper version=$SKIPPER_VERSION"
     else
