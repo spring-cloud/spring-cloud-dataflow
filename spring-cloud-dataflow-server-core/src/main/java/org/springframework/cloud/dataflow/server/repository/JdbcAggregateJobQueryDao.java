@@ -184,7 +184,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 		"        where (select count(*) from AGGREGATE_TASK_EXECUTION_PARAMS where" +
 		"                    CT.TASK_EXECUTION_ID = TASK_EXECUTION_ID and" +
 		"                    CT.SCHEMA_TARGET = SCHEMA_TARGET and" +
-		"                    TASK_PARAM = '--spring.cloud.task.parent-schema-target=boot2') > 0" +
+		"                    TASK_PARAM = '--spring.cloud.task.parent-schema-target=:schemaTarget') > 0" +
 		"    AND CT.PARENT_EXECUTION_ID = T.TASK_EXECUTION_ID) > 0";
 
 	private static final String FIND_JOB_BY_NAME_INSTANCE_ID = FIND_JOB_BY +
@@ -308,7 +308,7 @@ public class JdbcAggregateJobQueryDao implements AggregateJobQueryDao {
 				execution.setCtrTaskStatus(ctrStatus);
 			});
 		}
-		LOG.debug("updated {} ctr statuses", updated.get());
+		LOG.debug("updated {} ctr statuses", updated);
 	}
 
 	@Override
