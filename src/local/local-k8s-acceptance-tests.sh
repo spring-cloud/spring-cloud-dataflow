@@ -1,4 +1,17 @@
 #!/bin/bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 if [ "$1" = "-h" ]; then
   echo "Usage $0 <test>"
   echo "  where test:"
@@ -8,12 +21,8 @@ if [ "$1" = "-h" ]; then
   echo "    otherwise the profile will be test-all with -Dtest and the parameter"
   exit 0
 fi
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
-fi
-SCDIR=$(realpath $(dirname "$(readlink -f "${BASH_SOURCE[0]}")"))
-ROOTDIR=$(realpath $SCDIR/../..)
+
+ROOTDIR=$(realpath "$SCDIR/../..")
 
 pushd "$ROOTDIR/../spring-cloud-dataflow-acceptance-tests/acceptance-tests/custom-apps/timestamp-batch-with-drivers-template1"  > /dev/null
 ./gradlew build install

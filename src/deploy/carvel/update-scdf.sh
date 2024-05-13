@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+  exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+
 start_time=$(date +%s)
 # the following names are your choice.
 if [ "$NS" = "" ]; then

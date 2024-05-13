@@ -50,7 +50,7 @@ while [ "$1" != "" ]; do
         export USE_PRO=true
         ;;
     "--namespace" | "-ns")
-        if [ "$2" == "" ]; then
+        if [ "$2" = "" ]; then
             echo "Expected <namespace> after $1"
             return 0
         fi
@@ -63,10 +63,10 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-echo "Namespace: $NS"
 if [ "$NS" = "" ]; then
     NS=scdf
 fi
+echo "Namespace: $NS"
 export NS
 if [ "$BROKER" != "" ]; then
     echo "BROKER: $BROKER"

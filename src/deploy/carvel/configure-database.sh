@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+  exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-if [ "$DEBUG" == "true" ]; then
+SCDIR="$(dirname "$SCDIR")"
+
+if [ "$DEBUG" = "true" ]; then
     echo "DEBUG: configure-database.sh $*"
 fi
 if [ "$4" = "" ]; then
@@ -29,7 +37,7 @@ case $1 in
     exit 1
     ;;
 esac
-if [ "$DEBUG" == "true" ]; then
+if [ "$DEBUG" = "true" ]; then
     echo "DEBUG: APP=$APP"
 fi
 case $2 in
@@ -55,7 +63,7 @@ JDBC_URL="$3"
 
 yq ".scdf.${APP}.database.url=\"$JDBC_URL\"" -i ./scdf-values.yml
 
-if [ "$DEBUG" == "true" ]; then
+if [ "$DEBUG" = "true" ]; then
     echo "DEBUG: DATABASE=$DATABASE"
 fi
 case $DATABASE in
@@ -72,7 +80,7 @@ case $DATABASE in
     echo "Unsupported $DATABASE."
     ;;
 esac
-if [ "$DEBUG" == "true" ]; then
+if [ "$DEBUG" = "true" ]; then
     echo "DEBUG: JDBC_DRIVER_CLASS=$JDBC_DRIVER_CLASS"
 fi
 if [ "$JDBC_DRIVER_CLASS" != "" ]; then
@@ -83,7 +91,7 @@ if [ "$DIALECT" = "" ] && [ "$DATABASE" = "mariadb" ]; then
     DIALECT="org.hibernate.dialect.MariaDB106Dialect"
 fi
 if [ "$DIALECT" != "" ]; then
-    if [ "$DEBUG" == "true" ]; then
+    if [ "$DEBUG" = "true" ]; then
         echo "DEBUG: DIALECT=$DIALECT"
     fi
     yq ".scdf.${APP}.database.dialect=\"$DIALECT\"" -i ./scdf-values.yml
@@ -101,7 +109,7 @@ else
     SECRET_PASSWORD_KEY=password
 fi
 if [ "$SECRET_NAME" != "" ]; then
-    if [ "$DEBUG" == "true" ]; then
+    if [ "$DEBUG" = "true" ]; then
         echo "DEBUG: SECRET_NAME=$SECRET_NAME, SECRET_USERNAME_KEY=$SECRET_USERNAME_KEY, SECRET_PASSWORD_KEY=$SECRET_PASSWORD_KEY"
     fi
     yq ".scdf.${APP}.database.secretName=\"$SECRET_NAME\"" -i ./scdf-values.yml

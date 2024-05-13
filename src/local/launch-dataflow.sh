@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
 
 function usage_msg() {
     echo "Arguments: [--skipper-compose | --no-skipper] [--pro] [--no-dataflow]"
@@ -8,12 +20,7 @@ function usage_msg() {
     echo "  --no-dataflow: Don't start Data Flow"
     echo "  --pro: Launches SCDF Pro instead of OSS"
 }
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
+
 PROJECT_DIR=$(realpath "$SCDIR/../..")
 if [ "$DATAFLOW_VERSION" = "" ]; then
     DATAFLOW_VERSION=2.11.3-SNAPSHOT

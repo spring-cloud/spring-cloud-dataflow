@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
-ROOT_DIR=$(realpath $SCDIR/..)
+SCDIR="$(dirname "$SCDIR")"
+
+ROOT_DIR=$(realpath "$SCDIR/..")
 # set to specific version
 if [ "$1" != "" ]; then
     TAG=$1
@@ -38,4 +45,4 @@ if [ "$DOCKER_USERNAME" != "" ]; then
 fi
 jib jar --from=$IMAGE $CRED \
     --target=docker://springcloud/spring-cloud-skipper-server:$TAG \
-    $ROOT_DIR/spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar
+    "$ROOT_DIR/spring-cloud-skipper-server/target/spring-cloud-skipper-server-$TAG.jar"

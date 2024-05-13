@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
-ROOT_DIR=$(realpath $SCDIR/..)
+SCDIR="$(dirname "$SCDIR")"
+
+ROOT_DIR=$(realpath "$SCDIR/..")
 
 if [ "$1" != "" ]; then
     VER=$1
 else
-    VER=2.9.0-SNAPSHOT
+    VER=2.11.3-SNAPSHOT
 fi
 
 function download_deps() {

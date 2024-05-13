@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+  exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
@@ -13,11 +26,7 @@ function check_env() {
 function count_kind() {
     jq --arg kind $1 --arg name $2 '.items | .[] | select(.kind == $kind) | .metadata | select(.name == $name) | .name' | grep -c -F "$2"
 }
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+
 start_time=$(date +%s)
 # the following names are your choice.
 check_env NS
