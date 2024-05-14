@@ -4,21 +4,8 @@
   </a>
 </p>
 
-<p align="center">
-  <a href="https://dataflow.spring.io/getting-started/">
-    <img src="https://spring.io/badges/spring-cloud-dataflow/ga.svg"
-         alt="Latest Release Version" />
-  </a>
-  <a href="https://dataflow.spring.io/getting-started/">
-    <img src="https://spring.io/badges/spring-cloud-dataflow/snapshot.svg"
-         alt="Latest Snapshot Version" />
-  </a>
-  <br>
-  <a href="https://build.spring.io/browse/SCD-BMASTER">
-    <img src="https://build.spring.io/plugins/servlet/wittified/build-status/SCD-BMASTER"
-         alt="Build Status" />
-  </a>
-</p>
+
+[![Build Status](https://jenkins.spring.io/buildStatus/icon?job=spring-ws%2Fmain)](https://jenkins.spring.io/job/spring-ws/job/main/)
 
 *Spring Cloud Data Flow* is a microservices-based toolkit for building streaming and batch data processing pipelines in
 Cloud Foundry and Kubernetes.
