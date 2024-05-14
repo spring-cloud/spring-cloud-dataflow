@@ -4,8 +4,8 @@
   </a>
 </p>
 
+[![Build Status - CI](https://github.com/spring-cloud/spring-cloud-dataflow/actions/workflows/ci.yml/badge.svg)](https://github.com/spring-cloud/spring-cloud-dataflow/actions/workflows/ci.yml)
 
-[![Build Status](https://jenkins.spring.io/buildStatus/icon?job=spring-ws%2Fmain)](https://jenkins.spring.io/job/spring-ws/job/main/)
 
 *Spring Cloud Data Flow* is a microservices-based toolkit for building streaming and batch data processing pipelines in
 Cloud Foundry and Kubernetes.
