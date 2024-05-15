@@ -305,19 +305,27 @@ public class DefaultTaskJobServiceTests {
 		JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 		if (insertTaskExecutionMetadata) {
-			template.execute(String.format("INSERT INTO " + schemaVersionTarget.getTaskPrefix() + "EXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", taskExecution.getExecutionId(), taskExecution.getExecutionId()));
+			template.execute(String.format("INSERT INTO %sEXECUTION_METADATA (ID, TASK_EXECUTION_ID, TASK_EXECUTION_MANIFEST) VALUES (%s, %s, '{\"taskDeploymentRequest\":{\"definition\":{\"name\":\"bd0917a\",\"properties\":{\"spring.datasource.username\":\"root\",\"spring.cloud.task.name\":\"bd0917a\",\"spring.datasource.url\":\"jdbc:mariadb://localhost:3306/task\",\"spring.datasource.driverClassName\":\"org.mariadb.jdbc.Driver\",\"spring.datasource.password\":\"password\"}},\"resource\":\"file:/Users/glennrenfro/tmp/batchdemo-0.0.1-SNAPSHOT.jar\",\"deploymentProperties\":{},\"commandlineArguments\":[\"run.id_long=1\",\"--spring.cloud.task.executionid=201\"]},\"platformName\":\"demo\"}')", schemaVersionTarget.getTaskPrefix(), taskExecution.getExecutionId(), taskExecution.getExecutionId()));
 		}
 		if(AppBootSchemaVersion.BOOT3.equals(schemaVersionTarget.getSchemaVersion())) {
 			jobExecution = new JobExecution(instance, taskExecution.getExecutionId(), this.jobParameters, "foo");
 			jobExecution.setCreateTime(new Date());
 			jobExecution.setVersion(1);
-
-			Object[] jobExecutionParameters = new Object[] { jobExecution.getId(), instance.getInstanceId(), new Date(), new Date(),
-				BatchStatus.COMPLETED, ExitStatus.COMPLETED,
-				ExitStatus.COMPLETED.getExitDescription(), 1, new Date(), new Date() };
-			this.jdbcTemplate.update(SAVE_JOB_EXECUTION, jobExecutionParameters,
-				new int[] { Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR,
-					Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP });
+			// JOB_EXECUTION_ID, JOB_INSTANCE_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, VERSION, CREATE_TIME, LAST_UPDATED
+			Object[] jobExecutionParameters = new Object[] {
+				jobExecution.getId(),
+				instance.getInstanceId(),
+				new Date(),
+				new Date(),
+				BatchStatus.COMPLETED,
+				ExitStatus.COMPLETED.getExitCode(),
+				ExitStatus.COMPLETED.getExitDescription(),
+				1,
+				new Date(),
+				new Date()
+			};
+			int[] argTypes = {Types.BIGINT, Types.BIGINT, Types.TIMESTAMP, Types.TIMESTAMP, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.TIMESTAMP, Types.TIMESTAMP};
+			this.jdbcTemplate.update(SAVE_JOB_EXECUTION, jobExecutionParameters, argTypes);
 
 			Object[] jobExecutionParmParameters = new Object[] { jobExecution.getId(),  "identifying.param", "java.lang.String", "testparm", "Y"};
 			this.jdbcTemplate.update(SAVE_JOB_EXECUTION_PARAM, jobExecutionParmParameters, new int[] { Types.BIGINT,
@@ -332,7 +340,7 @@ public class DefaultTaskJobServiceTests {
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
 		jobExecution.setStartTime(new Date());
-		ExitStatus exitStatus = new ExitStatus(BatchStatus.COMPLETED.equals(status.getBatchStatus()) ? "0" : "1", status.toString());
+		ExitStatus exitStatus = new ExitStatus(status.getBatchStatus().name(), status.toString());
 		jobExecution.setExitStatus(exitStatus);
 		jobRepository.update(jobExecution);
 		return Pair.of(taskExecution, jobExecution);
