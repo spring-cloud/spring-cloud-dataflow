@@ -74,14 +74,6 @@ jobs:
             -Dproperty=skipper.version \
             -DnewVersion=${{ inputs.version }} \
             -B
-          jfrog rt mvn versions:set-property \
-            -gs .github/settings.xml \
-            -DskipResolution=true \
-            -Pstagingrelease \
-            -DgenerateBackupPoms=false \
-            -Dproperty=spring-cloud-dataflow-ui.version \
-            -DnewVersion=${{ inputs.version }} \
-            -B
           spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "spring_cloud_dataflow_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${spring_cloud_dataflow_version}"
