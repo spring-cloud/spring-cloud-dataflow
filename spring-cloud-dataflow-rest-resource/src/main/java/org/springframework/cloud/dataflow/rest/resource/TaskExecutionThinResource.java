@@ -79,8 +79,6 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 
 	private String schemaTarget;
 
-	private String platformName;
-
 	public TaskExecutionThinResource() {
 	}
 
@@ -88,7 +86,6 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.executionId = aggregateTaskExecution.getExecutionId();
 		this.schemaTarget = aggregateTaskExecution.getSchemaTarget();
 		this.taskName = aggregateTaskExecution.getTaskName();
-		this.platformName = aggregateTaskExecution.getPlatformName();
 		this.externalExecutionId = aggregateTaskExecution.getExternalExecutionId();
 		this.parentExecutionId =aggregateTaskExecution.getParentExecutionId();
 		this.startTime = aggregateTaskExecution.getStartTime();
@@ -179,23 +176,8 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.schemaTarget = schemaTarget;
 	}
 
-	public String getPlatformName() {
-		return platformName;
-	}
-
-	public void setPlatformName(String platformName) {
-		this.platformName = platformName;
-	}
 	public void setTaskExecutionStatus(String taskExecutionStatus) {
 		this.taskExecutionStatus = taskExecutionStatus;
-	}
-
-	public String getComposedTaskJobExecutionStatus() {
-		return composedTaskJobExecutionStatus;
-	}
-
-	public void setComposedTaskJobExecutionStatus(String composedTaskJobExecutionStatus) {
-		this.composedTaskJobExecutionStatus = composedTaskJobExecutionStatus;
 	}
 
 	/**
