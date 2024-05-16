@@ -25,7 +25,6 @@
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-shell.version>2.1.13</spring-shell.version>
-		<commons-io.version>2.7</commons-io.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<testcontainers.version>1.19.7</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
@@ -39,7 +38,8 @@
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
-		<commons-compress.version>1.26.0</commons-compress.version>
+		<commons-compress.version>1.26.1</commons-compress.version>
+		<commons-io.version>2.15.1</commons-io.version>
 		<postgresql.version>42.7.2</postgresql.version>
 		<prometheus-rsocket.version>1.5.2</prometheus-rsocket.version>
 		<java-cfenv.version>2.3.0</java-cfenv.version>
@@ -89,6 +89,11 @@
 				<version>${commons-compress.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers-bom</artifactId>
 				<version>${testcontainers.version}</version>
@@ -135,11 +140,6 @@
 				<version>${spring-shell.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
