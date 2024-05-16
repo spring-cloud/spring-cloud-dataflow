@@ -43,7 +43,8 @@
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
-		<commons-compress.version>1.26.0</commons-compress.version>
+		<commons-compress.version>1.26.1</commons-compress.version>
+		<commons-io.version>2.15.1</commons-io.version>
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
@@ -276,6 +277,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
 				<version>${commons-compress.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
