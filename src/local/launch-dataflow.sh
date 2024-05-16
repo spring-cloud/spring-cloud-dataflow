@@ -84,7 +84,7 @@ else
 fi
 if [ "$USE_PRO" == "true" ]; then
     if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-        DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
+        DATAFLOW_PRO_VERSION=1.6.2-SNAPSHOT
     fi
     SCDF_JAR="$(realpath $PROJECT_DIR/../scdf-pro/scdf-pro-server/target/scdf-pro-server-$DATAFLOW_PRO_VERSION.jar)"
 

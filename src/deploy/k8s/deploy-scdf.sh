@@ -14,7 +14,7 @@ if [ ! -d "$K8S" ]; then
 fi
 PARENT=$(realpath "$SCDIR/../../..")
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
-  DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
+  export DATAFLOW_PRO_VERSION=1.6.2-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
   export DATAFLOW_VERSION=2.11.3-SNAPSHOT
@@ -137,12 +137,11 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
     if [ "$USE_PRO" = "true" ]; then
         sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
-#        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
-#            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
-#
-#        else
+        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
+            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
+        else
             sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true
-#        fi
+        fi
     else
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server:$DATAFLOW_VERSION" true
@@ -198,22 +197,22 @@ kubectl apply --namespace "$NS" -f "$YAML_PATH/server-config.yaml"
 kubectl create --namespace "$NS" clusterrolebinding scdftestrole --clusterrole cluster-admin --user=system:serviceaccount:default:scdf-sa
 
 kubectl apply --namespace "$NS" -f "$YAML_PATH/skipper-config-$BROKER.yaml"
-cat "$YAML_PATH/skipper-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$SKIPPER_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
-kubectl create --namespace "$NS" -f "$YAML_PATH/skipper-svc.yaml"
 
 if [ "$USE_PRO" = "true" ]; then
     echo "Deploying Skipper Pro $DATAFLOW_PRO_VERSION for $BROKER and $DATABASE"
-    # kubectl apply --namespace "$NS" -f "$YAML_PATH/skipper-config-$BROKER.yaml"
-    # cat "$YAML_PATH/skipper-deployment-pro.yaml" | envsubst '$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+    cat "$YAML_PATH/skipper-deployment-pro.yaml" | envsubst '$SKIPPER_VERSION,$DATAFLOW_PRO_VERSION,$DATABASE' > ./skipper-deployment.yaml
     echo "Deploying Data Flow Server Pro $DATAFLOW_PRO_VERSION and $DATABASE"
-    cat "$YAML_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_VERSION,$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+    cat "$YAML_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_VERSION,$DATAFLOW_PRO_VERSION,$DATABASE' > ./server-deployment.yaml
 else
-    # Deploy Spring Cloud Skipper
-    echo "Deploying Skipper $SKIPPER_VERSION for $BROKER and $DATABASE"
+    echo "Deploying Skipper Server $DATAFLOW_VERSION for $DATABASE"
+    cat "$YAML_PATH/skipper-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$SKIPPER_VERSION,$DATABASE' > ./skipper-deployment.yaml
     echo "Deploying Data Flow Server $DATAFLOW_VERSION for $DATABASE"
-    cat "$YAML_PATH/server-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$DATABASE' | kubectl create --namespace "$NS" -f -
+    cat "$YAML_PATH/server-deployment.yaml" | envsubst '$DATAFLOW_VERSION,$DATABASE' > ./server-deployment.yaml
 fi
+kubectl create --namespace "$NS" -f ./skipper-deployment.yaml
+kubectl create --namespace "$NS" -f ./server-deployment.yaml
 
+kubectl create --namespace "$NS" -f "$YAML_PATH/skipper-svc.yaml"
 kubectl create --namespace "$NS" -f "$YAML_PATH/server-svc.yaml"
 
 popd >/dev/null
