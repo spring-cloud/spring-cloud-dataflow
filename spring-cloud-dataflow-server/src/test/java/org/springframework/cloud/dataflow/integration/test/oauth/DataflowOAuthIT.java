@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.integration.test.oauth;
 
 import java.util.concurrent.TimeUnit;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,7 @@ import org.testcontainers.containers.Container.ExecResult;
 import org.springframework.cloud.dataflow.integration.test.db.AbstractDataflowTests;
 import org.springframework.cloud.dataflow.integration.test.tags.Oauth;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
+import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.awaitility.Awaitility.with;
@@ -54,12 +56,26 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 				.ignoreExceptions()
 				.atMost(120, TimeUnit.SECONDS)
 				.until(() -> {
-					log.debug("Checking auth using curl");
+					log.info("Checking auth using curl");
 					ExecResult cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/about");
 					String response = cmdResult.getStdout();
 					log.debug("Response is {}", response);
-					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
+					Boolean authenticated = JsonPath.parse(response).read("$.securityInfo.authenticated", Boolean.class);
+					String username = JsonPath.parse(response).read("$.securityInfo.username", String.class);
+					boolean ok = Boolean.TRUE.equals(authenticated) && "janne".equals(username);
 					log.info("Check for oauth {}", ok);
+					if (ok) {
+						String version = JsonPath.parse(response).read("$.versionInfo.core.version");
+						log.info("Version=[{}]", version);
+						String api = "tasks/executions";
+						if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
+								VersionUtils.getThreePartVersion(version), "2.11.3")) {
+							api = "tasks/thinexecutions";
+						}
+						cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/" + api);
+						response = cmdResult.getStdout();
+						ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
+					}
 					return ok;
 				});
 	}
