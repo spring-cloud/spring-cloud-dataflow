@@ -213,21 +213,20 @@ public class PackageService implements ResourceLoaderAware {
 
 	@Transactional
 	public PackageMetadata upload(UploadRequest uploadRequest) {
-		validateUploadRequest(uploadRequest);
+
 		Repository localRepositoryToUpload = getRepositoryToUpload(uploadRequest.getRepoName());
 		Path packageDirPath = null;
 		try {
 			packageDirPath = TempFileUtils.createTempDirectory("skipperUpload");
+			validateUploadRequest(packageDirPath, uploadRequest);
 			File packageDir = new File(packageDirPath + File.separator + uploadRequest.getName());
 			packageDir.mkdir();
-			Path packageFile = Paths
-					.get(packageDir.getPath() + File.separator + uploadRequest.getName() + "-"
-							+ uploadRequest.getVersion() + "." + uploadRequest.getExtension());
+			String fullName = uploadRequest.getName().trim() + "-" + uploadRequest.getVersion().trim() + "." + uploadRequest.getExtension().trim();
+			Path packageFile = Paths.get(packageDir.getPath() + File.separator + fullName);
 			Assert.isTrue(packageDir.exists(), "Package directory doesn't exist.");
 			Files.write(packageFile, uploadRequest.getPackageFileAsBytes());
 			ZipUtil.unpack(packageFile.toFile(), packageDir);
-			String unzippedPath = packageDir.getAbsolutePath() + File.separator + uploadRequest.getName()
-					+ "-" + uploadRequest.getVersion();
+			String unzippedPath = packageDir.getAbsolutePath() + File.separator + uploadRequest.getName() + "-" + uploadRequest.getVersion();
 			File unpackagedFile = new File(unzippedPath);
 			Assert.isTrue(unpackagedFile.exists(), "Package is expected to be unpacked, but it doesn't exist");
 			Package packageToUpload = this.packageReader.read(unpackagedFile);
@@ -267,7 +266,7 @@ public class PackageService implements ResourceLoaderAware {
 		return localRepositoryToUpload;
 	}
 
-	private void validateUploadRequest(UploadRequest uploadRequest) {
+	private void validateUploadRequest(Path packageDirPath, UploadRequest uploadRequest) throws IOException {
 		Assert.notNull(uploadRequest.getRepoName(), "Repo name can not be null");
 		Assert.notNull(uploadRequest.getName(), "Name of package can not be null");
 		Assert.notNull(uploadRequest.getVersion(), "Version can not be null");
@@ -283,11 +282,16 @@ public class PackageService implements ResourceLoaderAware {
 				+ uploadRequest.getExtension());
 		Assert.notNull(uploadRequest.getPackageFileAsBytes(), "Package file as bytes must not be null");
 		Assert.isTrue(uploadRequest.getPackageFileAsBytes().length != 0, "Package file as bytes must not be empty");
+		File destinationFile = new File(packageDirPath.toFile(), uploadRequest.getName().trim());
+		String canonicalDestinationDirPath = packageDirPath.toFile().getCanonicalPath();
+		String canonicalDestinationFile =  destinationFile.getCanonicalPath();
+		if (!canonicalDestinationFile.startsWith(canonicalDestinationDirPath + File.separator)) {
+			throw new SkipperException("Entry is outside of the target dir: " + uploadRequest.getName());
+		}
 		PackageMetadata existingPackageMetadata = this.packageMetadataRepository.findByRepositoryNameAndNameAndVersion(
 				uploadRequest.getRepoName().trim(), uploadRequest.getName().trim(), uploadRequest.getVersion().trim());
 		if (existingPackageMetadata != null) {
-			throw new SkipperException(String.format("Failed to upload the package. " + "" +
-							"Package [%s:%s] in Repository [%s] already exists.",
+			throw new SkipperException(String.format("Failed to upload the package. Package [%s:%s] in Repository [%s] already exists.",
 					uploadRequest.getName(), uploadRequest.getVersion(), uploadRequest.getRepoName().trim()));
 		}
 	}
