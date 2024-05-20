@@ -1,0 +1,16 @@
+#!/bin/bash
+
+VALUES='
+2.11.3,spring-cloud-dataflow
+2.9.3,spring-cloud-deployer
+3.4.3,spring-cloud-dataflow-ui
+'
+
+
+for VALUE in $VALUES;
+  do
+    MILESTONE=$(echo $VALUE | cut -f1 -d,)
+    REPO=$(echo $VALUE | cut -f2 -d,)
+    TEMPLATE="{{range .}}spring-cloud/$REPO#{{.number}} {{.title}}{{\"\n\"}}{{end}}"
+    gh issue list --repo spring-cloud/$REPO --search milestone:$MILESTONE --state all
+done;
