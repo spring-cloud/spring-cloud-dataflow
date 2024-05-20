@@ -1,14 +1,14 @@
 scdf-type:
   oss:
-    release: '2.11.2'
-    snapshot: '2.11.3-SNAPSHOT'
+    release: '2.11.3'
+    snapshot: '2.11.4-SNAPSHOT'
     milestone: '2.11.0-RC1'
     maintenance-snapshot: '2.10.4-SNAPSHOT'
   pro:
     release: '1.6.1'
-    snapshot: '1.6.2-SNAPSHOT'
+    snapshot: '1.6.3-SNAPSHOT'
     maintenance-snapshot: '1.5.4-SNAPSHOT'
 default:
   scdf-type: 'oss'
   version: 'release'
-  package-version: '2.11.2'
+  package-version: '2.11.3'
