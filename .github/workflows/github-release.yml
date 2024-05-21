@@ -31,97 +31,16 @@ jobs:
           curl -sSL https://github.com/cbroglie/mustache/releases/download/v1.2.2/mustache_1.2.2_linux_amd64.tar.gz | sudo tar -C /usr/local/bin/ --no-same-owner -xzv mustache
       # release notes and gh release
       - name: Release
+        shell: bash
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          RELEASE_NOTES_FILE: ${{runner.temp}}/release_notes.md5
-          RELEASE_NOTES_DATA: ${{runner.temp}}/release_notes_data.json
-          RELEASE_NOTES_HEADERS1: ${{runner.temp}}/release_notes_headers1.json
-          RELEASE_NOTES_HEADERS2: ${{runner.temp}}/release_notes_headers2.json
-          RELEASE_NOTES_HEADERS3: ${{runner.temp}}/release_notes_headers3.json
-          RELEASE_NOTES_FOOTERS1: ${{runner.temp}}/release_notes_footers1.json
-          RELEASE_NOTES_FOOTERS2: ${{runner.temp}}/release_notes_footers2.json
-          RELEASE_NOTES_FOOTERS3: ${{runner.temp}}/release_notes_footers3.json
-          RELEASE_NOTES_ISSUES1: ${{runner.temp}}/release_notes_issues1.json
-          RELEASE_NOTES_ISSUES2: ${{runner.temp}}/release_notes_issues2.json
-          RELEASE_NOTES_ISSUES3: ${{runner.temp}}/release_notes_issues3.json
-          RELEASE_NOTES_PROJECT1: ${{runner.temp}}/release_notes_project1.json
-          RELEASE_NOTES_PROJECT2: ${{runner.temp}}/release_notes_project2.json
-          RELEASE_NOTES_PROJECT3: ${{runner.temp}}/release_notes_project3.json
         run: |
-          gh issue list \
-            --repo spring-cloud/spring-cloud-deployer \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_deployer_version \
-            --label automation/rlnotes-header  \
-            --state all --json title,body \
-            --jq '{headers:map(.),headerslength:(length)}' \
-            > $RELEASE_NOTES_HEADERS1
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow-ui \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version \
-            --label automation/rlnotes-header  \
-            --state all --json title,body \
-            --jq '{headers:map(.),headerslength:(length)}' \
-            > $RELEASE_NOTES_HEADERS2
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
-            --label automation/rlnotes-header  \
-            --state all --json title,body \
-            --jq '{headers:map(.),headerslength:(length)}' \
-            > $RELEASE_NOTES_HEADERS3
-          gh issue list \
-            --repo spring-cloud/spring-cloud-deployer \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_deployer_version \
-            --label automation/rlnotes-footer  \
-            --state all --json title,body \
-            --jq '{footers:map(.),footerslength:(length)}' \
-            > $RELEASE_NOTES_FOOTERS1
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow-ui \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version \
-            --label automation/rlnotes-footer  \
-            --state all --json title,body \
-            --jq '{footers:map(.),footerslength:(length)}' \
-            > $RELEASE_NOTES_FOOTERS2
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
-            --label automation/rlnotes-footer  \
-            --state all --json title,body \
-            --jq '{footers:map(.),footerslength:(length)}' \
-            > $RELEASE_NOTES_FOOTERS3
-          echo "{\"name\":\"Spring Cloud Dataflow Deployer\",\"version\":\"$BUILD_ZOO_HANDLER_spring_cloud_deployer_version\"}" > $RELEASE_NOTES_PROJECT1
-          echo "{\"name\":\"Spring Cloud Dataflow UI\",\"version\":\"$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version\"}" > $RELEASE_NOTES_PROJECT2
-          echo "{\"name\":\"Spring Cloud Dataflow\",\"version\":\"$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version\"}" > $RELEASE_NOTES_PROJECT3
-          gh issue list \
-            --repo spring-cloud/spring-cloud-deployer \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_deployer_version \
-            --state all --json number,title,labels \
-            --jq '{issues:map(select((.labels | length == 0) or (any(.labels[].name; startswith("automation/rlnotes")|not))) + {repo:"spring-cloud/spring-cloud-deployer"})}' \
-            > $RELEASE_NOTES_ISSUES1
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow-ui \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version \
-            --state all --json number,title,labels \
-            --jq '{issues:map(select((.labels | length == 0) or (any(.labels[].name; startswith("automation/rlnotes")|not))) + {repo:"spring-cloud/spring-cloud-dataflow-ui"})}' \
-            > $RELEASE_NOTES_ISSUES2
-          gh issue list \
-            --repo spring-cloud/spring-cloud-dataflow \
-            --search milestone:$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
-            --state all --limit 100 --json number,title,labels \
-            --jq '{issues:map(select((.labels | length == 0) or (any(.labels[].name; startswith("automation/rlnotes")|not))) + {repo:"spring-cloud/spring-cloud-dataflow"})}' \
-            > $RELEASE_NOTES_ISSUES3
-          jq -s '{issues:(.[0].issues + .[1].issues + .[2].issues + .[3].issues + .[4].issues + .[5].issues + .[6].issues + .[7].issues + .[8].issues + .[9].issues),headers:(.[10].headers + .[11].headers + .[12].headers + .[13].headers + .[14].headers + .[15].headers + .[16].headers + .[17].headers + .[18].headers + .[19].headers),headerslength:(.[10].headerslength + .[11].headerslength + .[12].headerslength + .[13].headerslength + .[14].headerslength + .[15].headerslength + .[16].headerslength + .[17].headerslength + .[18].headerslength + .[19].headerslength),footers:(.[20].footers + .[21].footers + .[22].footers + .[23].footers + .[24].footers + .[25].footers + .[26].footers + .[27].footers + .[28].footers + .[29].footers), footerslength:(.[20].footerslength + .[21].footerslength + .[22].footerslength + .[23].footerslength + .[24].footerslength + .[25].footerslength + .[26].footerslength + .[27].footerslength + .[28].footerslength + .[29].footerslength),projects:{spring_cloud_dataflow_build:{name:"Spring Cloud Dataflow Build",version:(.[30].version)},spring_cloud_dataflow_common:{name:"Spring Cloud Dataflow Common",version:(.[31].version)},spring_cloud_deployer:{name:"Spring Cloud Deployer",version:(.[32].version)},spring_cloud_deployer_local:{name:"Spring Cloud Deployer Local",version:(.[33].version)},spring_cloud_deployer_cloudfoundry:{name:"Spring Cloud Deployer CF",version:(.[34].version)},spring_cloud_deployer_kubernetes:{name:"Spring Cloud Deployer K8S",version:(.[35].version)},spring_cloud_common_security_config:{name:"Spring Cloud Common Security Config",version:(.[36].version)},spring_cloud_skipper:{name:"Spring Cloud Skipper",version:(.[37].version)},spring_cloud_dataflow_ui:{name:"Spring Cloud Dataflow UI",version:(.[38].version)},spring_cloud_dataflow:{name:"Spring Cloud Dataflow",version:(.[39].version)}}}' \
-            $RELEASE_NOTES_ISSUES1 $RELEASE_NOTES_ISSUES2 $RELEASE_NOTES_ISSUES3 \
-            $RELEASE_NOTES_HEADERS1 $RELEASE_NOTES_HEADERS2 $RELEASE_NOTES_HEADERS3 \
-            $RELEASE_NOTES_FOOTERS1 $RELEASE_NOTES_FOOTERS2 $RELEASE_NOTES_FOOTERS3 \
-            $RELEASE_NOTES_PROJECT1 $RELEASE_NOTES_PROJECT2 $RELEASE_NOTES_PROJECT3 \
-            > $RELEASE_NOTES_DATA
-          mustache $RELEASE_NOTES_DATA .github/rlnotes.mustache > $RELEASE_NOTES_FILE
+          # generate release notes
+          .github/workflows/generate-release-notes.sh "${{ runner.temp }}" "$BUILD_ZOO_HANDLER_spring_cloud_deployer_version" "$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version" "$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" 
           gh release create v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
             --draft \
             --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
-            --notes-file $RELEASE_NOTES_FILE
+            --notes-file "${{runner.temp}}/release_notes.md"
           # retrieve spring-cloud-dataflow-package and upload to github release
           export PACKAGE_VERSION=${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
           pushd spring-cloud-dataflow-package 
