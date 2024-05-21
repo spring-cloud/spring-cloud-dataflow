@@ -4,11 +4,11 @@
 	<parent>
 		<artifactId>spring-cloud-dataflow-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>2.11.3-SNAPSHOT</version>
+		<version>2.11.3</version>
 		<relativePath>../spring-cloud-dataflow-build/spring-cloud-dataflow-dependencies-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-dependencies</artifactId>
-	<version>2.11.3-SNAPSHOT</version>
+	<version>2.11.3</version>
 	<packaging>pom</packaging>
 	<name>spring-cloud-dataflow-dependencies</name>
 	<description>Spring Cloud Data Flow Dependencies BOM designed to support consumption of Spring Cloud Data Flow from

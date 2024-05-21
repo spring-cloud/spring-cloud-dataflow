@@ -4,34 +4,29 @@ version: '3'
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-rabbitmq.yml up
 services:
 
+  kafka-broker:
+    entrypoint: ["echo", "kafka-broker service is disabled"]
+
+  zookeeper:
+    entrypoint: ["echo", "zookeeper service is disabled"]
+
   rabbitmq:
-    image: rabbitmq:3.8-management
+    image: rabbitmq:3.7
     container_name: dataflow-rabbitmq
-    environment:
-      LANG: en_US.utf8
-      LC_ALL: en_US.utf8
-      JDK_JAVA_OPTIONS: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
     expose:
       - '5672'
-      - '15672'
 
   dataflow-server:
     environment:
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_RABBITMQ_HOST=rabbitmq
-    depends_on:
-      - rabbitmq
-
-  skipper-server:
-    environment:
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_RABBITMQ_HOST=rabbitmq
-    depends_on:
-      - rabbitmq
 
   app-import-stream:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/rabbitmq-maven-latest&force=true}';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-rabbit:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/3.0.1' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.1';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/ver-log/2.1.5.RELEASE' --no-check-certificate --post-data='uri=maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.1.5.RELEASE';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-@project.version@}' --no-check-certificate --post-data='uri=maven://org.springframework.cloud:spring-cloud-dataflow-tasklauncher-sink-rabbit:${DATAFLOW_VERSION:-@project.version@}';
         echo 'Stream apps imported'"
 

@@ -14,7 +14,7 @@ spec:
         app: grafana
     spec:
       containers:
-        - image: springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.3-SNAPSHOT
+        - image: springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.3
           name: grafana
           env:
             - name: GF_SECURITY_ADMIN_USER
@@ -30,12 +30,9 @@ spec:
           ports:
             - containerPort: 3000
           resources:
-            limits:
-              cpu: 500m
-              memory: 2500Mi
             requests:
-              cpu: 100m
-              memory: 100Mi
+              cpu: 500m
+              memory: 256Mi
           volumeMounts:
             - name: config
               mountPath: "/etc/grafana/provisioning/datasources/datasources.yaml"

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: scdf-server
-        image: springcloud/spring-cloud-dataflow-server:2.11.3-SNAPSHOT
+        image: springcloud/spring-cloud-dataflow-server:2.11.3
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
@@ -26,60 +26,60 @@ spec:
             mountPath: /etc/secrets/database
             readOnly: true
         ports:
-        - containerPort: 9393
+        - containerPort: 8080
         livenessProbe:
           httpGet:
             path: /management/health/liveness
-            port: 9393
+            port: 8080
           initialDelaySeconds: 0
         readinessProbe:
           httpGet:
             path: /management/health/readiness
-            port: 9393
+            port: 8080
           initialDelaySeconds: 0
         startupProbe:
           tcpSocket:
-            port: 9393
+            port: 8080
           initialDelaySeconds: 15
-          periodSeconds: 3
-          failureThreshold: 120
-          timeoutSeconds: 3
         resources:
+          limits:
+            cpu: 1.0
+            memory: 2048Mi
           requests:
-            cpu: 1500m
+            cpu: 0.5
             memory: 1024Mi
         env:
-        - name: LANG
-          value: 'en_US.utf8'
-        - name: LC_ALL
-          value: 'en_US.utf8'
-        - name: JDK_JAVA_OPTIONS
-          value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
-        - name: KUBERNETES_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: "metadata.namespace"
-        - name: SERVER_PORT
-          value: '9393'
-        - name: SPRING_CLOUD_CONFIG_ENABLED
-          value: 'false'
-        - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
-          value: 'true'
-        - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
-          value: 'true'
-        - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
-          value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:2.11.3-SNAPSHOT'
-        - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
-          value: 'false'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-          value: 'false'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
-          value: /etc/secrets
-        - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
-          value: 'http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}'
-          # Provide the Skipper service location
-        - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
-          value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+          - name: JDK_JAVA_OPTIONS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: "metadata.namespace"
+          - name: SERVER_PORT
+            value: '8080'
+          - name: SPRING_CLOUD_CONFIG_ENABLED
+            value: 'false'
+          - name: SPRING_CLOUD_DATAFLOW_FEATURES_ANALYTICS_ENABLED
+            value: 'true'
+          - name: SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED
+            value: 'true'
+          - name: SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI
+            value: 'docker://springcloud/spring-cloud-dataflow-composed-task-runner:@ctr.version@'
+          - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+            value: /etc/secrets
+          - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
+            value: 'http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}'
+            # Provide the Skipper service location
+          - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
+            value: 'http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api'
       serviceAccountName: scdf-sa
       volumes:
         - name: config
