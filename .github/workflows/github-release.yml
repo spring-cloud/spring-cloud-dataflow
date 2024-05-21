@@ -28,7 +28,7 @@ jobs:
       # tooling
       - name: Install Tooling
         run: |
-          curl -sSL https://github.com/cbroglie/mustache/releases/download/v1.2.2/mustache_1.2.2_linux_amd64.tar.gz | sudo tar -C /usr/local/bin/ --no-same-owner -xzv mustache
+          curl -sSL https://github.com/cbroglie/mustache/releases/download/v1.4.0/mustache_1.4.0_linux_amd64.tar.gz | sudo tar -C /usr/local/bin/ --no-same-owner -xzv mustache
       # release notes and gh release
       - name: Release
         shell: bash
