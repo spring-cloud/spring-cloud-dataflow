@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-skipper-parent</artifactId>
-	<version>2.11.3-SNAPSHOT</version>
+	<version>2.11.4-SNAPSHOT</version>
 	<name>Spring Cloud Skipper</name>
 	<description>Spring Cloud Skipper</description>
 	<packaging>pom</packaging>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.11.3-SNAPSHOT</version>
+		<version>2.11.4-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-build</relativePath>
 	</parent>
 
@@ -25,7 +25,7 @@
 		<java.version>1.8</java.version>
 
 		<spring-statemachine.version>2.5.1</spring-statemachine.version>
-		<spring-cloud-deployer.version>2.9.3-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer.version>2.9.4-SNAPSHOT</spring-cloud-deployer.version>
 
 		<zeroturnaround.version>1.15</zeroturnaround.version>
 		<spring-restdocs.version>2.0.7.RELEASE</spring-restdocs.version>
