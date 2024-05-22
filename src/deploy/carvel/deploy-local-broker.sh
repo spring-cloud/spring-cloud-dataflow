@@ -56,7 +56,7 @@ else
     KAFKA_HOST="kafka.kafka"
     yq ".scdf.binder.type=\"kafka\"" -i ./scdf-values.yml
     yq ".scdf.binder.kafka.broker.host=\"$KAFKA_HOST\"" -i ./scdf-values.yml
-    yq ".scdf.binder.kafka.zk.host=\"kafka-zk.kafka\"" -i ./scdf-values.yml
+    yq ".scdf.binder.kafka.zk.host=\"kafka-zk\"" -i ./scdf-values.yml
 fi
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))

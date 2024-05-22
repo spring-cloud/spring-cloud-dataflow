@@ -51,6 +51,7 @@ case "$K8S_DRIVER" in
 "microk8s")
     echo "Configure Microk8s"
     microk8s enable registry
+    microk8s enable hostpath-storage
     microk8s enable metallb:172.18.0.1-172.18.0.254
     microk8s kubectl get all --all-namespaces
     ;;

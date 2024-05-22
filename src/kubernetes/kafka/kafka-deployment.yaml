@@ -33,7 +33,7 @@ spec:
           - name: KAFKA_ADVERTISED_LISTENERS
             value: "PLAINTEXT://kafka-broker.kafka:9092"
           - name: KAFKA_ZOOKEEPER_CONNECT
-            value: kafka-zk.kafka:2181
+            value: kafka-zk:2181
           - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
             value: "1"
           - name: KAFKA_LOG4J_ROOT_LOGLEVEL
