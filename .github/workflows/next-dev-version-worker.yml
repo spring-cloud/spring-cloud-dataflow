@@ -96,7 +96,7 @@ jobs:
     - name: Commit Next Dev Changes
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
-        commit-changes-branch: 2.11.x
+        commit-changes-branch: main
         commit-changes-message: Next development version
 
     # zoo success
