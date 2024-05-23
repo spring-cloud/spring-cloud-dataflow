@@ -94,6 +94,9 @@ spring:
         dependency-fetch:
           enabled: false
         dependencies:
+          spring-cloud-dataflow-server:
+            name: Spring Cloud Dataflow
+            version: "@project.version@"
           spring-cloud-dataflow-dashboard:
             name: Spring Cloud Dataflow UI
             version: "@spring-cloud-dataflow-ui.version@"
