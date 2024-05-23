@@ -63,26 +63,19 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
 					log.info("Check for oauth {}", ok);
 					if (ok) {
-						try {
-							String version = JsonPath.parse(response).read("$.versionInfo.core.version");
-							log.info("Version=[{}]", version);
-							String api = "tasks/executions";
-							if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
-									VersionUtils.getThreePartVersion(version), "2.11.3")) {
-								api = "tasks/thinexecutions";
-							}
-							log.info("Checking {}", api);
-							cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/" + api);
-							response = cmdResult.getStdout();
-							log.debug("Response is {}", response);
-							ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
-
-							// TODO add checks for new endpoints to check security
+						String version = JsonPath.parse(response).read("$.versionInfo.core.version");
+						log.info("Version=[{}]", version);
+						String api = "tasks/executions";
+						if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
+								VersionUtils.getThreePartVersion(version), "2.11.3")) {
+							api = "tasks/thinexecutions";
 						}
-						catch (Throwable x) {
-							log.error("Exception:" + x, x);
-							ok = false;
-						}
+						log.info("Checking {}", api);
+						cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/" + api);
+						response = cmdResult.getStdout();
+						log.debug("Response is {}", response);
+						ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
+						// TODO add checks for new endpoints to check security
 					}
 					return ok;
 				});
