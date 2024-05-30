@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.dataflow.rest.util.HttpClientConfigurer;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -88,8 +87,6 @@ public class TaskLauncherTasklet implements Tasklet {
 	private static final Logger logger = LoggerFactory.getLogger(TaskLauncherTasklet.class);
 
 	private Long executionId;
-
-	private final String ctrSchemaTarget;
 
 	private long startTimeout;
 
@@ -134,7 +131,6 @@ public class TaskLauncherTasklet implements Tasklet {
 		this.taskProperties = taskProperties;
 		this.clientRegistrations = clientRegistrations;
 		this.clientCredentialsTokenResponseClient = clientCredentialsTokenResponseClient;
-		this.ctrSchemaTarget = environment.getProperty("spring.cloud.task.schemaTarget");
 	}
 
 	public void setProperties(Map<String, String> properties) {
@@ -203,9 +199,6 @@ public class TaskLauncherTasklet implements Tasklet {
 			Long parentTaskExecutionId = getParentTaskExecutionId(contribution);
 			if (parentTaskExecutionId != null) {
 				args.add("--spring.cloud.task.parent-execution-id=" + parentTaskExecutionId);
-				String parentSchemaTarget = StringUtils.hasText(ctrSchemaTarget) ? ctrSchemaTarget : SchemaVersionTarget.defaultTarget().getName();
-				args.add("--spring.cloud.task.parent-schema-target=" + parentSchemaTarget);
-
 			} else {
 				logger.error("Cannot find task execution id");
 			}
@@ -219,7 +212,6 @@ public class TaskLauncherTasklet implements Tasklet {
 			this.executionId = response.getExecutionId();
 
 			stepExecutionContext.put("task-execution-id", response.getExecutionId());
-			stepExecutionContext.put("schema-target", response.getSchemaTarget());
 
 			stepExecutionContext.put("task-name", tmpTaskName);
 			if (!args.isEmpty()) {

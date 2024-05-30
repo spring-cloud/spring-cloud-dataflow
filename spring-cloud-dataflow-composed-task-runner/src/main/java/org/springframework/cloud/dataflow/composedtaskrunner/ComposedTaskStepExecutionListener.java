@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,11 @@ import org.springframework.util.StringUtils;
 public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupport {
 	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskStepExecutionListener.class);
 
-	private final TaskExplorerContainer taskExplorerContainer;
+	private final TaskExplorer taskExplorer;
 
-	public ComposedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
-		Assert.notNull(taskExplorerContainer, "taskExplorerContainer must not be null.");
-		this.taskExplorerContainer = taskExplorerContainer;
-		logger.info("ComposedTaskStepExecutionListener supporting {}", taskExplorerContainer.getKeys());
+	public ComposedTaskStepExecutionListener(TaskExplorer taskExplorer) {
+		Assert.notNull(taskExplorer, "taskExplorer must not be null.");
+		this.taskExplorer = taskExplorer;
 	}
 
 	/**
@@ -66,18 +65,6 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 		Long executionId = (Long) stepExecution.getExecutionContext().get("task-execution-id");
 		Assert.notNull(executionId, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
 				" did not return a task-execution-id. Check to see if task exists.");
-		String schemaTarget = stepExecution.getExecutionContext().getString("schema-target");
-		String taskName = stepExecution.getExecutionContext().getString("task-name");
-		Assert.notNull(taskName, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
-				" did not return a task-name. Check to see if task exists.");
-		String explorerName = taskName;
-		if (!this.taskExplorerContainer.getKeys().contains(taskName)) {
-			Assert.notNull(schemaTarget, "TaskLauncherTasklet for job " + stepExecution.getJobExecutionId() +
-					" did not return a schema-target. Check to see if task exists.");
-			explorerName = schemaTarget;
-		}
-		logger.info("AfterStep for {}:{}:{}:{}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId(), taskName, executionId, schemaTarget);
-		TaskExplorer taskExplorer = this.taskExplorerContainer.get(explorerName);
 		TaskExecution resultExecution = taskExplorer.getTaskExecution(executionId);
 		if (!stepExecution.getExecutionContext().containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE) &&
 				StringUtils.hasText(resultExecution.getExitMessage())) {
@@ -85,16 +72,7 @@ public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupp
 		} else if (resultExecution.getExitCode() != 0) {
 			result = ExitStatus.FAILED;
 		}
-		logger.info("AfterStep processing complete for stepExecution {} with taskExecution {}:{}:{}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId(), taskName, executionId, schemaTarget);
+		logger.info("AfterStep processing complete for stepExecution {} with taskExecution {}:{}", stepExecution.getStepName(), stepExecution.getJobExecutionId());
 		return result;
-	}
-
-	@Override
-	public void beforeStep(StepExecution stepExecution) {
-		logger.info("beforeStep:{}:{}>>>>", stepExecution.getStepName(), stepExecution.getJobExecutionId());
-		super.beforeStep(stepExecution);
-		logger.debug("beforeStep:{}", stepExecution.getExecutionContext());
-		logger.info("beforeStep:{}:{}<<<", stepExecution.getStepName(), stepExecution.getJobExecutionId());
-
 	}
 }
