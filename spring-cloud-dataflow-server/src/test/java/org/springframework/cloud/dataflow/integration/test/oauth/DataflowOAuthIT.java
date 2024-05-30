@@ -60,7 +60,9 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 					ExecResult cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/about");
 					String response = cmdResult.getStdout();
 					log.debug("Response is {}", response);
-					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
+					Boolean authenticated = JsonPath.parse(response).read("$.securityInfo.authenticated", Boolean.class);
+					String username = JsonPath.parse(response).read("$.securityInfo.username", String.class);
+					boolean ok = Boolean.TRUE.equals(authenticated) && "janne".equals(username);
 					log.info("Check for oauth {}", ok);
 					if (ok) {
 						String version = JsonPath.parse(response).read("$.versionInfo.core.version");
@@ -75,7 +77,6 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 						response = cmdResult.getStdout();
 						log.debug("Response is {}", response);
 						ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
-						// TODO add checks for new endpoints to check security
 					}
 					return ok;
 				});
