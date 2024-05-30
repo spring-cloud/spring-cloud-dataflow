@@ -90,6 +90,8 @@
 		<maven-dependency-plugin-for-guides.phase>generate-resources</maven-dependency-plugin-for-guides.phase>
 		<groups />
 		<excludedGroups>slow,docker</excludedGroups>
+		<!--Specific Spring framework javadoc version for attach-javadocs plugin-->
+		<javadoc-spring.version>6.1.3</javadoc-spring.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
