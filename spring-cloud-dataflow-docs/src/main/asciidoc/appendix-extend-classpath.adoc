@@ -4,7 +4,7 @@
 
 Users may require the addition of dependencies to the existing Stream applications or specific database drivers to Dataflow and Skipper or any of the other containers provider by the project.
 
-NOTE: The Spring Cloud Dataflow repository contains scripts to help with this task. The examples below assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/templates/add-deps`.
+NOTE: The Spring Cloud Dataflow repository contains scripts to help with this task. The examples below assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `src/add-deps`.
 
 ==== JAR File
 
@@ -22,7 +22,7 @@ This example:
     -P appFolder="." \
     -P appGroup="org.springframework.cloud" \
     -P appName="spring-cloud-dataflow-server" \
-    -P appVersion="2.11.2" \
+    -P appVersion="2.11.3" \
     -P depFolder="./extra-libs"
 ....
 
@@ -35,7 +35,7 @@ In order to create a container we suggest using https://buildpacks.io/docs/for-p
 [source, shell]
 ....
 REPO=springcloud/spring-cloud-dataflow-server
-TAG=2.11.2
+TAG=2.11.3
 JAR=build/spring-cloud-dataflow-server-${TAG}.jar
 JAVA_VERSION=8
 pack build --builder gcr.io/paketo-buildpacks/builder:base \
