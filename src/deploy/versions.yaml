@@ -10,5 +10,5 @@ scdf-type:
     maintenance-snapshot: '1.5.4-SNAPSHOT'
 default:
   scdf-type: 'oss'
-  version: 'release'
-  package-version: '2.11.3'
+  version: 'snapshot'
+  package-version: '2.11.4-SNAPSHOT'
