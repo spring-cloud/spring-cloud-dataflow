@@ -1,0 +1,65 @@
+# Default values for scdf.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# Global values
+global:
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: docker-reg-cred
+  startupProbe:
+    tcpSocket:
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 15
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    timeoutSeconds: 3
+    periodSeconds: 15
+serviceAccount:
+  create: true
+  automount: true
+  name: "scdf-sa"
+
+server:
+  livenessProbe:
+    httpGet:
+      path: /management/health/liveness
+  readinessProbe:
+    httpGet:
+      path: /management/health/readiness
+
+  service:
+    type: LoadBalancer
+
+
+configuration:
+  streamingEnabled: true
+  batchEnabled: true
+  stream:
+    deployer:
+      kubernetes:
+        imagePullPolicy: IfNotPresent
+        imagePullSecret:
+          - name: private-registry-key
+          - name: docker-registry-key
+  task:
+    deployer:
+      kubernetes:
+        imagePullPolicy: IfNotPresent
+        imagePullSecret:
+          - name: private-registry-key
+          - name: docker-registry-key

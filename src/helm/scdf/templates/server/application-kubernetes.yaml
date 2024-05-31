@@ -1,0 +1,32 @@
+logging:
+  level:
+    root: info
+management:
+  {{- with .Values.global.management.metrics }}
+  metrics:
+    {{ toYaml . }}
+  {{- end }}
+  defaults:
+    metrics:
+      export:
+        enabled: false
+spring:
+  output:
+    ansi:
+      enabled: NEVER
+  cloud:
+    {{- with mergeOverwrite .Values.global .Values.configuration.task.deployer.kubernetes }}
+    deployer:
+      kubernetes:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    dataflow:
+        {{- with .Values.configuration.dashboard.url }}
+        metrics.dashboard:
+            url: {{ . | squote }}
+        {{- end }}
+      {{- with .Values.configuration.task.deployer }}
+      task:
+        platform:
+          {{- toYaml . | nindent 14 }}
+      {{- end }}

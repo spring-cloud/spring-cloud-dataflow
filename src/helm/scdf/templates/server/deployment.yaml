@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "scdf.fullname" . }}-server
+  labels:
+    app: {{ include "scdf.fullname" . }}-server
+    {{- include "scdf.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "scdf.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.server.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "scdf.labels" . | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "scdf.serviceAccountName" . }}
+      {{- with mergeOverwrite .Values.global.podSecurityContext .Values.server.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 12 }}
+      {{- end }}
+      containers:
+        - name: {{ include "scdf.fullname" . }}-server
+          {{- with mergeOverwrite .Values.global.securityContext .Values.server.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ .Values.server.image.repository | default "springcloud/spring-cloud-dataflow-server" }}:{{ .Values.server.image.tag | default .Chart.AppVersion }}
+          {{- $GlobalImagePullPolicy := .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.server.image.pullPolicy | default $GlobalImagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.containerPort | default 9393 }}
+              protocol: {{ .Values.server.protocol | default "TCP" }}
+          {{- with mergeOverwrite .Values.global.startupProbe .Values.server.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.livenessProbe .Values.server.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.readinessProbe .Values.server.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with mergeOverwrite .Values.global.resources .Values.server.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.server.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- else }}
+          volumeMounts:
+            - name: config
+              mountPath: /workspace/config
+              readOnly: true
+          {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      {{- with .Values.server.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{ end }}
+      {{ end }}
+      {{- with .Values.server.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- else }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "scdf.fullname" . }}-server
+          items:
+          - key: 'application-kubernetes.yaml'
+            path: 'application-kubernetes.yaml'
+      {{- end }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

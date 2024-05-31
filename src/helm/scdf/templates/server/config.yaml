@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scdf-server
+  labels:
+    app: scdf-server
+data:
+  application-kubernetes.yaml: |-
+    {{- tpl ($.Files.Get "application-kubernetes.yaml") . | nindent 4 }}
