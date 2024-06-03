@@ -48,6 +48,8 @@
 		<spring-security.version>5.7.11</spring-security.version>
 		<guava.version>32.1.3-jre</guava.version>
 		<json-path.version>2.9.0</json-path.version>
+		<!--Specific Spring framework javadoc version for attach-javadocs plugin-->
+		<spring-javadoc.version>6.1.3</spring-javadoc.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

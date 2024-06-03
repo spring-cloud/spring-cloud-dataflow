@@ -35,6 +35,8 @@
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
 		<junit.version>4.13.1</junit.version>
 		<json-path.version>2.9.0</json-path.version>
+		<!--Specific Spring framework javadoc version for attach-javadocs plugin-->
+		<spring-javadoc.version>6.1.3</spring-javadoc.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
