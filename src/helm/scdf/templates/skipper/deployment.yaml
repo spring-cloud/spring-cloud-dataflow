@@ -35,13 +35,75 @@ spec:
         - name: {{ include "scdf.fullname" . }}-skipper
           securityContext:
             {{- toYaml .Values.skipper.securityContext | nindent 12 }}
-          image: "{{ .Values.skipper.image.repository | default "springcloud/spring-cloud-skipper" }}:{{ .Values.skipper.image.tag | default .Chart.AppVersion }}"
+          {{- $skipperImage := .Values.skipper.image.repository | default "springcloud/spring-cloud-skipper-server" }}
+          {{- $skipperTag := .Values.skipper.image.tag | default .Chart.AppVersion }}
+          image: {{ print $skipperImage ":" $skipperTag | squote }}
           {{- $GlobalImagePullPolicy := .Values.global.imagePullPolicy | default "IfNotPresent" }}
           imagePullPolicy: {{ .Values.skipper.image.pullPolicy | default $GlobalImagePullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.skipper.containerPort | default 7577 }}
               protocol: {{ .Values.skipper.protocol | default "TCP" }}
+          env:
+            - name: SERVER_PORT
+              value: {{ .Values.skipper.containerPort | default 7577 }}
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.namespace"
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: {{ .Values.skipper.config.springCloudConfigEnabled | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+              value: {{ .Values.skipper.config.springCloudKubernetesEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+              value: {{ .Values.skipper.config.springCloudKubernetesSecretsEnableApi | default false | squote }}
+            - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+              value: '/workspace/runtime/secrets'
+            {{- $databaseDialect := .Values.skipper.config.database.dialect | default .Values.configuration.database.dialect }}
+            {{- if $databaseDialect  }}
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: {{ $databaseDialect | squote }}
+            {{- end }}
+            {{- $databaseUrl := .Values.skipper.config.database.url | default .Values.configuration.database.url }}
+            {{- if $databaseUrl  }}
+            - name: SPRING_DATASOURCE_URL
+              value: {{ $databaseUrl | squote }}
+            {{- end }}
+            {{- $databaseDriverClassName := .Values.skipper.config.database.driverClassName | default .Values.configuration.database.driverClassName }}
+            {{- if $databaseDriverClassName  }}
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: {{ $databaseDriverClassName | squote }}
+            {{- end }}
+            {{- with .Values.skipper.config.database.testOnBorrow | default .Values.configuration.database.testOnBorrow }}
+            - name: SPRING_DATASOURCE_TEST_ON_BORROW
+              value: {{ . | squote }}
+            {{- end }}
+            {{- $databaseUserNameSecret := .Values.skipper.config.database.usernameSecret | default .Values.configuration.database.usernameSecret }}
+            {{- if $databaseUserNameSecret }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databaseUserNameSecret.name | squote }}
+                  key: {{ $databaseUserNameSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.skipper.config.database.username | default .Values.configuration.database.username }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- $databasePasswordSecret := .Values.skipper.config.database.passwordSecret | default .Values.configuration.database.passwordSecret }}
+            {{- if $databasePasswordSecret  }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $databasePasswordSecret.name | squote }}
+                  key: {{ $databasePasswordSecret.key | squote }}
+            {{- else }}
+            {{- with .Values.skipper.config.database.password | default .Values.configuration.database.password }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
           {{- with mergeOverwrite .Values.global.startupProbe .Values.skipper.startupProbe }}
           startupProbe:
             {{- toYaml . | nindent 12 }}
@@ -64,18 +126,22 @@ spec:
           {{- else }}
           volumeMounts:
           - name: config
-            mountPath: /workspace/config
+            mountPath: '/workspace/config'
             readOnly: true
           {{- end }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- range . }}
+        - name: {{ . }}
+      {{- end }}
       {{- else }}
-      {{- with .Values.skipper.image.pullSecrets }}
+      {{- with .Values.server.image.pullSecrets }}
       imagePullSecrets:
-          {{- toYaml . | nindent 8 }}
-      {{ end }}
-      {{ end }}
+      {{- range . }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
       {{- with .Values.skipper.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
@@ -83,7 +149,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: scdf-server
+          name: scdf-skipper
           items:
           - key: 'application-kubernetes.yaml'
             path: 'application-kubernetes.yaml'

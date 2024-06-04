@@ -4,8 +4,7 @@
 # Global values
 global:
   imagePullPolicy: IfNotPresent
-  imagePullSecrets:
-    - name: docker-reg-cred
+  imagePullSecrets: [ docker-reg-cred ]
   startupProbe:
     tcpSocket:
       port: http
@@ -15,7 +14,7 @@ global:
     periodSeconds: 15
   livenessProbe:
     httpGet:
-      path: /actuator/health/liveness
+      path: '/actuator/health/liveness'
       port: http
     failureThreshold: 4
     initialDelaySeconds: 1
@@ -23,10 +22,10 @@ global:
     periodSeconds: 15
   readinessProbe:
     httpGet:
-      path: /actuator/health/readiness
+      path: '/actuator/health/readiness'
       port: http
     failureThreshold: 3
-    initialDelaySeconds: 5
+    initialDelaySeconds: 1
     timeoutSeconds: 3
     periodSeconds: 15
 serviceAccount:
@@ -37,29 +36,57 @@ serviceAccount:
 server:
   livenessProbe:
     httpGet:
-      path: /management/health/liveness
+      path: '/management/health/liveness'
   readinessProbe:
     httpGet:
-      path: /management/health/readiness
+      path: '/management/health/readiness'
 
   service:
     type: LoadBalancer
+  config:
+    server:
+      forward-headers-strategy: framework
 
+skipper:
+  config:
+    springCloudConfigEnabled: false
 
 configuration:
   streamingEnabled: true
   batchEnabled: true
+  composedTaskRunner:
+    image:
+      digest: sha256:612de6a94ae122434b5bc73f32a8c19e0bcfa1cbdb1dcd7287bb290d113f03e4
+      tag: 2.11.4
   stream:
     deployer:
       kubernetes:
         imagePullPolicy: IfNotPresent
-        imagePullSecret:
-          - name: private-registry-key
-          - name: docker-registry-key
+        imagePullSecrets: [ private-registry-key, docker-registry-key ]
   task:
     deployer:
       kubernetes:
         imagePullPolicy: IfNotPresent
-        imagePullSecret:
-          - name: private-registry-key
-          - name: docker-registry-key
+        imagePullSecrets: [ private-registry-key, docker-registry-key ]
+    platform:
+      kubernetes:
+        accounts:
+          default:
+            containerSecurityContext:
+              allowPrivilegeEscalation: true
+            environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1'
+            imagePullPolicy: IfNotPresent
+            imagePullSecret: registry-key
+            requests:
+              cpu: 1500m
+              memory: 1024Mi
+  database:
+    usernameSecret:
+      name: postgres
+      key: database-username
+    passwordSecret:
+      name: postgres
+      key: database-password
+    url: jdbc://postgresql.postgresql:5432/dataflow
+    driverClassName: org.postgresql.Driver
+    dialect: org.hibernate.dialect.PostgreSQLDialect
