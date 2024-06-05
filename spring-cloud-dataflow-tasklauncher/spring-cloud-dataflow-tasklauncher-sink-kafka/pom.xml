@@ -17,7 +17,7 @@
 	<properties>
 		<skipTests>true</skipTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
-		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.7</spring-cloud-dataflow-apps-metadata-plugin.version>
+		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.14</spring-cloud-dataflow-apps-metadata-plugin.version>
 		<failIfNoTests>true</failIfNoTests>
 	</properties>
 	<dependencies>

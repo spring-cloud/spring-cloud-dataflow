@@ -16,9 +16,7 @@
 package org.springframework.cloud.dataflow.rest.client.config;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +28,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2AccessTokenProvidingClientHttpRequestInterceptor;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
@@ -191,9 +189,8 @@ public class DataFlowClientAutoConfiguration {
 	private static final Authentication DEFAULT_PRINCIPAL = createAuthentication("dataflow-client-principal");
 
 	private ClientRegistrationRepository shellClientRegistrationRepository(OAuth2ClientProperties properties) {
-		List<ClientRegistration> registrations = new ArrayList<>(
-				OAuth2ClientPropertiesRegistrationAdapter.getClientRegistrations(properties).values());
-		return new InMemoryClientRegistrationRepository(registrations);
+		var oauthClientPropsMapper = new OAuth2ClientPropertiesMapper(properties);
+		return new InMemoryClientRegistrationRepository(oauthClientPropsMapper.asClientRegistrations().values().stream().toList());
 	}
 
 	private OAuth2AuthorizedClientService shellAuthorizedClientService(ClientRegistrationRepository shellClientRegistrationRepository) {

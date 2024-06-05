@@ -17,7 +17,7 @@
 		<java.version>17</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-		<spring-boot.version>3.2.2</spring-boot.version>
+		<spring-boot.version>3.3.0</spring-boot.version>
 		<spring-cloud-dataflow-ui.version>3.4.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
