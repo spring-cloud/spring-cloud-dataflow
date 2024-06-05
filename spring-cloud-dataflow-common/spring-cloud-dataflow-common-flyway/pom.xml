@@ -15,7 +15,7 @@
 
 	<properties>
 		<!-- have to repeat this here in order for filtering in src/main/resources/ -->
-		<flyway.version>9.22.3</flyway.version>
+		<flyway.version>10.10.0</flyway.version>
 	</properties>
 
 	<dependencies>
@@ -42,6 +42,14 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-db2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
