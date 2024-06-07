@@ -62,35 +62,18 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk8() {
+	public void testLatestSharedDbJdk21() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
 
 		// start defined skipper server and check it started
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk8");
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk21");
 		assertSkipperServerRunning(this.dataflowCluster);
 
 		// start defined dataflow server and check it started
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk8");
-		assertDataflowServerRunning(this.dataflowCluster);
-	}
-
-	@Test
-	@DataflowMain
-	public void testLatestSharedDbJdk11() {
-		log.info("Running testLatestSharedDb()");
-		// start defined database
-		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
-		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
-
-		// start defined skipper server and check it started
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk11");
-		assertSkipperServerRunning(this.dataflowCluster);
-
-		// start defined dataflow server and check it started
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk11");
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk21");
 		assertDataflowServerRunning(this.dataflowCluster);
 	}
 

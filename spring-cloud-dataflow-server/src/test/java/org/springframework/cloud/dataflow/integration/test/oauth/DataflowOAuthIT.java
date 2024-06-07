@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.integration.test.oauth;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.springframework.cloud.dataflow.integration.test.db.AbstractDataflowTe
 import org.springframework.cloud.dataflow.integration.test.tags.Oauth;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.StringUtils;
 
 import static org.awaitility.Awaitility.with;
 
@@ -47,20 +49,38 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 		// need proper networking, so use separate tools container to run
 		// curl command as we support basic auth and if we get good response
 		// oauth is working with dataflow and skipper.
-		with()
-			.pollInterval(5, TimeUnit.SECONDS)
-			.and()
-			.await()
+
+		AtomicReference<String> stderr = new AtomicReference<>();
+		try {
+			with()
+				.pollInterval(5, TimeUnit.SECONDS)
+				.and()
+				.await()
 				.ignoreExceptions()
-				.atMost(120, TimeUnit.SECONDS)
+				.atMost(90, TimeUnit.SECONDS)
 				.until(() -> {
 					log.debug("Checking auth using curl");
-					ExecResult cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/about");
+					ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", "janne:janne", "http://dataflow:9393/about");
 					String response = cmdResult.getStdout();
-					log.debug("Response is {}", response);
+					if (StringUtils.hasText(response)) {
+						log.debug("Response is {}", response);
+					}
 					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
 					log.info("Check for oauth {}", ok);
+					if (!ok) {
+						stderr.set(cmdResult.getStderr());
+					}
+					else {
+						stderr.set("");
+					}
 					return ok;
 				});
+		}
+		finally {
+			String msg = stderr.get();
+			if (StringUtils.hasText(msg)) {
+				log.error("curl error: {}", msg);
+			}
+		}
 	}
 }
