@@ -169,7 +169,7 @@ public abstract class AbstractDataflowTests {
 	protected List<ClusterContainer> getDataflowContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(DATAFLOW_CONTAINERS);
 		containers.add(ClusterContainer.from(TagNames.DATAFLOW_main, DATAFLOW_IMAGE_PREFIX + getDataflowLatestVersion()));
-		List<Integer> jdkTags = Arrays.asList(8, 11, 17);
+		List<Integer> jdkTags = Arrays.asList(17, 21);
 		for(Integer jdk : jdkTags) {
 			containers.add(ClusterContainer.from(TagNames.DATAFLOW_main + "-jdk" + jdk, DATAFLOW_IMAGE_PREFIX + getDataflowLatestVersion() + "-jdk" + jdk));
 		}
