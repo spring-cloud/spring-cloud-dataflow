@@ -16,7 +16,11 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.task.configuration.EnableTask;
@@ -27,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configures the Job that will execute the Composed Task Execution.
@@ -67,6 +72,16 @@ public class ComposedTaskRunnerConfiguration {
 		taskExecutor.setWaitForTasksToCompleteOnShutdown(
 			properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
 		return taskExecutor;
+	}
+
+	/**
+	 * Provides the {@link JobRepository} that is configured to be used by the composed task runner.
+	 */
+	@Bean
+	public BeanPostProcessor jobRepositoryBeanPostProcessor(PlatformTransactionManager transactionManager,
+															DataSource incrementerDataSource,
+															ComposedTaskProperties composedTaskProperties) {
+		return new JobRepositoryBeanPostProcessor(transactionManager, incrementerDataSource, composedTaskProperties);
 	}
 
 }
