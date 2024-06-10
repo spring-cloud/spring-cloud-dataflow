@@ -25,7 +25,14 @@ data:
           {{- toYaml . | nindent 10 }}
     {{- end }}
       dataflow:
-      {{- with .Values.configuration.dashboard.url }}
+        features:
+          streams:
+            enabled: {{ .Values.configuration.streamsEnabled | default true }}
+          tasks:
+            enabled: {{ .Values.configuration.tasksEnabled | default true }}
+          schedules:
+            enabled: {{ .Values.configuration.schedulesEnabled | default true }}
+      {{- with .Values.configuration.metrics.dashboard.url }}
         metrics:
           dashboard:
             url: {{ . | squote }}

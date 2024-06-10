@@ -1,7 +1,66 @@
 # Default values for scdf.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-# Global values
+# Configuration that applies to Spring Cloud Data Flow as a whole.
+configuration:
+  streamsEnabled: true
+  tasksEnabled: true
+  schedulesEnabled: true
+  composedTaskRunner:
+    image:
+      repository: springcloud/spring-cloud-dataflow-composed-task-runner
+      tag: "2.11.4-SNAPSHOT"
+      digest: ""
+  stream:
+    deployer:
+      # entries will be added to spring.cloud.deployer.kubernetes in skipper configuration
+      kubernetes: { }
+    platform:
+      # entries will be added to spring.cloud.skipper.server.platform.kubernetes
+      kubernetes: { }
+  task:
+    deployer:
+      # entries will be added to spring.cloud.deployer.kubernetes in dataflow server configuration
+      kubernetes: { }
+    platform:
+      # entries will be added to spring.cloud.dataflow.task.platform.kubernetes
+      kubernetes: { }
+  metrics:
+    dashboard:
+      url: 'http://grafana:3000'
+  analytics:
+    enabled: true
+  schedules:
+    enabled: true
+  broker:
+    #
+    type: rabbit
+    kafka:
+      # comma separated list of host:port of brokers
+      brokers: ""
+    rabbit:
+      host: ""
+      port: 5672
+      username: ""
+      # userNameSecret contains name and key for referencing username from secret
+      usernameSecret: { }
+      password: ""
+      # passwordSecret contains name and key for referencing password from secret
+      passwordSecret: { }
+  database:
+    url: ""
+    username: ""
+    # userNameSecret contains name and key for referencing username from secret
+    usernameSecret: { }
+    password: ""
+    # passwordSecret contains name and key for referencing password from secret
+    passwordSecret: { }
+    driverClassName: ""
+    testOnBorrow: true
+    validationQuery: ""
+    dialect: ""
+
+# Global values applied to all deployed applications, tasks and stream applications
 global:
   # Registry secret
   registry:
@@ -9,11 +68,33 @@ global:
       ref: ""
   imagePullPolicy: IfNotPresent
   imagePullSecrets: [ ]
+  # will be added to spec.template.spec.securityContext
   podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
   securityContext: { }
-  startupProbe: { }
-  livenessProbe: { }
-  readinessProbe: { }
+  startupProbe:
+    tcpSocket:
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 15
+  livenessProbe:
+    httpGet:
+      path: '/actuator/health/liveness'
+      port: http
+    failureThreshold: 4
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
+  readinessProbe:
+    httpGet:
+      path: '/actuator/health/readiness'
+      port: http
+    failureThreshold: 3
+    initialDelaySeconds: 1
+    timeoutSeconds: 3
+    periodSeconds: 15
   resources: { }
   # will be applied to management of server and skipper config
   management:
@@ -54,7 +135,9 @@ server:
   protocol: TCP
   podAnnotations: { }
   podLabels: { }
+  # will be added to spec.template.spec.securityContext
   podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
   securityContext: { }
 
   resources:
@@ -66,41 +149,15 @@ server:
   #    limits:
   #      cpu: 4000m
   #      memory: 4096Mi
-  startupProbe:
-    tcpSocket:
-      port: http
-    failureThreshold: 4
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
-    periodSeconds: 15
+  startupProbe: { }
   livenessProbe:
     httpGet:
       path: '/management/health/liveness'
-      port: http
-    failureThreshold: 4
-    initialDelaySeconds: 1
-    timeoutSeconds: 3
-    periodSeconds: 15
   readinessProbe:
     httpGet:
       path: '/management/health/readiness'
-      port: http
-    failureThreshold: 3
-    initialDelaySeconds: 5
-    timeoutSeconds: 3
-    periodSeconds: 15
-  # If you override volumes you should include the following section unless you to not want to use the ConfigMap named scdf-server
-  #   - name: config
-  #     configMap:
-  #       name: scdf-server
-  #       items:
-  #         - key: 'application-kubernetes.yaml'
-  #           path: 'application-kubernetes.yaml'
+  # If a volume named config will be added and mounted in /workspace/config
   volumes: [ ]
-  #If you override volumeMounts you should include the following section unless you want to skip config or use a different mapping.
-  #  - name: config
-  #    mountPath: /workspace/config
-  #    readOnly: true
   volumeMounts: [ ]
   nodeSelector: { }
   tolerations: [ ]
@@ -148,7 +205,9 @@ skipper:
   protocol: TCP
   podAnnotations: { }
   podLabels: { }
+  # will be added to spec.template.spec.securityContext
   podSecurityContext: { }
+  # will be added to spec.template.spec.containers.securityContext
   securityContext: { }
 
   resources:
@@ -225,64 +284,3 @@ skipper:
   service:
     type: LoadBalancer
     port: http
-
-
-configuration:
-  streamingEnabled: true
-  batchEnabled: true
-  composedTaskRunner:
-    image:
-      repository: springcloud/spring-cloud-dataflow-composed-task-runner
-      tag: "2.11.4-SNAPSHOT"
-      digest: ""
-  stream:
-    deployer:
-      # entries will be added to spring.cloud.deployer.kubernetes in skipper configuration
-      kubernetes: { }
-    platform:
-      # entries will be added to spring.cloud.skipper.server.platform.kubernetes
-      kubernetes: { }
-  task:
-    deployer:
-      # entries will be added to spring.cloud.deployer.kubernetes in dataflow server configuration
-      kubernetes: { }
-    platform:
-      # entries will be added to spring.cloud.dataflow.task.platform.kubernetes
-      kubernetes: { }
-  dashboard:
-    url: 'http://grafana:3000'
-  analytics:
-    enabled: true
-  schedules:
-    enabled: true
-  broker:
-    #
-    type: rabbit
-    kafka:
-      broker:
-        host: ""
-        port: 9092
-      zk:
-        host: ""
-        port: 9092
-    rabbit:
-      host: ""
-      port: 5672
-      username: ""
-      # userNameSecret contains name and key for referencing username from secret
-      usernameSecret: { }
-      password: ""
-      # passwordSecret contains name and key for referencing password from secret
-      passwordSecret: { }
-  database:
-    url: ""
-    username: ""
-    # userNameSecret contains name and key for referencing username from secret
-    usernameSecret: { }
-    password: ""
-    # passwordSecret contains name and key for referencing password from secret
-    passwordSecret: { }
-    driverClassName: ""
-    testOnBorrow: true
-    validationQuery: ""
-    dialect: ""

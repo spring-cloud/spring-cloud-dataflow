@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "scdf.fullname" . }}-server
+  name: scdf-server
   labels:
-    app: {{ include "scdf.fullname" . }}-server
+    app: scdf-server
     {{- include "scdf.labels" . | nindent 4 }}
 spec:
   selector:
@@ -24,10 +24,10 @@ spec:
       serviceAccountName: {{ include "scdf.serviceAccountName" . }}
       {{- with mergeOverwrite .Values.global.podSecurityContext .Values.server.podSecurityContext }}
       securityContext:
-        {{- toYaml . | nindent 12 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ include "scdf.fullname" . }}-server
+        - name: scdf-server
           {{- with mergeOverwrite .Values.global.securityContext .Values.server.securityContext }}
           securityContext:
             {{- toYaml . | nindent 12 }}
@@ -71,7 +71,7 @@ spec:
             - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
               value: {{ .Values.server.config.serverUri | default "http://${SCDF_SERVER_SERVICE_HOST}:${SCDF_SERVER_SERVICE_PORT}" | squote }}
             - name: SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI
-              value: {{ .Values.server.config.skipperUri | default "http://${SKIPPER_SERVICE_HOST}:${SKIPPER_SERVICE_PORT}/api" | squote }}
+              value: {{ .Values.server.config.skipperUri | default "http://${SCDF_SKIPPER_SERVICE_HOST}:${SCDF_SKIPPER_SERVICE_PORT}/api" | squote }}
             {{- $databaseDialect := .Values.server.config.database.dialect | default .Values.configuration.database.dialect }}
             {{- if $databaseDialect  }}
             - name: SPRING_JPA_DATABASE_PLATFORM
@@ -133,14 +133,12 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.server.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- else }}
           volumeMounts:
             - name: config
               mountPath: '/workspace/config'
               readOnly: true
+          {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
       {{- with .Values.global.imagePullSecrets }}
       imagePullSecrets:
@@ -155,17 +153,15 @@ spec:
         {{- end }}
       {{- end }}
       {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: scdf-server
+            items:
+              - key: 'application-kubernetes.yaml'
+                path: 'application-kubernetes.yaml'
       {{- with .Values.server.volumes }}
-      volumes:
         {{- toYaml . | nindent 8 }}
-      {{- else }}
-      volumes:
-      - name: config
-        configMap:
-          name: scdf-server
-          items:
-          - key: 'application-kubernetes.yaml'
-            path: 'application-kubernetes.yaml'
       {{- end }}
       {{- with .Values.server.nodeSelector }}
       nodeSelector:

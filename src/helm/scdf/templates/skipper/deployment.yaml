@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "scdf.fullname" . }}-skipper
+  name: scdf-skipper
   labels:
-    app: {{ include "scdf.fullname" . }}-skipper
+    app: scdf-skipper
     {{- include "scdf.labels" . | nindent 4 }}
 spec:
   selector:
@@ -22,19 +22,16 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "scdf.serviceAccountName" . }}
-      {{- with .Values.skipper.podSecurityContext }}
+      {{- with mergeOverwrite .Values.global.podSecurityContext .Values.skipper.podSecurityContext }}
       securityContext:
-        {{- . | nindent 8 }}
-      {{- else }}
-      {{- with .Values.global.podSecurityContext }}
-      securityContext:
-        {{- . | nindent 8 }}
-      {{- end }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ include "scdf.fullname" . }}-skipper
+          {{- with mergeOverwrite .Values.global.securityContext .Values.server.securityContext }}
           securityContext:
-            {{- toYaml .Values.skipper.securityContext | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- $skipperImage := .Values.skipper.image.repository | default "springcloud/spring-cloud-skipper-server" }}
           {{- $skipperTag := .Values.skipper.image.tag | default .Chart.AppVersion }}
           image: {{ print $skipperImage ":" $skipperTag | squote }}
@@ -104,6 +101,40 @@ spec:
               value: {{ . | squote }}
             {{- end }}
             {{- end }}
+            {{- if eq .Values.configuration.broker.type "rabbit" }}
+            - name: SPRING_RABBITMQ_HOST
+              value: {{ .Values.configuration.broker.rabbit.host | squote }}
+            - name: SPRING_RABBITMQ_PORT
+              value: {{ .Values.configuration.broker.rabbit.port | default 5672 | squote }}
+            {{- with .Values.configuration.broker.rabbit.usernameSecret }}
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | squote }}
+                  key: {{ .key | squote }}
+            {{- else }}
+            {{- with .Values.configuration.broker.rabbit.username }}
+            - name: SPRING_RABBITMQ_USERNAME
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.configuration.broker.rabbit.passwordSecret }}
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | squote }}
+                  key: {{ .key | squote }}
+            {{- else }}
+            {{- with .Values.configuration.broker.rabbit.username }}
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: {{ . | squote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.configuration.broker.type "kafka" }}
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              value: {{ .Values.configuration.broker.kafka.brokers | squote }}
+            {{- end }}
           {{- with mergeOverwrite .Values.global.startupProbe .Values.skipper.startupProbe }}
           startupProbe:
             {{- toYaml . | nindent 12 }}
@@ -135,7 +166,7 @@ spec:
         - name: {{ . }}
       {{- end }}
       {{- else }}
-      {{- with .Values.server.image.pullSecrets }}
+      {{- with .Values.skipper.image.pullSecrets }}
       imagePullSecrets:
       {{- range . }}
         - name: {{ . }}

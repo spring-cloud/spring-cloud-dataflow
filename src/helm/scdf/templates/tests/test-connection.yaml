@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "scdf.fullname" . }}:{{ .Values.server.service.port }}']
+      args: ['scdf-server:{{ .Values.server.service.port }}']
   restartPolicy: Never
