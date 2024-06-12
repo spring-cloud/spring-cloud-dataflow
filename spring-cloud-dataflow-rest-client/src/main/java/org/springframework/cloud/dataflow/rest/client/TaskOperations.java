@@ -109,11 +109,6 @@ public interface TaskOperations {
 	PagedModel<TaskExecutionResource> executionList();
 
 	/**
-	 * @return the list of thin task executions known to the system.
-	 */
-	PagedModel<TaskExecutionThinResource> thinExecutionList();
-
-	/**
 	 * List task executions known to the system filtered by task name.
 	 *
 	 * @param taskName of the executions.

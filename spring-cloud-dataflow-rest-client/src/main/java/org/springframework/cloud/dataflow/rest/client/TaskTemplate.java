@@ -69,8 +69,6 @@ public class TaskTemplate implements TaskOperations {
 	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
-	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
-
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
@@ -94,8 +92,6 @@ public class TaskTemplate implements TaskOperations {
 	private final Link definitionLink;
 
 	private final Link executionsLink;
-
-	private final Link thinExecutionsLink;
 
 	private final Link executionLink;
 
@@ -131,8 +127,7 @@ public class TaskTemplate implements TaskOperations {
 			EXECUTIONS_INFO_RELATION,
 			PLATFORM_LIST_RELATION,
 			RETRIEVE_LOG,
-			VALIDATION_REL,
-			THIN_EXECUTIONS_RELATION
+			VALIDATION_REL
 		).forEach(relation -> {
 			Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
 		});
@@ -147,12 +142,7 @@ public class TaskTemplate implements TaskOperations {
 		} else {
 			this.executionsCurrentLink = null;
 		}
-		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION)) {
-			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), () -> THIN_EXECUTIONS_RELATION + " relation is required");
-			this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
-		} else {
-			this.thinExecutionsLink = null;
-		}
+
 		this.restTemplate = restTemplate;
 		this.aboutLink = resources.getLink("about").get();
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
@@ -263,11 +253,6 @@ public class TaskTemplate implements TaskOperations {
 	@Override
 	public TaskExecutionResource.Page executionList() {
 		return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionResource.Page.class);
-	}
-
-	@Override
-	public PagedModel<TaskExecutionThinResource> thinExecutionList() {
-		return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
 	}
 
 	@Override
