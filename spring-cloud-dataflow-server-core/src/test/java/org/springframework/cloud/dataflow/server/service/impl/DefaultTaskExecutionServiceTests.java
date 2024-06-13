@@ -208,8 +208,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 	ApplicationContext applicationContext;
 
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class SimpleDefaultPlatformTests extends DefaultTaskExecutionServiceTests {
+	public static class SimpleDefaultPlatformTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		DataSource dataSource;
@@ -295,9 +294,8 @@ public abstract class DefaultTaskExecutionServiceTests {
 	}
 
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
 	@TestPropertySource(properties = {"spring.cloud.dataflow.task.use-kubernetes-secrets-for-db-credentials=true"})
-	public class SimpleDefaultPlatformForKubernetesTests extends DefaultTaskExecutionServiceTests {
+	public static class SimpleDefaultPlatformForKubernetesTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		DataSource dataSource;
@@ -333,8 +331,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.task.maximum-concurrent-tasks=10"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class CICDTaskTests extends DefaultTaskExecutionServiceTests {
+	public static class CICDTaskTests extends DefaultTaskExecutionServiceTests {
 
 		private Launcher launcher;
 
@@ -817,8 +814,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.task.maximum-concurrent-tasks=10"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
+	public static class SimpleTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		TaskDefinitionReader taskDefinitionReader;
@@ -1245,8 +1241,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.task.auto-create-task-definitions=true"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class AutoCreateTaskDefinitionTests extends DefaultTaskExecutionServiceTests {
+	public static class AutoCreateTaskDefinitionTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		TaskDefinitionRepository taskDefinitionRepository;
@@ -1272,8 +1267,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue", "spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class Boot3TaskTests extends DefaultTaskExecutionServiceTests {
+	public static class Boot3TaskTests extends DefaultTaskExecutionServiceTests {
 
 		public static final String TIMESTAMP_3 = "timestamp3";
 
@@ -1387,9 +1381,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			"spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere"
 	})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-
-	public class ComposedTaskTests extends DefaultTaskExecutionServiceTests {
+	public static class ComposedTaskTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		TaskRepositoryContainer taskRepositoryContainer;
@@ -1962,8 +1954,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 
 	@TestPropertySource(properties = {"spring.cloud.dataflow.applicationProperties.task.globalkey=globalvalue", "spring.cloud.dataflow.applicationProperties.stream.globalstreamkey=nothere", "spring.cloud.dataflow.task.useUserAccessToken=true"})
 	@AutoConfigureTestDatabase(replace = Replace.ANY)
-	@Nested
-	public class ComposedTaskWithSystemUseUserAccessTokenTests extends DefaultTaskExecutionServiceTests {
+	public static class ComposedTaskWithSystemUseUserAccessTokenTests extends DefaultTaskExecutionServiceTests {
 
 		@Autowired
 		TaskRepositoryContainer taskRepositoryContainer;
