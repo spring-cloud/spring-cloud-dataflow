@@ -64,7 +64,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.3"),
-		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.0")
+		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.3")
 	);
 
 	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
@@ -72,7 +72,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
 		ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
 		ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.3"),
-		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.0")
+		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.3")
 	);
 
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
@@ -159,7 +159,7 @@ public abstract class AbstractDataflowTests {
 	protected List<ClusterContainer> getSkipperContainers() {
 		ArrayList<ClusterContainer> containers = new ArrayList<>(SKIPPER_CONTAINERS);
 		containers.add(ClusterContainer.from(TagNames.SKIPPER_main, SKIPPER_IMAGE_PREFIX + getSkipperLatestVersion()));
-		List<Integer> jdkTags = Arrays.asList(8, 11, 17);
+		List<Integer> jdkTags = Arrays.asList(17, 21);
 		for(Integer jdk : jdkTags) {
 			containers.add(ClusterContainer.from(TagNames.SKIPPER_main + "-jdk" + jdk, SKIPPER_IMAGE_PREFIX + getSkipperLatestVersion() + "-jdk" + jdk));
 		}
