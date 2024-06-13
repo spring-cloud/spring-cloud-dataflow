@@ -57,9 +57,11 @@ import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowM
 import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.schema.service.SchemaService;
+import org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
+import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
 import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
@@ -109,9 +111,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@SpringBootTest(
-		classes = { JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
-				PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@SpringBootTest(classes = {
+	JobDependencies.class,
+	TaskExecutionAutoConfiguration.class,
+	DataflowAsyncAutoConfiguration.class,
+	PropertyPlaceholderAutoConfiguration.class,
+	BatchProperties.class
+})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -509,6 +515,13 @@ public class TaskExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(2)));
 	}
 
+	@Test
+	void getDefinitionsWithLastExecution() throws Exception {
+		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andDo(print())
+			.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(1)));
+	}
 	@Test
 	void getExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
