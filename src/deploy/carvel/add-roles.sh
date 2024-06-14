@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 function add_role() {
     ROLE=$1
     ROLE_NAME=$(echo "rolebinding-$NS-default-$ROLE" | sed 's/:/-/g')
@@ -16,7 +16,7 @@ function add_role() {
       --clusterrole=$ROLE \
       --group=system:authenticated --namespace $NS
 }
-if [ "$NS" == "" ]; then
+if [ "$NS" = "" ]; then
   echo "NS not defined"
   exit 1
 fi

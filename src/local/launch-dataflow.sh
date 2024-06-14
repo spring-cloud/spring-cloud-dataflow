@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
 
 function usage_msg() {
     echo "Arguments: [--skipper-compose | --no-skipper] [--pro] [--no-dataflow]"
@@ -8,12 +20,7 @@ function usage_msg() {
     echo "  --no-dataflow: Don't start Data Flow"
     echo "  --pro: Launches SCDF Pro instead of OSS"
 }
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
+
 PROJECT_DIR=$(realpath "$SCDIR/../..")
 if [ "$DATAFLOW_VERSION" = "" ]; then
     DATAFLOW_VERSION=2.11.3-SNAPSHOT
@@ -66,7 +73,7 @@ if [ "$SKIPPER_CLI" = "true" ]; then
         --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect &
     echo "$!" > skipper.pid
 fi
-if [ "$COMPOSE_PROFILE" == "skipper" ] || [ "$SKIPPER_CLI" == "true" ]; then
+if [ "$COMPOSE_PROFILE" = "skipper" ] || [ "$SKIPPER_CLI" = "true" ]; then
     echo "Waiting for Skipper"
     wget --retry-connrefused --read-timeout=20 --timeout=15 --tries=10 --continue -q http://localhost:7577
     echo "Skipper running"
@@ -82,7 +89,7 @@ if [ "$NO_TASKS" = "true" ]; then
 else
     DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.cloud.dataflow.features.tasks-enabled=true"
 fi
-if [ "$USE_PRO" == "true" ]; then
+if [ "$USE_PRO" = "true" ]; then
     if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
         DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
     fi
@@ -94,7 +101,7 @@ fi
 if [[ "$DATAFLOW_ARGS" != *"--spring.datasource."* ]]; then
     DATAFLOW_ARGS="$DATAFLOW_ARGS --spring.datasource.url=jdbc:mariadb://localhost:3306/dataflow --spring.datasource.username=spring --spring.datasource.password=spring --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect"
 fi
-if [ "$START_DATAFLOW" == "true" ]; then
+if [ "$START_DATAFLOW" = "true" ]; then
     echo "launching $SCDF_JAR with $DATAFLOW_ARGS"
     read -p "Press any key to launch Spring Cloud Data Flow..."
     java -jar "$SCDF_JAR" $DATAFLOW_ARGS &

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
   DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
 fi

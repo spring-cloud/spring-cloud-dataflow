@@ -12,9 +12,9 @@ if [ "$3" != "" ] && [ "$3" != "--import" ] && [ "$3" != "--placeholder" ]; then
 else
     FROM_NAMESPACE=secret-ns
 fi
-if [ "$3" == "--import" ]; then
+if [ "$3" = "--import" ]; then
     IMPORT_TYPE=import
-elif [ "$3" == "--placeholder" ]; then
+elif [ "$3" = "--placeholder" ]; then
     IMPORT_TYPE=placeholder
 fi
 if [ "$SECRET_NAME" = "" ]; then
@@ -25,7 +25,7 @@ if [ "$NAMESPACE" = "" ]; then
     echo "NAMESPACE required"
     exit 2
 fi
-if [ "$IMPORT_TYPE" == "import" ]; then
+if [ "$IMPORT_TYPE" = "import" ]; then
 kubectl apply -f -  <<EOF
 apiVersion: secretgen.carvel.dev/v1alpha1
 kind: SecretImport

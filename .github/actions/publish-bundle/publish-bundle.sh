@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 IMG_PKG_OPT=
-if [ "$USE_SRP" == "true" ]; then
+if [ "$USE_SRP" = "true" ]; then
     IMG_PKG_OPT="--debug"
     if [ "$SSL_CERT_FILE" != "" ] && [ -f "$SSL_CERT_FILE" ]; then
         IMG_PKG_OPT="$IMG_PKG_OPT --registry-ca-cert-path $SSL_CERT_FILE"

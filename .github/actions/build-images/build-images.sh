@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ "$TAG" == "" ]; then
+if [ "$TAG" = "" ]; then
     echo "TAG not found"
     exit 1
 fi
@@ -45,7 +45,7 @@ for ((i = 0; i < LEN; i++)); do
         fi
         docker push "$IMAGE:$TAG-jdk$v"
         echo "Pushed $IMAGE:$TAG-jdk$v"
-        if [ "$DEFAULT_JDK" == "$v" ]; then
+        if [ "$DEFAULT_JDK" = "$v" ]; then
             docker tag "$IMAGE:$TAG-jdk$DEFAULT_JDK" "$IMAGE:$TAG"
             docker push "$IMAGE:$TAG"
             echo "Pushed $IMAGE:$TAG"

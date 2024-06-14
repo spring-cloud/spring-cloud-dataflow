@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
-ROOT_DIR=$(realpath $SCDIR/../..)
+SCDIR="$(dirname "$SCDIR")"
+
+ROOT_DIR=$(realpath "$SCDIR/../..")
 
 if [ "$1" != "" ]; then
     VER=$1
@@ -36,7 +43,7 @@ function download_deps() {
     VERSION=$(echo "$DEP" | awk -F":" '{split($0,a); print a[3]}')
     echo "Dependency: groupId: $GROUP_ID, artifactId: $ARTIFACT_ID, version: $VERSION"
     TS=
-    if [ "$INC_VER" == "true" ]; then
+    if [ "$INC_VER" = "true" ]; then
         DEP_PATH="${DEP//\:/\/}"
         META_DATA="$URL/${GROUP_ID//\./\/}/$ARTIFACT_ID/$VERSION/maven-metadata.xml"
         echo "Reading $META_DATA"
@@ -76,7 +83,7 @@ function download_deps() {
     TARGET_FILE="${TARGET}/${ARTIFACT_ID}-${VERSION}.${EXT}"
     if [ "$TS" != "" ] && [ "$DS" != "" ] && [ -f "$TARGET_FILE" ]; then
         FD=$(date -r "$TARGET_FILE" +"%Y-%m-%d %H:%M:%S")
-        if [ "$FD" == "$DS" ]; then
+        if [ "$FD" = "$DS" ]; then
             echo "$TARGET_FILE has same timestamp ($FD) as $SOURCE."
             echo "Skipping download"
             return 0

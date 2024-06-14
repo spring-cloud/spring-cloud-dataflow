@@ -1,13 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+  exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 if [ "$NS" = "" ]; then
     echo "NS not defined" >&2
     exit 0
 fi
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+
 K8S=$(realpath $SCDIR/../kubernetes)
 if [ ! -d "$K8S" ]; then
   K8S=$(realpath $SCDIR/../../kubernetes)
@@ -137,7 +146,7 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
     if [ "$USE_PRO" = "true" ]; then
         sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
-#        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
+#        if [[ "$DATAFLOW_PRO_VERSION" = *"1.6"* ]]; then
 #            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
 #
 #        else

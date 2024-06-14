@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+SCDIR="$(dirname "$SCDIR")"
 
 if [ "$DATAFLOW_VERSION" = "" ]; then
     SCDF_TYPE=$(yq '.default.scdf-type' "$SCDIR/../versions.yaml")
@@ -13,11 +20,11 @@ fi
 SHELL_JAR="$SCDIR/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
 if [ ! -f "$SHELL_JAR" ]; then
     echo "Downloading $SHELL_JAR"
-    if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
+    if [[ "$DATAFLOW_VERSION" = *"SNAPSHOT"* ]]; then
         URL="https://repo.spring.io/artifactory/snapshot/org/springframework/cloud/spring-cloud-dataflow-shell/$DATAFLOW_VERSION/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
         echo "Please visit $URL to download the latest jar file and save as $SHELL_JAR"
         exit 1
-    elif [[ "$DATAFLOW_VERSION" == *"-M"* ]] || [[ "$DATAFLOW_VERSION" == *"-RC"* ]]; then
+    elif [[ "$DATAFLOW_VERSION" = *"-M"* ]] || [[ "$DATAFLOW_VERSION" = *"-RC"* ]]; then
         URL="https://repo.spring.io/artifactory/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/$DATAFLOW_VERSION/spring-cloud-dataflow-shell-$DATAFLOW_VERSION.jar"
         echo "Downloading $URL"
         set -e

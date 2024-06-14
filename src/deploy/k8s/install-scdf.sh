@@ -1,15 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 if [ "$NS" = "" ]; then
   echo "NS not defined" >&2
   exit 2
 fi
 start_time=$(date +%s)
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-LS_DIR=$(realpath $SCDIR)
+
+LS_DIR="$SCDIR"
 K8S_PATH="$LS_DIR/yaml"
 set -e
 if [ "$K8S_DRIVER" = "" ]; then

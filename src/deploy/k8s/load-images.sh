@@ -1,9 +1,17 @@
-#!/bin/bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
+#!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+SCDIR="$(dirname "$SCDIR")"
+
 case $BROKER in
 "" | "kafka")
   export BROKER=kafka
@@ -16,8 +24,8 @@ case $BROKER in
 *)
   echo "BROKER=$BROKER not supported"
 esac
-if [ "$STREAM_APPS_VERSION" == "" ]; then
-    if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
+if [ "$STREAM_APPS_VERSION" = "" ]; then
+    if [[ "$DATAFLOW_VERSION" = *"SNAPSHOT"* ]]; then
         STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
     else
         STREAM_APPS_VERSION="4.0.0"

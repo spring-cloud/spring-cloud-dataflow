@@ -1,5 +1,5 @@
-#!/bin/bash
-if [ "$1" == "" ]; then
+#!/usr/bin/env bash
+if [ "$1" = "" ]; then
     echo "Provide one or more of mariadb, postgres, performance, oauth"
     exit 1
 fi

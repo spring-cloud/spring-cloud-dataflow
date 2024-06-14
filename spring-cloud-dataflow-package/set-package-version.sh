@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 0
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+    exit 2
 fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-MVNW=$SCDIR/../mvnw
+SCDIR="$(dirname "$SCDIR")"
+ROOTDIR="$(realpath "$SCDIR/..")"
+MVNW="$ROOTDIR/mvnw"
+pushd "$ROOTDIR" > /dev/null
 if [ "$PACKAGE_VERSION" = "" ]; then
     $MVNW help:evaluate -Dexpression=project.version -q -DforceStdout > /dev/null
     PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
-    if [[ "$PACKAGE_VERSION" == *"Downloading"* ]]; then
+    if [[ "$PACKAGE_VERSION" = *"Downloading"* ]]; then
         PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -q -DforceStdout)
     fi
 fi
@@ -20,3 +29,4 @@ if [[ "$PACKAGE_VERSION" != *"SNAPSHOT"* ]]; then
     echo "Setting scdf-type.oss.release=$PACKAGE_VERSION"
     yq ".scdf-type.oss.release=\"$PACKAGE_VERSION\"" -i "$SCDIR/../src/deploy/versions.yaml"
 fi
+popd

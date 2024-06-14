@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
+if [ -n "$BASH_SOURCE" ]; then
+  SCDIR="$(readlink -f "${BASH_SOURCE[0]}")"
+elif [ -n "$ZSH_VERSION" ]; then
+  setopt function_argzero
+  SCDIR="${(%):-%N}"
+elif eval '[[ -n ${.sh.file} ]]' 2>/dev/null; then
+  eval 'SCDIR=${.sh.file}'
+else
+  echo 1>&2 "Unsupported shell. Please use bash, ksh93 or zsh."
+  exit 2
+fi
+SCDIR="$(dirname "$SCDIR")"
+
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
 function check_env() {
   eval ev='$'$1
-  if [ "$ev" == "" ]; then
+  if [ "$ev" = "" ]; then
     echo "env var $1 not defined"
     if ((sourced != 0)); then
       return 1
@@ -13,22 +26,18 @@ function check_env() {
     fi
   fi
 }
-if [ "$SCDF_TYPE" == "" ]; then
+if [ "$SCDF_TYPE" = "" ]; then
     echo "Environmental variable SCDF_TYPE must be set to one of oss or pro."
 fi
 check_env NS
 check_env PACKAGE_VERSION
 check_env SCDF_TYPE
-if [ -z "$BASH_VERSION" ]; then
-    echo "This script requires Bash. Use: bash $0 $*"
-    exit 1
-fi
-SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+
 start_time=$(date +%s)
 # the following names are your choice.
 
 COUNT=$(kubectl get namespace $NS | grep -c "$NS")
-if ((COUNT == 0)); then
+if ((COUNT = 0)); then
     echo "Expected namespace $NS"
     exit 2
 else
@@ -54,8 +63,8 @@ fi
 echo "Deploying scdf-$SCDF_TYPE $PACKAGE_NAME:$PACKAGE_VERSION as $APP_NAME"
 SERVER_TAG=$(yq '.scdf.server.image.tag' ./scdf-values.yml)
 if [ "$DATAFLOW_VERSION" != "" ]; then
-    if [ "$SCDF_TYPE" == "oss" ]; then
-        if [ "$SERVER_TAG" == "null" ] || [ "$SERVER_TAG" == "" ]; then
+    if [ "$SCDF_TYPE" = "oss" ]; then
+        if [ "$SERVER_TAG" = "null" ] || [ "$SERVER_TAG" = "" ]; then
             yq ".scdf.server.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
             echo "Overriding Data Flow version=$DATAFLOW_VERSION"
         else
@@ -63,20 +72,20 @@ if [ "$DATAFLOW_VERSION" != "" ]; then
         fi
     fi
     CTR_TAG=$(yq '.scdf.ctr.image.tag' ./scdf-values.yml)
-    if [ "$CTR_TAG" == "null" ] || [ "$CTR_TAG" == "" ]; then
+    if [ "$CTR_TAG" = "null" ] || [ "$CTR_TAG" = "" ]; then
         yq ".scdf.ctr.image.tag=\"$DATAFLOW_VERSION\"" -i ./scdf-values.yml
         echo "Overriding Composed Task Runner version=$DATAFLOW_VERSION"
     else
         echo "Using Composed Task Runner version=$CTR_TAG"
     fi
 else
-    if [ "$SCDF_TYPE" == "oss" ] && [ "$SERVER_TAG" != "null" ] && [ "$SERVER_TAG" != "" ]; then
+    if [ "$SCDF_TYPE" = "oss" ] && [ "$SERVER_TAG" != "null" ] && [ "$SERVER_TAG" != "" ]; then
         echo "Using Data Flow version=$SERVER_TAG"
     fi
 fi
 SERVER_TAG=$(yq '.scdf.server.image.tag' ./scdf-values.yml)
-if [ "$DATAFLOW_PRO_VERSION" != "" ] && [ "$SCDF_TYPE" == "pro" ]; then
-    if [ "$SERVER_TAG" == "null" ] || [ "$SERVER_TAG" == "" ]; then
+if [ "$DATAFLOW_PRO_VERSION" != "" ] && [ "$SCDF_TYPE" = "pro" ]; then
+    if [ "$SERVER_TAG" = "null" ] || [ "$SERVER_TAG" = "" ]; then
         yq ".scdf.server.image.tag=\"$DATAFLOW_PRO_VERSION\"" -i ./scdf-values.yml
         echo "Overriding Data Flow Pro version=$DATAFLOW_PRO_VERSION"
     else
@@ -89,7 +98,7 @@ else
 fi
 SKIPPER_TAG=$(yq '.scdf.skipper.image.tag' ./scdf-values.yml)
 if [ "$SKIPPER_VERSION" != "" ]; then
-    if [ "$SKIPPER_TAG" == "null" ] || [ "$SKIPPER_TAG" == "" ]; then
+    if [ "$SKIPPER_TAG" = "null" ] || [ "$SKIPPER_TAG" = "" ]; then
         yq ".scdf.skipper.image.tag=\"$SKIPPER_VERSION\"" -i ./scdf-values.yml
         echo "Overriding Skipper version=$SKIPPER_VERSION"
     else

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 rm -f rewrite.log
 CMD=$1
 shift
@@ -13,16 +13,20 @@ done
 for RECIPE in $RECIPES; do
     case $RECIPE in
     "1")
-        RECIPE_CLASS="org.openrewrite.java.testing.hamcrest.MigrateHamcrestToAssertJ"
-        RECIPE_COORD="org.openrewrite.recipe:rewrite-testing-frameworks:RELEASE"
+        RECIPE_CLASS="org.openrewrite.java.spring.boot2.SpringBoot2JUnit4to5Migration"
+        RECIPE_COORD="org.openrewrite.recipe:rewrite-spring:RELEASE"
         ;;
     "2")
         RECIPE_CLASS="org.openrewrite.java.testing.assertj.JUnitToAssertj"
         RECIPE_COORD="org.openrewrite.recipe:rewrite-testing-frameworks:RELEASE"
         ;;
     "3")
-        RECIPE_CLASS="org.openrewrite.java.spring.boot2.SpringBoot2JUnit4to5Migration"
-        RECIPE_COORD="org.openrewrite.recipe:rewrite-spring:RELEASE"
+        RECIPE_CLASS="org.openrewrite.java.testing.hamcrest.MigrateHamcrestToAssertJ"
+        RECIPE_COORD="org.openrewrite.recipe:rewrite-testing-frameworks:RELEASE"
+        ;;
+    "4")
+        RECIPE_CLASS="org.openrewrite.java.testing.assertj.Assertj"
+        RECIPE_COORD="org.openrewrite.recipe:rewrite-testing-frameworks:RELEASE"
         ;;
     *)
         echo "Unknown recipe $RECIPE"

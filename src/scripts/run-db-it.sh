@@ -7,7 +7,7 @@ case $DB in
         ;;
 
     *)
-        if [ "$DB" == "" ]; then
+        if [ "$DB" = "" ]; then
             echo "Database type required. One of mariadb, postgres"
         else
             echo "Invalid database $DB for integration test"

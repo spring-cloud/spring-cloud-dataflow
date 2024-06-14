@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 GROUPS="mariadb postgres oauth performance"
 set -e
 for GROUP in $GROUPS; do

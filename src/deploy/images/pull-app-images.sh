@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 if [ "$BROKER" = "rabbitmq" ]; then
     docker pull springcloudstream/scdf-app-kitchen:1.0.0-SNAPSHOT
