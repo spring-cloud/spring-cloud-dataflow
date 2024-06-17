@@ -18,6 +18,7 @@ package org.springframework.cloud.skipper.shell.command;
 import javax.validation.constraints.NotNull;
 
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Commands that operation on the manifest.
@@ -43,7 +46,7 @@ public class ManifestCommands extends AbstractSkipperCommand {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		this.yaml = new Yaml(dumperOptions);
+		this.yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 	}
 
 	@ShellMethod(key = "manifest get", value = "Get the manifest for a release")

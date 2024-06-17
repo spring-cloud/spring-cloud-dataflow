@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.springframework.cloud.skipper.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,7 +30,6 @@ import java.util.stream.Stream;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.commons.FileUtils;
 
@@ -163,15 +164,14 @@ public class DefaultPackageReader implements PackageReader {
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
 		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new Constructor(PackageMetadata.class, loaderOptions), representer);
-		String fileContents = null;
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		String fileContents;
 		try {
 			fileContents = FileUtils.readFileToString(file);
 		}
 		catch (IOException e) {
 			throw new SkipperException("Error reading yaml file", e);
 		}
-		PackageMetadata pkgMetadata = (PackageMetadata) yaml.load(fileContents);
-		return pkgMetadata;
+		return yaml.load(fileContents);
 	}
 }

@@ -23,6 +23,7 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.StreamUtils;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * @author Mark Pollack
@@ -63,7 +66,7 @@ public class ConfigValueUtilsTests {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		Yaml yaml = new Yaml(dumperOptions);
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
 
 		Resource resource = new ClassPathResource("/org/springframework/cloud/skipper/server/service/ticktock-1.0.0");
 
