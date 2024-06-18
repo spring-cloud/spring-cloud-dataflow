@@ -136,9 +136,9 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
 #        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
-#            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
+#            sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
 #
 #        else
             sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true

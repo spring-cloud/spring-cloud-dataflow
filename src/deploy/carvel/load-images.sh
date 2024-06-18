@@ -61,7 +61,7 @@ sh "$K8S/load-image.sh" "springcloud/spring-cloud-skipper-server" "$DATAFLOW_VER
 
 if [ "$SCDF_TYPE" = "pro" ]; then
     if [ "$SCDF_PRO_VERSION" != "" ]; then
-        sh "$K8S/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server" "$SCDF_PRO_VERSION" true
+        sh "$K8S/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server" "$SCDF_PRO_VERSION" true
     fi
 else
     sh "$K8S/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
