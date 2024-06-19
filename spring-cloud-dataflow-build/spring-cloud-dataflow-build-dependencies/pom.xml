@@ -35,6 +35,7 @@
 		<reactor-bom.version>2020.0.43</reactor-bom.version>
 		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
+		<jackson-bom.version>2.17.1</jackson-bom.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
