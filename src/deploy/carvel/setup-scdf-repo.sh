@@ -52,10 +52,12 @@ case $SCDF_TYPE in
     echo "Invalid SCDF_TYPE=$SCDF_TYPE only pro or oss is acceptable"
     ;;
 esac
-if [ "$REGISTRY" != "" ]; then
-    PACKAGE="$REGISTRY/$REPO_NAME:$PACKAGE_VERSION"
-else
-    PACKAGE="$PACKAGE_REPO/$REPO_NAME:$PACKAGE_VERSION"
+if [ "$PACKAGE" = "" ]; then
+    if [ "$REGISTRY" != "" ]; then
+        PACKAGE="$REGISTRY/$REPO_NAME:$PACKAGE_VERSION"
+    else
+        PACKAGE="$PACKAGE_REPO/$REPO_NAME:$PACKAGE_VERSION"
+    fi
 fi
 echo "Adding repository for $PACKAGE"
 "$SCDIR/carvel-add-package.sh" "$PACKAGE" "$PACKAGE_NAME" "$NS"
